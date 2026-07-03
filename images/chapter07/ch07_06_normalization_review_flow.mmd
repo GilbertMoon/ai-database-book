@@ -1,0 +1,14 @@
+flowchart TD
+    A[중간 프로젝트 설계] --> B[엔터티 분리 검토]
+    B --> C[중복 검토]
+    C --> D[N:M 관계 검토]
+    D --> E[외래키 검토]
+    E --> F[이상 현상 검토]
+    F --> G[JOIN 검증]
+
+    B --> B1[students / instructors / courses / enrollments]
+    C --> C1[email, instructor info 반복 여부]
+    D --> D1[students-courses 관계를 enrollments로 해소]
+    E --> E1[student_id, course_id, instructor_id]
+    F --> F1[삽입 / 수정 / 삭제 이상]
+    G --> H[정규화 검토 완료]
