@@ -1,0 +1,14 @@
+flowchart TB
+    A[SELECT query] --> B[EXPLAIN before index]
+    B --> C[Read plan]
+    C --> D[Create index]
+    D --> E[EXPLAIN after index]
+    E --> F[Compare plan]
+
+    F --> G[Seq Scan]
+    F --> H[Index Scan]
+    F --> I[Bitmap Index Scan]
+
+    G --> J[Interpret result]
+    H --> J
+    I --> J
