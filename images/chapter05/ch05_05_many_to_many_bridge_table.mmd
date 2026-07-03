@@ -1,0 +1,23 @@
+flowchart TB
+    A[members] --> A1[한 회원은 여러 책을 대여]
+    B[books] --> B1[한 책은 여러 회원에게 대여]
+
+    A1 --> C{N:M 관계}
+    B1 --> C
+
+    C --> D[중간 테이블 필요]
+    D --> E[loans]
+
+    E --> E1[member_id FK]
+    E --> E2[book_id FK]
+    E --> E3[borrowed_at]
+    E --> E4[due_at]
+    E --> E5[returned_at]
+
+    A --> F[1:N]
+    F --> E
+    E --> G[N:1]
+    G --> B
+
+    H[members 1:N loans N:1 books]
+    E --> H
