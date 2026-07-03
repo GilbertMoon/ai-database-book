@@ -1,6 +1,6 @@
 # Chapter 08. JOIN과 집계 쿼리
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -39,6 +39,10 @@ Chapter 07에서는 온라인 강의 수강신청 시스템을 설계했습니�
 ## 1. 왜 JOIN과 집계 쿼리를 배워야 하는가
 
 정규화된 데이터베이스에서는 데이터를 여러 테이블에 나누어 저장합니다. 이 구조는 중복을 줄이고 데이터 일관성을 높입니다. 하지만 조회할 때는 테이블을 다시 연결해야 합니다.
+
+![JOIN이 필요한 이유](../../images/chapter08/ch08_01_join_why_needed.svg)
+
+그림 8-1 JOIN이 필요한 이유
 
 예를 들어 `enrollments` 테이블에는 `student_id`와 `course_id`만 저장되어 있습니다.
 
@@ -106,6 +110,10 @@ students N:M courses는 enrollments로 해소
 
 `INNER JOIN`은 양쪽 테이블에서 조건이 일치하는 데이터만 조회합니다.
 
+![INNER JOIN 개념](../../images/chapter08/ch08_02_inner_join_concept.svg)
+
+그림 8-2 INNER JOIN 개념
+
 학생과 수강신청을 연결해 보겠습니다.
 
 ```sql
@@ -167,6 +175,10 @@ JOIN enrollments AS e ON s.id = e.student_id;
 
 수강신청 현황을 제대로 보려면 학생, 수강신청, 강의, 강사 테이블을 모두 연결해야 합니다.
 
+![여러 테이블 JOIN 경로](../../images/chapter08/ch08_03_multi_table_join_path.svg)
+
+그림 8-3 여러 테이블 JOIN 경로
+
 ```sql
 SELECT
     e.id AS enrollment_id,
@@ -198,6 +210,10 @@ courses.instructor_id -> instructors.id
 ## 6. LEFT JOIN 이해하기
 
 `LEFT JOIN`은 왼쪽 테이블의 모든 행을 유지하고, 오른쪽 테이블에서 일치하는 값이 있으면 함께 보여 줍니다.
+
+![LEFT JOIN과 NULL 결과](../../images/chapter08/ch08_04_left_join_null_rows.svg)
+
+그림 8-4 LEFT JOIN과 NULL 결과
 
 예를 들어 모든 학생을 조회하되, 수강신청이 있으면 함께 보여 주고 싶다고 가정합니다.
 
@@ -278,6 +294,10 @@ FROM enrollments;
 
 `GROUP BY`는 같은 값을 가진 행을 그룹으로 묶고, 그룹별로 집계합니다.
 
+![GROUP BY와 집계 흐름](../../images/chapter08/ch08_05_group_by_aggregation_flow.svg)
+
+그림 8-5 GROUP BY와 집계 흐름
+
 예를 들어 수강상태별 인원을 구해 보겠습니다.
 
 ```sql
@@ -319,6 +339,10 @@ GROUP BY status;
 ## 9. 강의별 수강생 수 구하기
 
 강의별 수강생 수를 구하려면 `courses`와 `enrollments`를 JOIN한 뒤 `courses` 기준으로 그룹화합니다.
+
+![강의별 수강생 수와 매출 집계](../../images/chapter08/ch08_06_course_revenue_summary.svg)
+
+그림 8-6 강의별 수강생 수와 매출 집계
 
 ```sql
 SELECT
@@ -408,6 +432,10 @@ ORDER BY course_count DESC;
 
 `WHERE`는 그룹을 만들기 전에 행을 필터링합니다. 반면 `HAVING`은 그룹을 만든 뒤 집계 결과를 기준으로 필터링합니다.
 
+![SQL 실행 순서: WHERE, GROUP BY, HAVING](../../images/chapter08/ch08_07_where_group_having_order.svg)
+
+그림 8-7 SQL 실행 순서: WHERE, GROUP BY, HAVING
+
 예를 들어 수강생이 2명 이상인 강의만 조회하려면 다음처럼 작성합니다.
 
 ```sql
@@ -470,6 +498,10 @@ students, courses, enrollments, instructors 테이블을 사용해서
 ```
 
 AI가 SQL을 만들어 주더라도 다음을 반드시 검토해야 합니다.
+
+![AI 생성 JOIN/집계 SQL 검토](../../images/chapter08/ch08_08_ai_join_sql_review_flow.svg)
+
+그림 8-8 AI 생성 JOIN/집계 SQL 검토
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
