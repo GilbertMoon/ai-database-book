@@ -1,0 +1,16 @@
+flowchart TB
+    T[students 테이블]
+
+    subgraph TABLE[테이블 구조]
+        direction TB
+        H[id | name | email | major]
+        R1[1 | 김민지 | minji@example.com | 컴퓨터공학]
+        R2[2 | 이준호 | junho@example.com | 데이터사이언스]
+        R3[3 | 박서연 | seoyeon@example.com | 경영학]
+    end
+
+    T --> TABLE
+
+    R1 -. 행 Row .-> ROW[한 명의 학생 정보 한 줄]
+    H -. 열 Column .-> COL[데이터 항목<br/>id, name, email, major]
+    TABLE -. 테이블 Table .-> DESC[행과 열로 정리된 데이터 구조]
