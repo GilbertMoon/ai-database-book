@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 실습 SQL 파일을 작성한다.
+Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -25,23 +25,23 @@ Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 실습 SQL 파일을 작�
 15. Chapter 11 원고 1차 리뷰 및 보완 완료
 16. Chapter 12 원고 1차 리뷰 및 보완 완료
 17. Chapter 13 원고 1차 확장 완료
+18. Chapter 13 실습 SQL 파일 작성 완료
+19. Chapter 13 코드 README 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 13 실습 SQL 파일 작성
-2. Chapter 13 코드 README 작성
-3. Chapter 13 활동/실습 자료 작성
-4. Chapter 13 도식 후보 정리
-5. Chapter 13 Mermaid 도식 원본 작성
-6. Chapter 13 SVG 도식 생성
-7. Chapter 13 리뷰 체크리스트 작성
+1. Chapter 13 활동/실습 자료 작성
+2. Chapter 13 도식 후보 정리
+3. Chapter 13 Mermaid 도식 원본 작성
+4. Chapter 13 SVG 도식 생성
+5. Chapter 13 본문에 그림 링크와 캡션 삽입
+6. Chapter 13 리뷰 체크리스트 작성
 
 ## Chapter 13 후속 작업 메모
 
 ```text
-- 실습 SQL은 AI가 만든 나쁜 설계 예시와 사람이 보완한 좋은 설계 예시를 함께 포함한다.
-- PK/FK/UNIQUE/CHECK/NOT NULL/데이터 타입/정규화 관점의 차이를 확인할 수 있도록 구성한다.
-- 실행 전 안전 검토, 오류 수정 루프, AI 검토 질문을 포함한다.
+- 활동 자료는 AI 설계 초안 검토표, 나쁜 설계 문제 찾기, 좋은 설계 비교, 제약조건 검증, information_schema 결과 해석, AI 검토 프롬프트 작성 중심으로 구성한다.
+- SQL 실행 전 안전 검토와 Codex 오류 수정 루프를 포함한다.
 ```
 
 ## 집필 운영 메모
