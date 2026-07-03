@@ -1,0 +1,19 @@
+flowchart TB
+    A[수강 기록 테이블]
+    A --> B[student_id + course_id]
+
+    B --> C[student_name]
+    B --> D[course_name]
+    B --> E[grade]
+
+    C --> F[student_id에만 의존]
+    D --> G[course_id에만 의존]
+    E --> H[student_id + course_id 전체에 의존]
+
+    F --> I[students 테이블로 분리]
+    G --> J[courses 테이블로 분리]
+    H --> K[enrollments 테이블에 유지]
+
+    I --> L[2NF 구조]
+    J --> L
+    K --> L
