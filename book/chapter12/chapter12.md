@@ -1,6 +1,6 @@
 # Chapter 12. NoSQL 이해와 선택 기준
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -80,6 +80,10 @@ NoSQL = Not Only SQL
 
 NoSQL은 하나의 제품이나 하나의 구조를 뜻하지 않습니다. 여러 유형이 있습니다.
 
+![NoSQL 유형 분류](../../images/chapter12/ch12_02_nosql_types_map.svg)
+
+그림 12-2 NoSQL 유형 분류
+
 | 유형 | 저장 방식 | 대표적 사용 예 |
 | --- | --- | --- |
 | Key-Value DB | 키와 값 | 캐시, 세션, 간단한 설정값 |
@@ -94,6 +98,10 @@ NoSQL은 하나의 제품이나 하나의 구조를 뜻하지 않습니다. 여�
 ## 3. 관계형 데이터베이스와 NoSQL 비교
 
 관계형 데이터베이스와 NoSQL의 차이를 단순히 좋고 나쁨으로 구분하면 안 됩니다. 두 방식은 목적과 강점이 다릅니다.
+
+![RDBMS와 NoSQL의 차이](../../images/chapter12/ch12_01_rdbms_vs_nosql_overview.svg)
+
+그림 12-1 RDBMS와 NoSQL의 차이
 
 | 구분 | 관계형 데이터베이스 | NoSQL |
 | --- | --- | --- |
@@ -112,6 +120,10 @@ NoSQL은 하나의 제품이나 하나의 구조를 뜻하지 않습니다. 여�
 ## 4. Key-Value DB
 
 Key-Value DB는 가장 단순한 형태의 NoSQL입니다. 데이터를 **키(key)**와 **값(value)**의 쌍으로 저장합니다.
+
+![Key-Value DB 조회 흐름](../../images/chapter12/ch12_03_key_value_lookup.svg)
+
+그림 12-3 Key-Value DB 조회 흐름
 
 예를 들어 다음과 같은 형태입니다.
 
@@ -154,6 +166,10 @@ Key-Value DB는 키를 알고 있을 때 매우 빠르게 값을 가져오는 �
 
 Document DB는 데이터를 JSON과 비슷한 문서 형태로 저장합니다.
 
+![Document DB와 JSON 문서 구조](../../images/chapter12/ch12_04_document_json_structure.svg)
+
+그림 12-4 Document DB와 JSON 문서 구조
+
 예를 들어 강의 정보를 하나의 문서로 저장할 수 있습니다.
 
 ```json
@@ -192,6 +208,10 @@ Document DB는 다음과 같은 경우에 유용합니다.
 
 Column-Family DB는 대규모 분산 저장과 빠른 쓰기, 대량 조회에 강점을 가진 NoSQL 유형입니다.
 
+![Column-Family와 대규모 로그 흐름](../../images/chapter12/ch12_05_column_family_log_flow.svg)
+
+그림 12-5 Column-Family와 대규모 로그 흐름
+
 초급 단계에서는 다음처럼 이해해도 충분합니다.
 
 ```text
@@ -220,6 +240,10 @@ Column-Family DB는 매우 많은 데이터를 분산 환경에 저장하고, �
 
 Graph DB는 데이터를 **노드(node)**와 **관계(edge)**로 표현합니다.
 
+![Graph DB 관계 탐색](../../images/chapter12/ch12_06_graph_relationship_search.svg)
+
+그림 12-6 Graph DB 관계 탐색
+
 예를 들어 다음과 같은 관계를 생각할 수 있습니다.
 
 ```text
@@ -247,6 +271,10 @@ Graph DB는 관계를 따라가며 탐색하는 문제에 적합합니다.
 ## 8. PostgreSQL JSONB로 문서형 데이터 맛보기
 
 NoSQL을 이해하기 위해 반드시 별도 DBMS를 바로 설치해야 하는 것은 아닙니다. PostgreSQL에서도 JSON 형태의 데이터를 저장할 수 있습니다.
+
+![PostgreSQL JSONB 문서형 데이터 맛보기](../../images/chapter12/ch12_07_jsonb_practice_flow.svg)
+
+그림 12-7 PostgreSQL JSONB 문서형 데이터 맛보기
 
 PostgreSQL의 `JSONB`는 JSON 데이터를 저장하고 조회할 수 있는 타입입니다.
 
@@ -367,7 +395,13 @@ AI는 다음과 같이 추천할 수 있습니다.
 | 채팅 메시지 | Document DB 또는 Column-Family DB |
 | 추천 관계 | Graph DB |
 
-이 추천을 그대로 받아들이면 안 됩니다. 다음 기준으로 검토해야 합니다.
+이 추천을 그대로 받아들이면 안 됩니다.
+
+![AI 추천 NoSQL 선택 검토 흐름](../../images/chapter12/ch12_08_ai_nosql_choice_review.svg)
+
+그림 12-8 AI 추천 NoSQL 선택 검토 흐름
+
+다음 기준으로 검토해야 합니다.
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
