@@ -1,0 +1,14 @@
+flowchart LR
+    A[Use AI tool] --> B[AI draft]
+    B --> C[Human review]
+    C --> D{Problems found?}
+    D -->|Yes| E[Revise design or SQL]
+    E --> F[Run and test]
+    F --> C
+    D -->|No| G[Record final decision]
+    G --> H[AI review report]
+
+    C --> C1[PK FK constraints]
+    C --> C2[Normalization]
+    C --> C3[Security and privacy]
+    H --> H1[Prompt result issue revision]
