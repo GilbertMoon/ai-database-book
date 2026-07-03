@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 02 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
+Chapter 03 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
 ```
 
 ## 완료된 작업
@@ -19,27 +19,27 @@ Chapter 02 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완
 9. Chapter 02 Mermaid 도식 원본 8종 작성 완료
 10. Chapter 02 SVG 도식 8종 생성 완료
 11. Chapter 02 본문에 그림 링크와 캡션 삽입 완료
+12. Chapter 02 리뷰 체크리스트 작성 완료
+13. Chapter 02 리뷰 후 보완 반영안 작성 완료
+14. Chapter 02 본문에 PK/FK 혼동 방지 문구 삽입 완료
+15. Chapter 02 본문에 핵심 용어 한눈에 보기 표 삽입 완료
+16. Chapter 02 원고 1차 리뷰 및 보완 완료
 
 ## 우선순위 작업
 
-1. Chapter 02 리뷰 체크리스트 작성
-2. Chapter 02 원고 1차 리뷰 및 보완
-3. Chapter 03 원고 확장
-4. Chapter 03 활동/실습 자료 작성
-5. Chapter 03 도식 후보 정리
+1. Chapter 03 원고 확장
+2. Chapter 03 활동/실습 자료 작성
+3. Chapter 03 도식 후보 정리
+4. Chapter 03 리뷰 체크리스트 작성
+5. Chapter 03 원고 1차 리뷰 및 보완
 
-## Chapter 02 도식 목록
+## Chapter 03 후속 작업 메모
 
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 2-1 | `images/chapter02/ch02_01_dbms_hierarchy.mmd` | `ch02_01_dbms_hierarchy.svg` |
-| 그림 2-2 | `images/chapter02/ch02_02_table_row_column.mmd` | `ch02_02_table_row_column.svg` |
-| 그림 2-3 | `images/chapter02/ch02_03_primary_key_concept.mmd` | `ch02_03_primary_key_concept.svg` |
-| 그림 2-4 | `images/chapter02/ch02_04_foreign_key_relationship.mmd` | `ch02_04_foreign_key_relationship.svg` |
-| 그림 2-5 | `images/chapter02/ch02_05_relationship_types.mmd` | `ch02_05_relationship_types.svg` |
-| 그림 2-6 | `images/chapter02/ch02_06_crud_flow.mmd` | `ch02_06_crud_flow.svg` |
-| 그림 2-7 | `images/chapter02/ch02_07_constraints_guardrail.mmd` | `ch02_07_constraints_guardrail.svg` |
-| 그림 2-8 | `images/chapter02/ch02_08_ai_table_review.mmd` | `ch02_08_ai_table_review.svg` |
+```text
+- Chapter 03은 PostgreSQL 설치, DBeaver 연결, 실습용 DB 생성, 기본 SQL 실행 테스트, GitHub 저장소 관리 흐름을 중심으로 확장한다.
+- 설치가 어려운 학습자를 위해 Neon 또는 Supabase PostgreSQL 같은 클라우드 대안도 함께 제시한다.
+- Windows 기준 설치 흐름을 기본으로 하되, macOS 사용자를 위한 간단 안내도 포함한다.
+```
 
 ## 집필 운영 메모
 
