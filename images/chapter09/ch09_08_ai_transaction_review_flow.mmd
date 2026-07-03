@@ -1,0 +1,15 @@
+flowchart TD
+    A[AI가 생성한 트랜잭션 SQL]
+    A --> B[작업 범위 검토]
+    B --> C[BEGIN / COMMIT 확인]
+    C --> D[실패 시 ROLLBACK 검토]
+    D --> E[좌석 조건 검토]
+    E --> F[금액과 상태 검토]
+    F --> G[SELECT 결과 검증]
+    G --> H[업무 규칙과 비교]
+    H --> I[사람이 수정 후 확정]
+
+    B --> B1[수강신청 / 결제 / 좌석 차감 포함]
+    E --> E1[remaining_seats > 0]
+    F --> F1[결제금액과 수강상태 일치]
+    G --> G1[DBeaver 실행 결과 확인]
