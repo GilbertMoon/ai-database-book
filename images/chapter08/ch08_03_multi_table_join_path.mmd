@@ -1,0 +1,23 @@
+flowchart LR
+    A[enrollments]
+    B[students]
+    C[courses]
+    D[instructors]
+
+    A --> A1[student_id]
+    A --> A2[course_id]
+    C --> C1[instructor_id]
+
+    A1 -. FK .-> B1[students.id]
+    A2 -. FK .-> C2[courses.id]
+    C1 -. FK .-> D1[instructors.id]
+
+    B --> E[student_name]
+    C --> F[course_title]
+    D --> G[instructor_name]
+    A --> H[status / paid_amount]
+
+    E --> I[수강신청 현황]
+    F --> I
+    G --> I
+    H --> I
