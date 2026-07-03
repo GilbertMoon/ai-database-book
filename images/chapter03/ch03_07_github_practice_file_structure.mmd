@@ -1,0 +1,19 @@
+flowchart TD
+    A[ai-database-book 저장소] --> B[code]
+    B --> C[chapter03]
+    C --> C1[README.md]
+    C --> C2[setup_check.sql]
+
+    A --> D[book]
+    D --> D1[chapter03]
+    D1 --> D2[chapter03.md]
+    D1 --> D3[chapter03_activity.md]
+
+    A --> E[images]
+    E --> E1[chapter03]
+    E1 --> E2[도식 원본 .mmd]
+    E1 --> E3[도식 이미지 .svg]
+
+    C2 -. 실행 .-> F[DBeaver SQL Editor]
+    F -. 결과 확인 .-> G[PostgreSQL]
+    G -. 결과 기록 .-> D3
