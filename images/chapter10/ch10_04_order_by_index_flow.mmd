@@ -1,0 +1,11 @@
+flowchart TB
+    A[ORDER BY query] --> B[Sort target column]
+    B --> C[Example: courses.title]
+
+    C --> D{Index exists?}
+    D --> E[May help sorting]
+    D --> F[May need sort step]
+
+    E --> G[Check EXPLAIN]
+    F --> G
+    G --> H[Decide by plan]
