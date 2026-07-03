@@ -93,7 +93,7 @@ ChatGPT로 설계하고
 
 | Chapter | 제목 | 주요 내용 | 상태 |
 | --- | --- | --- | --- |
-| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 데이터베이스의 필요성, 파일/엑셀/DB 차이, 바이브코딩 시대의 DB 학습 방향 | 원고 초안 작성 완료 |
+| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 데이터베이스의 필요성, 파일/엑셀/DB 차이, 바이브코딩 시대의 DB 학습 방향 | 원고 1차 확장 완료 |
 | Chapter 02 | DBMS 기본 개념 | 데이터베이스, DBMS, 테이블, 행, 열, PK, FK, 관계, SQL, CRUD 개념 | 원고 초안 작성 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | PostgreSQL 설치, DBeaver 연결, 기본 DB 생성, GitHub 저장소 준비 | 원고 초안 작성 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY 등 기본 SQL | 원고 초안 작성 완료 |
@@ -219,7 +219,8 @@ Chapter별 진행 상태는 다음 값을 사용합니다.
 | Chapter별 images 폴더 생성 | 완료 |
 | publish/full_manuscript.md 초기 파일 생성 | 완료 |
 | scripts/merge_chapters.py 초기 파일 생성 | 완료 |
-| Chapter 01 원고 확장 | 예정 |
+| Chapter 01 원고 확장 | 완료 |
+| Chapter 01 활동/실습 자료 작성 | 예정 |
 
 ---
 
@@ -228,7 +229,7 @@ Chapter별 진행 상태는 다음 값을 사용합니다.
 가장 먼저 진행할 다음 작업은 다음과 같습니다.
 
 ```text
-Chapter 01 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
+Chapter 01의 미니 과제와 저장 방식 선택 활동을 별도 활동 자료로 정리한다.
 ```
 
 ---
