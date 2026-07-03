@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 06 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
+Chapter 06 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -16,33 +16,23 @@ Chapter 06 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1�
 6. Chapter 02 원고 1차 리뷰 및 보완 완료
 7. Chapter 03 원고 1차 리뷰 및 보완 완료
 8. Chapter 04 원고 1차 리뷰 및 보완 완료
-9. Chapter 05 원고 1차 확장 완료
-10. Chapter 05 실습 SQL 파일 작성 완료
-11. Chapter 05 활동/실습 자료 작성 완료
-12. Chapter 05 도식 후보 정리 완료
-13. Chapter 05 Mermaid 도식 원본 8종 작성 완료
-14. Chapter 05 SVG 도식 8종 생성 완료
-15. Chapter 05 본문에 그림 링크와 캡션 삽입 완료
-16. Chapter 05 리뷰 체크리스트 작성 완료
-17. Chapter 05 리뷰 후 보완 반영안 작성 완료
-18. Chapter 05 본문에 데이터 모델링 검토 원칙 삽입 완료
-19. Chapter 05 원고 1차 리뷰 및 보완 완료
+9. Chapter 05 원고 1차 리뷰 및 보완 완료
+10. Chapter 06 원고 1차 확장 완료
+11. Chapter 06 실습 SQL 파일 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 06 원고 확장
-2. Chapter 06 활동/실습 자료 작성
-3. Chapter 06 도식 후보 정리
-4. Chapter 06 리뷰 체크리스트 작성
-5. Chapter 06 원고 1차 리뷰 및 보완
+1. Chapter 06 활동/실습 자료 작성
+2. Chapter 06 도식 후보 정리
+3. Chapter 06 Mermaid 도식 원본 작성
+4. Chapter 06 SVG 도식 생성
+5. Chapter 06 본문에 그림 링크와 캡션 삽입
 
 ## Chapter 06 후속 작업 메모
 
 ```text
-- Chapter 06은 정규화와 좋은 테이블 설계를 중심으로 확장한다.
-- 데이터 중복, 삽입/수정/삭제 이상, 1NF, 2NF, 3NF를 초급자 기준으로 설명한다.
-- Chapter 05의 도서 대여 시스템 ERD와 나쁜 모델링 예시를 이어서 활용한다.
-- AI가 만든 테이블 구조를 정규화 기준으로 검토하는 활동을 포함한다.
+- 활동 자료는 데이터 중복 찾기, 삽입/수정/삭제 이상 분석, 1NF/2NF/3NF 적용, normalization_practice.sql 실행 결과 기록 중심으로 구성한다.
+- AI 생성 테이블 구조를 정규화 기준으로 검토하는 활동을 포함한다.
 ```
 
 ## 집필 운영 메모
