@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650">
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.cell{fill:#fff;stroke:#4a5568;stroke-width:1.5}.head{fill:#ebf8ff}.rowhi{fill:#fefcbf}.colhi{fill:#f0fff4}.label{font-size:17px;text-anchor:middle;dominant-baseline:middle}.small{font-size:14px;text-anchor:middle;dominant-baseline:middle}.note{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}</style></defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="550" y="40" text-anchor="middle" class="title">테이블, 행, 열의 구조</text>
+  <text x="550" y="85" text-anchor="middle" class="label">students 테이블</text>
+  <g transform="translate(180,130)">
+    <rect x="0" y="0" width="160" height="55" class="cell head"/><text x="80" y="28" class="label">id</text>
+    <rect x="160" y="0" width="180" height="55" class="cell head"/><text x="250" y="28" class="label">name</text>
+    <rect x="340" y="0" width="260" height="55" class="cell head"/><text x="470" y="28" class="label">email</text>
+    <rect x="600" y="0" width="180" height="55" class="cell head"/><text x="690" y="28" class="label">major</text>
+    <rect x="0" y="55" width="160" height="55" class="cell rowhi"/><text x="80" y="83" class="label">1</text>
+    <rect x="160" y="55" width="180" height="55" class="cell rowhi"/><text x="250" y="83" class="label">김민지</text>
+    <rect x="340" y="55" width="260" height="55" class="cell rowhi"/><text x="470" y="83" class="small">minji@example.com</text>
+    <rect x="600" y="55" width="180" height="55" class="cell rowhi"/><text x="690" y="83" class="label">컴퓨터공학</text>
+    <rect x="0" y="110" width="160" height="55" class="cell"/><text x="80" y="138" class="label">2</text>
+    <rect x="160" y="110" width="180" height="55" class="cell"/><text x="250" y="138" class="label">이준호</text>
+    <rect x="340" y="110" width="260" height="55" class="cell"/><text x="470" y="138" class="small">junho@example.com</text>
+    <rect x="600" y="110" width="180" height="55" class="cell"/><text x="690" y="138" class="label">데이터사이언스</text>
+    <rect x="0" y="165" width="160" height="55" class="cell"/><text x="80" y="193" class="label">3</text>
+    <rect x="160" y="165" width="180" height="55" class="cell"/><text x="250" y="193" class="label">박서연</text>
+    <rect x="340" y="165" width="260" height="55" class="cell"/><text x="470" y="193" class="small">seoyeon@example.com</text>
+    <rect x="600" y="165" width="180" height="55" class="cell"/><text x="690" y="193" class="label">경영학</text>
+  </g>
+  <rect x="105" y="410" width="260" height="62" class="note"/><text x="235" y="438" class="label">행 Row</text><text x="235" y="462" class="small">한 줄 = 하나의 데이터 기록</text>
+  <rect x="420" y="410" width="260" height="62" class="note"/><text x="550" y="438" class="label">열 Column</text><text x="550" y="462" class="small">항목 = id, name, email 등</text>
+  <rect x="735" y="410" width="260" height="62" class="note"/><text x="865" y="438" class="label">테이블 Table</text><text x="865" y="462" class="small">행과 열로 정리된 구조</text>
+  <line x1="235" y1="410" x2="560" y2="212" stroke="#d69e2e" stroke-width="2" marker-end="url(#arrow)"/><line x1="550" y1="410" x2="260" y2="130" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/><line x1="865" y1="410" x2="960" y2="130" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
