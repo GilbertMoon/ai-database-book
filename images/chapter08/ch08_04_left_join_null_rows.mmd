@@ -1,0 +1,20 @@
+flowchart TB
+    A[students 기준]
+    A --> B[김민지]
+    A --> C[이준호]
+    A --> D[최현우]
+
+    E[enrollments]
+    E --> F[김민지 수강신청]
+    E --> G[이준호 수강신청]
+
+    B --> H[매칭 성공]
+    F --> H
+    C --> I[매칭 성공]
+    G --> I
+    D --> J[매칭 없음]
+
+    H --> K[LEFT JOIN 결과 포함]
+    I --> K
+    J --> L[course_title = NULL]
+    L --> K
