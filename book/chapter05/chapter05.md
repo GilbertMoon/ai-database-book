@@ -1,6 +1,6 @@
 # Chapter 05. 데이터 모델링과 ERD
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -78,6 +78,10 @@ AI 시대에도 데이터 모델링은 중요합니다. ChatGPT가 테이블 초
 9. 샘플 데이터를 넣고 검증한다.
 ```
 
+![데이터 모델링 전체 흐름](../../images/chapter05/ch05_01_modeling_process.svg)
+
+그림 5-1 데이터 모델링 전체 흐름
+
 초급 단계에서는 완벽한 모델링보다 다음 질문에 답하는 것이 중요합니다.
 
 ```text
@@ -134,6 +138,10 @@ loans
 
 엔터티는 테이블이 되고, 속성은 컬럼이 됩니다.
 
+![엔터티와 속성 구분](../../images/chapter05/ch05_02_entity_attribute_classification.svg)
+
+그림 5-2 엔터티와 속성 구분
+
 도서관 예제에서는 다음처럼 정리할 수 있습니다.
 
 | 엔터티 | 속성 |
@@ -184,6 +192,10 @@ members.id  ← loans.member_id
 books.id    ← loans.book_id
 ```
 
+![기본키와 외래키 관계](../../images/chapter05/ch05_03_primary_foreign_key_relationship.svg)
+
+그림 5-3 기본키와 외래키 관계
+
 이 구조를 사용하면 다음을 표현할 수 있습니다.
 
 ```text
@@ -219,6 +231,10 @@ books.id    ← loans.book_id
 loans.member_id → members.id
 ```
 
+![1:N 관계 구조](../../images/chapter05/ch05_04_one_to_many_relationship.svg)
+
+그림 5-4 1:N 관계 구조
+
 ### 6.2 N:M 관계
 
 N:M 관계는 직접 표현하지 않고 중간 테이블을 둡니다.
@@ -244,6 +260,10 @@ students 1:N enrollments N:1 courses
 ```
 
 이 관계를 loans 테이블이 중간에서 연결합니다.
+
+![N:M 관계와 중간 테이블](../../images/chapter05/ch05_05_many_to_many_bridge_table.svg)
+
+그림 5-5 N:M 관계와 중간 테이블
 
 ---
 
@@ -334,6 +354,10 @@ ERD는 이 구조를 한눈에 볼 수 있게 해 줍니다.
 members 1 ─── N loans N ─── 1 books
 ```
 
+![도서 대여 시스템 ERD](../../images/chapter05/ch05_06_library_erd_overview.svg)
+
+그림 5-6 도서 대여 시스템 ERD
+
 관계를 문장으로 풀어 쓰면 다음과 같습니다.
 
 ```text
@@ -352,6 +376,10 @@ members 1 ─── N loans N ─── 1 books
 ## 10. ERD를 PostgreSQL 테이블로 바꾸기
 
 ERD 초안을 PostgreSQL 테이블로 바꾸면 다음과 같습니다.
+
+![ERD에서 SQL로 변환](../../images/chapter05/ch05_07_erd_to_sql_flow.svg)
+
+그림 5-7 ERD에서 SQL로 변환
 
 ```sql
 DROP TABLE IF EXISTS loans;
@@ -523,6 +551,10 @@ loans에 member_id와 book_id를 두어 members와 books를 연결한다.
 ## 15. AI가 만든 ERD 검토하기
 
 AI가 만든 ERD를 검토할 때는 다음 질문을 사용합니다.
+
+![AI 생성 ERD 검토 흐름](../../images/chapter05/ch05_08_ai_erd_review_flow.svg)
+
+그림 5-8 AI 생성 ERD 검토 흐름
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
