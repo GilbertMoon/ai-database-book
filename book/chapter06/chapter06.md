@@ -1,6 +1,6 @@
 # Chapter 06. 정규화와 좋은 테이블 설계
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -50,6 +50,10 @@ Chapter 05에서는 요구사항에서 엔터티, 속성, 관계를 찾고 ERD�
 - 마지막 대여 기록을 삭제하면 책 정보까지 사라질 수 있다.
 ```
 
+![정규화가 필요한 이유](../../images/chapter06/ch06_01_normalization_problem_overview.svg)
+
+그림 6-1 정규화가 필요한 이유
+
 정규화는 이런 문제를 줄이기 위한 테이블 설계 방법입니다.
 
 ```text
@@ -90,6 +94,10 @@ Chapter 05에서는 요구사항에서 엔터티, 속성, 관계를 찾고 ERD�
 | 삽입 이상 | 필요한 데이터를 자연스럽게 추가하기 어려움 |
 | 수정 이상 | 같은 정보를 여러 곳에서 수정해야 해서 불일치가 생김 |
 | 삭제 이상 | 삭제하면 보존해야 할 정보까지 함께 사라짐 |
+
+![삽입·수정·삭제 이상](../../images/chapter06/ch06_02_anomaly_types.svg)
+
+그림 6-2 삽입·수정·삭제 이상
 
 ---
 
@@ -253,6 +261,10 @@ loans: 대여 기록
 | 1 | 김민지 | SQL 기초 |
 | 2 | 이준호 | 데이터베이스 입문 |
 
+![1정규형: 반복값 분리](../../images/chapter06/ch06_03_first_normal_form.svg)
+
+그림 6-3 1정규형: 반복값 분리
+
 하지만 아직 회원 이름과 책 제목이 반복됩니다. 1정규형은 시작일 뿐입니다.
 
 ---
@@ -285,6 +297,10 @@ courses(id, name)
 enrollments(student_id, course_id, grade)
 ```
 
+![2정규형: 일부 키 의존 분리](../../images/chapter06/ch06_04_second_normal_form.svg)
+
+그림 6-4 2정규형: 일부 키 의존 분리
+
 2정규형의 핵심은 “수강 정보 테이블에는 수강과 직접 관련된 정보만 남긴다”입니다.
 
 ---
@@ -314,6 +330,10 @@ zip_code가 48058이면 city는 부산이다.
 members(id, name, zip_code)
 zip_codes(zip_code, city)
 ```
+
+![3정규형: 일반 컬럼 의존 분리](../../images/chapter06/ch06_05_third_normal_form.svg)
+
+그림 6-5 3정규형: 일반 컬럼 의존 분리
 
 초급 과정에서는 3정규형을 다음 문장으로 기억하면 됩니다.
 
@@ -349,6 +369,10 @@ members(id, name, email, joined_at)
 books(id, title, author, published_year, isbn)
 loans(id, member_id, book_id, borrowed_at, due_at, returned_at)
 ```
+
+![도서 대여 테이블 정규화](../../images/chapter06/ch06_06_library_normalization_flow.svg)
+
+그림 6-6 도서 대여 테이블 정규화
 
 각 테이블의 역할은 명확합니다.
 
@@ -423,6 +447,10 @@ JOIN members ON loans.member_id = members.id
 JOIN books ON loans.book_id = books.id;
 ```
 
+![정규화 전후 비교와 JOIN](../../images/chapter06/ch06_07_before_after_join_tradeoff.svg)
+
+그림 6-7 정규화 전후 비교와 JOIN
+
 JOIN이 필요하다는 점은 단점처럼 보일 수 있습니다. 하지만 데이터의 일관성과 안정성을 얻기 위한 자연스러운 비용입니다.
 
 ---
@@ -480,6 +508,10 @@ library_records(
 ```
 
 이 구조는 초안으로는 이해하기 쉽지만 정규화 관점에서는 문제가 있습니다.
+
+![AI 생성 테이블 구조 검토](../../images/chapter06/ch06_08_ai_normalization_review_flow.svg)
+
+그림 6-8 AI 생성 테이블 구조 검토
 
 검토 질문은 다음과 같습니다.
 
