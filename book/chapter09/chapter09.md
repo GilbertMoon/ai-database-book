@@ -1,6 +1,6 @@
 # Chapter 09. 트랜잭션과 데이터 정합성
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -38,6 +38,10 @@ Chapter 07과 Chapter 08에서는 온라인 강의 수강신청 시스템을 설
 
 온라인 강의 수강신청을 예로 들어 보겠습니다.
 
+![트랜잭션이 필요한 이유](../../images/chapter09/ch09_01_transaction_need.svg)
+
+그림 9-1 트랜잭션이 필요한 이유
+
 한 학생이 강의를 신청하면 다음 작업이 함께 일어날 수 있습니다.
 
 ```text
@@ -63,6 +67,10 @@ Chapter 07과 Chapter 08에서는 온라인 강의 수강신청 시스템을 설
 ## 2. 트랜잭션이란 무엇인가
 
 트랜잭션은 데이터베이스에서 여러 SQL 실행을 하나의 논리적 작업 단위로 묶는 방법입니다.
+
+![BEGIN-COMMIT-ROLLBACK 기본 흐름](../../images/chapter09/ch09_02_transaction_basic_flow.svg)
+
+그림 9-2 BEGIN-COMMIT-ROLLBACK 기본 흐름
 
 가장 기본적인 구조는 다음과 같습니다.
 
@@ -97,6 +105,10 @@ ROLLBACK: 지금까지의 변경을 취소하겠다.
 ## 3. 데이터 정합성이란 무엇인가
 
 데이터 정합성은 데이터가 서로 모순 없이 맞는 상태를 의미합니다.
+
+![데이터 정합성이 깨지는 예](../../images/chapter09/ch09_03_consistency_problem_examples.svg)
+
+그림 9-3 데이터 정합성이 깨지는 예
 
 예를 들어 다음 상태는 정합성이 맞지 않습니다.
 
@@ -165,6 +177,10 @@ ROLLBACK;
 
 트랜잭션은 보통 ACID라는 네 가지 특성으로 설명합니다.
 
+![ACID 개요](../../images/chapter09/ch09_04_acid_overview.svg)
+
+그림 9-4 ACID 개요
+
 | 항목 | 의미 | 쉬운 설명 |
 | --- | --- | --- |
 | Atomicity | 원자성 | 모두 성공하거나 모두 실패해야 함 |
@@ -211,6 +227,10 @@ CREATE TABLE courses (
 
 다음 예제는 수강신청, 결제 기록, 잔여 좌석 차감을 하나의 트랜잭션으로 처리합니다.
 
+![수강신청-결제-좌석 차감 트랜잭션](../../images/chapter09/ch09_05_enrollment_payment_transaction.svg)
+
+그림 9-5 수강신청-결제-좌석 차감 트랜잭션
+
 ```sql
 BEGIN;
 
@@ -243,6 +263,10 @@ COMMIT;
 실제 서비스에서는 중간에 문제가 발생할 수 있습니다.
 
 예를 들어 결제 검증이 실패했다면 수강신청도 저장되면 안 됩니다.
+
+![ROLLBACK 전후 비교](../../images/chapter09/ch09_06_rollback_before_after.svg)
+
+그림 9-6 ROLLBACK 전후 비교
 
 ```sql
 BEGIN;
@@ -308,6 +332,10 @@ WHERE id = 1;
 
 예를 들어 한 강의에 잔여 좌석이 1개만 남아 있다고 가정합니다.
 
+![동시성, Lock, Deadlock 맛보기](../../images/chapter09/ch09_07_concurrency_lock_deadlock.svg)
+
+그림 9-7 동시성, Lock, Deadlock 맛보기
+
 ```text
 학생 A가 마지막 좌석을 신청한다.
 동시에 학생 B도 같은 좌석을 신청한다.
@@ -352,6 +380,10 @@ PostgreSQL에서 수강신청, 결제 기록, 잔여 좌석 차감을 하나의 
 ```
 
 AI가 만든 SQL은 다음 기준으로 검토해야 합니다.
+
+![AI 트랜잭션 SQL 검토 흐름](../../images/chapter09/ch09_08_ai_transaction_review_flow.svg)
+
+그림 9-8 AI 트랜잭션 SQL 검토 흐름
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
