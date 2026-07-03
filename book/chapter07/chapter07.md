@@ -1,6 +1,6 @@
 # Chapter 07. 중간 프로젝트 또는 중간 평가
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -17,6 +17,10 @@
 ## 1. 프로젝트 목표
 
 중간 프로젝트의 목표는 다음과 같습니다.
+
+![중간 프로젝트 진행 흐름](../../images/chapter07/ch07_01_midterm_project_flow.svg)
+
+그림 7-1 중간 프로젝트 진행 흐름
 
 ```text
 1. 요구사항에서 엔터티와 속성을 찾을 수 있다.
@@ -35,9 +39,8 @@
 - 요구사항 분석 문서
 - 엔터티/속성 정리표
 - ERD 초안
-- CREATE TABLE SQL
-- 샘플 데이터 INSERT SQL
-- 기본 SELECT/INSERT/UPDATE/DELETE SQL
+- SQL 파일
+- 실행 결과 기록
 - 정규화 검토 보고서
 - AI 활용 및 검토 보고서
 ```
@@ -74,6 +77,10 @@
 ```text
 학생, 이름, 이메일, 가입일, 강사, 전문분야, 강의, 제목, 설명, 난이도, 수강료, 개설일, 수강신청, 신청일, 수강상태, 결제금액
 ```
+
+![요구사항에서 엔터티 도출](../../images/chapter07/ch07_02_requirement_to_entities.svg)
+
+그림 7-2 요구사항에서 엔터티 도출
 
 이 중 테이블 후보가 될 수 있는 것은 다음입니다.
 
@@ -134,11 +141,19 @@ enrollments
 students 1:N enrollments N:1 courses
 ```
 
+![학생-강의 N:M 관계 해소](../../images/chapter07/ch07_04_many_to_many_enrollments.svg)
+
+그림 7-4 학생-강의 N:M 관계 해소
+
 ---
 
 ## 6. ERD 초안 작성
 
 ERD를 텍스트로 표현하면 다음과 같습니다.
+
+![온라인 강의 수강신청 ERD](../../images/chapter07/ch07_03_online_course_erd.svg)
+
+그림 7-3 온라인 강의 수강신청 ERD
 
 ```text
 instructors
@@ -184,46 +199,28 @@ students N:M courses는 enrollments로 해소
 
 ## 7. PostgreSQL 테이블 설계
 
-ERD 초안을 PostgreSQL 테이블로 구현하면 다음과 같습니다.
+ERD 초안을 PostgreSQL 테이블로 구현합니다. 전체 실행 가능한 SQL은 다음 파일에 정리되어 있습니다.
 
-```sql
-DROP TABLE IF EXISTS enrollments;
-DROP TABLE IF EXISTS courses;
-DROP TABLE IF EXISTS instructors;
-DROP TABLE IF EXISTS students;
+```text
+code/chapter07/midterm_project_template.sql
+```
 
-CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    joined_at DATE NOT NULL
-);
+![SQL 기반 설계 검증 흐름](../../images/chapter07/ch07_05_sql_validation_flow.svg)
 
-CREATE TABLE instructors (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    specialty VARCHAR(100) NOT NULL
-);
+그림 7-5 SQL 기반 설계 검증 흐름
 
-CREATE TABLE courses (
-    id SERIAL PRIMARY KEY,
-    instructor_id INT NOT NULL REFERENCES instructors(id),
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    level VARCHAR(20) NOT NULL,
-    price INT NOT NULL,
-    opened_at DATE NOT NULL
-);
+SQL 파일에는 다음 내용이 포함되어야 합니다.
 
-CREATE TABLE enrollments (
-    id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES students(id),
-    course_id INT NOT NULL REFERENCES courses(id),
-    enrolled_at DATE NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    paid_amount INT NOT NULL
-);
+```text
+- students 테이블 생성
+- instructors 테이블 생성
+- courses 테이블 생성
+- enrollments 테이블 생성
+- 샘플 데이터 입력
+- 기본 테이블 조회
+- JOIN 기반 수강신청 현황 조회
+- SELECT, INSERT, UPDATE, DELETE 실습
+- 정규화 검토용 확인 쿼리
 ```
 
 초급 단계에서는 `status`를 `VARCHAR(20)`으로 두고, 가능한 값은 문서에서 관리합니다. 이후 더 엄격한 제약조건이 필요하면 `CHECK` 제약조건을 추가할 수 있습니다.
@@ -232,32 +229,22 @@ CREATE TABLE enrollments (
 
 ## 8. 샘플 데이터 입력
 
-테이블을 만들었다면 샘플 데이터를 입력합니다.
+테이블을 만들었다면 다음과 같은 샘플 데이터를 입력합니다.
 
-```sql
-INSERT INTO students (name, email, joined_at)
-VALUES
-    ('김민지', 'minji@example.com', '2026-03-01'),
-    ('이준호', 'junho@example.com', '2026-03-03'),
-    ('박서연', 'seoyeon@example.com', '2026-03-05');
+```text
+students: 김민지, 이준호, 박서연
+instructors: 문길래, 홍길동
+courses: 데이터베이스 입문, 정규화 실습, 파이썬 데이터 분석
+enrollments: 학생별 수강신청 기록
+```
 
-INSERT INTO instructors (name, email, specialty)
-VALUES
-    ('문길래', 'gilbert@example.com', 'Database'),
-    ('홍길동', 'hong@example.com', 'Python');
+샘플 데이터는 다음을 검증하기 위해 필요합니다.
 
-INSERT INTO courses (instructor_id, title, description, level, price, opened_at)
-VALUES
-    (1, '데이터베이스 입문', '관계형 데이터베이스와 SQL 기초', 'basic', 100000, '2026-04-01'),
-    (1, '정규화 실습', '좋은 테이블 설계와 정규화', 'basic', 120000, '2026-04-05'),
-    (2, '파이썬 데이터 분석', 'Pandas 기반 데이터 분석 입문', 'basic', 150000, '2026-04-10');
-
-INSERT INTO enrollments (student_id, course_id, enrolled_at, status, paid_amount)
-VALUES
-    (1, 1, '2026-04-02', '수강중', 100000),
-    (1, 2, '2026-04-06', '신청', 120000),
-    (2, 1, '2026-04-03', '수강중', 100000),
-    (3, 3, '2026-04-11', '신청', 150000);
+```text
+- 한 학생이 여러 강의를 신청할 수 있는가?
+- 한 강의에 여러 학생이 등록될 수 있는가?
+- 한 강사가 여러 강의를 개설할 수 있는가?
+- 수강상태와 결제금액을 수강신청 단위로 저장할 수 있는가?
 ```
 
 ---
@@ -266,20 +253,16 @@ VALUES
 
 수강신청 현황을 학생 이름, 강의명, 강사명과 함께 조회하려면 JOIN을 사용합니다.
 
-```sql
-SELECT
-    enrollments.id,
-    students.name AS student_name,
-    courses.title AS course_title,
-    instructors.name AS instructor_name,
-    enrollments.status,
-    enrollments.paid_amount,
-    enrollments.enrolled_at
-FROM enrollments
-JOIN students ON enrollments.student_id = students.id
-JOIN courses ON enrollments.course_id = courses.id
-JOIN instructors ON courses.instructor_id = instructors.id
-ORDER BY enrollments.id;
+조회 결과에는 다음 항목이 포함되어야 합니다.
+
+```text
+- 수강신청 ID
+- 학생 이름
+- 강의명
+- 강사명
+- 수강상태
+- 결제금액
+- 신청일
 ```
 
 이 SQL은 다음을 검증합니다.
@@ -295,72 +278,26 @@ ORDER BY enrollments.id;
 
 ## 10. CRUD SQL 작성
 
-### 10.1 SELECT
+중간 프로젝트 SQL 파일에는 기본 CRUD 실습이 포함되어야 합니다.
 
-특정 학생의 수강신청 목록을 조회합니다.
+| 구분 | 확인 내용 |
+| --- | --- |
+| SELECT | 특정 학생의 수강신청 목록을 조회할 수 있는가 |
+| INSERT | 새로운 수강신청을 추가할 수 있는가 |
+| UPDATE | 수강상태를 변경할 수 있는가 |
+| DELETE | 취소된 수강신청을 삭제하거나 상태 변경으로 처리할 수 있는가 |
 
-```sql
-SELECT
-    students.name AS student_name,
-    courses.title AS course_title,
-    enrollments.status
-FROM enrollments
-JOIN students ON enrollments.student_id = students.id
-JOIN courses ON enrollments.course_id = courses.id
-WHERE students.email = 'minji@example.com';
-```
-
-### 10.2 INSERT
-
-새로운 수강신청을 추가합니다.
-
-```sql
-INSERT INTO enrollments (student_id, course_id, enrolled_at, status, paid_amount)
-VALUES (2, 2, '2026-04-07', '신청', 120000);
-```
-
-### 10.3 UPDATE
-
-수강상태를 완료로 변경합니다.
-
-```sql
-SELECT *
-FROM enrollments
-WHERE id = 1;
-
-UPDATE enrollments
-SET status = '완료'
-WHERE id = 1;
-
-SELECT *
-FROM enrollments
-WHERE id = 1;
-```
-
-### 10.4 DELETE
-
-취소된 수강신청을 삭제합니다. 실제 서비스에서는 삭제 대신 상태를 `취소`로 변경하는 방식도 자주 사용합니다.
-
-```sql
-SELECT *
-FROM enrollments
-WHERE id = 4;
-
-DELETE FROM enrollments
-WHERE id = 4;
-
-SELECT *
-FROM enrollments
-WHERE id = 4;
-```
-
-`UPDATE`와 `DELETE`를 실행하기 전에는 반드시 같은 `WHERE` 조건으로 `SELECT`를 먼저 실행해야 합니다.
+`UPDATE`와 `DELETE`를 실행하기 전에는 반드시 같은 조건으로 `SELECT`를 먼저 실행해야 합니다.
 
 ---
 
 ## 11. 정규화 관점 검토
 
 이 프로젝트의 구조는 다음 기준으로 검토합니다.
+
+![중간 프로젝트 정규화 검토](../../images/chapter07/ch07_06_normalization_review_flow.svg)
+
+그림 7-6 중간 프로젝트 정규화 검토
 
 | 검토 항목 | 확인 질문 | 검토 결과 예시 |
 | --- | --- | --- |
@@ -378,6 +315,10 @@ WHERE id = 4;
 ## 12. AI 활용 방법
 
 AI는 다음 작업에 활용할 수 있습니다.
+
+![AI 활용 및 검토 보고 흐름](../../images/chapter07/ch07_07_ai_review_report_flow.svg)
+
+그림 7-7 AI 활용 및 검토 보고 흐름
 
 ```text
 - 요구사항에서 테이블 후보 찾기
@@ -424,7 +365,7 @@ AI의 답변은 초안으로만 사용합니다. 최종 설계는 다음 기준�
 | 1 | 요구사항 분석 문서 | 주요 명사, 엔터티 후보, 제외한 속성 정리 |
 | 2 | 엔터티/속성 정리표 | 각 테이블의 컬럼과 의미 정리 |
 | 3 | ERD 초안 | 그림 또는 텍스트 ERD 모두 허용 |
-| 4 | SQL 파일 | CREATE TABLE, INSERT, SELECT, UPDATE, DELETE 포함 |
+| 4 | SQL 파일 | 테이블 생성, 샘플 데이터, 조회, 수정 SQL 포함 |
 | 5 | 실행 결과 기록 | 주요 SELECT 결과와 오류 해결 기록 |
 | 6 | 정규화 검토 보고서 | 중복, 이상 현상, N:M 관계 검토 |
 | 7 | AI 활용 및 검토 보고서 | 사용한 프롬프트, AI 답변 요약, 수정한 내용 |
@@ -442,11 +383,15 @@ AI의 답변은 초안으로만 사용합니다. 최종 설계는 다음 기준�
 
 총점 100점 기준 예시는 다음과 같습니다.
 
+![중간 프로젝트 평가 기준](../../images/chapter07/ch07_08_assessment_rubric_overview.svg)
+
+그림 7-8 중간 프로젝트 평가 기준
+
 | 평가 항목 | 배점 | 평가 기준 |
 | --- | ---: | --- |
 | 요구사항 분석 | 15 | 주요 엔터티와 속성을 적절히 도출했는가 |
 | ERD 및 관계 설계 | 20 | PK/FK, 1:N, N:M 관계를 정확히 표현했는가 |
-| SQL 구현 | 25 | CREATE TABLE, INSERT, SELECT, UPDATE, DELETE가 실행 가능한가 |
+| SQL 구현 | 25 | 테이블 생성, 샘플 데이터, 조회, 수정 SQL이 실행 가능한가 |
 | 정규화 검토 | 15 | 중복, 이상 현상, 중간 테이블 필요성을 설명했는가 |
 | AI 활용 및 검토 | 15 | AI 결과를 비판적으로 검토하고 수정했는가 |
 | 제출 형식 | 10 | 산출물이 명확하고 재현 가능한가 |
@@ -461,7 +406,7 @@ AI의 답변은 초안으로만 사용합니다. 최종 설계는 다음 기준�
 | N:M 관계를 중간 테이블 없이 처리 | -10 ~ -15 |
 | 기본키 또는 외래키 누락 | -5 ~ -15 |
 | SQL 실행 오류가 많고 수정 기록 없음 | -10 ~ -20 |
-| UPDATE/DELETE에 WHERE 조건 없음 | -10 ~ -20 |
+| 수정/삭제 조건 확인이 없음 | -10 ~ -20 |
 | 정규화 검토 내용이 형식적임 | -5 ~ -10 |
 | AI 답변을 그대로 붙여 넣고 검토가 없음 | -10 ~ -20 |
 | 제출 파일명 또는 필수 산출물 누락 | -3 ~ -10 |
@@ -506,7 +451,7 @@ AI의 답변은 초안으로만 사용합니다. 최종 설계는 다음 기준�
 
 AI가 만든 SQL은 실행 오류가 있을 수 있고, 요구사항을 빠뜨릴 수 있습니다. 반드시 DBeaver에서 실행하고 결과를 확인해야 합니다.
 
-### 실수 5. UPDATE와 DELETE를 바로 실행한다
+### 실수 5. 수정과 삭제를 바로 실행한다
 
 수정과 삭제 전에는 같은 조건으로 SELECT를 먼저 실행해야 합니다.
 
