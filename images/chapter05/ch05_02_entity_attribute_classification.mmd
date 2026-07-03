@@ -1,0 +1,23 @@
+flowchart TB
+    A[요구사항의 명사 후보] --> B{독립적으로 관리해야 하는가?}
+
+    B -- 예 --> C[엔터티 후보]
+    B -- 아니오 --> D[속성 후보]
+
+    C --> C1[members]
+    C --> C2[books]
+    C --> C3[loans]
+
+    D --> D1[name]
+    D --> D2[email]
+    D --> D3[title]
+    D --> D4[borrowed_at]
+
+    C1 --> E[테이블]
+    C2 --> E
+    C3 --> E
+
+    D1 --> F[컬럼]
+    D2 --> F
+    D3 --> F
+    D4 --> F
