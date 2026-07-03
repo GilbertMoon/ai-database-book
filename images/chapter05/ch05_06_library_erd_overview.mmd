@@ -1,0 +1,27 @@
+erDiagram
+    MEMBERS ||--o{ LOANS : borrows
+    BOOKS ||--o{ LOANS : is_borrowed_in
+
+    MEMBERS {
+        int id PK
+        string name
+        string email
+        date joined_at
+    }
+
+    BOOKS {
+        int id PK
+        string title
+        string author
+        int published_year
+        string isbn
+    }
+
+    LOANS {
+        int id PK
+        int member_id FK
+        int book_id FK
+        date borrowed_at
+        date due_at
+        date returned_at
+    }
