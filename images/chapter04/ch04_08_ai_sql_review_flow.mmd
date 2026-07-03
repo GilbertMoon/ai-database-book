@@ -1,0 +1,25 @@
+flowchart TD
+    A[AI 생성 SQL] --> B{SQL 종류 확인}
+
+    B --> C[SELECT]
+    B --> D[INSERT]
+    B --> E[UPDATE]
+    B --> F[DELETE]
+
+    C --> G[대상 테이블 / 컬럼 확인]
+    D --> H[입력 컬럼 / 값 / 제약조건 확인]
+    E --> I[WHERE 조건 / 영향 범위 확인]
+    F --> J[WHERE 조건 / 삭제 대상 확인]
+
+    I --> K[실행 전 SELECT]
+    J --> K
+    G --> L[PostgreSQL 문법 확인]
+    H --> L
+    K --> L
+
+    L --> M{실행해도 안전한가?}
+    M -- 예 --> N[DBeaver에서 실행]
+    M -- 아니오 --> O[SQL 수정 또는 실행 중단]
+
+    N --> P[결과 확인 및 기록]
+    O --> P
