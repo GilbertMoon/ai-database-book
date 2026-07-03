@@ -1,0 +1,13 @@
+flowchart LR
+    A[학습자] --> B[Chapter 03 원고 읽기]
+    B --> C[ChatGPT<br/>개념 질문 / 오류 원인 질문]
+    B --> D[Codex<br/>SQL 파일 생성 보조]
+
+    D --> E[code/chapter03/setup_check.sql]
+    E --> F[PostgreSQL<br/>SQL 실행]
+    F --> G[DBeaver<br/>테이블과 결과 확인]
+    G --> H[실습 결과 기록]
+    H --> I[GitHub<br/>실습 파일과 결과 관리]
+
+    C -. 오류 해결 도움 .-> H
+    G -. 결과 확인 .-> E
