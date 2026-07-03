@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 13 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 13 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 13 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -30,27 +30,16 @@ Chapter 13 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 13 �
 20. Chapter 13 활동/실습 자료 작성 완료
 21. Chapter 13 도식 후보 정리 완료
 22. Chapter 13 Mermaid 도식 원본 8종 작성 완료
+23. Chapter 13 SVG 도식 8종 생성 완료
+24. Chapter 13 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 13 SVG 도식 생성
-2. Chapter 13 본문에 그림 링크와 캡션 삽입
-3. Chapter 13 리뷰 체크리스트 작성
-4. Chapter 13 원고 1차 리뷰 및 보완
-5. Chapter 14 원고 확장
-
-## Chapter 13 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 13-1 | `images/chapter13/ch13_01_ai_db_design_review_flow.mmd` | `ch13_01_ai_db_design_review_flow.svg` |
-| 그림 13-2 | `images/chapter13/ch13_02_chatgpt_codex_roles.mmd` | `ch13_02_chatgpt_codex_roles.svg` |
-| 그림 13-3 | `images/chapter13/ch13_03_good_prompt_structure.mmd` | `ch13_03_good_prompt_structure.svg` |
-| 그림 13-4 | `images/chapter13/ch13_04_erd_review_checkpoints.mmd` | `ch13_04_erd_review_checkpoints.svg` |
-| 그림 13-5 | `images/chapter13/ch13_05_bad_vs_good_design.mmd` | `ch13_05_bad_vs_good_design.svg` |
-| 그림 13-6 | `images/chapter13/ch13_06_constraints_review.mmd` | `ch13_06_constraints_review.svg` |
-| 그림 13-7 | `images/chapter13/ch13_07_information_schema_review.mmd` | `ch13_07_information_schema_review.svg` |
-| 그림 13-8 | `images/chapter13/ch13_08_codex_error_fix_loop.mmd` | `ch13_08_codex_error_fix_loop.svg` |
+1. Chapter 13 리뷰 체크리스트 작성
+2. Chapter 13 원고 1차 리뷰 및 보완
+3. Chapter 14 원고 확장
+4. Chapter 14 실습 SQL 또는 Vector DB 예제 작성
+5. Chapter 14 활동/실습 자료 작성
 
 ## 집필 운영 메모
 
