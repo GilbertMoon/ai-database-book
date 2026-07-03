@@ -40,7 +40,7 @@
 | Chapter 10 | 인덱스와 성능 기초 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 11 | 데이터베이스 보안과 백업 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 12 | NoSQL 이해와 선택 기준 | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | 원고 1차 확장 완료 |
+| Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | 원고 1차 확장 완료 / 실습 SQL 작성 완료 |
 | Chapter 14 | Vector DB와 RAG 기초 | 원고 초안 작성 완료 |
 | Chapter 15 | 최종 프로젝트 또는 최종 평가 | 원고 초안 작성 완료 |
 
@@ -68,14 +68,15 @@
 | Chapter 11 원고 1차 리뷰 및 보완 | 완료 |
 | Chapter 12 원고 1차 리뷰 및 보완 | 완료 |
 | Chapter 13 원고 확장 | 완료 |
-| Chapter 13 실습 SQL 파일 작성 | 예정 |
+| Chapter 13 실습 SQL 파일 작성 | 완료 |
+| Chapter 13 활동/실습 자료 작성 | 예정 |
 
 ---
 
 ## 다음 작업
 
 ```text
-Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 실습 SQL 파일을 작성한다.
+Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 활동/실습 자료를 작성한다.
 ```
 
 ---
