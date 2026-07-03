@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 08 활동/실습 자료를 작성한다.
+Chapter 08 도식 후보를 정리하고, images/chapter08/에 사용할 이미지 목록을 설계한다.
 ```
 
 ## 완료된 작업
@@ -21,20 +21,21 @@ Chapter 08 활동/실습 자료를 작성한다.
 11. Chapter 07 원고 1차 리뷰 및 보완 완료
 12. Chapter 08 원고 1차 확장 완료
 13. Chapter 08 실습 SQL 파일 작성 완료
+14. Chapter 08 활동/실습 자료 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 08 활동/실습 자료 작성
-2. Chapter 08 도식 후보 정리
-3. Chapter 08 Mermaid 도식 원본 작성
-4. Chapter 08 SVG 도식 생성
+1. Chapter 08 도식 후보 정리
+2. Chapter 08 Mermaid 도식 원본 작성
+3. Chapter 08 SVG 도식 생성
+4. Chapter 08 본문에 그림 링크와 캡션 삽입
 5. Chapter 08 리뷰 체크리스트 작성
 
 ## Chapter 08 후속 작업 메모
 
 ```text
-- 활동 자료는 INNER JOIN, LEFT JOIN, 여러 테이블 JOIN, GROUP BY, COUNT, SUM, AVG, HAVING 실행 결과 기록 중심으로 구성한다.
-- AI가 만든 JOIN 및 집계 SQL을 검토하는 활동을 포함한다.
+- 도식 후보는 JOIN 기본 구조, INNER JOIN과 LEFT JOIN 차이, 여러 테이블 JOIN 경로, GROUP BY 흐름, HAVING 흐름, AI SQL 검토 흐름을 우선 고려한다.
+- 활동 자료는 INNER JOIN, LEFT JOIN, 여러 테이블 JOIN, GROUP BY, COUNT, SUM, AVG, HAVING 실행 결과 기록과 AI SQL 검토 중심으로 작성 완료했다.
 ```
 
 ## 집필 운영 메모
