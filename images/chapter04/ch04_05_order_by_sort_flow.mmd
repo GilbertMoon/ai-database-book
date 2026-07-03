@@ -1,0 +1,18 @@
+flowchart TB
+    A[students result] --> B{ORDER BY grade}
+
+    B --> C[ASC]
+    B --> D[DESC]
+
+    C --> C1[grade 1]
+    C1 --> C2[grade 2]
+    C2 --> C3[grade 3]
+    C3 --> C4[grade 4]
+
+    D --> D1[grade 4]
+    D1 --> D2[grade 3]
+    D2 --> D3[grade 2]
+    D3 --> D4[grade 1]
+
+    C4 --> E[small to large]
+    D4 --> F[large to small]
