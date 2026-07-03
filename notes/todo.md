@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 11 데이터베이스 보안과 백업 원고를 BOOK_STYLE.md 기준에 맞춰 1차 원고로 확장한다.
+Chapter 11 데이터베이스 보안과 백업 실습 SQL 파일을 작성한다.
 ```
 
 ## 완료된 작업
@@ -21,32 +21,26 @@ Chapter 11 데이터베이스 보안과 백업 원고를 BOOK_STYLE.md 기준에
 11. Chapter 07 원고 1차 리뷰 및 보완 완료
 12. Chapter 08 원고 1차 리뷰 및 보완 완료
 13. Chapter 09 원고 1차 리뷰 및 보완 완료
-14. Chapter 10 원고 1차 확장 완료
-15. Chapter 10 실습 SQL 파일 작성 완료
-16. Chapter 10 코드 README 작성 완료
-17. Chapter 10 활동/실습 자료 작성 완료
-18. Chapter 10 도식 후보 정리 완료
-19. Chapter 10 Mermaid 도식 원본 8종 작성 완료
-20. Chapter 10 SVG 도식 8종 생성 완료
-21. Chapter 10 본문에 그림 링크와 캡션 삽입 완료
-22. Chapter 10 리뷰 체크리스트 작성 완료
-23. Chapter 10 리뷰 후 보완 반영 기록 작성 완료
-24. Chapter 10 원고 1차 리뷰 및 보완 완료
+14. Chapter 10 원고 1차 리뷰 및 보완 완료
+15. Chapter 11 원고 1차 확장 완료
 
 ## 우선순위 작업
 
-1. Chapter 11 원고 확장
-2. Chapter 11 실습 SQL 파일 작성
+1. Chapter 11 실습 SQL 파일 작성
+2. Chapter 11 코드 README 작성
 3. Chapter 11 활동/실습 자료 작성
 4. Chapter 11 도식 후보 정리
-5. Chapter 11 리뷰 체크리스트 작성
+5. Chapter 11 Mermaid 도식 원본 작성
+6. Chapter 11 SVG 도식 생성
+7. Chapter 11 리뷰 체크리스트 작성
 
 ## Chapter 11 후속 작업 메모
 
 ```text
-- Chapter 11은 데이터베이스 보안과 백업의 기본 개념을 초급자 기준으로 설명한다.
-- 사용자, 권한, GRANT/REVOKE, 비밀번호 관리, 최소 권한 원칙을 포함한다.
-- 백업과 복구는 pg_dump/pg_restore 또는 DBeaver 기준으로 맛보기 수준에서 다룬다.
+- 실습 SQL은 보안 교육용으로 안전한 범위에서 사용자/권한/GRANT/REVOKE 확인 흐름을 포함한다.
+- 실습용 역할 이름과 비밀번호는 예시임을 명확히 안내한다.
+- 운영 DB가 아닌 실습 DB에서만 실행하도록 안내한다.
+- 백업과 복구는 실제 명령을 무조건 실행시키기보다 명령 구조와 체크리스트 중심으로 안내한다.
 - AI가 제안한 보안 설정이나 백업 명령을 그대로 실행하지 않고 사람이 위험성을 검토하는 흐름을 포함한다.
 ```
 
