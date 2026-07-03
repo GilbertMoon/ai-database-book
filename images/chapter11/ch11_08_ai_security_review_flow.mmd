@@ -1,0 +1,9 @@
+flowchart TD
+    A[AI command suggestion] --> B[Check permission scope]
+    B --> C[Check least privilege]
+    C --> D[Check password exposure]
+    D --> E[Check target database]
+    E --> F[Check risky commands]
+    F --> G[Check backup location]
+    G --> H[Check restore test]
+    H --> I[Apply or revise]
