@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 14 Vector DB와 RAG 기초 도식 후보를 정리하고, images/chapter14/에 사용할 이미지 목록을 설계한다.
+Chapter 14 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 14 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -29,22 +29,29 @@ Chapter 14 Vector DB와 RAG 기초 도식 후보를 정리하고, images/chapter
 19. Chapter 14 실습 SQL/Vector DB 예제 작성 완료
 20. Chapter 14 코드 README 작성 완료
 21. Chapter 14 활동/실습 자료 작성 완료
+22. Chapter 14 도식 후보 정리 완료
+23. Chapter 14 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 14 도식 후보 정리
-2. Chapter 14 Mermaid 도식 원본 작성
-3. Chapter 14 SVG 도식 생성
-4. Chapter 14 본문에 그림 링크와 캡션 삽입
-5. Chapter 14 리뷰 체크리스트 작성
-6. Chapter 14 원고 1차 리뷰 및 보완
+1. Chapter 14 SVG 도식 생성
+2. Chapter 14 본문에 그림 링크와 캡션 삽입
+3. Chapter 14 리뷰 체크리스트 작성
+4. Chapter 14 원고 1차 리뷰 및 보완
+5. Chapter 15 원고 확장
 
-## Chapter 14 후속 작업 메모
+## Chapter 14 도식 목록
 
-```text
-- 도식 후보는 일반 검색과 의미 기반 검색 비교, 임베딩 변환, 벡터 거리와 Top-k 검색, 문서 청킹, RAG 전체 흐름, pgvector 실습 흐름, RAG 답변 근거성 검토, Vector DB와 기존 DB 역할 분리를 우선 고려한다.
-- 활동 자료는 일반 검색과 의미 기반 검색 비교, 문서 청킹, 질문 벡터 검색, Top-k 결과 해석, RAG 답변 근거성 검토 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 14-1 | `images/chapter14/ch14_01_sql_vs_semantic_search.mmd` | `ch14_01_sql_vs_semantic_search.svg` |
+| 그림 14-2 | `images/chapter14/ch14_02_embedding_vector_conversion.mmd` | `ch14_02_embedding_vector_conversion.svg` |
+| 그림 14-3 | `images/chapter14/ch14_03_vector_similarity_topk.mmd` | `ch14_03_vector_similarity_topk.svg` |
+| 그림 14-4 | `images/chapter14/ch14_04_document_chunking.mmd` | `ch14_04_document_chunking.svg` |
+| 그림 14-5 | `images/chapter14/ch14_05_rag_pipeline.mmd` | `ch14_05_rag_pipeline.svg` |
+| 그림 14-6 | `images/chapter14/ch14_06_pgvector_practice_flow.mmd` | `ch14_06_pgvector_practice_flow.svg` |
+| 그림 14-7 | `images/chapter14/ch14_07_rag_answer_grounding_review.mmd` | `ch14_07_rag_answer_grounding_review.svg` |
+| 그림 14-8 | `images/chapter14/ch14_08_db_role_separation.mmd` | `ch14_08_db_role_separation.svg` |
 
 ## 집필 운영 메모
 
