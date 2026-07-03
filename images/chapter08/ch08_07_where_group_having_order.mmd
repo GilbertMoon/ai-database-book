@@ -1,0 +1,14 @@
+flowchart TB
+    A[FROM / JOIN]
+    A --> B[WHERE]
+    B --> C[GROUP BY]
+    C --> D[COUNT / SUM / AVG]
+    D --> E[HAVING]
+    E --> F[ORDER BY]
+    F --> G[최종 결과]
+
+    B --> B1[개별 행 필터링]
+    E --> E1[집계 결과 필터링]
+
+    B1 --> H[예: status = 수강중]
+    E1 --> I[예: COUNT >= 2]
