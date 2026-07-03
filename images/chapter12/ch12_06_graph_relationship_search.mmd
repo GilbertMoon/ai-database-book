@@ -1,0 +1,12 @@
+flowchart LR
+    A[Student A] -->|enrolled| B[Course X]
+    A -->|follows| C[Student B]
+    C -->|enrolled| D[Course Y]
+    B -->|prerequisite| D
+    B -->|tagged| E[Database]
+    D -->|tagged| F[AI]
+
+    A --> G[Relationship search]
+    G --> H[Recommendation]
+    G --> I[Path finding]
+    G --> J[Similar users]
