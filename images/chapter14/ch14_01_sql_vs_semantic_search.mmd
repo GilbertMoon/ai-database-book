@@ -1,0 +1,17 @@
+flowchart LR
+    A[User search need] --> B[SQL search]
+    A --> C[Semantic search]
+
+    B --> B1[Exact value]
+    B --> B2[Keyword match]
+    B --> B3[Structured condition]
+    B1 --> B4[email = kim@example.com]
+    B2 --> B5[title LIKE refund]
+    B3 --> B6[status = completed]
+
+    C --> C1[Meaning similarity]
+    C --> C2[Embedding vector]
+    C --> C3[Vector distance]
+    C1 --> C4[money back ~= refund]
+    C2 --> C5[question vector]
+    C3 --> C6[Top-k documents]
