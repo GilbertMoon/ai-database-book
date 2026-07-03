@@ -4,9 +4,7 @@
 
 이 저장소는 **AI 시대의 데이터베이스 입문** 교재 집필을 위한 작업 저장소입니다.
 
-이 책은 ChatGPT와 Codex를 활용해 데이터베이스 기본 개념, SQL, PostgreSQL, DB 설계, NoSQL, Vector DB, RAG 기초를 배우는 **실습형 eBook 겸 대학 교재**를 목표로 합니다.
-
-단순히 SQL 문법을 배우는 것이 아니라, AI가 생성한 데이터베이스 설계와 SQL을 사람이 검토하고 수정할 수 있는 역량을 기르는 데 중점을 둡니다.
+이 책은 데이터베이스 기본 개념, SQL, PostgreSQL, DB 설계, NoSQL, Vector DB, RAG 기초를 배우는 **실습형 eBook 겸 대학 교재**를 목표로 합니다.
 
 ---
 
@@ -41,7 +39,7 @@
 | Chapter 11 | 데이터베이스 보안과 백업 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 12 | NoSQL 이해와 선택 기준 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 14 | Vector DB와 RAG 기초 | 원고 초안 작성 완료 |
+| Chapter 14 | Vector DB와 RAG 기초 | 원고 1차 확장 완료 |
 | Chapter 15 | 최종 프로젝트 또는 최종 평가 | 원고 초안 작성 완료 |
 
 ---
@@ -52,30 +50,16 @@
 | --- | --- |
 | 저장소 생성 | 완료 |
 | 집필 가이드 확인 | 완료 |
-| README.md 생성 | 완료 |
-| BOOK_STYLE.md 작성 | 완료 |
-| Chapter별 기본 구조 생성 | 완료 |
-| Chapter 01 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 02 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 03 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 04 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 05 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 06 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 07 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 08 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 09 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 10 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 11 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 12 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 13 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 14 원고 확장 | 예정 |
+| Chapter 01~13 원고 1차 리뷰 및 보완 | 완료 |
+| Chapter 14 원고 확장 | 완료 |
+| Chapter 14 실습 SQL 또는 Vector DB 예제 작성 | 예정 |
 
 ---
 
 ## 다음 작업
 
 ```text
-Chapter 14 Vector DB와 RAG 기초 원고를 BOOK_STYLE.md 기준에 맞춰 1차 원고로 확장한다.
+Chapter 14 Vector DB와 RAG 기초 실습 SQL 또는 Vector DB 예제 파일을 작성한다.
 ```
 
 ---
@@ -86,7 +70,6 @@ Chapter 14 Vector DB와 RAG 기초 원고를 BOOK_STYLE.md 기준에 맞춰 1차
 - 모든 Chapter는 원고, 코드, 도식, 리뷰 기록을 함께 관리한다.
 - 초급 학습자가 따라 할 수 있도록 설명한다.
 - 단순 문법 설명보다 실제 데이터베이스 설계와 검증 흐름을 중시한다.
-- AI가 생성한 결과는 반드시 사람이 검토하고 수정하는 과정을 포함한다.
-- 각 Chapter는 대학 수업 1주차 분량 또는 eBook 독립 학습 단위로 사용할 수 있어야 한다.
+- AI가 생성한 결과는 반드시 검토하고 수정하는 과정을 포함한다.
 - 최종적으로 publish/full_manuscript.md로 통합 가능한 구조를 유지한다.
 ```
