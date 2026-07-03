@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5568"/>
+    </marker>
+    <style>
+      text { font-family: Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; fill:#1a202c; }
+      .title { font-size: 24px; font-weight: 700; }
+      .entity { fill:#f7fafc; stroke:#4a5568; stroke-width:2; rx:8; ry:8; }
+      .head { fill:#ebf8ff; stroke:#2b6cb0; stroke-width:2; rx:8; ry:8; }
+      .name { font-size:18px; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
+      .field { font-size:15px; }
+      .rel { font-size:15px; text-anchor:middle; }
+      .cap { fill:#edf2f7; stroke:#718096; stroke-width:2; rx:10; ry:10; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="700" y="38" class="title" text-anchor="middle">온라인 강의 서비스 데이터 관계</text>
+
+  <g>
+    <rect x="80" y="160" width="240" height="150" class="entity"/>
+    <rect x="80" y="160" width="240" height="44" class="head"/>
+    <text x="200" y="182" class="name">STUDENT</text>
+    <text x="100" y="230" class="field">student_id (PK)</text>
+    <text x="100" y="258" class="field">name</text>
+    <text x="100" y="286" class="field">email</text>
+  </g>
+
+  <g>
+    <rect x="560" y="90" width="250" height="150" class="entity"/>
+    <rect x="560" y="90" width="250" height="44" class="head"/>
+    <text x="685" y="112" class="name">INSTRUCTOR</text>
+    <text x="580" y="160" class="field">instructor_id (PK)</text>
+    <text x="580" y="188" class="field">name</text>
+    <text x="580" y="216" class="field">email</text>
+  </g>
+
+  <g>
+    <rect x="540" y="330" width="290" height="180" class="entity"/>
+    <rect x="540" y="330" width="290" height="44" class="head"/>
+    <text x="685" y="352" class="name">COURSE</text>
+    <text x="560" y="400" class="field">course_id (PK)</text>
+    <text x="560" y="428" class="field">instructor_id (FK)</text>
+    <text x="560" y="456" class="field">title</text>
+    <text x="560" y="484" class="field">price</text>
+  </g>
+
+  <g>
+    <rect x="120" y="520" width="320" height="200" class="entity"/>
+    <rect x="120" y="520" width="320" height="44" class="head"/>
+    <text x="280" y="542" class="name">ENROLLMENT</text>
+    <text x="140" y="590" class="field">enrollment_id (PK)</text>
+    <text x="140" y="618" class="field">student_id (FK)</text>
+    <text x="140" y="646" class="field">course_id (FK)</text>
+    <text x="140" y="674" class="field">enrolled_at</text>
+    <text x="140" y="702" class="field">status</text>
+  </g>
+
+  <g>
+    <rect x="980" y="520" width="280" height="180" class="entity"/>
+    <rect x="980" y="520" width="280" height="44" class="head"/>
+    <text x="1120" y="542" class="name">PAYMENT</text>
+    <text x="1000" y="590" class="field">payment_id (PK)</text>
+    <text x="1000" y="618" class="field">enrollment_id (FK)</text>
+    <text x="1000" y="646" class="field">amount</text>
+    <text x="1000" y="674" class="field">payment_status</text>
+  </g>
+
+  <line x1="320" y1="240" x2="540" y2="590" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="450" y="370" class="rel">학생 1 : N 수강신청</text>
+
+  <line x1="685" y1="240" x2="685" y2="330" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="760" y="285" class="rel">강사 1 : N 강의</text>
+
+  <line x1="540" y1="510" x2="440" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="470" y="535" class="rel">강의 1 : N 수강신청</text>
+
+  <line x1="440" y1="620" x2="980" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="710" y="595" class="rel">수강신청 1 : 0..1 결제</text>
+
+  <rect x="90" y="770" width="1220" height="60" class="cap"/>
+  <text x="700" y="800" class="rel" style="font-size:17px;">핵심 구조: 학생과 강의는 N:M 관계이므로 ENROLLMENT가 필요하며, 결제 정보는 PAYMENT로 분리해 정합성과 확장성을 높인다.</text>
+</svg>
