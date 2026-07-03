@@ -39,7 +39,7 @@
 | Chapter 11 | 데이터베이스 보안과 백업 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 12 | NoSQL 이해와 선택 기준 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 14 | Vector DB와 RAG 기초 | 원고 1차 확장 완료 / 실습 예제 작성 완료 / 활동·실습 자료 작성 완료 |
+| Chapter 14 | Vector DB와 RAG 기초 | 원고 1차 확장 완료 / 실습 예제 작성 완료 / 활동·실습 자료 작성 완료 / 도식 후보 정리 완료 / Mermaid 원본 작성 완료 |
 | Chapter 15 | 최종 프로젝트 또는 최종 평가 | 원고 초안 작성 완료 |
 
 ---
@@ -54,14 +54,16 @@
 | Chapter 14 원고 확장 | 완료 |
 | Chapter 14 실습 SQL 또는 Vector DB 예제 작성 | 완료 |
 | Chapter 14 활동/실습 자료 작성 | 완료 |
-| Chapter 14 도식 후보 정리 | 예정 |
+| Chapter 14 도식 후보 정리 | 완료 |
+| Chapter 14 Mermaid 도식 원본 작성 | 완료 |
+| Chapter 14 SVG 도식 생성 및 본문 삽입 | 예정 |
 
 ---
 
 ## 다음 작업
 
 ```text
-Chapter 14 Vector DB와 RAG 기초 도식 후보를 정리하고, images/chapter14/에 사용할 이미지 목록을 설계한다.
+Chapter 14 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 14 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ---
