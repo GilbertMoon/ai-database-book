@@ -1,0 +1,14 @@
+flowchart LR
+    A[students 테이블] --> B{SELECT 범위}
+
+    B --> C[SELECT *]
+    B --> D[SELECT name, email, major]
+
+    C --> C1[모든 컬럼 조회]
+    D --> D1[필요한 컬럼만 조회]
+
+    C1 --> E[결과: id, name, email, major, grade, created_at]
+    D1 --> F[결과: name, email, major]
+
+    E --> G[편리하지만 불필요한 데이터 포함 가능]
+    F --> H[명확하고 필요한 데이터만 확인]
