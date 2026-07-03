@@ -1,0 +1,27 @@
+flowchart LR
+    A[library_records]
+
+    A --> B[회원 정보]
+    A --> C[책 정보]
+    A --> D[대여 정보]
+
+    B --> E[members]
+    C --> F[books]
+    D --> G[loans]
+
+    E --> E1[id]
+    E --> E2[name]
+    E --> E3[email]
+
+    F --> F1[id]
+    F --> F2[title]
+    F --> F3[author]
+
+    G --> G1[id]
+    G --> G2[member_id FK]
+    G --> G3[book_id FK]
+    G --> G4[borrowed_at]
+    G --> G5[due_at]
+
+    E1 -. 참조 .-> G2
+    F1 -. 참조 .-> G3
