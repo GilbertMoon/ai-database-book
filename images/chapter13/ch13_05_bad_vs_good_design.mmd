@@ -1,0 +1,21 @@
+flowchart TB
+    A[Bad AI design] --> B[ai_bad_enrollments]
+    B --> B1[student_name]
+    B --> B2[course_title]
+    B --> B3[course_price as TEXT]
+    B --> B4[payment_status]
+    B --> B5[card_number plain text]
+
+    A --> C[Problems]
+    C --> C1[Mixed roles]
+    C --> C2[Duplicated data]
+    C --> C3[Weak types]
+    C --> C4[No FK]
+    C --> C5[Security risk]
+
+    C --> D[Reviewed good design]
+    D --> E[students]
+    D --> F[courses]
+    D --> G[enrollments]
+    D --> H[payments]
+    D --> I[instructors]
