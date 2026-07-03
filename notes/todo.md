@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 12 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 12 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 12 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -29,27 +29,16 @@ Chapter 12 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 12 �
 19. Chapter 12 활동/실습 자료 작성 완료
 20. Chapter 12 도식 후보 정리 완료
 21. Chapter 12 Mermaid 도식 원본 8종 작성 완료
+22. Chapter 12 SVG 도식 8종 생성 완료
+23. Chapter 12 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 12 SVG 도식 생성
-2. Chapter 12 본문에 그림 링크와 캡션 삽입
-3. Chapter 12 리뷰 체크리스트 작성
-4. Chapter 12 원고 1차 리뷰 및 보완
-5. Chapter 13 원고 확장
-
-## Chapter 12 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 12-1 | `images/chapter12/ch12_01_rdbms_vs_nosql_overview.mmd` | `ch12_01_rdbms_vs_nosql_overview.svg` |
-| 그림 12-2 | `images/chapter12/ch12_02_nosql_types_map.mmd` | `ch12_02_nosql_types_map.svg` |
-| 그림 12-3 | `images/chapter12/ch12_03_key_value_lookup.mmd` | `ch12_03_key_value_lookup.svg` |
-| 그림 12-4 | `images/chapter12/ch12_04_document_json_structure.mmd` | `ch12_04_document_json_structure.svg` |
-| 그림 12-5 | `images/chapter12/ch12_05_column_family_log_flow.mmd` | `ch12_05_column_family_log_flow.svg` |
-| 그림 12-6 | `images/chapter12/ch12_06_graph_relationship_search.mmd` | `ch12_06_graph_relationship_search.svg` |
-| 그림 12-7 | `images/chapter12/ch12_07_jsonb_practice_flow.mmd` | `ch12_07_jsonb_practice_flow.svg` |
-| 그림 12-8 | `images/chapter12/ch12_08_ai_nosql_choice_review.mmd` | `ch12_08_ai_nosql_choice_review.svg` |
+1. Chapter 12 리뷰 체크리스트 작성
+2. Chapter 12 원고 1차 리뷰 및 보완
+3. Chapter 13 원고 확장
+4. Chapter 13 실습 SQL 파일 작성
+5. Chapter 13 활동/실습 자료 작성
 
 ## 집필 운영 메모
 
