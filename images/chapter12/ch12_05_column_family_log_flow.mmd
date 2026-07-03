@@ -1,0 +1,15 @@
+flowchart TB
+    A[User events] --> B[Page view]
+    A --> C[Video play]
+    A --> D[Quiz submit]
+    A --> E[Course exit]
+
+    B --> F[Event stream]
+    C --> F
+    D --> F
+    E --> F
+
+    F --> G[Column-Family DB]
+    G --> H[Partition by time or user]
+    H --> I[Large-scale write]
+    I --> J[Analytics query]
