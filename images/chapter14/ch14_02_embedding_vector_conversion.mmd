@@ -1,0 +1,14 @@
+flowchart TB
+    A[Text document] --> B[Embedding model]
+    B --> C[Vector]
+    C --> D[Store with document]
+
+    A1[Course refund policy] --> B
+    A2[Final project guide] --> B
+    A3[SQL JOIN note] --> B
+
+    C --> C1[[0.90, 0.10, 0.20]]
+    C --> C2[[0.20, 0.75, 0.25]]
+    C --> C3[[0.15, 0.30, 0.90]]
+
+    D --> E[Vector DB or pgvector]
