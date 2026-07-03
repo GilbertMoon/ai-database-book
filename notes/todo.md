@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 11 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 11 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 11 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -28,27 +28,16 @@ Chapter 11 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 11 �
 18. Chapter 11 활동/실습 자료 작성 완료
 19. Chapter 11 도식 후보 정리 완료
 20. Chapter 11 Mermaid 도식 원본 8종 작성 완료
+21. Chapter 11 SVG 도식 8종 생성 완료
+22. Chapter 11 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 11 SVG 도식 생성
-2. Chapter 11 본문에 그림 링크와 캡션 삽입
-3. Chapter 11 리뷰 체크리스트 작성
-4. Chapter 11 원고 1차 리뷰 및 보완
-5. Chapter 12 원고 확장
-
-## Chapter 11 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 11-1 | `images/chapter11/ch11_01_security_backup_overview.mmd` | `ch11_01_security_backup_overview.svg` |
-| 그림 11-2 | `images/chapter11/ch11_02_account_permission_model.mmd` | `ch11_02_account_permission_model.svg` |
-| 그림 11-3 | `images/chapter11/ch11_03_least_privilege_principle.mmd` | `ch11_03_least_privilege_principle.svg` |
-| 그림 11-4 | `images/chapter11/ch11_04_grant_revoke_flow.mmd` | `ch11_04_grant_revoke_flow.svg` |
-| 그림 11-5 | `images/chapter11/ch11_05_dev_prod_account_separation.mmd` | `ch11_05_dev_prod_account_separation.svg` |
-| 그림 11-6 | `images/chapter11/ch11_06_sql_injection_safe_query.mmd` | `ch11_06_sql_injection_safe_query.svg` |
-| 그림 11-7 | `images/chapter11/ch11_07_backup_restore_flow.mmd` | `ch11_07_backup_restore_flow.svg` |
-| 그림 11-8 | `images/chapter11/ch11_08_ai_security_review_flow.mmd` | `ch11_08_ai_security_review_flow.svg` |
+1. Chapter 11 리뷰 체크리스트 작성
+2. Chapter 11 원고 1차 리뷰 및 보완
+3. Chapter 12 원고 확장
+4. Chapter 12 실습 SQL 또는 NoSQL 예제 작성
+5. Chapter 12 활동/실습 자료 작성
 
 ## 집필 운영 메모
 
