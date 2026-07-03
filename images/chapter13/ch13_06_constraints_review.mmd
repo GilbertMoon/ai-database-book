@@ -1,0 +1,21 @@
+flowchart TB
+    A[DDL review] --> B[PRIMARY KEY]
+    A --> C[FOREIGN KEY]
+    A --> D[NOT NULL]
+    A --> E[UNIQUE]
+    A --> F[CHECK]
+    A --> G[Data type]
+
+    B --> B1[Identify each row]
+    C --> C1[Protect relationships]
+    D --> D1[Prevent missing required values]
+    E --> E1[Prevent duplicates]
+    F --> F1[Limit status and numeric ranges]
+    G --> G1[Use numeric date boolean correctly]
+
+    B1 --> H[Safer schema]
+    C1 --> H
+    D1 --> H
+    E1 --> H
+    F1 --> H
+    G1 --> H
