@@ -1,0 +1,16 @@
+flowchart TB
+    A[User question] --> B[Retrieved chunk]
+    B --> C[Generated answer]
+
+    B --> D[Grounding review]
+    C --> D
+
+    D --> E{Answer uses only evidence?}
+    E -->|Yes| F[Grounded answer]
+    E -->|No| G[Unsupported claim]
+
+    G --> H[Revise prompt or retrieval]
+    H --> I[Search again]
+    I --> B
+
+    F --> J[Answer with source]
