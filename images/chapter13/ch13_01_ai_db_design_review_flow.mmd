@@ -1,0 +1,14 @@
+flowchart TB
+    A[Requirements] --> B[Ask AI for ERD and SQL draft]
+    B --> C[AI draft]
+    C --> D[Human review]
+    D --> E[Check entities and relationships]
+    D --> F[Check PK and FK]
+    D --> G[Check constraints and types]
+    D --> H[Check normalization and security]
+    E --> I[Revise design]
+    F --> I
+    G --> I
+    H --> I
+    I --> J[Test in practice DB]
+    J --> K[Final reviewed schema]
