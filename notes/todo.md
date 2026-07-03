@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 02 도식 후보를 정리하고, images/chapter02/에 사용할 이미지 목록을 설계한다.
+Chapter 02 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 02 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -15,21 +15,29 @@ Chapter 02 도식 후보를 정리하고, images/chapter02/에 사용할 이미�
 5. Chapter 01 원고 1차 리뷰 및 보완 완료
 6. Chapter 02 원고 1차 확장 완료
 7. Chapter 02 활동/실습 자료 작성 완료
+8. Chapter 02 도식 후보 정리 완료
+9. Chapter 02 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 02 도식 후보 정리
-2. Chapter 02 Mermaid 도식 원본 작성
-3. Chapter 02 SVG 도식 생성
-4. Chapter 02 본문에 그림 링크와 캡션 삽입
-5. Chapter 02 리뷰 체크리스트 작성
+1. Chapter 02 SVG 도식 생성
+2. Chapter 02 본문에 그림 링크와 캡션 삽입
+3. Chapter 02 리뷰 체크리스트 작성
+4. Chapter 02 원고 1차 리뷰 및 보완
+5. Chapter 03 원고 확장
 
-## Chapter 02 후속 작업 메모
+## Chapter 02 도식 목록
 
-```text
-- 도식 후보는 DBMS-데이터베이스-테이블 계층 구조, 테이블/행/열 구조, PK/FK 관계, CRUD 흐름을 우선 고려한다.
-- 활동 자료는 DBMS 기본 용어, 테이블/행/열 구분, PK/FK 판단, AI 생성 테이블 구조 검토 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 2-1 | `images/chapter02/ch02_01_dbms_hierarchy.mmd` | `ch02_01_dbms_hierarchy.svg` |
+| 그림 2-2 | `images/chapter02/ch02_02_table_row_column.mmd` | `ch02_02_table_row_column.svg` |
+| 그림 2-3 | `images/chapter02/ch02_03_primary_key_concept.mmd` | `ch02_03_primary_key_concept.svg` |
+| 그림 2-4 | `images/chapter02/ch02_04_foreign_key_relationship.mmd` | `ch02_04_foreign_key_relationship.svg` |
+| 그림 2-5 | `images/chapter02/ch02_05_relationship_types.mmd` | `ch02_05_relationship_types.svg` |
+| 그림 2-6 | `images/chapter02/ch02_06_crud_flow.mmd` | `ch02_06_crud_flow.svg` |
+| 그림 2-7 | `images/chapter02/ch02_07_constraints_guardrail.mmd` | `ch02_07_constraints_guardrail.svg` |
+| 그림 2-8 | `images/chapter02/ch02_08_ai_table_review.mmd` | `ch02_08_ai_table_review.svg` |
 
 ## 집필 운영 메모
 
