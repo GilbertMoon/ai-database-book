@@ -1,0 +1,19 @@
+flowchart LR
+    A[courses]
+    B[enrollments]
+
+    A --> A1[course_id / title]
+    B --> B1[course_id / paid_amount]
+
+    A1 --> C[JOIN by course_id]
+    B1 --> C
+
+    C --> D[GROUP BY course]
+
+    D --> E[COUNT enrollment_id]
+    D --> F[SUM paid_amount]
+    D --> G[AVG paid_amount]
+
+    E --> H[강의별 수강생 수]
+    F --> I[강의별 매출]
+    G --> J[강의별 평균 결제금액]
