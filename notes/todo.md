@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 15 최종 프로젝트/평가 자료와 제출 템플릿을 작성한다.
+Chapter 15 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -27,20 +27,23 @@ Chapter 15 최종 프로젝트/평가 자료와 제출 템플릿을 작성한다
 17. Chapter 13 원고 1차 리뷰 및 보완 완료
 18. Chapter 14 원고 1차 리뷰 및 보완 완료
 19. Chapter 15 원고 1차 확장 완료
+20. Chapter 15 최종 프로젝트/평가 자료 작성 완료
+21. Chapter 15 제출 템플릿 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 15 최종 프로젝트/평가 자료 작성
-2. Chapter 15 제출 템플릿 작성
-3. Chapter 15 활동/실습 자료 작성
-4. Chapter 15 도식 후보 정리
-5. publish/full_manuscript.md 통합 준비
+1. Chapter 15 활동/실습 자료 작성
+2. Chapter 15 도식 후보 정리
+3. Chapter 15 Mermaid 도식 원본 작성
+4. Chapter 15 SVG 도식 생성
+5. Chapter 15 리뷰 체크리스트 작성
+6. publish/full_manuscript.md 통합 준비
 
 ## Chapter 15 후속 작업 메모
 
 ```text
-- 최종 프로젝트/평가 자료는 프로젝트형 평가 안내, 시험형 평가 문제지, 제출 폴더 구조, 평가 루브릭, AI 활용 보고서 양식을 포함한다.
-- 제출 템플릿은 requirements.md, ai_review_report.md, final_report.md, queries.sql, schema.sql 골격을 제공할 수 있다.
+- 활동/실습 자료는 최종 프로젝트 주제 선정, 요구사항 정의, ERD 점검, DDL 점검, 핵심 SQL 점검, AI 검토 보고서 작성, 발표 준비를 단계별 활동으로 구성한다.
+- 도식 후보는 최종 프로젝트 진행 흐름, 제출물 구조, 평가 루브릭, AI 검토 루프를 우선 고려한다.
 ```
 
 ## 집필 운영 메모
