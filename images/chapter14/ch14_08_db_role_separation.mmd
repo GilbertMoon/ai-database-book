@@ -1,0 +1,15 @@
+flowchart TB
+    A[AI service data] --> B[Relational DB]
+    A --> C[Document storage]
+    A --> D[Vector DB]
+    A --> E[Log storage]
+
+    B --> B1[students enrollments payments]
+    C --> C1[notices manuals lecture notes]
+    D --> D1[document embeddings]
+    E --> E1[questions searches answer reviews]
+
+    B1 --> F[Data consistency]
+    C1 --> G[Original evidence]
+    D1 --> H[Semantic search]
+    E1 --> I[Quality monitoring]
