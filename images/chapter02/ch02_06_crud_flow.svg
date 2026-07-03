@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.box{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}.main{fill:#ebf8ff;stroke:#2b6cb0}.sql{fill:#fffaf0;stroke:#d69e2e}.db{fill:#f0fff4;stroke:#38a169}.label{font-size:17px;text-anchor:middle;dominant-baseline:middle}.small{font-size:14px;text-anchor:middle;dominant-baseline:middle}</style></defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="600" y="40" text-anchor="middle" class="title">CRUD와 SQL 명령어 흐름</text>
+  <rect x="70" y="120" width="170" height="70" class="box main"/><text x="155" y="155" class="label">Create</text><text x="155" y="178" class="small">학생 등록</text>
+  <rect x="330" y="120" width="170" height="70" class="box main"/><text x="415" y="155" class="label">Read</text><text x="415" y="178" class="small">학생 조회</text>
+  <rect x="590" y="120" width="170" height="70" class="box main"/><text x="675" y="155" class="label">Update</text><text x="675" y="178" class="small">이메일 수정</text>
+  <rect x="850" y="120" width="170" height="70" class="box main"/><text x="935" y="155" class="label">Delete</text><text x="935" y="178" class="small">학생 삭제</text>
+  <rect x="70" y="280" width="170" height="58" class="box sql"/><text x="155" y="309" class="label">INSERT</text>
+  <rect x="330" y="280" width="170" height="58" class="box sql"/><text x="415" y="309" class="label">SELECT</text>
+  <rect x="590" y="280" width="170" height="58" class="box sql"/><text x="675" y="309" class="label">UPDATE</text>
+  <rect x="850" y="280" width="170" height="58" class="box sql"/><text x="935" y="309" class="label">DELETE</text>
+  <rect x="410" y="450" width="380" height="80" class="box db"/><text x="600" y="490" class="label">Database</text><text x="600" y="515" class="small">테이블의 데이터를 생성·조회·수정·삭제</text>
+  <line x1="155" y1="190" x2="155" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="415" y1="190" x2="415" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="675" y1="190" x2="675" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="935" y1="190" x2="935" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="155" y1="338" x2="500" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="415" y1="338" x2="560" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="675" y1="338" x2="640" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="935" y1="338" x2="700" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
