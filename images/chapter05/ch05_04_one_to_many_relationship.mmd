@@ -1,0 +1,17 @@
+flowchart LR
+    A[members] --> A1[id PK]
+    A --> A2[name]
+
+    B[loans] --> B1[id PK]
+    B --> B2[member_id FK]
+    B --> B3[borrowed_at]
+    B --> B4[due_at]
+
+    A1 --> R[1명의 회원]
+    R --> N[여러 대여 기록]
+    N --> B2
+
+    B2 -. references .-> A1
+
+    C[1:N 관계에서는 N쪽 테이블에 외래키를 둔다]
+    B2 --> C
