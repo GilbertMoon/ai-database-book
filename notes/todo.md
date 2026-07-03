@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 10 인덱스와 성능 기초 도식 후보를 정리하고, images/chapter10/에 사용할 이미지 목록을 설계한다.
+Chapter 10 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 10 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -25,21 +25,29 @@ Chapter 10 인덱스와 성능 기초 도식 후보를 정리하고, images/chap
 15. Chapter 10 실습 SQL 파일 작성 완료
 16. Chapter 10 코드 README 작성 완료
 17. Chapter 10 활동/실습 자료 작성 완료
+18. Chapter 10 도식 후보 정리 완료
+19. Chapter 10 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 10 도식 후보 정리
-2. Chapter 10 Mermaid 도식 원본 작성
-3. Chapter 10 SVG 도식 생성
-4. Chapter 10 본문에 그림 링크와 캡션 삽입
-5. Chapter 10 리뷰 체크리스트 작성
+1. Chapter 10 SVG 도식 생성
+2. Chapter 10 본문에 그림 링크와 캡션 삽입
+3. Chapter 10 리뷰 체크리스트 작성
+4. Chapter 10 원고 1차 리뷰 및 보완
+5. Chapter 11 원고 확장
 
-## Chapter 10 후속 작업 메모
+## Chapter 10 도식 목록
 
-```text
-- 도식 후보는 인덱스가 필요한 이유, 전체 테이블 스캔과 인덱스 검색 차이, WHERE/ORDER BY/JOIN 조건 인덱스, 복합 인덱스, EXPLAIN 비교, AI 추천 인덱스 검토 흐름을 우선 고려한다.
-- 활동 자료는 인덱스 생성 전후 EXPLAIN 결과 기록, Seq Scan/Index Scan 해석, AI 추천 인덱스 검토 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 10-1 | `images/chapter10/ch10_01_index_need_overview.mmd` | `ch10_01_index_need_overview.svg` |
+| 그림 10-2 | `images/chapter10/ch10_02_table_scan_vs_index_scan.mmd` | `ch10_02_table_scan_vs_index_scan.svg` |
+| 그림 10-3 | `images/chapter10/ch10_03_where_index_candidate.mmd` | `ch10_03_where_index_candidate.svg` |
+| 그림 10-4 | `images/chapter10/ch10_04_order_by_index_flow.mmd` | `ch10_04_order_by_index_flow.svg` |
+| 그림 10-5 | `images/chapter10/ch10_05_join_foreign_key_index.mmd` | `ch10_05_join_foreign_key_index.svg` |
+| 그림 10-6 | `images/chapter10/ch10_06_composite_index_order.mmd` | `ch10_06_composite_index_order.svg` |
+| 그림 10-7 | `images/chapter10/ch10_07_explain_before_after.mmd` | `ch10_07_explain_before_after.svg` |
+| 그림 10-8 | `images/chapter10/ch10_08_ai_index_review_flow.mmd` | `ch10_08_ai_index_review_flow.svg` |
 
 ## 집필 운영 메모
 
