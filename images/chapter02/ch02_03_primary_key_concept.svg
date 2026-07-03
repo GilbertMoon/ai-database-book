@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640">
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.box{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}.main{fill:#ebf8ff;stroke:#2b6cb0}.bad{fill:#fff5f5;stroke:#e53e3e}.good{fill:#f0fff4;stroke:#38a169}.label{font-size:17px;text-anchor:middle;dominant-baseline:middle}.small{font-size:14px;text-anchor:middle;dominant-baseline:middle}</style></defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="550" y="40" text-anchor="middle" class="title">기본키가 행을 구분하는 방식</text>
+  <rect x="420" y="80" width="260" height="65" class="box main"/><text x="550" y="112" class="label">students.id</text><text x="550" y="134" class="small">기본키 Primary Key</text>
+  <rect x="100" y="230" width="260" height="95" class="box"/><text x="230" y="260" class="label">id: 1</text><text x="230" y="284" class="label">name: 김민지</text><text x="230" y="306" class="small">minji@example.com</text>
+  <rect x="420" y="230" width="260" height="95" class="box"/><text x="550" y="260" class="label">id: 2</text><text x="550" y="284" class="label">name: 김민지</text><text x="550" y="306" class="small">minji2@example.com</text>
+  <rect x="740" y="230" width="260" height="95" class="box"/><text x="870" y="260" class="label">id: 3</text><text x="870" y="284" class="label">name: 이준호</text><text x="870" y="306" class="small">junho@example.com</text>
+  <line x1="550" y1="145" x2="230" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="550" y1="145" x2="550" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="550" y1="145" x2="870" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="130" y="430" width="360" height="90" class="box bad"/><text x="310" y="462" class="label">name은 기본키로 부적합</text><text x="310" y="490" class="small">같은 이름이 있을 수 있고 바뀔 수 있음</text>
+  <rect x="610" y="430" width="360" height="90" class="box good"/><text x="790" y="462" class="label">id는 기본키로 적합</text><text x="790" y="490" class="small">고유하고, 필수이며, 행을 안정적으로 구분</text>
+  <line x1="550" y1="325" x2="310" y2="430" stroke="#e53e3e" stroke-width="2" marker-end="url(#arrow)"/><line x1="550" y1="325" x2="790" y2="430" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
