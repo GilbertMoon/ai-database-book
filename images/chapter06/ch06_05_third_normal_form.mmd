@@ -1,0 +1,20 @@
+flowchart TB
+    A[members 테이블]
+    A --> B[member_id]
+    A --> C[member_name]
+    A --> D[zip_code]
+    A --> E[city]
+
+    D --> F[zip_code가 city를 결정]
+    F --> G[기본키가 아닌 컬럼에 의존]
+
+    G --> H[3NF 적용]
+    H --> I[members]
+    H --> J[zip_codes]
+
+    I --> I1[id]
+    I --> I2[name]
+    I --> I3[zip_code FK]
+
+    J --> J1[zip_code PK]
+    J --> J2[city]
