@@ -1,0 +1,19 @@
+flowchart TB
+    A[데이터 정합성 문제]
+
+    A --> B[payments 있음]
+    B --> B1[enrollments 없음]
+    B1 --> Z[업무 규칙과 불일치]
+
+    A --> C[enrollments 있음]
+    C --> C1[payment amount = 0]
+    C1 --> Z
+
+    A --> D[remaining_seats = -1]
+    D --> Z
+
+    A --> E[status = 결제완료]
+    E --> E1[payments 기록 없음]
+    E1 --> Z
+
+    Z --> F[트랜잭션과 검증 필요]
