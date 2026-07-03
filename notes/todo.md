@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 05 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 05 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 05 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -21,27 +21,16 @@ Chapter 05 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 05 �
 11. Chapter 05 활동/실습 자료 작성 완료
 12. Chapter 05 도식 후보 정리 완료
 13. Chapter 05 Mermaid 도식 원본 8종 작성 완료
+14. Chapter 05 SVG 도식 8종 생성 완료
+15. Chapter 05 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 05 SVG 도식 생성
-2. Chapter 05 본문에 그림 링크와 캡션 삽입
-3. Chapter 05 리뷰 체크리스트 작성
-4. Chapter 05 원고 1차 리뷰 및 보완
-5. Chapter 06 원고 확장
-
-## Chapter 05 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 5-1 | `images/chapter05/ch05_01_modeling_process.mmd` | `ch05_01_modeling_process.svg` |
-| 그림 5-2 | `images/chapter05/ch05_02_entity_attribute_classification.mmd` | `ch05_02_entity_attribute_classification.svg` |
-| 그림 5-3 | `images/chapter05/ch05_03_primary_foreign_key_relationship.mmd` | `ch05_03_primary_foreign_key_relationship.svg` |
-| 그림 5-4 | `images/chapter05/ch05_04_one_to_many_relationship.mmd` | `ch05_04_one_to_many_relationship.svg` |
-| 그림 5-5 | `images/chapter05/ch05_05_many_to_many_bridge_table.mmd` | `ch05_05_many_to_many_bridge_table.svg` |
-| 그림 5-6 | `images/chapter05/ch05_06_library_erd_overview.mmd` | `ch05_06_library_erd_overview.svg` |
-| 그림 5-7 | `images/chapter05/ch05_07_erd_to_sql_flow.mmd` | `ch05_07_erd_to_sql_flow.svg` |
-| 그림 5-8 | `images/chapter05/ch05_08_ai_erd_review_flow.mmd` | `ch05_08_ai_erd_review_flow.svg` |
+1. Chapter 05 리뷰 체크리스트 작성
+2. Chapter 05 원고 1차 리뷰 및 보완
+3. Chapter 06 원고 확장
+4. Chapter 06 활동/실습 자료 작성
+5. Chapter 06 도식 후보 정리
 
 ## 집필 운영 메모
 
