@@ -1,0 +1,30 @@
+flowchart LR
+    A[데이터 저장 방식] --> B[파일 기반]
+    A --> C[표 기반]
+    A --> D[관계형 DB]
+    A --> E[NoSQL]
+    A --> F[Vector DB]
+
+    B --> B1[텍스트 파일]
+    B --> B2[JSON]
+    B --> B3[CSV]
+
+    C --> C1[엑셀]
+    C --> C2[스프레드시트]
+
+    D --> D1[PostgreSQL]
+    D --> D2[MySQL]
+
+    E --> E1[Redis]
+    E --> E2[MongoDB]
+    E --> E3[Neo4j]
+
+    F --> F1[pgvector]
+    F --> F2[Chroma]
+
+    B1 -. 적합 .-> G1[개인 메모]
+    B2 -. 적합 .-> G2[작은 설정값]
+    C1 -. 적합 .-> G3[소규모 명단]
+    D1 -. 적합 .-> G4[수강신청/주문/결제]
+    E1 -. 적합 .-> G5[캐시/세션]
+    F1 -. 적합 .-> G6[의미 기반 문서 검색]
