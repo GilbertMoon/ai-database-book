@@ -1,0 +1,19 @@
+flowchart TB
+    A[ROLLBACK 전 트랜잭션 내부]
+    A --> B[enrollments 임시 변경]
+    A --> C[payments 임시 변경]
+    A --> D[courses 임시 변경]
+
+    B --> E{결제 검증 실패}
+    C --> E
+    D --> E
+
+    E --> F[ROLLBACK 실행]
+
+    F --> G[enrollments 변경 취소]
+    F --> H[payments 변경 취소]
+    F --> I[courses 변경 취소]
+
+    G --> J[ROLLBACK 후 원래 상태]
+    H --> J
+    I --> J
