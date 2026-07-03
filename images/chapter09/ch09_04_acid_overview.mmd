@@ -1,0 +1,19 @@
+flowchart TB
+    A[ACID]
+
+    A --> B[Atomicity]
+    B --> B1[모두 성공 또는 모두 실패]
+
+    A --> C[Consistency]
+    C --> C1[업무 규칙과 데이터 일치]
+
+    A --> D[Isolation]
+    D --> D1[동시 작업이 섞이지 않음]
+
+    A --> E[Durability]
+    E --> E1[COMMIT 후 결과 유지]
+
+    B1 --> F[안전한 트랜잭션]
+    C1 --> F
+    D1 --> F
+    E1 --> F
