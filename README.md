@@ -93,21 +93,21 @@ ChatGPT로 설계하고
 
 | Chapter | 제목 | 주요 내용 | 상태 |
 | --- | --- | --- | --- |
-| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 데이터베이스의 필요성, 파일/엑셀/DB 차이, 바이브코딩 시대의 DB 학습 방향 | 구성 예정 |
-| Chapter 02 | DBMS 기본 개념 | 데이터베이스, DBMS, 테이블, 행, 열, PK, FK, 관계, SQL, CRUD 개념 | 구성 예정 |
-| Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | PostgreSQL 설치, DBeaver 연결, 기본 DB 생성, GitHub 저장소 준비 | 구성 예정 |
-| Chapter 04 | 관계형 데이터베이스와 SQL 기초 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY 등 기본 SQL | 구성 예정 |
-| Chapter 05 | 데이터 모델링과 ERD | 엔티티, 속성, 관계, 1:N, N:M, ERD 작성 방법 | 구성 예정 |
-| Chapter 06 | 정규화와 좋은 테이블 설계 | 중복 제거, 이상 현상, 1NF~3NF, 좋은 설계와 나쁜 설계 비교 | 구성 예정 |
-| Chapter 07 | 중간 프로젝트 또는 중간 평가 | 간단한 서비스 요구사항을 바탕으로 ERD, 테이블, SQL 작성 및 검증 | 구성 예정 |
-| Chapter 08 | JOIN과 집계 쿼리 | INNER JOIN, LEFT JOIN, GROUP BY, HAVING, 서브쿼리 기초 | 구성 예정 |
-| Chapter 09 | 트랜잭션과 데이터 정합성 | ACID, COMMIT, ROLLBACK, Lock, Deadlock, 주문·결제·재고 예제 | 구성 예정 |
-| Chapter 10 | 인덱스와 성능 기초 | 인덱스 개념, 검색 속도, 실행 계획, 느린 쿼리 개선 | 구성 예정 |
-| Chapter 11 | 데이터베이스 보안과 백업 | SQL Injection, 권한 관리, 개인정보 보호, 백업과 복구 | 구성 예정 |
-| Chapter 12 | NoSQL 이해와 선택 기준 | Key-Value, Document, Column, Graph DB 개념과 RDBMS와의 차이 | 구성 예정 |
-| Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | AI가 만든 ERD, DDL, SQL의 오류 찾기, SQL Anti-pattern 검토 | 구성 예정 |
-| Chapter 14 | Vector DB와 RAG 기초 | Embedding, Vector DB, pgvector, 의미 기반 검색, 간단한 RAG 테스트 | 구성 예정 |
-| Chapter 15 | 최종 프로젝트 또는 최종 평가 | DB 설계부터 간단한 웹 구동까지 전체 프로젝트 수행 | 구성 예정 |
+| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 데이터베이스의 필요성, 파일/엑셀/DB 차이, 바이브코딩 시대의 DB 학습 방향 | 원고 초안 작성 완료 |
+| Chapter 02 | DBMS 기본 개념 | 데이터베이스, DBMS, 테이블, 행, 열, PK, FK, 관계, SQL, CRUD 개념 | 원고 초안 작성 완료 |
+| Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | PostgreSQL 설치, DBeaver 연결, 기본 DB 생성, GitHub 저장소 준비 | 원고 초안 작성 완료 |
+| Chapter 04 | 관계형 데이터베이스와 SQL 기초 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY 등 기본 SQL | 원고 초안 작성 완료 |
+| Chapter 05 | 데이터 모델링과 ERD | 엔티티, 속성, 관계, 1:N, N:M, ERD 작성 방법 | 원고 초안 작성 완료 |
+| Chapter 06 | 정규화와 좋은 테이블 설계 | 중복 제거, 이상 현상, 1NF~3NF, 좋은 설계와 나쁜 설계 비교 | 원고 초안 작성 완료 |
+| Chapter 07 | 중간 프로젝트 또는 중간 평가 | 간단한 서비스 요구사항을 바탕으로 ERD, 테이블, SQL 작성 및 검증 | 원고 초안 작성 완료 |
+| Chapter 08 | JOIN과 집계 쿼리 | INNER JOIN, LEFT JOIN, GROUP BY, HAVING, 서브쿼리 기초 | 원고 초안 작성 완료 |
+| Chapter 09 | 트랜잭션과 데이터 정합성 | ACID, COMMIT, ROLLBACK, Lock, Deadlock, 주문·결제·재고 예제 | 원고 초안 작성 완료 |
+| Chapter 10 | 인덱스와 성능 기초 | 인덱스 개념, 검색 속도, 실행 계획, 느린 쿼리 개선 | 원고 초안 작성 완료 |
+| Chapter 11 | 데이터베이스 보안과 백업 | SQL Injection, 권한 관리, 개인정보 보호, 백업과 복구 | 원고 초안 작성 완료 |
+| Chapter 12 | NoSQL 이해와 선택 기준 | Key-Value, Document, Column, Graph DB 개념과 RDBMS와의 차이 | 원고 초안 작성 완료 |
+| Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | AI가 만든 ERD, DDL, SQL의 오류 찾기, SQL Anti-pattern 검토 | 원고 초안 작성 완료 |
+| Chapter 14 | Vector DB와 RAG 기초 | Embedding, Vector DB, pgvector, 의미 기반 검색, 간단한 RAG 테스트 | 원고 초안 작성 완료 |
+| Chapter 15 | 최종 프로젝트 또는 최종 평가 | DB 설계부터 간단한 웹 구동까지 전체 프로젝트 수행 | 원고 초안 작성 완료 |
 
 ---
 
@@ -149,6 +149,9 @@ project-root/
 │   ├── chapter02/
 │   └── ...
 ├── images/
+│   ├── chapter01/
+│   ├── chapter02/
+│   └── ...
 ├── notes/
 ├── scripts/
 └── publish/
@@ -209,8 +212,14 @@ Chapter별 진행 상태는 다음 값을 사용합니다.
 | 집필 가이드 확인 | 완료 |
 | README.md 생성 | 완료 |
 | BOOK_STYLE.md 작성 | 완료 |
-| Chapter별 폴더 생성 | 예정 |
-| Chapter 01 구성 설계 | 예정 |
+| Chapter별 book 폴더 생성 | 완료 |
+| Chapter별 outline 파일 생성 | 완료 |
+| Chapter별 chapter 초안 파일 생성 | 완료 |
+| Chapter별 code 폴더 생성 | 완료 |
+| Chapter별 images 폴더 생성 | 완료 |
+| publish/full_manuscript.md 초기 파일 생성 | 완료 |
+| scripts/merge_chapters.py 초기 파일 생성 | 완료 |
+| Chapter 01 원고 확장 | 예정 |
 
 ---
 
@@ -219,7 +228,7 @@ Chapter별 진행 상태는 다음 값을 사용합니다.
 가장 먼저 진행할 다음 작업은 다음과 같습니다.
 
 ```text
-Chapter별 기본 폴더와 outline.md / chapter.md 초안 파일을 생성한다.
+Chapter 01 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
 ```
 
 ---
