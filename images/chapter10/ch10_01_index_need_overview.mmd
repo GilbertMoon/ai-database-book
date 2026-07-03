@@ -1,0 +1,11 @@
+flowchart TB
+    A[Small table] --> B[Few rows checked]
+    B --> C[Fast lookup]
+
+    D[Large table] --> E[Many rows checked]
+    E --> F[Slow lookup]
+
+    F --> G[Index]
+    G --> H[Find target row faster]
+
+    H --> I[Better read performance]
