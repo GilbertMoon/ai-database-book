@@ -1,0 +1,18 @@
+flowchart LR
+    A[ERD draft] --> B[CREATE TABLE]
+    B --> C[INSERT sample data]
+    C --> D[SELECT tables]
+    D --> E[JOIN validation]
+    E --> F[CRUD SQL]
+
+    F --> G[SELECT before UPDATE]
+    G --> H[UPDATE]
+    H --> I[SELECT after UPDATE]
+
+    F --> J[SELECT before DELETE]
+    J --> K[DELETE or status update]
+    K --> L[SELECT after DELETE]
+
+    E --> M{Can answer requirements?}
+    M -- No --> A
+    M -- Yes --> N[Design validated]
