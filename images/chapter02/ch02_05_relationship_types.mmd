@@ -1,0 +1,19 @@
+flowchart TB
+    A[테이블 간 관계 유형]
+
+    A --> R1[1:1 관계]
+    A --> R2[1:N 관계]
+    A --> R3[N:M 관계]
+
+    R1 --> R1A[users 1명]
+    R1A --> R1B[user_profiles 1개]
+    R1 -. 예 .-> R1C[한 사용자에게 하나의 상세 프로필]
+
+    R2 --> R2A[instructors 1명]
+    R2A --> R2B[courses 여러 개]
+    R2 -. 예 .-> R2C[한 강사가 여러 강의를 담당]
+
+    R3 --> R3A[students 여러 명]
+    R3A --> R3B[enrollments 연결 테이블]
+    R3B --> R3C[courses 여러 개]
+    R3 -. 예 .-> R3D[학생 여러 명과 강의 여러 개가 서로 연결]
