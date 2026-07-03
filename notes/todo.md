@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 14 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 14 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 14 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -31,27 +31,16 @@ Chapter 14 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 14 �
 21. Chapter 14 활동/실습 자료 작성 완료
 22. Chapter 14 도식 후보 정리 완료
 23. Chapter 14 Mermaid 도식 원본 8종 작성 완료
+24. Chapter 14 SVG 도식 8종 생성 완료
+25. Chapter 14 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 14 SVG 도식 생성
-2. Chapter 14 본문에 그림 링크와 캡션 삽입
-3. Chapter 14 리뷰 체크리스트 작성
-4. Chapter 14 원고 1차 리뷰 및 보완
-5. Chapter 15 원고 확장
-
-## Chapter 14 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 14-1 | `images/chapter14/ch14_01_sql_vs_semantic_search.mmd` | `ch14_01_sql_vs_semantic_search.svg` |
-| 그림 14-2 | `images/chapter14/ch14_02_embedding_vector_conversion.mmd` | `ch14_02_embedding_vector_conversion.svg` |
-| 그림 14-3 | `images/chapter14/ch14_03_vector_similarity_topk.mmd` | `ch14_03_vector_similarity_topk.svg` |
-| 그림 14-4 | `images/chapter14/ch14_04_document_chunking.mmd` | `ch14_04_document_chunking.svg` |
-| 그림 14-5 | `images/chapter14/ch14_05_rag_pipeline.mmd` | `ch14_05_rag_pipeline.svg` |
-| 그림 14-6 | `images/chapter14/ch14_06_pgvector_practice_flow.mmd` | `ch14_06_pgvector_practice_flow.svg` |
-| 그림 14-7 | `images/chapter14/ch14_07_rag_answer_grounding_review.mmd` | `ch14_07_rag_answer_grounding_review.svg` |
-| 그림 14-8 | `images/chapter14/ch14_08_db_role_separation.mmd` | `ch14_08_db_role_separation.svg` |
+1. Chapter 14 리뷰 체크리스트 작성
+2. Chapter 14 원고 1차 리뷰 및 보완
+3. Chapter 15 원고 확장
+4. Chapter 15 최종 프로젝트/평가 자료 작성
+5. publish/full_manuscript.md 통합 준비
 
 ## 집필 운영 메모
 
