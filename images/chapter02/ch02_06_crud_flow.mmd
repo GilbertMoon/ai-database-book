@@ -1,0 +1,22 @@
+flowchart LR
+    A[서비스 기능] --> C[Create 생성]
+    A --> R[Read 조회]
+    A --> U[Update 수정]
+    A --> D[Delete 삭제]
+
+    C --> C1[학생 등록]
+    C1 --> C2[INSERT]
+
+    R --> R1[학생 목록 조회]
+    R1 --> R2[SELECT]
+
+    U --> U1[학생 이메일 수정]
+    U1 --> U2[UPDATE]
+
+    D --> D1[학생 정보 삭제]
+    D1 --> D2[DELETE]
+
+    C2 --> DB[(Database)]
+    R2 --> DB
+    U2 --> DB
+    D2 --> DB
