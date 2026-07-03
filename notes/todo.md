@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 15 최종 프로젝트 또는 최종 평가 원고를 BOOK_STYLE.md 기준에 맞춰 1차 원고로 확장한다.
+Chapter 15 최종 프로젝트/평가 자료와 제출 템플릿을 작성한다.
 ```
 
 ## 완료된 작업
@@ -25,22 +25,13 @@ Chapter 15 최종 프로젝트 또는 최종 평가 원고를 BOOK_STYLE.md 기�
 15. Chapter 11 원고 1차 리뷰 및 보완 완료
 16. Chapter 12 원고 1차 리뷰 및 보완 완료
 17. Chapter 13 원고 1차 리뷰 및 보완 완료
-18. Chapter 14 원고 1차 확장 완료
-19. Chapter 14 실습 SQL/Vector DB 예제 작성 완료
-20. Chapter 14 코드 README 작성 완료
-21. Chapter 14 활동/실습 자료 작성 완료
-22. Chapter 14 도식 후보 정리 완료
-23. Chapter 14 Mermaid 도식 원본 8종 작성 완료
-24. Chapter 14 SVG 도식 8종 생성 완료
-25. Chapter 14 본문에 그림 링크와 캡션 삽입 완료
-26. Chapter 14 리뷰 체크리스트 작성 완료
-27. Chapter 14 리뷰 후 보완 반영 기록 작성 완료
-28. Chapter 14 원고 1차 리뷰 및 보완 완료
+18. Chapter 14 원고 1차 리뷰 및 보완 완료
+19. Chapter 15 원고 1차 확장 완료
 
 ## 우선순위 작업
 
-1. Chapter 15 원고 확장
-2. Chapter 15 최종 프로젝트/평가 자료 작성
+1. Chapter 15 최종 프로젝트/평가 자료 작성
+2. Chapter 15 제출 템플릿 작성
 3. Chapter 15 활동/실습 자료 작성
 4. Chapter 15 도식 후보 정리
 5. publish/full_manuscript.md 통합 준비
@@ -48,10 +39,8 @@ Chapter 15 최종 프로젝트 또는 최종 평가 원고를 BOOK_STYLE.md 기�
 ## Chapter 15 후속 작업 메모
 
 ```text
-- Chapter 15는 최종 프로젝트 또는 최종 평가로 구성한다.
-- 데이터베이스 설계, SQL, 정규화, AI 검토, NoSQL 선택, Vector DB/RAG 개념을 종합하도록 설계한다.
-- 프로젝트형 평가와 시험형 평가를 모두 선택 가능하도록 구성한다.
-- 제출물, 발표 방식, 평가 루브릭, AI 활용 허용 범위를 명확히 작성한다.
+- 최종 프로젝트/평가 자료는 프로젝트형 평가 안내, 시험형 평가 문제지, 제출 폴더 구조, 평가 루브릭, AI 활용 보고서 양식을 포함한다.
+- 제출 템플릿은 requirements.md, ai_review_report.md, final_report.md, queries.sql, schema.sql 골격을 제공할 수 있다.
 ```
 
 ## 집필 운영 메모
