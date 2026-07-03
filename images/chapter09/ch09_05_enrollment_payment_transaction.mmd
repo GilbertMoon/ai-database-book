@@ -1,0 +1,15 @@
+flowchart LR
+    A[BEGIN]
+    A --> B[수강신청 INSERT]
+    B --> C[결제 기록 INSERT]
+    C --> D[잔여 좌석 UPDATE]
+    D --> E{모든 작업 성공?}
+
+    E -- 예 --> F[COMMIT]
+    E -- 아니오 --> G[ROLLBACK]
+
+    F --> H[수강신청 확정]
+    F --> I[결제 기록 확정]
+    F --> J[좌석 차감 확정]
+
+    G --> K[모든 변경 취소]
