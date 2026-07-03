@@ -1,0 +1,13 @@
+flowchart TB
+    A[Frequent SELECT query] --> B[Check WHERE condition]
+    B --> C[email column]
+    B --> D[title column]
+    B --> E[student_id column]
+
+    C --> F[Index candidate]
+    D --> F
+    E --> F
+
+    F --> G[Create index]
+    G --> H[Compare with EXPLAIN]
+    H --> I[Keep or revise]
