@@ -1,0 +1,26 @@
+flowchart LR
+    A[instructors] --> A1[id PK]
+    A --> A2[name]
+    A --> A3[email]
+    A --> A4[specialty]
+
+    B[courses] --> B1[id PK]
+    B --> B2[instructor_id FK]
+    B --> B3[title]
+    B --> B4[level]
+    B --> B5[price]
+
+    C[students] --> C1[id PK]
+    C --> C2[name]
+    C --> C3[email]
+    C --> C4[joined_at]
+
+    D[enrollments] --> D1[id PK]
+    D --> D2[student_id FK]
+    D --> D3[course_id FK]
+    D --> D4[status]
+    D --> D5[paid_amount]
+
+    A1 -. 1:N .-> B2
+    C1 -. 1:N .-> D2
+    B1 -. 1:N .-> D3
