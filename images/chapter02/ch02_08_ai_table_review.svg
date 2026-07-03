@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860">
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.box{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}.main{fill:#ebf8ff;stroke:#2b6cb0}.warn{fill:#fffaf0;stroke:#d69e2e}.fix{fill:#f0fff4;stroke:#38a169}.label{font-size:16px;text-anchor:middle;dominant-baseline:middle}.small{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="600" y="40" text-anchor="middle" class="title">AI 생성 테이블 구조 검토 흐름</text>
+  <rect x="420" y="80" width="360" height="60" class="box main"/><text x="600" y="110" class="label">AI에게 테이블 설계 요청</text>
+  <rect x="420" y="190" width="360" height="60" class="box"/><text x="600" y="220" class="label">AI 생성 테이블 구조</text>
+  <line x1="600" y1="140" x2="600" y2="190" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="90" y="320" width="210" height="70" class="box warn"/><text x="195" y="346" class="label">검토 1</text><text x="195" y="370" class="small">기본키가 있는가?</text>
+  <rect x="360" y="320" width="210" height="70" class="box warn"/><text x="465" y="346" class="label">검토 2</text><text x="465" y="370" class="small">외래키가 있는가?</text>
+  <rect x="630" y="320" width="210" height="70" class="box warn"/><text x="735" y="346" class="label">검토 3</text><text x="735" y="370" class="small">중복 데이터가 많은가?</text>
+  <rect x="900" y="320" width="210" height="70" class="box warn"/><text x="1005" y="346" class="label">검토 4</text><text x="1005" y="370" class="small">제약조건이 있는가?</text>
+  <line x1="600" y1="250" x2="195" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="600" y1="250" x2="465" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="600" y1="250" x2="735" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="600" y1="250" x2="1005" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="120" y="500" width="220" height="70" class="box fix"/><text x="230" y="528" class="label">PK 추가</text><text x="230" y="552" class="small">각 행을 구분</text>
+  <rect x="380" y="500" width="220" height="70" class="box fix"/><text x="490" y="528" class="label">FK 추가</text><text x="490" y="552" class="small">테이블 관계 연결</text>
+  <rect x="640" y="500" width="220" height="70" class="box fix"/><text x="750" y="528" class="label">테이블 분리</text><text x="750" y="552" class="small">중복 줄이기</text>
+  <rect x="900" y="500" width="220" height="70" class="box fix"/><text x="1010" y="528" class="label">제약조건 추가</text><text x="1010" y="552" class="small">NOT NULL, UNIQUE 등</text>
+  <line x1="195" y1="390" x2="230" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/><line x1="465" y1="390" x2="490" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/><line x1="735" y1="390" x2="750" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/><line x1="1005" y1="390" x2="1010" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="420" y="680" width="360" height="70" class="box main"/><text x="600" y="708" class="label">PostgreSQL에서 실행</text><text x="600" y="732" class="small">DBeaver로 결과 확인 후 GitHub에 기록</text>
+  <line x1="230" y1="570" x2="600" y2="680" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="490" y1="570" x2="600" y2="680" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="750" y1="570" x2="600" y2="680" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="1010" y1="570" x2="600" y2="680" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="220" y="790" width="760" height="45" class="box"/><text x="600" y="813" class="label">AI 결과는 초안이며, PK/FK/중복/제약조건 관점의 검토가 필요하다.</text>
+</svg>
