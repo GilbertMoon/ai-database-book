@@ -24,37 +24,22 @@ Chapter 11은 데이터베이스를 안전하게 보호하고, 장애나 실수 
 
 ## 2. 도식 목록
 
-| 번호 | 파일명 | 도식 제목 | 삽입 위치 | 목적 | 우선순위 |
-| --- | --- | --- | --- | --- | --- |
-| 그림 11-1 | `ch11_01_security_backup_overview.svg` | 보안과 백업이 필요한 이유 | 1장 왜 데이터베이스 보안과 백업을 배워야 하는가 | 보호와 복구의 기본 관점 설명 | 높음 |
-| 그림 11-2 | `ch11_02_account_permission_model.svg` | 계정과 권한 구조 | 3장 계정과 권한 관리 | 사용자·역할·권한·테이블 관계 설명 | 높음 |
-| 그림 11-3 | `ch11_03_least_privilege_principle.svg` | 최소 권한 원칙 | 3장 계정과 권한 관리 | 필요한 권한만 부여하는 원칙 설명 | 높음 |
-| 그림 11-4 | `ch11_04_grant_revoke_flow.svg` | GRANT와 REVOKE 흐름 | 5장 GRANT와 REVOKE | 권한 부여와 회수 흐름 설명 | 높음 |
-| 그림 11-5 | `ch11_05_dev_prod_account_separation.svg` | 개발용 계정과 운영용 계정 분리 | 6장 개발용 계정과 운영용 계정 구분 | 개발/운영 DB와 계정 분리 필요성 설명 | 중간 |
-| 그림 11-6 | `ch11_06_sql_injection_safe_query.svg` | SQL Injection 위험과 안전한 쿼리 | 8장 SQL Injection 개념 | 문자열 결합 위험과 파라미터 바인딩 비교 | 높음 |
-| 그림 11-7 | `ch11_07_backup_restore_flow.svg` | 백업과 복구 테스트 흐름 | 10~13장 백업과 복구 | 백업 파일 생성 후 복구 테스트 흐름 설명 | 높음 |
-| 그림 11-8 | `ch11_08_ai_security_review_flow.svg` | AI 보안·백업 명령 검토 흐름 | 15장 AI가 제안한 보안 설정과 백업 명령 검토하기 | AI 제안 명령을 사람이 검토하는 절차 설명 | 높음 |
+| 번호 | 파일명 | 도식 제목 | 삽입 위치 | 상태 |
+| --- | --- | --- | --- | --- |
+| 그림 11-1 | `ch11_01_security_backup_overview.svg` | 보안과 백업이 필요한 이유 | 1장 왜 데이터베이스 보안과 백업을 배워야 하는가 | 삽입 완료 |
+| 그림 11-2 | `ch11_02_account_permission_model.svg` | 계정과 권한 구조 | 3장 계정과 권한 관리 | 삽입 완료 |
+| 그림 11-3 | `ch11_03_least_privilege_principle.svg` | 최소 권한 원칙 | 3장 계정과 권한 관리 | 삽입 완료 |
+| 그림 11-4 | `ch11_04_grant_revoke_flow.svg` | GRANT와 REVOKE 흐름 | 5장 GRANT와 REVOKE | 삽입 완료 |
+| 그림 11-5 | `ch11_05_dev_prod_account_separation.svg` | 개발용 계정과 운영용 계정 분리 | 6장 개발용 계정과 운영용 계정 구분 | 삽입 완료 |
+| 그림 11-6 | `ch11_06_sql_injection_safe_query.svg` | SQL Injection 위험과 안전한 쿼리 | 8장 SQL Injection 개념 | 삽입 완료 |
+| 그림 11-7 | `ch11_07_backup_restore_flow.svg` | 백업과 복구 테스트 흐름 | 10장 백업이란 무엇인가 | 삽입 완료 |
+| 그림 11-8 | `ch11_08_ai_security_review_flow.svg` | AI 보안·백업 명령 검토 흐름 | 15장 AI가 제안한 보안 설정과 백업 명령 검토하기 | 삽입 완료 |
 
 ---
 
-## 3. 본문 삽입 권장 위치
+## 3. Mermaid 원본과 SVG 결과물
 
-| 그림 | 삽입 권장 위치 |
-| --- | --- |
-| 그림 11-1 | 1. 왜 데이터베이스 보안과 백업을 배워야 하는가 |
-| 그림 11-2 | 3. 계정과 권한 관리 |
-| 그림 11-3 | 3. 계정과 권한 관리, 최소 권한 원칙 설명 직후 |
-| 그림 11-4 | 5. GRANT와 REVOKE |
-| 그림 11-5 | 6. 개발용 계정과 운영용 계정 구분 |
-| 그림 11-6 | 8. SQL Injection 개념 |
-| 그림 11-7 | 10. 백업이란 무엇인가 또는 13. 복구 맛보기 |
-| 그림 11-8 | 15. AI가 제안한 보안 설정과 백업 명령 검토하기 |
-
----
-
-## 4. Mermaid 원본 파일 계획
-
-| Mermaid 파일 | 대상 이미지 |
+| Mermaid 원본 | SVG 결과물 |
 | --- | --- |
 | `ch11_01_security_backup_overview.mmd` | `ch11_01_security_backup_overview.svg` |
 | `ch11_02_account_permission_model.mmd` | `ch11_02_account_permission_model.svg` |
@@ -67,7 +52,7 @@ Chapter 11은 데이터베이스를 안전하게 보호하고, 장애나 실수 
 
 ---
 
-## 5. 도식 제작 후 점검 항목
+## 4. 도식 제작 후 점검 항목
 
 ```text
 - 보안과 백업이 각각 보호와 복구의 관점으로 구분되어 보이는가?
@@ -78,13 +63,17 @@ Chapter 11은 데이터베이스를 안전하게 보호하고, 장애나 실수 
 - SQL Injection 방어가 문자열 결합 금지와 파라미터 바인딩으로 설명되는가?
 - 백업 후 복구 테스트가 핵심이라는 점이 표현되는가?
 - AI 검토 흐름에 권한, 비밀번호, 운영 DB 여부, 위험 명령, 복구 테스트가 포함되는가?
+- 그림 번호와 캡션이 본문에 포함되었는가?
 ```
 
 ---
 
-## 6. 현재 상태 및 다음 작업
+## 5. 현재 상태 및 다음 작업
 
 ```text
 - Chapter 11 도식 후보 8종 정리 완료
-- 다음 작업: Chapter 11 Mermaid 도식 원본 8종 작성
+- Chapter 11 Mermaid 원본 8종 작성 완료
+- Chapter 11 SVG 도식 8종 생성 완료
+- Chapter 11 본문 그림 링크와 캡션 삽입 완료
+- 다음 작업: Chapter 11 리뷰 체크리스트 작성
 ```
