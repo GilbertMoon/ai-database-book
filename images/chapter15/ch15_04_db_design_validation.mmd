@@ -1,0 +1,13 @@
+flowchart TB
+    A[Requirements] --> B[ERD check]
+    B --> C[DDL check]
+    C --> D[Seed data]
+    D --> E[Core SQL]
+    E --> F[Validation result]
+
+    B --> B1[Entities relationships N:M]
+    C --> C1[PK FK NOT NULL UNIQUE CHECK]
+    D --> D1[Normal and relation data]
+    E --> E1[SELECT JOIN GROUP BY]
+    F --> F1[Revise design if needed]
+    F1 --> B
