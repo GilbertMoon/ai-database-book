@@ -1,6 +1,6 @@
 # Chapter 04. 관계형 데이터베이스와 SQL 기초
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -151,6 +151,10 @@ DELETE → 데이터 삭제
 
 이 네 가지를 합쳐 CRUD라고 부릅니다.
 
+![SQL 명령어와 CRUD 흐름](../../images/chapter04/ch04_01_sql_crud_overview.svg)
+
+그림 4-1 SQL 명령어와 CRUD 흐름
+
 ---
 
 ## 5. SELECT: 데이터 조회하기
@@ -181,6 +185,10 @@ FROM students;
 ```
 
 이 SQL은 students 테이블에서 `name`과 `major` 컬럼만 가져옵니다.
+
+![SELECT와 컬럼 선택 흐름](../../images/chapter04/ch04_02_select_projection_flow.svg)
+
+그림 4-2 SELECT와 컬럼 선택 흐름
 
 ### SELECT 결과 읽기
 
@@ -246,6 +254,10 @@ SELECT *
 FROM students;
 ```
 
+![INSERT로 새 행 추가하기](../../images/chapter04/ch04_03_insert_row_flow.svg)
+
+그림 4-3 INSERT로 새 행 추가하기
+
 ### INSERT에서 자주 하는 실수
 
 첫 번째 실수는 컬럼 수와 값의 수가 맞지 않는 경우입니다.
@@ -292,6 +304,10 @@ SELECT *
 FROM students
 WHERE major = '컴퓨터공학';
 ```
+
+![WHERE 조건으로 행 필터링](../../images/chapter04/ch04_04_where_filter_flow.svg)
+
+그림 4-4 WHERE 조건으로 행 필터링
 
 학년이 3학년 이상인 학생을 조회할 수도 있습니다.
 
@@ -366,6 +382,10 @@ FROM students
 ORDER BY grade DESC;
 ```
 
+![ORDER BY 정렬 흐름](../../images/chapter04/ch04_05_order_by_sort_flow.svg)
+
+그림 4-5 ORDER BY 정렬 흐름
+
 이름순으로 정렬할 수도 있습니다.
 
 ```sql
@@ -417,6 +437,10 @@ FROM students
 WHERE email = 'minji@example.com';
 ```
 
+![안전한 UPDATE 실행 절차](../../images/chapter04/ch04_06_update_safe_flow.svg)
+
+그림 4-6 안전한 UPDATE 실행 절차
+
 ### UPDATE에서 가장 중요한 점
 
 `UPDATE`에서는 `WHERE`가 매우 중요합니다.
@@ -466,6 +490,10 @@ WHERE email = 'hyunwoo@example.com';
 SELECT *
 FROM students;
 ```
+
+![안전한 DELETE 실행 절차](../../images/chapter04/ch04_07_delete_safe_flow.svg)
+
+그림 4-7 안전한 DELETE 실행 절차
 
 ### DELETE에서 가장 중요한 점
 
@@ -604,6 +632,10 @@ SELECT *
 FROM students
 WHERE grade = 1;
 ```
+
+![AI 생성 SQL 검토 흐름](../../images/chapter04/ch04_08_ai_sql_review_flow.svg)
+
+그림 4-8 AI 생성 SQL 검토 흐름
 
 AI가 만든 SQL을 검토할 때는 다음을 확인합니다.
 
