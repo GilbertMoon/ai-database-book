@@ -1,0 +1,15 @@
+flowchart TB
+    A[Database environments] --> B[Development DB]
+    A --> C[Production DB]
+
+    B --> B1[Dev account]
+    B --> B2[Test data]
+    B --> B3[Practice SQL]
+
+    C --> C1[Production account]
+    C --> C2[Real user data]
+    C --> C3[Limited access]
+
+    B1 --> D[Separate accounts]
+    C1 --> D
+    D --> E[Safer operation]
