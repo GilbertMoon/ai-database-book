@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 11 데이터베이스 보안과 백업 활동/실습 자료를 작성한다.
+Chapter 11 데이터베이스 보안과 백업 도식 후보를 정리하고, images/chapter11/에 사용할 이미지 목록을 설계한다.
 ```
 
 ## 완료된 작업
@@ -25,22 +25,22 @@ Chapter 11 데이터베이스 보안과 백업 활동/실습 자료를 작성한
 15. Chapter 11 원고 1차 확장 완료
 16. Chapter 11 실습 SQL 파일 작성 완료
 17. Chapter 11 코드 README 작성 완료
+18. Chapter 11 활동/실습 자료 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 11 활동/실습 자료 작성
-2. Chapter 11 도식 후보 정리
-3. Chapter 11 Mermaid 도식 원본 작성
-4. Chapter 11 SVG 도식 생성
-5. Chapter 11 본문에 그림 링크와 캡션 삽입
-6. Chapter 11 리뷰 체크리스트 작성
+1. Chapter 11 도식 후보 정리
+2. Chapter 11 Mermaid 도식 원본 작성
+3. Chapter 11 SVG 도식 생성
+4. Chapter 11 본문에 그림 링크와 캡션 삽입
+5. Chapter 11 리뷰 체크리스트 작성
+6. Chapter 11 원고 1차 리뷰 및 보완
 
 ## Chapter 11 후속 작업 메모
 
 ```text
-- 활동 자료는 권한 설계, GRANT/REVOKE 해석, 권한 확인 결과 기록, SQL Injection 위험 검토, 백업/복구 체크리스트 중심으로 구성한다.
-- 실제 운영 DB가 아니라 실습 DB 기준으로 작성하도록 안내한다.
-- AI가 제안한 보안 설정이나 백업 명령을 그대로 실행하지 않고 사람이 위험성을 검토하는 활동을 포함한다.
+- 도식 후보는 보안과 백업이 필요한 이유, 계정/권한 구조, 최소 권한 원칙, GRANT/REVOKE 흐름, SQL Injection 방어, 백업/복구 흐름, AI 보안 명령 검토 흐름을 우선 고려한다.
+- 활동 자료는 권한 설계, GRANT/REVOKE 해석, 권한 확인 결과 기록, SQL Injection 위험 검토, 백업/복구 체크리스트 중심으로 작성 완료했다.
 ```
 
 ## 집필 운영 메모
