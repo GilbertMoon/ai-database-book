@@ -1,0 +1,25 @@
+flowchart TB
+    A[enrollments 원본 행]
+    A --> B[status = 신청]
+    A --> C[status = 수강중]
+    A --> D[status = 완료]
+    A --> E[status = 신청]
+    A --> F[status = 수강중]
+
+    B --> G[GROUP BY status]
+    C --> G
+    D --> G
+    E --> G
+    F --> G
+
+    G --> H[신청 그룹]
+    G --> I[수강중 그룹]
+    G --> J[완료 그룹]
+
+    H --> K[COUNT = 2]
+    I --> L[COUNT = 2]
+    J --> M[COUNT = 1]
+
+    K --> N[상태별 통계 결과]
+    L --> N
+    M --> N
