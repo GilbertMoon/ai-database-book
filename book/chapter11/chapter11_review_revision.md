@@ -42,7 +42,7 @@ Chapter 11은 데이터베이스 보안과 백업의 기본을 초급 학습자�
 | 도식 설계 문서 상태 갱신 | 완료 | `images/chapter11/README.md` |
 | README 진행 상태 갱신 | 완료 | `README.md` |
 | TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
-| Chapter 상태 문구 변경 | 반영 예정 | `book/chapter11/chapter11.md` 상단 |
+| Chapter 상태 문구 변경 | 완료 | `book/chapter11/chapter11.md` 상단 |
 
 ---
 
@@ -68,14 +68,14 @@ Chapter 11은 데이터베이스 보안과 백업의 기본을 초급 학습자�
 | --- | --- |
 | 리뷰 체크리스트 작성 | 완료 |
 | 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 진행 예정 |
-| Chapter 11 1차 완료 판정 | 가능 |
+| 원고 상태 변경 | 완료 |
+| Chapter 11 1차 완료 판정 | 완료 |
 
 ---
 
 ## 5. 결론
 
 ```text
-Chapter 11은 원고 1차 리뷰 및 보완 완료 상태로 전환할 수 있다.
+Chapter 11은 원고 1차 리뷰 및 보완 완료 상태로 전환되었다.
 다음 작업은 Chapter 12 원고 확장이다.
 ```
