@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 15 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
+publish/full_manuscript.md 통합 원고를 최신 Chapter 01~15 내용 기준으로 준비한다.
 ```
 
 ## 완료된 작업
@@ -34,14 +34,17 @@ Chapter 15 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완
 24. Chapter 15 Mermaid 도식 원본 8종 작성 완료
 25. Chapter 15 SVG 도식 8종 생성 완료
 26. Chapter 15 본문에 그림 링크와 캡션 삽입 완료
+27. Chapter 15 리뷰 체크리스트 작성 완료
+28. Chapter 15 리뷰 후 보완 반영 기록 작성 완료
+29. Chapter 15 원고 1차 리뷰 및 보완 완료
 
 ## 우선순위 작업
 
-1. Chapter 15 리뷰 체크리스트 작성
-2. Chapter 15 원고 1차 리뷰 및 보완
-3. publish/full_manuscript.md 통합 준비
-4. 통합 원고 1차 점검
-5. 출판 변환 테스트
+1. publish/full_manuscript.md 통합 준비
+2. 통합 원고 1차 점검
+3. 출판 변환 테스트
+4. README 최종 출판 상태 정리
+5. 전체 Chapter 산출물 누락 점검
 
 ## 집필 운영 메모
 
