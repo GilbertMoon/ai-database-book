@@ -24,37 +24,22 @@ Chapter 07은 Chapter 01~06의 내용을 종합하는 중간 프로젝트 장이
 
 ## 2. 도식 목록
 
-| 번호 | 파일명 | 도식 제목 | 삽입 위치 | 목적 | 우선순위 |
-| --- | --- | --- | --- | --- | --- |
-| 그림 7-1 | `ch07_01_midterm_project_flow.svg` | 중간 프로젝트 진행 흐름 | 1장 프로젝트 목표 또는 16장 진행 순서 | 요구사항 분석부터 최종 보고서까지 전체 흐름 설명 | 높음 |
-| 그림 7-2 | `ch07_02_requirement_to_entities.svg` | 요구사항에서 엔터티 도출 | 3장 요구사항 분석 | 학생, 강사, 강의, 수강신청 도출 과정 설명 | 높음 |
-| 그림 7-3 | `ch07_03_online_course_erd.svg` | 온라인 강의 수강신청 ERD | 6장 ERD 초안 작성 | 전체 테이블과 관계 구조 설명 | 높음 |
-| 그림 7-4 | `ch07_04_many_to_many_enrollments.svg` | 학생-강의 N:M 관계 해소 | 5장 관계 분석 | students와 courses 관계를 enrollments로 풀어내는 과정 설명 | 높음 |
-| 그림 7-5 | `ch07_05_sql_validation_flow.svg` | SQL 기반 설계 검증 흐름 | 7~10장 SQL 구현 및 CRUD | CREATE TABLE → INSERT → JOIN → CRUD 검증 흐름 설명 | 높음 |
-| 그림 7-6 | `ch07_06_normalization_review_flow.svg` | 중간 프로젝트 정규화 검토 | 11장 정규화 관점 검토 | 중복, N:M, 이상 현상, 외래키 검토 흐름 설명 | 중간 |
-| 그림 7-7 | `ch07_07_ai_review_report_flow.svg` | AI 활용 및 검토 보고 흐름 | 12장 AI 활용 방법 | AI 초안 생성 후 사람 검토와 수정 기록 흐름 설명 | 높음 |
-| 그림 7-8 | `ch07_08_assessment_rubric_overview.svg` | 중간 프로젝트 평가 기준 | 14장 평가 기준 | 100점 루브릭의 평가 항목과 배점 요약 | 높음 |
+| 번호 | 파일명 | 도식 제목 | 삽입 위치 | 상태 |
+| --- | --- | --- | --- | --- |
+| 그림 7-1 | `ch07_01_midterm_project_flow.svg` | 중간 프로젝트 진행 흐름 | 1장 프로젝트 목표 | 삽입 완료 |
+| 그림 7-2 | `ch07_02_requirement_to_entities.svg` | 요구사항에서 엔터티 도출 | 3장 요구사항 분석 | 삽입 완료 |
+| 그림 7-3 | `ch07_03_online_course_erd.svg` | 온라인 강의 수강신청 ERD | 6장 ERD 초안 작성 | 삽입 완료 |
+| 그림 7-4 | `ch07_04_many_to_many_enrollments.svg` | 학생-강의 N:M 관계 해소 | 5장 관계 분석 | 삽입 완료 |
+| 그림 7-5 | `ch07_05_sql_validation_flow.svg` | SQL 기반 설계 검증 흐름 | 7장 PostgreSQL 테이블 설계 | 삽입 완료 |
+| 그림 7-6 | `ch07_06_normalization_review_flow.svg` | 중간 프로젝트 정규화 검토 | 11장 정규화 관점 검토 | 삽입 완료 |
+| 그림 7-7 | `ch07_07_ai_review_report_flow.svg` | AI 활용 및 검토 보고 흐름 | 12장 AI 활용 방법 | 삽입 완료 |
+| 그림 7-8 | `ch07_08_assessment_rubric_overview.svg` | 중간 프로젝트 평가 기준 | 14장 평가 기준 | 삽입 완료 |
 
 ---
 
-## 3. 본문 삽입 권장 위치
+## 3. Mermaid 원본과 SVG 결과물
 
-| 그림 | 삽입 권장 위치 |
-| --- | --- |
-| 그림 7-1 | 1. 프로젝트 목표 또는 16. 프로젝트 진행 순서 |
-| 그림 7-2 | 3. 요구사항 분석 |
-| 그림 7-3 | 6. ERD 초안 작성 |
-| 그림 7-4 | 5. 관계 분석 |
-| 그림 7-5 | 7. PostgreSQL 테이블 설계 또는 10. CRUD SQL 작성 |
-| 그림 7-6 | 11. 정규화 관점 검토 |
-| 그림 7-7 | 12. AI 활용 방법 |
-| 그림 7-8 | 14. 평가 기준 |
-
----
-
-## 4. Mermaid 원본 파일 계획
-
-| Mermaid 파일 | 대상 이미지 |
+| Mermaid 원본 | SVG 결과물 |
 | --- | --- |
 | `ch07_01_midterm_project_flow.mmd` | `ch07_01_midterm_project_flow.svg` |
 | `ch07_02_requirement_to_entities.mmd` | `ch07_02_requirement_to_entities.svg` |
@@ -67,7 +52,7 @@ Chapter 07은 Chapter 01~06의 내용을 종합하는 중간 프로젝트 장이
 
 ---
 
-## 5. 도식 제작 후 점검 항목
+## 4. 도식 제작 후 점검 항목
 
 ```text
 - 중간 프로젝트 수행 순서가 명확한가?
@@ -77,13 +62,17 @@ Chapter 07은 Chapter 01~06의 내용을 종합하는 중간 프로젝트 장이
 - SQL 실행 흐름이 설계 검증과 연결되어 있는가?
 - 정규화 검토와 AI 검토가 평가 기준과 연결되는가?
 - 평가 루브릭 배점이 본문과 일치하는가?
+- 그림 번호와 캡션이 본문에 포함되었는가?
 ```
 
 ---
 
-## 6. 현재 상태 및 다음 작업
+## 5. 현재 상태 및 다음 작업
 
 ```text
 - Chapter 07 도식 후보 8종 정리 완료
-- 다음 작업: Chapter 07 Mermaid 도식 원본 8종 작성
+- Chapter 07 Mermaid 원본 8종 작성 완료
+- Chapter 07 SVG 도식 8종 생성 완료
+- Chapter 07 본문 그림 링크와 캡션 삽입 완료
+- 다음 작업: Chapter 07 리뷰 체크리스트 작성
 ```
