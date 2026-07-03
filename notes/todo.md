@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 07 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 07 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 07 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -23,27 +23,16 @@ Chapter 07 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 07 �
 13. Chapter 07 활동/평가 자료 작성 완료
 14. Chapter 07 도식 후보 정리 완료
 15. Chapter 07 Mermaid 도식 원본 8종 작성 완료
+16. Chapter 07 SVG 도식 8종 생성 완료
+17. Chapter 07 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 07 SVG 도식 생성
-2. Chapter 07 본문에 그림 링크와 캡션 삽입
-3. Chapter 07 리뷰 체크리스트 작성
-4. Chapter 07 원고 1차 리뷰 및 보완
-5. Chapter 08 원고 확장
-
-## Chapter 07 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 7-1 | `images/chapter07/ch07_01_midterm_project_flow.mmd` | `ch07_01_midterm_project_flow.svg` |
-| 그림 7-2 | `images/chapter07/ch07_02_requirement_to_entities.mmd` | `ch07_02_requirement_to_entities.svg` |
-| 그림 7-3 | `images/chapter07/ch07_03_online_course_erd.mmd` | `ch07_03_online_course_erd.svg` |
-| 그림 7-4 | `images/chapter07/ch07_04_many_to_many_enrollments.mmd` | `ch07_04_many_to_many_enrollments.svg` |
-| 그림 7-5 | `images/chapter07/ch07_05_sql_validation_flow.mmd` | `ch07_05_sql_validation_flow.svg` |
-| 그림 7-6 | `images/chapter07/ch07_06_normalization_review_flow.mmd` | `ch07_06_normalization_review_flow.svg` |
-| 그림 7-7 | `images/chapter07/ch07_07_ai_review_report_flow.mmd` | `ch07_07_ai_review_report_flow.svg` |
-| 그림 7-8 | `images/chapter07/ch07_08_assessment_rubric_overview.mmd` | `ch07_08_assessment_rubric_overview.svg` |
+1. Chapter 07 리뷰 체크리스트 작성
+2. Chapter 07 원고 1차 리뷰 및 보완
+3. Chapter 08 원고 확장
+4. Chapter 08 실습 SQL 파일 작성
+5. Chapter 08 활동/실습 자료 작성
 
 ## 집필 운영 메모
 
