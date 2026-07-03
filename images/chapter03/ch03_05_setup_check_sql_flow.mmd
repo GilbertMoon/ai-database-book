@@ -1,0 +1,12 @@
+flowchart TD
+    A[code/chapter03/setup_check.sql] --> B[SELECT version()]
+    B --> C[SELECT current_database()]
+    C --> D[SELECT 1 + 1 AS result]
+    D --> E[CREATE TABLE students]
+    E --> F[INSERT 샘플 학생 데이터 3건]
+    F --> G[SELECT * FROM students]
+    G --> H[조회 결과 확인]
+    H --> I[UNIQUE 오류 확인용 INSERT]
+    I --> J{오류 발생?}
+    J -- 예 --> K[UNIQUE 제약조건 정상 동작]
+    J -- 아니오 --> L[테이블 구조와 데이터 확인]
