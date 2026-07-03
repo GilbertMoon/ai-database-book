@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 08 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 08 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 08 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -24,27 +24,16 @@ Chapter 08 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 08 �
 14. Chapter 08 활동/실습 자료 작성 완료
 15. Chapter 08 도식 후보 정리 완료
 16. Chapter 08 Mermaid 도식 원본 8종 작성 완료
+17. Chapter 08 SVG 도식 8종 생성 완료
+18. Chapter 08 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 08 SVG 도식 생성
-2. Chapter 08 본문에 그림 링크와 캡션 삽입
-3. Chapter 08 리뷰 체크리스트 작성
-4. Chapter 08 원고 1차 리뷰 및 보완
-5. Chapter 09 원고 확장
-
-## Chapter 08 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 8-1 | `images/chapter08/ch08_01_join_why_needed.mmd` | `ch08_01_join_why_needed.svg` |
-| 그림 8-2 | `images/chapter08/ch08_02_inner_join_concept.mmd` | `ch08_02_inner_join_concept.svg` |
-| 그림 8-3 | `images/chapter08/ch08_03_multi_table_join_path.mmd` | `ch08_03_multi_table_join_path.svg` |
-| 그림 8-4 | `images/chapter08/ch08_04_left_join_null_rows.mmd` | `ch08_04_left_join_null_rows.svg` |
-| 그림 8-5 | `images/chapter08/ch08_05_group_by_aggregation_flow.mmd` | `ch08_05_group_by_aggregation_flow.svg` |
-| 그림 8-6 | `images/chapter08/ch08_06_course_revenue_summary.mmd` | `ch08_06_course_revenue_summary.svg` |
-| 그림 8-7 | `images/chapter08/ch08_07_where_group_having_order.mmd` | `ch08_07_where_group_having_order.svg` |
-| 그림 8-8 | `images/chapter08/ch08_08_ai_join_sql_review_flow.mmd` | `ch08_08_ai_join_sql_review_flow.svg` |
+1. Chapter 08 리뷰 체크리스트 작성
+2. Chapter 08 원고 1차 리뷰 및 보완
+3. Chapter 09 원고 확장
+4. Chapter 09 실습 SQL 파일 작성
+5. Chapter 09 활동/실습 자료 작성
 
 ## 집필 운영 메모
 
