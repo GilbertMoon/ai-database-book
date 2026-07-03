@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 14 Vector DB와 RAG 기초 실습 SQL 또는 Vector DB 예제 파일을 작성한다.
+Chapter 14 Vector DB와 RAG 기초 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -26,21 +26,22 @@ Chapter 14 Vector DB와 RAG 기초 실습 SQL 또는 Vector DB 예제 파일을 
 16. Chapter 12 원고 1차 리뷰 및 보완 완료
 17. Chapter 13 원고 1차 리뷰 및 보완 완료
 18. Chapter 14 원고 1차 확장 완료
+19. Chapter 14 실습 SQL/Vector DB 예제 작성 완료
+20. Chapter 14 코드 README 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 14 실습 SQL 또는 Vector DB 예제 작성
-2. Chapter 14 코드 README 작성
-3. Chapter 14 활동/실습 자료 작성
-4. Chapter 14 도식 후보 정리
+1. Chapter 14 활동/실습 자료 작성
+2. Chapter 14 도식 후보 정리
+3. Chapter 14 Mermaid 도식 원본 작성
+4. Chapter 14 SVG 도식 생성
 5. Chapter 14 리뷰 체크리스트 작성
 
 ## Chapter 14 후속 작업 메모
 
 ```text
-- pgvector를 사용할 수 있는 환경과 사용할 수 없는 환경을 모두 고려한다.
-- 실습은 3차원 샘플 벡터로 의미 기반 검색 개념을 설명한다.
-- 문서 청킹, 임베딩 저장, 질문 벡터 검색, RAG 답변 검토 흐름을 포함한다.
+- 활동 자료는 일반 검색과 의미 기반 검색 비교, 문서 청킹, 질문 벡터 검색, Top-k 결과 해석, RAG 답변 근거성 검토 중심으로 구성한다.
+- pgvector 설치 환경과 미설치 환경을 모두 고려해 실습 안내를 작성한다.
 ```
 
 ## 집필 운영 메모
