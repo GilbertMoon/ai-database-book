@@ -29,7 +29,7 @@
 | Chapter | 제목 | 상태 |
 | --- | --- | --- |
 | Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 02 | DBMS 기본 개념 | 원고 초안 작성 완료 |
+| Chapter 02 | DBMS 기본 개념 | 원고 1차 확장 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | 원고 초안 작성 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | 원고 초안 작성 완료 |
 | Chapter 05 | 데이터 모델링과 ERD | 원고 초안 작성 완료 |
@@ -55,17 +55,9 @@
 | README.md 생성 | 완료 |
 | BOOK_STYLE.md 작성 | 완료 |
 | Chapter별 기본 구조 생성 | 완료 |
-| Chapter 01 원고 확장 | 완료 |
-| Chapter 01 활동/실습 자료 작성 | 완료 |
-| Chapter 01 도식 후보 정리 | 완료 |
-| Chapter 01 Mermaid 도식 원본 작성 | 완료 |
-| Chapter 01 SVG 도식 생성 | 완료 |
-| Chapter 01 본문 그림 링크 및 캡션 삽입 | 완료 |
-| Chapter 01 리뷰 체크리스트 작성 | 완료 |
-| Chapter 01 리뷰 후 보완 반영안 작성 | 완료 |
-| Chapter 01 본문 보완안 직접 반영 | 완료 |
 | Chapter 01 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 02 원고 확장 | 예정 |
+| Chapter 02 원고 확장 | 완료 |
+| Chapter 02 활동/실습 자료 작성 | 예정 |
 
 ---
 
@@ -74,7 +66,7 @@
 가장 먼저 진행할 다음 작업은 다음과 같습니다.
 
 ```text
-Chapter 02 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
+Chapter 02 활동/실습 자료를 작성한다.
 ```
 
 ---
