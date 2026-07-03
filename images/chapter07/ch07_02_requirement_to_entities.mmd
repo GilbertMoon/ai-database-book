@@ -1,0 +1,17 @@
+flowchart TB
+    A[온라인 강의 서비스 요구사항] --> B[중요 명사 찾기]
+
+    B --> C[학생]
+    B --> D[강사]
+    B --> E[강의]
+    B --> F[수강신청]
+    B --> G[이름 / 이메일 / 가입일]
+    B --> H[제목 / 난이도 / 수강료]
+
+    C --> I[students 테이블]
+    D --> J[instructors 테이블]
+    E --> K[courses 테이블]
+    F --> L[enrollments 테이블]
+
+    G --> M[컬럼 후보]
+    H --> M
