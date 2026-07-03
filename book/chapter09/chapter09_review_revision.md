@@ -37,9 +37,9 @@ Chapter 09는 트랜잭션과 데이터 정합성을 초급 학습자에게 설�
 | --- | --- | --- |
 | 리뷰 체크리스트 작성 | 완료 | `notes/chapter09_review_checklist.md` |
 | 리뷰 후 보완 반영 기록 | 완료 | `book/chapter09/chapter09_review_revision.md` |
-| Chapter 상태 문구 변경 | 반영 예정 | `book/chapter09/chapter09.md` 상단 |
-| README 진행 상태 갱신 | 반영 예정 | `README.md` |
-| TODO 진행 상태 갱신 | 반영 예정 | `notes/todo.md` |
+| Chapter 상태 문구 변경 | 완료 | `book/chapter09/chapter09.md` 상단 |
+| README 진행 상태 갱신 | 완료 예정 | `README.md` |
+| TODO 진행 상태 갱신 | 완료 예정 | `notes/todo.md` |
 
 ---
 
@@ -63,14 +63,14 @@ Chapter 09는 트랜잭션과 데이터 정합성을 초급 학습자에게 설�
 | --- | --- |
 | 리뷰 체크리스트 작성 | 완료 |
 | 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 진행 예정 |
-| Chapter 09 1차 완료 판정 | 가능 |
+| 원고 상태 변경 | 완료 |
+| Chapter 09 1차 완료 판정 | 완료 |
 
 ---
 
 ## 5. 결론
 
 ```text
-Chapter 09는 원고 1차 리뷰 및 보완 완료 상태로 전환할 수 있다.
+Chapter 09는 원고 1차 리뷰 및 보완 완료 상태로 전환되었다.
 다음 작업은 Chapter 10 원고 확장이다.
 ```
