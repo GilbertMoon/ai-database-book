@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 09 도식 후보를 정리하고, images/chapter09/에 사용할 이미지 목록을 설계한다.
+Chapter 09 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 09 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -23,21 +23,29 @@ Chapter 09 도식 후보를 정리하고, images/chapter09/에 사용할 이미�
 13. Chapter 09 원고 1차 확장 완료
 14. Chapter 09 실습 SQL 파일 작성 완료
 15. Chapter 09 활동/실습 자료 작성 완료
+16. Chapter 09 도식 후보 정리 완료
+17. Chapter 09 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 09 도식 후보 정리
-2. Chapter 09 Mermaid 도식 원본 작성
-3. Chapter 09 SVG 도식 생성
-4. Chapter 09 본문에 그림 링크와 캡션 삽입
-5. Chapter 09 리뷰 체크리스트 작성
+1. Chapter 09 SVG 도식 생성
+2. Chapter 09 본문에 그림 링크와 캡션 삽입
+3. Chapter 09 리뷰 체크리스트 작성
+4. Chapter 09 원고 1차 리뷰 및 보완
+5. Chapter 10 원고 확장
 
-## Chapter 09 후속 작업 메모
+## Chapter 09 도식 목록
 
-```text
-- 도식 후보는 트랜잭션 필요성, BEGIN-COMMIT-ROLLBACK 흐름, ACID, 수강신청/결제/좌석 차감, ROLLBACK 전후 비교, 동시성/Lock 맛보기, AI 트랜잭션 SQL 검토 흐름을 우선 고려한다.
-- 활동 자료는 BEGIN, COMMIT, ROLLBACK 실행 결과 기록과 AI 트랜잭션 SQL 검토 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 9-1 | `images/chapter09/ch09_01_transaction_need.mmd` | `ch09_01_transaction_need.svg` |
+| 그림 9-2 | `images/chapter09/ch09_02_transaction_basic_flow.mmd` | `ch09_02_transaction_basic_flow.svg` |
+| 그림 9-3 | `images/chapter09/ch09_03_consistency_problem_examples.mmd` | `ch09_03_consistency_problem_examples.svg` |
+| 그림 9-4 | `images/chapter09/ch09_04_acid_overview.mmd` | `ch09_04_acid_overview.svg` |
+| 그림 9-5 | `images/chapter09/ch09_05_enrollment_payment_transaction.mmd` | `ch09_05_enrollment_payment_transaction.svg` |
+| 그림 9-6 | `images/chapter09/ch09_06_rollback_before_after.mmd` | `ch09_06_rollback_before_after.svg` |
+| 그림 9-7 | `images/chapter09/ch09_07_concurrency_lock_deadlock.mmd` | `ch09_07_concurrency_lock_deadlock.svg` |
+| 그림 9-8 | `images/chapter09/ch09_08_ai_transaction_review_flow.mmd` | `ch09_08_ai_transaction_review_flow.svg` |
 
 ## 집필 운영 메모
 
