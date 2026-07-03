@@ -1,0 +1,19 @@
+flowchart LR
+    A[members 테이블] --> A1[id PK]
+    A --> A2[name]
+    A --> A3[email]
+
+    B[loans 테이블] --> B1[id PK]
+    B --> B2[member_id FK]
+    B --> B3[book_id FK]
+    B --> B4[borrowed_at]
+
+    C[books 테이블] --> C1[id PK]
+    C --> C2[title]
+    C --> C3[isbn]
+
+    B2 -. 참조 .-> A1
+    B3 -. 참조 .-> C1
+
+    A1 --> D[기본키: 자기 테이블의 행을 구분]
+    B2 --> E[외래키: 다른 테이블의 기본키를 참조]
