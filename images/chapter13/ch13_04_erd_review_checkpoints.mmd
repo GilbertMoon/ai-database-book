@@ -1,0 +1,18 @@
+flowchart LR
+    A[AI ERD draft] --> B[Entity check]
+    A --> C[Relationship check]
+    A --> D[N:M check]
+    A --> E[FK check]
+    A --> F[Role separation]
+
+    B --> B1[Missing tables?]
+    C --> C1[Correct cardinality?]
+    D --> D1[Junction table needed?]
+    E --> E1[Reference integrity?]
+    F --> F1[Mixed responsibilities?]
+
+    B1 --> G[Revised ERD]
+    C1 --> G
+    D1 --> G
+    E1 --> G
+    F1 --> G
