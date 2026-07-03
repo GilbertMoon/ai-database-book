@@ -1,0 +1,20 @@
+flowchart TB
+    A[students] --> A1[한 학생은 여러 강의 신청]
+    B[courses] --> B1[한 강의에는 여러 학생 등록]
+
+    A1 --> C{N:M 관계}
+    B1 --> C
+
+    C --> D[중간 테이블 필요]
+    D --> E[enrollments]
+
+    E --> E1[student_id FK]
+    E --> E2[course_id FK]
+    E --> E3[enrolled_at]
+    E --> E4[status]
+    E --> E5[paid_amount]
+
+    A --> F[1:N]
+    F --> E
+    E --> G[N:1]
+    G --> B
