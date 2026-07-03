@@ -1,0 +1,17 @@
+flowchart LR
+    A[User] --> B[Role]
+    B --> C[Permission]
+    C --> D[Table]
+
+    B --> B1[readonly_user]
+    B --> B2[app_user]
+    B --> B3[admin_user]
+
+    C --> C1[SELECT]
+    C --> C2[INSERT]
+    C --> C3[UPDATE]
+    C --> C4[DELETE]
+
+    D --> D1[students]
+    D --> D2[courses]
+    D --> D3[enrollments]
