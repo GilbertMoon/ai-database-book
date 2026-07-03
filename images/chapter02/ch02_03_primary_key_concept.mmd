@@ -1,0 +1,18 @@
+flowchart LR
+    A[students 테이블] --> B[id = 기본키 PK]
+
+    subgraph S[학생 데이터]
+        direction TB
+        S1[id: 1<br/>name: 김민지<br/>email: minji@example.com]
+        S2[id: 2<br/>name: 김민지<br/>email: minji2@example.com]
+        S3[id: 3<br/>name: 이준호<br/>email: junho@example.com]
+    end
+
+    B --> S1
+    B --> S2
+    B --> S3
+
+    S1 -. 이름은 같을 수 있음 .-> N[이름 name은 기본키로 부적합]
+    S2 -. 이름은 같을 수 있음 .-> N
+
+    B -. 고유 / 필수 / 안정 .-> K[각 행을 안정적으로 구분]
