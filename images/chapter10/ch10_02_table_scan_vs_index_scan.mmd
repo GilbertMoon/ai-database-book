@@ -1,0 +1,12 @@
+flowchart LR
+    A[Query] --> B{Access path}
+
+    B --> C[Seq Scan]
+    C --> C1[Read many table rows]
+    C1 --> C2[Compare each value]
+    C2 --> C3[Return matching row]
+
+    B --> D[Index Scan]
+    D --> D1[Read index first]
+    D1 --> D2[Find row location]
+    D2 --> D3[Return matching row]
