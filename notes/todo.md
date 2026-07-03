@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 02 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
+Chapter 02 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -12,25 +12,23 @@ Chapter 02 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1�
 2. BOOK_STYLE.md 생성
 3. Chapter 01~15 기본 폴더 및 원고 초안 생성
 4. code/images/notes/scripts/publish 기본 구조 생성
-5. Chapter 01 원고 1차 확장
-6. Chapter 01 활동/실습 자료 작성
-7. Chapter 01 도식 후보 정리
-8. Chapter 01 Mermaid 도식 원본 6종 작성
-9. Chapter 01 SVG 도식 6종 생성
-10. Chapter 01 본문에 그림 링크와 캡션 삽입
-11. Chapter 01 리뷰 체크리스트 작성
-12. Chapter 01 리뷰 후 보완 반영안 작성
-13. Chapter 01 본문에 용어 미리보기 박스 삽입
-14. Chapter 01 본문에 활동 자료 연결 문구 삽입
-15. Chapter 01 원고 1차 리뷰 및 보완 완료
+5. Chapter 01 원고 1차 리뷰 및 보완 완료
+6. Chapter 02 원고 1차 확장 완료
 
 ## 우선순위 작업
 
-1. Chapter 02 원고 확장
-2. Chapter 02 활동/실습 자료 작성
-3. Chapter 02 도식 후보 정리
-4. Chapter 02 리뷰 체크리스트 작성
-5. Chapter 02 원고 1차 리뷰 및 보완
+1. Chapter 02 활동/실습 자료 작성
+2. Chapter 02 도식 후보 정리
+3. Chapter 02 리뷰 체크리스트 작성
+4. Chapter 02 원고 1차 리뷰 및 보완
+5. Chapter 03 원고 확장
+
+## Chapter 02 후속 작업 메모
+
+```text
+- 활동 자료는 DBMS 기본 용어, 테이블/행/열 구분, PK/FK 판단, AI 생성 테이블 구조 검토 중심으로 구성한다.
+- 도식 후보는 DBMS-데이터베이스-테이블 계층 구조, 테이블/행/열 구조, PK/FK 관계, CRUD 흐름을 우선 고려한다.
+```
 
 ## 집필 운영 메모
 
