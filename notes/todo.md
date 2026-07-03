@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 도식 후보를 정리하고, images/chapter13/에 사용할 이미지 목록을 설계한다.
+Chapter 13 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 13 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -28,22 +28,29 @@ Chapter 13 ChatGPT와 Codex로 DB 설계 검증하기 도식 후보를 정리하
 18. Chapter 13 실습 SQL 파일 작성 완료
 19. Chapter 13 코드 README 작성 완료
 20. Chapter 13 활동/실습 자료 작성 완료
+21. Chapter 13 도식 후보 정리 완료
+22. Chapter 13 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 13 도식 후보 정리
-2. Chapter 13 Mermaid 도식 원본 작성
-3. Chapter 13 SVG 도식 생성
-4. Chapter 13 본문에 그림 링크와 캡션 삽입
-5. Chapter 13 리뷰 체크리스트 작성
-6. Chapter 13 원고 1차 리뷰 및 보완
+1. Chapter 13 SVG 도식 생성
+2. Chapter 13 본문에 그림 링크와 캡션 삽입
+3. Chapter 13 리뷰 체크리스트 작성
+4. Chapter 13 원고 1차 리뷰 및 보완
+5. Chapter 14 원고 확장
 
-## Chapter 13 후속 작업 메모
+## Chapter 13 도식 목록
 
-```text
-- 도식 후보는 AI 설계 검증 전체 흐름, ChatGPT와 Codex 역할 구분, 좋은 프롬프트 구조, ERD 검토 흐름, 나쁜 설계와 좋은 설계 비교, 제약조건 검증, information_schema 점검, Codex 오류 수정 루프를 우선 고려한다.
-- 활동 자료는 AI 설계 초안 검토표, 나쁜 설계 문제 찾기, 좋은 설계 비교, 제약조건 검증, information_schema 결과 해석, AI 검토 프롬프트 작성 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 13-1 | `images/chapter13/ch13_01_ai_db_design_review_flow.mmd` | `ch13_01_ai_db_design_review_flow.svg` |
+| 그림 13-2 | `images/chapter13/ch13_02_chatgpt_codex_roles.mmd` | `ch13_02_chatgpt_codex_roles.svg` |
+| 그림 13-3 | `images/chapter13/ch13_03_good_prompt_structure.mmd` | `ch13_03_good_prompt_structure.svg` |
+| 그림 13-4 | `images/chapter13/ch13_04_erd_review_checkpoints.mmd` | `ch13_04_erd_review_checkpoints.svg` |
+| 그림 13-5 | `images/chapter13/ch13_05_bad_vs_good_design.mmd` | `ch13_05_bad_vs_good_design.svg` |
+| 그림 13-6 | `images/chapter13/ch13_06_constraints_review.mmd` | `ch13_06_constraints_review.svg` |
+| 그림 13-7 | `images/chapter13/ch13_07_information_schema_review.mmd` | `ch13_07_information_schema_review.svg` |
+| 그림 13-8 | `images/chapter13/ch13_08_codex_error_fix_loop.mmd` | `ch13_08_codex_error_fix_loop.svg` |
 
 ## 집필 운영 메모
 
