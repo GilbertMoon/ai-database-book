@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860">
+  <defs>
+    <style>
+      text { font-family: Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; fill:#1a202c; }
+      .title { font-size:24px; font-weight:700; }
+      .quad { fill:none; stroke:#4a5568; stroke-width:2; }
+      .label { font-size:18px; text-anchor:middle; }
+      .small { font-size:15px; }
+      .tag1 { fill:#fefcbf; stroke:#d69e2e; stroke-width:2; rx:10; ry:10; }
+      .tag2 { fill:#ebf8ff; stroke:#2b6cb0; stroke-width:2; rx:10; ry:10; }
+      .tag3 { fill:#f0fff4; stroke:#38a169; stroke-width:2; rx:10; ry:10; }
+      .tag4 { fill:#faf5ff; stroke:#805ad5; stroke-width:2; rx:10; ry:10; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="600" y="40" class="title" text-anchor="middle">저장 방식 선택 매트릭스</text>
+
+  <rect x="180" y="120" width="860" height="620" class="quad"/>
+  <line x1="610" y1="120" x2="610" y2="740" class="quad" stroke="#a0aec0"/>
+  <line x1="180" y1="430" x2="1040" y2="430" class="quad" stroke="#a0aec0"/>
+
+  <rect x="220" y="160" width="230" height="54" class="tag1"/><text x="335" y="193" class="label">파일 / 엑셀 우선</text>
+  <rect x="660" y="160" width="250" height="54" class="tag2"/><text x="785" y="193" class="label">관계형 DB 검토</text>
+  <rect x="220" y="650" width="280" height="54" class="tag3"/><text x="360" y="683" class="label">파일 / JSON / CSV 적합</text>
+  <rect x="640" y="650" width="330" height="54" class="tag4"/><text x="805" y="683" class="label">DB 또는 클라우드 저장소 검토</text>
+
+  <text x="610" y="800" class="label">단순한 데이터  →  복잡한 관계 데이터</text>
+  <text x="85" y="420" transform="rotate(-90 85 420)" class="label">개인 / 소규모 사용  →  다중 사용자 / 서비스 운영</text>
+
+  <circle cx="300" cy="650" r="7" fill="#2b6cb0"/><text x="316" y="645" class="small">개인 메모</text>
+  <circle cx="360" cy="600" r="7" fill="#2b6cb0"/><text x="376" y="595" class="small">카페 메뉴</text>
+  <circle cx="430" cy="500" r="7" fill="#2b6cb0"/><text x="446" y="495" class="small">학생 명단</text>
+  <circle cx="790" cy="300" r="7" fill="#2b6cb0"/><text x="806" y="295" class="small">온라인 강의 수강신청</text>
+  <circle cx="900" cy="250" r="7" fill="#2b6cb0"/><text x="916" y="245" class="small">쇼핑몰 주문·결제·재고</text>
+  <circle cx="760" cy="380" r="7" fill="#2b6cb0"/><text x="776" y="375" class="small">문서 의미 검색</text>
+</svg>
