@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 02 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 02 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 02 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -17,14 +17,16 @@ Chapter 02 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 02 �
 7. Chapter 02 활동/실습 자료 작성 완료
 8. Chapter 02 도식 후보 정리 완료
 9. Chapter 02 Mermaid 도식 원본 8종 작성 완료
+10. Chapter 02 SVG 도식 8종 생성 완료
+11. Chapter 02 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 02 SVG 도식 생성
-2. Chapter 02 본문에 그림 링크와 캡션 삽입
-3. Chapter 02 리뷰 체크리스트 작성
-4. Chapter 02 원고 1차 리뷰 및 보완
-5. Chapter 03 원고 확장
+1. Chapter 02 리뷰 체크리스트 작성
+2. Chapter 02 원고 1차 리뷰 및 보완
+3. Chapter 03 원고 확장
+4. Chapter 03 활동/실습 자료 작성
+5. Chapter 03 도식 후보 정리
 
 ## Chapter 02 도식 목록
 
