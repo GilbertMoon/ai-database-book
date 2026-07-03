@@ -1,6 +1,6 @@
 # Chapter 11. 데이터베이스 보안과 백업
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -44,6 +44,10 @@
 
 이 데이터가 외부에 노출되거나, 잘못 변경되거나, 삭제되면 서비스 신뢰도가 크게 떨어집니다.
 
+![보안과 백업이 필요한 이유](../../images/chapter11/ch11_01_security_backup_overview.svg)
+
+그림 11-1 보안과 백업이 필요한 이유
+
 데이터베이스 운영에서 중요한 질문은 다음과 같습니다.
 
 ```text
@@ -85,6 +89,10 @@ AI가 만든 SQL이나 설정을 그대로 적용해도 안전한가?
 
 데이터베이스에는 여러 사용자가 접속할 수 있습니다. 이때 모든 사용자에게 관리자 권한을 주면 위험합니다.
 
+![계정과 권한 구조](../../images/chapter11/ch11_02_account_permission_model.svg)
+
+그림 11-2 계정과 권한 구조
+
 예를 들어 다음과 같은 계정을 구분할 수 있습니다.
 
 | 계정 유형 | 목적 | 권장 권한 |
@@ -95,6 +103,10 @@ AI가 만든 SQL이나 설정을 그대로 적용해도 안전한가?
 | 실습 계정 | 교육용 실습 | 별도 실습 DB에 제한된 권한 |
 
 가장 중요한 원칙은 **최소 권한 원칙**입니다.
+
+![최소 권한 원칙](../../images/chapter11/ch11_03_least_privilege_principle.svg)
+
+그림 11-3 최소 권한 원칙
 
 ```text
 최소 권한 원칙 = 사용자가 자기 역할을 수행하는 데 필요한 권한만 부여하는 것
@@ -144,6 +156,10 @@ GRANT SELECT ON enrollments TO readonly_user;
 
 `GRANT`는 권한을 부여할 때 사용합니다. `REVOKE`는 권한을 회수할 때 사용합니다.
 
+![GRANT와 REVOKE 흐름](../../images/chapter11/ch11_04_grant_revoke_flow.svg)
+
+그림 11-4 GRANT와 REVOKE 흐름
+
 | 명령 | 의미 |
 | --- | --- |
 | GRANT | 권한 부여 |
@@ -181,6 +197,10 @@ GRANT INSERT, UPDATE ON enrollments TO app_user;
 ## 6. 개발용 계정과 운영용 계정 구분
 
 실무에서는 개발 환경과 운영 환경을 구분해야 합니다.
+
+![개발용 계정과 운영용 계정 분리](../../images/chapter11/ch11_05_dev_prod_account_separation.svg)
+
+그림 11-5 개발용 계정과 운영용 계정 분리
 
 | 구분 | 설명 |
 | --- | --- |
@@ -253,6 +273,10 @@ GRANT INSERT, UPDATE ON enrollments TO app_user;
 
 SQL Injection은 사용자 입력값이 SQL 문장의 구조에 영향을 주어, 의도하지 않은 조회나 변경이 발생할 수 있는 보안 취약점입니다.
 
+![SQL Injection 위험과 안전한 쿼리](../../images/chapter11/ch11_06_sql_injection_safe_query.svg)
+
+그림 11-6 SQL Injection 위험과 안전한 쿼리
+
 초급자는 다음 원칙만 먼저 기억해도 좋습니다.
 
 ```text
@@ -318,6 +342,10 @@ WHERE email = ?
 ## 10. 백업이란 무엇인가
 
 백업은 데이터 손실에 대비해 데이터를 별도로 복사해 두는 작업입니다.
+
+![백업과 복구 테스트 흐름](../../images/chapter11/ch11_07_backup_restore_flow.svg)
+
+그림 11-7 백업과 복구 테스트 흐름
 
 데이터가 손실될 수 있는 상황은 다양합니다.
 
@@ -440,6 +468,10 @@ PostgreSQL 데이터베이스의 보안 설정과 백업 명령을 추천해 주
 ```
 
 AI는 계정 생성, 권한 부여, 백업 명령을 제안할 수 있습니다. 하지만 이를 그대로 실행해서는 안 됩니다.
+
+![AI 보안·백업 명령 검토 흐름](../../images/chapter11/ch11_08_ai_security_review_flow.svg)
+
+그림 11-8 AI 보안·백업 명령 검토 흐름
 
 다음 기준으로 검토해야 합니다.
 
