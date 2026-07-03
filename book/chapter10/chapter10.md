@@ -1,6 +1,6 @@
 # Chapter 10. 인덱스와 성능 기초
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -40,6 +40,10 @@ WHERE email = 'minji@example.com';
 ```
 
 하지만 학생이 100만 명이라면 이야기가 달라집니다. 데이터베이스가 모든 행을 처음부터 끝까지 확인해야 한다면 검색 시간이 길어질 수 있습니다.
+
+![인덱스가 필요한 이유](../../images/chapter10/ch10_01_index_need_overview.svg)
+
+그림 10-1 인덱스가 필요한 이유
 
 인덱스는 이런 상황에서 원하는 데이터를 더 빠르게 찾기 위한 구조입니다.
 
@@ -131,6 +135,10 @@ idx_enrollments_course_id
 
 인덱스가 없는 상태에서는 데이터베이스가 테이블의 많은 행을 확인해야 할 수 있습니다.
 
+![전체 테이블 스캔과 인덱스 검색 비교](../../images/chapter10/ch10_02_table_scan_vs_index_scan.svg)
+
+그림 10-2 전체 테이블 스캔과 인덱스 검색 비교
+
 ```text
 students 테이블 전체 확인 -> email 값 비교 -> 일치하는 행 반환
 ```
@@ -154,6 +162,10 @@ email 인덱스 확인 -> 해당 행 위치 찾기 -> 필요한 행 반환
 ## 5. WHERE 조건과 인덱스
 
 인덱스는 주로 `WHERE` 조건에서 자주 사용되는 컬럼에 만듭니다.
+
+![WHERE 조건과 인덱스 후보](../../images/chapter10/ch10_03_where_index_candidate.svg)
+
+그림 10-3 WHERE 조건과 인덱스 후보
 
 예를 들어 학생 이메일로 자주 검색한다면 `students.email` 컬럼이 인덱스 후보입니다.
 
@@ -193,6 +205,10 @@ WHERE title = '데이터베이스 입문';
 
 인덱스는 정렬에도 도움이 될 수 있습니다.
 
+![ORDER BY와 인덱스](../../images/chapter10/ch10_04_order_by_index_flow.svg)
+
+그림 10-4 ORDER BY와 인덱스
+
 예를 들어 강의 목록을 제목순으로 자주 보여 준다면 다음 SQL이 자주 실행될 수 있습니다.
 
 ```sql
@@ -217,6 +233,10 @@ ON courses(title);
 ## 7. JOIN 조건과 인덱스
 
 JOIN에서는 외래키 컬럼이 자주 사용됩니다.
+
+![JOIN 조건과 외래키 인덱스](../../images/chapter10/ch10_05_join_foreign_key_index.svg)
+
+그림 10-5 JOIN 조건과 외래키 인덱스
 
 Chapter 08에서 다음 JOIN을 사용했습니다.
 
@@ -273,6 +293,10 @@ WHERE course_id = 1;
 
 하나의 컬럼이 아니라 여러 컬럼을 함께 사용하는 인덱스도 있습니다. 이를 복합 인덱스라고 합니다.
 
+![복합 인덱스와 컬럼 순서](../../images/chapter10/ch10_06_composite_index_order.svg)
+
+그림 10-6 복합 인덱스와 컬럼 순서
+
 예를 들어 특정 강의에서 특정 상태의 수강신청을 자주 조회한다고 가정합니다.
 
 ```sql
@@ -304,6 +328,10 @@ ON enrollments(course_id, status);
 인덱스를 만들었다고 해서 무조건 사용되는 것은 아닙니다. 데이터베이스는 SQL을 실행할 때 여러 방법 중 하나를 선택합니다.
 
 이 선택 과정을 확인할 수 있는 도구가 `EXPLAIN`입니다.
+
+![EXPLAIN 생성 전후 비교](../../images/chapter10/ch10_07_explain_before_after.svg)
+
+그림 10-7 EXPLAIN 생성 전후 비교
 
 ```sql
 EXPLAIN
@@ -414,6 +442,10 @@ students, courses, enrollments 테이블을 사용합니다.
 ```
 
 AI는 다음과 같은 인덱스를 추천할 수 있습니다.
+
+![AI 추천 인덱스 검토 흐름](../../images/chapter10/ch10_08_ai_index_review_flow.svg)
+
+그림 10-8 AI 추천 인덱스 검토 흐름
 
 ```sql
 CREATE INDEX idx_students_email
