@@ -1,0 +1,16 @@
+flowchart TB
+    A[Good DB design prompt] --> B[System background]
+    A --> C[Core entities]
+    A --> D[Relationships]
+    A --> E[Main attributes]
+    A --> F[Constraints]
+    A --> G[Output format]
+    A --> H[Review criteria]
+
+    B --> B1[Online course system]
+    C --> C1[students instructors courses enrollments payments]
+    D --> D1[1:N and N:M]
+    E --> E1[name email price status]
+    F --> F1[PK FK UNIQUE CHECK NOT NULL]
+    G --> G1[tables ERD DDL notes]
+    H --> H1[normalization security PostgreSQL syntax]
