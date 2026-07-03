@@ -1,0 +1,15 @@
+flowchart TD
+    A[AI가 생성한 JOIN/집계 SQL]
+    A --> B[JOIN 조건 검토]
+    B --> C[GROUP BY 검토]
+    C --> D[COUNT/SUM/AVG 검토]
+    D --> E[NULL 처리 검토]
+    E --> F[실행 결과 확인]
+    F --> G[요구사항과 비교]
+
+    B --> B1[ON 조건 누락 여부]
+    C --> C1[일반 컬럼 포함 여부]
+    D --> D1[중복 집계 여부]
+    E --> E1[COALESCE 필요 여부]
+    F --> F1[DBeaver 실행]
+    G --> H[사람이 수정 후 확정]
