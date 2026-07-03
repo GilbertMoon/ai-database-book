@@ -1,0 +1,15 @@
+flowchart TB
+    A[Documents] --> B[Chunking]
+    B --> C[Embedding]
+    C --> D[Vector DB]
+
+    E[User question] --> F[Question embedding]
+    F --> G[Similarity search]
+    D --> G
+    G --> H[Retrieved chunks]
+    H --> I[Prompt with evidence]
+    I --> J[LLM answer]
+    J --> K[Grounding review]
+
+    H --> K
+    K --> L[Final answer with source]
