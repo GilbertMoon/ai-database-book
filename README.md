@@ -32,7 +32,7 @@
 | Chapter 02 | DBMS 기본 개념 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 05 | 데이터 모델링과 ERD | 원고 초안 작성 완료 |
+| Chapter 05 | 데이터 모델링과 ERD | 원고 1차 확장 완료 / 실습 SQL 작성 완료 |
 | Chapter 06 | 정규화와 좋은 테이블 설계 | 원고 초안 작성 완료 |
 | Chapter 07 | 중간 프로젝트 또는 중간 평가 | 원고 초안 작성 완료 |
 | Chapter 08 | JOIN과 집계 쿼리 | 원고 초안 작성 완료 |
@@ -59,14 +59,16 @@
 | Chapter 02 원고 1차 리뷰 및 보완 | 완료 |
 | Chapter 03 원고 1차 리뷰 및 보완 | 완료 |
 | Chapter 04 원고 1차 리뷰 및 보완 | 완료 |
-| Chapter 05 원고 확장 | 예정 |
+| Chapter 05 원고 확장 | 완료 |
+| Chapter 05 실습 SQL 파일 작성 | 완료 |
+| Chapter 05 활동/실습 자료 작성 | 예정 |
 
 ---
 
 ## 다음 작업
 
 ```text
-Chapter 05 원고를 BOOK_STYLE.md 기준에 맞춰 15~20페이지 분량의 1차 원고로 확장한다.
+Chapter 05 활동/실습 자료를 작성한다.
 ```
 
 ---
