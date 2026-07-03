@@ -1,0 +1,22 @@
+flowchart TB
+    A[SQL 기초 명령어] --> C[Create]
+    A --> R[Read]
+    A --> U[Update]
+    A --> D[Delete]
+
+    C --> C1[INSERT]
+    C1 --> C2[새 학생 등록]
+
+    R --> R1[SELECT]
+    R1 --> R2[학생 목록 조회]
+
+    U --> U1[UPDATE]
+    U1 --> U2[학생 정보 수정]
+
+    D --> D1[DELETE]
+    D1 --> D2[학생 정보 삭제]
+
+    C2 --> T[(students 테이블)]
+    R2 --> T
+    U2 --> T
+    D2 --> T
