@@ -44,7 +44,7 @@
 
 | Chapter | 제목 | 상태 |
 | --- | --- | --- |
-| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 원고 1차 확장 완료 / 활동 자료 작성 완료 / 도식 후보 정리 완료 |
+| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | 원고 1차 확장 완료 / 활동 자료 작성 완료 / 도식 후보 정리 완료 / SVG 도식 생성 완료 / 본문 그림 삽입 완료 |
 | Chapter 02 | DBMS 기본 개념 | 원고 초안 작성 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | 원고 초안 작성 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | 원고 초안 작성 완료 |
@@ -102,7 +102,9 @@ project-root/
 │   ├── chapter01/
 │   │   ├── README.md
 │   │   ├── ch01_01_storage_options.mmd
+│   │   ├── ch01_01_storage_options.svg
 │   │   ├── ch01_02_db_need_decision_flow.mmd
+│   │   ├── ch01_02_db_need_decision_flow.svg
 │   │   └── ...
 │   ├── chapter02/
 │   └── ...
@@ -147,7 +149,9 @@ project-root/
 | Chapter 01 활동/실습 자료 작성 | 완료 |
 | Chapter 01 도식 후보 정리 | 완료 |
 | Chapter 01 Mermaid 도식 원본 작성 | 완료 |
-| Chapter 01 도식 이미지 생성 및 본문 삽입 | 예정 |
+| Chapter 01 SVG 도식 생성 | 완료 |
+| Chapter 01 본문 그림 링크 및 캡션 삽입 | 완료 |
+| Chapter 01 리뷰 체크리스트 작성 | 예정 |
 
 ---
 
@@ -156,7 +160,7 @@ project-root/
 가장 먼저 진행할 다음 작업은 다음과 같습니다.
 
 ```text
-Chapter 01 Mermaid 도식 원본을 PNG 또는 SVG 이미지로 변환하고, Chapter 01 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 01 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ---
