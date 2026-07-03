@@ -40,9 +40,9 @@ Chapter 15는 교재 전체의 최종 장으로서 최종 프로젝트 또는 �
 | 리뷰 후 보완 반영 기록 | 완료 | `book/chapter15/chapter15_review_revision.md` |
 | 본문 그림 링크와 캡션 삽입 | 완료 | Chapter 15 본문 전반 |
 | 도식 설계 문서 상태 갱신 | 완료 | `images/chapter15/README.md` |
-| README 진행 상태 갱신 | 진행 예정 | `README.md` |
-| TODO 진행 상태 갱신 | 진행 예정 | `notes/todo.md` |
-| Chapter 상태 문구 변경 | 진행 예정 | `book/chapter15/chapter15.md` 상단 |
+| README 진행 상태 갱신 | 완료 | `README.md` |
+| TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
+| Chapter 상태 문구 변경 | 완료 | `book/chapter15/chapter15.md` 상단 |
 
 ---
 
@@ -69,14 +69,14 @@ Chapter 15는 교재 전체의 최종 장으로서 최종 프로젝트 또는 �
 | --- | --- |
 | 리뷰 체크리스트 작성 | 완료 |
 | 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 진행 예정 |
-| Chapter 15 1차 완료 판정 | 가능 |
+| 원고 상태 변경 | 완료 |
+| Chapter 15 1차 완료 판정 | 완료 |
 
 ---
 
 ## 5. 결론
 
 ```text
-Chapter 15는 원고 1차 리뷰 및 보완 완료 상태로 전환할 수 있다.
+Chapter 15는 원고 1차 리뷰 및 보완 완료 상태로 전환되었다.
 다음 작업은 publish/full_manuscript.md 통합 준비이다.
 ```
