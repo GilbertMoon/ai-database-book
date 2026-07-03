@@ -1,0 +1,23 @@
+erDiagram
+    STUDENTS ||--o{ ENROLLMENTS : referenced_by
+    COURSES ||--o{ ENROLLMENTS : referenced_by
+
+    STUDENTS {
+        int id PK
+        string name
+        string email
+    }
+
+    COURSES {
+        int id PK
+        string title
+        int price
+    }
+
+    ENROLLMENTS {
+        int id PK
+        int student_id FK
+        int course_id FK
+        string status
+        date enrolled_at
+    }
