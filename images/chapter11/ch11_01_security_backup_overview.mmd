@@ -1,0 +1,19 @@
+flowchart TB
+    A[Database] --> B[Security]
+    A --> C[Backup]
+
+    B --> B1[Control access]
+    B --> B2[Control permissions]
+    B --> B3[Protect sensitive data]
+
+    C --> C1[Create backup file]
+    C --> C2[Test restore]
+    C --> C3[Recover after failure]
+
+    B1 --> D[Protect data]
+    B2 --> D
+    B3 --> D
+
+    C1 --> E[Recover data]
+    C2 --> E
+    C3 --> E
