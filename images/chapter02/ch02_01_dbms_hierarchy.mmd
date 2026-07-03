@@ -1,0 +1,20 @@
+flowchart TD
+    A[PostgreSQL<br/>DBMS] --> B[school_db<br/>데이터베이스]
+    A --> C[shop_db<br/>데이터베이스]
+
+    B --> B1[students<br/>테이블]
+    B --> B2[courses<br/>테이블]
+    B --> B3[enrollments<br/>테이블]
+
+    B1 --> B1A[행 Row]
+    B1 --> B1B[열 Column]
+
+    C --> C1[members<br/>테이블]
+    C --> C2[orders<br/>테이블]
+    C --> C3[products<br/>테이블]
+
+    A -. 관리 .-> D[SQL 실행]
+    A -. 관리 .-> E[권한 / 백업 / 연결]
+
+    B1A -. 예 .-> F[김민지 학생 한 줄]
+    B1B -. 예 .-> G[id, name, email]
