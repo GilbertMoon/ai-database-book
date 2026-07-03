@@ -24,12 +24,12 @@ Chapter 01은 데이터베이스 개념을 처음 소개하는 장이므로, 장
 
 | 번호 | 파일명 | 도식 제목 | 삽입 위치 | 목적 | 우선순위 |
 | --- | --- | --- | --- | --- | --- |
-| 그림 1-1 | `ch01_01_storage_options.png` | 데이터 저장 방식의 선택지 | 3장 데이터 저장 방식은 여러 가지다 | 파일, JSON, CSV, 엑셀, DB, NoSQL, Vector DB의 위치를 보여 줌 | 높음 |
-| 그림 1-2 | `ch01_02_db_need_decision_flow.png` | 데이터베이스 필요 여부 판단 흐름 | 5장 데이터베이스가 필요한 경우 | 데이터 양, 동시성, 관계, 정합성, 검색/집계 기준으로 DB 필요 여부 판단 | 높음 |
-| 그림 1-3 | `ch01_03_ai_db_learning_flow.png` | AI 시대의 DB 학습 흐름 | 10장 이 책에서 사용하는 AI 학습 흐름 | ChatGPT, Codex, PostgreSQL, DBeaver, GitHub의 역할 연결 | 높음 |
-| 그림 1-4 | `ch01_04_ai_result_verification_cycle.png` | AI 생성 결과 검증 사이클 | 9장 AI가 잘하는 일과 사람이 해야 하는 일 | AI 생성 → 사람 검토 → 실행 → 수정 → 기록 흐름 설명 | 높음 |
-| 그림 1-5 | `ch01_05_online_course_data_relationship.png` | 온라인 강의 서비스 데이터 관계 | 13장 온라인 강의 서비스 | 학생, 강의, 강사, 수강신청, 결제 간 기본 관계 설명 | 중간 |
-| 그림 1-6 | `ch01_06_storage_choice_matrix.png` | 저장 방식 선택 매트릭스 | 활동 자료 또는 정리 부분 | 단순/복잡, 개인/다중 사용자 기준으로 저장 방식 선택 | 중간 |
+| 그림 1-1 | `ch01_01_storage_options.svg` | 데이터 저장 방식의 선택지 | 3장 데이터 저장 방식은 여러 가지다 | 파일, JSON, CSV, 엑셀, DB, NoSQL, Vector DB의 위치를 보여 줌 | 높음 |
+| 그림 1-2 | `ch01_02_db_need_decision_flow.svg` | 데이터베이스 필요 여부 판단 흐름 | 5장 데이터베이스가 필요한 경우 | 데이터 양, 동시성, 관계, 정합성, 검색/집계 기준으로 DB 필요 여부 판단 | 높음 |
+| 그림 1-3 | `ch01_03_ai_db_learning_flow.svg` | AI 시대의 DB 학습 흐름 | 10장 이 책에서 사용하는 AI 학습 흐름 | ChatGPT, Codex, PostgreSQL, DBeaver, GitHub의 역할 연결 | 높음 |
+| 그림 1-4 | `ch01_04_ai_result_verification_cycle.svg` | AI 생성 결과 검증 사이클 | 9장 AI가 잘하는 일과 사람이 해야 하는 일 | AI 생성 → 사람 검토 → 실행 → 수정 → 기록 흐름 설명 | 높음 |
+| 그림 1-5 | `ch01_05_online_course_data_relationship.svg` | 온라인 강의 서비스 데이터 관계 | 13장 온라인 강의 서비스 | 학생, 강의, 강사, 수강신청, 결제 간 기본 관계 설명 | 중간 |
+| 그림 1-6 | `ch01_06_storage_choice_matrix.svg` | 저장 방식 선택 매트릭스 | 활동 자료 또는 정리 부분 | 단순/복잡, 개인/다중 사용자 기준으로 저장 방식 선택 | 중간 |
 
 ---
 
@@ -46,7 +46,7 @@ Chapter 01 본문 3. 데이터 저장 방식은 여러 가지다
 본문 삽입 예시:
 
 ```markdown
-![데이터 저장 방식의 선택지](../../images/chapter01/ch01_01_storage_options.png)
+![데이터 저장 방식의 선택지](../../images/chapter01/ch01_01_storage_options.svg)
 
 그림 1-1 데이터 저장 방식의 선택지
 ```
@@ -65,7 +65,7 @@ Chapter 01 본문 5. 데이터베이스가 필요한 경우
 본문 삽입 예시:
 
 ```markdown
-![데이터베이스 필요 여부 판단 흐름](../../images/chapter01/ch01_02_db_need_decision_flow.png)
+![데이터베이스 필요 여부 판단 흐름](../../images/chapter01/ch01_02_db_need_decision_flow.svg)
 
 그림 1-2 데이터베이스 필요 여부 판단 흐름
 ```
@@ -83,7 +83,7 @@ Chapter 01 본문 10. 이 책에서 사용하는 AI 학습 흐름
 본문 삽입 예시:
 
 ```markdown
-![AI 시대의 DB 학습 흐름](../../images/chapter01/ch01_03_ai_db_learning_flow.png)
+![AI 시대의 DB 학습 흐름](../../images/chapter01/ch01_03_ai_db_learning_flow.svg)
 
 그림 1-3 AI 시대의 DB 학습 흐름
 ```
@@ -102,7 +102,7 @@ Chapter 01 본문 9. AI가 잘하는 일과 사람이 해야 하는 일
 본문 삽입 예시:
 
 ```markdown
-![AI 생성 결과 검증 사이클](../../images/chapter01/ch01_04_ai_result_verification_cycle.png)
+![AI 생성 결과 검증 사이클](../../images/chapter01/ch01_04_ai_result_verification_cycle.svg)
 
 그림 1-4 AI 생성 결과 검증 사이클
 ```
@@ -120,7 +120,7 @@ Chapter 01 본문 13. 작은 사례: 온라인 강의 서비스
 본문 삽입 예시:
 
 ```markdown
-![온라인 강의 서비스 데이터 관계](../../images/chapter01/ch01_05_online_course_data_relationship.png)
+![온라인 강의 서비스 데이터 관계](../../images/chapter01/ch01_05_online_course_data_relationship.svg)
 
 그림 1-5 온라인 강의 서비스 데이터 관계
 ```
@@ -138,7 +138,7 @@ Chapter 01 활동 자료 또는 본문 14. 실습 활동 1
 본문 삽입 예시:
 
 ```markdown
-![저장 방식 선택 매트릭스](../../images/chapter01/ch01_06_storage_choice_matrix.png)
+![저장 방식 선택 매트릭스](../../images/chapter01/ch01_06_storage_choice_matrix.svg)
 
 그림 1-6 저장 방식 선택 매트릭스
 ```
@@ -151,12 +151,12 @@ Chapter 01 활동 자료 또는 본문 14. 실습 활동 1
 
 | Mermaid 파일 | 대상 이미지 |
 | --- | --- |
-| `ch01_01_storage_options.mmd` | `ch01_01_storage_options.png` |
-| `ch01_02_db_need_decision_flow.mmd` | `ch01_02_db_need_decision_flow.png` |
-| `ch01_03_ai_db_learning_flow.mmd` | `ch01_03_ai_db_learning_flow.png` |
-| `ch01_04_ai_result_verification_cycle.mmd` | `ch01_04_ai_result_verification_cycle.png` |
-| `ch01_05_online_course_data_relationship.mmd` | `ch01_05_online_course_data_relationship.png` |
-| `ch01_06_storage_choice_matrix.mmd` | `ch01_06_storage_choice_matrix.png` |
+| `ch01_01_storage_options.mmd` | `ch01_01_storage_options.svg` |
+| `ch01_02_db_need_decision_flow.mmd` | `ch01_02_db_need_decision_flow.svg` |
+| `ch01_03_ai_db_learning_flow.mmd` | `ch01_03_ai_db_learning_flow.svg` |
+| `ch01_04_ai_result_verification_cycle.mmd` | `ch01_04_ai_result_verification_cycle.svg` |
+| `ch01_05_online_course_data_relationship.mmd` | `ch01_05_online_course_data_relationship.svg` |
+| `ch01_06_storage_choice_matrix.mmd` | `ch01_06_storage_choice_matrix.svg` |
 
 ---
 
@@ -173,9 +173,11 @@ Chapter 01 활동 자료 또는 본문 14. 실습 활동 1
 
 ---
 
-## 6. 다음 작업
+## 6. 현재 상태 및 다음 작업
 
 ```text
-Mermaid 원본을 바탕으로 PNG 또는 SVG 이미지를 생성하고,
-Chapter 01 본문에 그림 링크와 캡션을 삽입한다.
+- Mermaid 원본 6종 작성 완료
+- SVG 도식 6종 생성 완료
+- Chapter 01 본문 삽입 완료
+- 다음 작업: Chapter 01 리뷰 체크리스트 작성
 ```
