@@ -1,0 +1,12 @@
+flowchart LR
+    A[CREATE EXTENSION vector] --> B[Create table]
+    B --> C[Store title content embedding]
+    C --> D[Question vector]
+    D --> E[Distance search]
+    E --> F[ORDER BY embedding distance]
+    F --> G[LIMIT top-k]
+    G --> H[Review retrieved chunks]
+
+    B --> B1[document_embeddings]
+    C --> C1[embedding vector 3]
+    E --> E1[smaller distance means closer]
