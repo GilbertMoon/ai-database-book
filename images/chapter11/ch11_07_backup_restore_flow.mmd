@@ -1,0 +1,13 @@
+flowchart TB
+    A[Database] --> B[Create backup]
+    B --> C[Backup file]
+    C --> D[Restore to test DB]
+    D --> E[Check table counts]
+    E --> F[Check key queries]
+    F --> G{Restore works?}
+
+    G --> H[Keep backup plan]
+    G --> I[Fix backup process]
+
+    H --> J[Ready for failure]
+    I --> B
