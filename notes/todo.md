@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 11 데이터베이스 보안과 백업 도식 후보를 정리하고, images/chapter11/에 사용할 이미지 목록을 설계한다.
+Chapter 11 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 11 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ## 완료된 작업
@@ -26,22 +26,29 @@ Chapter 11 데이터베이스 보안과 백업 도식 후보를 정리하고, im
 16. Chapter 11 실습 SQL 파일 작성 완료
 17. Chapter 11 코드 README 작성 완료
 18. Chapter 11 활동/실습 자료 작성 완료
+19. Chapter 11 도식 후보 정리 완료
+20. Chapter 11 Mermaid 도식 원본 8종 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 11 도식 후보 정리
-2. Chapter 11 Mermaid 도식 원본 작성
-3. Chapter 11 SVG 도식 생성
-4. Chapter 11 본문에 그림 링크와 캡션 삽입
-5. Chapter 11 리뷰 체크리스트 작성
-6. Chapter 11 원고 1차 리뷰 및 보완
+1. Chapter 11 SVG 도식 생성
+2. Chapter 11 본문에 그림 링크와 캡션 삽입
+3. Chapter 11 리뷰 체크리스트 작성
+4. Chapter 11 원고 1차 리뷰 및 보완
+5. Chapter 12 원고 확장
 
-## Chapter 11 후속 작업 메모
+## Chapter 11 도식 목록
 
-```text
-- 도식 후보는 보안과 백업이 필요한 이유, 계정/권한 구조, 최소 권한 원칙, GRANT/REVOKE 흐름, SQL Injection 방어, 백업/복구 흐름, AI 보안 명령 검토 흐름을 우선 고려한다.
-- 활동 자료는 권한 설계, GRANT/REVOKE 해석, 권한 확인 결과 기록, SQL Injection 위험 검토, 백업/복구 체크리스트 중심으로 작성 완료했다.
-```
+| 번호 | Mermaid 원본 | 대상 이미지 |
+| --- | --- | --- |
+| 그림 11-1 | `images/chapter11/ch11_01_security_backup_overview.mmd` | `ch11_01_security_backup_overview.svg` |
+| 그림 11-2 | `images/chapter11/ch11_02_account_permission_model.mmd` | `ch11_02_account_permission_model.svg` |
+| 그림 11-3 | `images/chapter11/ch11_03_least_privilege_principle.mmd` | `ch11_03_least_privilege_principle.svg` |
+| 그림 11-4 | `images/chapter11/ch11_04_grant_revoke_flow.mmd` | `ch11_04_grant_revoke_flow.svg` |
+| 그림 11-5 | `images/chapter11/ch11_05_dev_prod_account_separation.mmd` | `ch11_05_dev_prod_account_separation.svg` |
+| 그림 11-6 | `images/chapter11/ch11_06_sql_injection_safe_query.mmd` | `ch11_06_sql_injection_safe_query.svg` |
+| 그림 11-7 | `images/chapter11/ch11_07_backup_restore_flow.mmd` | `ch11_07_backup_restore_flow.svg` |
+| 그림 11-8 | `images/chapter11/ch11_08_ai_security_review_flow.mmd` | `ch11_08_ai_security_review_flow.svg` |
 
 ## 집필 운영 메모
 
