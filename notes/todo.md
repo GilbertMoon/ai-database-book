@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 12 NoSQL 이해와 선택 기준 실습 SQL 또는 NoSQL 예제 파일을 작성한다.
+Chapter 12 NoSQL 이해와 선택 기준 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -24,21 +24,22 @@ Chapter 12 NoSQL 이해와 선택 기준 실습 SQL 또는 NoSQL 예제 파일�
 14. Chapter 10 원고 1차 리뷰 및 보완 완료
 15. Chapter 11 원고 1차 리뷰 및 보완 완료
 16. Chapter 12 원고 1차 확장 완료
+17. Chapter 12 실습 SQL/NoSQL 예제 작성 완료
+18. Chapter 12 코드 README 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 12 실습 SQL 또는 NoSQL 예제 작성
-2. Chapter 12 활동/실습 자료 작성
-3. Chapter 12 도식 후보 정리
-4. Chapter 12 Mermaid 도식 원본 작성
-5. Chapter 12 SVG 도식 생성
+1. Chapter 12 활동/실습 자료 작성
+2. Chapter 12 도식 후보 정리
+3. Chapter 12 Mermaid 도식 원본 작성
+4. Chapter 12 SVG 도식 생성
+5. Chapter 12 본문에 그림 링크와 캡션 삽입
 6. Chapter 12 리뷰 체크리스트 작성
 
 ## Chapter 12 후속 작업 메모
 
 ```text
-- 실습은 별도 NoSQL 서버 설치 없이 PostgreSQL JSONB를 활용해 문서형 데이터 맛보기를 구성한다.
-- Key-Value DB는 SQL 테이블로 개념을 단순 시뮬레이션하거나 설명 중심으로 다룬다.
+- 활동 자료는 JSONB 문서 조회, 중첩 필드 조회, 배열 태그 검색, Key-Value 개념, 저장 방식 선택표, AI 추천 검토표를 중심으로 구성한다.
 - NoSQL 선택 실습은 데이터 구조, 조회 패턴, 정합성 요구, 운영 난이도 기준으로 판단표를 작성하도록 구성한다.
 - AI가 추천한 NoSQL 선택 결과를 그대로 따르지 않고 검토표를 통해 수정하는 흐름을 포함한다.
 ```
