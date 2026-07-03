@@ -1,0 +1,18 @@
+flowchart TB
+    A[Task] --> B{Needed permission?}
+
+    B --> C[Read report]
+    C --> C1[SELECT only]
+
+    B --> D[Register enrollment]
+    D --> D1[SELECT + INSERT]
+
+    B --> E[Manage database]
+    E --> E1[Admin permission]
+
+    C1 --> F[Least privilege]
+    D1 --> F
+    E1 --> G[Limit to admins]
+
+    F --> H[Reduce risk]
+    G --> H
