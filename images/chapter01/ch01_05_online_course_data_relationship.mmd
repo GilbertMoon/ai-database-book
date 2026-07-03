@@ -1,0 +1,40 @@
+erDiagram
+    STUDENT ||--o{ ENROLLMENT : applies
+    COURSE ||--o{ ENROLLMENT : has
+    INSTRUCTOR ||--o{ COURSE : teaches
+    ENROLLMENT ||--o| PAYMENT : may_have
+
+    STUDENT {
+        int student_id PK
+        string name
+        string email
+    }
+
+    INSTRUCTOR {
+        int instructor_id PK
+        string name
+        string email
+    }
+
+    COURSE {
+        int course_id PK
+        int instructor_id FK
+        string title
+        int price
+    }
+
+    ENROLLMENT {
+        int enrollment_id PK
+        int student_id FK
+        int course_id FK
+        date enrolled_at
+        string status
+    }
+
+    PAYMENT {
+        int payment_id PK
+        int enrollment_id FK
+        int amount
+        string payment_status
+        date paid_at
+    }
