@@ -1,0 +1,18 @@
+flowchart TB
+    A[정규화된 테이블 구조] --> B[students]
+    A --> C[courses]
+    A --> D[instructors]
+    A --> E[enrollments]
+
+    B --> F[학생 이름]
+    C --> G[강의 제목]
+    D --> H[강사 이름]
+    E --> I[수강상태와 결제금액]
+
+    F --> J[수강신청 현황 조회]
+    G --> J
+    H --> J
+    I --> J
+
+    J --> K[JOIN 필요]
+    K --> L[사용자가 이해할 수 있는 결과]
