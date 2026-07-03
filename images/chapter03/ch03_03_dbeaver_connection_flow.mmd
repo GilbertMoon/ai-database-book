@@ -1,0 +1,21 @@
+flowchart LR
+    A[DBeaver 실행] --> B[New Database Connection]
+    B --> C[PostgreSQL 선택]
+    C --> D[연결 정보 입력]
+
+    D --> D1[Host<br/>localhost]
+    D --> D2[Port<br/>5432]
+    D --> D3[Database<br/>postgres 또는 ai_database_book]
+    D --> D4[Username<br/>postgres]
+    D --> D5[Password<br/>설치 시 설정한 비밀번호]
+
+    D1 --> E[Test Connection]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+
+    E --> F{성공?}
+    F -- 예 --> G[Finish]
+    G --> H[Database Navigator에 표시]
+    F -- 아니오 --> I[서비스 / 비밀번호 / 포트 / DB 이름 확인]
