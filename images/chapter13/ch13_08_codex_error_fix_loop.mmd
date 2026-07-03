@@ -1,0 +1,15 @@
+flowchart TB
+    A[SQL file draft] --> B[Run in practice DB]
+    B --> C{Error?}
+    C -->|No| D[Verify results]
+    D --> E[Reviewed SQL]
+
+    C -->|Yes| F[Copy error message]
+    F --> G[Ask Codex to fix]
+    G --> H[Codex modifies SQL]
+    H --> I[Human review]
+    I --> B
+
+    G --> G1[Keep requirements]
+    G --> G2[Explain reason in comments]
+    G --> G3[Do not change unrelated logic]
