@@ -1,0 +1,21 @@
+flowchart TB
+    A[PostgreSQL 실습 환경 선택]
+
+    A --> L[로컬 PostgreSQL]
+    A --> C[클라우드 PostgreSQL]
+
+    L --> L1[내 컴퓨터에 설치]
+    L --> L2[localhost:5432]
+    L --> L3[DBeaver로 직접 연결]
+    L --> L4[인터넷 없이 실습 가능]
+    L --> L5[설치 오류 가능]
+
+    C --> C1[Neon / Supabase]
+    C --> C2[클라우드 접속 URL]
+    C --> C3[DBeaver로 원격 연결]
+    C --> C4[설치 없이 시작 가능]
+    C --> C5[인터넷과 계정 필요]
+
+    L3 --> R[SQL 실행]
+    C3 --> R
+    R --> D[테이블 생성 / 데이터 입력 / 조회]
