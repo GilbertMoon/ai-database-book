@@ -1,0 +1,15 @@
+flowchart TB
+    A[Composite index] --> B[(course_id, status)]
+    A --> C[(status, course_id)]
+
+    D[Query condition] --> E[course_id = 5]
+    D --> F[status = active]
+
+    E --> B
+    F --> B
+
+    B --> G[Good match for course first search]
+    C --> H[Different access order]
+
+    G --> I[Column order matters]
+    H --> I
