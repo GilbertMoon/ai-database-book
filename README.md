@@ -33,7 +33,7 @@
 | Chapter 03 | PostgreSQL과 DBeaver 실습 환경 구축 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | 원고 1차 리뷰 및 보완 완료 |
 | Chapter 05 | 데이터 모델링과 ERD | 원고 1차 리뷰 및 보완 완료 |
-| Chapter 06 | 정규화와 좋은 테이블 설계 | 원고 1차 확장 완료 / 실습 SQL 작성 완료 / 활동 자료 작성 완료 |
+| Chapter 06 | 정규화와 좋은 테이블 설계 | 원고 1차 확장 완료 / 실습 SQL 작성 완료 / 활동 자료 작성 완료 / 도식 후보 정리 완료 / Mermaid 원본 작성 완료 |
 | Chapter 07 | 중간 프로젝트 또는 중간 평가 | 원고 초안 작성 완료 |
 | Chapter 08 | JOIN과 집계 쿼리 | 원고 초안 작성 완료 |
 | Chapter 09 | 트랜잭션과 데이터 정합성 | 원고 초안 작성 완료 |
@@ -63,14 +63,16 @@
 | Chapter 06 원고 확장 | 완료 |
 | Chapter 06 실습 SQL 파일 작성 | 완료 |
 | Chapter 06 활동/실습 자료 작성 | 완료 |
-| Chapter 06 도식 후보 정리 | 예정 |
+| Chapter 06 도식 후보 정리 | 완료 |
+| Chapter 06 Mermaid 도식 원본 작성 | 완료 |
+| Chapter 06 SVG 도식 생성 및 본문 삽입 | 예정 |
 
 ---
 
 ## 다음 작업
 
 ```text
-Chapter 06 도식 후보를 정리하고, images/chapter06/에 사용할 이미지 목록을 설계한다.
+Chapter 06 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 06 본문에 그림 링크와 캡션을 삽입한다.
 ```
 
 ---
