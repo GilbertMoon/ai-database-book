@@ -1,0 +1,10 @@
+flowchart TD
+    A[AI index suggestion] --> B[Check query pattern]
+    B --> C[Check WHERE condition]
+    C --> D[Check JOIN condition]
+    D --> E[Check ORDER BY]
+    E --> F[Check data size]
+    F --> G[Check selectivity]
+    G --> H[Check write cost]
+    H --> I[Run EXPLAIN]
+    I --> J[Apply or hold]
