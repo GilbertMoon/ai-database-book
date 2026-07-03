@@ -1,0 +1,17 @@
+flowchart TB
+    A[Document DB] --> B[JSON-like document]
+
+    B --> C[course_id]
+    B --> D[title]
+    B --> E[tags array]
+    B --> F[instructor object]
+    B --> G[options object]
+
+    F --> F1[name]
+    F --> F2[specialty]
+
+    G --> G1[online]
+    G --> G2[certificate]
+
+    B --> H[Flexible fields]
+    H --> I[Still needs design]
