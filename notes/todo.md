@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 10 인덱스와 성능 기초 원고를 BOOK_STYLE.md 기준에 맞춰 1차 원고로 확장한다.
+Chapter 10 인덱스와 성능 기초 실습 SQL 파일을 작성한다.
 ```
 
 ## 완료된 작업
@@ -20,32 +20,26 @@ Chapter 10 인덱스와 성능 기초 원고를 BOOK_STYLE.md 기준에 맞춰 1
 10. Chapter 06 원고 1차 리뷰 및 보완 완료
 11. Chapter 07 원고 1차 리뷰 및 보완 완료
 12. Chapter 08 원고 1차 리뷰 및 보완 완료
-13. Chapter 09 원고 1차 확장 완료
-14. Chapter 09 실습 SQL 파일 작성 완료
-15. Chapter 09 활동/실습 자료 작성 완료
-16. Chapter 09 도식 후보 정리 완료
-17. Chapter 09 Mermaid 도식 원본 8종 작성 완료
-18. Chapter 09 SVG 도식 8종 생성 완료
-19. Chapter 09 본문에 그림 링크와 캡션 삽입 완료
-20. Chapter 09 리뷰 체크리스트 작성 완료
-21. Chapter 09 리뷰 후 보완 반영 기록 작성 완료
-22. Chapter 09 원고 1차 리뷰 및 보완 완료
+13. Chapter 09 원고 1차 리뷰 및 보완 완료
+14. Chapter 10 원고 1차 확장 완료
 
 ## 우선순위 작업
 
-1. Chapter 10 원고 확장
-2. Chapter 10 실습 SQL 파일 작성
-3. Chapter 10 활동/실습 자료 작성
-4. Chapter 10 도식 후보 정리
-5. Chapter 10 리뷰 체크리스트 작성
+1. Chapter 10 실습 SQL 파일 작성
+2. Chapter 10 활동/실습 자료 작성
+3. Chapter 10 도식 후보 정리
+4. Chapter 10 Mermaid 도식 원본 작성
+5. Chapter 10 SVG 도식 생성
+6. Chapter 10 리뷰 체크리스트 작성
 
 ## Chapter 10 후속 작업 메모
 
 ```text
-- Chapter 10은 조회 속도 저하 상황에서 인덱스가 필요한 이유를 초급자 기준으로 설명한다.
-- WHERE, ORDER BY, JOIN 조건에서 인덱스가 어떻게 활용되는지 다룬다.
-- EXPLAIN 또는 EXPLAIN ANALYZE는 맛보기 수준으로 사용한다.
-- AI가 추천한 인덱스를 무조건 적용하지 않고 실행계획과 쿼리 패턴 기준으로 검토하는 흐름을 포함한다.
+- 실습 SQL은 students, courses, enrollments 구조를 기반으로 작성한다.
+- 인덱스 생성 전후 EXPLAIN 비교를 포함한다.
+- students.email, courses.title, enrollments.student_id, enrollments.course_id, enrollments(course_id, status) 예제를 포함한다.
+- 데이터가 적으면 인덱스가 사용되지 않을 수 있다는 안내를 포함한다.
+- AI가 추천한 인덱스를 쿼리 패턴과 실행 계획 기준으로 검토하는 흐름을 포함한다.
 ```
 
 ## 집필 운영 메모
