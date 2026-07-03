@@ -1,0 +1,23 @@
+flowchart TD
+    A[INSERT INTO students] --> B[컬럼 지정]
+    B --> B1[name]
+    B --> B2[email]
+    B --> B3[major]
+    B --> B4[grade]
+
+    A --> C[VALUES]
+    C --> C1['김민지']
+    C --> C2['minji@example.com']
+    C --> C3['컴퓨터공학']
+    C --> C4[2]
+
+    B1 --> D[새 행 생성]
+    B2 --> D
+    B3 --> D
+    B4 --> D
+    C1 --> D
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> E[(students 테이블에 새 행 추가)]
