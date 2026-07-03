@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 10 인덱스와 성능 기초 실습 SQL 파일을 작성한다.
+Chapter 10 인덱스와 성능 기초 활동/실습 자료를 작성한다.
 ```
 
 ## 완료된 작업
@@ -22,24 +22,25 @@ Chapter 10 인덱스와 성능 기초 실습 SQL 파일을 작성한다.
 12. Chapter 08 원고 1차 리뷰 및 보완 완료
 13. Chapter 09 원고 1차 리뷰 및 보완 완료
 14. Chapter 10 원고 1차 확장 완료
+15. Chapter 10 실습 SQL 파일 작성 완료
+16. Chapter 10 코드 README 작성 완료
 
 ## 우선순위 작업
 
-1. Chapter 10 실습 SQL 파일 작성
-2. Chapter 10 활동/실습 자료 작성
-3. Chapter 10 도식 후보 정리
-4. Chapter 10 Mermaid 도식 원본 작성
-5. Chapter 10 SVG 도식 생성
-6. Chapter 10 리뷰 체크리스트 작성
+1. Chapter 10 활동/실습 자료 작성
+2. Chapter 10 도식 후보 정리
+3. Chapter 10 Mermaid 도식 원본 작성
+4. Chapter 10 SVG 도식 생성
+5. Chapter 10 리뷰 체크리스트 작성
 
 ## Chapter 10 후속 작업 메모
 
 ```text
-- 실습 SQL은 students, courses, enrollments 구조를 기반으로 작성한다.
-- 인덱스 생성 전후 EXPLAIN 비교를 포함한다.
-- students.email, courses.title, enrollments.student_id, enrollments.course_id, enrollments(course_id, status) 예제를 포함한다.
-- 데이터가 적으면 인덱스가 사용되지 않을 수 있다는 안내를 포함한다.
-- AI가 추천한 인덱스를 쿼리 패턴과 실행 계획 기준으로 검토하는 흐름을 포함한다.
+- 활동 자료는 인덱스 생성 전후 EXPLAIN 결과 기록 중심으로 구성한다.
+- Seq Scan, Index Scan, Bitmap Index Scan 의미를 초급자 기준으로 기록하게 한다.
+- students.email, courses.title, enrollments.student_id, enrollments.course_id, enrollments(course_id, status) 실습을 포함한다.
+- 데이터가 적으면 인덱스가 사용되지 않을 수 있다는 해석 질문을 포함한다.
+- AI가 추천한 인덱스를 쿼리 패턴과 실행 계획 기준으로 검토하는 활동을 포함한다.
 ```
 
 ## 집필 운영 메모
