@@ -1,0 +1,14 @@
+flowchart LR
+    A[Role] --> B{Permission change}
+
+    B --> C[GRANT]
+    C --> C1[Add permission]
+    C1 --> C2[Can access table]
+
+    B --> D[REVOKE]
+    D --> D1[Remove permission]
+    D1 --> D2[Access blocked]
+
+    C2 --> E[Check permission]
+    D2 --> E
+    E --> F[has_table_privilege]
