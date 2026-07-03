@@ -1,6 +1,6 @@
 # Chapter 03. PostgreSQL과 DBeaver 실습 환경 구축
 
-> 상태: 원고 1차 확장 완료
+> 상태: 원고 1차 확장 완료 / 도식 삽입 완료
 
 ---
 
@@ -84,6 +84,10 @@ PostgreSQL + DBeaver + GitHub
 | ChatGPT | 개념 설명, 오류 메시지 해석, SQL 검토 보조 |
 | Codex | SQL 파일 생성, 코드 작성, 프로젝트 구조 생성 보조 |
 
+![전체 실습 환경 구조](../../images/chapter03/ch03_01_practice_environment_flow.svg)
+
+그림 3-1 전체 실습 환경 구조
+
 초급 학습자는 모든 도구를 완벽하게 이해할 필요는 없습니다. 이 장에서는 최소한 다음을 할 수 있으면 됩니다.
 
 ```text
@@ -149,6 +153,10 @@ DBeaver는 여러 DBMS를 지원합니다. PostgreSQL뿐 아니라 MySQL, SQLite
 | --- | --- | --- | --- |
 | 로컬 PostgreSQL | 내 컴퓨터에 직접 설치 | 인터넷 없이 실습 가능, 구조 이해에 좋음 | 설치 오류가 생길 수 있음 |
 | 클라우드 PostgreSQL | Neon, Supabase 같은 서비스 사용 | 설치 없이 바로 사용 가능 | 인터넷 필요, 계정 생성 필요 |
+
+![로컬 PostgreSQL과 클라우드 PostgreSQL 비교](../../images/chapter03/ch03_02_local_vs_cloud_db.svg)
+
+그림 3-2 로컬 PostgreSQL과 클라우드 PostgreSQL 비교
 
 이 책의 기본 흐름은 로컬 PostgreSQL입니다. 이유는 DBMS가 내 컴퓨터에서 실제로 어떻게 실행되는지 이해하기 좋기 때문입니다.
 
@@ -293,6 +301,10 @@ DBeaver에서 PostgreSQL 연결을 만드는 기본 흐름은 다음과 같습�
 7. Finish 클릭
 ```
 
+![DBeaver에서 PostgreSQL 연결 흐름](../../images/chapter03/ch03_03_dbeaver_connection_flow.svg)
+
+그림 3-3 DBeaver에서 PostgreSQL 연결 흐름
+
 처음에는 Database 항목에 `postgres`를 입력해도 됩니다. `postgres`는 기본 관리용 데이터베이스입니다.
 
 연결 테스트에 성공하면 DBeaver 왼쪽 Database Navigator에 PostgreSQL 연결이 표시됩니다.
@@ -350,6 +362,10 @@ test!!!
 ## 12. 기본 SQL 실행 테스트
 
 데이터베이스 연결이 끝났다면 간단한 SQL을 실행해 봅니다.
+
+![기본 SQL 실행 확인 흐름](../../images/chapter03/ch03_04_sql_execution_check_flow.svg)
+
+그림 3-4 기본 SQL 실행 확인 흐름
 
 ### 12.1 버전 확인
 
@@ -455,6 +471,10 @@ Chapter 03 실습 파일은 다음 위치에 저장할 수 있습니다.
 code/chapter03/setup_check.sql
 ```
 
+![setup_check.sql 실행 흐름](../../images/chapter03/ch03_05_setup_check_sql_flow.svg)
+
+그림 3-5 setup_check.sql 실행 흐름
+
 파일 내용 예시는 다음과 같습니다.
 
 ```sql
@@ -502,6 +522,10 @@ code/
     └── erd_schema.sql
 ```
 
+![GitHub 실습 파일 관리 구조](../../images/chapter03/ch03_07_github_practice_file_structure.svg)
+
+그림 3-7 GitHub 실습 파일 관리 구조
+
 GitHub를 사용하는 이유는 다음과 같습니다.
 
 ```text
@@ -546,6 +570,12 @@ DB 비밀번호, 접속 URL, API Key는 GitHub에 공개하지 않는다.
 ---
 
 ## 19. 자주 발생하는 오류와 해결 방향
+
+설치와 연결 과정에서 오류가 발생할 수 있습니다. 이때 중요한 것은 오류 메시지를 복사하고, 원인을 분류하고, 확인 순서대로 점검하는 것입니다.
+
+![오류 메시지 해결 흐름](../../images/chapter03/ch03_06_error_troubleshooting_flow.svg)
+
+그림 3-6 오류 메시지 해결 흐름
 
 ### 19.1 DBeaver 연결 실패
 
@@ -614,6 +644,10 @@ PostgreSQL 환경 확인용 SQL을 작성해 주세요.
 포함할 내용은 SELECT version(), SELECT current_database(), students 테이블 생성, 샘플 INSERT, SELECT 조회입니다.
 초급자가 이해할 수 있도록 주석을 포함해 주세요.
 ```
+
+![ChatGPT와 Codex를 활용한 실습 보조 흐름](../../images/chapter03/ch03_08_ai_help_prompt_flow.svg)
+
+그림 3-8 ChatGPT와 Codex를 활용한 실습 보조 흐름
 
 Codex가 파일을 만들면 반드시 직접 확인해야 합니다.
 
