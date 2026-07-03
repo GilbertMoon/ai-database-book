@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-Chapter 15 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 15 본문에 그림 링크와 캡션을 삽입한다.
+Chapter 15 리뷰 체크리스트를 작성하고, 원고 1차 리뷰 및 보완을 진행한다.
 ```
 
 ## 완료된 작업
@@ -32,27 +32,16 @@ Chapter 15 Mermaid 도식 원본을 SVG 이미지로 변환하고, Chapter 15 �
 22. Chapter 15 활동/실습 자료 작성 완료
 23. Chapter 15 도식 후보 정리 완료
 24. Chapter 15 Mermaid 도식 원본 8종 작성 완료
+25. Chapter 15 SVG 도식 8종 생성 완료
+26. Chapter 15 본문에 그림 링크와 캡션 삽입 완료
 
 ## 우선순위 작업
 
-1. Chapter 15 SVG 도식 생성
-2. Chapter 15 본문에 그림 링크와 캡션 삽입
-3. Chapter 15 리뷰 체크리스트 작성
-4. Chapter 15 원고 1차 리뷰 및 보완
-5. publish/full_manuscript.md 통합 준비
-
-## Chapter 15 도식 목록
-
-| 번호 | Mermaid 원본 | 대상 이미지 |
-| --- | --- | --- |
-| 그림 15-1 | `images/chapter15/ch15_01_final_project_flow.mmd` | `ch15_01_final_project_flow.svg` |
-| 그림 15-2 | `images/chapter15/ch15_02_evaluation_modes.mmd` | `ch15_02_evaluation_modes.svg` |
-| 그림 15-3 | `images/chapter15/ch15_03_submission_structure.mmd` | `ch15_03_submission_structure.svg` |
-| 그림 15-4 | `images/chapter15/ch15_04_db_design_validation.mmd` | `ch15_04_db_design_validation.svg` |
-| 그림 15-5 | `images/chapter15/ch15_05_ai_review_loop.mmd` | `ch15_05_ai_review_loop.svg` |
-| 그림 15-6 | `images/chapter15/ch15_06_rubric_breakdown.mmd` | `ch15_06_rubric_breakdown.svg` |
-| 그림 15-7 | `images/chapter15/ch15_07_presentation_flow.mmd` | `ch15_07_presentation_flow.svg` |
-| 그림 15-8 | `images/chapter15/ch15_08_final_checklist.mmd` | `ch15_08_final_checklist.svg` |
+1. Chapter 15 리뷰 체크리스트 작성
+2. Chapter 15 원고 1차 리뷰 및 보완
+3. publish/full_manuscript.md 통합 준비
+4. 통합 원고 1차 점검
+5. 출판 변환 테스트
 
 ## 집필 운영 메모
 
