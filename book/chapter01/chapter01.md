@@ -335,7 +335,7 @@ DBeaver: 테이블 구조와 데이터 확인
 GitHub: SQL, 코드, 문서와 변경 이력 관리
 ```
 
-![AI 시대의 DB 학습 흐름](../../images/chapter01/ch01_03_ai_db_learning_flow.svg)
+![AI 시대의 데이터베이스 작업 흐름](../../images/chapter01/ch01_03_ai_db_learning_flow.svg)
 
 그림 1-4 AI 시대의 데이터베이스 작업 흐름
 
