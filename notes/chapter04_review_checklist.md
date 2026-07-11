@@ -18,7 +18,7 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 
 | 점검 항목 | 상태 | 리뷰 의견 |
 | --- | --- | --- |
-| 학습 목표가 명확한가 | 통과 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY, AI SQL 검토가 제시됨 |
+| 이 장에서 다룰 내용가 명확한가 | 통과 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY, AI SQL 검토가 제시됨 |
 | Chapter 03과 연결되는가 | 통과 | ai_database_book, DBeaver, basic_crud.sql 실습 환경을 이어서 사용함 |
 | SQL 기초 흐름이 단계적인가 | 통과 | 테이블 준비 → 조회 → 추가 → 조건 → 정렬 → 수정 → 삭제 순서가 적절함 |
 | CRUD 개념과 연결되는가 | 통과 | INSERT, SELECT, UPDATE, DELETE를 CRUD 흐름으로 정리함 |
@@ -72,7 +72,7 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 
 | 기준 | 상태 | 리뷰 의견 |
 | --- | --- | --- |
-| 학습 내용 제시 | 통과 | 장 시작부에 학습 항목 제시 |
+| 학습 내용 제시 | 통과 | 장 시작부에 핵심 항목 제시 |
 | 왜 배우는지 설명 | 통과 | SQL을 실행 전 영향 범위 이해와 연결함 |
 | 핵심 개념 설명 | 통과 | SQL 분류, CRUD, 주요 명령어 설명 포함 |
 | 작은 예제 | 통과 | students 테이블 예제 사용 |
@@ -102,7 +102,7 @@ Chapter 04는 SQL 기초 장으로서 1차 원고 사용이 가능하다.
 SELECT, INSERT, WHERE, ORDER BY, UPDATE, DELETE가 단계적으로 설명되어 있고,
 위험한 UPDATE/DELETE를 SELECT 확인 절차와 연결한 점이 좋다.
 
-다만 초급 학습자가 안전 실행 원칙을 쉽게 기억할 수 있도록
+다만 입문 독자가 안전 실행 원칙을 쉽게 기억할 수 있도록
 정리 부분에 “SQL 안전 실행 원칙” 요약 박스를 추가하면 더 안정적이다.
 ```
 

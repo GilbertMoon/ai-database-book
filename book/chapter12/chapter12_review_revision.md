@@ -43,7 +43,7 @@ Chapter 12는 NoSQL 이해와 선택 기준을 처음 접하는 독자에게 설
 | README 진행 상태 갱신 | 완료 | `README.md` |
 | TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
 | Chapter 상태 문구 변경 | 완료 | `book/chapter12/chapter12.md` 상단 |
-| 강의안형 표현 완화 | 완료 | Chapter 12 본문, 실습 자료 |
+| 실용서형 표현 정리 | 완료 | Chapter 12 본문, 실습 자료 |
 | 제출/평가 표현 전환 | 완료 | Chapter 12 실습 자료 18~19장 |
 
 ---

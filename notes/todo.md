@@ -3,7 +3,7 @@
 ## 현재 다음 작업
 
 ```text
-publish/full_manuscript.md 통합 원고를 최신 Chapter 01~15 내용 기준으로 준비한다.
+통합 원고 1차 점검을 진행한다.
 ```
 
 ## 완료된 작업
@@ -27,8 +27,8 @@ publish/full_manuscript.md 통합 원고를 최신 Chapter 01~15 내용 기준�
 17. Chapter 13 원고 1차 리뷰 및 보완 완료
 18. Chapter 14 원고 1차 리뷰 및 보완 완료
 19. Chapter 15 원고 1차 확장 완료
-20. Chapter 15 최종 프로젝트/평가 자료 작성 완료
-21. Chapter 15 제출 템플릿 작성 완료
+20. Chapter 15 실전 프로젝트 안내 자료 작성 완료
+21. Chapter 15 실습 템플릿 작성 완료
 22. Chapter 15 활동/실습 자료 작성 완료
 23. Chapter 15 도식 후보 정리 완료
 24. Chapter 15 Mermaid 도식 원본 8종 작성 완료
@@ -37,14 +37,14 @@ publish/full_manuscript.md 통합 원고를 최신 Chapter 01~15 내용 기준�
 27. Chapter 15 리뷰 체크리스트 작성 완료
 28. Chapter 15 리뷰 후 보완 반영 기록 작성 완료
 29. Chapter 15 원고 1차 리뷰 및 보완 완료
+30. publish/full_manuscript.md 최신 Chapter 01~15 기준 재생성 완료
 
 ## 우선순위 작업
 
-1. publish/full_manuscript.md 통합 준비
-2. 통합 원고 1차 점검
-3. 출판 변환 테스트
-4. README 최종 출판 상태 정리
-5. 전체 Chapter 산출물 누락 점검
+1. 통합 원고 1차 점검
+2. 출판 변환 테스트
+3. README 최종 출판 상태 정리
+4. 전체 Chapter 산출물 누락 점검
 
 ## 집필 운영 메모
 

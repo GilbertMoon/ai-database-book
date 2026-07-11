@@ -127,12 +127,12 @@ code/chapter12/nosql_jsonb_practice.sql
 생성되는 테이블을 확인합니다.
 
 ```text
-course_documents
+content_documents
 key_value_cache_examples
 storage_choice_cases
 ```
 
-`course_documents` 테이블의 구조를 기록합니다.
+`content_documents` 테이블의 구조를 기록합니다.
 
 | 컬럼 | 역할 |
 | --- | --- |
@@ -159,7 +159,7 @@ SELECT
     title,
     metadata ->> 'level' AS level,
     metadata ->> 'online' AS online
-FROM course_documents
+FROM content_documents
 ORDER BY id;
 ```
 
@@ -184,12 +184,12 @@ metadata ->> 'level'에서 ->> 연산자는 어떤 결과를 반환하나요?
 ```sql
 SELECT
     title,
-    metadata -> 'instructor' ->> 'name' AS instructor_name,
-    metadata -> 'instructor' ->> 'specialty' AS instructor_specialty
-FROM course_documents;
+    metadata -> 'creator' ->> 'name' AS creator_name,
+    metadata -> 'creator' ->> 'specialty' AS creator_specialty
+FROM content_documents;
 ```
 
-| title | instructor_name | instructor_specialty |
+| title | creator_name | creator_specialty |
 | --- | --- | --- |
 |  |  |  |
 |  |  |  |
@@ -198,7 +198,7 @@ FROM course_documents;
 ### 생각해 보기
 
 ```text
-중첩 객체를 조회할 때 metadata -> 'instructor' ->> 'name'처럼 단계적으로 접근하는 이유를 설명해 봅니다.
+중첩 객체를 조회할 때 metadata -> 'creator' ->> 'name'처럼 단계적으로 접근하는 이유를 설명해 봅니다.
 ```
 
 ---
@@ -209,7 +209,7 @@ FROM course_documents;
 
 ```sql
 SELECT id, title, metadata -> 'tags' AS tags
-FROM course_documents
+FROM content_documents
 WHERE metadata -> 'tags' ? 'SQL';
 ```
 
@@ -231,7 +231,7 @@ JSON 배열 안에 특정 태그가 포함되어 있는지 검색하는 방식�
 
 ```sql
 SELECT id, title, metadata
-FROM course_documents
+FROM content_documents
 WHERE metadata @> '{"online": true}'::jsonb;
 ```
 
@@ -253,7 +253,7 @@ metadata @> '{"online": true}'::jsonb 조건은 어떤 의미인가요?
 다음 SQL의 의미를 설명해 봅니다.
 
 ```sql
-UPDATE course_documents
+UPDATE content_documents
 SET metadata = jsonb_set(metadata, '{certificate}', 'true'::jsonb)
 WHERE title = '그래프 데이터 이해';
 ```
@@ -278,20 +278,20 @@ WHERE title = '그래프 데이터 이해';
 다음 인덱스의 목적을 설명해 봅니다.
 
 ```sql
-CREATE INDEX IF NOT EXISTS idx_course_documents_metadata_gin
-ON course_documents
+CREATE INDEX IF NOT EXISTS idx_content_documents_metadata_gin
+ON content_documents
 USING GIN (metadata);
 ```
 
 ```sql
-CREATE INDEX IF NOT EXISTS idx_course_documents_level
-ON course_documents ((metadata ->> 'level'));
+CREATE INDEX IF NOT EXISTS idx_content_documents_level
+ON content_documents ((metadata ->> 'level'));
 ```
 
 | 인덱스 | 목적 |
 | --- | --- |
-| idx_course_documents_metadata_gin |  |
-| idx_course_documents_level |  |
+| idx_content_documents_metadata_gin |  |
+| idx_content_documents_level |  |
 
 ### 생각해 보기
 
@@ -307,7 +307,7 @@ ON course_documents ((metadata ->> 'level'));
 
 | cache_key | cache_value 요약 | expired_at |
 | --- | --- | --- |
-| course:popular:top3 |  |  |
+| content:popular:top3 |  |  |
 | user:1001:session |  |  |
 | feature:recommendation:v1 |  |  |
 
@@ -344,7 +344,7 @@ ORDER BY id;
 | --- | --- | --- | --- | --- |
 | 주문/결제 내역 |  |  |  |  |
 | 로그인 세션 |  |  |  |  |
-| 강의 상세 옵션 |  |  |  |  |
+| 콘텐츠 상세 옵션 |  |  |  |  |
 | 사용자 행동 로그 |  |  |  |  |
 | 추천 관계 |  |  |  |  |
 
@@ -357,10 +357,10 @@ ORDER BY id;
 | 데이터 | 선택한 저장 방식 | 이유 | 주의할 점 |
 | --- | --- | --- | --- |
 | 실시간 채팅 메시지 |  |  |  |
-| 강의 댓글 |  |  |  |
+| 콘텐츠 댓글 |  |  |  |
 | 결제 실패 로그 |  |  |  |
-| 사용자별 최근 본 강의 목록 |  |  |  |
-| 강의 간 선수과목 관계 |  |  |  |
+| 사용자별 최근 본 콘텐츠 목록 |  |  |  |
+| 콘텐츠 간 관련 콘텐츠 관계 |  |  |  |
 
 선택 가능한 저장 방식 예시는 다음과 같습니다.
 

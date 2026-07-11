@@ -4,7 +4,7 @@
 
 이 문서는 Chapter 08 본문과 활동 자료에 삽입할 도식 후보를 정리한 이미지 설계 문서입니다.
 
-Chapter 08은 정규화된 여러 테이블을 실제 조회와 통계 결과로 연결하는 장입니다. 따라서 도식은 **JOIN 구조, INNER JOIN과 LEFT JOIN 차이, 여러 테이블 JOIN 경로, GROUP BY와 집계 함수 흐름, HAVING, AI SQL 검토**를 초급자가 직관적으로 이해할 수 있도록 구성합니다.
+Chapter 08은 정규화된 여러 테이블을 실제 조회와 통계 결과로 연결하는 장입니다. 따라서 도식은 **JOIN 구조, INNER JOIN과 LEFT JOIN 차이, 여러 테이블 JOIN 경로, GROUP BY와 집계 함수 흐름, HAVING, AI SQL 검토**를 입문 독자가 직관적으로 이해할 수 있도록 구성합니다.
 
 ---
 

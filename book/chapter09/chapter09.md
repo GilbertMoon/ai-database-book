@@ -111,7 +111,7 @@ ROLLBACK;
 | COMMIT | 변경 내용 확정 | 모든 결과가 정상일 때 |
 | ROLLBACK | 변경 내용 되돌리기 | 오류가 있거나 결과가 잘못되었을 때 |
 
-![COMMIT과 ROLLBACK 비교](../../images/chapter09/ch09_03_commit_rollback_compare.svg)
+![COMMIT과 ROLLBACK 비교](../../images/chapter09/ch09_02_transaction_basic_flow.svg)
 
 그림 9-3 COMMIT과 ROLLBACK 비교
 
@@ -168,7 +168,7 @@ WHERE student_id = 4 AND course_id = 2;
 
 두 SQL이 모두 성공하면 문제가 없어 보입니다. 하지만 첫 번째 SQL만 성공하고 두 번째 SQL이 실패하면 데이터가 불완전하게 남을 수 있습니다.
 
-![트랜잭션 없이 처리할 때의 문제](../../images/chapter09/ch09_04_without_transaction_problem.svg)
+![트랜잭션 없이 처리할 때의 문제](../../images/chapter09/ch09_03_consistency_problem_examples.svg)
 
 그림 9-4 트랜잭션 없이 처리할 때의 문제
 
@@ -236,7 +236,7 @@ ROLLBACK;
 
 `ROLLBACK`을 실행하면 트랜잭션 안에서 변경한 `paid_amount = 999999`는 취소됩니다.
 
-![ROLLBACK으로 되돌리기](../../images/chapter09/ch09_05_rollback_restore.svg)
+![ROLLBACK으로 되돌리기](../../images/chapter09/ch09_06_rollback_before_after.svg)
 
 그림 9-5 ROLLBACK으로 되돌리기
 
@@ -264,7 +264,7 @@ WHERE id = 1;
 - 취소 상태인데 paid_amount가 남아 있다면 환불 여부를 검토해야 한다.
 ```
 
-![데이터 정합성 검증 흐름](../../images/chapter09/ch09_06_consistency_check_flow.svg)
+![데이터 정합성 검증 흐름](../../images/chapter09/ch09_03_consistency_problem_examples.svg)
 
 그림 9-6 데이터 정합성 검증 흐름
 
@@ -299,7 +299,7 @@ WHERE status = '완료' AND paid_amount = 0;
 6. 예상과 맞으면 COMMIT한다.
 ```
 
-![트랜잭션 실습 안전 원칙](../../images/chapter09/ch09_07_transaction_safety_rules.svg)
+![트랜잭션 실습 안전 원칙](../../images/chapter09/ch09_05_enrollment_payment_transaction.svg)
 
 그림 9-7 트랜잭션 실습 안전 원칙
 

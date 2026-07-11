@@ -1,8 +1,8 @@
 flowchart LR
-    A[Student A] -->|enrolled| B[Course X]
-    A -->|follows| C[Student B]
-    C -->|enrolled| D[Course Y]
-    B -->|prerequisite| D
+    A[Member A] -->|used| B[Content X]
+    A -->|follows| C[Member B]
+    C -->|used| D[Content Y]
+    B -->|related| D
     B -->|tagged| E[Database]
     D -->|tagged| F[AI]
 

@@ -3,23 +3,23 @@
 --       데이터 유형별 저장 방식 선택 기준을 연습한다.
 
 -- 중요 주의:
--- 1. 이 파일은 교육용 예제입니다.
+-- 1. 이 파일은 실습용 예제입니다.
 -- 2. 별도 NoSQL 서버를 설치하지 않고 PostgreSQL 안에서 JSONB를 사용합니다.
 -- 3. JSONB는 Document DB를 완전히 대체한다는 의미가 아니라 문서형 데이터 개념을 이해하기 위한 맛보기입니다.
 -- 4. 실제 서비스에서는 데이터 구조, 조회 패턴, 정합성, 운영 난이도를 함께 검토해야 합니다.
 
 -- ============================================================
--- 1. 문서형 데이터 맛보기: course_documents
+-- 1. 문서형 데이터 맛보기: content_documents
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS course_documents (
+CREATE TABLE IF NOT EXISTS content_documents (
     id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     metadata JSONB NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO course_documents (title, metadata)
+INSERT INTO content_documents (title, metadata)
 VALUES
 (
     '데이터베이스 입문',
@@ -28,8 +28,8 @@ VALUES
         "tags": ["SQL", "PostgreSQL", "DB"],
         "online": true,
         "certificate": true,
-        "instructor": {
-            "name": "김교수",
+        "creator": {
+            "name": "김작가",
             "specialty": "Database"
         }
     }'::jsonb
@@ -41,8 +41,8 @@ VALUES
         "tags": ["Python", "Pandas", "AI"],
         "online": true,
         "certificate": true,
-        "instructor": {
-            "name": "이교수",
+        "creator": {
+            "name": "이작가",
             "specialty": "Data Analysis"
         }
     }'::jsonb
@@ -54,8 +54,8 @@ VALUES
         "tags": ["Graph", "Recommendation", "Network"],
         "online": false,
         "certificate": false,
-        "instructor": {
-            "name": "박교수",
+        "creator": {
+            "name": "박작가",
             "specialty": "Graph Data"
         }
     }'::jsonb
@@ -63,7 +63,7 @@ VALUES
 
 -- 전체 문서 조회
 SELECT id, title, metadata
-FROM course_documents
+FROM content_documents
 ORDER BY id;
 
 -- JSONB의 특정 필드 조회
@@ -72,29 +72,29 @@ SELECT
     title,
     metadata ->> 'level' AS level,
     metadata ->> 'online' AS online
-FROM course_documents
+FROM content_documents
 ORDER BY id;
 
 -- 중첩 객체 필드 조회
 SELECT
     title,
-    metadata -> 'instructor' ->> 'name' AS instructor_name,
-    metadata -> 'instructor' ->> 'specialty' AS instructor_specialty
-FROM course_documents;
+    metadata -> 'creator' ->> 'name' AS creator_name,
+    metadata -> 'creator' ->> 'specialty' AS creator_specialty
+FROM content_documents;
 
 -- 특정 조건의 JSONB 필드 조회
 SELECT id, title, metadata ->> 'level' AS level
-FROM course_documents
+FROM content_documents
 WHERE metadata ->> 'level' = 'basic';
 
 -- 배열에 특정 태그가 포함된 문서 조회
 SELECT id, title, metadata -> 'tags' AS tags
-FROM course_documents
+FROM content_documents
 WHERE metadata -> 'tags' ? 'SQL';
 
 -- JSONB 포함 연산자를 사용한 조회
 SELECT id, title, metadata
-FROM course_documents
+FROM content_documents
 WHERE metadata @> '{"online": true}'::jsonb;
 
 -- ============================================================
@@ -102,25 +102,25 @@ WHERE metadata @> '{"online": true}'::jsonb;
 -- ============================================================
 
 -- certificate 값을 true로 변경하는 예시
-UPDATE course_documents
+UPDATE content_documents
 SET metadata = jsonb_set(metadata, '{certificate}', 'true'::jsonb)
 WHERE title = '그래프 데이터 이해';
 
 SELECT
     title,
     metadata ->> 'certificate' AS certificate
-FROM course_documents
+FROM content_documents
 WHERE title = '그래프 데이터 이해';
 
 -- 새 필드 추가 예시
-UPDATE course_documents
+UPDATE content_documents
 SET metadata = jsonb_set(metadata, '{duration_hours}', '24'::jsonb)
 WHERE title = '데이터베이스 입문';
 
 SELECT
     title,
     metadata ->> 'duration_hours' AS duration_hours
-FROM course_documents
+FROM content_documents
 WHERE title = '데이터베이스 입문';
 
 -- ============================================================
@@ -128,23 +128,23 @@ WHERE title = '데이터베이스 입문';
 -- ============================================================
 
 -- JSONB 전체 문서에 대한 GIN 인덱스 예시
-CREATE INDEX IF NOT EXISTS idx_course_documents_metadata_gin
-ON course_documents
+CREATE INDEX IF NOT EXISTS idx_content_documents_metadata_gin
+ON content_documents
 USING GIN (metadata);
 
 -- level 필드에 대한 표현식 인덱스 예시
-CREATE INDEX IF NOT EXISTS idx_course_documents_level
-ON course_documents ((metadata ->> 'level'));
+CREATE INDEX IF NOT EXISTS idx_content_documents_level
+ON content_documents ((metadata ->> 'level'));
 
 -- 실행 계획 확인
 EXPLAIN
 SELECT id, title
-FROM course_documents
+FROM content_documents
 WHERE metadata ->> 'level' = 'basic';
 
 EXPLAIN
 SELECT id, title
-FROM course_documents
+FROM content_documents
 WHERE metadata @> '{"online": true}'::jsonb;
 
 -- 주의:
@@ -164,13 +164,13 @@ CREATE TABLE IF NOT EXISTS key_value_cache_examples (
 INSERT INTO key_value_cache_examples (cache_key, cache_value, expired_at)
 VALUES
 (
-    'course:popular:top3',
-    '{"course_ids": [1, 2, 3], "description": "인기 강의 Top 3"}'::jsonb,
+    'content:popular:top3',
+    '{"content_ids": [1, 2, 3], "description": "인기 콘텐츠 Top 3"}'::jsonb,
     CURRENT_TIMESTAMP + INTERVAL '1 hour'
 ),
 (
     'user:1001:session',
-    '{"user_id": 1001, "login": true, "role": "student"}'::jsonb,
+    '{"user_id": 1001, "login": true, "role": "member"}'::jsonb,
     CURRENT_TIMESTAMP + INTERVAL '30 minutes'
 ),
 (
@@ -185,7 +185,7 @@ SET cache_value = EXCLUDED.cache_value,
 -- 키로 빠르게 조회하는 예시
 SELECT cache_key, cache_value, expired_at
 FROM key_value_cache_examples
-WHERE cache_key = 'course:popular:top3';
+WHERE cache_key = 'content:popular:top3';
 
 -- 만료되지 않은 캐시만 확인
 SELECT cache_key, cache_value, expired_at
@@ -220,9 +220,9 @@ INSERT INTO storage_choice_cases (
 VALUES
 (
     '주문/결제 내역',
-    '학생이 강의를 결제하고 수강신청하는 핵심 거래 데이터',
+    '회원이 콘텐츠를 결제하고 이용신청하는 핵심 거래 데이터',
     'high',
-    '학생별 주문 조회, 결제 상태 변경, 정산 조회',
+    '회원별 주문 조회, 결제 상태 변경, 정산 조회',
     'Relational DB',
     '정합성과 트랜잭션이 중요하므로 관계형 DB가 적합하다.'
 ),
@@ -235,16 +235,16 @@ VALUES
     '키 기반 조회와 만료 처리에 적합하다.'
 ),
 (
-    '강의 상세 옵션',
-    '강의별로 서로 다른 설정값과 태그를 포함하는 데이터',
+    '콘텐츠 상세 옵션',
+    '콘텐츠별로 서로 다른 설정값과 태그를 포함하는 데이터',
     'medium',
-    '강의별 문서 조회, 일부 필드 조건 검색',
+    '콘텐츠별 문서 조회, 일부 필드 조건 검색',
     'Document DB or PostgreSQL JSONB',
     '필드 구조가 유연하므로 문서형 저장이 유리할 수 있다.'
 ),
 (
     '사용자 행동 로그',
-    '페이지 조회, 영상 시청, 퀴즈 제출 등 대량 이벤트 데이터',
+    '페이지 조회, 콘텐츠 재생, 리뷰 작성 등 대량 이벤트 데이터',
     'low',
     '시간대별 대량 저장과 분석',
     'Column-Family DB or Log System',
@@ -252,7 +252,7 @@ VALUES
 ),
 (
     '추천 관계',
-    '학생, 강의, 태그, 수강 이력 사이의 관계 데이터',
+    '회원, 콘텐츠, 태그, 이용 이력 사이의 관계 데이터',
     'medium',
     '관계 탐색과 추천 경로 조회',
     'Graph DB',
@@ -289,7 +289,7 @@ ORDER BY id;
 -- ============================================================
 
 SELECT 'Document DB taste with JSONB' AS practice_topic, COUNT(*) AS row_count
-FROM course_documents
+FROM content_documents
 UNION ALL
 SELECT 'Key-Value concept simulation' AS practice_topic, COUNT(*) AS row_count
 FROM key_value_cache_examples

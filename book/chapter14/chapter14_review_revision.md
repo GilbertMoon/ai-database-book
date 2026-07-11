@@ -43,9 +43,9 @@ Chapter 14는 Vector DB와 RAG의 기본 개념을 처음 접하는 독자에게
 | README 진행 상태 갱신 | 완료 | `README.md` |
 | TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
 | Chapter 상태 문구 변경 | 완료 | `book/chapter14/chapter14.md` 상단 |
-| 강의안형 표현 완화 | 완료 | Chapter 14 본문, 실습 자료 |
-| 제출/평가 표현 전환 | 완료 | Chapter 14 실습 자료 17~18장 |
-| 수업 공지 예시를 서비스 공지 예시로 전환 | 완료 | Chapter 14 본문, 실습 자료 |
+| 실용서형 표현 정리 | 완료 | Chapter 14 본문, 실습 자료 |
+| 프로젝트 점검 표현 전환 | 완료 | Chapter 14 실습 자료 17~18장 |
+| 서비스 공지 예시 정리 | 완료 | Chapter 14 본문, 실습 자료 |
 
 ---
 
@@ -59,7 +59,7 @@ Chapter 14는 Vector DB와 RAG의 기본 개념을 처음 접하는 독자에게
 - SVG 도식이 PDF 변환 시 정상 표시되는가?
 - Word 또는 eBook 변환 시 그림 크기가 적절한가?
 - SQL 코드 블록이 출판물에서 적절히 줄바꿈되는가?
-- 긴 검토표와 루브릭이 PDF/Word 변환 시 가독성을 유지하는가?
+- 긴 검토표와 완성도 점검표가 PDF/Word 변환 시 가독성을 유지하는가?
 - PostgreSQL 환경에서 pgvector 미설치 대체 실습 Section B가 정상 동작하는가?
 - pgvector 설치 환경에서는 Section A가 정상 동작하는가?
 ```
