@@ -23,7 +23,7 @@
 → 다른 사람이 다시 실행할 수 있도록 문서화한다.
 ```
 
-![최종 프로젝트 진행 흐름](../../images/chapter15/ch15_01_final_project_flow.svg)
+![데이터베이스 서비스 프로젝트 진행 흐름](../../images/chapter15/ch15_01_service_project_flow.svg)
 
 그림 15-1 데이터베이스 서비스 완성 흐름
 
@@ -624,7 +624,7 @@ code/chapter15/templates/
 
 ## 16. 완성도를 점검한다
 
-![최종 제출 체크리스트](../../images/chapter15/ch15_08_final_checklist.svg)
+![프로젝트 완성도 체크리스트](../../images/chapter15/ch15_08_completion_checklist.svg)
 
 그림 15-4 프로젝트 완성도 점검
 

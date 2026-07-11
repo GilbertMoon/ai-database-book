@@ -20,7 +20,7 @@
 → AI가 만든 초안과 최종 설계를 비교한다.
 ```
 
-![프로젝트 진행 흐름](../../images/chapter07/ch07_01_midterm_project_flow.svg)
+![프로젝트 진행 흐름](../../images/chapter07/ch07_01_project_flow.svg)
 
 그림 7-1 온라인 강의 데이터베이스 프로젝트 진행 흐름
 
@@ -527,7 +527,7 @@ AI는 요구사항 정리, 테이블 후보 제안, DDL 초안, JOIN 작성, 오
 N:M 관계, 중복 데이터, 삽입·수정·삭제 이상 가능성도 검토해 주세요.
 ```
 
-![AI 활용 및 검토 흐름](../../images/chapter07/ch07_07_ai_review_report_flow.svg)
+![AI 활용 및 검토 흐름](../../images/chapter07/ch07_07_ai_review_flow.svg)
 
 그림 7-7 AI 제안을 실행 가능한 설계로 검증하는 흐름
 
