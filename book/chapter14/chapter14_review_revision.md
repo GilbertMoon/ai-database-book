@@ -1,4 +1,4 @@
-# Chapter 14 리뷰 후 보완 반영 완료
+# Chapter 14 출간용 문체 정리 기록
 
 ## 대상 원고
 
@@ -8,13 +8,13 @@ book/chapter14/chapter14.md
 
 ## 목적
 
-`notes/chapter14_review_checklist.md`의 1차 리뷰 결과를 바탕으로 Chapter 14에 반영한 내용을 기록합니다.
+Chapter 14를 일반 실용서 문체에 맞게 정리한 내용을 기록합니다.
 
 ---
 
 ## 1. 리뷰 결과 요약
 
-Chapter 14는 Vector DB와 RAG의 기본 개념을 초급 학습자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
+Chapter 14는 Vector DB와 RAG의 기본 개념을 처음 접하는 독자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
 
 본문, 실습 SQL, 활동 자료, 도식, RAG 답변 검토 흐름이 다음과 같이 연결되어 있습니다.
 
@@ -43,6 +43,9 @@ Chapter 14는 Vector DB와 RAG의 기본 개념을 초급 학습자에게 설명
 | README 진행 상태 갱신 | 완료 | `README.md` |
 | TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
 | Chapter 상태 문구 변경 | 완료 | `book/chapter14/chapter14.md` 상단 |
+| 강의안형 표현 완화 | 완료 | Chapter 14 본문, 실습 자료 |
+| 제출/평가 표현 전환 | 완료 | Chapter 14 실습 자료 17~18장 |
+| 수업 공지 예시를 서비스 공지 예시로 전환 | 완료 | Chapter 14 본문, 실습 자료 |
 
 ---
 
@@ -77,6 +80,6 @@ Chapter 14는 Vector DB와 RAG의 기본 개념을 초급 학습자에게 설명
 ## 5. 결론
 
 ```text
-Chapter 14는 원고 1차 리뷰 및 보완 완료 상태로 전환되었다.
-다음 작업은 Chapter 15 원고 확장이다.
+Chapter 14는 일반 독자가 혼자 읽고 따라갈 수 있는 실용서형 문체로 1차 정리했다.
+다음 작업은 Chapter 15를 두 번째 실전 프로젝트 장으로 정리하는 것이다.
 ```

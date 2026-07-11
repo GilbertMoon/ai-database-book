@@ -1,4 +1,4 @@
-# Chapter 08 리뷰 후 보완 반영 완료
+# Chapter 08 출간용 문체 정리 기록
 
 ## 대상 원고
 
@@ -8,13 +8,13 @@ book/chapter08/chapter08.md
 
 ## 목적
 
-`notes/chapter08_review_checklist.md`의 1차 리뷰 결과를 바탕으로 Chapter 08에 반영한 내용을 기록합니다.
+Chapter 08을 일반 실용서 문체에 맞게 정리한 내용을 기록합니다.
 
 ---
 
 ## 1. 리뷰 결과 요약
 
-Chapter 08은 JOIN과 집계 쿼리를 초급 학습자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
+Chapter 08은 JOIN과 집계 쿼리를 처음 접하는 독자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
 
 본문, 실습 SQL, 활동 자료, 도식, AI SQL 검토 흐름이 다음과 같이 연결되어 있습니다.
 
@@ -44,6 +44,8 @@ Chapter 08은 JOIN과 집계 쿼리를 초급 학습자에게 설명하기 위�
 | TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
 | 리뷰 체크리스트 작성 | 완료 | `notes/chapter08_review_checklist.md` |
 | Chapter 상태 문구 변경 | 완료 | `book/chapter08/chapter08.md` 상단 |
+| 강의안형 표현 완화 | 완료 | Chapter 08 본문, 실습 자료 |
+| 제출/평가 표현 전환 | 완료 | Chapter 08 실습 자료 18~19장 |
 
 ---
 
@@ -75,6 +77,6 @@ Chapter 08은 JOIN과 집계 쿼리를 초급 학습자에게 설명하기 위�
 ## 5. 결론
 
 ```text
-Chapter 08은 원고 1차 리뷰 및 보완 완료 상태로 전환되었다.
-다음 작업은 Chapter 09 원고 확장이다.
+Chapter 08은 일반 독자가 혼자 읽고 따라갈 수 있는 실용서형 문체로 1차 정리했다.
+다음 작업은 다른 장에도 같은 기준을 적용하는 것이다.
 ```
