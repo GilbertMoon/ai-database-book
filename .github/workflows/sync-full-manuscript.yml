@@ -10,6 +10,7 @@ on:
       - "images/chapter*/**"
       - "scripts/migrate_project_image_assets.py"
       - "scripts/normalize_chapter_headers.py"
+      - "scripts/sync_image_references.py"
       - "scripts/merge_chapters.py"
       - ".github/workflows/sync-full-manuscript.yml"
   workflow_dispatch:
@@ -38,6 +39,9 @@ jobs:
       - name: Normalize chapter headers
         run: python scripts/normalize_chapter_headers.py
 
+      - name: Synchronize image references
+        run: python scripts/sync_image_references.py
+
       - name: Generate full manuscript
         run: python scripts/merge_chapters.py
 
@@ -52,5 +56,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add book code images publish/full_manuscript.md
-          git commit -m "7장과 15장 프로젝트 이미지 자산 및 참조 정리"
+          git commit -m "도서 자산 및 통합 원고 자동 동기화"
           git push
