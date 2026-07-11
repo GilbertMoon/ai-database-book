@@ -1,62 +1,112 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="1220" viewBox="0 0 980 1220">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc">
+  <title id="title">데이터베이스 필요 여부 판단 흐름</title>
+  <desc id="desc">데이터베이스가 필요한지 판단하고, 필요하지 않은 경우 파일과 스프레드시트 중 적절한 방식을 고르는 의사결정 흐름도</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5568"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
     </marker>
     <style>
-      text { font-family: Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; fill:#1a202c; }
-      .title { font-size: 24px; font-weight: 700; }
-      .node { fill:#f7fafc; stroke:#4a5568; stroke-width:2; rx:10; ry:10; }
-      .main { fill:#ebf8ff; stroke:#2b6cb0; }
-      .note { fill:#fffaf0; stroke:#d69e2e; }
-      .label { font-size:18px; text-anchor:middle; dominant-baseline:middle; }
-      .yn { font-size:15px; font-weight:700; fill:#2d3748; }
+      text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+      .title { font-size: 30px; font-weight: 700; fill: #0f2d5c; }
+      .main { fill: #24497a; stroke: #17355c; stroke-width: 2.5; }
+      .main-text { font-size: 23px; font-weight: 700; fill: #ffffff; }
+      .question { fill: #f8fafc; stroke: #64748b; stroke-width: 2; }
+      .question-head { font-size: 19px; font-weight: 700; fill: #1e3a5f; }
+      .question-body { font-size: 15px; }
+      .db-box { fill: #f3effd; stroke: #7c4dcb; stroke-width: 2; }
+      .db-head { font-size: 19px; font-weight: 700; fill: #5b34a2; }
+      .db-text { font-size: 15px; }
+      .sheet-box { fill: #eef5ff; stroke: #3b82f6; stroke-width: 2; }
+      .sheet-head { font-size: 18px; font-weight: 700; fill: #1f5fb8; }
+      .file-box { fill: #eef9f1; stroke: #2f9a58; stroke-width: 2; }
+      .file-head { font-size: 18px; font-weight: 700; fill: #1f7a42; }
+      .hint-box { fill: #fffaf0; stroke: #d69e2e; stroke-width: 2; }
+      .hint-head { font-size: 17px; font-weight: 700; fill: #9a6700; }
+      .label { font-size: 14px; font-weight: 700; fill: #334155; }
+      .message-box { fill: #eef5ff; stroke: #4d86d7; stroke-width: 2.5; }
+      .message-title { font-size: 22px; font-weight: 700; fill: #0f2d5c; }
+      .message-text { font-size: 16px; fill: #222222; }
+      .line { stroke: #475569; stroke-width: 2.2; fill: none; stroke-linecap: round; marker-end: url(#arrow); }
+      .line-noarrow { stroke: #475569; stroke-width: 2.2; fill: none; stroke-linecap: round; }
     </style>
   </defs>
-  <rect width="100%" height="100%" fill="white"/>
-  <text x="490" y="40" class="title" text-anchor="middle">데이터베이스 필요 여부 판단 흐름</text>
 
-  <rect x="300" y="70" width="380" height="60" class="node main"/><text x="490" y="100" class="label">저장할 데이터가 있다</text>
-  <rect x="250" y="180" width="480" height="80" class="node"/><text x="490" y="208" class="label">데이터가 작고</text><text x="490" y="235" class="label">거의 변하지 않는가?</text>
-  <rect x="40" y="320" width="240" height="70" class="node note"/><text x="160" y="355" class="label">파일 / JSON / CSV 검토</text>
-  <rect x="250" y="320" width="480" height="80" class="node"/><text x="490" y="348" class="label">여러 사용자가</text><text x="490" y="375" class="label">동시에 접근하는가?</text>
-  <rect x="250" y="470" width="480" height="80" class="node"/><text x="490" y="498" class="label">데이터 간 관계가</text><text x="490" y="525" class="label">중요한가?</text>
-  <rect x="250" y="620" width="480" height="80" class="node"/><text x="490" y="648" class="label">검색 / 집계가</text><text x="490" y="675" class="label">자주 필요한가?</text>
-  <rect x="250" y="770" width="480" height="80" class="node"/><text x="490" y="798" class="label">정확성 / 복구 / 권한 관리가</text><text x="490" y="825" class="label">중요한가?</text>
-  <rect x="250" y="920" width="480" height="70" class="node main"/><text x="490" y="955" class="label">데이터베이스 필요 가능성 높음</text>
-  <rect x="720" y="770" width="210" height="80" class="node note"/><text x="825" y="798" class="label">파일 / 엑셀로</text><text x="825" y="825" class="label">충분할 수 있음</text>
-  <rect x="160" y="1050" width="250" height="60" class="node"/><text x="285" y="1080" class="label">관계형 DB 우선 검토</text>
-  <rect x="470" y="1050" width="340" height="60" class="node"/><text x="640" y="1080" class="label">의미 기반 검색도 필요한가?</text>
-  <rect x="110" y="1140" width="220" height="50" class="node note"/><text x="220" y="1165" class="label">PostgreSQL</text>
-  <rect x="470" y="1140" width="360" height="50" class="node note"/><text x="650" y="1165" class="label">Vector DB 또는 pgvector 검토</text>
+  <rect width="1200" height="860" fill="#ffffff"/>
+  <text x="600" y="48" text-anchor="middle" class="title">데이터베이스 필요 여부 판단 흐름</text>
 
-  <line x1="490" y1="130" x2="490" y2="180" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="250" y1="220" x2="160" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="210" y="262" class="yn">예</text>
-  <line x1="490" y1="260" x2="490" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="510" y="292" class="yn">아니오</text>
-  <line x1="490" y1="400" x2="490" y2="470" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="510" y="438" class="yn">아니오</text>
-  <line x1="490" y1="550" x2="490" y2="620" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="510" y="588" class="yn">아니오</text>
-  <line x1="490" y1="700" x2="490" y2="770" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="510" y="738" class="yn">아니오</text>
-  <line x1="730" y1="810" x2="720" y2="810" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="690" y="794" class="yn">아니오</text>
-  <line x1="490" y1="850" x2="490" y2="920" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="510" y="888" class="yn">예</text>
+  <rect x="430" y="68" width="340" height="58" rx="14" ry="14" class="main"/>
+  <text x="600" y="105" text-anchor="middle" class="main-text">저장할 데이터가 있다</text>
 
-  <polyline points="730,360 900,360 900,955 730,955" fill="none" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="820" y="345" class="yn">예</text>
-  <polyline points="730,510 860,510 860,955 730,955" fill="none" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="800" y="495" class="yn">예</text>
-  <polyline points="730,660 820,660 820,955 730,955" fill="none" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="780" y="645" class="yn">예</text>
+  <line x1="600" y1="126" x2="600" y2="160" class="line"/>
+  <rect x="80" y="160" width="470" height="170" rx="16" ry="16" class="question"/>
+  <text x="315" y="190" text-anchor="middle" class="question-head">다음 항목 중 하나라도 예인가?</text>
+  <text x="110" y="225" class="question-body">• 여러 사용자가 동시에 접근하는가?</text>
+  <text x="110" y="255" class="question-body">• 데이터 간 관계를 함께 관리해야 하는가?</text>
+  <text x="110" y="285" class="question-body">• 검색, 집계, 조건 조회가 자주 필요한가?</text>
+  <text x="110" y="315" class="question-body">• 정확성, 복구, 권한 관리가 중요한가?</text>
 
-  <line x1="410" y1="990" x2="285" y2="1050" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="570" y1="990" x2="640" y2="1050" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="640" y1="1110" x2="640" y2="1140" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="660" y="1128" class="yn">예</text>
-  <line x1="470" y1="1110" x2="330" y2="1140" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="390" y="1128" class="yn">아니오</text>
+  <line x1="550" y1="245" x2="710" y2="245" class="line"/>
+  <text x="628" y="232" text-anchor="middle" class="label">예</text>
+  <rect x="710" y="170" width="400" height="72" rx="16" ry="16" class="db-box"/>
+  <text x="910" y="200" text-anchor="middle" class="db-head">데이터베이스 우선 검토</text>
+  <text x="910" y="223" text-anchor="middle" class="db-text">하나라도 중요하면 파일보다 DB가 적합할 가능성이 크다.</text>
+
+  <line x1="910" y1="242" x2="910" y2="282" class="line"/>
+  <rect x="710" y="282" width="400" height="72" rx="16" ry="16" class="db-box"/>
+  <text x="910" y="312" text-anchor="middle" class="db-head">관계형 DB 우선 검토</text>
+  <text x="910" y="335" text-anchor="middle" class="db-text">대부분의 업무 데이터는 PostgreSQL 같은 관계형 DB부터 검토한다.</text>
+
+  <line x1="910" y1="354" x2="910" y2="394" class="line"/>
+  <rect x="710" y="394" width="400" height="68" rx="16" ry="16" class="question"/>
+  <text x="910" y="423" text-anchor="middle" class="question-head">의미 기반 검색도 필요한가?</text>
+  <text x="910" y="445" text-anchor="middle" class="question-body">예: 유사 문서 탐색, 임베딩 검색, RAG</text>
+
+  <line x1="830" y1="462" x2="830" y2="510" class="line"/>
+  <text x="808" y="490" text-anchor="middle" class="label">아니오</text>
+  <rect x="680" y="510" width="300" height="92" rx="16" ry="16" class="db-box"/>
+  <text x="830" y="543" text-anchor="middle" class="db-head">관계형 DB 중심으로 시작</text>
+  <text x="830" y="569" text-anchor="middle" class="db-text">예: PostgreSQL, MySQL</text>
+  <text x="830" y="589" text-anchor="middle" class="db-text">트랜잭션, 관계, 정합성 관리에 적합</text>
+
+  <line x1="990" y1="462" x2="990" y2="510" class="line"/>
+  <text x="1012" y="490" text-anchor="middle" class="label">예</text>
+  <rect x="1000" y="510" width="150" height="92" rx="16" ry="16" class="db-box"/>
+  <text x="1075" y="540" text-anchor="middle" class="db-head" style="font-size:17px;">추가 확장 검토</text>
+  <text x="1075" y="567" text-anchor="middle" class="db-text">PostgreSQL + pgvector</text>
+  <text x="1075" y="587" text-anchor="middle" class="db-text">또는 Vector DB</text>
+
+  <line x1="315" y1="330" x2="315" y2="374" class="line"/>
+  <text x="338" y="356" text-anchor="middle" class="label">아니오</text>
+  <rect x="80" y="374" width="470" height="72" rx="16" ry="16" class="hint-box"/>
+  <text x="315" y="404" text-anchor="middle" class="hint-head">DB 필요성은 상대적으로 낮음</text>
+  <text x="315" y="427" text-anchor="middle" class="question-body">작고 단순한 데이터라면 파일이나 스프레드시트부터 검토한다.</text>
+
+  <line x1="315" y1="446" x2="315" y2="492" class="line"/>
+  <rect x="80" y="492" width="470" height="72" rx="16" ry="16" class="question"/>
+  <text x="315" y="521" text-anchor="middle" class="question-head">주로 사람이 표 형태로 직접 관리하는가?</text>
+  <text x="315" y="544" text-anchor="middle" class="question-body">명단, 공유 목록, 수기 입력 표라면 스프레드시트가 편리하다.</text>
+
+  <line x1="315" y1="564" x2="315" y2="604" class="line-noarrow"/>
+  <line x1="155" y1="604" x2="475" y2="604" class="line-noarrow"/>
+  <line x1="155" y1="604" x2="155" y2="624" class="line"/>
+  <line x1="475" y1="604" x2="475" y2="624" class="line"/>
+  <text x="130" y="592" text-anchor="middle" class="label">아니오</text>
+  <text x="500" y="592" text-anchor="middle" class="label">예</text>
+
+  <rect x="40" y="624" width="230" height="108" rx="16" ry="16" class="file-box"/>
+  <text x="155" y="656" text-anchor="middle" class="file-head">파일 검토</text>
+  <text x="155" y="682" text-anchor="middle" class="question-body">텍스트, JSON, CSV</text>
+  <text x="155" y="705" text-anchor="middle" class="question-body">설정값, 데이터 교환,</text>
+  <text x="155" y="724" text-anchor="middle" class="question-body">개인 메모에 적합</text>
+
+  <rect x="360" y="624" width="230" height="108" rx="16" ry="16" class="sheet-box"/>
+  <text x="475" y="656" text-anchor="middle" class="sheet-head">스프레드시트 검토</text>
+  <text x="475" y="682" text-anchor="middle" class="question-body">엑셀, 구글 스프레드시트</text>
+  <text x="475" y="705" text-anchor="middle" class="question-body">소규모 명단, 공유 목록,</text>
+  <text x="475" y="724" text-anchor="middle" class="question-body">표 형태 관리에 적합</text>
+
+  <rect x="70" y="764" width="1060" height="72" rx="18" ry="18" class="message-box"/>
+  <text x="600" y="791" text-anchor="middle" class="message-title">핵심 메시지</text>
+  <text x="600" y="814" text-anchor="middle" class="message-text">여러 사용자, 관계, 검색, 정확성이 중요하면 데이터베이스를 우선 검토한다.</text>
+  <text x="600" y="833" text-anchor="middle" class="message-text">그 외의 작고 단순한 데이터는 파일이나 스프레드시트로 시작할 수 있다.</text>
 </svg>
