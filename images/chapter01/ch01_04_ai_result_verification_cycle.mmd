@@ -1,18 +1,27 @@
 flowchart TD
-    A[AI에게 요청] --> B[AI 결과 생성]
-    B --> C[사람이 요구사항과 비교]
-    C --> D{문제 있음?}
-    D -- 예 --> E[문제점 기록]
-    E --> F[프롬프트 또는 설계 수정]
-    F --> A
-    D -- 아니오 --> G[PostgreSQL에서 실행]
-    G --> H[DBeaver로 결과 확인]
-    H --> I{실행/결과 문제?}
-    I -- 예 --> E
-    I -- 아니오 --> J[GitHub에 기록]
-    J --> K[원고/실습 자료에 반영]
+    A[요구사항 정리 후 AI에게 요청] --> B[AI 초안 생성<br/>ERD·테이블·SQL]
+    B --> C[사람이 요구사항과 설계 기준으로 검토]
+    C --> D[PostgreSQL 실행·DBeaver 확인]
+    D --> E{문제가 있는가?}
 
-    C --> C1[PK/FK 검토]
-    C --> C2[중복/정규화 검토]
-    C --> C3[보안/위험 SQL 검토]
-    C --> C4[확장성 검토]
+    C -. 검토 체크리스트 .-> C1[요구사항·PK/FK·중복·위험 SQL 확인]
+    D -. 실행 체크리스트 .-> C1
+
+    E -- 예 --> F[문제 기록]
+    F --> G[프롬프트 또는 설계 수정]
+    G --> A
+
+    E -- 아니오 --> H[검증 완료]
+    H --> I[GitHub에 결과와 수정 이유 기록]
+
+    classDef step fill:#f8fafc,stroke:#64748b,stroke-width:2px;
+    classDef review fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef decision fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
+    classDef fix fill:#fff7e6,stroke:#d97706,stroke-width:2px;
+    classDef done fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+
+    class A,B step;
+    class C,D,C1 review;
+    class E decision;
+    class F,G fix;
+    class H,I done;

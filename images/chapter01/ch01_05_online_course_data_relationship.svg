@@ -1,83 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">온라인 강의 서비스 데이터 관계</title>
+  <desc id="desc">회원, 강사, 강의, 수강신청, 결제 테이블의 기본키와 외래키, 그리고 1:N 및 1:0..1 관계를 보여 주는 ER 관계 도식</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5568"/>
-    </marker>
     <style>
-      text { font-family: Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; fill:#1a202c; }
-      .title { font-size: 24px; font-weight: 700; }
-      .entity { fill:#f7fafc; stroke:#4a5568; stroke-width:2; rx:8; ry:8; }
-      .head { fill:#ebf8ff; stroke:#2b6cb0; stroke-width:2; rx:8; ry:8; }
-      .name { font-size:18px; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
+      text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill:#1f2937; }
+      .title { font-size:30px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
+      .entity { fill:#f8fafc; stroke:#475569; stroke-width:2; }
+      .entity-head { fill:#e9f2fe; stroke:#3174d0; stroke-width:2; }
+      .entity-title { font-size:19px; font-weight:700; text-anchor:middle; }
+      .entity-sub { font-size:13.5px; font-weight:700; text-anchor:middle; fill:#475569; }
       .field { font-size:15px; }
-      .rel { font-size:15px; text-anchor:middle; }
-      .cap { fill:#edf2f7; stroke:#718096; stroke-width:2; rx:10; ry:10; }
+      .pk { font-size:15px; font-weight:700; fill:#1f5fb8; }
+      .fk { font-size:15px; fill:#7c4dcb; }
+      .rel-line { stroke:#475569; stroke-width:2.2; fill:none; stroke-linecap:round; }
+      .rel-label { font-size:14.5px; font-weight:700; text-anchor:middle; fill:#334155; }
+      .card { font-size:16px; font-weight:700; text-anchor:middle; fill:#0f2d5c; }
+      .note { fill:#eef5ff; stroke:#4d86d7; stroke-width:2.3; }
+      .note-title { font-size:21px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
+      .note-text { font-size:16px; text-anchor:middle; }
+      .legend { fill:#ffffff; stroke:#94a3b8; stroke-width:1.6; }
+      .legend-text { font-size:14px; }
     </style>
   </defs>
-  <rect width="100%" height="100%" fill="white"/>
-  <text x="700" y="38" class="title" text-anchor="middle">온라인 강의 서비스 데이터 관계</text>
 
-  <g>
-    <rect x="80" y="160" width="240" height="150" class="entity"/>
-    <rect x="80" y="160" width="240" height="44" class="head"/>
-    <text x="200" y="182" class="name">STUDENT</text>
-    <text x="100" y="230" class="field">student_id (PK)</text>
-    <text x="100" y="258" class="field">name</text>
-    <text x="100" y="286" class="field">email</text>
-  </g>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <text x="600" y="46" class="title">온라인 강의 서비스 데이터 관계</text>
 
-  <g>
-    <rect x="560" y="90" width="250" height="150" class="entity"/>
-    <rect x="560" y="90" width="250" height="44" class="head"/>
-    <text x="685" y="112" class="name">INSTRUCTOR</text>
-    <text x="580" y="160" class="field">instructor_id (PK)</text>
-    <text x="580" y="188" class="field">name</text>
-    <text x="580" y="216" class="field">email</text>
-  </g>
+  <rect x="78" y="90" width="254" height="154" rx="12" ry="12" class="entity"/>
+  <rect x="78" y="90" width="254" height="48" rx="12" ry="12" class="entity-head"/>
+  <text x="205" y="113" class="entity-title">회원</text>
+  <text x="205" y="132" class="entity-sub">MEMBER</text>
+  <text x="102" y="166" class="pk">member_id (PK)</text>
+  <text x="102" y="194" class="field">name</text>
+  <text x="102" y="222" class="field">email</text>
 
-  <g>
-    <rect x="540" y="330" width="290" height="180" class="entity"/>
-    <rect x="540" y="330" width="290" height="44" class="head"/>
-    <text x="685" y="352" class="name">COURSE</text>
-    <text x="560" y="400" class="field">course_id (PK)</text>
-    <text x="560" y="428" class="field">instructor_id (FK)</text>
-    <text x="560" y="456" class="field">title</text>
-    <text x="560" y="484" class="field">price</text>
-  </g>
+  <rect x="474" y="90" width="254" height="154" rx="12" ry="12" class="entity"/>
+  <rect x="474" y="90" width="254" height="48" rx="12" ry="12" class="entity-head"/>
+  <text x="601" y="113" class="entity-title">강사</text>
+  <text x="601" y="132" class="entity-sub">INSTRUCTOR</text>
+  <text x="498" y="166" class="pk">instructor_id (PK)</text>
+  <text x="498" y="194" class="field">name</text>
+  <text x="498" y="222" class="field">email</text>
 
-  <g>
-    <rect x="120" y="520" width="320" height="200" class="entity"/>
-    <rect x="120" y="520" width="320" height="44" class="head"/>
-    <text x="280" y="542" class="name">ENROLLMENT</text>
-    <text x="140" y="590" class="field">enrollment_id (PK)</text>
-    <text x="140" y="618" class="field">student_id (FK)</text>
-    <text x="140" y="646" class="field">course_id (FK)</text>
-    <text x="140" y="674" class="field">enrolled_at</text>
-    <text x="140" y="702" class="field">status</text>
-  </g>
+  <rect x="474" y="330" width="254" height="184" rx="12" ry="12" class="entity"/>
+  <rect x="474" y="330" width="254" height="48" rx="12" ry="12" class="entity-head"/>
+  <text x="601" y="353" class="entity-title">강의</text>
+  <text x="601" y="372" class="entity-sub">COURSE</text>
+  <text x="498" y="406" class="pk">course_id (PK)</text>
+  <text x="498" y="434" class="fk">instructor_id (FK)</text>
+  <text x="498" y="462" class="field">title</text>
+  <text x="498" y="490" class="field">price</text>
 
-  <g>
-    <rect x="980" y="520" width="280" height="180" class="entity"/>
-    <rect x="980" y="520" width="280" height="44" class="head"/>
-    <text x="1120" y="542" class="name">PAYMENT</text>
-    <text x="1000" y="590" class="field">payment_id (PK)</text>
-    <text x="1000" y="618" class="field">enrollment_id (FK)</text>
-    <text x="1000" y="646" class="field">amount</text>
-    <text x="1000" y="674" class="field">payment_status</text>
-  </g>
+  <rect x="78" y="560" width="284" height="194" rx="12" ry="12" class="entity"/>
+  <rect x="78" y="560" width="284" height="48" rx="12" ry="12" class="entity-head"/>
+  <text x="220" y="583" class="entity-title">수강신청</text>
+  <text x="220" y="602" class="entity-sub">ENROLLMENT</text>
+  <text x="102" y="636" class="pk">enrollment_id (PK)</text>
+  <text x="102" y="664" class="fk">member_id (FK)</text>
+  <text x="102" y="692" class="fk">course_id (FK)</text>
+  <text x="102" y="720" class="field">enrolled_at, status</text>
 
-  <line x1="320" y1="240" x2="540" y2="590" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="450" y="370" class="rel">학생 1 : N 수강신청</text>
+  <rect x="860" y="560" width="264" height="176" rx="12" ry="12" class="entity"/>
+  <rect x="860" y="560" width="264" height="48" rx="12" ry="12" class="entity-head"/>
+  <text x="992" y="583" class="entity-title">결제</text>
+  <text x="992" y="602" class="entity-sub">PAYMENT</text>
+  <text x="884" y="636" class="pk">payment_id (PK)</text>
+  <text x="884" y="664" class="fk">enrollment_id (FK)</text>
+  <text x="884" y="692" class="field">amount</text>
+  <text x="884" y="720" class="field">payment_status</text>
 
-  <line x1="685" y1="240" x2="685" y2="330" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="760" y="285" class="rel">강사 1 : N 강의</text>
+  <line x1="601" y1="244" x2="601" y2="330" class="rel-line"/>
+  <text x="581" y="270" class="card">1</text>
+  <text x="581" y="316" class="card">N</text>
+  <text x="706" y="292" class="rel-label">강사가 여러 강의를 담당</text>
 
-  <line x1="540" y1="510" x2="440" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="470" y="535" class="rel">강의 1 : N 수강신청</text>
+  <path d="M205 244 V470 H220 V560" class="rel-line"/>
+  <text x="185" y="270" class="card">1</text>
+  <text x="200" y="546" class="card">N</text>
+  <text x="338" y="466" class="rel-label">회원이 여러 수강신청을 가짐</text>
 
-  <line x1="440" y1="620" x2="980" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="710" y="595" class="rel">수강신청 1 : 0..1 결제</text>
+  <path d="M474 422 H420 V532 H300 V560" class="rel-line"/>
+  <text x="450" y="414" class="card">1</text>
+  <text x="316" y="548" class="card">N</text>
+  <text x="442" y="548" class="rel-label">강의별 수강신청</text>
 
-  <rect x="90" y="770" width="1220" height="60" class="cap"/>
-  <text x="700" y="800" class="rel" style="font-size:17px;">핵심 구조: 학생과 강의는 N:M 관계이므로 ENROLLMENT가 필요하며, 결제 정보는 PAYMENT로 분리해 정합성과 확장성을 높인다.</text>
+  <line x1="362" y1="657" x2="860" y2="657" class="rel-line"/>
+  <text x="392" y="647" class="card">1</text>
+  <text x="830" y="647" class="card">0..1</text>
+  <text x="611" y="636" class="rel-label">수강신청 하나에 결제는 없거나 하나</text>
+
+  <rect x="820" y="110" width="280" height="98" rx="12" ry="12" class="legend"/>
+  <text x="846" y="142" class="pk">PK</text>
+  <text x="884" y="142" class="legend-text">행을 구분하는 기본키</text>
+  <text x="846" y="174" class="fk">FK</text>
+  <text x="884" y="174" class="legend-text">다른 테이블을 참조하는 외래키</text>
+
+  <rect x="90" y="772" width="1020" height="34" rx="16" ry="16" class="note"/>
+  <text x="250" y="794" class="note-title">핵심 구조</text>
+  <text x="682" y="793" class="note-text">회원과 강의는 수강신청을 통해 N:M 관계를 만들고, 결제는 수강신청에 연결한다.</text>
 </svg>

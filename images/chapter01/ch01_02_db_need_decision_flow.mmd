@@ -19,5 +19,5 @@ flowchart TD
     J --> K[PostgreSQL]
 
     H --> L{의미 기반 검색이 필요한가?}
-    L -- 예 --> M[Vector DB 또는 pgvector 검토]
+    L -- 예 --> M[PostgreSQL + pgvector 또는 Vector DB 추가 확장]
     L -- 아니오 --> K

@@ -1,36 +1,92 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">저장 방식 선택 매트릭스</title>
+  <desc id="desc">데이터 복잡성과 운영 범위를 기준으로 파일, 스프레드시트, 관계형 DB를 비교하고 특수 목적 저장소는 별도 조건으로 검토하는 매트릭스</desc>
   <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
     <style>
-      text { font-family: Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; fill:#1a202c; }
-      .title { font-size:24px; font-weight:700; }
-      .quad { fill:none; stroke:#4a5568; stroke-width:2; }
-      .label { font-size:18px; text-anchor:middle; }
-      .small { font-size:15px; }
-      .tag1 { fill:#fefcbf; stroke:#d69e2e; stroke-width:2; rx:10; ry:10; }
-      .tag2 { fill:#ebf8ff; stroke:#2b6cb0; stroke-width:2; rx:10; ry:10; }
-      .tag3 { fill:#f0fff4; stroke:#38a169; stroke-width:2; rx:10; ry:10; }
-      .tag4 { fill:#faf5ff; stroke:#805ad5; stroke-width:2; rx:10; ry:10; }
+      text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill:#1f2937; }
+      .title { font-size:30px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
+      .grid { fill:#ffffff; stroke:#475569; stroke-width:2; }
+      .axis { stroke:#475569; stroke-width:2.2; fill:none; marker-end:url(#arrow); }
+      .axis-line { stroke:#94a3b8; stroke-width:1.8; }
+      .axis-label { font-size:17px; font-weight:700; text-anchor:middle; fill:#334155; }
+      .quad-title { font-size:18px; font-weight:700; text-anchor:middle; }
+      .quad-body { font-size:14.5px; text-anchor:middle; }
+      .q-file { fill:#f0fff4; stroke:#2f9a58; stroke-width:2; }
+      .q-sheet { fill:#eef5ff; stroke:#3b82f6; stroke-width:2; }
+      .q-db { fill:#f5f0ff; stroke:#7c4dcb; stroke-width:2; }
+      .q-db2 { fill:#fff7e6; stroke:#d97706; stroke-width:2; }
+      .dot { fill:#2b6cb0; stroke:#ffffff; stroke-width:2; }
+      .dot-label { font-size:14.5px; fill:#1f2937; }
+      .assist { fill:#ffffff; stroke:#94a3b8; stroke-width:1.8; }
+      .assist-title { font-size:17px; font-weight:700; fill:#475569; text-anchor:middle; }
+      .assist-text { font-size:14.5px; text-anchor:start; fill:#334155; }
+      .message { fill:#eef5ff; stroke:#4d86d7; stroke-width:2.4; }
+      .message-title { font-size:21px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
+      .message-text { font-size:16px; text-anchor:middle; }
     </style>
   </defs>
-  <rect width="100%" height="100%" fill="white"/>
-  <text x="600" y="40" class="title" text-anchor="middle">저장 방식 선택 매트릭스</text>
 
-  <rect x="180" y="120" width="860" height="620" class="quad"/>
-  <line x1="610" y1="120" x2="610" y2="740" class="quad" stroke="#a0aec0"/>
-  <line x1="180" y1="430" x2="1040" y2="430" class="quad" stroke="#a0aec0"/>
+  <rect width="1200" height="900" fill="#ffffff"/>
+  <text x="600" y="46" class="title">저장 방식 선택 매트릭스</text>
 
-  <rect x="220" y="160" width="230" height="54" class="tag1"/><text x="335" y="193" class="label">파일 / 엑셀 우선</text>
-  <rect x="660" y="160" width="250" height="54" class="tag2"/><text x="785" y="193" class="label">관계형 DB 검토</text>
-  <rect x="220" y="650" width="280" height="54" class="tag3"/><text x="360" y="683" class="label">파일 / JSON / CSV 적합</text>
-  <rect x="640" y="650" width="330" height="54" class="tag4"/><text x="805" y="683" class="label">DB 또는 클라우드 저장소 검토</text>
+  <rect x="170" y="110" width="800" height="560" class="grid"/>
+  <line x1="570" y1="110" x2="570" y2="670" class="axis-line"/>
+  <line x1="170" y1="390" x2="970" y2="390" class="axis-line"/>
 
-  <text x="610" y="800" class="label">단순한 데이터  →  복잡한 관계 데이터</text>
-  <text x="85" y="420" transform="rotate(-90 85 420)" class="label">개인 / 소규모 사용  →  다중 사용자 / 서비스 운영</text>
+  <line x1="170" y1="704" x2="970" y2="704" class="axis"/>
+  <text x="210" y="735" class="axis-label">단순한 데이터</text>
+  <text x="920" y="735" class="axis-label">복잡한 관계 데이터</text>
 
-  <circle cx="300" cy="650" r="7" fill="#2b6cb0"/><text x="316" y="645" class="small">개인 메모</text>
-  <circle cx="360" cy="600" r="7" fill="#2b6cb0"/><text x="376" y="595" class="small">카페 메뉴</text>
-  <circle cx="430" cy="500" r="7" fill="#2b6cb0"/><text x="446" y="495" class="small">학생 명단</text>
-  <circle cx="790" cy="300" r="7" fill="#2b6cb0"/><text x="806" y="295" class="small">온라인 강의 수강신청</text>
-  <circle cx="900" cy="250" r="7" fill="#2b6cb0"/><text x="916" y="245" class="small">쇼핑몰 주문·결제·재고</text>
-  <circle cx="760" cy="380" r="7" fill="#2b6cb0"/><text x="776" y="375" class="small">문서 의미 검색</text>
+  <line x1="124" y1="670" x2="124" y2="110" class="axis"/>
+  <text x="78" y="640" class="axis-label" transform="rotate(-90 78 640)">개인·소규모</text>
+  <text x="78" y="170" class="axis-label" transform="rotate(-90 78 170)">다중 사용자·서비스 운영</text>
+
+  <rect x="220" y="470" width="300" height="92" rx="14" ry="14" class="q-file"/>
+  <text x="370" y="500" class="quad-title" fill="#1f7a42">파일 / JSON / CSV</text>
+  <text x="370" y="526" class="quad-body">개인 메모, 설정값,</text>
+  <text x="370" y="548" class="quad-body">작은 데이터 교환</text>
+
+  <rect x="220" y="150" width="310" height="94" rx="14" ry="14" class="q-sheet"/>
+  <text x="375" y="181" class="quad-title" fill="#1f5fb8">스프레드시트</text>
+  <text x="375" y="207" class="quad-body">소규모 명단, 공유 목록,</text>
+  <text x="375" y="229" class="quad-body">사람이 관리하는 표</text>
+
+  <rect x="640" y="470" width="300" height="92" rx="14" ry="14" class="q-db"/>
+  <text x="790" y="500" class="quad-title" fill="#5b34a2">관계형 DB 검토</text>
+  <text x="790" y="526" class="quad-body">개인 앱이라도 관계와</text>
+  <text x="790" y="548" class="quad-body">무결성이 중요할 때</text>
+
+  <rect x="640" y="150" width="300" height="94" rx="14" ry="14" class="q-db2"/>
+  <text x="790" y="181" class="quad-title" fill="#9a6700">관계형 DB 우선</text>
+  <text x="790" y="207" class="quad-body">수강신청, 주문, 결제처럼</text>
+  <text x="790" y="229" class="quad-body">관계가 많은 서비스</text>
+
+  <circle cx="300" cy="622" r="8" class="dot"/>
+  <text x="318" y="627" class="dot-label">개인 메모</text>
+  <circle cx="382" cy="596" r="8" class="dot"/>
+  <text x="400" y="601" class="dot-label">카페 메뉴</text>
+  <circle cx="412" cy="340" r="8" class="dot"/>
+  <text x="430" y="345" class="dot-label">학생 명단</text>
+  <circle cx="760" cy="312" r="8" class="dot"/>
+  <text x="778" y="317" class="dot-label">온라인 강의 수강신청</text>
+  <circle cx="838" cy="272" r="8" class="dot"/>
+  <text x="856" y="277" class="dot-label">쇼핑몰 주문·결제·재고</text>
+  <circle cx="720" cy="616" r="8" class="dot"/>
+  <text x="738" y="621" class="dot-label">개인 프로젝트 데이터</text>
+
+  <rect x="1000" y="270" width="170" height="246" rx="14" ry="14" class="assist"/>
+  <text x="1085" y="302" class="assist-title">추가 요구 조건</text>
+  <text x="1020" y="338" class="assist-text">• 세션·만료·초고속</text>
+  <text x="1034" y="360" class="assist-text">키 조회가 중요하면</text>
+  <text x="1034" y="382" class="assist-text">Key-Value DB 검토</text>
+  <text x="1020" y="424" class="assist-text">• 의미 기반 검색이</text>
+  <text x="1034" y="446" class="assist-text">필요하면 Vector 기능</text>
+  <text x="1034" y="468" class="assist-text">또는 Vector DB 추가</text>
+
+  <rect x="100" y="792" width="1000" height="70" rx="18" ry="18" class="message"/>
+  <text x="600" y="820" class="message-title">핵심 메시지</text>
+  <text x="600" y="846" class="message-text">기본 선택은 데이터 복잡성과 운영 범위로 판단하고, 특수 목적 저장소는 별도 요구 조건으로 추가 검토한다.</text>
 </svg>

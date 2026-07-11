@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
   <title id="title">데이터 저장 방식의 선택지</title>
-  <desc id="desc">파일, 스프레드시트, 데이터베이스를 비교하고 데이터베이스를 관계형 DB, NoSQL, Vector DB로 세분화한 도식</desc>
+  <desc id="desc">파일, 스프레드시트, 데이터베이스를 비교하고 데이터베이스를 관계형 DB, NoSQL, Vector 기능 또는 Vector DB로 세분화한 도식</desc>
   <defs>
     <style>
       text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
@@ -24,7 +24,8 @@
       .pill-sheet { fill: #eef5ff; stroke: #86afea; stroke-width: 1.5; }
       .pill-db { fill: #f5f1fe; stroke: #b7a1e4; stroke-width: 1.5; }
       .pill-text { font-size: 14px; font-weight: 600; }
-      .small { font-size: 12px; }
+      .pill-text-small { font-size: 13px; font-weight: 600; }
+      .small { font-size: 14px; }
       .body-start { font-size: 15px; dominant-baseline: middle; }
       .subhead { font-size: 16px; font-weight: 700; fill: #422776; }
       .message-box { fill: #eef5ff; stroke: #4d86d7; stroke-width: 2.5; }
@@ -119,8 +120,9 @@
   <text x="1090" y="349" text-anchor="middle" class="subhead">Vector DB</text>
   <rect x="1005" y="382" rx="14" ry="14" width="170" height="118" class="panel-db section-fill"/>
   <text x="1090" y="411" text-anchor="middle" class="section-title-db">예시</text>
-  <rect x="1026" y="428" rx="10" ry="10" width="128" height="34" class="pill-db"/>
-  <text x="1090" y="450" text-anchor="middle" class="pill-text">pgvector</text>
+  <rect x="1017" y="424" rx="10" ry="10" width="146" height="42" class="pill-db"/>
+  <text x="1090" y="441" text-anchor="middle" class="pill-text-small">PostgreSQL</text>
+  <text x="1090" y="458" text-anchor="middle" class="pill-text-small">+ pgvector</text>
   <rect x="1026" y="468" rx="10" ry="10" width="128" height="34" class="pill-db"/>
   <text x="1090" y="490" text-anchor="middle" class="pill-text">Chroma</text>
   <rect x="1005" y="518" rx="14" ry="14" width="170" height="76" class="panel-db section-fill"/>

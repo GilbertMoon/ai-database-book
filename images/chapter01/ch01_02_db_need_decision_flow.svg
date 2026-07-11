@@ -102,11 +102,11 @@
   <text x="780" y="709" text-anchor="middle" class="db-text">예: PostgreSQL, MySQL</text>
   <text x="780" y="732" text-anchor="middle" class="db-text">트랜잭션, 관계, 정합성 관리에 적합</text>
 
-  <rect x="980" y="650" width="180" height="112" rx="16" ry="16" class="db-box"/>
-  <text x="1070" y="682" text-anchor="middle" class="db-head" style="font-size:18px;">추가 확장 검토</text>
-  <text x="1070" y="709" text-anchor="middle" class="db-text">PostgreSQL +</text>
-  <text x="1070" y="732" text-anchor="middle" class="db-text">pgvector</text>
-  <text x="1070" y="751" text-anchor="middle" class="db-text">또는 Vector DB</text>
+  <rect x="960" y="650" width="200" height="112" rx="16" ry="16" class="db-box"/>
+  <text x="1060" y="682" text-anchor="middle" class="db-head" style="font-size:18px;">추가 확장 검토</text>
+  <text x="1060" y="709" text-anchor="middle" class="db-text">PostgreSQL + pgvector</text>
+  <text x="1060" y="732" text-anchor="middle" class="db-text">또는 Vector DB</text>
+  <text x="1060" y="751" text-anchor="middle" class="db-text">의미 검색용 추가 기능</text>
 
   <rect x="70" y="798" width="1060" height="84" rx="18" ry="18" class="message-box"/>
   <text x="600" y="827" text-anchor="middle" class="message-title">핵심 메시지</text>

@@ -1,11 +1,11 @@
 erDiagram
-    STUDENT ||--o{ ENROLLMENT : applies
+    MEMBER ||--o{ ENROLLMENT : makes
     COURSE ||--o{ ENROLLMENT : has
     INSTRUCTOR ||--o{ COURSE : teaches
     ENROLLMENT ||--o| PAYMENT : may_have
 
-    STUDENT {
-        int student_id PK
+    MEMBER {
+        int member_id PK
         string name
         string email
     }
@@ -25,7 +25,7 @@ erDiagram
 
     ENROLLMENT {
         int enrollment_id PK
-        int student_id FK
+        int member_id FK
         int course_id FK
         date enrolled_at
         string status
