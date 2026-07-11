@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "book/chapter*/chapter*.md"
+      - "scripts/normalize_chapter_headers.py"
       - "scripts/merge_chapters.py"
       - ".github/workflows/sync-full-manuscript.yml"
   workflow_dispatch:
@@ -28,19 +29,22 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Normalize chapter headers
+        run: python scripts/normalize_chapter_headers.py
+
       - name: Generate full manuscript
         run: python scripts/merge_chapters.py
 
-      - name: Commit generated manuscript
+      - name: Commit normalized chapters and manuscript
         shell: bash
         run: |
-          if git diff --quiet -- publish/full_manuscript.md; then
-            echo "full_manuscript.md is already up to date."
+          if git diff --quiet -- book publish/full_manuscript.md; then
+            echo "Chapter headers and full_manuscript.md are already up to date."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add publish/full_manuscript.md
-          git commit -m "1~15장 최신 원고로 통합 원고 재생성"
+          git add book publish/full_manuscript.md
+          git commit -m "장 머리말 형식 통일 및 통합 원고 재생성"
           git push
