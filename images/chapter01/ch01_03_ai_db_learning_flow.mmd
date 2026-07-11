@@ -5,17 +5,21 @@ flowchart TD
     D --> E[SQL 실행·구조와 데이터 확인<br/>PostgreSQL·DBeaver]
     E --> F[요구사항과 실행 결과 비교<br/>사람 검토]
     F --> G{문제가 있는가?}
-    G -- 예 --> H[요구사항·ERD·SQL 수정]
-    H --> B
+    G -- 예 --> H[관련 단계 수정 후 재검증<br/>요구사항·ERD·SQL·실행 중 원인 단계]
     G -- 아니오 --> I[검증 완료·변경 이력 기록<br/>GitHub]
 
-    classDef ai fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    H --> A
+    H --> C
+    H --> D
+    H --> E
+
+    classDef step fill:#f8fafc,stroke:#64748b,stroke-width:2px;
     classDef execute fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
     classDef human fill:#f3effd,stroke:#7c4dcb,stroke-width:2px;
     classDef decision fill:#fffaf0,stroke:#d69e2e,stroke-width:2px;
     classDef complete fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
 
-    class B,D ai;
+    class A,B,C,D step;
     class E execute;
     class F human;
     class G,H decision;
