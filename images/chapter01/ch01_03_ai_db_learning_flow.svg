@@ -1,143 +1,135 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="960" viewBox="0 0 1200 960" role="img" aria-labelledby="title desc">
   <title id="title">AI 시대의 데이터베이스 작업 흐름</title>
-  <desc id="desc">요구사항 확인부터 AI 보조 설계, SQL 생성, PostgreSQL 실행, 사람 검토, 수정과 GitHub 기록까지 이어지는 작업 흐름</desc>
+  <desc id="desc">요구사항 확인, 핵심 규칙 정리, 데이터 모델 설계, DDL과 SQL 초안 작성, PostgreSQL 실행과 DBeaver 확인, 사람 검토, 재검증과 GitHub 기록으로 이어지는 데이터베이스 작업 흐름</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
     </marker>
     <style>
       text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill:#1f2937; }
-      .title { font-size:30px; font-weight:700; fill:#0f2d5c; }
+      .canvas { fill:#ffffff; }
+      .title { font-size:30px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
       .step { fill:#f8fafc; stroke:#64748b; stroke-width:2; }
       .execute { fill:#eef5ff; stroke:#3b82f6; stroke-width:2; }
-      .human { fill:#f3effd; stroke:#7c4dcb; stroke-width:2; }
-      .decision { fill:#fffaf0; stroke:#d69e2e; stroke-width:2; }
-      .fix { fill:#fff7e8; stroke:#d69e2e; stroke-width:2; }
+      .human { fill:#f5f0ff; stroke:#7c4dcb; stroke-width:2; }
+      .decision { fill:#fff7e6; stroke:#d97706; stroke-width:2; }
+      .fix { fill:#fff7e6; stroke:#d97706; stroke-width:2; }
       .complete { fill:#eef9f1; stroke:#2f9a58; stroke-width:2; }
-      .loop-note { fill:#ffffff; stroke:#94a3b8; stroke-width:1.8; }
+      .message { fill:#eef5ff; stroke:#4d86d7; stroke-width:2.4; }
+      .number { fill:#24497a; }
+      .number-text { font-size:14px; font-weight:700; fill:#ffffff; text-anchor:middle; dominant-baseline:middle; }
       .head { font-size:19px; font-weight:700; text-anchor:middle; }
       .head-blue { font-size:19px; font-weight:700; text-anchor:middle; fill:#1f5fb8; }
       .head-purple { font-size:19px; font-weight:700; text-anchor:middle; fill:#5b34a2; }
       .head-orange { font-size:19px; font-weight:700; text-anchor:middle; fill:#9a6700; }
       .head-green { font-size:19px; font-weight:700; text-anchor:middle; fill:#1f7a42; }
-      .body { font-size:15px; text-anchor:middle; }
+      .body { font-size:15.5px; text-anchor:middle; }
+      .body-left { font-size:15px; text-anchor:start; }
+      .small { font-size:14px; text-anchor:middle; fill:#475569; }
+      .label { font-size:14px; font-weight:700; fill:#334155; text-anchor:middle; }
+      .message-title { font-size:21px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
+      .message-text { font-size:16px; text-anchor:middle; }
       .badge-ai { fill:#e7fbf6; stroke:#1aa382; stroke-width:1.4; }
       .badge-code { fill:#eef0ff; stroke:#5b6fc7; stroke-width:1.4; }
       .badge-tool { fill:#e5f0ff; stroke:#3b82f6; stroke-width:1.4; }
       .badge-git { fill:#e7f7eb; stroke:#2f9a58; stroke-width:1.4; }
-      .badge-text-ai { font-size:13px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#15725c; }
-      .badge-text-code { font-size:13px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#4856a6; }
-      .badge-text-tool { font-size:13px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#1f5fb8; }
-      .badge-text-git { font-size:13px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#1f7a42; }
+      .badge-text-ai { font-size:13.5px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#15725c; }
+      .badge-text-code { font-size:13.5px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#4856a6; }
+      .badge-text-tool { font-size:13.5px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#1f5fb8; }
+      .badge-text-git { font-size:13.5px; font-weight:700; text-anchor:middle; dominant-baseline:middle; fill:#1f7a42; }
       .line { stroke:#475569; stroke-width:2.2; fill:none; stroke-linecap:round; marker-end:url(#arrow); }
-      .line-noarrow { stroke:#475569; stroke-width:2.2; fill:none; stroke-linecap:round; }
-      .guide { stroke:#94a3b8; stroke-width:1.7; fill:none; stroke-linecap:round; }
-      .label { font-size:14px; font-weight:700; fill:#334155; }
-      .message { fill:#eef5ff; stroke:#4d86d7; stroke-width:2.5; }
-      .message-title { font-size:21px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
-      .message-text { font-size:16px; text-anchor:middle; }
-      .step-no { fill:#24497a; }
-      .step-no-text { font-size:14px; font-weight:700; fill:white; text-anchor:middle; dominant-baseline:middle; }
-      .small-note-title { font-size:15px; font-weight:700; text-anchor:middle; fill:#475569; }
-      .small-note { font-size:13px; text-anchor:start; fill:#475569; }
+      .line-plain { stroke:#475569; stroke-width:2.2; fill:none; stroke-linecap:round; }
+      .loop { stroke:#d97706; stroke-width:2.1; fill:none; stroke-linecap:round; stroke-dasharray:7 5; marker-end:url(#arrow); }
     </style>
   </defs>
 
-  <rect width="1200" height="960" fill="#ffffff"/>
-  <text x="600" y="46" class="title" text-anchor="middle">AI 시대의 데이터베이스 작업 흐름</text>
+  <rect width="1200" height="960" class="canvas"/>
+  <text x="600" y="46" class="title">AI 시대의 데이터베이스 작업 흐름</text>
 
   <rect x="330" y="76" width="540" height="68" rx="14" ry="14" class="step"/>
-  <circle cx="360" cy="110" r="18" class="step-no"/>
-  <text x="360" y="111" class="step-no-text">1</text>
+  <circle cx="360" cy="110" r="18" class="number"/>
+  <text x="360" y="111" class="number-text">1</text>
   <text x="600" y="103" class="head">요구사항 확인</text>
   <text x="600" y="128" class="body">사용자, 업무 목적, 저장할 데이터와 규칙을 먼저 파악한다.</text>
 
-  <line x1="600" y1="144" x2="600" y2="172" class="line"/>
+  <line x1="600" y1="144" x2="600" y2="166" class="line"/>
 
-  <rect x="330" y="172" width="540" height="68" rx="14" ry="14" class="step"/>
-  <circle cx="360" cy="206" r="18" class="step-no"/>
-  <text x="360" y="207" class="step-no-text">2</text>
-  <text x="560" y="199" class="head">핵심 규칙 정리</text>
-  <text x="560" y="224" class="body">설명을 목록으로 정리하되 누락과 오해는 사람이 확인한다.</text>
-  <rect x="736" y="185" width="110" height="30" rx="15" ry="15" class="badge-ai"/>
-  <text x="791" y="201" class="badge-text-ai">ChatGPT 보조</text>
+  <rect x="330" y="166" width="540" height="76" rx="14" ry="14" class="step"/>
+  <circle cx="360" cy="204" r="18" class="number"/>
+  <text x="360" y="205" class="number-text">2</text>
+  <text x="600" y="194" class="head">핵심 규칙 정리</text>
+  <text x="600" y="220" class="body">설명을 목록으로 정리하고 누락과 오해를 확인한다.</text>
+  <rect x="726" y="179" width="120" height="30" rx="15" ry="15" class="badge-ai"/>
+  <text x="786" y="195" class="badge-text-ai">ChatGPT 보조</text>
 
-  <line x1="600" y1="240" x2="600" y2="268" class="line"/>
+  <line x1="600" y1="242" x2="600" y2="264" class="line"/>
 
-  <rect x="330" y="268" width="540" height="74" rx="14" ry="14" class="step"/>
-  <circle cx="360" cy="305" r="18" class="step-no"/>
-  <text x="360" y="306" class="step-no-text">3</text>
-  <text x="600" y="297" class="head">데이터 모델 설계</text>
-  <text x="600" y="323" class="body">테이블 후보, 속성, 관계, ERD와 업무 규칙을 함께 설계한다.</text>
+  <rect x="330" y="264" width="540" height="72" rx="14" ry="14" class="step"/>
+  <circle cx="360" cy="300" r="18" class="number"/>
+  <text x="360" y="301" class="number-text">3</text>
+  <text x="600" y="292" class="head">데이터 모델 설계</text>
+  <text x="600" y="318" class="body">테이블 후보, 속성, 관계, ERD와 업무 규칙을 함께 설계한다.</text>
 
-  <line x1="600" y1="342" x2="600" y2="370" class="line"/>
+  <line x1="600" y1="336" x2="600" y2="358" class="line"/>
 
-  <rect x="330" y="370" width="540" height="68" rx="14" ry="14" class="step"/>
-  <circle cx="360" cy="404" r="18" class="step-no"/>
-  <text x="360" y="405" class="step-no-text">4</text>
-  <text x="555" y="397" class="head">DDL · SQL 초안 생성</text>
-  <text x="555" y="422" class="body">설계 내용을 실행 가능한 PostgreSQL 문장으로 바꾼다.</text>
-  <rect x="752" y="383" width="94" height="30" rx="15" ry="15" class="badge-code"/>
-  <text x="799" y="399" class="badge-text-code">Codex 보조</text>
+  <rect x="330" y="358" width="540" height="76" rx="14" ry="14" class="step"/>
+  <circle cx="360" cy="396" r="18" class="number"/>
+  <text x="360" y="397" class="number-text">4</text>
+  <text x="590" y="386" class="head">DDL과 SQL 초안</text>
+  <text x="590" y="412" class="body">설계 내용을 실행 가능한 PostgreSQL 문장으로 바꾼다.</text>
+  <rect x="748" y="371" width="98" height="30" rx="15" ry="15" class="badge-code"/>
+  <text x="797" y="387" class="badge-text-code">Codex 보조</text>
 
-  <line x1="600" y1="438" x2="600" y2="466" class="line"/>
+  <line x1="600" y1="434" x2="600" y2="456" class="line"/>
 
-  <rect x="330" y="466" width="540" height="76" rx="14" ry="14" class="execute"/>
-  <circle cx="360" cy="504" r="18" class="step-no"/>
-  <text x="360" y="505" class="step-no-text">5</text>
-  <text x="545" y="494" class="head-blue">SQL 실행 · 구조와 데이터 확인</text>
-  <text x="545" y="521" class="body">오류 메시지, 테이블 구조, 샘플 데이터와 조회 결과까지 확인한다.</text>
-  <rect x="690" y="480" width="156" height="30" rx="15" ry="15" class="badge-tool"/>
-  <text x="768" y="496" class="badge-text-tool">PostgreSQL · DBeaver</text>
+  <rect x="330" y="456" width="540" height="82" rx="14" ry="14" class="execute"/>
+  <circle cx="360" cy="497" r="18" class="number"/>
+  <text x="360" y="498" class="number-text">5</text>
+  <text x="522" y="486" class="head-blue">SQL 실행 · 구조와 데이터 확인</text>
+  <text x="600" y="513" class="body">PostgreSQL에서 실행하고</text>
+  <text x="600" y="533" class="body">DBeaver로 구조와 데이터를 확인한다.</text>
+  <rect x="682" y="468" width="164" height="30" rx="15" ry="15" class="badge-tool"/>
+  <text x="764" y="484" class="badge-text-tool">PostgreSQL · DBeaver</text>
 
-  <line x1="600" y1="542" x2="600" y2="570" class="line"/>
+  <line x1="600" y1="538" x2="600" y2="560" class="line"/>
 
-  <rect x="330" y="570" width="540" height="74" rx="14" ry="14" class="human"/>
-  <circle cx="360" cy="607" r="18" class="step-no"/>
-  <text x="360" y="608" class="step-no-text">6</text>
-  <text x="600" y="598" class="head-purple">요구사항과 실행 결과 비교</text>
-  <text x="600" y="624" class="body">관계, 제약조건, 정합성, 보안과 위험한 SQL을 사람이 검토한다.</text>
+  <rect x="330" y="560" width="540" height="76" rx="14" ry="14" class="human"/>
+  <circle cx="360" cy="598" r="18" class="number"/>
+  <text x="360" y="599" class="number-text">6</text>
+  <text x="600" y="590" class="head-purple">요구사항과 실행 결과 비교</text>
+  <text x="600" y="616" class="body">누락, 오류, 실행 실패 또는 위험 요소를 사람이 검토한다.</text>
 
-  <line x1="600" y1="644" x2="600" y2="672" class="line"/>
+  <line x1="600" y1="636" x2="600" y2="650" class="line"/>
 
-  <rect x="430" y="672" width="340" height="70" rx="16" ry="16" class="decision"/>
-  <text x="600" y="701" class="head-orange">문제가 있는가?</text>
-  <text x="600" y="727" class="body">누락, 오류, 실행 실패 또는 위험 요소를 확인한다.</text>
+  <rect x="430" y="650" width="340" height="72" rx="16" ry="16" class="decision"/>
+  <text x="600" y="680" class="head-orange">문제가 있는가?</text>
+  <text x="600" y="706" class="body">검토 결과를 기준으로 수정 여부를 판단한다.</text>
 
-  <line x1="600" y1="742" x2="600" y2="766" class="line-noarrow"/>
-  <line x1="320" y1="766" x2="880" y2="766" class="line-noarrow"/>
-  <line x1="320" y1="766" x2="320" y2="792" class="line"/>
-  <line x1="880" y1="766" x2="880" y2="792" class="line"/>
-  <text x="292" y="754" class="label">예</text>
-  <text x="902" y="754" class="label">아니오</text>
+  <line x1="600" y1="722" x2="600" y2="744" class="line-plain"/>
+  <line x1="308" y1="744" x2="892" y2="744" class="line-plain"/>
+  <line x1="308" y1="744" x2="308" y2="768" class="line"/>
+  <line x1="892" y1="744" x2="892" y2="768" class="line"/>
+  <text x="278" y="738" class="label">예</text>
+  <text x="922" y="738" class="label">아니오</text>
 
-  <rect x="80" y="792" width="470" height="84" rx="16" ry="16" class="fix"/>
-  <text x="315" y="824" class="head-orange">관련 단계 수정 후 재검증</text>
-  <text x="315" y="851" class="body">요구사항, ERD, SQL, 실행 단계 중 문제 원인에 해당하는 단계로 돌아간다.</text>
+  <rect x="70" y="768" width="476" height="106" rx="16" ry="16" class="fix"/>
+  <text x="308" y="798" class="head-orange">문제 원인 확인 → 관련 단계 수정</text>
+  <text x="102" y="827" class="body-left">요구사항이 모호함 → 1단계</text>
+  <text x="102" y="849" class="body-left">모델·관계 문제 → 3단계 / DDL·SQL 문제 → 4단계</text>
+  <text x="102" y="871" class="body-left">실행 오류 또는 결과 이상 → 5단계부터 다시 실행</text>
 
-  <rect x="650" y="792" width="470" height="84" rx="16" ry="16" class="complete"/>
-  <text x="850" y="824" class="head-green">검증 완료 · 변경 이력 기록</text>
-  <text x="850" y="851" class="body">실행 결과와 수정 이유를 저장해 다른 사람이 재현할 수 있게 한다.</text>
-  <rect x="993" y="806" width="86" height="30" rx="15" ry="15" class="badge-git"/>
-  <text x="1036" y="822" class="badge-text-git">GitHub 기록</text>
+  <rect x="654" y="768" width="476" height="106" rx="16" ry="16" class="complete"/>
+  <text x="865" y="800" class="head-green">검증 완료 · 변경 이력 기록</text>
+  <text x="865" y="829" class="body">실행 결과와 수정 이유를 저장해</text>
+  <text x="865" y="852" class="body">다른 사람이 재현할 수 있게 한다.</text>
+  <rect x="1005" y="786" width="90" height="30" rx="15" ry="15" class="badge-git"/>
+  <text x="1050" y="802" class="badge-text-git">GitHub 기록</text>
 
-  <rect x="30" y="164" width="220" height="260" rx="14" ry="14" class="loop-note"/>
-  <text x="140" y="192" class="small-note-title">수정 시 되돌아갈 수 있는 단계</text>
-  <text x="54" y="228" class="small-note">• 1 요구사항 자체가 모호함</text>
-  <text x="54" y="260" class="small-note">• 3 ERD / 관계 설계 문제</text>
-  <text x="54" y="292" class="small-note">• 4 DDL / SQL 초안 문제</text>
-  <text x="54" y="324" class="small-note">• 5 실행 오류 또는 결과 이상</text>
-  <text x="54" y="370" class="small-note">문제 원인을 찾은 뒤 해당 단계부터</text>
-  <text x="54" y="394" class="small-note">같은 흐름으로 다시 검증한다.</text>
+  <path d="M70 821 H42 V598 H330" class="loop"/>
+  <text x="186" y="586" class="label">수정한 단계부터 재검증 후 검토로 합류</text>
 
-  <path d="M80 834 H34 V110 H330" class="line"/>
-  <text x="42" y="814" class="label">재검증 루프</text>
-  <line x1="250" y1="230" x2="330" y2="110" class="guide"/>
-  <line x1="250" y1="262" x2="330" y2="305" class="guide"/>
-  <line x1="250" y1="294" x2="330" y2="404" class="guide"/>
-  <line x1="250" y1="326" x2="330" y2="504" class="guide"/>
-
-  <rect x="70" y="900" width="1060" height="54" rx="16" ry="16" class="message"/>
-  <text x="600" y="922" class="message-title">핵심 원칙</text>
-  <text x="600" y="943" class="message-text">AI는 초안을 빠르게 만들지만, 요구사항 판단과 실행 결과 검증은 사람이 책임진다.</text>
+  <rect x="100" y="890" width="1000" height="48" rx="16" ry="16" class="message"/>
+  <text x="315" y="920" class="message-title">핵심 원칙</text>
+  <text x="704" y="909" class="message-text">AI는 초안을 빠르게 만들지만,</text>
+  <text x="704" y="930" class="message-text">요구사항 판단과 실행 결과 검증은 사람이 책임진다.</text>
 </svg>
