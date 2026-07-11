@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "book/chapter*/chapter*.md"
+      - "code/chapter*/**"
+      - "images/chapter*/**"
+      - "scripts/migrate_project_image_assets.py"
       - "scripts/normalize_chapter_headers.py"
       - "scripts/merge_chapters.py"
       - ".github/workflows/sync-full-manuscript.yml"
@@ -29,22 +32,25 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Migrate project image assets
+        run: python scripts/migrate_project_image_assets.py
+
       - name: Normalize chapter headers
         run: python scripts/normalize_chapter_headers.py
 
       - name: Generate full manuscript
         run: python scripts/merge_chapters.py
 
-      - name: Commit normalized chapters and manuscript
+      - name: Commit synchronized book assets
         shell: bash
         run: |
-          if git diff --quiet -- book publish/full_manuscript.md; then
-            echo "Chapter headers and full_manuscript.md are already up to date."
+          if git diff --quiet -- book code images publish/full_manuscript.md; then
+            echo "Book assets and full manuscript are already up to date."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add book publish/full_manuscript.md
-          git commit -m "장 머리말 형식 통일 및 통합 원고 재생성"
+          git add book code images publish/full_manuscript.md
+          git commit -m "7장과 15장 프로젝트 이미지 자산 및 참조 정리"
           git push
