@@ -1,16 +1,22 @@
-flowchart LR
-    A[요구사항 읽기] --> B[ChatGPT로 요구사항 정리]
-    B --> C[테이블 후보 도출]
-    C --> D[ERD 초안 작성]
-    D --> E[Codex로 DDL/SQL 초안 생성]
-    E --> F[PostgreSQL에서 실행]
-    F --> G[DBeaver로 결과 확인]
-    G --> H{문제 발견?}
-    H -- 예 --> I[설계/SQL 수정]
-    I --> F
-    H -- 아니오 --> J[GitHub에 기록]
-    J --> K[다음 실습으로 확장]
+flowchart TD
+    A[요구사항 확인<br/>사용자·업무 목적·데이터·규칙] --> B[핵심 규칙 정리<br/>ChatGPT 보조]
+    B --> C[데이터 모델 설계<br/>테이블 후보·속성·관계·ERD·업무 규칙]
+    C --> D[DDL·SQL 초안 생성<br/>Codex 보조]
+    D --> E[SQL 실행·구조와 데이터 확인<br/>PostgreSQL·DBeaver]
+    E --> F[요구사항과 실행 결과 비교<br/>사람 검토]
+    F --> G{문제가 있는가?}
+    G -- 예 --> H[요구사항·ERD·SQL 수정]
+    H --> B
+    G -- 아니오 --> I[검증 완료·변경 이력 기록<br/>GitHub]
 
-    B -. 보조 .-> B1[개념 설명]
-    E -. 보조 .-> E1[코드 생성]
-    G -. 확인 .-> G1[테이블/데이터/결과]
+    classDef ai fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    classDef execute fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef human fill:#f3effd,stroke:#7c4dcb,stroke-width:2px;
+    classDef decision fill:#fffaf0,stroke:#d69e2e,stroke-width:2px;
+    classDef complete fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+
+    class B,D ai;
+    class E execute;
+    class F human;
+    class G,H decision;
+    class I complete;
