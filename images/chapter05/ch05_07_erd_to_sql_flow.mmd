@@ -1,13 +1,6 @@
-flowchart TD
-    A[ERD<br/>members 1 - N loans N - 1 books]
-    B[요소 변환<br/>엔터티·속성·PK·FK·필수값·고유값]
-    C[생성 순서<br/>members → books → loans]
-    D[PostgreSQL 테이블 생성]
-    E[샘플 데이터와 JOIN으로 검증]
-    F{요구사항을 표현하는가?}
-    G[설계 초안 채택]
-    H[ERD 또는 SQL 수정]
-
-    A --> B --> C --> D --> E --> F
-    F -- 예 --> G
-    F -- 아니요 --> H --> A
+flowchart LR
+    A[ERD<br/>members 1 ─ N loans N ─ 1 books]
+    B[요소 변환<br/>엔터티 → CREATE TABLE<br/>속성 → 컬럼 + 타입<br/>PK → PRIMARY KEY<br/>관계 → FOREIGN KEY]
+    C[생성 순서<br/>1. members<br/>2. books<br/>3. loans]
+    D[샘플 데이터와 JOIN으로 검증]
+    A --> B --> C --> D
