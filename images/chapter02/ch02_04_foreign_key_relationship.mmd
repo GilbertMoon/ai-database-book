@@ -1,23 +1,31 @@
-erDiagram
-    STUDENTS ||--o{ ENROLLMENTS : referenced_by
-    COURSES ||--o{ ENROLLMENTS : referenced_by
+flowchart TB
+    subgraph DATA[1. 기본 데이터와 기본키]
+        S[students<br/>id PK | name<br/>1 | 김민지<br/>2 | 이준호]
+        C[courses<br/>id PK | title<br/>10 | 데이터베이스 입문<br/>20 | 파이썬 기초]
+    end
 
-    STUDENTS {
-        int id PK
-        string name
-        string email
-    }
+    subgraph BRIDGE[2. 수강신청 연결 테이블]
+        E[enrollments<br/>id PK | student_id FK | course_id FK | status | enrolled_at<br/>1 | 1 | 10 | active | 2026-07-01<br/>2 | 1 | 20 | active | 2026-07-02<br/>3 | 2 | 10 | active | 2026-07-03]
+    end
 
-    COURSES {
-        int id PK
-        string title
-        int price
-    }
+    S -->|students.id 1:N enrollments.student_id| E
+    C -->|courses.id 1:N enrollments.course_id| E
 
-    ENROLLMENTS {
-        int id PK
-        int student_id FK
-        int course_id FK
-        string status
-        date enrolled_at
-    }
+    E --> R1[행 1 해석<br/>student_id 1 → 김민지<br/>course_id 10 → 데이터베이스 입문]
+    E --> R2[학생 N:M 강의 관계를<br/>students 1:N enrollments N:1 courses로 해소]
+    E --> R3[관계 자체의 속성 저장<br/>신청일·상태·성적 등]
+
+    subgraph CHECK[3. 참조 무결성 검사]
+        I1[student_id=2, course_id=10<br/>두 PK가 모두 존재] --> A[INSERT 허용]
+        I2[student_id=99<br/>students.id에 없음] --> X1[FK 위반으로 거부]
+        I3[course_id=999<br/>courses.id에 없음] --> X2[FK 위반으로 거부]
+    end
+
+    S --> I1
+    C --> I1
+    S --> I2
+    C --> I3
+
+    N1[PK와 FK<br/>PK는 자기 테이블의 행을 식별하고<br/>FK는 다른 테이블의 PK 또는 UNIQUE 값을 참조] --- E
+    N2[주의<br/>FK는 중복 수강신청을 막지 않음<br/>필요하면 UNIQUE(student_id, course_id)를 별도로 정의] --- E
+    N3[삭제 규칙<br/>부모 행 삭제 시 RESTRICT·CASCADE·SET NULL 등은<br/>ON DELETE 옵션으로 별도 설계] --- E
