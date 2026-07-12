@@ -1,10 +1,38 @@
 flowchart TB
-    A[project 폴더] --> B[README.md]
-    A --> C[requirements.md]
-    A --> D[erd.md 또는 erd.png]
-    A --> E[schema.sql]
-    A --> F[seed.sql]
-    A --> G[queries.sql]
-    A --> H[ai_review.md]
-    A --> I[project_notes.md]
-    A --> J[screenshots]
+    A[project/ 루트<br/>한 저장소 안에서 설계·SQL·검토 근거 관리]
+
+    A --> R[README.md<br/>문제·환경·준비 조건·실행 순서·예상 결과]
+    A --> REQ[requirements.md<br/>사용자·기능·데이터·업무 규칙·제외 범위]
+    A --> ERD[erd.md 또는 erd.png<br/>테이블·컬럼·관계·카디널리티]
+    A --> SC[schema.sql<br/>테이블·PK/FK·NOT NULL·UNIQUE·CHECK]
+    A --> SE[seed.sql<br/>정상·상태 차이·관계·경계 상황을 재현하는 가상 데이터]
+    A --> QU[queries.sql<br/>기본 조회·조건·JOIN·집계·검증 SQL]
+    A --> AI[ai_review.md<br/>AI 제안·발견한 문제·사람의 수정·수정 근거·실행 결과]
+    A --> PN[project_notes.md<br/>한계·성능·보안·복구 검토·다음 버전 계획]
+    A --> SS[screenshots/<br/>필요한 실행 결과만 보조 증거로 저장]
+
+    REQ --> ERD
+    ERD --> SC
+    SC --> SE
+    SE --> QU
+    QU --> EV[실행 결과와 예상 결과 비교<br/>요구사항이 실제로 증명되는지 확인]
+    EV --> AI
+    EV --> PN
+    SS --> EV
+
+    R --> RUN[재현 실행 시작]
+    RUN --> RUN1[1 작업용 PostgreSQL DB 준비<br/>운영 DB 아님 확인]
+    RUN1 --> RUN2[2 schema.sql 실행]
+    RUN2 --> RUN3[3 seed.sql 실행]
+    RUN3 --> RUN4[4 queries.sql 실행]
+    RUN4 --> RUN5{예상 결과와<br/>실제 결과가 일치하는가?}
+    RUN5 -- 아니요 --> FIX[요구사항·ERD·SQL을 함께 수정<br/>한 파일만 임시로 고치지 않음]
+    FIX --> RUN2
+    RUN5 -- 예 --> DONE[다른 사람이 같은 순서로 재현 가능]
+
+    C1[일치성 규칙<br/>requirements ↔ ERD ↔ schema.sql의<br/>이름·관계·제약조건이 서로 일치] --- SC
+    C2[SQL 파일 책임 분리<br/>schema는 구조, seed는 상황, queries는 증명] --- SE
+    C3[증거 우선<br/>스크린샷은 SQL과 실행 절차를 대신하지 않고<br/>필요한 결과를 보조] --- SS
+    C4[접속 정보 보호<br/>비공개 접속 정보와 실제 사용자 데이터를 저장소에 포함하지 않고<br/>공개 가능한 설정 예시와 제외 규칙을 사용] --- A
+    C5[선택 확장<br/>웹 CRUD가 있으면 app/·tests/를 추가하되<br/>README의 실행 방법과 DB 초기화 절차를 함께 기록] --- A
+    C6[핵심<br/>재현 가능한 프로젝트는 파일이 많은 프로젝트가 아니라<br/>설계 이유·실행 순서·검증 결과가 연결된 프로젝트] --- DONE
