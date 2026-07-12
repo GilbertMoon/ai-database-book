@@ -1,19 +1,37 @@
 flowchart TB
-    A[테이블 간 관계 유형]
+    A[테이블 간 관계 유형<br/>업무 규칙을 한쪽 행이 다른 쪽 행 몇 개와 연결되는지로 표현]
 
-    A --> R1[1:1 관계]
-    A --> R2[1:N 관계]
-    A --> R3[N:M 관계]
+    subgraph ONE[1. 1:1 또는 1:0..1]
+        U[users<br/>user_id PK]
+        P[user_profiles<br/>profile_id PK<br/>user_id FK UNIQUE]
+        U -->|사용자 1명당 프로필 최대 1개| P
+        P --> O1[구현<br/>FK에 UNIQUE를 추가해 여러 프로필 연결 방지]
+        P --> O2[분리 이유<br/>선택 입력·보안·큰 데이터·역할 분리]
+    end
 
-    R1 --> R1A[users 1명]
-    R1A --> R1B[user_profiles 1개]
-    R1 -. 예 .-> R1C[한 사용자에게 하나의 상세 프로필]
+    subgraph MANY[2. 1:N 또는 1:0..N]
+        I[instructors<br/>instructor_id PK]
+        C[courses<br/>course_id PK<br/>instructor_id FK]
+        I -->|강사 1명은 강의 여러 개 담당 가능| C
+        C --> M1[구현<br/>N 쪽인 courses에 instructor_id FK 배치]
+        C --> M2[각 강의는 한 강사를 참조하고<br/>강사는 강의가 없을 수도 있음]
+    end
 
-    R2 --> R2A[instructors 1명]
-    R2A --> R2B[courses 여러 개]
-    R2 -. 예 .-> R2C[한 강사가 여러 강의를 담당]
+    subgraph NM[3. N:M]
+        S[students<br/>student_id PK]
+        E[enrollments<br/>student_id FK<br/>course_id FK<br/>status·enrolled_at]
+        K[courses<br/>course_id PK]
+        S -->|1:N| E
+        K -->|1:N| E
+        E --> N1[구현<br/>직접 N:M으로 저장하지 않고 연결 테이블로 해소]
+        E --> N2[관계의 속성<br/>신청일·상태·성적 등을 함께 저장]
+        E --> N3[중복 방지 필요 시<br/>UNIQUE(student_id, course_id)]
+    end
 
-    R3 --> R3A[students 여러 명]
-    R3A --> R3B[enrollments 연결 테이블]
-    R3B --> R3C[courses 여러 개]
-    R3 -. 예 .-> R3D[학생 여러 명과 강의 여러 개가 서로 연결]
+    A --> U
+    A --> I
+    A --> S
+
+    R[관계 읽기 기준<br/>1. 한쪽 행 하나를 선택한다<br/>2. 반대쪽 행이 최소 몇 개·최대 몇 개 연결되는지 질문한다<br/>3. FK 위치와 NULL·UNIQUE 조건으로 구현한다] --- A
+
+    N[핵심<br/>1:1은 FK+UNIQUE, 1:N은 N 쪽의 FK,<br/>N:M은 두 FK를 가진 연결 테이블로 구현] --- E
