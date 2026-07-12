@@ -1,20 +1,23 @@
-flowchart TD
-    A[PostgreSQL<br/>DBMS] --> B[school_db<br/>데이터베이스]
-    A --> C[shop_db<br/>데이터베이스]
+flowchart TB
+    U[사용자·애플리케이션·DBeaver] --> P[PostgreSQL 서버<br/>관계형 DBMS<br/>연결·SQL 실행·권한·동시성·백업·복구 관리]
 
-    B --> B1[students<br/>테이블]
-    B --> B2[courses<br/>테이블]
-    B --> B3[enrollments<br/>테이블]
+    P --> D1[school_db<br/>데이터베이스<br/>학교 서비스 데이터의 논리적 공간]
+    P --> D2[shop_db<br/>데이터베이스<br/>쇼핑 서비스 데이터의 논리적 공간]
 
-    B1 --> B1A[행 Row]
-    B1 --> B1B[열 Column]
+    D1 --> S1[public 또는 app 스키마<br/>테이블·뷰 등을 이름 공간으로 구분]
+    D2 --> S2[public 또는 sales 스키마]
 
-    C --> C1[members<br/>테이블]
-    C --> C2[orders<br/>테이블]
-    C --> C3[products<br/>테이블]
+    S1 --> T1[students 테이블]
+    S1 --> T2[courses 테이블]
+    S1 --> T3[enrollments 테이블]
 
-    A -. 관리 .-> D[SQL 실행]
-    A -. 관리 .-> E[권한 / 백업 / 연결]
+    S2 --> T4[members 테이블]
+    S2 --> T5[orders 테이블]
+    S2 --> T6[products 테이블]
 
-    B1A -. 예 .-> F[김민지 학생 한 줄]
-    B1B -. 예 .-> G[id, name, email]
+    T1 --> C[열 Column<br/>id·name·email·major<br/>모든 행이 따르는 데이터 항목과 구조]
+    T1 --> R[행 Row<br/>1·김민지·minji@example.com·컴퓨터공학<br/>학생 한 명에 대한 하나의 기록]
+
+    N1[연결할 때<br/>서버와 사용할 데이터베이스를 선택] --- P
+    N2[전체 이름 예시<br/>school_db의 public.students<br/>같은 데이터베이스 안에서 schema.table로 구분] --- S1
+    N3[핵심<br/>DBMS는 여러 데이터베이스를 관리하고<br/>데이터베이스는 스키마, 스키마는 테이블을 포함하며<br/>테이블은 열 구조에 맞는 여러 행을 저장] --- T1
