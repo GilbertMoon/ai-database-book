@@ -1,18 +1,32 @@
-flowchart LR
-    A[students 테이블] --> B[id = 기본키 PK]
+flowchart TB
+    T[students 테이블<br/>각 행은 서로 다른 학생 기록]
 
-    subgraph S[학생 데이터]
-        direction TB
-        S1[id: 1<br/>name: 김민지<br/>email: minji@example.com]
-        S2[id: 2<br/>name: 김민지<br/>email: minji2@example.com]
-        S3[id: 3<br/>name: 이준호<br/>email: junho@example.com]
-    end
+    T --> R1[id: 1 | name: 김민지 | email: minji@example.com]
+    T --> R2[id: 2 | name: 김민지 | email: minji2@example.com]
+    T --> R3[id: 3 | name: 이준호 | email: junho@example.com]
 
-    B --> S1
-    B --> S2
-    B --> S3
+    R1 --> Q{어떤 열로 각 행을<br/>안정적으로 구분할까?}
+    R2 --> Q
+    R3 --> Q
 
-    S1 -. 이름은 같을 수 있음 .-> N[이름 name은 기본키로 부적합]
-    S2 -. 이름은 같을 수 있음 .-> N
+    Q --> N[name<br/>중복 가능·변경 가능<br/>기본키로 부적합]
+    Q --> E[email<br/>중복 방지는 필요하지만 변경 가능<br/>UNIQUE 업무상 고유값으로 적합]
+    Q --> I[id<br/>각 행에 하나씩 부여하는 식별자<br/>PRIMARY KEY로 적합]
 
-    B -. 고유 / 필수 / 안정 .-> K[각 행을 안정적으로 구분]
+    I --> P1[고유성<br/>같은 PK 값을 가진 두 행을 허용하지 않음]
+    I --> P2[필수성<br/>PK는 NULL일 수 없음]
+    I --> P3[식별성<br/>PK 값 하나로 특정 행을 정확히 찾음]
+    I --> P4[안정성<br/>자주 바뀌지 않는 값을 설계자가 선택]
+
+    P1 --> C[DBMS가 PK 제약조건 검사]
+    P2 --> C
+    C --> A1[새로운 고유 id<br/>INSERT 허용]
+    C --> A2[중복 id<br/>거부]
+    C --> A3[NULL id<br/>거부]
+
+    E --> U[email UNIQUE NOT NULL<br/>업무상 중복은 막지만 행의 대표 식별자는 id]
+
+    S[주의<br/>PRIMARY KEY가 자동 증가를 의미하지는 않음<br/>SERIAL·IDENTITY 등은 값을 생성하는 별도 방식] --- I
+    K[확장<br/>기본키는 한 열뿐 아니라 여러 열을 조합한 복합 기본키도 가능] --- I
+
+    H[핵심<br/>PK는 한 행을 고유하고 필수적으로 식별하며<br/>업무상 고유값은 필요에 따라 UNIQUE로 별도 관리] --- C
