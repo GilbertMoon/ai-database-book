@@ -1,149 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">1:N 관계 구조</title>
-  <desc id="desc">회원 한 명은 대여 기록을 0개 이상 가질 수 있고 각 대여 기록은 정확히 한 회원에 속한다. N쪽 loans 테이블의 member_id 외래키가 1쪽 members 테이블의 id 기본키를 참조하며, 삽입 검증과 삭제 정책, 조인 방법을 설명한다.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">1:N 관계와 외래키 위치</title>
+  <desc id="desc">members와 loans의 1:N 관계에서 외래키 member_id는 N쪽인 loans 테이블에 위치한다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#54606f" />
     </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
-    </marker>
-    <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .table-sub{font-size:12px;text-anchor:middle;fill:#475569}
-      .th{font-size:12.5px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
-      .td{font-size:12.3px;text-anchor:middle;dominant-baseline:middle;fill:#334155}
-      .pk{font-size:12.3px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#1d4ed8}
-      .fk{font-size:12.3px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#92400e}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .reference{stroke:#2f6fad;stroke-width:2.3;fill:none;marker-end:url(#arrow-blue)}
-      .relation{stroke:#64748b;stroke-width:2.2;fill:none}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
-      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
-      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
-    </style>
   </defs>
-  <rect width="1200" height="1600" fill="#ffffff"/>
-  <text x="600" y="42" class="title">1:N 관계 구조</text>
-  <text x="600" y="72" class="subtitle">한 부모 행에는 여러 자식 행이 연결될 수 있고, 각 자식 행은 자신이 속한 부모의 PK를 FK로 저장한다</text>
+  <style>
+    .bg { fill: #ffffff; }
+    .title { font: 700 28px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #172033; }
+    .one { fill: #eef6ff; stroke: #6b9bd2; stroke-width: 2; rx: 8; }
+    .many { fill: #f4efff; stroke: #8e78c9; stroke-width: 2; rx: 8; }
+    .note { fill: #fff7d9; stroke: #d8aa34; stroke-width: 2; rx: 8; }
+    .head { font: 700 21px Consolas, D2Coding, "Courier New", monospace; fill: #1f2a3d; text-anchor: middle; }
+    .code { font: 16px Consolas, D2Coding, "Courier New", monospace; fill: #263246; text-anchor: middle; }
+    .text { font: 16px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #334155; text-anchor: middle; }
+    .rel { font: 700 22px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2a3d; text-anchor: middle; }
+    .line { stroke: #54606f; stroke-width: 2.6; fill: none; }
+    .ref { stroke: #54606f; stroke-width: 2.2; stroke-dasharray: 8 6; fill: none; marker-end: url(#arrow); }
+  </style>
+  <rect class="bg" width="1200" height="520" />
+  <text class="title" x="600" y="48">1:N 관계와 외래키 위치</text>
 
-  <rect x="34" y="98" width="1132" height="252" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 업무 규칙을 양방향으로 읽기</text>
-  <text x="365" y="132" class="section-sub">관계는 양쪽에서 읽어야 최소·최대 참여 수와 필수성이 정확해진다</text>
-  <rect x="58" y="160" width="510" height="96" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="188" r="15" fill="#2f6fad"/><text x="88" y="188" class="badge">1</text>
-  <text x="313" y="191" class="card-title">회원 → 대여 기록</text>
-  <text x="313" y="220" class="card-text">회원 한 명은 대여 기록을 0건 이상 가질 수 있다</text>
-  <text x="313" y="244" class="card-text-small">최소 0, 최대 여러 건이므로 회원 쪽에서 loans는 0..N</text>
-  <rect x="632" y="160" width="510" height="96" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="662" cy="188" r="15" fill="#b7791f"/><text x="662" y="188" class="badge">2</text>
-  <text x="887" y="191" class="card-title">대여 기록 → 회원</text>
-  <text x="887" y="220" class="card-text">각 대여 기록은 정확히 한 회원에 속한다</text>
-  <text x="887" y="244" class="card-text-small">member_id가 NOT NULL이면 대여 기록 쪽에서 members는 정확히 1</text>
-  <rect x="198" y="286" width="804" height="40" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="1.3"/>
-  <text x="364" y="311" class="card-title">members</text>
-  <text x="486" y="311" class="mono">1</text>
-  <path d="M515 306H685" class="relation"/>
-  <text x="714" y="311" class="mono">0..N</text>
-  <text x="836" y="311" class="card-title">loans</text>
-  <rect x="58" y="334" width="1084" height="1" fill="#dbe4ef"/>
+  <rect class="one" x="150" y="150" width="280" height="170" />
+  <text class="head" x="290" y="195">members</text>
+  <text class="code" x="290" y="238">PK id</text>
+  <text class="text" x="290" y="280">회원 한 명</text>
 
-  <rect x="34" y="380" width="1132" height="508" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="414" class="section-title">2. N쪽 외래키가 1쪽 기본키를 참조</text>
-  <text x="410" y="414" class="section-sub">FK 값의 반복은 관계를 표현하기 위한 정상적인 구조이며, 참조 방향은 자식 FK → 부모 PK다</text>
-  <rect x="58" y="450" width="430" height="338" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <rect x="58" y="450" width="430" height="64" rx="12" fill="#dcecff"/>
-  <rect x="58" y="502" width="430" height="12" fill="#dcecff"/>
-  <text x="273" y="476" class="table-title">members · 1쪽 부모 테이블</text>
-  <text x="273" y="498" class="table-sub">id PK로 회원 한 명을 식별</text>
-  <rect x="78" y="532" width="94" height="34" fill="#e9eef5" stroke="#94a3b8"/>
-  <rect x="172" y="532" width="156" height="34" fill="#e9eef5" stroke="#94a3b8"/>
-  <rect x="328" y="532" width="140" height="34" fill="#e9eef5" stroke="#94a3b8"/>
-  <text x="125" y="549" class="th">id · PK</text><text x="250" y="549" class="th">name</text><text x="398" y="549" class="th">email</text>
-  <g>
-    <rect x="78" y="566" width="94" height="48" fill="#eef5ff" stroke="#cbd5e1"/><rect x="172" y="566" width="156" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="328" y="566" width="140" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="125" y="590" class="pk">1</text><text x="250" y="590" class="td">김민지</text><text x="398" y="590" class="td">minji@…</text>
-    <rect x="78" y="614" width="94" height="48" fill="#eef5ff" stroke="#cbd5e1"/><rect x="172" y="614" width="156" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="328" y="614" width="140" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="125" y="638" class="pk">2</text><text x="250" y="638" class="td">이준호</text><text x="398" y="638" class="td">junho@…</text>
-    <rect x="78" y="662" width="94" height="48" fill="#eef5ff" stroke="#cbd5e1"/><rect x="172" y="662" width="156" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="328" y="662" width="140" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="125" y="686" class="pk">3</text><text x="250" y="686" class="td">박서연</text><text x="398" y="686" class="td">seoyeon@…</text>
-  </g>
-  <text x="273" y="742" class="card-text">id=3 회원은 대여 기록이 0건이어도 존재 가능</text>
-  <text x="273" y="766" class="card-text-small">부모의 자식 수 0건은 1:N 관계에 허용된 상태</text>
+  <rect class="many" x="770" y="150" width="280" height="170" />
+  <text class="head" x="910" y="195">loans</text>
+  <text class="code" x="910" y="238">FK member_id</text>
+  <text class="text" x="910" y="280">여러 대여 기록</text>
 
-  <rect x="712" y="438" width="430" height="370" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <rect x="712" y="438" width="430" height="64" rx="12" fill="#fff1cf"/>
-  <rect x="712" y="490" width="430" height="12" fill="#fff1cf"/>
-  <text x="927" y="464" class="table-title">loans · N쪽 자식 테이블</text>
-  <text x="927" y="486" class="table-sub">각 행의 member_id FK가 회원 한 명을 가리킴</text>
-  <rect x="732" y="520" width="84" height="34" fill="#e9eef5" stroke="#94a3b8"/><rect x="816" y="520" width="132" height="34" fill="#e9eef5" stroke="#94a3b8"/><rect x="948" y="520" width="174" height="34" fill="#e9eef5" stroke="#94a3b8"/>
-  <text x="774" y="537" class="th">id · PK</text><text x="882" y="537" class="th">member_id · FK</text><text x="1035" y="537" class="th">borrowed_at</text>
-  <g>
-    <rect x="732" y="554" width="84" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="816" y="554" width="132" height="48" fill="#fff8e8" stroke="#d69e2e"/><rect x="948" y="554" width="174" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="774" y="578" class="pk">101</text><text x="882" y="578" class="fk">1</text><text x="1035" y="578" class="td">2026-07-01</text>
-    <rect x="732" y="602" width="84" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="816" y="602" width="132" height="48" fill="#fff8e8" stroke="#d69e2e"/><rect x="948" y="602" width="174" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="774" y="626" class="pk">102</text><text x="882" y="626" class="fk">1</text><text x="1035" y="626" class="td">2026-07-05</text>
-    <rect x="732" y="650" width="84" height="48" fill="#ffffff" stroke="#cbd5e1"/><rect x="816" y="650" width="132" height="48" fill="#fff8e8" stroke="#d69e2e"/><rect x="948" y="650" width="174" height="48" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="774" y="674" class="pk">103</text><text x="882" y="674" class="fk">2</text><text x="1035" y="674" class="td">2026-07-08</text>
-  </g>
-  <text x="927" y="732" class="card-text">같은 member_id=1이 여러 대여 행에서 반복 가능</text>
-  <text x="927" y="756" class="card-text-small">각 행은 서로 다른 대여 사건이므로 중복 데이터가 아님</text>
-  <text x="927" y="780" class="mono">FOREIGN KEY (member_id) REFERENCES members(id)</text>
-  <path d="M816 578H640V590H172" class="reference"/>
-  <path d="M816 626H620V590H172" class="reference"/>
-  <path d="M816 674H650V638H172" class="reference"/>
-  <text x="600" y="812" class="mono">참조 방향: loans.member_id → members.id</text>
-  <rect x="58" y="830" width="1084" height="34" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.2"/>
-  <text x="600" y="852" class="note-title">관계선의 1:N은 허용 가능한 수를 뜻하며, 모든 회원이 반드시 여러 대여 기록을 가진다는 뜻은 아니다</text>
+  <line class="line" x1="430" y1="235" x2="770" y2="235" />
+  <text class="rel" x="495" y="220">1</text>
+  <text class="rel" x="705" y="220">0..N</text>
+  <path class="ref" d="M 830 320 C 760 405, 430 405, 360 320" />
+  <text class="text" x="600" y="430">N쪽 테이블인 loans에 외래키를 둔다</text>
 
-  <rect x="34" y="920" width="1132" height="264" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="954" class="section-title">3. 왜 외래키는 N쪽에 두는가?</text>
-  <text x="350" y="954" class="section-sub">자식 행 하나가 자신이 속한 부모 하나를 저장하면 행 수가 늘어도 구조가 변하지 않는다</text>
-  <rect x="58" y="986" width="520" height="146" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="318" y="1014" class="card-title">권장 · loans.member_id</text>
-  <text x="318" y="1045" class="mono">loans(id, member_id, borrowed_at, ...)</text>
-  <text x="318" y="1074" class="card-text">대여 행마다 부모 회원 id 하나를 저장</text>
-  <text x="318" y="1099" class="card-text">새 대여는 새 행 추가로 표현</text>
-  <text x="318" y="1122" class="card-text-small">JOIN·제약조건·검색·인덱스 적용이 단순함</text>
-  <rect x="622" y="986" width="520" height="146" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="882" y="1014" class="card-title">비권장 · members에 loan_id 목록 저장</text>
-  <text x="882" y="1045" class="mono">loan_ids = '101,102,...'</text>
-  <text x="882" y="1074" class="card-text">한 컬럼에 여러 값을 넣거나 컬럼을 계속 추가해야 함</text>
-  <text x="882" y="1099" class="card-text">개별 값 검색과 참조 무결성 보장이 어려움</text>
-  <text x="882" y="1122" class="card-text-small">원자값 원칙과 관계형 구조에 맞지 않음</text>
-  <rect x="152" y="1144" width="896" height="24" rx="8" fill="#fff1cf" stroke="#d69e2e" stroke-width="1.1"/>
-  <text x="600" y="1161" class="card-text-small">N쪽 FK 열에는 보통 JOIN·부모별 조회가 많으므로 별도 인덱스가 필요한지 실제 질의와 실행 계획으로 검토한다</text>
-
-  <rect x="34" y="1216" width="1132" height="254" rx="16" fill="#eefbf2" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="1250" class="section-title">4. FK 제약조건과 작업별 확인 사항</text>
-  <text x="385" y="1250" class="section-sub">카디널리티는 데이터 구조로, 필수성과 삭제 동작은 제약조건과 정책으로 구현한다</text>
-  <rect x="58" y="1282" width="250" height="140" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="183" y="1310" class="card-title">INSERT</text><text x="183" y="1340" class="mono">member_id = 1</text><text x="183" y="1365" class="ok">부모 존재 → 저장 가능</text><text x="183" y="1390" class="mono">member_id = 999</text><text x="183" y="1414" class="no">부모 없음 → FK 오류</text>
-  <rect x="337" y="1282" width="250" height="140" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="462" y="1310" class="card-title">필수성</text><text x="462" y="1340" class="mono">member_id NOT NULL</text><text x="462" y="1365" class="card-text">각 대여는 회원 1명이 필수</text><text x="462" y="1390" class="mono">member_id NULL 허용</text><text x="462" y="1414" class="card-text-small">자식→부모 관계가 선택적 0..1로 바뀜</text>
-  <rect x="616" y="1282" width="250" height="140" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="741" y="1310" class="card-title">DELETE</text><text x="741" y="1340" class="card-text">RESTRICT / NO ACTION</text><text x="741" y="1365" class="card-text">CASCADE</text><text x="741" y="1390" class="card-text">SET NULL</text><text x="741" y="1414" class="card-text-small">업무 의미와 NULL 허용 여부에 맞게 선택</text>
-  <rect x="895" y="1282" width="247" height="140" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="1018" y="1310" class="card-title">JOIN</text><text x="1018" y="1340" class="mono">FROM members m</text><text x="1018" y="1365" class="mono">JOIN loans l</text><text x="1018" y="1390" class="mono">ON m.id = l.member_id</text><text x="1018" y="1414" class="card-text-small">회원 정보와 대여 기록 결합</text>
-
-  <rect x="54" y="1500" width="344" height="54" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="226" y="1522" class="note-title">부모 없는 자식 방지</text><text x="226" y="1544" class="note-text">FK가 존재하지 않는 member_id 저장을 차단</text>
-  <rect x="428" y="1500" width="344" height="54" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1522" class="note-title">0건도 정상</text><text x="600" y="1544" class="note-text">부모 회원은 자식 대여 기록 없이 존재 가능</text>
-  <rect x="802" y="1500" width="344" height="54" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="974" y="1522" class="note-title">FK 반복은 정상</text><text x="974" y="1544" class="note-text">같은 부모를 가리키는 여러 사건 행을 표현</text>
-  <rect x="80" y="1562" width="1040" height="28" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.3"/>
-  <text x="600" y="1582" class="principle">1:N 관계는 N쪽 FK가 1쪽 PK를 참조하며, 수량·필수성·삭제 정책을 함께 설계한다</text>
+  <rect class="note" x="445" y="105" width="310" height="56" />
+  <text class="text" x="600" y="140">loans.member_id → members.id</text>
 </svg>

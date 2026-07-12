@@ -1,250 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1740" viewBox="0 0 1200 1740" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">도서 대여 시스템 ERD</title>
-  <desc id="desc">members, books, loans 세 테이블의 컬럼과 PostgreSQL 타입, 기본키, 외래키, 고유값, 필수값과 NULL 허용을 보여준다. 회원과 도서는 각각 대여 기록을 0개 이상 가질 수 있고, 각 대여 기록은 정확히 한 회원과 한 도서를 참조한다. 단순 예제에서는 동일 ISBN의 복본을 구분하지 않는다.</desc>
-  <defs>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
-    </marker>
-    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#b7791f"/>
-    </marker>
-    <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .table-title{font-size:18px;font-weight:700;text-anchor:middle}
-      .table-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .col{font-size:12.2px;fill:#334155}
-      .type{font-size:11.2px;fill:#64748b}
-      .badge{font-size:10.8px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-      .constraint{font-size:10.8px;font-weight:700;text-anchor:middle}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
-      .line{stroke:#cbd5e1;stroke-width:1}
-      .ref-blue{stroke:#2f6fad;stroke-width:2.4;fill:none;marker-end:url(#arrow-blue)}
-      .ref-orange{stroke:#b7791f;stroke-width:2.4;fill:none;marker-end:url(#arrow-orange)}
-      .relation{stroke:#64748b;stroke-width:2.2;fill:none}
-      .cardinality{font-size:12px;font-weight:700;text-anchor:middle}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.4px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
-    </style>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 660" role="img" aria-labelledby="title desc">
+  <title id="title">도서 대여 시스템 핵심 ERD</title>
+  <desc id="desc">members, loans, books 세 테이블의 기본키, 외래키, 주요 컬럼과 1 대 0..N 관계를 보여 주는 ERD이다.</desc>
+  <style>
+    .bg { fill: #ffffff; }
+    .title { font: 700 28px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #172033; }
+    .table { fill: #eef6ff; stroke: #6b9bd2; stroke-width: 2; rx: 8; }
+    .bridge { fill: #f4efff; stroke: #8e78c9; stroke-width: 2; rx: 8; }
+    .head { font: 700 21px Consolas, D2Coding, "Courier New", monospace; fill: #1f2a3d; text-anchor: middle; }
+    .code { font: 15px Consolas, D2Coding, "Courier New", monospace; fill: #263246; }
+    .pk { fill: #dbeafe; }
+    .fk { fill: #fff0d7; }
+    .uk { fill: #edf8ef; }
+    .text { font: 14px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #334155; text-anchor: middle; }
+    .rel { font: 700 18px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2a3d; text-anchor: middle; }
+    .line { stroke: #54606f; stroke-width: 2.6; fill: none; }
+    .ref { stroke: #8c6cc4; stroke-width: 2; stroke-dasharray: 8 6; fill: none; }
+  </style>
+  <rect class="bg" width="1200" height="660" />
+  <text class="title" x="600" y="48">도서 대여 시스템 핵심 ERD</text>
 
-  <rect width="1200" height="1740" fill="#ffffff"/>
-  <text x="600" y="42" class="title">도서 대여 시스템 ERD</text>
-  <text x="600" y="72" class="subtitle">ERD는 테이블 이름뿐 아니라 컬럼·키·제약조건·관계의 수량과 필수성을 함께 읽는 설계 문서다</text>
+  <rect class="table" x="70" y="155" width="300" height="300" />
+  <text class="head" x="220" y="200">members</text>
+  <rect class="pk" x="100" y="225" width="240" height="34" rx="5" />
+  <text class="code" x="125" y="248">PK id</text>
+  <text class="code" x="125" y="292">name</text>
+  <rect class="uk" x="100" y="310" width="240" height="34" rx="5" />
+  <text class="code" x="125" y="333">email UK</text>
+  <text class="code" x="125" y="376">joined_at</text>
 
-  <rect x="34" y="98" width="1132" height="790" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 세 테이블의 구조와 참조 관계</text>
-  <text x="350" y="132" class="section-sub">현재 장의 PostgreSQL DDL과 동일한 컬럼·타입·제약조건을 표시한다</text>
+  <rect class="bridge" x="450" y="115" width="300" height="380" />
+  <text class="head" x="600" y="160">loans</text>
+  <rect class="pk" x="480" y="185" width="240" height="34" rx="5" />
+  <text class="code" x="505" y="208">PK id</text>
+  <rect class="fk" x="480" y="230" width="240" height="34" rx="5" />
+  <text class="code" x="505" y="253">FK member_id</text>
+  <rect class="fk" x="480" y="275" width="240" height="34" rx="5" />
+  <text class="code" x="505" y="298">FK book_id</text>
+  <text class="code" x="505" y="342">borrowed_at</text>
+  <text class="code" x="505" y="386">due_at</text>
+  <text class="code" x="505" y="430">returned_at NULL 가능</text>
 
-  <rect x="48" y="172" width="332" height="430" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
-  <rect x="48" y="172" width="332" height="64" rx="12" fill="#dcecff"/>
-  <rect x="48" y="224" width="332" height="12" fill="#dcecff"/>
-  <text x="214" y="198" class="table-title">members</text>
-  <text x="214" y="220" class="table-sub">회원 한 명을 한 행으로 관리</text>
+  <rect class="table" x="830" y="155" width="300" height="300" />
+  <text class="head" x="980" y="200">books</text>
+  <rect class="pk" x="860" y="225" width="240" height="34" rx="5" />
+  <text class="code" x="885" y="248">PK id</text>
+  <text class="code" x="885" y="292">title</text>
+  <text class="code" x="885" y="333">author</text>
+  <text class="code" x="885" y="374">published_year</text>
+  <rect class="uk" x="860" y="392" width="240" height="34" rx="5" />
+  <text class="code" x="885" y="415">isbn UK</text>
 
-  <line x1="48" y1="236" x2="380" y2="236" class="line"/>
-  <line x1="48" y1="314" x2="380" y2="314" class="line"/>
-  <line x1="48" y1="392" x2="380" y2="392" class="line"/>
-  <line x1="48" y1="470" x2="380" y2="470" class="line"/>
+  <line class="line" x1="370" y1="305" x2="450" y2="305" />
+  <text class="rel" x="392" y="285">1</text>
+  <text class="rel" x="430" y="285">0..N</text>
+  <line class="line" x1="750" y1="305" x2="830" y2="305" />
+  <text class="rel" x="770" y="285">0..N</text>
+  <text class="rel" x="810" y="285">1</text>
 
-  <rect x="66" y="258" width="34" height="20" rx="10" fill="#2563eb"/><text x="83" y="268" class="badge">PK</text>
-  <text x="118" y="272" class="col">id</text><text x="230" y="272" class="type">SERIAL</text>
-  <rect x="310" y="257" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="335" y="272" class="constraint" fill="#166534">필수</text>
-
-  <text x="66" y="350" class="col">name</text><text x="230" y="350" class="type">VARCHAR(50)</text>
-  <rect x="310" y="335" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="335" y="350" class="constraint" fill="#166534">필수</text>
-
-  <rect x="66" y="414" width="34" height="20" rx="10" fill="#7c3aed"/><text x="83" y="424" class="badge">UK</text>
-  <text x="118" y="428" class="col">email</text><text x="230" y="428" class="type">VARCHAR(100)</text>
-  <rect x="310" y="413" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="335" y="428" class="constraint" fill="#166534">필수</text>
-
-  <text x="66" y="506" class="col">joined_at</text><text x="230" y="506" class="type">DATE</text>
-  <rect x="310" y="491" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="335" y="506" class="constraint" fill="#166534">필수</text>
-
-  <rect x="76" y="548" width="276" height="34" rx="9" fill="#eef5ff" stroke="#6fa2e8"/>
-  <text x="214" y="570" class="card-text-small">email은 회원을 식별하는 업무상 고유값</text>
-
-  <rect x="434" y="150" width="332" height="500" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.7"/>
-  <rect x="434" y="150" width="332" height="64" rx="12" fill="#fff1cf"/>
-  <rect x="434" y="202" width="332" height="12" fill="#fff1cf"/>
-  <text x="600" y="176" class="table-title">loans</text>
-  <text x="600" y="198" class="table-sub">회원과 도서 사이의 대여 사건 한 건</text>
-
-  <line x1="434" y1="214" x2="766" y2="214" class="line"/>
-  <line x1="434" y1="278" x2="766" y2="278" class="line"/>
-  <line x1="434" y1="342" x2="766" y2="342" class="line"/>
-  <line x1="434" y1="406" x2="766" y2="406" class="line"/>
-  <line x1="434" y1="470" x2="766" y2="470" class="line"/>
-  <line x1="434" y1="534" x2="766" y2="534" class="line"/>
-  <line x1="434" y1="598" x2="766" y2="598" class="line"/>
-
-  <rect x="452" y="236" width="34" height="20" rx="10" fill="#2563eb"/><text x="469" y="246" class="badge">PK</text>
-  <text x="504" y="250" class="col">id</text><text x="620" y="250" class="type">SERIAL</text>
-  <rect x="696" y="235" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="721" y="250" class="constraint" fill="#166534">필수</text>
-
-  <rect x="452" y="300" width="34" height="20" rx="10" fill="#b45309"/><text x="469" y="310" class="badge">FK</text>
-  <text x="504" y="314" class="col">member_id</text><text x="620" y="314" class="type">INT</text>
-  <rect x="696" y="299" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="721" y="314" class="constraint" fill="#166534">필수</text>
-
-  <rect x="452" y="364" width="34" height="20" rx="10" fill="#b45309"/><text x="469" y="374" class="badge">FK</text>
-  <text x="504" y="378" class="col">book_id</text><text x="620" y="378" class="type">INT</text>
-  <rect x="696" y="363" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="721" y="378" class="constraint" fill="#166534">필수</text>
-
-  <text x="452" y="442" class="col">borrowed_at</text><text x="620" y="442" class="type">DATE</text>
-  <rect x="696" y="427" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="721" y="442" class="constraint" fill="#166534">필수</text>
-
-  <text x="452" y="506" class="col">due_at</text><text x="620" y="506" class="type">DATE</text>
-  <rect x="696" y="491" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="721" y="506" class="constraint" fill="#166534">필수</text>
-
-  <text x="452" y="570" class="col">returned_at</text><text x="620" y="570" class="type">DATE</text>
-  <rect x="684" y="555" width="62" height="22" rx="9" fill="#fff6e5" stroke="#d69e2e"/><text x="715" y="570" class="constraint" fill="#92400e">NULL 가능</text>
-
-  <rect x="468" y="614" width="264" height="24" rx="8" fill="#fff8e8" stroke="#d69e2e"/>
-  <text x="600" y="631" class="card-text-small">returned_at IS NULL → 아직 반납되지 않음</text>
-
-  <rect x="820" y="172" width="332" height="430" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
-  <rect x="820" y="172" width="332" height="64" rx="12" fill="#dcecff"/>
-  <rect x="820" y="224" width="332" height="12" fill="#dcecff"/>
-  <text x="986" y="198" class="table-title">books</text>
-  <text x="986" y="220" class="table-sub">복본을 구분하지 않는 도서 레코드 한 건</text>
-
-  <line x1="820" y1="236" x2="1152" y2="236" class="line"/>
-  <line x1="820" y1="300" x2="1152" y2="300" class="line"/>
-  <line x1="820" y1="364" x2="1152" y2="364" class="line"/>
-  <line x1="820" y1="428" x2="1152" y2="428" class="line"/>
-  <line x1="820" y1="492" x2="1152" y2="492" class="line"/>
-
-  <rect x="838" y="258" width="34" height="20" rx="10" fill="#2563eb"/><text x="855" y="268" class="badge">PK</text>
-  <text x="890" y="272" class="col">id</text><text x="1006" y="272" class="type">SERIAL</text>
-  <rect x="1082" y="257" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="1107" y="272" class="constraint" fill="#166534">필수</text>
-
-  <text x="838" y="336" class="col">title</text><text x="1006" y="336" class="type">VARCHAR(200)</text>
-  <rect x="1082" y="321" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="1107" y="336" class="constraint" fill="#166534">필수</text>
-
-  <text x="838" y="400" class="col">author</text><text x="1006" y="400" class="type">VARCHAR(100)</text>
-  <rect x="1082" y="385" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="1107" y="400" class="constraint" fill="#166534">필수</text>
-
-  <text x="838" y="464" class="col">published_year</text><text x="1006" y="464" class="type">INT</text>
-  <rect x="1070" y="449" width="62" height="22" rx="9" fill="#fff6e5" stroke="#d69e2e"/><text x="1101" y="464" class="constraint" fill="#92400e">NULL 가능</text>
-
-  <rect x="838" y="514" width="34" height="20" rx="10" fill="#7c3aed"/><text x="855" y="524" class="badge">UK</text>
-  <text x="890" y="528" class="col">isbn</text><text x="1006" y="528" class="type">VARCHAR(20)</text>
-  <rect x="1082" y="513" width="50" height="22" rx="9" fill="#e8f7ee" stroke="#62b47a"/><text x="1107" y="528" class="constraint" fill="#166534">필수</text>
-
-  <rect x="848" y="548" width="276" height="34" rx="9" fill="#eef5ff" stroke="#6fa2e8"/>
-  <text x="986" y="570" class="card-text-small">isbn은 도서 레코드의 업무상 고유값</text>
-
-  <path d="M434 310H400V268H380" class="ref-blue"/>
-  <text x="405" y="296" class="card-text-small">FK → PK</text>
-  <path d="M766 374H800V268H820" class="ref-orange"/>
-  <text x="795" y="354" class="card-text-small">FK → PK</text>
-
-  <rect x="86" y="690" width="1028" height="156" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="1.3"/>
-  <text x="600" y="720" class="card-title">관계의 수량과 필수성</text>
-
-  <path d="M190 770H500" class="relation"/>
-  <text x="206" y="754" class="cardinality" fill="#1d4ed8">members 1</text>
-  <text x="484" y="754" class="cardinality" fill="#92400e">0..N loans</text>
-  <text x="345" y="798" class="card-text-small">회원은 대여 기록이 없어도 되지만, 각 대여 기록은 회원 정확히 1명을 참조</text>
-
-  <path d="M700 770H1010" class="relation"/>
-  <text x="716" y="754" class="cardinality" fill="#92400e">0..N loans</text>
-  <text x="994" y="754" class="cardinality" fill="#1d4ed8">books 1</text>
-  <text x="855" y="798" class="card-text-small">도서는 대여 이력이 없어도 되지만, 각 대여 기록은 도서 정확히 1건을 참조</text>
-
-  <rect x="250" y="816" width="700" height="22" rx="8" fill="#ecfdf3" stroke="#62b47a"/>
-  <text x="600" y="832" class="mono">loans.member_id → members.id · loans.book_id → books.id</text>
-
-  <rect x="34" y="920" width="1132" height="304" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="954" class="section-title">2. ERD를 읽을 때 확인할 네 가지</text>
-  <text x="400" y="954" class="section-sub">표시된 구조와 업무 의미를 함께 읽어야 한다</text>
-
-  <rect x="58" y="986" width="250" height="178" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="1014" r="15" fill="#2f6fad"/><text x="88" y="1014" class="badge">1</text>
-  <text x="183" y="1018" class="card-title">행의 의미</text>
-  <text x="183" y="1050" class="card-text">members · 회원 한 명</text>
-  <text x="183" y="1075" class="card-text">books · 도서 레코드 한 건</text>
-  <text x="183" y="1100" class="card-text">loans · 대여 사건 한 건</text>
-  <text x="183" y="1136" class="card-text-small">한 행이 무엇을 뜻하는지 먼저 합의</text>
-
-  <rect x="337" y="986" width="250" height="178" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <circle cx="367" cy="1014" r="15" fill="#7c5cc4"/><text x="367" y="1014" class="badge">2</text>
-  <text x="462" y="1018" class="card-title">키와 중복 규칙</text>
-  <text x="462" y="1050" class="card-text">PK · 각 행을 식별</text>
-  <text x="462" y="1075" class="card-text">FK · 부모 행을 참조</text>
-  <text x="462" y="1100" class="card-text">UK · 업무상 중복 금지</text>
-  <text x="462" y="1136" class="card-text-small">PK와 업무상 후보키를 구분</text>
-
-  <rect x="616" y="986" width="250" height="178" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="646" cy="1014" r="15" fill="#b7791f"/><text x="646" y="1014" class="badge">3</text>
-  <text x="741" y="1018" class="card-title">필수성과 상태</text>
-  <text x="741" y="1050" class="card-text">NOT NULL · 값이 반드시 필요</text>
-  <text x="741" y="1075" class="card-text">NULL 허용 · 값 없음도 의미</text>
-  <text x="741" y="1100" class="card-text">0..N · 부모에 자식이 없을 수 있음</text>
-  <text x="741" y="1136" class="card-text-small">NULL과 미입력의 업무 의미 확인</text>
-
-  <rect x="895" y="986" width="247" height="178" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="925" cy="1014" r="15" fill="#2f855a"/><text x="925" y="1014" class="badge">4</text>
-  <text x="1018" y="1018" class="card-title">범위와 가정</text>
-  <text x="1018" y="1050" class="card-text">현재 books는 복본 미구분</text>
-  <text x="1018" y="1075" class="card-text">ISBN당 레코드 한 건 가정</text>
-  <text x="1018" y="1100" class="card-text">복본 관리 시 구조 분리 필요</text>
-  <text x="1018" y="1136" class="card-text-small">book_titles + book_copies 검토</text>
-
-  <rect x="176" y="1182" width="848" height="24" rx="8" fill="#dfeeff" stroke="#6fa2e8"/>
-  <text x="600" y="1199" class="card-text-small">loans는 단순 연결선이 아니라 borrowed_at·due_at·returned_at을 가진 업무 테이블이다</text>
-
-  <rect x="34" y="1256" width="1132" height="324" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="1290" class="section-title">3. 요구사항·DDL·검증을 연결해 확인</text>
-  <text x="390" y="1290" class="section-sub">ERD의 각 표시는 실행 가능한 규칙과 테스트로 이어져야 한다</text>
-
-  <rect x="58" y="1322" width="250" height="130" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="183" y="1350" class="card-title">고유값</text>
-  <text x="183" y="1380" class="mono">members.email UNIQUE</text>
-  <text x="183" y="1405" class="mono">books.isbn UNIQUE</text>
-  <text x="183" y="1434" class="card-text-small">중복 입력이 거부되는지 테스트</text>
-
-  <rect x="337" y="1322" width="250" height="130" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="462" y="1350" class="card-title">참조 무결성</text>
-  <text x="462" y="1380" class="mono">member_id REFERENCES members(id)</text>
-  <text x="462" y="1405" class="mono">book_id REFERENCES books(id)</text>
-  <text x="462" y="1434" class="card-text-small">없는 부모 ID 입력이 거부되는지 확인</text>
-
-  <rect x="616" y="1322" width="250" height="130" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="741" y="1350" class="card-title">상태 표현</text>
-  <text x="741" y="1380" class="mono">returned_at IS NULL</text>
-  <text x="741" y="1405" class="card-text">미반납 대여 조회</text>
-  <text x="741" y="1434" class="card-text-small">반납 시 날짜가 저장되는지 확인</text>
-
-  <rect x="895" y="1322" width="247" height="130" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="1018" y="1350" class="card-title">부모 삭제 정책</text>
-  <text x="1018" y="1380" class="card-text">현재 DDL은 ON DELETE 생략</text>
-  <text x="1018" y="1405" class="mono">기본값: NO ACTION</text>
-  <text x="1018" y="1434" class="card-text-small">이력 보존 정책에 맞게 명시 검토</text>
-
-  <rect x="80" y="1480" width="1040" height="70" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.3"/>
-  <text x="600" y="1506" class="note-title">ERD에 직접 표시되지 않은 업무 규칙도 별도로 기록한다</text>
-  <text x="600" y="1532" class="note-text">예: due_at ≥ borrowed_at, 이미 대여 중인 도서의 중복 대여 방지, 복본을 구분할지 여부</text>
-
-  <rect x="54" y="1610" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="226" y="1637" class="note-title">PK와 UK</text>
-  <text x="226" y="1662" class="note-text">PK는 행 식별, UK는 업무상 중복 금지</text>
-
-  <rect x="428" y="1610" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1637" class="note-title">FK 방향</text>
-  <text x="600" y="1662" class="note-text">N쪽 자식 FK가 1쪽 부모 PK를 참조</text>
-
-  <rect x="802" y="1610" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="974" y="1637" class="note-title">모델 범위</text>
-  <text x="974" y="1662" class="note-text">복본 미구분 가정을 요구사항과 함께 기록</text>
-
-  <rect x="80" y="1698" width="1040" height="28" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="1717" class="principle">ERD의 테이블·키·관계·선택성은 요구사항과 DDL, 테스트 결과로 추적할 수 있어야 한다</text>
+  <path class="ref" d="M 480 247 C 430 535, 265 535, 220 455" />
+  <text class="text" x="340" y="545">loans.member_id → members.id</text>
+  <path class="ref" d="M 720 292 C 780 570, 940 560, 980 455" />
+  <text class="text" x="860" y="585">loans.book_id → books.id</text>
+  <text class="text" x="600" y="535">각 loans 행은 회원 한 명과 도서 한 건을 반드시 참조한다.</text>
 </svg>

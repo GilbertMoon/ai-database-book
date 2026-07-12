@@ -1,48 +1,8 @@
-flowchart TB
-    A[업무 규칙<br/>한 회원은 여러 대여 기록을 가질 수 있고<br/>각 대여 기록은 한 회원에 속함] --> B[관계의 양쪽 수량과 필수 여부 확인]
+flowchart LR
+    M[members<br/>PK id]
+    L[loans<br/>FK member_id]
+    N[N쪽 테이블에 FK 배치]
 
-    B --> B1[members 쪽<br/>대여 기록 한 건이 가리키는 회원은 정확히 1명]
-    B --> B2[loans 쪽<br/>회원 한 명의 대여 기록은 0건 이상]
-
-    B1 --> C[1:N 관계 설계]
-    B2 --> C
-
-    C --> M[members · 부모 테이블]
-    C --> L[loans · 자식 테이블]
-
-    M --> M1[id PK = 1<br/>김민지]
-    M --> M2[id PK = 2<br/>이준호]
-    M --> M3[id PK = 3<br/>박서연]
-
-    L --> L1[id 101 · member_id FK = 1<br/>김민지의 첫 번째 대여]
-    L --> L2[id 102 · member_id FK = 1<br/>김민지의 두 번째 대여]
-    L --> L3[id 103 · member_id FK = 2<br/>이준호의 대여]
-
-    M1 -->|1| L1
-    M1 -->|같은 PK 값 반복 참조| L2
-    M2 -->|1| L3
-    M3 --> Z[현재 연결된 loans 행 0건]
-
-    L1 --> N[여러 자식 행의 member_id에<br/>같은 부모 id 값이 반복될 수 있음]
-    L2 --> N
-
-    C --> F[외래키 위치 결정]
-    F --> F1[N쪽인 loans에 member_id 배치]
-    F1 --> F2[각 loans 행이 부모 한 명의 id를 저장]
-    F2 --> F3[loans.member_id REFERENCES members.id]
-
-    F --> W[반대 방식의 문제]
-    W --> W1[members 행에 loan_id 목록을 저장하면<br/>개수가 계속 변하고 한 컬럼에 여러 값을 넣게 됨]
-    W1 --> W2[행 추가·조회·무결성 검사가 복잡해지므로<br/>자식 행이 부모 키를 갖는 구조를 사용]
-
-    L3 --> V{새 loans 행의 member_id가<br/>실제 members.id에 존재하는가?}
-    V -- 예 --> OK[저장 가능<br/>부모와 자식의 참조 무결성 유지]
-    V -- 아니요 · 예: 999 --> E[FK 오류<br/>존재하지 않는 회원의 대여 기록 차단]
-
-    OK --> J[JOIN으로 회원별 대여 조회<br/>members.id = loans.member_id]
-
-    N1[카디널리티 해석<br/>1:N은 모든 회원이 반드시 여러 대여를 가진다는 뜻이 아니라<br/>한 부모에 여러 자식이 연결될 수 있다는 최대 구조] --- B2
-    N2[필수성<br/>loans.member_id가 NOT NULL이므로 각 대여 기록에는 회원이 필수지만<br/>회원은 대여 기록 없이도 존재할 수 있음] --- F1
-    N3[역할<br/>members.id는 부모 행의 PK이며<br/>loans.member_id는 부모를 가리키는 FK] --- M1
-    N4[확장<br/>books와 loans도 같은 방식의 1:N 관계이며<br/>loans.book_id가 books.id를 참조] --- C
-    N5[핵심<br/>1:N 관계에서는 각 N쪽 행이 자신이 속한 1쪽 행의 PK를 FK로 저장] --- F3
+    M -- "1 : 0..N" --> L
+    L -. "member_id → members.id" .-> M
+    L --> N
