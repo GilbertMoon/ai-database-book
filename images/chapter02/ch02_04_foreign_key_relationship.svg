@@ -1,225 +1,210 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
-  <title id="title">외래키로 연결되는 학생-강의-수강신청 관계</title>
-  <desc id="desc">students와 courses의 기본키를 enrollments의 student_id와 course_id 외래키가 참조하고, 수강신청 행의 실제 값을 학생과 강의 행에 연결하며, 존재하지 않는 참조 값은 외래키 제약조건으로 거부되는 구조</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1240" viewBox="0 0 1200 1240" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">외래키로 연결되는 학생·강의·수강신청 관계</title>
+  <desc id="desc">students와 courses의 기본키를 enrollments의 student_id와 course_id 외래키가 참조하여 학생과 강의의 다대다 관계를 두 개의 일대다 관계로 표현하고, 존재하지 않는 참조 값은 외래키 제약조건으로 거부되는 구조를 설명한다.</desc>
+
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#6b46a8"/>
     </marker>
     <style>
       text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .section{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:15}
-      .section-title{font-size:18px;font-weight:700}
-      .section-sub{font-size:13px;fill:#475569}
-      .entity{fill:#fff;stroke:#64748b;stroke-width:1.6;rx:12}
-      .entity-head{stroke-width:1.6;rx:12}
-      .student-head{fill:#eef5ff;stroke:#3b82c4}
-      .course-head{fill:#fff8e8;stroke:#d69e2e}
-      .enroll-head{fill:#f5f1ff;stroke:#7c5cc4}
-      .entity-title{font-size:17px;font-weight:700;text-anchor:middle}
-      .entity-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .field-head{fill:#e9eef5;stroke:#94a3b8;stroke-width:1}
-      .field-head-text{font-size:11.5px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
-      .row{fill:#fff;stroke:#cbd5e1;stroke-width:1}
-      .pk-row{fill:#ecfdf3;stroke:#3c9a5f;stroke-width:1.2}
-      .fk-row{fill:#faf7ff;stroke:#9b7bd2;stroke-width:1.2}
-      .row-text{font-size:11.5px;text-anchor:middle;dominant-baseline:middle}
-      .key-pill{stroke-width:1;rx:6}
-      .pk-pill{fill:#e8f2ff;stroke:#3b82c4}.fk-pill{fill:#f3edff;stroke:#7c5cc4}
-      .key-text{font-size:10px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .entity-title{font-size:19px;font-weight:700;text-anchor:middle}
+      .entity-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .header-text{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .cell-text{font-size:13px;text-anchor:middle;dominant-baseline:middle}
+      .cell-text-small{font-size:12px;text-anchor:middle;dominant-baseline:middle}
+      .key-text{font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
       .pk-text{fill:#1e4f91}.fk-text{fill:#5b3a96}
-      .arrow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
-      .ref-arrow{stroke:#7c5cc4;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
-      .relation-label{font-size:12px;font-weight:700;text-anchor:middle;fill:#5b3a96}
-      .cardinality{font-size:13px;font-weight:700;fill:#334155;text-anchor:middle}
-      .explain-card{fill:#fff;stroke-width:1.4;rx:10}
-      .blue-card{stroke:#3b82c4}.purple-card{stroke:#7c5cc4}.green-card{stroke:#3c9a5f}
-      .explain-title{font-size:13.5px;font-weight:700;text-anchor:middle}
-      .explain-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .check-panel{fill:#f4f8ff;stroke:#93b4e6;stroke-width:1.5;rx:15}
-      .check-card{fill:#fff;stroke-width:1.4;rx:10}
-      .allow{stroke:#3c9a5f}.reject{stroke:#d9534f}
+      .relation{stroke:#6b46a8;stroke-width:2.6;fill:none;marker-end:url(#arrow-purple)}
+      .relation-label{font-size:13px;font-weight:700;text-anchor:middle;fill:#5b3a96}
+      .cardinality{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
+      .explain-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .explain-text{font-size:13px;text-anchor:middle;fill:#475569}
       .check-title{font-size:14px;font-weight:700;text-anchor:middle}
-      .check-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .result-ok{font-size:12px;font-weight:700;text-anchor:middle;fill:#166534}
-      .result-no{font-size:12px;font-weight:700;text-anchor:middle;fill:#b42318}
-      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}
-      .note-title{font-size:13px;font-weight:700;fill:#92400e}
-      .note-text{font-size:12px;fill:#475569}
-      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}
+      .check-text{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .result-ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .result-no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;fill:#92400e}
+      .note-text{font-size:12.5px;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;fill:#166534;text-anchor:middle}
+      .principle-main{font-size:18px;font-weight:700;fill:#166534;text-anchor:middle}
+      .principle-sub{font-size:13px;fill:#3f6f50;text-anchor:middle}
     </style>
   </defs>
 
-  <rect width="1200" height="1080" fill="#fff"/>
-  <text x="600" y="40" class="title">외래키로 연결되는 학생-강의-수강신청 관계</text>
-  <text x="600" y="68" class="subtitle">기본키는 자기 테이블의 행을 식별하고, 외래키는 다른 테이블의 기존 행을 참조해 관계를 만든다</text>
+  <rect width="1200" height="1240" fill="#ffffff"/>
 
-  <rect x="34" y="92" width="1132" height="620" class="section"/>
-  <text x="58" y="123" class="section-title">1. 학생과 강의를 수강신청 테이블로 연결</text>
-  <text x="387" y="123" class="section-sub">학생과 강의의 N:M 관계를 두 개의 1:N 관계로 표현</text>
+  <text x="600" y="42" class="title">외래키로 연결되는 학생·강의·수강신청 관계</text>
+  <text x="600" y="72" class="subtitle">기본키는 자기 테이블의 행을 식별하고, 외래키는 다른 테이블의 기존 행을 참조해 관계와 참조 무결성을 만든다</text>
 
-  <!-- students entity -->
-  <rect x="55" y="158" width="300" height="230" class="entity"/>
-  <rect x="55" y="158" width="300" height="58" class="entity-head student-head"/>
-  <text x="205" y="183" class="entity-title">students</text>
-  <text x="205" y="204" class="entity-sub">학생 기본 데이터</text>
-  <rect x="75" y="236" width="70" height="36" class="field-head"/>
-  <rect x="145" y="236" width="190" height="36" class="field-head"/>
-  <text x="110" y="254" class="field-head-text">id</text>
-  <text x="240" y="254" class="field-head-text">name</text>
-  <rect x="75" y="272" width="70" height="44" class="pk-row"/>
-  <rect x="145" y="272" width="190" height="44" class="row"/>
-  <text x="110" y="294" class="row-text">1</text>
-  <text x="240" y="294" class="row-text">김민지</text>
-  <rect x="75" y="316" width="70" height="44" class="pk-row"/>
-  <rect x="145" y="316" width="190" height="44" class="row"/>
-  <text x="110" y="338" class="row-text">2</text>
-  <text x="240" y="338" class="row-text">이준호</text>
-  <rect x="76" y="367" width="34" height="18" class="key-pill pk-pill"/>
-  <text x="93" y="376" class="key-text pk-text">PK</text>
-  <text x="125" y="379" class="entity-sub">id가 학생 행을 식별</text>
+  <!-- Section 1 -->
+  <rect x="34" y="98" width="1132" height="760" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 학생과 강의를 수강신청 테이블로 연결</text>
+  <text x="422" y="132" class="section-sub">학생과 강의의 N:M 관계를 연결 테이블을 이용해 두 개의 1:N 관계로 표현</text>
 
-  <!-- courses entity -->
-  <rect x="845" y="158" width="300" height="230" class="entity"/>
-  <rect x="845" y="158" width="300" height="58" class="entity-head course-head"/>
-  <text x="995" y="183" class="entity-title">courses</text>
-  <text x="995" y="204" class="entity-sub">강의 기본 데이터</text>
-  <rect x="865" y="236" width="70" height="36" class="field-head"/>
-  <rect x="935" y="236" width="190" height="36" class="field-head"/>
-  <text x="900" y="254" class="field-head-text">id</text>
-  <text x="1030" y="254" class="field-head-text">title</text>
-  <rect x="865" y="272" width="70" height="44" class="pk-row"/>
-  <rect x="935" y="272" width="190" height="44" class="row"/>
-  <text x="900" y="294" class="row-text">10</text>
-  <text x="1030" y="294" class="row-text">데이터베이스 입문</text>
-  <rect x="865" y="316" width="70" height="44" class="pk-row"/>
-  <rect x="935" y="316" width="190" height="44" class="row"/>
-  <text x="900" y="338" class="row-text">20</text>
-  <text x="1030" y="338" class="row-text">파이썬 기초</text>
-  <rect x="866" y="367" width="34" height="18" class="key-pill pk-pill"/>
-  <text x="883" y="376" class="key-text pk-text">PK</text>
-  <text x="915" y="379" class="entity-sub">id가 강의 행을 식별</text>
+  <!-- students -->
+  <rect x="70" y="168" width="350" height="260" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
+  <path d="M83 168H407A13 13 0 0 1 420 181V226H70V181A13 13 0 0 1 83 168Z" fill="#eef5ff" stroke="#3b82c4" stroke-width="1.7"/>
+  <text x="245" y="194" class="entity-title">students</text>
+  <text x="245" y="216" class="entity-sub">학생 기본 데이터</text>
 
-  <!-- enrollments entity -->
-  <rect x="390" y="188" width="420" height="300" class="entity"/>
-  <rect x="390" y="188" width="420" height="58" class="entity-head enroll-head"/>
-  <text x="600" y="213" class="entity-title">enrollments</text>
-  <text x="600" y="234" class="entity-sub">학생과 강의를 연결하고 관계의 속성을 저장</text>
+  <rect x="92" y="248" width="84" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="176" y="248" width="222" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="134" y="267" class="header-text">id</text>
+  <text x="287" y="267" class="header-text">name</text>
 
-  <rect x="410" y="266" width="55" height="34" class="field-head"/>
-  <rect x="465" y="266" width="90" height="34" class="field-head"/>
-  <rect x="555" y="266" width="90" height="34" class="field-head"/>
-  <rect x="645" y="266" width="70" height="34" class="field-head"/>
-  <rect x="715" y="266" width="75" height="34" class="field-head"/>
-  <text x="437.5" y="283" class="field-head-text">id</text>
-  <text x="510" y="283" class="field-head-text">student_id</text>
-  <text x="600" y="283" class="field-head-text">course_id</text>
-  <text x="680" y="283" class="field-head-text">status</text>
-  <text x="752.5" y="283" class="field-head-text">date</text>
+  <rect x="92" y="286" width="84" height="48" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="176" y="286" width="222" height="48" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="134" y="310" class="cell-text">1</text>
+  <text x="287" y="310" class="cell-text">김민지</text>
 
-  <rect x="410" y="300" width="55" height="50" class="pk-row"/>
-  <rect x="465" y="300" width="90" height="50" class="fk-row"/>
-  <rect x="555" y="300" width="90" height="50" class="fk-row"/>
-  <rect x="645" y="300" width="70" height="50" class="row"/>
-  <rect x="715" y="300" width="75" height="50" class="row"/>
-  <text x="437.5" y="325" class="row-text">1</text>
-  <text x="510" y="325" class="row-text">1</text>
-  <text x="600" y="325" class="row-text">10</text>
-  <text x="680" y="325" class="row-text">active</text>
-  <text x="752.5" y="325" class="row-text">07-01</text>
+  <rect x="92" y="334" width="84" height="48" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="176" y="334" width="222" height="48" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="134" y="358" class="cell-text">2</text>
+  <text x="287" y="358" class="cell-text">이준호</text>
 
-  <rect x="410" y="350" width="55" height="50" class="pk-row"/>
-  <rect x="465" y="350" width="90" height="50" class="fk-row"/>
-  <rect x="555" y="350" width="90" height="50" class="fk-row"/>
-  <rect x="645" y="350" width="70" height="50" class="row"/>
-  <rect x="715" y="350" width="75" height="50" class="row"/>
-  <text x="437.5" y="375" class="row-text">2</text>
-  <text x="510" y="375" class="row-text">1</text>
-  <text x="600" y="375" class="row-text">20</text>
-  <text x="680" y="375" class="row-text">active</text>
-  <text x="752.5" y="375" class="row-text">07-02</text>
+  <rect x="93" y="394" width="38" height="20" rx="7" fill="#e8f2ff" stroke="#3b82c4"/>
+  <text x="112" y="404" class="key-text pk-text">PK</text>
+  <text x="146" y="407" class="entity-sub" text-anchor="start">id가 학생 행을 식별</text>
 
-  <rect x="410" y="400" width="55" height="50" class="pk-row"/>
-  <rect x="465" y="400" width="90" height="50" class="fk-row"/>
-  <rect x="555" y="400" width="90" height="50" class="fk-row"/>
-  <rect x="645" y="400" width="70" height="50" class="row"/>
-  <rect x="715" y="400" width="75" height="50" class="row"/>
-  <text x="437.5" y="425" class="row-text">3</text>
-  <text x="510" y="425" class="row-text">2</text>
-  <text x="600" y="425" class="row-text">10</text>
-  <text x="680" y="425" class="row-text">active</text>
-  <text x="752.5" y="425" class="row-text">07-03</text>
+  <!-- courses -->
+  <rect x="780" y="168" width="350" height="260" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
+  <path d="M793 168H1117A13 13 0 0 1 1130 181V226H780V181A13 13 0 0 1 793 168Z" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.7"/>
+  <text x="955" y="194" class="entity-title">courses</text>
+  <text x="955" y="216" class="entity-sub">강의 기본 데이터</text>
 
-  <rect x="418" y="459" width="34" height="18" class="key-pill pk-pill"/>
-  <text x="435" y="468" class="key-text pk-text">PK</text>
-  <text x="462" y="471" class="entity-sub">id</text>
-  <rect x="490" y="459" width="34" height="18" class="key-pill fk-pill"/>
-  <text x="507" y="468" class="key-text fk-text">FK</text>
-  <text x="535" y="471" class="entity-sub">student_id</text>
-  <rect x="610" y="459" width="34" height="18" class="key-pill fk-pill"/>
-  <text x="627" y="468" class="key-text fk-text">FK</text>
-  <text x="655" y="471" class="entity-sub">course_id</text>
+  <rect x="802" y="248" width="84" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="886" y="248" width="222" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="844" y="267" class="header-text">id</text>
+  <text x="997" y="267" class="header-text">title</text>
 
-  <!-- FK reference arrows -->
-  <path d="M465 325H375V294H145" class="ref-arrow"/>
-  <text x="305" y="310" class="relation-label">student_id 1 → students.id 1</text>
-  <path d="M645 325H825V294H865" class="ref-arrow"/>
-  <text x="760" y="310" class="relation-label">course_id 10 → courses.id 10</text>
+  <rect x="802" y="286" width="84" height="48" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="886" y="286" width="222" height="48" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="844" y="310" class="cell-text">10</text>
+  <text x="997" y="310" class="cell-text">데이터베이스 입문</text>
 
-  <text x="365" y="205" class="cardinality">1</text>
-  <text x="385" y="245" class="cardinality">N</text>
-  <text x="815" y="245" class="cardinality">N</text>
-  <text x="835" y="205" class="cardinality">1</text>
+  <rect x="802" y="334" width="84" height="48" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="886" y="334" width="222" height="48" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="844" y="358" class="cell-text">20</text>
+  <text x="997" y="358" class="cell-text">파이썬 기초</text>
 
-  <rect x="70" y="526" width="320" height="112" class="explain-card blue-card"/>
-  <text x="230" y="554" class="explain-title">행 1의 의미</text>
-  <text x="230" y="582" class="explain-sub">student_id 1은 김민지 행을 참조</text>
-  <text x="230" y="604" class="explain-sub">course_id 10은 데이터베이스 입문을 참조</text>
-  <text x="230" y="626" class="explain-sub">“김민지가 데이터베이스 입문을 신청했다”</text>
+  <rect x="803" y="394" width="38" height="20" rx="7" fill="#e8f2ff" stroke="#3b82c4"/>
+  <text x="822" y="404" class="key-text pk-text">PK</text>
+  <text x="856" y="407" class="entity-sub" text-anchor="start">id가 강의 행을 식별</text>
 
-  <rect x="440" y="526" width="320" height="112" class="explain-card purple-card"/>
-  <text x="600" y="554" class="explain-title">N:M 관계 해소</text>
-  <text x="600" y="582" class="explain-sub">학생 1명은 여러 수강신청을 가질 수 있음</text>
-  <text x="600" y="604" class="explain-sub">강의 1개도 여러 수강신청을 가질 수 있음</text>
-  <text x="600" y="626" class="explain-sub">students 1:N enrollments N:1 courses</text>
+  <!-- enrollments -->
+  <rect x="285" y="500" width="630" height="235" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
+  <path d="M298 500H902A13 13 0 0 1 915 513V558H285V513A13 13 0 0 1 298 500Z" fill="#f5f1ff" stroke="#7c5cc4" stroke-width="1.7"/>
+  <text x="600" y="526" class="entity-title">enrollments</text>
+  <text x="600" y="548" class="entity-sub">학생과 강의를 연결하고 수강 관계 자체의 정보를 저장</text>
 
-  <rect x="810" y="526" width="320" height="112" class="explain-card green-card"/>
-  <text x="970" y="554" class="explain-title">관계 자체의 속성</text>
-  <text x="970" y="582" class="explain-sub">신청일 · 상태 · 성적 · 취소일 등</text>
-  <text x="970" y="604" class="explain-sub">학생이나 강의가 아닌 “수강 관계”의 정보</text>
-  <text x="970" y="626" class="explain-sub">연결 테이블에 함께 저장</text>
+  <rect x="307" y="580" width="64" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="371" y="580" width="116" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="487" y="580" width="116" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="603" y="580" width="104" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="707" y="580" width="186" height="38" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="339" y="599" class="header-text">id</text>
+  <text x="429" y="599" class="header-text">student_id</text>
+  <text x="545" y="599" class="header-text">course_id</text>
+  <text x="655" y="599" class="header-text">status</text>
+  <text x="800" y="599" class="header-text">enrolled_at</text>
 
-  <rect x="34" y="736" width="1132" height="190" class="check-panel"/>
-  <text x="58" y="767" class="section-title">2. 외래키 제약조건의 참조 무결성 검사</text>
-  <text x="405" y="767" class="section-sub">자식 테이블의 FK 값은 부모 테이블에 실제로 존재해야 함</text>
+  <rect x="307" y="618" width="64" height="44" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="371" y="618" width="116" height="44" fill="#faf7ff" stroke="#9b7bd2" stroke-width="1.3"/>
+  <rect x="487" y="618" width="116" height="44" fill="#faf7ff" stroke="#9b7bd2" stroke-width="1.3"/>
+  <rect x="603" y="618" width="104" height="44" fill="#ffffff" stroke="#cbd5e1"/>
+  <rect x="707" y="618" width="186" height="44" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="339" y="640" class="cell-text">1</text>
+  <text x="429" y="640" class="cell-text">1</text>
+  <text x="545" y="640" class="cell-text">10</text>
+  <text x="655" y="640" class="cell-text-small">active</text>
+  <text x="800" y="640" class="cell-text-small">2026-07-01</text>
 
-  <rect x="58" y="796" width="330" height="100" class="check-card allow"/>
-  <text x="223" y="824" class="check-title">student_id=2, course_id=10</text>
-  <text x="223" y="852" class="check-sub">students.id 2와 courses.id 10이 모두 존재</text>
-  <text x="223" y="878" class="result-ok">INSERT 허용</text>
+  <rect x="307" y="662" width="64" height="44" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.3"/>
+  <rect x="371" y="662" width="116" height="44" fill="#faf7ff" stroke="#9b7bd2" stroke-width="1.3"/>
+  <rect x="487" y="662" width="116" height="44" fill="#faf7ff" stroke="#9b7bd2" stroke-width="1.3"/>
+  <rect x="603" y="662" width="104" height="44" fill="#ffffff" stroke="#cbd5e1"/>
+  <rect x="707" y="662" width="186" height="44" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="339" y="684" class="cell-text">2</text>
+  <text x="429" y="684" class="cell-text">1</text>
+  <text x="545" y="684" class="cell-text">20</text>
+  <text x="655" y="684" class="cell-text-small">active</text>
+  <text x="800" y="684" class="cell-text-small">2026-07-02</text>
 
-  <rect x="435" y="796" width="330" height="100" class="check-card reject"/>
-  <text x="600" y="824" class="check-title">student_id=99</text>
-  <text x="600" y="852" class="check-sub">students.id에 99가 존재하지 않음</text>
-  <text x="600" y="878" class="result-no">외래키 위반으로 거부</text>
+  <!-- key legend -->
+  <rect x="315" y="716" width="38" height="20" rx="7" fill="#e8f2ff" stroke="#3b82c4"/>
+  <text x="334" y="726" class="key-text pk-text">PK</text>
+  <text x="364" y="729" class="entity-sub" text-anchor="start">id</text>
+  <rect x="418" y="716" width="38" height="20" rx="7" fill="#f3edff" stroke="#7c5cc4"/>
+  <text x="437" y="726" class="key-text fk-text">FK</text>
+  <text x="467" y="729" class="entity-sub" text-anchor="start">student_id</text>
+  <rect x="585" y="716" width="38" height="20" rx="7" fill="#f3edff" stroke="#7c5cc4"/>
+  <text x="604" y="726" class="key-text fk-text">FK</text>
+  <text x="634" y="729" class="entity-sub" text-anchor="start">course_id</text>
 
-  <rect x="812" y="796" width="330" height="100" class="check-card reject"/>
-  <text x="977" y="824" class="check-title">course_id=999</text>
-  <text x="977" y="852" class="check-sub">courses.id에 999가 존재하지 않음</text>
-  <text x="977" y="878" class="result-no">외래키 위반으로 거부</text>
+  <!-- parent PK to child FK connectors -->
+  <path d="M134 428V468H429V578" class="relation"/>
+  <path d="M844 428V468H545V578" class="relation"/>
+  <text x="282" y="460" class="relation-label">students.id → enrollments.student_id</text>
+  <text x="728" y="460" class="relation-label">courses.id → enrollments.course_id</text>
+  <text x="146" y="451" class="cardinality">1</text>
+  <text x="415" y="493" class="cardinality">N</text>
+  <text x="830" y="451" class="cardinality">1</text>
+  <text x="559" y="493" class="cardinality">N</text>
 
-  <rect x="54" y="948" width="535" height="48" class="note"/>
-  <text x="76" y="970" class="note-title">중복 신청</text>
-  <text x="154" y="970" class="note-text">FK만으로는 중복 수강신청을 막지 않는다. 필요하면 UNIQUE(student_id, course_id)를 추가한다.</text>
+  <!-- explanation cards -->
+  <rect x="58" y="765" width="330" height="70" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="790" class="explain-title">수강신청 행의 의미</text>
+  <text x="223" y="815" class="explain-text">student_id 1, course_id 10 → 김민지가 데이터베이스 입문을 신청</text>
 
-  <rect x="611" y="948" width="535" height="48" class="note"/>
-  <text x="633" y="970" class="note-title">삭제 규칙</text>
-  <text x="711" y="970" class="note-text">부모 행 삭제 시 RESTRICT·CASCADE·SET NULL 같은 ON DELETE 동작을 별도로 설계한다.</text>
+  <rect x="435" y="765" width="330" height="70" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="790" class="explain-title">N:M 관계 해소</text>
+  <text x="600" y="815" class="explain-text">students 1:N enrollments N:1 courses</text>
 
-  <rect x="155" y="1018" width="890" height="42" class="principle"/>
-  <text x="181" y="1043" class="principle-label">핵심 원칙</text>
-  <text x="620" y="1043" class="principle-text">PK는 자기 행을 식별하고, FK는 존재하는 다른 행을 참조하여 관계와 참조 무결성을 만든다</text>
+  <rect x="812" y="765" width="330" height="70" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="977" y="790" class="explain-title">관계 자체의 속성</text>
+  <text x="977" y="815" class="explain-text">신청일·상태·성적·취소일 등은 enrollments에 저장</text>
+
+  <!-- Section 2 -->
+  <rect x="34" y="882" width="1132" height="190" rx="16" fill="#f4f8ff" stroke="#93b4e6" stroke-width="1.6"/>
+  <text x="58" y="916" class="section-title">2. 외래키 제약조건의 참조 무결성 검사</text>
+  <text x="433" y="916" class="section-sub">NULL을 허용하지 않는 FK라면, 입력 값은 부모 테이블에 실제로 존재해야 한다</text>
+
+  <rect x="58" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="223" y="970" class="check-title">student_id=2, course_id=10</text>
+  <text x="223" y="995" class="check-text">students.id 2와 courses.id 10이 모두 존재</text>
+  <text x="223" y="1022" class="result-ok">INSERT 허용</text>
+
+  <rect x="435" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="600" y="970" class="check-title">student_id=99</text>
+  <text x="600" y="995" class="check-text">students.id에 99가 존재하지 않음</text>
+  <text x="600" y="1022" class="result-no">외래키 위반으로 거부</text>
+
+  <rect x="812" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="977" y="970" class="check-title">course_id=999</text>
+  <text x="977" y="995" class="check-text">courses.id에 999가 존재하지 않음</text>
+  <text x="977" y="1022" class="result-no">외래키 위반으로 거부</text>
+
+  <!-- notes -->
+  <rect x="54" y="1092" width="535" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="76" y="1118" class="note-title">중복 신청</text>
+  <text x="154" y="1118" class="note-text">FK만으로는 중복 수강신청을 막지 않는다.</text>
+  <text x="154" y="1139" class="note-text">필요하면 UNIQUE(student_id, course_id)를 추가한다.</text>
+
+  <rect x="611" y="1092" width="535" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="633" y="1118" class="note-title">삭제 규칙</text>
+  <text x="711" y="1118" class="note-text">부모 행 삭제 시 RESTRICT·CASCADE·SET NULL 등</text>
+  <text x="711" y="1139" class="note-text">ON DELETE 동작을 관계의 의미에 맞게 별도로 설계한다.</text>
+
+  <!-- principle -->
+  <rect x="80" y="1170" width="1040" height="54" rx="12" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1170" width="190" height="54" rx="12" fill="#dcf7e5"/>
+  <line x1="270" y1="1181" x2="270" y2="1213" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1202" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1193" class="principle-main">PK는 행을 식별하고, FK는 존재하는 부모 행을 참조한다</text>
+  <text x="695" y="1214" class="principle-sub">외래키 제약조건은 테이블 간 관계의 참조 무결성을 유지한다</text>
 </svg>
