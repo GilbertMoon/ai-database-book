@@ -1,15 +1,16 @@
-flowchart TD
-    A[AI가 생성한 JOIN/집계 SQL]
-    A --> B[JOIN 조건 검토]
-    B --> C[GROUP BY 검토]
-    C --> D[COUNT/SUM/AVG 검토]
-    D --> E[NULL 처리 검토]
-    E --> F[실행 결과 확인]
-    F --> G[요구사항과 비교]
+flowchart TB
+    Q[1. 업무 질문과 예상 결과 정의]
+    A[2. AI 생성 SQL]
+    J[3. JOIN 경로와 ON 조건 확인]
+    T[4. 기준 행과 JOIN 종류 확인]
+    G[5. GROUP BY와 집계 대상 확인]
+    C[6. COUNT · SUM · NULL · 중복 계산 확인]
+    R[7. PostgreSQL에서 실행]
+    D{원본 건수와 수동 계산에 맞는가?}
+    F[SQL 또는 요구사항을 수정하고\n다시 실행]
+    O[검토된 SQL과 근거 기록]
 
-    B --> B1[ON 조건 누락 여부]
-    C --> C1[일반 컬럼 포함 여부]
-    D --> D1[중복 집계 여부]
-    E --> E1[COALESCE 필요 여부]
-    F --> F1[DBeaver 실행]
-    G --> H[사람이 수정 후 확정]
+    Q --> A --> J --> T --> G --> C --> R --> D
+    D -->|아니요| F
+    F --> A
+    D -->|예| O

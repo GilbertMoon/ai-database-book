@@ -1,20 +1,7 @@
 flowchart TB
-    A[students 기준]
-    A --> B[김민지]
-    A --> C[이준호]
-    A --> D[최현우]
+    S[students 기준\n김민지 일치 2건\n이준호 일치 2건\n박서연 일치 1건\n최현우 일치 0건]
+    R[LEFT JOIN 결과\n2 + 2 + 1 + NULL 1행\n총 6행]
+    N[최현우 결과\nstudent_name = 최현우\ncourse_title = NULL\nstatus = NULL]
+    M[일치 행이 없으면 왼쪽 행은 유지되고\n오른쪽 컬럼이 NULL로 채워진다]
 
-    E[enrollments]
-    E --> F[김민지 수강신청]
-    E --> G[이준호 수강신청]
-
-    B --> H[매칭 성공]
-    F --> H
-    C --> I[매칭 성공]
-    G --> I
-    D --> J[매칭 없음]
-
-    H --> K[LEFT JOIN 결과 포함]
-    I --> K
-    J --> L[course_title = NULL]
-    L --> K
+    S --> R --> N --> M

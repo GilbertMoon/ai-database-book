@@ -1,20 +1,7 @@
-flowchart LR
-    A[students]
-    B[enrollments]
+flowchart TB
+    S[students\n김민지 2건\n이준호 2건\n박서연 1건\n최현우 0건]
+    J[students.id = enrollments.student_id]
+    R[INNER JOIN 결과\n김민지 2행\n이준호 2행\n박서연 1행\n최현우 제외\n총 5행]
+    M[일치하는 행만 포함하고\n한 학생에 일치 행이 여러 개면 결과도 여러 행이다]
 
-    A --> A1[id = 1 김민지]
-    A --> A2[id = 2 이준호]
-    A --> A3[id = 4 최현우]
-
-    B --> B1[student_id = 1]
-    B --> B2[student_id = 2]
-
-    A1 --> C[조건 일치]
-    B1 --> C
-    A2 --> D[조건 일치]
-    B2 --> D
-    A3 --> E[조건 불일치]
-
-    C --> F[INNER JOIN 결과 포함]
-    D --> F
-    E --> G[결과 제외]
+    S --> J --> R --> M

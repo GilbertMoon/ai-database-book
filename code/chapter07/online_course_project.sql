@@ -2,6 +2,14 @@
 -- 프로젝트: 온라인 강의 수강신청 데이터베이스 설계
 -- 목적: 요구사항, 관계, 제약조건, 샘플 데이터, JOIN과 CRUD를 하나의 실행 흐름으로 검증한다.
 
+-- 주의:
+-- 이 파일은 enrollments, courses, instructors, students 테이블을
+-- 삭제하고 다시 생성합니다.
+-- 개인 실습용 데이터베이스에서만 실행하세요.
+
+-- 0. 현재 연결된 데이터베이스 확인
+SELECT current_database();
+
 -- 1. 반복 실행을 위한 기존 테이블 삭제
 -- 외래키로 참조하는 테이블부터 먼저 삭제한다.
 DROP TABLE IF EXISTS enrollments;
@@ -89,7 +97,16 @@ SELECT * FROM instructors ORDER BY id;
 SELECT * FROM courses ORDER BY id;
 SELECT * FROM enrollments ORDER BY id;
 
--- 11. 수강신청 현황 JOIN 조회
+-- 11. 기본 데이터 건수 확인
+-- 기본 샘플 입력 직후 기준이다.
+SELECT COUNT(*) FROM students;      -- 예상 3
+SELECT COUNT(*) FROM instructors;   -- 예상 2
+SELECT COUNT(*) FROM courses;       -- 예상 3
+SELECT COUNT(*) FROM enrollments;   -- 예상 4
+
+-- 12. 수강신청 현황 JOIN 조회
+-- enrollments 4건, INNER JOIN 결과 예상 4행
+-- 이 시점은 CRUD 추가 전 기준선이다.
 SELECT
     e.id AS enrollment_id,
     s.name AS student_name,
@@ -107,7 +124,7 @@ JOIN instructors AS i
     ON c.instructor_id = i.id
 ORDER BY e.id;
 
--- 12. 특정 학생의 수강신청 목록 조회
+-- 13. 특정 학생의 수강신청 목록 조회
 SELECT
     s.name AS student_name,
     c.title AS course_title,
@@ -120,28 +137,32 @@ JOIN courses AS c
 WHERE s.email = 'minji@example.com'
 ORDER BY e.id;
 
--- 13. 새로운 수강신청 추가
+-- 14. 새로운 수강신청 추가
+-- 이준호가 정규화 실습을 신청한다.
 INSERT INTO enrollments
     (student_id, course_id, enrolled_at, status, paid_amount)
 VALUES
     (2, 2, '2026-04-07', '신청', 120000);
 
--- 14. UPDATE 전 대상 확인
+-- 신규 신청 추가 후 enrollments는 5행이다.
+SELECT COUNT(*) FROM enrollments;   -- 예상 5
+
+-- 15. UPDATE 전 대상 확인
 SELECT *
 FROM enrollments
 WHERE id = 1;
 
--- 15. 수강 상태 변경
+-- 16. 수강 상태 변경
 UPDATE enrollments
 SET status = '완료'
 WHERE id = 1;
 
--- 16. UPDATE 후 결과 확인
+-- 17. UPDATE 후 결과 확인
 SELECT *
 FROM enrollments
 WHERE id = 1;
 
--- 17. 삭제보다 상태 변경을 우선 검토
+-- 18. 삭제보다 상태 변경을 우선 검토
 SELECT *
 FROM enrollments
 WHERE id = 4;
@@ -154,13 +175,43 @@ SELECT *
 FROM enrollments
 WHERE id = 4;
 
--- 18. 실제 삭제가 필요한 경우의 예시
+-- 상태 변경 후 최종 상태 확인
+-- id 1은 완료, id 4는 취소, 전체 enrollments는 5행이어야 한다.
+SELECT id, student_id, course_id, status, paid_amount
+FROM enrollments
+WHERE id IN (1, 4)
+ORDER BY id;
+
+SELECT COUNT(*) FROM enrollments;   -- 예상 5
+
+-- 19. 실제 삭제가 필요한 경우의 예시
 -- 반드시 같은 WHERE 조건으로 SELECT를 먼저 실행한다.
 -- SELECT * FROM enrollments WHERE id = 4;
 -- DELETE FROM enrollments WHERE id = 4;
 -- SELECT * FROM enrollments WHERE id = 4;
 
--- 19. 정규화 검토용 조회
+-- 20. Chapter 08 인계 상태 확인
+-- 전체 SQL 파일을 끝까지 실행한 뒤의 기준 JOIN이다.
+-- 최종 JOIN 결과 예상 5행
+-- id 1 완료, id 4 취소, 신규 신청 행이 포함되어야 한다.
+SELECT
+    e.id AS enrollment_id,
+    s.name AS student_name,
+    c.title AS course_title,
+    i.name AS instructor_name,
+    e.status,
+    e.paid_amount,
+    e.enrolled_at
+FROM enrollments AS e
+JOIN students AS s
+    ON e.student_id = s.id
+JOIN courses AS c
+    ON e.course_id = c.id
+JOIN instructors AS i
+    ON c.instructor_id = i.id
+ORDER BY e.id;
+
+-- 21. 정규화 검토용 조회
 -- 학생 이메일은 students에 한 번만 저장된다.
 SELECT id, name, email
 FROM students
@@ -176,8 +227,9 @@ SELECT student_id, course_id, status
 FROM enrollments
 ORDER BY student_id, course_id;
 
--- 20. 선택적 오류 검증 예시
--- 아래 SQL은 제약조건이 정상적으로 작동하는지 확인할 때 한 줄씩 실행한다.
+-- 22. 선택적 오류 검증 예시
+-- 아래 SQL은 제약조건이 정상적으로 작동하는지 확인할 때
+-- 한 문장씩 주석을 해제하여 선택적으로 실행한다.
 
 -- 중복 이메일: UNIQUE 오류가 발생해야 정상이다.
 -- INSERT INTO students (name, email, joined_at)
@@ -194,3 +246,9 @@ ORDER BY student_id, course_id;
 --     (student_id, course_id, enrolled_at, status, paid_amount)
 -- VALUES
 --     (1, 3, CURRENT_DATE, '알 수 없음', 150000);
+
+-- 존재하지 않는 학생 참조: FOREIGN KEY 오류가 발생해야 정상이다.
+-- INSERT INTO enrollments
+--     (student_id, course_id, enrolled_at, status, paid_amount)
+-- VALUES
+--     (999, 1, CURRENT_DATE, '신청', 100000);

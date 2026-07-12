@@ -1,194 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1980" viewBox="0 0 1200 1980" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">GROUP BY와 집계 흐름</title>
-  <desc id="desc">수강신청 원본 5행을 status 값에 따라 신청, 수강중, 완료의 세 그룹으로 묶고 각 그룹에서 COUNT, SUM, AVG를 계산해 그룹당 결과 한 행을 만드는 과정을 설명한다. SELECT의 일반 컬럼과 GROUP BY 규칙, WHERE와 HAVING의 적용 시점, COUNT 별 NULL 처리, ORDER BY 필요성과 전체 건수 및 합계 검증 기준을 함께 보여 준다.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 560">
+  <title id="title">GROUP BY로 상태별 행 묶기</title>
+  <desc id="desc">원본 5개의 수강신청 행이 status 값에 따라 신청, 수강중, 완료의 세 그룹으로 묶이고 COUNT 결과 3행으로 요약되는 과정을 보여 주는 도식이다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
-    </marker>
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f855a"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
-      .mono-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.3px;text-anchor:middle;fill:#334155}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .group-blue{stroke:#2f6fad;stroke-width:2;fill:none;marker-end:url(#arrow-blue)}
-      .group-green{stroke:#2f855a;stroke-width:2;fill:none;marker-end:url(#arrow-green)}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .th{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
-      .cell{font-size:11.3px;text-anchor:middle;fill:#334155}
-      .cell-blue{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
-      .cell-orange{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .cell-green{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#166534}
-      .line{stroke:#cbd5e1;stroke-width:1}
-      .result-head{font-size:11.6px;font-weight:700;text-anchor:middle;fill:#334155}
-      .result-cell{font-size:11.4px;text-anchor:middle;fill:#334155}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.2px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
-      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
-      .warn{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .head { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
     </style>
   </defs>
-
-  <rect width="1200" height="1980" fill="#ffffff"/>
-  <text x="600" y="42" class="title">GROUP BY와 집계 흐름</text>
-  <text x="600" y="72" class="subtitle">같은 그룹 키를 가진 여러 원본 행을 묶고, 그룹별 요약값을 계산해 그룹당 결과 한 행을 만든다</text>
-
-  <rect x="34" y="98" width="1132" height="404" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 집계 질문과 원본 행의 기준을 확인한다</text>
-  <text x="402" y="132" class="section-sub">질문: 수강상태별 신청 건수·결제 합계·평균은 얼마인가?</text>
-
-  <rect x="58" y="162" width="1084" height="68" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="600" y="187" class="card-title">원본 한 행 = 수강신청 한 건 · 그룹 키 = status</text>
-  <text x="600" y="212" class="card-text-small">GROUP BY 전에는 5행이며, status가 같은 행들이 같은 그룹으로 모인다</text>
-
-  <rect x="58" y="258" width="1084" height="190" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.4"/>
-  <rect x="58" y="258" width="1084" height="40" rx="11" fill="#dcecff"/>
-  <text x="130" y="284" class="th">id</text>
-  <text x="330" y="284" class="th">student_id</text>
-  <text x="530" y="284" class="th">course_id</text>
-  <text x="760" y="284" class="th">status</text>
-  <text x="1010" y="284" class="th">paid_amount</text>
-  <line x1="58" y1="298" x2="1142" y2="298" class="line"/>
-  <line x1="205" y1="258" x2="205" y2="448" class="line"/>
-  <line x1="430" y1="258" x2="430" y2="448" class="line"/>
-  <line x1="635" y1="258" x2="635" y2="448" class="line"/>
-  <line x1="885" y1="258" x2="885" y2="448" class="line"/>
-  <line x1="58" y1="328" x2="1142" y2="328" class="line"/>
-  <line x1="58" y1="358" x2="1142" y2="358" class="line"/>
-  <line x1="58" y1="388" x2="1142" y2="388" class="line"/>
-  <line x1="58" y1="418" x2="1142" y2="418" class="line"/>
-  <text x="130" y="320" class="cell">1</text><text x="330" y="320" class="cell">1</text><text x="530" y="320" class="cell">1</text><text x="760" y="320" class="cell-blue">수강중</text><text x="1010" y="320" class="cell">100000</text>
-  <text x="130" y="350" class="cell">2</text><text x="330" y="350" class="cell">1</text><text x="530" y="350" class="cell">2</text><text x="760" y="350" class="cell-orange">신청</text><text x="1010" y="350" class="cell">120000</text>
-  <text x="130" y="380" class="cell">3</text><text x="330" y="380" class="cell">2</text><text x="530" y="380" class="cell">1</text><text x="760" y="380" class="cell-blue">수강중</text><text x="1010" y="380" class="cell">100000</text>
-  <text x="130" y="410" class="cell">4</text><text x="330" y="410" class="cell">3</text><text x="530" y="410" class="cell">3</text><text x="760" y="410" class="cell-orange">신청</text><text x="1010" y="410" class="cell">150000</text>
-  <text x="130" y="440" class="cell">5</text><text x="330" y="440" class="cell">2</text><text x="530" y="440" class="cell">3</text><text x="760" y="440" class="cell-green">완료</text><text x="1010" y="440" class="cell">150000</text>
-
-  <rect x="176" y="462" width="848" height="24" rx="8" fill="#ffffff" stroke="#6fa2e8" stroke-width="1.1"/>
-  <text x="600" y="479" class="card-text-small">전체 검산 기준 · COUNT(*) = 5 · SUM(paid_amount) = 620000</text>
-
-  <path d="M600 502V526" class="flow"/>
-
-  <rect x="34" y="526" width="1132" height="486" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="560" class="section-title">2. GROUP BY status로 세 그룹을 만들고 그룹 안에서 계산한다</text>
-  <text x="545" y="560" class="section-sub">그룹 키의 서로 다른 값 수가 기본적인 결과 행 수가 된다</text>
-
-  <rect x="414" y="588" width="372" height="58" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="612" class="card-title">GROUP BY status</text>
-  <text x="600" y="635" class="mono-small">수강중 · 신청 · 완료 → 3개 그룹</text>
-
-  <rect x="58" y="690" width="330" height="244" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <rect x="58" y="690" width="330" height="42" rx="12" fill="#fff1cf"/>
-  <text x="223" y="717" class="table-title">신청 그룹</text>
-  <text x="223" y="760" class="mono-small">행 id 2 · paid 120000</text>
-  <text x="223" y="790" class="mono-small">행 id 4 · paid 150000</text>
-  <line x1="84" y1="812" x2="362" y2="812" class="line"/>
-  <text x="223" y="842" class="card-text">COUNT(*) = 2</text>
-  <text x="223" y="870" class="card-text">SUM = 270000</text>
-  <text x="223" y="898" class="card-text">AVG = 135000</text>
-
-  <rect x="435" y="690" width="330" height="244" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <rect x="435" y="690" width="330" height="42" rx="12" fill="#dcecff"/>
-  <text x="600" y="717" class="table-title">수강중 그룹</text>
-  <text x="600" y="760" class="mono-small">행 id 1 · paid 100000</text>
-  <text x="600" y="790" class="mono-small">행 id 3 · paid 100000</text>
-  <line x1="461" y1="812" x2="739" y2="812" class="line"/>
-  <text x="600" y="842" class="card-text">COUNT(*) = 2</text>
-  <text x="600" y="870" class="card-text">SUM = 200000</text>
-  <text x="600" y="898" class="card-text">AVG = 100000</text>
-
-  <rect x="812" y="690" width="330" height="244" rx="12" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <rect x="812" y="690" width="330" height="42" rx="12" fill="#dcf7e5"/>
-  <text x="977" y="717" class="table-title">완료 그룹</text>
-  <text x="977" y="760" class="mono-small">행 id 5 · paid 150000</text>
-  <text x="977" y="790" class="mono-small">추가 행 없음</text>
-  <line x1="838" y1="812" x2="1116" y2="812" class="line"/>
-  <text x="977" y="842" class="card-text">COUNT(*) = 1</text>
-  <text x="977" y="870" class="card-text">SUM = 150000</text>
-  <text x="977" y="898" class="card-text">AVG = 150000</text>
-
-  <path d="M520 646L223 690" class="group-blue"/>
-  <path d="M600 646V690" class="group-blue"/>
-  <path d="M680 646L977 690" class="group-green"/>
-
-  <rect x="154" y="954" width="892" height="34" rx="10" fill="#ffffff" stroke="#d69e2e" stroke-width="1.2"/>
-  <text x="600" y="976" class="card-text-small">집계 함수는 그룹별 입력 행을 하나의 요약값으로 줄이며, GROUP BY 자체가 원본 행을 수정하지는 않는다</text>
-
-  <path d="M600 1012V1036" class="flow"/>
-
-  <rect x="34" y="1036" width="1132" height="496" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="1070" class="section-title">3. SELECT 결과는 그룹당 한 행이며, 정렬은 ORDER BY로 지정한다</text>
-  <text x="555" y="1070" class="section-sub">GROUP BY는 결과 표시 순서를 보장하지 않는다</text>
-
-  <rect x="58" y="1102" width="1084" height="156" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <text x="600" y="1130" class="card-title">상태별 건수·결제 합계·평균</text>
-  <text x="600" y="1161" class="mono">SELECT status, COUNT(*) AS enrollment_count,</text>
-  <text x="600" y="1187" class="mono">SUM(paid_amount) AS total_amount, AVG(paid_amount) AS avg_amount</text>
-  <text x="600" y="1213" class="mono">FROM enrollments GROUP BY status ORDER BY status</text>
-  <text x="600" y="1241" class="card-text-small">SELECT의 비집계 컬럼 status는 GROUP BY에도 포함한다</text>
-
-  <rect x="58" y="1286" width="1084" height="188" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <rect x="58" y="1286" width="1084" height="40" rx="11" fill="#dcf7e5"/>
-  <text x="190" y="1312" class="result-head">status</text>
-  <text x="420" y="1312" class="result-head">enrollment_count</text>
-  <text x="700" y="1312" class="result-head">total_amount</text>
-  <text x="1000" y="1312" class="result-head">avg_amount</text>
-  <line x1="58" y1="1326" x2="1142" y2="1326" class="line"/>
-  <line x1="305" y1="1286" x2="305" y2="1474" class="line"/>
-  <line x1="565" y1="1286" x2="565" y2="1474" class="line"/>
-  <line x1="845" y1="1286" x2="845" y2="1474" class="line"/>
-  <line x1="58" y1="1372" x2="1142" y2="1372" class="line"/>
-  <line x1="58" y1="1418" x2="1142" y2="1418" class="line"/>
-  <text x="190" y="1358" class="result-cell">신청</text><text x="420" y="1358" class="result-cell">2</text><text x="700" y="1358" class="result-cell">270000</text><text x="1000" y="1358" class="result-cell">135000</text>
-  <text x="190" y="1404" class="result-cell">수강중</text><text x="420" y="1404" class="result-cell">2</text><text x="700" y="1404" class="result-cell">200000</text><text x="1000" y="1404" class="result-cell">100000</text>
-  <text x="190" y="1450" class="result-cell">완료</text><text x="420" y="1450" class="result-cell">1</text><text x="700" y="1450" class="result-cell">150000</text><text x="1000" y="1450" class="result-cell">150000</text>
-
-  <rect x="126" y="1488" width="948" height="26" rx="8" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.1"/>
-  <text x="600" y="1506" class="ok">결과 3행 · 그룹 COUNT 합계 5 · 그룹 SUM 합계 620000 → 원본 전체와 일치</text>
-
-  <path d="M600 1532V1556" class="flow"/>
-
-  <rect x="34" y="1556" width="1132" height="330" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="1590" class="section-title">4. GROUP BY와 집계를 검토할 때 확인할 것</text>
-  <text x="420" y="1590" class="section-sub">작은 문법 차이가 집계 대상과 결과 건수를 바꾼다</text>
-
-  <rect x="58" y="1622" width="330" height="170" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="223" y="1650" class="card-title">그룹 기준과 SELECT</text>
-  <text x="223" y="1680" class="card-text">결과 한 행이 무엇을 의미하는가?</text>
-  <text x="223" y="1705" class="card-text">비집계 SELECT 컬럼은 GROUP BY에 포함</text>
-  <text x="223" y="1730" class="card-text-small">불필요한 컬럼 추가는 그룹을 더 잘게 나눔</text>
-  <text x="223" y="1755" class="card-text-small">DISTINCT는 집계 오류의 대체 수단이 아님</text>
-
-  <rect x="435" y="1622" width="330" height="170" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1650" class="card-title">필터 적용 시점</text>
-  <text x="600" y="1680" class="mono-small">WHERE · 그룹화 전 행 필터</text>
-  <text x="600" y="1705" class="mono-small">HAVING · 그룹화 후 집계 필터</text>
-  <text x="600" y="1730" class="card-text-small">예: WHERE status = '수강중'</text>
-  <text x="600" y="1755" class="card-text-small">예: HAVING COUNT(*) &gt;= 2</text>
-
-  <rect x="812" y="1622" width="330" height="170" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="977" y="1650" class="card-title">NULL과 검산</text>
-  <text x="977" y="1680" class="mono-small">COUNT(*) · 모든 결과 행 계산</text>
-  <text x="977" y="1705" class="mono-small">COUNT(column) · NULL 제외</text>
-  <text x="977" y="1730" class="card-text-small">SUM·AVG도 일반적으로 NULL을 제외</text>
-  <text x="977" y="1755" class="card-text-small">그룹별 건수·합계를 전체 값과 비교</text>
-
-  <rect x="130" y="1810" width="940" height="54" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
-  <text x="600" y="1831" class="note-title">논리적 처리 흐름</text>
-  <text x="600" y="1852" class="note-text">FROM/JOIN → WHERE → GROUP BY → 집계 계산 → HAVING → SELECT → ORDER BY</text>
-
-  <rect x="84" y="1912" width="1032" height="36" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="1935" class="principle">원본 행의 기준 확인 → 그룹 키 선택 → 그룹별 집계 → 그룹당 한 행 → 건수·합계 검증</text>
+  <rect width="1200" height="560" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="title">GROUP BY로 상태별 행 묶기</text>
+  <rect x="80" y="120" width="220" height="210" class="box" fill="#dbeafe"/>
+  <text x="190" y="155" text-anchor="middle" class="head">원본 5행</text>
+  <text x="190" y="190" text-anchor="middle" class="text">신청</text>
+  <text x="190" y="220" text-anchor="middle" class="text">수강중</text>
+  <text x="190" y="250" text-anchor="middle" class="text">완료</text>
+  <text x="190" y="280" text-anchor="middle" class="text">신청</text>
+  <text x="190" y="310" text-anchor="middle" class="text">수강중</text>
+  <rect x="390" y="180" width="210" height="90" class="box" fill="#fed7aa"/>
+  <text x="495" y="215" text-anchor="middle" class="head">GROUP BY status</text>
+  <rect x="690" y="120" width="420" height="210" class="box" fill="#ffedd5"/>
+  <text x="900" y="155" text-anchor="middle" class="head">상태 그룹</text>
+  <text x="900" y="195" text-anchor="middle" class="text">신청 그룹 · 2행</text>
+  <text x="900" y="230" text-anchor="middle" class="text">수강중 그룹 · 2행</text>
+  <text x="900" y="265" text-anchor="middle" class="text">완료 그룹 · 1행</text>
+  <text x="900" y="300" text-anchor="middle" class="text">그룹 하나당 결과 한 행</text>
+  <line x1="300" y1="225" x2="390" y2="225" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="225" x2="690" y2="225" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="430" y="390" width="340" height="100" class="box" fill="#dcfce7"/>
+  <text x="600" y="425" text-anchor="middle" class="head">상태별 결과 3행</text>
+  <text x="600" y="455" text-anchor="middle" class="text">신청 2 · 수강중 2 · 완료 1</text>
+  <line x1="900" y1="330" x2="770" y2="390" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 </svg>

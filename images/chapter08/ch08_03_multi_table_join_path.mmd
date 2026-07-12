@@ -1,23 +1,14 @@
 flowchart LR
-    A[enrollments]
-    B[students]
-    C[courses]
-    D[instructors]
+    S[students\nPK id · name]
+    E[enrollments\nPK id\nFK student_id\nFK course_id\nstatus · paid_amount]
+    C[courses\nPK id · title\nFK instructor_id]
+    I[instructors\nPK id · name]
+    R[결과 컬럼\nenrollment_id\nstudent_name\ncourse_title\ninstructor_name\nstatus\npaid_amount\nenrolled_at]
 
-    A --> A1[student_id]
-    A --> A2[course_id]
-    C --> C1[instructor_id]
-
-    A1 -. FK .-> B1[students.id]
-    A2 -. FK .-> C2[courses.id]
-    C1 -. FK .-> D1[instructors.id]
-
-    B --> E[student_name]
-    C --> F[course_title]
-    D --> G[instructor_name]
-    A --> H[status / paid_amount]
-
-    E --> I[수강신청 현황]
-    F --> I
-    G --> I
-    H --> I
+    E -->|student_id -> students.id| S
+    E -->|course_id -> courses.id| C
+    C -->|instructor_id -> instructors.id| I
+    E --> R
+    S --> R
+    C --> R
+    I --> R

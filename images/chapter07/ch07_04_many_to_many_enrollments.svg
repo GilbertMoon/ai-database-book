@@ -1,110 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1320" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc">
-  <title id="title">학생-강의 N:M 관계 해소</title>
-  <desc id="desc">학생과 강의의 다대다 관계를 문자열 목록으로 직접 저장했을 때의 문제를 보여 주고, 신청일·상태·결제 금액을 가진 enrollments 관계 엔터티로 분리하여 두 개의 일대다 관계와 필수 외래키, 재신청 정책 및 SQL 검증 기준을 설명하는 도식</desc>
-  <defs>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-    <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}
-      .panel{stroke-width:1.5;rx:15}.problem{fill:#fff5f5;stroke:#e39a98}.model{fill:#eef5ff;stroke:#6fa2e8}.rows{fill:#f8fafc;stroke:#a8b3c4}.verify{fill:#f2fbf5;stroke:#8bc9a0}
-      .pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.red{stroke:#d9534f}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.purple{stroke:#7c5cc4}.gray{stroke:#64748b}
-      .h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.3px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:11.8px;font-weight:700;text-anchor:middle;fill:#334155}
-      .arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.bad{stroke:#d9534f;stroke-width:2;fill:none;marker-end:url(#a)}.good{stroke:#3c9a5f;stroke-width:2.2;fill:none;marker-end:url(#a)}
-      .tagR{fill:#fee2e2}.tagB{fill:#dcecff}.tagO{fill:#fff1cf}.tagG{fill:#dcfce7}.tagP{fill:#ede9fe}
-      .table{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:9}.th{font-size:14px;font-weight:700;text-anchor:middle}.line{stroke:#d7dee8;stroke-width:1}.cell{font-size:10.8px;text-anchor:middle;fill:#334155}.card{font-size:13px;font-weight:700;text-anchor:middle}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:13.7px;font-weight:700;text-anchor:middle}
-      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.2px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14px;font-weight:700;text-anchor:middle;fill:#166534}
-    </style>
-  </defs>
-  <rect width="1200" height="1320" fill="#fff"/>
-  <text x="600" y="40" class="t">학생-강의 N:M 관계 해소</text>
-  <text x="600" y="68" class="s">다대다 관계는 목록 문자열로 저장하지 않고, 관계 자체의 정보를 가진 업무 엔터티로 표현한다</text>
-
-  <rect x="35" y="100" width="1130" height="245" class="panel problem"/>
-  <text x="60" y="132" class="pt">1. 직접 연결하거나 한 셀에 여러 ID를 저장하면 생기는 문제</text>
-  <rect x="55" y="165" width="255" height="120" class="box blue"/>
-  <rect x="55" y="165" width="255" height="34" class="tagB" rx="10"/>
-  <text x="182" y="188" class="h">students</text>
-  <text x="182" y="225" class="m">학생은 여러 강의를 신청</text>
-  <text x="182" y="251" class="code">course_ids = '10,20,30'</text>
-  <rect x="365" y="165" width="470" height="120" class="box red"/>
-  <rect x="365" y="165" width="470" height="34" class="tagR" rx="10"/>
-  <text x="600" y="188" class="h">잘못된 직접 저장</text>
-  <text x="600" y="220" class="m">한 셀에 여러 값 · 각 값에 FK 적용 불가 · 정확한 검색과 집계 어려움</text>
-  <text x="600" y="244" class="m">학생-강의 조합마다 다른 신청일·상태·결제 금액을 연결하기 어려움</text>
-  <text x="600" y="268" class="code">LIKE 검색 · 문자열 분리 · 전체 목록 재작성에 의존</text>
-  <rect x="890" y="165" width="255" height="120" class="box purple"/>
-  <rect x="890" y="165" width="255" height="34" class="tagP" rx="10"/>
-  <text x="1017" y="188" class="h">courses</text>
-  <text x="1017" y="225" class="m">강의에는 여러 학생 등록</text>
-  <text x="1017" y="251" class="code">student_ids = '1,2,7'</text>
-  <path d="M310 225H365" class="bad"/><path d="M890 225H835" class="bad"/>
-  <rect x="170" y="300" width="860" height="27" class="box red"/>
-  <text x="600" y="319" class="m">N:M 관계를 한쪽 테이블의 다중값 컬럼으로 압축하면 관계의 각 발생 건을 독립적으로 식별·검증할 수 없다</text>
-
-  <rect x="35" y="375" width="1130" height="390" class="panel model"/>
-  <text x="60" y="407" class="pt">2. enrollments를 수강신청 한 건의 업무 엔터티로 설계</text>
-  <rect x="55" y="455" width="280" height="180" class="table"/>
-  <rect x="55" y="455" width="280" height="40" class="tagB" rx="9"/>
-  <text x="195" y="481" class="th">students</text>
-  <text x="195" y="526" class="h">학생 한 명당 한 행</text>
-  <text x="195" y="555" class="code">id PK</text>
-  <text x="195" y="581" class="code">name · email · joined_at</text>
-  <text x="195" y="610" class="m">신청이 없어도 학생은 존재 가능</text>
-
-  <rect x="430" y="430" width="340" height="245" class="table"/>
-  <rect x="430" y="430" width="340" height="42" class="tagO" rx="9"/>
-  <text x="600" y="457" class="th">enrollments</text>
-  <text x="600" y="500" class="h">수강신청 한 건당 한 행</text>
-  <line x1="430" y1="520" x2="770" y2="520" class="line"/>
-  <text x="600" y="545" class="code">id PK</text>
-  <text x="600" y="571" class="code">student_id FK NOT NULL</text>
-  <text x="600" y="597" class="code">course_id FK NOT NULL</text>
-  <text x="600" y="623" class="code">enrolled_at · status · paid_amount</text>
-  <text x="600" y="651" class="m">날짜·상태·실제 결제액은 연결 자체의 정보</text>
-
-  <rect x="865" y="455" width="280" height="180" class="table"/>
-  <rect x="865" y="455" width="280" height="40" class="tagP" rx="9"/>
-  <text x="1005" y="481" class="th">courses</text>
-  <text x="1005" y="526" class="h">강의 하나당 한 행</text>
-  <text x="1005" y="555" class="code">id PK · instructor_id FK</text>
-  <text x="1005" y="581" class="code">title · level · price</text>
-  <text x="1005" y="610" class="m">등록 학생이 없어도 강의는 존재 가능</text>
-
-  <path d="M335 548H430" class="good"/><path d="M865 575H770" class="good"/>
-  <text x="382" y="532" class="card" fill="#1d4ed8">1</text><text x="412" y="532" class="card" fill="#92400e">0..N</text>
-  <text x="818" y="559" class="card" fill="#92400e">0..N</text><text x="788" y="559" class="card" fill="#1d4ed8">1</text>
-  <text x="382" y="585" class="m">학생별 신청</text><text x="818" y="612" class="m">강의별 신청</text>
-  <rect x="115" y="700" width="970" height="38" class="box green"/>
-  <text x="600" y="719" class="code">students 1 : 0..N enrollments N : 1 courses</text>
-  <text x="600" y="737" class="m">각 enrollments 행은 student_id와 course_id가 NOT NULL이므로 학생 정확히 1명과 강의 정확히 1개를 참조</text>
-
-  <rect x="35" y="795" width="1130" height="250" class="panel rows"/>
-  <text x="60" y="827" class="pt">3. 실제 행으로 한 학생의 여러 강의와 한 강의의 여러 학생을 동시에 표현</text>
-  <rect x="60" y="865" width="1080" height="130" class="table"/>
-  <rect x="60" y="865" width="1080" height="34" class="tagO" rx="9"/>
-  <text x="125" y="888" class="th">id</text><text x="260" y="888" class="th">student_id</text><text x="420" y="888" class="th">course_id</text><text x="600" y="888" class="th">enrolled_at</text><text x="790" y="888" class="th">status</text><text x="1000" y="888" class="th">paid_amount</text>
-  <line x1="60" y1="899" x2="1140" y2="899" class="line"/><line x1="60" y1="931" x2="1140" y2="931" class="line"/><line x1="60" y1="963" x2="1140" y2="963" class="line"/>
-  <text x="125" y="921" class="cell">101</text><text x="260" y="921" class="cell">1</text><text x="420" y="921" class="cell">10</text><text x="600" y="921" class="cell">2026-04-02</text><text x="790" y="921" class="cell">수강중</text><text x="1000" y="921" class="cell">100000</text>
-  <text x="125" y="953" class="cell">102</text><text x="260" y="953" class="cell">1</text><text x="420" y="953" class="cell">20</text><text x="600" y="953" class="cell">2026-04-06</text><text x="790" y="953" class="cell">신청</text><text x="1000" y="953" class="cell">120000</text>
-  <text x="125" y="985" class="cell">103</text><text x="260" y="985" class="cell">2</text><text x="420" y="985" class="cell">10</text><text x="600" y="985" class="cell">2026-04-03</text><text x="790" y="985" class="cell">수강중</text><text x="1000" y="985" class="cell">100000</text>
-  <rect x="100" y="1005" width="430" height="26" class="box blue"/><text x="315" y="1023" class="m">student 1 → course 10·20: 한 학생의 여러 신청</text>
-  <rect x="670" y="1005" width="430" height="26" class="box purple"/><text x="885" y="1023" class="m">course 10 ← student 1·2: 한 강의의 여러 학생</text>
-
-  <rect x="35" y="1075" width="1130" height="180" class="panel verify"/>
-  <text x="60" y="1107" class="pt">4. 재신청 정책과 SQL 결과까지 검증</text>
-  <polygon points="260,1130 375,1160 260,1190 145,1160" class="decision"/>
-  <text x="260" y="1155" class="dt">같은 학생의 같은 강의</text><text x="260" y="1175" class="m">재신청을 허용하는가?</text>
-  <rect x="415" y="1128" width="310" height="65" class="box purple"/>
-  <text x="570" y="1152" class="h">허용하지 않는 정책</text><text x="570" y="1176" class="code">UNIQUE (student_id, course_id)</text>
-  <rect x="765" y="1128" width="350" height="65" class="box orange"/>
-  <text x="940" y="1152" class="h">취소 후 재신청·이력 보존</text><text x="940" y="1176" class="m">단순 UNIQUE 대신 상태·회차·부분 UNIQUE 검토</text>
-  <path d="M375 1160H415" class="arr"/><path d="M375 1172H765" class="arr"/>
-  <rect x="65" y="1210" width="245" height="28" class="box green"/><text x="187" y="1229" class="m">없는 학생·강의 FK 오류</text>
-  <rect x="335" y="1210" width="245" height="28" class="box green"/><text x="457" y="1229" class="m">JOIN으로 학생명·강의명 복원</text>
-  <rect x="605" y="1210" width="245" height="28" class="box green"/><text x="727" y="1229" class="m">학생별·강의별 건수 집계</text>
-  <rect x="875" y="1210" width="245" height="28" class="box green"/><text x="997" y="1229" class="m">상태·금액 제약조건 확인</text>
-
-  <rect x="55" y="1275" width="350" height="28" class="note"/><text x="230" y="1294" class="nt">FK 두 개가 있다고 자동으로 UNIQUE인 것은 아님</text>
-  <rect x="425" y="1275" width="350" height="28" class="note"/><text x="600" y="1294" class="nt">관계 속성은 학생이나 강의가 아닌 신청 건에 저장</text>
-  <rect x="795" y="1275" width="350" height="28" class="core"/><text x="970" y="1294" class="cv">N:M → 두 개의 1:N과 검증 가능한 업무 엔터티</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+<title id="title">enrollments로 학생-강의 N:M 관계 해소</title>
+<desc id="desc">관계 자체의 정보는 연결 테이블에 둔다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#fff;stroke:#8bbcf6;stroke-width:2;rx:14} .green{stroke:#22a06b;fill:#f2fff8} .orange{stroke:#f59e0b;fill:#fff8eb} .purple{stroke:#8b5cf6;fill:#f7f3ff} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#ef4444;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle} .pk{fill:#dbeafe;stroke:#2563eb;stroke-width:1.4} .fk{fill:#ffedd5;stroke:#f97316;stroke-width:1.4} .note{fill:#eefdf4;stroke:#22c55e;stroke-width:1.5;rx:12} .small{font-size:12.5px;text-anchor:middle;fill:#334155}
+</style></defs>
+<rect width="1200" height="500" fill="#ffffff"/>
+<text x="600" y="48" class="title">enrollments로 학생-강의 N:M 관계 해소</text>
+<text x="600" y="76" class="sub">관계 자체의 정보는 연결 테이블에 둔다</text>
+<rect x="90" y="165" width="230" height="150" class="box"/>
+<text x="205.0" y="197" class="head">students</text>
+<text x="205.0" y="223" class="body">id PK</text>
+<text x="205.0" y="245" class="body">name · email</text>
+<rect x="485" y="140" width="230" height="200" class="green"/>
+<text x="600.0" y="172" class="head">enrollments</text>
+<text x="600.0" y="198" class="body">id PK</text>
+<text x="600.0" y="220" class="code">student_id FK</text>
+<text x="600.0" y="242" class="code">course_id FK</text>
+<text x="600.0" y="264" class="body">status</text>
+<text x="600.0" y="286" class="code">paid_amount</text>
+<rect x="880" y="165" width="230" height="150" class="box"/>
+<text x="995.0" y="197" class="head">courses</text>
+<text x="995.0" y="223" class="body">id PK</text>
+<text x="995.0" y="245" class="body">title · price</text>
+<path d="M320 240 L485 240" class="arrow"/>
+<path d="M880 240 L715 240" class="arrow"/>
+<text x="395" y="220" class="tag">1:N</text><text x="805" y="220" class="tag">N:1</text>
+<rect x="320" y="385" width="560" height="52" class="note"/>
+<text x="600" y="418" class="head">학생-강의 N:M 관계는 enrollments 두 개의 1:N 관계로 해소한다</text>
 </svg>

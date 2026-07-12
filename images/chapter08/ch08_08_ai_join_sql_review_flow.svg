@@ -1,1 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="40" text-anchor="middle" class="t">AI 생성 JOIN/집계 SQL 검토</text><rect x="420" y="80" width="360" height="60" class="b m"/><text x="600" y="110" class="l">AI가 생성한 SQL</text><rect x="90" y="230" width="230" height="70" class="b y"/><text x="205" y="258" class="l">JOIN 조건 검토</text><text x="205" y="282" class="s">ON 조건 누락 여부</text><rect x="355" y="230" width="230" height="70" class="b y"/><text x="470" y="258" class="l">GROUP BY 검토</text><text x="470" y="282" class="s">일반 컬럼 포함 여부</text><rect x="620" y="230" width="230" height="70" class="b y"/><text x="735" y="258" class="l">집계 함수 검토</text><text x="735" y="282" class="s">중복 집계 여부</text><rect x="885" y="230" width="230" height="70" class="b y"/><text x="1000" y="258" class="l">NULL 처리 검토</text><text x="1000" y="282" class="s">COALESCE 필요 여부</text><rect x="320" y="470" width="250" height="70" class="b g"/><text x="445" y="498" class="l">실행 결과 확인</text><text x="445" y="522" class="s">DBeaver에서 실행</text><rect x="630" y="470" width="250" height="70" class="b g"/><text x="755" y="498" class="l">요구사항과 비교</text><text x="755" y="522" class="s">결과가 맞는지 확인</text><rect x="440" y="650" width="320" height="55" class="b m"/><text x="600" y="678" class="l">사람이 수정 후 확정</text><line x1="520" y1="140" x2="205" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="575" y1="140" x2="470" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="625" y1="140" x2="735" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="140" x2="1000" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="470" y1="300" x2="445" y2="470" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="735" y1="300" x2="755" y2="470" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="570" y1="505" x2="630" y2="505" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="755" y1="540" x2="650" y2="650" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="445" y1="540" x2="550" y2="650" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 760">
+  <title id="title">AI 생성 JOIN·집계 SQL 검토 흐름</title>
+  <desc id="desc">업무 질문 정의에서 시작해 AI가 만든 SQL을 JOIN 경로, 기준 행, 집계 대상, 검산 기준으로 검토하고 문제 시 수정 후 다시 실행하는 피드백 루프를 보여 주는 도식이다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .head { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="title">AI 생성 JOIN·집계 SQL 검토 흐름</text>
+  <rect x="390" y="85" width="420" height="68" class="box" fill="#dbeafe"/>
+  <text x="600" y="115" text-anchor="middle" class="head">1. 업무 질문과 예상 결과 정의</text>
+  <text x="600" y="140" text-anchor="middle" class="text">예상 행 수와 합계를 먼저 정한다</text>
+  <rect x="390" y="185" width="420" height="68" class="box" fill="#ede9fe"/>
+  <text x="600" y="215" text-anchor="middle" class="head">2. AI 생성 SQL</text>
+  <text x="600" y="240" text-anchor="middle" class="text">AI SQL은 초안이다</text>
+  <rect x="130" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
+  <text x="255" y="330" text-anchor="middle" class="head">3. JOIN 경로와 ON 조건 확인</text>
+  <text x="255" y="358" text-anchor="middle" class="text">실제 FK 경로인지 확인</text>
+  <rect x="475" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
+  <text x="600" y="330" text-anchor="middle" class="head">4. 기준 행과 JOIN 종류 확인</text>
+  <text x="600" y="358" text-anchor="middle" class="text">INNER / LEFT 선택 검토</text>
+  <rect x="820" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
+  <text x="945" y="330" text-anchor="middle" class="head">5. GROUP BY와 집계 대상 확인</text>
+  <text x="945" y="358" text-anchor="middle" class="text">COUNT · SUM · DISTINCT · COALESCE</text>
+  <rect x="390" y="430" width="420" height="78" class="box" fill="#dcfce7"/>
+  <text x="600" y="460" text-anchor="middle" class="head">6. PostgreSQL에서 실행</text>
+  <text x="600" y="488" text-anchor="middle" class="text">원본 건수와 수동 계산으로 검산</text>
+  <polygon points="600,555 760,635 600,715 440,635" fill="#fef3c7" stroke="#334155" stroke-width="2"/>
+  <text x="600" y="625" text-anchor="middle" class="head">원본 건수와 합계에 맞는가?</text>
+  <rect x="110" y="600" width="240" height="70" class="box" fill="#fee2e2"/>
+  <text x="230" y="630" text-anchor="middle" class="head">아니요</text>
+  <text x="230" y="655" text-anchor="middle" class="text">SQL 또는 요구사항을 수정하고 다시 실행</text>
+  <rect x="860" y="600" width="240" height="70" class="box" fill="#dbeafe"/>
+  <text x="980" y="630" text-anchor="middle" class="head">예</text>
+  <text x="980" y="655" text-anchor="middle" class="text">검토된 SQL과 근거 기록</text>
+  <line x1="600" y1="153" x2="600" y2="185" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="253" x2="255" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="253" x2="600" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="253" x2="945" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="255" y1="378" x2="520" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="378" x2="600" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="945" y1="378" x2="680" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="508" x2="600" y2="555" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="440" y1="635" x2="350" y2="635" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="760" y1="635" x2="860" y2="635" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M230 600 C230 520, 320 500, 390 220" fill="none" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="260" y="545" class="text">수정 후 재실행</text>
+</svg>

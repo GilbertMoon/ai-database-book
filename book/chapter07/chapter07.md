@@ -22,7 +22,7 @@
 
 ![프로젝트 진행 흐름](../../images/chapter07/ch07_01_project_flow.svg)
 
-그림 7-1 온라인 강의 데이터베이스 프로젝트 진행 흐름
+그림 7-1 온라인 강의 데이터베이스 프로젝트 핵심 흐름
 
 이 프로젝트의 핵심은 SQL을 많이 작성하는 데 있지 않습니다. 서비스 설명을 데이터 구조로 바꾸고, 그 구조가 실제로 동작하는지 증명하는 데 있습니다.
 
@@ -48,10 +48,10 @@ enrollments
 | 항목 | 이 장의 선택 | 다른 선택 가능성 |
 | --- | --- | --- |
 | 학생과 강사 | 별도 테이블 | 공통 users 테이블과 역할 테이블 사용 |
-| 결제 금액 | enrollments에 저장 | payments 테이블로 분리 |
-| 수강 상태 | 문자열 열로 저장 | CHECK, ENUM, 상태 코드 테이블 사용 |
+| 결제 금액 | 신청 시점의 실제 금액을 enrollments에 저장 | 결제 시도·성공·실패·환불 이력을 payments로 분리 |
+| 수강 상태 | VARCHAR(20)과 CHECK 제약조건으로 관리 | PostgreSQL ENUM 또는 상태 코드 테이블 사용 |
 | 취소 처리 | 상태 변경 우선 | 행 삭제 또는 별도 이력 테이블 사용 |
-| 같은 강의 재신청 | 기본 버전에서는 별도 제한 없음 | `(student_id, course_id)` UNIQUE 추가 |
+| 같은 강의 재신청 | 기본 버전에서는 별도 제한 없음 | 정책이 확정된 경우만 UNIQUE 또는 이력 모델 검토 |
 
 초기 프로젝트에서는 단순한 구조가 유리합니다. 하지만 단순함과 부정확함은 다릅니다. 생략한 기능과 선택한 범위를 의식적으로 구분해야 합니다.
 
@@ -103,7 +103,7 @@ enrollments
 
 ![요구사항에서 엔터티 도출](../../images/chapter07/ch07_02_requirement_to_entities.svg)
 
-그림 7-2 요구사항을 엔터티와 속성으로 바꾸는 과정
+그림 7-2 요구사항을 데이터 구조로 바꾸기
 
 모든 명사가 테이블이 되는 것은 아닙니다.
 
@@ -119,6 +119,8 @@ enrollments
 | 결제 금액 | 속성 | 수강신청 시점과 조건에 따라 달라질 수 있는 값 |
 
 여기서 `enrollments`가 중요한 이유는 단순히 두 테이블을 연결하기 때문만이 아닙니다. 수강신청에는 신청일, 상태, 결제 금액처럼 **관계 자체의 정보**가 있기 때문입니다.
+
+이 예제는 원 단위의 정수 금액만 저장한다고 가정하므로 `courses.price`와 `enrollments.paid_amount`를 `INT`로 둡니다. 소수점 통화, 여러 통화, 더 큰 금액 범위가 필요하다면 `NUMERIC` 같은 타입을 별도로 검토해야 합니다. `courses.price`는 강의의 현재 기본 수강료이고, `enrollments.paid_amount`는 특정 신청 시점의 실제 결제 금액입니다. 두 값은 의미와 시점이 다르므로 불필요한 중복으로 보지 않습니다.
 
 ---
 
@@ -183,7 +185,7 @@ students 1:N enrollments N:1 courses
 
 ![학생-강의 N:M 관계 해소](../../images/chapter07/ch07_04_many_to_many_enrollments.svg)
 
-그림 7-3 연결 테이블로 학생과 강의의 N:M 관계를 표현하는 방식
+그림 7-3 enrollments로 학생-강의 N:M 관계 해소
 
 ---
 
@@ -224,7 +226,7 @@ enrollments
 
 ![온라인 강의 수강신청 ERD](../../images/chapter07/ch07_03_online_course_erd.svg)
 
-그림 7-4 온라인 강의 수강신청 데이터베이스 ERD
+그림 7-4 온라인 강의 수강신청 핵심 ERD
 
 ERD를 확인할 때는 선의 모양보다 다음 질문이 더 중요합니다.
 
@@ -245,6 +247,10 @@ N:M 관계가 연결 테이블로 해소되었는가?
 ```text
 code/chapter07/online_course_project.sql
 ```
+
+> **실습 DB 확인**
+>
+> `online_course_project.sql`은 `enrollments`, `courses`, `instructors`, `students` 테이블을 삭제하고 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 실행 전에 `SELECT current_database();`로 현재 연결 대상을 확인합니다. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
 
 핵심 DDL은 다음과 같습니다.
 
@@ -363,6 +369,8 @@ VALUES
 
 샘플 데이터는 단순히 행 수를 채우는 값이 아니라 요구사항을 검증하는 테스트 데이터입니다.
 
+기본 샘플 데이터 입력 직후에는 `students` 3행, `instructors` 2행, `courses` 3행, `enrollments` 4행이 있어야 합니다. 이 상태가 첫 번째 전체 JOIN 검증의 기준입니다.
+
 ---
 
 ## 9. JOIN으로 사용 가능한 정보 만들기
@@ -399,6 +407,8 @@ courses.instructor_id → instructors.id
 ![SQL 기반 설계 검증 흐름](../../images/chapter07/ch07_05_sql_validation_flow.svg)
 
 그림 7-5 샘플 데이터와 JOIN으로 설계를 검증하는 흐름
+
+이 시점의 전체 JOIN 결과는 수강신청 4건입니다. 아직 CRUD 예제에서 신규 수강신청을 추가하기 전의 기준선입니다.
 
 JOIN 결과가 예상과 다르다면 SQL 문법만 보지 말고 다음 항목도 확인해야 합니다.
 
@@ -464,15 +474,30 @@ WHERE id = 4;
 행을 실제로 삭제해야 한다면 같은 조건의 `SELECT`로 대상을 먼저 확인합니다.
 
 ```sql
-SELECT *
-FROM enrollments
-WHERE id = 4;
-
-DELETE FROM enrollments
-WHERE id = 4;
+-- SELECT *
+-- FROM enrollments
+-- WHERE id = 4;
+--
+-- DELETE FROM enrollments
+-- WHERE id = 4;
 ```
 
 `UPDATE`와 `DELETE`에서 가장 중요한 습관은 실행 전에 대상 행을 확인하는 것입니다.
+
+실제 `online_course_project.sql`에서는 DELETE 예제를 주석으로 남겨 둡니다. 기본 흐름에서는 취소 이력을 지우지 않고 `status = '취소'` 상태 변경으로 보존합니다.
+
+### 실행 단계별 데이터 상태
+
+| 실행 시점 | students | instructors | courses | enrollments | 주요 변화 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 기본 샘플 입력 직후 | 3 | 2 | 3 | 4 | 첫 번째 JOIN 검증 기준 |
+| 신규 수강신청 추가 후 | 3 | 2 | 3 | 5 | 이준호의 정규화 실습 신청 추가 |
+| 상태 변경 후 | 3 | 2 | 3 | 5 | id 1 완료, id 4 취소 |
+| 실제 DELETE 예시 | 변경 없음 | 변경 없음 | 변경 없음 | 실행하지 않음 | DELETE 문은 주석 상태 |
+
+> 이 장의 첫 번째 JOIN 예시는 기본 샘플 4건을 기준으로 합니다. 전체 SQL 파일을 끝까지 실행하면 신규 신청 1건이 추가되어 다음 장에서 사용하는 수강신청 데이터는 5건이 됩니다.
+
+이 장의 숫자 ID 예시는 SQL 파일을 처음부터 실행해 테이블을 새로 만든 상태를 기준으로 합니다. 일부 구간만 반복 실행하거나 기존 데이터를 유지한 상태에서는 실제 ID가 달라질 수 있으므로 먼저 `SELECT` 결과를 확인해야 합니다.
 
 ---
 
@@ -482,7 +507,7 @@ WHERE id = 4;
 
 ![프로젝트 정규화 검토](../../images/chapter07/ch07_06_normalization_review_flow.svg)
 
-그림 7-6 데이터 중복과 이상 현상을 확인하는 흐름
+그림 7-6 온라인 강의 프로젝트 정규화 점검
 
 | 검토 항목 | 현재 구조 | 효과 |
 | --- | --- | --- |
@@ -529,7 +554,7 @@ N:M 관계, 중복 데이터, 삽입·수정·삭제 이상 가능성도 검토�
 
 ![AI 활용 및 검토 흐름](../../images/chapter07/ch07_07_ai_review_flow.svg)
 
-그림 7-7 AI 제안을 실행 가능한 설계로 검증하는 흐름
+그림 7-7 AI 제안을 검토된 설계로 바꾸기
 
 AI가 만든 결과는 다음 기준으로 확인합니다.
 
@@ -551,6 +576,10 @@ AI가 만든 결과는 다음 기준으로 확인합니다.
 ## 13. 프로젝트 완성도 점검
 
 이 프로젝트의 결과는 다음 항목으로 스스로 점검할 수 있습니다.
+
+![온라인 강의 DB 프로젝트 완성도 점검](../../images/chapter07/ch07_08_project_completion_checklist.svg)
+
+그림 7-8 온라인 강의 데이터베이스 프로젝트 완성도 점검
 
 | 영역 | 확인 기준 |
 | --- | --- |

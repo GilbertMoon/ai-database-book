@@ -8,6 +8,433 @@
 
 ## 1. 실습 개요
 
+이 실습은 `students`, `instructors`, `courses`, `enrollments` 네 테이블을 기준으로 JOIN과 집계 쿼리를 직접 확인하기 위한 자료입니다.
+
+Chapter 07과 테이블 구조는 같지만, Chapter 08은 LEFT JOIN과 집계 차이를 확인하기 위해 전용 샘플 데이터를 다시 입력합니다. 따라서 Chapter 07의 마지막 데이터 상태를 그대로 이어 쓰지 않고 `code/chapter08/join_aggregation_practice.sql`이 테이블을 초기화한 뒤 Chapter 08용 데이터를 구성합니다.
+
+---
+
+## 2. 실행 준비
+
+### 필요한 도구
+
+```text
+- PostgreSQL
+- DBeaver Community Edition
+- ai_database_book 데이터베이스
+- code/chapter08/join_aggregation_practice.sql
+- AI 보조 도구(선택)
+```
+
+> **실습 DB 확인**
+>
+> `join_aggregation_practice.sql`은 `enrollments`, `courses`, `instructors`, `students` 테이블을 삭제하고 다시 생성합니다.
+>
+> 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 실행 전에 `SELECT current_database();`로 현재 연결 대상을 확인합니다.
+>
+> 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+
+---
+
+## 3. 실습 1: 실습 SQL 실행 준비
+
+다음 파일을 실행합니다.
+
+```text
+code/chapter08/join_aggregation_practice.sql
+```
+
+| 항목 | 예상값 | 실제 결과 |
+| --- | ---: | --- |
+| students | 4 |  |
+| instructors | 3 |  |
+| courses | 4 |  |
+| enrollments | 5 |  |
+
+| 항목 | 작성 |
+| --- | --- |
+| SQL 파일 실행 성공 여부 |  |
+| 생성된 테이블 목록 |  |
+| 오류가 있었다면 오류 메시지 |  |
+| 오류를 어떻게 해결했는가? |  |
+
+### 생각해 보기
+
+```text
+Chapter 07과 테이블 구조는 같지만 Chapter 08 샘플 데이터가 다른 이유는 무엇인가?
+
+수강신청이 없는 학생과 강의를 추가한 이유는 무엇인가?
+```
+
+---
+
+## 4. 실습 2: INNER JOIN 결과 확인
+
+```sql
+SELECT
+    s.name AS student_name,
+    c.title AS course_title,
+    e.status
+FROM students AS s
+JOIN enrollments AS e ON s.id = e.student_id
+JOIN courses AS c ON e.course_id = c.id
+ORDER BY s.id, c.id;
+```
+
+예상 결과 행 수: 5행
+
+| student_name | course_title | status |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 생각해 보기
+
+```text
+INNER JOIN 결과에 최현우가 나타나지 않는 이유는 무엇인가?
+
+한 학생의 수강신청이 2건이면 결과 행도 2행이 되는 이유는 무엇인가?
+```
+
+---
+
+## 5. 실습 3: 여러 테이블 JOIN 결과 확인
+
+```sql
+SELECT
+    e.id AS enrollment_id,
+    s.name AS student_name,
+    c.title AS course_title,
+    i.name AS instructor_name,
+    e.status,
+    e.paid_amount,
+    e.enrolled_at
+FROM enrollments AS e
+JOIN students AS s ON e.student_id = s.id
+JOIN courses AS c ON e.course_id = c.id
+JOIN instructors AS i ON c.instructor_id = i.id
+ORDER BY e.id;
+```
+
+예상 결과 행 수: 5행
+
+| enrollment_id | student_name | course_title | instructor_name | status | paid_amount | enrolled_at |
+| ---: | --- | --- | --- | --- | ---: | --- |
+|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |
+
+### JOIN 경로 설명
+
+```text
+enrollments.student_id -> students.id
+enrollments.course_id -> courses.id
+courses.instructor_id -> instructors.id
+```
+
+---
+
+## 6. 실습 4: LEFT JOIN 결과 확인
+
+```sql
+SELECT
+    s.name AS student_name,
+    c.title AS course_title,
+    e.status
+FROM students AS s
+LEFT JOIN enrollments AS e ON s.id = e.student_id
+LEFT JOIN courses AS c ON e.course_id = c.id
+ORDER BY s.id, c.id;
+```
+
+예상 결과 행 수: 6행
+
+| student_name | course_title | status |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 생각해 보기
+
+```text
+LEFT JOIN 결과가 학생 수 4행이 아니라 6행인 이유는 무엇인가?
+
+최현우의 course_title과 status가 NULL일 때, 이 NULL은 어디에서 생긴 값인가?
+```
+
+---
+
+## 7. 실습 5: 수강신청이 없는 학생 찾기
+
+```sql
+SELECT
+    s.id,
+    s.name,
+    s.email
+FROM students AS s
+LEFT JOIN enrollments AS e ON s.id = e.student_id
+WHERE e.id IS NULL;
+```
+
+예상 결과 행 수: 1행
+
+| id | name | email |
+| ---: | --- | --- |
+|  |  |  |
+
+### 생각해 보기
+
+```text
+왜 WHERE e.id IS NULL 조건을 사용하면 수강신청이 없는 학생만 남는가?
+```
+
+---
+
+## 8. 실습 6: 기본 집계 함수 확인
+
+```sql
+SELECT
+    COUNT(*) AS enrollment_count,
+    SUM(paid_amount) AS total_paid_amount,
+    AVG(paid_amount) AS avg_paid_amount
+FROM enrollments;
+```
+
+| enrollment_count | total_paid_amount | avg_paid_amount |
+| ---: | ---: | ---: |
+| 5 | 620000 | 124000 |
+
+### 생각해 보기
+
+```text
+COUNT는 어떤 질문에 답하고, SUM과 AVG는 각각 무엇을 요약하는가?
+```
+
+---
+
+## 9. 실습 7: GROUP BY로 상태별 건수 구하기
+
+```sql
+SELECT
+    status,
+    COUNT(*) AS enrollment_count
+FROM enrollments
+GROUP BY status
+ORDER BY status;
+```
+
+예상 결과 행 수: 3행
+
+| status | enrollment_count |
+| --- | ---: |
+|  |  |
+|  |  |
+|  |  |
+
+### 생각해 보기
+
+```text
+상태별 건수가 신청 2, 수강중 2, 완료 1이 되는 이유를 원본 행 기준으로 설명해 보자.
+```
+
+---
+
+## 10. 실습 8: 강의별 수강신청 건수와 고유 학생 수 구하기
+
+```sql
+SELECT
+    c.id AS course_id,
+    c.title AS course_title,
+    COUNT(e.id) AS enrollment_count,
+    COUNT(DISTINCT e.student_id) AS student_count
+FROM courses AS c
+LEFT JOIN enrollments AS e ON c.id = e.course_id
+GROUP BY c.id, c.title
+ORDER BY c.id;
+```
+
+예상 결과 행 수: 4행
+
+| course_id | course_title | enrollment_count | student_count |
+| ---: | --- | ---: | ---: |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+
+### 구분해서 기록하기
+
+```text
+- 수강신청 건수: COUNT(e.id)
+- 고유 학생 수: COUNT(DISTINCT e.student_id)
+- 현재 샘플에서 두 값이 같은 강의가 있어도 같은 개념은 아니다.
+```
+
+---
+
+## 11. 실습 9: 강의별 결제금액 합계 구하기
+
+```sql
+SELECT
+    c.id AS course_id,
+    c.title AS course_title,
+    COALESCE(SUM(e.paid_amount), 0) AS total_paid_amount
+FROM courses AS c
+LEFT JOIN enrollments AS e ON c.id = e.course_id
+GROUP BY c.id, c.title
+ORDER BY c.id;
+```
+
+예상 결과 행 수: 4행
+
+| course_id | course_title | total_paid_amount |
+| ---: | --- | ---: |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 매출 정책 메모
+
+```text
+이 결과는 결제금액 합계이며, 환불·취소 정책을 반영한 최종 매출과 같은 의미로 단정하지 않는다.
+```
+
+---
+
+## 12. 실습 10: 강사별 개설 강의 수 구하기
+
+```sql
+SELECT
+    i.name AS instructor_name,
+    COUNT(c.id) AS course_count
+FROM instructors AS i
+LEFT JOIN courses AS c ON i.id = c.instructor_id
+GROUP BY i.id, i.name
+ORDER BY i.id;
+```
+
+예상 결과 행 수: 3행
+
+| instructor_name | course_count |
+| --- | ---: |
+|  |  |
+|  |  |
+|  |  |
+
+---
+
+## 13. 실습 11: HAVING으로 집계 결과 필터링
+
+```sql
+SELECT
+    c.title AS course_title,
+    COUNT(e.id) AS enrollment_count
+FROM courses AS c
+JOIN enrollments AS e ON c.id = e.course_id
+GROUP BY c.id, c.title
+HAVING COUNT(e.id) >= 2
+ORDER BY c.id;
+```
+
+예상 결과 행 수: 2행
+
+| course_title | enrollment_count |
+| --- | ---: |
+|  |  |
+|  |  |
+
+### 생각해 보기
+
+```text
+HAVING은 왜 GROUP BY 뒤에 와야 하는가?
+```
+
+---
+
+## 14. 실습 12: WHERE + GROUP BY 함께 사용하기
+
+```sql
+SELECT
+    c.title AS course_title,
+    COUNT(e.id) AS enrollment_count
+FROM courses AS c
+JOIN enrollments AS e ON c.id = e.course_id
+WHERE e.status = '수강중'
+GROUP BY c.id, c.title
+ORDER BY c.id;
+```
+
+예상 결과 행 수: 1행
+
+| course_title | enrollment_count |
+| --- | ---: |
+| 데이터베이스 입문 | 2 |
+
+### 실행 순서 정리
+
+```text
+FROM / JOIN -> WHERE -> GROUP BY + 집계 -> HAVING -> SELECT -> ORDER BY
+```
+
+---
+
+## 15. 실습 13: AI 생성 SQL 검토
+
+AI가 만든 SQL은 초안으로 보고 아래 기준으로 검토합니다.
+
+| 검토 항목 | 확인 결과 | 수정 필요 여부 |
+| --- | --- | --- |
+| 실제 FK 경로를 따라 JOIN했는가? |  |  |
+| 기준 행이 무엇인지 분명한가? |  |  |
+| INNER JOIN과 LEFT JOIN 선택이 맞는가? |  |  |
+| GROUP BY에 필요한 일반 컬럼이 포함되었는가? |  |  |
+| COUNT 대상이 적절한가? |  |  |
+| DISTINCT가 필요한가? |  |  |
+| NULL 처리가 필요한가? |  |  |
+| 원본 건수와 합계로 다시 검산했는가? |  |  |
+
+---
+
+## 16. 직접 SQL 작성하기
+
+```text
+1. 학생별 수강신청 수를 조회한다.
+2. 강의별 평균 결제금액을 조회한다.
+3. 강사별 결제금액 합계를 조회한다.
+4. 수강신청이 없는 강의를 조회한다.
+5. 수강신청 2건 이상인 강의만 조회한다.
+```
+
+---
+
+## 17. 실습 정리 메모
+
+```text
+- 수강신청 건수와 고유 학생 수를 같은 개념으로 쓰지 않았는가?
+- 결제금액 합계와 실제 매출을 구분했는가?
+- LEFT JOIN의 NULL이 원본 저장값이 아니라 결과 행에서 생성된 값임을 이해했는가?
+- AI SQL을 실행 결과와 수동 계산으로 다시 검토했는가?
+```
+# Chapter 08 실습 자료
+
+## JOIN과 집계 쿼리
+
+> 용도: 자기주도 실습 / Chapter 08 보조 자료
+
+---
+
+## 1. 실습 개요
+
 이 실습 자료는 Chapter 08의 JOIN과 집계 쿼리를 직접 확인하기 위한 자료입니다.
 
 Chapter 07에서 만든 온라인 강의 수강신청 시스템의 `students`, `instructors`, `courses`, `enrollments` 테이블을 사용해 여러 테이블을 연결하고, 데이터를 요약하는 SQL을 작성합니다.

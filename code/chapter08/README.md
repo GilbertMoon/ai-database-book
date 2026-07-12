@@ -10,6 +10,101 @@
 
 | 파일 | 설명 |
 | --- | --- |
+| `join_aggregation_practice.sql` | Chapter 07과 같은 테이블 구조를 사용하되, Chapter 08 전용 샘플 데이터로 JOIN과 집계를 검증하는 실습 SQL |
+
+---
+
+## 실행 전 확인
+
+1. 개인 실습용 `ai_database_book` 데이터베이스에 연결합니다.
+2. `SELECT current_database();`로 현재 연결 대상을 확인합니다.
+3. `join_aggregation_practice.sql`이 `enrollments`, `courses`, `instructors`, `students`를 삭제하고 다시 생성한다는 점을 확인합니다.
+4. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+
+---
+
+## Chapter 08 데이터셋 설명
+
+Chapter 08은 Chapter 07과 같은 스키마를 사용하지만, LEFT JOIN과 집계 차이를 분명히 확인하기 위해 전용 샘플 데이터를 다시 입력합니다.
+
+| 테이블 | 예상 건수 |
+| --- | ---: |
+| students | 4 |
+| instructors | 3 |
+| courses | 4 |
+| enrollments | 5 |
+
+특히 다음 두 행이 실습 핵심입니다.
+
+```text
+- 최현우: 수강신청이 없는 학생
+- 집계 쿼리 실습: 수강신청이 없는 강의
+```
+
+---
+
+## 주요 예상 결과
+
+| 항목 | 예상값 |
+| --- | --- |
+| students | 4 |
+| instructors | 3 |
+| courses | 4 |
+| enrollments | 5 |
+| INNER JOIN 결과 | 5행 |
+| 학생 기준 LEFT JOIN 결과 | 6행 |
+| 전체 결제금액 | 620000 |
+| 평균 결제금액 | 124000 |
+
+상세 기준은 다음과 같습니다.
+
+```text
+- 수강신청이 없는 학생: 최현우
+- 수강신청이 없는 강의: 집계 쿼리 실습
+- 상태별 건수: 신청 2, 수강중 2, 완료 1
+- HAVING 결과: 데이터베이스 입문, 파이썬 데이터 분석
+```
+
+---
+
+## 이 장에서 특히 구분할 개념
+
+```text
+COUNT(*)
+- 결과 행 전체 수
+
+COUNT(e.id)
+- 실제 수강신청 행 수
+
+COUNT(DISTINCT e.student_id)
+- 중복을 제거한 고유 학생 수
+```
+
+현재 샘플에서는 `COUNT(e.id)`와 `COUNT(DISTINCT e.student_id)`가 같은 값으로 보일 수 있지만, 재신청 데이터가 생기면 달라질 수 있습니다.
+
+또한 `SUM(paid_amount)`는 저장된 결제금액의 단순 합계입니다. 환불·취소·매출 인식 기준까지 반영한 실제 매출과 같은 의미로 단정하지 않습니다.
+
+---
+
+## 실행 후 확인할 핵심 결과
+
+1. INNER JOIN 결과가 5행인지 확인합니다.
+2. 학생 기준 LEFT JOIN 결과가 6행인지 확인합니다.
+3. 최현우가 `WHERE e.id IS NULL` 결과에 1행으로 나오는지 확인합니다.
+4. `집계 쿼리 실습` 강의의 수강신청 건수와 결제금액 합계가 0인지 확인합니다.
+5. AI가 만든 SQL을 사용할 때는 원본 건수와 합계로 다시 검산합니다.
+# Chapter 08 실습 코드
+
+## JOIN과 집계 쿼리
+
+이 폴더는 Chapter 08의 JOIN과 집계 쿼리 실습 SQL 파일을 관리합니다.
+
+---
+
+## 파일 목록
+
+| 파일 | 설명 |
+| --- | --- |
 | `join_aggregation_practice.sql` | 온라인 강의 수강신청 시스템을 활용한 INNER JOIN, LEFT JOIN, GROUP BY, COUNT, SUM, AVG, HAVING 실습 |
 
 ---

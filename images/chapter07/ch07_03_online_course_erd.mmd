@@ -1,79 +1,24 @@
-flowchart TB
-    A[온라인 강의 수강신청 ERD<br/>요구사항을 테이블·키·제약조건·관계로 표현] --> T[네 테이블과 한 행의 의미]
-
-    T --> I[instructors<br/>강사 한 명당 한 행]
-    I --> I1[id SERIAL PK]
-    I --> I2[name VARCHAR(50) NOT NULL]
-    I --> I3[email VARCHAR(100) UNIQUE NOT NULL]
-    I --> I4[specialty VARCHAR(100) NOT NULL]
-
-    T --> C[courses<br/>강의 하나당 한 행]
-    C --> C1[id SERIAL PK]
-    C --> C2[instructor_id INT FK NOT NULL<br/>references instructors.id]
-    C --> C3[title VARCHAR(200) NOT NULL]
-    C --> C4[description TEXT NULL 가능]
-    C --> C5[level VARCHAR(20) NOT NULL]
-    C --> C6[price INT NOT NULL CHECK 0 이상]
-    C --> C7[opened_at DATE NOT NULL]
-
-    T --> S[students<br/>학생 한 명당 한 행]
-    S --> S1[id SERIAL PK]
-    S --> S2[name VARCHAR(50) NOT NULL]
-    S --> S3[email VARCHAR(100) UNIQUE NOT NULL]
-    S --> S4[joined_at DATE NOT NULL]
-
-    T --> E[enrollments<br/>수강신청 한 건당 한 행]
-    E --> E1[id SERIAL PK]
-    E --> E2[student_id INT FK NOT NULL<br/>references students.id]
-    E --> E3[course_id INT FK NOT NULL<br/>references courses.id]
-    E --> E4[enrolled_at DATE NOT NULL]
-    E --> E5[status VARCHAR(20) NOT NULL<br/>CHECK 신청·수강중·완료·취소]
-    E --> E6[paid_amount INT NOT NULL CHECK 0 이상]
-
-    I1 -. instructors 1 : 0..N courses .-> C2
-    S1 -. students 1 : 0..N enrollments .-> E2
-    C1 -. courses 1 : 0..N enrollments .-> E3
-
-    C2 --> R1[각 courses 행은 강사 정확히 1명을 참조]
-    E2 --> R2[각 enrollments 행은 학생 정확히 1명을 참조]
-    E3 --> R3[각 enrollments 행은 강의 정확히 1개를 참조]
-    R2 --> NM[students N:M courses를<br/>enrollments의 두 1:N 관계로 해소]
-    R3 --> NM
-
-    I3 --> B[요구사항과 제약조건 추적]
-    S3 --> B
-    C6 --> B
-    E5 --> B
-    E6 --> B
-    B --> B1[학생·강사 이메일 중복 금지 → UNIQUE]
-    B --> B2[필수 정보 누락 금지 → NOT NULL]
-    B --> B3[없는 부모 참조 금지 → FOREIGN KEY]
-    B --> B4[음수 가격·결제액 금지 → CHECK]
-    B --> B5[허용 상태만 저장 → CHECK]
-    B --> B6[설명은 선택 입력 → description NULL 가능]
-
-    B1 --> O[구현 순서와 실행 검증]
-    B2 --> O
-    B3 --> O
-    B4 --> O
-    B5 --> O
-    B6 --> O
-    O --> O1[CREATE 순서<br/>students · instructors → courses → enrollments]
-    O --> O2[DROP 순서<br/>enrollments → courses → instructors · students]
-    O --> O3[정상 데이터<br/>한 강사의 여러 강의 · 한 학생의 여러 신청]
-    O --> O4[오류 데이터<br/>중복 이메일 · 없는 FK · 음수 금액 · 잘못된 상태 차단]
-    O --> O5[JOIN 검증<br/>학생명·강의명·강사명·상태·결제액 복원]
-
-    O1 --> Q{요구사항·ERD·DDL·샘플·JOIN 결과가<br/>같은 업무 규칙을 설명하는가?}
-    O2 --> Q
-    O3 --> Q
-    O4 --> Q
-    O5 --> Q
-    Q -- 아니요 --> Q1[컬럼 소유자·FK 위치·선택성·제약조건·테스트를 다시 검토]
-    Q1 --> T
-    Q -- 예 --> OK[검토된 온라인 강의 DB 설계<br/>ERD와 CREATE TABLE을 같은 버전으로 관리]
-
-    N1[ERD 읽기 원칙<br/>선 모양보다 부모·자식 방향, 1·0..N, FK의 NULL 허용 여부를 문장으로 읽는다] --- NM
-    N2[관계 엔터티 원칙<br/>enrollments는 연결선이 아니라 신청일·상태·결제액을 가진 업무 테이블] --- E
-    N3[제약조건 원칙<br/>문서에만 적지 말고 데이터베이스가 검증할 수 있는 규칙은 DDL로 구현] --- B
-    N4[동기화 원칙<br/>ERD를 바꾸면 DDL·샘플 데이터·JOIN·설명도 함께 수정] --- OK
+erDiagram
+    INSTRUCTORS ||--o{ COURSES : opens
+    STUDENTS ||--o{ ENROLLMENTS : makes
+    COURSES ||--o{ ENROLLMENTS : receives
+    STUDENTS {
+        int id PK
+        string email UNIQUE
+    }
+    INSTRUCTORS {
+        int id PK
+        string email UNIQUE
+    }
+    COURSES {
+        int id PK
+        int instructor_id FK
+        int price
+    }
+    ENROLLMENTS {
+        int id PK
+        int student_id FK
+        int course_id FK
+        string status
+        int paid_amount
+    }

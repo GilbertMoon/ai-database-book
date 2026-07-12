@@ -1,217 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1900" viewBox="0 0 1200 1900" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">INNER JOIN 개념</title>
-  <desc id="desc">students와 enrollments를 students.id와 enrollments.student_id가 같은 조건으로 연결해 일치하는 행 쌍만 결과에 포함하는 INNER JOIN의 원리를 설명한다. 한 학생이 여러 수강신청을 가지면 학생 정보가 결과 행마다 반복되고, 수강신청이 없는 학생은 제외된다. 샘플 데이터에서 외래키 무결성이 유지되면 수강신청 5건이 결과 5행으로 복원되는 과정과 검증 기준을 보여 준다.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 520">
+  <title id="title">INNER JOIN은 일치하는 행만 포함한다</title>
+  <desc id="desc">학생별 수강신청 일치 건수를 기준으로 INNER JOIN 결과가 총 5행이 되고 수강신청이 없는 최현우는 제외됨을 보여 주는 도식이다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f855a"/>
-    </marker>
-    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.7px;text-anchor:middle;fill:#334155}
-      .mono-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.4px;text-anchor:middle;fill:#334155}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .match{stroke:#2f855a;stroke-width:2.2;fill:none;marker-end:url(#arrow-green)}
-      .exclude{stroke:#c2413b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .th{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#334155}
-      .cell{font-size:11.3px;text-anchor:middle;fill:#334155}
-      .cell-green{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#166534}
-      .cell-red{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#b42318}
-      .pk{font-size:11px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
-      .fk{font-size:11px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .line{stroke:#cbd5e1;stroke-width:1}
-      .result-head{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
-      .result-cell{font-size:11.4px;text-anchor:middle;fill:#334155}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.3px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
-      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
-      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .label { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
     </style>
   </defs>
-
-  <rect width="1200" height="1900" fill="#ffffff"/>
-  <text x="600" y="42" class="title">INNER JOIN 개념</text>
-  <text x="600" y="72" class="subtitle">ON 조건이 참인 왼쪽 행과 오른쪽 행의 조합만 결과로 만들며, 일치하지 않는 행은 제외한다</text>
-
-  <rect x="34" y="98" width="1132" height="250" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 결과 행의 기준과 연결 조건을 먼저 정한다</text>
-  <text x="405" y="132" class="section-sub">이 예제의 결과 한 행은 “학생과 수강신청이 연결된 한 건”이다</text>
-
-  <rect x="58" y="162" width="330" height="112" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="190" r="15" fill="#2f6fad"/><text x="88" y="190" class="badge">L</text>
-  <text x="223" y="194" class="card-title">왼쪽 테이블</text>
-  <text x="223" y="226" class="mono">students AS s</text>
-  <text x="223" y="252" class="card-text">학생 한 명당 한 행</text>
-
-  <rect x="435" y="162" width="330" height="112" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="465" cy="190" r="15" fill="#2f855a"/><text x="465" y="190" class="badge">ON</text>
-  <text x="600" y="194" class="card-title">일치 조건</text>
-  <text x="600" y="226" class="mono">s.id = e.student_id</text>
-  <text x="600" y="252" class="card-text">학생 PK와 수강신청 FK의 값 비교</text>
-
-  <rect x="812" y="162" width="330" height="112" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="842" cy="190" r="15" fill="#b7791f"/><text x="842" y="190" class="badge">R</text>
-  <text x="977" y="194" class="card-title">오른쪽 테이블</text>
-  <text x="977" y="226" class="mono">enrollments AS e</text>
-  <text x="977" y="252" class="card-text">수강신청 한 건당 한 행</text>
-
-  <rect x="164" y="296" width="872" height="30" rx="9" fill="#ffffff" stroke="#6fa2e8" stroke-width="1.2"/>
-  <text x="600" y="316" class="card-text-small">PostgreSQL에서 JOIN은 INNER JOIN의 축약 표현이다. 두 문법의 결과는 같다.</text>
-
-  <path d="M600 348V372" class="flow"/>
-
-  <rect x="34" y="372" width="1132" height="570" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="406" class="section-title">2. 샘플 행을 키 값으로 비교해 일치하는 행 쌍을 만든다</text>
-  <text x="500" y="406" class="section-sub">1:N 관계에서는 학생 한 행이 여러 수강신청과 각각 결합될 수 있다</text>
-
-  <rect x="54" y="442" width="390" height="356" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <rect x="54" y="442" width="390" height="44" rx="11" fill="#dcecff"/>
-  <text x="249" y="470" class="table-title">students · 왼쪽</text>
-  <text x="112" y="516" class="th">id · PK</text>
-  <text x="245" y="516" class="th">name</text>
-  <text x="365" y="516" class="th">판정</text>
-  <line x1="54" y1="532" x2="444" y2="532" class="line"/>
-  <line x1="54" y1="590" x2="444" y2="590" class="line"/>
-  <line x1="54" y1="648" x2="444" y2="648" class="line"/>
-  <line x1="54" y1="706" x2="444" y2="706" class="line"/>
-  <line x1="54" y1="764" x2="444" y2="764" class="line"/>
-  <line x1="170" y1="486" x2="170" y2="798" class="line"/>
-  <line x1="320" y1="486" x2="320" y2="798" class="line"/>
-  <text x="112" y="568" class="pk">1</text><text x="245" y="568" class="cell">김민지</text><text x="382" y="568" class="cell-green">2건 일치</text>
-  <text x="112" y="626" class="pk">2</text><text x="245" y="626" class="cell">이준호</text><text x="382" y="626" class="cell-green">2건 일치</text>
-  <text x="112" y="684" class="pk">3</text><text x="245" y="684" class="cell">박서연</text><text x="382" y="684" class="cell-green">1건 일치</text>
-  <text x="112" y="742" class="pk">4</text><text x="245" y="742" class="cell">최현우</text><text x="382" y="742" class="cell-red">0건 · 제외</text>
-  <text x="249" y="786" class="card-text-small">학생 4는 존재하지만 연결되는 수강신청이 없음</text>
-
-  <rect x="756" y="442" width="390" height="356" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <rect x="756" y="442" width="390" height="44" rx="11" fill="#fff1cf"/>
-  <text x="951" y="470" class="table-title">enrollments · 오른쪽</text>
-  <text x="805" y="516" class="th">id · PK</text>
-  <text x="900" y="516" class="th">student_id · FK</text>
-  <text x="1010" y="516" class="th">course_id</text>
-  <text x="1100" y="516" class="th">status</text>
-  <line x1="756" y1="532" x2="1146" y2="532" class="line"/>
-  <line x1="756" y1="578" x2="1146" y2="578" class="line"/>
-  <line x1="756" y1="624" x2="1146" y2="624" class="line"/>
-  <line x1="756" y1="670" x2="1146" y2="670" class="line"/>
-  <line x1="756" y1="716" x2="1146" y2="716" class="line"/>
-  <line x1="756" y1="762" x2="1146" y2="762" class="line"/>
-  <line x1="850" y1="486" x2="850" y2="798" class="line"/>
-  <line x1="960" y1="486" x2="960" y2="798" class="line"/>
-  <line x1="1060" y1="486" x2="1060" y2="798" class="line"/>
-  <text x="805" y="562" class="pk">1</text><text x="905" y="562" class="fk">1</text><text x="1010" y="562" class="cell">1</text><text x="1100" y="562" class="cell">수강중</text>
-  <text x="805" y="608" class="pk">2</text><text x="905" y="608" class="fk">1</text><text x="1010" y="608" class="cell">2</text><text x="1100" y="608" class="cell">신청</text>
-  <text x="805" y="654" class="pk">3</text><text x="905" y="654" class="fk">2</text><text x="1010" y="654" class="cell">1</text><text x="1100" y="654" class="cell">수강중</text>
-  <text x="805" y="700" class="pk">4</text><text x="905" y="700" class="fk">3</text><text x="1010" y="700" class="cell">3</text><text x="1100" y="700" class="cell">신청</text>
-  <text x="805" y="746" class="pk">5</text><text x="905" y="746" class="fk">2</text><text x="1010" y="746" class="cell">3</text><text x="1100" y="746" class="cell">완료</text>
-  <text x="951" y="786" class="card-text-small">student_id는 NOT NULL FK이므로 각 행은 학생 1명을 참조</text>
-
-  <rect x="478" y="474" width="244" height="252" rx="13" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="502" class="card-title">ON 조건 평가</text>
-  <text x="600" y="535" class="mono-small">1 = 1 → 참</text>
-  <text x="600" y="565" class="mono-small">1 = 1 → 참</text>
-  <text x="600" y="595" class="mono-small">2 = 2 → 참</text>
-  <text x="600" y="625" class="mono-small">3 = 3 → 참</text>
-  <text x="600" y="655" class="mono-small">2 = 2 → 참</text>
-  <text x="600" y="692" class="card-text-small">각 참인 조합이 결과 한 행이 됨</text>
-
-  <path d="M444 568H478" class="match"/>
-  <path d="M444 626H466V565H478" class="match"/>
-  <path d="M444 684H458V625H478" class="match"/>
-  <path d="M722 535H756V562" class="match"/>
-  <path d="M722 565H742V608H756" class="match"/>
-  <path d="M722 595H736V654H756" class="match"/>
-  <path d="M722 625H730V700H756" class="match"/>
-  <path d="M722 655H724V746H756" class="match"/>
-
-  <path d="M444 742H468V854H600" class="exclude"/>
-  <rect x="394" y="830" width="412" height="74" rx="11" fill="#fff5f5" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="600" y="855" class="card-title">일치하지 않는 왼쪽 행</text>
-  <text x="600" y="880" class="card-text">최현우(id=4)는 INNER JOIN 결과에 포함되지 않음</text>
-
-  <path d="M600 942V966" class="flow"/>
-
-  <rect x="34" y="966" width="1132" height="480" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="1000" class="section-title">3. SQL 실행 결과: 일치한 조합만 행으로 출력</text>
-  <text x="430" y="1000" class="section-sub">학생 1명에 수강신청이 여러 건이면 학생 이름도 결과 행마다 반복된다</text>
-
-  <rect x="58" y="1032" width="1084" height="116" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <text x="600" y="1060" class="card-title">학생과 수강신청 INNER JOIN</text>
-  <text x="600" y="1091" class="mono">SELECT s.id, s.name, e.id AS enrollment_id, e.course_id, e.status</text>
-  <text x="600" y="1116" class="mono">FROM students AS s INNER JOIN enrollments AS e ON s.id = e.student_id</text>
-  <text x="600" y="1139" class="card-text-small">JOIN은 INNER JOIN의 축약형이며, ORDER BY가 없으면 결과 표시 순서는 보장되지 않는다</text>
-
-  <rect x="58" y="1176" width="1084" height="214" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <rect x="58" y="1176" width="1084" height="40" rx="11" fill="#dcf7e5"/>
-  <text x="145" y="1202" class="result-head">student_id</text>
-  <text x="330" y="1202" class="result-head">student_name</text>
-  <text x="540" y="1202" class="result-head">enrollment_id</text>
-  <text x="750" y="1202" class="result-head">course_id</text>
-  <text x="1000" y="1202" class="result-head">status</text>
-  <line x1="58" y1="1216" x2="1142" y2="1216" class="line"/>
-  <line x1="238" y1="1176" x2="238" y2="1390" class="line"/>
-  <line x1="430" y1="1176" x2="430" y2="1390" class="line"/>
-  <line x1="650" y1="1176" x2="650" y2="1390" class="line"/>
-  <line x1="850" y1="1176" x2="850" y2="1390" class="line"/>
-  <line x1="58" y1="1250" x2="1142" y2="1250" class="line"/>
-  <line x1="58" y1="1284" x2="1142" y2="1284" class="line"/>
-  <line x1="58" y1="1318" x2="1142" y2="1318" class="line"/>
-  <line x1="58" y1="1352" x2="1142" y2="1352" class="line"/>
-  <text x="145" y="1240" class="result-cell">1</text><text x="330" y="1240" class="result-cell">김민지</text><text x="540" y="1240" class="result-cell">1</text><text x="750" y="1240" class="result-cell">1</text><text x="1000" y="1240" class="result-cell">수강중</text>
-  <text x="145" y="1274" class="result-cell">1</text><text x="330" y="1274" class="result-cell">김민지</text><text x="540" y="1274" class="result-cell">2</text><text x="750" y="1274" class="result-cell">2</text><text x="1000" y="1274" class="result-cell">신청</text>
-  <text x="145" y="1308" class="result-cell">2</text><text x="330" y="1308" class="result-cell">이준호</text><text x="540" y="1308" class="result-cell">3</text><text x="750" y="1308" class="result-cell">1</text><text x="1000" y="1308" class="result-cell">수강중</text>
-  <text x="145" y="1342" class="result-cell">3</text><text x="330" y="1342" class="result-cell">박서연</text><text x="540" y="1342" class="result-cell">4</text><text x="750" y="1342" class="result-cell">3</text><text x="1000" y="1342" class="result-cell">신청</text>
-  <text x="145" y="1376" class="result-cell">2</text><text x="330" y="1376" class="result-cell">이준호</text><text x="540" y="1376" class="result-cell">5</text><text x="750" y="1376" class="result-cell">3</text><text x="1000" y="1376" class="result-cell">완료</text>
-
-  <rect x="198" y="1404" width="804" height="26" rx="8" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.1"/>
-  <text x="600" y="1422" class="ok">외래키가 유효하고 추가 필터가 없으므로 enrollments 5건 → INNER JOIN 결과 5행</text>
-
-  <path d="M600 1446V1470" class="flow"/>
-
-  <rect x="34" y="1470" width="1132" height="342" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="1504" class="section-title">4. INNER JOIN을 검토할 때 확인할 것</text>
-  <text x="370" y="1504" class="section-sub">“중복처럼 보이는 행”과 “잘못 늘어난 행”을 구분해야 한다</text>
-
-  <rect x="58" y="1536" width="330" height="146" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="223" y="1564" class="card-title">일치 조건</text>
-  <text x="223" y="1594" class="card-text">실제 FK와 참조 PK를 연결했는가?</text>
-  <text x="223" y="1619" class="card-text">잘못된 컬럼이나 누락된 관계는 없는가?</text>
-  <text x="223" y="1644" class="card-text-small">조건이 너무 넓으면 행 조합이 예상보다 증가</text>
-  <text x="223" y="1666" class="card-text-small">NULL은 일반 등호 조건에서 서로 일치하지 않음</text>
-
-  <rect x="435" y="1536" width="330" height="146" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1564" class="card-title">예상 행 수</text>
-  <text x="600" y="1594" class="card-text">1:N이면 1쪽 값의 반복은 정상</text>
-  <text x="600" y="1619" class="card-text">결과 건수를 기준 테이블과 비교</text>
-  <text x="600" y="1644" class="mono-small">COUNT(*) · COUNT(DISTINCT ...)</text>
-  <text x="600" y="1666" class="card-text-small">DISTINCT로 원인을 숨기기 전에 관계를 확인</text>
-
-  <rect x="812" y="1536" width="330" height="146" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="977" y="1564" class="card-title">포함 대상</text>
-  <text x="977" y="1594" class="card-text">일치하는 행만 필요하면 INNER JOIN</text>
-  <text x="977" y="1619" class="card-text">수강신청 없는 학생도 필요하면 LEFT JOIN</text>
-  <text x="977" y="1644" class="card-text-small">WHERE 조건이 필요한 행을 다시 제외하지 않는지 확인</text>
-  <text x="977" y="1666" class="card-text-small">결과 정렬이 필요하면 ORDER BY 명시</text>
-
-  <rect x="126" y="1710" width="948" height="74" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
-  <text x="600" y="1735" class="note-title">INNER JOIN은 교집합 그림보다 “조건을 만족하는 행 쌍 생성”으로 이해한다</text>
-  <text x="600" y="1761" class="note-text">같은 키에 여러 행이 매칭되면 결과도 여러 행이 되며, 매칭이 없는 왼쪽·오른쪽 행은 모두 제외된다</text>
-
-  <rect x="90" y="1830" width="1020" height="36" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="1853" class="principle">ON 조건 평가 → 참인 행 쌍 생성 → 필요한 컬럼 선택 → 예상 행 수와 의미 검증</text>
+  <rect width="1200" height="520" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="title">INNER JOIN은 일치하는 행만 포함한다</text>
+  <rect x="90" y="105" width="290" height="250" class="box" fill="#dbeafe"/>
+  <text x="235" y="140" text-anchor="middle" class="label">students</text>
+  <text x="235" y="180" text-anchor="middle" class="text">김민지 · 신청 2건</text>
+  <text x="235" y="215" text-anchor="middle" class="text">이준호 · 신청 2건</text>
+  <text x="235" y="250" text-anchor="middle" class="text">박서연 · 신청 1건</text>
+  <text x="235" y="285" text-anchor="middle" class="text">최현우 · 신청 0건</text>
+  <rect x="450" y="160" width="260" height="95" class="box" fill="#ede9fe"/>
+  <text x="580" y="195" text-anchor="middle" class="label">JOIN 조건</text>
+  <text x="580" y="228" text-anchor="middle" class="text">students.id = enrollments.student_id</text>
+  <rect x="780" y="105" width="320" height="250" class="box" fill="#dcfce7"/>
+  <text x="940" y="140" text-anchor="middle" class="label">INNER JOIN 결과</text>
+  <text x="940" y="180" text-anchor="middle" class="text">김민지 2행</text>
+  <text x="940" y="215" text-anchor="middle" class="text">이준호 2행</text>
+  <text x="940" y="250" text-anchor="middle" class="text">박서연 1행</text>
+  <text x="940" y="285" text-anchor="middle" class="text">최현우 제외</text>
+  <text x="940" y="320" text-anchor="middle" class="text">총 5행</text>
+  <line x1="380" y1="210" x2="450" y2="210" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="710" y1="210" x2="780" y2="210" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="130" y="400" width="940" height="70" class="box" fill="#f8fafc"/>
+  <text x="600" y="430" text-anchor="middle" class="label">일치하는 행만 결과에 포함되고, 한 학생에 일치 행이 여러 개면 결과도 여러 행이 된다</text>
+  <text x="600" y="455" text-anchor="middle" class="text">수강신청이 없는 최현우는 결과에서 제외된다</text>
 </svg>

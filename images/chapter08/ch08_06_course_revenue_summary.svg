@@ -1,227 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2160" viewBox="0 0 1200 2160" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">강의별 수강생 수와 매출 집계</title>
-  <desc id="desc">courses를 기준으로 enrollments를 LEFT JOIN한 뒤 강의별로 그룹화하여 수강신청 건수, 고유 수강생 수, 결제액 합계와 평균을 계산한다. COUNT(e.id)는 수강신청 행 수이며 학생과 강의의 중복 신청이 금지될 때만 수강생 수와 같아진다. 모든 paid_amount의 합계는 원시 결제액 합계이며 실제 매출은 취소, 환불, 상태별 인식 정책을 반영해야 한다. 수강신청이 없는 강의의 COUNT, SUM, AVG 처리와 원본 건수 및 금액 검산 절차를 함께 설명한다.</desc>
-
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 620">
+  <title id="title">강의별 신청 건수와 결제금액 집계</title>
+  <desc id="desc">모든 courses 행을 유지한 상태로 LEFT JOIN과 그룹화를 거쳐 수강신청 건수, 고유 학생 수, 결제금액 합계를 구하는 과정을 보여 주는 도식이다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.3px;text-anchor:middle;fill:#334155}
-      .mono-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.2px;text-anchor:middle;fill:#334155}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .ref{stroke:#2f6fad;stroke-width:2.2;fill:none;marker-end:url(#arrow-blue)}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .th{font-size:10.9px;font-weight:700;text-anchor:middle;fill:#334155}
-      .cell{font-size:10.9px;text-anchor:middle;fill:#334155}
-      .pk{font-size:10.9px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
-      .fk{font-size:10.9px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .zero{font-size:11px;font-weight:700;text-anchor:middle;fill:#b42318}
-      .line{stroke:#cbd5e1;stroke-width:1}
-      .result-head{font-size:10.5px;font-weight:700;text-anchor:middle;fill:#334155}
-      .result-cell{font-size:10.7px;text-anchor:middle;fill:#334155}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.1px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
-      .ok{font-size:12.6px;font-weight:700;text-anchor:middle;fill:#166534}
-      .warn{font-size:12.4px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .head { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .code { font: 13px Consolas,D2Coding,'Courier New',monospace; fill: #0f172a; }
     </style>
   </defs>
-
-  <rect width="1200" height="2160" fill="#ffffff"/>
-  <text x="600" y="42" class="title">강의별 수강생 수와 매출 집계</text>
-  <text x="600" y="72" class="subtitle">집계식의 숫자보다 “무엇을 한 건으로 세고, 어떤 결제액을 매출로 인정하는가”를 먼저 정의한다</text>
-
-  <rect x="34" y="98" width="1132" height="350" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 결과의 기준과 지표를 서로 다른 개념으로 정의한다</text>
-  <text x="470" y="132" class="section-sub">결과 한 행의 기준은 강의 한 개이며, 아래 지표는 같은 숫자일 수도 있지만 의미는 다르다</text>
-
-  <rect x="58" y="164" width="250" height="190" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="192" r="15" fill="#2f6fad"/><text x="88" y="192" class="badge">G</text>
-  <text x="183" y="196" class="card-title">그룹 기준</text>
-  <text x="183" y="228" class="mono">c.id · c.title</text>
-  <text x="183" y="256" class="card-text">강의 한 개당 결과 한 행</text>
-  <text x="183" y="282" class="card-small">제목이 같아도 다른 강의일 수 있음</text>
-  <text x="183" y="306" class="card-small">PK인 c.id를 반드시 포함</text>
-  <text x="183" y="332" class="card-small">SELECT 일반 컬럼과 GROUP BY 일치</text>
-
-  <rect x="336" y="164" width="250" height="190" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="366" cy="192" r="15" fill="#2f855a"/><text x="366" y="192" class="badge">E</text>
-  <text x="461" y="196" class="card-title">수강신청 건수</text>
-  <text x="461" y="228" class="mono">COUNT(e.id)</text>
-  <text x="461" y="256" class="card-text">enrollments 행 개수</text>
-  <text x="461" y="282" class="card-small">중복 신청이 있으면 모두 계산</text>
-  <text x="461" y="306" class="card-small">LEFT JOIN의 NULL 확장 행 제외</text>
-  <text x="461" y="332" class="card-small">정확한 이름: enrollment_count</text>
-
-  <rect x="614" y="164" width="250" height="190" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <circle cx="644" cy="192" r="15" fill="#7c5cc4"/><text x="644" y="192" class="badge">S</text>
-  <text x="739" y="196" class="card-title">고유 수강생 수</text>
-  <text x="739" y="228" class="mono-small">COUNT(DISTINCT e.student_id)</text>
-  <text x="739" y="256" class="card-text">학생을 중복 없이 계산</text>
-  <text x="739" y="282" class="card-small">재신청·재수강 허용 시 건수와 다름</text>
-  <text x="739" y="306" class="card-small">중복 금지 제약이 있을 때만 동일</text>
-  <text x="739" y="332" class="card-small">정확한 이름: unique_student_count</text>
-
-  <rect x="892" y="164" width="250" height="190" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="922" cy="192" r="15" fill="#b7791f"/><text x="922" y="192" class="badge">₩</text>
-  <text x="1017" y="196" class="card-title">결제액과 매출</text>
-  <text x="1017" y="228" class="mono-small">SUM(e.paid_amount)</text>
-  <text x="1017" y="256" class="card-text">원본 결제액의 단순 합계</text>
-  <text x="1017" y="282" class="card-small">취소·환불·부분결제 반영 여부 확인</text>
-  <text x="1017" y="306" class="card-small">정책 반영 후에만 “매출”로 해석</text>
-  <text x="1017" y="332" class="card-small">예제는 모든 행의 paid_amount 합산</text>
-
-  <rect x="108" y="378" width="984" height="46" rx="10" fill="#fff5f5" stroke="#d9534f" stroke-width="1.3"/>
-  <text x="600" y="398" class="warn">COUNT(e.id)를 student_count라고 부르려면 학생·강의당 신청이 최대 1건이라는 업무 규칙이 필요하다</text>
-  <text x="600" y="417" class="card-small">그 규칙이 없다면 별칭을 enrollment_count로 바꾸거나 COUNT(DISTINCT e.student_id)를 사용한다</text>
-
-  <path d="M600 448V472" class="flow"/>
-
-  <rect x="34" y="472" width="1132" height="524" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="506" class="section-title">2. courses를 기준으로 enrollments를 LEFT JOIN한다</text>
-  <text x="455" y="506" class="section-sub">수강신청이 없는 강의도 결과에 남겨야 하므로 강의를 왼쪽 기준 테이블로 둔다</text>
-
-  <rect x="54" y="542" width="470" height="322" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <rect x="54" y="542" width="470" height="44" rx="11" fill="#dcecff"/>
-  <text x="289" y="570" class="table-title">courses · 기준 4행</text>
-  <text x="104" y="616" class="th">id · PK</text>
-  <text x="270" y="616" class="th">title</text>
-  <text x="440" y="616" class="th">price</text>
-  <line x1="54" y1="632" x2="524" y2="632" class="line"/>
-  <line x1="54" y1="684" x2="524" y2="684" class="line"/>
-  <line x1="54" y1="736" x2="524" y2="736" class="line"/>
-  <line x1="54" y1="788" x2="524" y2="788" class="line"/>
-  <line x1="150" y1="586" x2="150" y2="864" class="line"/>
-  <line x1="390" y1="586" x2="390" y2="864" class="line"/>
-  <text x="104" y="666" class="pk">1</text><text x="270" y="666" class="cell">데이터베이스 입문</text><text x="440" y="666" class="cell">100000</text>
-  <text x="104" y="718" class="pk">2</text><text x="270" y="718" class="cell">정규화 실습</text><text x="440" y="718" class="cell">120000</text>
-  <text x="104" y="770" class="pk">3</text><text x="270" y="770" class="cell">파이썬 데이터 분석</text><text x="440" y="770" class="cell">150000</text>
-  <text x="104" y="822" class="pk">4</text><text x="270" y="822" class="cell">집계 쿼리 실습</text><text x="440" y="822" class="cell">130000</text>
-  <text x="289" y="852" class="card-small">price는 강의 기준 가격이며 paid_amount와 반드시 같지는 않음</text>
-
-  <rect x="676" y="542" width="470" height="322" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <rect x="676" y="542" width="470" height="44" rx="11" fill="#fff1cf"/>
-  <text x="911" y="570" class="table-title">enrollments · 원본 5행</text>
-  <text x="718" y="616" class="th">id</text>
-  <text x="800" y="616" class="th">course_id · FK</text>
-  <text x="900" y="616" class="th">student_id</text>
-  <text x="1015" y="616" class="th">status</text>
-  <text x="1110" y="616" class="th">paid_amount</text>
-  <line x1="676" y1="632" x2="1146" y2="632" class="line"/>
-  <line x1="676" y1="674" x2="1146" y2="674" class="line"/>
-  <line x1="676" y1="716" x2="1146" y2="716" class="line"/>
-  <line x1="676" y1="758" x2="1146" y2="758" class="line"/>
-  <line x1="676" y1="800" x2="1146" y2="800" class="line"/>
-  <line x1="758" y1="586" x2="758" y2="864" class="line"/>
-  <line x1="850" y1="586" x2="850" y2="864" class="line"/>
-  <line x1="950" y1="586" x2="950" y2="864" class="line"/>
-  <line x1="1070" y1="586" x2="1070" y2="864" class="line"/>
-  <text x="718" y="660" class="pk">1</text><text x="804" y="660" class="fk">1</text><text x="900" y="660" class="cell">1</text><text x="1015" y="660" class="cell">수강중</text><text x="1110" y="660" class="cell">100000</text>
-  <text x="718" y="702" class="pk">2</text><text x="804" y="702" class="fk">2</text><text x="900" y="702" class="cell">1</text><text x="1015" y="702" class="cell">신청</text><text x="1110" y="702" class="cell">120000</text>
-  <text x="718" y="744" class="pk">3</text><text x="804" y="744" class="fk">1</text><text x="900" y="744" class="cell">2</text><text x="1015" y="744" class="cell">수강중</text><text x="1110" y="744" class="cell">100000</text>
-  <text x="718" y="786" class="pk">4</text><text x="804" y="786" class="fk">3</text><text x="900" y="786" class="cell">3</text><text x="1015" y="786" class="cell">신청</text><text x="1110" y="786" class="cell">150000</text>
-  <text x="718" y="828" class="pk">5</text><text x="804" y="828" class="fk">3</text><text x="900" y="828" class="cell">2</text><text x="1015" y="828" class="cell">완료</text><text x="1110" y="828" class="cell">150000</text>
-  <text x="911" y="852" class="card-small">course_id = 4인 수강신청은 없음</text>
-
-  <path d="M676 660H638V666H524" class="ref"/>
-  <path d="M676 702H624V718H524" class="ref"/>
-  <path d="M676 744H632V666H524" class="ref"/>
-  <path d="M676 786H616V770H524" class="ref"/>
-  <path d="M676 828H608V770H524" class="ref"/>
-
-  <rect x="396" y="886" width="408" height="38" rx="10" fill="#ffffff" stroke="#3b82c4" stroke-width="1.3"/>
-  <text x="600" y="911" class="mono">c.id = e.course_id</text>
-
-  <rect x="104" y="942" width="992" height="34" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.2"/>
-  <text x="600" y="965" class="card-small">강의 4는 매칭이 없어도 한 행 남고 e.id·e.student_id·e.status·e.paid_amount는 NULL로 확장된다</text>
-
-  <path d="M600 996V1020" class="flow"/>
-
-  <rect x="34" y="1020" width="1132" height="566" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="1054" class="section-title">3. 강의별로 그룹화하고 지표별 집계식을 적용한다</text>
-  <text x="465" y="1054" class="section-sub">0건 강의는 집계 함수의 NULL 처리 차이를 함께 확인한다</text>
-
-  <rect x="58" y="1086" width="1084" height="166" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <text x="600" y="1114" class="card-title">의미가 드러나는 별칭을 사용한 집계 SQL</text>
-  <text x="600" y="1144" class="mono-small">SELECT c.id, c.title, COUNT(e.id) AS enrollment_count,</text>
-  <text x="600" y="1168" class="mono-small">COUNT(DISTINCT e.student_id) AS unique_student_count,</text>
-  <text x="600" y="1192" class="mono-small">COALESCE(SUM(e.paid_amount), 0) AS gross_paid_amount, AVG(e.paid_amount) AS avg_paid_amount</text>
-  <text x="600" y="1216" class="mono-small">FROM courses AS c LEFT JOIN enrollments AS e ON c.id = e.course_id GROUP BY c.id, c.title ORDER BY c.id</text>
-
-  <rect x="58" y="1280" width="1084" height="246" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <rect x="58" y="1280" width="1084" height="42" rx="11" fill="#dcf7e5"/>
-  <text x="115" y="1307" class="result-head">course_id</text>
-  <text x="280" y="1307" class="result-head">course_title</text>
-  <text x="498" y="1307" class="result-head">enrollment_count</text>
-  <text x="690" y="1307" class="result-head">unique_student_count</text>
-  <text x="885" y="1307" class="result-head">gross_paid_amount</text>
-  <text x="1060" y="1307" class="result-head">avg_paid_amount</text>
-  <line x1="58" y1="1322" x2="1142" y2="1322" class="line"/>
-  <line x1="58" y1="1368" x2="1142" y2="1368" class="line"/>
-  <line x1="58" y1="1414" x2="1142" y2="1414" class="line"/>
-  <line x1="58" y1="1460" x2="1142" y2="1460" class="line"/>
-  <line x1="172" y1="1280" x2="172" y2="1526" class="line"/>
-  <line x1="408" y1="1280" x2="408" y2="1526" class="line"/>
-  <line x1="588" y1="1280" x2="588" y2="1526" class="line"/>
-  <line x1="790" y1="1280" x2="790" y2="1526" class="line"/>
-  <line x1="980" y1="1280" x2="980" y2="1526" class="line"/>
-  <text x="115" y="1352" class="result-cell">1</text><text x="280" y="1352" class="result-cell">데이터베이스 입문</text><text x="498" y="1352" class="result-cell">2</text><text x="690" y="1352" class="result-cell">2</text><text x="885" y="1352" class="result-cell">200000</text><text x="1060" y="1352" class="result-cell">100000</text>
-  <text x="115" y="1398" class="result-cell">2</text><text x="280" y="1398" class="result-cell">정규화 실습</text><text x="498" y="1398" class="result-cell">1</text><text x="690" y="1398" class="result-cell">1</text><text x="885" y="1398" class="result-cell">120000</text><text x="1060" y="1398" class="result-cell">120000</text>
-  <text x="115" y="1444" class="result-cell">3</text><text x="280" y="1444" class="result-cell">파이썬 데이터 분석</text><text x="498" y="1444" class="result-cell">2</text><text x="690" y="1444" class="result-cell">2</text><text x="885" y="1444" class="result-cell">300000</text><text x="1060" y="1444" class="result-cell">150000</text>
-  <text x="115" y="1490" class="result-cell">4</text><text x="280" y="1490" class="result-cell">집계 쿼리 실습</text><text x="498" y="1490" class="zero">0</text><text x="690" y="1490" class="zero">0</text><text x="885" y="1490" class="zero">0</text><text x="1060" y="1490" class="zero">NULL</text>
-
-  <rect x="94" y="1540" width="1012" height="26" rx="8" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.1"/>
-  <text x="600" y="1558" class="ok">COUNT는 0 · SUM은 COALESCE로 0 · AVG는 관측된 결제액이 없어 NULL을 유지한다</text>
-
-  <path d="M600 1586V1610" class="flow"/>
-
-  <rect x="34" y="1610" width="1132" height="454" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="1644" class="section-title">4. 원본 데이터와 업무 정책으로 집계 결과를 검증한다</text>
-  <text x="470" y="1644" class="section-sub">SQL 실행 성공과 지표의 업무적 정확성은 서로 다른 문제다</text>
-
-  <rect x="58" y="1676" width="330" height="160" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="223" y="1704" class="card-title">건수·그룹 검산</text>
-  <text x="223" y="1734" class="mono">2 + 1 + 2 + 0 = 5</text>
-  <text x="223" y="1760" class="card-text">집계 결과 4행 = courses 4행</text>
-  <text x="223" y="1786" class="card-small">COUNT(e.id) 합 = enrollments 5행</text>
-  <text x="223" y="1810" class="card-small">COUNT(*)는 0건 강의도 1로 세므로 부적합</text>
-
-  <rect x="435" y="1676" width="330" height="160" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1704" class="card-title">금액 검산</text>
-  <text x="600" y="1734" class="mono">200000 + 120000 + 300000 = 620000</text>
-  <text x="600" y="1760" class="card-text">그룹별 gross_paid_amount 합</text>
-  <text x="600" y="1786" class="card-small">원본 paid_amount 합계와 일치해야 함</text>
-  <text x="600" y="1810" class="card-small">courses.price를 매출로 합산하지 않음</text>
-
-  <rect x="812" y="1676" width="330" height="160" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="977" y="1704" class="card-title">중복과 별칭 검증</text>
-  <text x="977" y="1734" class="card-text">신청 건수와 고유 학생 수 비교</text>
-  <text x="977" y="1760" class="card-small">현재 샘플은 모두 같지만 구조상 보장되지 않음</text>
-  <text x="977" y="1786" class="card-small">student_count 별칭은 전제 없으면 오해 가능</text>
-  <text x="977" y="1810" class="card-small">필요 시 이력 포함 UNIQUE 규칙 별도 설계</text>
-
-  <rect x="88" y="1862" width="1024" height="82" rx="11" fill="#fff5f5" stroke="#d9534f" stroke-width="1.4"/>
-  <text x="600" y="1887" class="note-title">“총 결제액”을 곧바로 “매출”로 부르지 않는다</text>
-  <text x="600" y="1913" class="note-text">예제는 신청·수강중·완료 상태의 모든 paid_amount를 합산한다. 실제 매출은 취소·환불·부분결제·매출 인식 시점 정책을 반영해야 한다.</text>
-  <text x="600" y="1936" class="mono-small">정책 예: SUM(CASE WHEN e.status IN ('수강중','완료') THEN e.paid_amount ELSE 0 END)</text>
-
-  <rect x="88" y="1968" width="1024" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
-  <text x="600" y="1993" class="note-title">중복 신청 제약은 운영 규칙에 맞게 설계</text>
-  <text x="600" y="2018" class="note-text">재수강 이력을 허용한다면 단순 UNIQUE(student_id, course_id)는 부적절할 수 있다. 학기·회차·활성 상태를 포함한 키나 부분 유니크 인덱스를 검토한다.</text>
-
-  <rect x="74" y="2092" width="1052" height="36" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="2115" class="principle">지표 정의 → LEFT JOIN → 강의별 GROUP BY → 0건 처리 → 원본 검산 → 상태·환불 정책 적용</text>
+  <rect width="1200" height="620" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="title">강의별 신청 건수와 결제금액 집계</text>
+  <rect x="90" y="145" width="220" height="110" class="box" fill="#dbeafe"/>
+  <text x="200" y="180" text-anchor="middle" class="head">courses</text>
+  <text x="200" y="212" text-anchor="middle" class="text">모든 강의 유지</text>
+  <rect x="390" y="145" width="240" height="110" class="box" fill="#ede9fe"/>
+  <text x="510" y="180" text-anchor="middle" class="head">LEFT JOIN enrollments</text>
+  <text x="510" y="212" text-anchor="middle" class="text">수강신청이 없어도 강의는 남는다</text>
+  <rect x="710" y="110" width="400" height="180" class="box" fill="#ffedd5"/>
+  <text x="910" y="145" text-anchor="middle" class="head">강의별 그룹과 계산</text>
+  <text x="910" y="180" text-anchor="middle" class="code">COUNT(e.id) = 수강신청 건수</text>
+  <text x="910" y="215" text-anchor="middle" class="code">COUNT(DISTINCT e.student_id) = 고유 학생 수</text>
+  <text x="910" y="250" text-anchor="middle" class="code">COALESCE(SUM(e.paid_amount), 0) = 결제금액 합계</text>
+  <line x1="310" y1="200" x2="390" y2="200" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="630" y1="200" x2="710" y2="200" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="270" y="360" width="660" height="120" class="box" fill="#dcfce7"/>
+  <text x="600" y="395" text-anchor="middle" class="head">수강신청이 없는 강의: 집계 쿼리 실습</text>
+  <text x="600" y="428" text-anchor="middle" class="text">수강신청 건수 0 · 고유 학생 수 0 · 결제금액 합계 0</text>
+  <rect x="230" y="515" width="740" height="60" class="box" fill="#fef2f2"/>
+  <text x="600" y="550" text-anchor="middle" class="text">결제금액 합계는 저장된 값의 합계이며, 환불·취소 정책을 반영한 최종 회계 매출과는 다를 수 있다</text>
 </svg>
