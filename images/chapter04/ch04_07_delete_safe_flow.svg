@@ -1,1 +1,191 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc"><title id="title">안전한 DELETE 실행 절차</title><desc id="desc">삭제 대상 행을 먼저 조회하고 정확한 한 행인지 확인한 뒤 DELETE를 실행하여 영향받은 행 수와 삭제 후 결과를 검증하는 흐름</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.title{font-size:28px;font-weight:700;text-anchor:middle}.sub{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.p1{fill:#eef5ff;stroke:#6fa2e8}.p2{fill:#fff8e8;stroke:#d69e2e}.p3{fill:#f5f1ff;stroke:#9b7bd2}.p4{fill:#f2fbf5;stroke:#8bc9a0}.box{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:10}.head{font-size:18px;font-weight:700}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.5px;text-anchor:middle;fill:#475569}.sql{font-family:Consolas,D2Coding,monospace;font-size:14px;font-weight:700;text-anchor:middle}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.5px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="900" fill="#fff"/><text x="600" y="40" class="title">안전한 DELETE 실행 절차</text><text x="600" y="68" class="sub">같은 WHERE 조건으로 삭제 전 대상과 삭제 후 결과를 확인한다</text><rect x="45" y="100" width="1110" height="150" class="panel p1"/><text x="70" y="132" class="head">1. 삭제 대상 정의</text><rect x="100" y="160" width="430" height="58" class="box"/><text x="315" y="185" class="h">대상 테이블</text><text x="315" y="207" class="sql">students</text><rect x="670" y="160" width="430" height="58" class="box"/><text x="885" y="185" class="h">식별 조건</text><text x="885" y="207" class="sql">email = 'hyunwoo@example.com'</text><rect x="250" y="285" width="700" height="78" class="box"/><text x="600" y="312" class="sql">SELECT * FROM students</text><text x="600" y="337" class="sql">WHERE email = 'hyunwoo@example.com';</text><text x="600" y="357" class="m">삭제할 행의 전체 값과 대상 행 수를 먼저 확인</text><path d="M315 218V270H600V285" class="arr"/><path d="M885 218V270H600" class="arr"/><polygon points="600,395 735,435 600,475 465,435" class="decision"/><text x="600" y="431" class="h">정확히 의도한 1행인가?</text><text x="600" y="453" class="m">0행·여러 행·다른 행이면 WHERE 수정</text><path d="M600 363V395" class="arr"/><rect x="45" y="510" width="525" height="190" class="panel p2"/><text x="70" y="542" class="head">2. 실행 전 확인</text><rect x="85" y="570" width="445" height="42" class="box"/><text x="307" y="596" class="h">필요하면 삭제 대상 값과 복구 방법 준비</text><rect x="85" y="625" width="445" height="42" class="box"/><text x="307" y="651" class="h">현재 DB·테이블·참조 관계 확인</text><rect x="630" y="510" width="525" height="190" class="panel p3"/><text x="655" y="542" class="head">3. DELETE 실행</text><rect x="670" y="570" width="445" height="70" class="box"/><text x="892" y="597" class="sql">DELETE FROM students</text><text x="892" y="622" class="sql">WHERE email = 'hyunwoo@example.com';</text><rect x="715" y="652" width="355" height="34" class="box"/><text x="892" y="674" class="h">영향받은 행 수 = 1 확인</text><path d="M735 435H892V510" class="arr"/><path d="M465 435H307V510" class="arr"/><path d="M570 605H630" class="arr"/><rect x="45" y="735" width="1110" height="95" class="panel p4"/><text x="70" y="767" class="head">4. 삭제 후 검증</text><rect x="75" y="785" width="320" height="30" class="box"/><text x="235" y="805" class="m">같은 WHERE 조회 결과 = 0행</text><rect x="440" y="785" width="320" height="30" class="box"/><text x="600" y="805" class="m">전체 행 수가 예상대로 1 감소</text><rect x="805" y="785" width="320" height="30" class="box"/><text x="965" y="805" class="m">다른 학생 행은 그대로 유지</text><path d="M892 700V735" class="arr"/><rect x="70" y="850" width="320" height="30" class="note"/><text x="230" y="870" class="nt">WHERE 없으면 모든 행이 대상</text><rect x="440" y="850" width="320" height="30" class="note"/><text x="600" y="870" class="nt">DELETE는 행만 제거하고 구조는 유지</text><rect x="810" y="850" width="320" height="30" class="note"/><text x="970" y="870" class="nt">영향 행 수와 남은 데이터 확인</text><rect x="130" y="888" width="940" height="8" class="core"/><text x="600" y="897" class="cv">삭제 전 대상 확인 → DELETE → 삭제 후 0행과 남은 데이터 확인</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1720" viewBox="0 0 1200 1720" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">안전한 DELETE 실행 절차</title>
+  <desc id="desc">삭제 정책을 먼저 결정하고 명시적 트랜잭션을 시작한 뒤 SELECT FOR UPDATE로 삭제 대상을 확인하고, 외래키 참조 영향을 점검한 다음 기본키 조건의 DELETE RETURNING을 실행하여 결과를 검증하고 COMMIT 또는 ROLLBACK하는 절차를 설명한다.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .box-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .box-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .box-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .sql{font-family:Consolas,D2Coding,Menlo,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#243b53}
+      .sql-small{font-family:Consolas,D2Coding,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .decision{font-size:14px;font-weight:700;text-anchor:middle}
+      .result-ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .result-no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      .principle-main{font-size:17px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1720" fill="#ffffff"/>
+  <text x="600" y="42" class="title">안전한 DELETE 실행 절차</text>
+  <text x="600" y="72" class="subtitle">삭제 정책과 참조 영향을 확인하고, 트랜잭션 안에서 삭제한 뒤 반환 결과를 검증한다</text>
+
+  <!-- Section 1 -->
+  <rect x="34" y="98" width="1132" height="322" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 삭제 목적과 정책을 먼저 결정</text>
+  <text x="372" y="132" class="section-sub">복구·감사·참조 관계가 중요하면 물리 삭제 대신 소프트 삭제를 검토한다</text>
+
+  <rect x="58" y="160" width="330" height="96" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="188" r="15" fill="#2f6fad"/><text x="88" y="188" class="badge">1</text>
+  <text x="223" y="190" class="box-title">대상 테이블</text>
+  <text x="223" y="224" class="sql">students</text>
+  <text x="223" y="246" class="box-text">삭제하려는 데이터 범위 확인</text>
+
+  <rect x="435" y="160" width="330" height="96" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <circle cx="465" cy="188" r="15" fill="#7c5cc4"/><text x="465" y="188" class="badge">2</text>
+  <text x="600" y="190" class="box-title">삭제 방식</text>
+  <text x="600" y="221" class="box-text">물리 삭제: 행을 실제 제거</text>
+  <text x="600" y="244" class="box-text">소프트 삭제: 상태·삭제시각 변경</text>
+
+  <rect x="812" y="160" width="330" height="96" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="842" cy="188" r="15" fill="#b7791f"/><text x="842" y="188" class="badge">3</text>
+  <text x="977" y="190" class="box-title">후보 조건</text>
+  <text x="977" y="222" class="sql-small">email = 'hyunwoo@example.com'</text>
+  <text x="977" y="246" class="box-text">먼저 조회한 뒤 PK로 대상을 고정</text>
+
+  <rect x="94" y="286" width="1012" height="100" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="600" y="314" class="sql">SELECT id, name, email, status FROM students</text>
+  <text x="600" y="341" class="sql">WHERE email = 'hyunwoo@example.com';</text>
+  <text x="600" y="366" class="box-text">현재 값·대상 행 수·기본키 id를 확인하고 필요한 복구 정보도 확보한다</text>
+
+  <path d="M223 256V270H600V286" class="flow"/>
+  <path d="M600 256V286" class="flow"/>
+  <path d="M977 256V270H600" class="flow"/>
+
+  <path d="M600 420V444" class="flow"/>
+  <polygon points="600,444 752,488 600,532 448,488" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="483" class="decision">의도한 행이 정확히 1건이며 물리 삭제가 적절한가?</text>
+  <text x="600" y="506" class="box-text">아니면 조건을 수정하거나 소프트 삭제로 전환</text>
+  <path d="M600 532V570" class="flow"/>
+  <text x="620" y="556" class="result-ok">예</text>
+
+  <!-- Section 2 -->
+  <rect x="34" y="570" width="1132" height="420" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="604" class="section-title">2. 트랜잭션 안에서 대상과 FK 영향을 다시 확인</text>
+  <text x="492" y="604" class="section-sub">조회와 삭제 사이의 변경을 줄이고 참조 무결성 오류나 연쇄 삭제를 미리 점검한다</text>
+
+  <rect x="58" y="636" width="250" height="112" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <circle cx="88" cy="664" r="15" fill="#64748b"/><text x="88" y="664" class="badge">1</text>
+  <text x="183" y="668" class="box-title">트랜잭션 시작</text>
+  <text x="183" y="704" class="sql">BEGIN;</text>
+  <text x="183" y="730" class="box-text">검증 전까지 삭제 확정 안 함</text>
+
+  <rect x="337" y="636" width="526" height="156" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
+  <circle cx="367" cy="664" r="15" fill="#2f6fad"/><text x="367" y="664" class="badge">2</text>
+  <text x="600" y="668" class="box-title">대상 행 재확인·잠금</text>
+  <text x="600" y="704" class="sql">SELECT id, name, email, status FROM students</text>
+  <text x="600" y="731" class="sql">WHERE id = 4 FOR UPDATE;</text>
+  <text x="600" y="758" class="box-text">삭제 완료 또는 ROLLBACK까지 다른 트랜잭션의 해당 행 변경을 대기시킨다</text>
+
+  <rect x="892" y="636" width="250" height="156" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <circle cx="922" cy="664" r="15" fill="#c2413b"/><text x="922" y="664" class="badge">3</text>
+  <text x="1017" y="668" class="box-title">FK 참조 영향</text>
+  <text x="1017" y="701" class="box-text">자식 행 존재 여부</text>
+  <text x="1017" y="725" class="box-text">RESTRICT·CASCADE</text>
+  <text x="1017" y="749" class="box-text">SET NULL 동작 확인</text>
+  <text x="1017" y="773" class="box-text-small">CASCADE는 자식 행도 삭제 가능</text>
+
+  <path d="M308 692H337" class="flow"/>
+  <path d="M863 714H892" class="flow"/>
+
+  <rect x="76" y="826" width="326" height="118" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="239" y="855" class="box-title">RESTRICT / NO ACTION</text>
+  <text x="239" y="883" class="box-text">참조 중인 자식 행이 있으면 삭제 거부</text>
+  <text x="239" y="908" class="box-text">먼저 관계를 정리하거나 정책 재검토</text>
+  <text x="239" y="932" class="result-no">무조건 자식 행부터 지우지 않기</text>
+
+  <rect x="437" y="826" width="326" height="118" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="855" class="box-title">ON DELETE CASCADE</text>
+  <text x="600" y="883" class="box-text">부모 삭제와 함께 관련 자식 행도 삭제</text>
+  <text x="600" y="908" class="box-text">영향 범위와 삭제 건수를 사전 확인</text>
+  <text x="600" y="932" class="result-no">의도하지 않은 연쇄 삭제 주의</text>
+
+  <rect x="798" y="826" width="326" height="118" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="961" y="855" class="box-title">SET NULL / 소프트 삭제</text>
+  <text x="961" y="883" class="box-text">SET NULL은 FK 열이 NULL 허용일 때 가능</text>
+  <text x="961" y="908" class="box-text">이력 보존이 필요하면 상태 변경 고려</text>
+  <text x="961" y="932" class="result-ok">업무 의미에 맞는 정책 선택</text>
+
+  <path d="M600 990V1014" class="flow"/>
+  <polygon points="600,1014 752,1058 600,1102 448,1058" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1053" class="decision">대상 1건과 FK 삭제 정책이 모두 확인되었는가?</text>
+  <text x="600" y="1076" class="box-text">확인되지 않으면 ROLLBACK 후 조건·관계·정책 재검토</text>
+  <path d="M600 1102V1140" class="flow"/>
+  <text x="620" y="1126" class="result-ok">예</text>
+
+  <!-- Section 3 -->
+  <rect x="34" y="1140" width="1132" height="190" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
+  <text x="58" y="1174" class="section-title">3. 기본키 조건으로 DELETE하고 반환 결과 검증</text>
+  <text x="465" y="1174" class="section-sub">PostgreSQL의 RETURNING으로 실제 삭제된 행을 즉시 확인할 수 있다</text>
+
+  <rect x="58" y="1204" width="510" height="96" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.6"/>
+  <text x="313" y="1232" class="sql">DELETE FROM students</text>
+  <text x="313" y="1258" class="sql">WHERE id = 4</text>
+  <text x="313" y="1284" class="sql">RETURNING id, name, email;</text>
+
+  <rect x="632" y="1204" width="510" height="96" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.6"/>
+  <text x="887" y="1232" class="box-title">검증 기준</text>
+  <text x="887" y="1258" class="box-text">반환 행 1건 · id=4 · 대상 값 일치</text>
+  <text x="887" y="1284" class="box-text">CASCADE가 있다면 관련 자식 행 영향도 확인</text>
+
+  <path d="M568 1252H632" class="flow"/>
+
+  <path d="M600 1330V1352" class="flow"/>
+  <polygon points="600,1352 748,1394 600,1436 452,1394" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1389" class="decision">삭제 결과와 전체 영향 범위가 예상과 일치하는가?</text>
+  <text x="600" y="1412" class="box-text">대상 행·반환 건수·FK 연쇄 동작·유지되어야 할 데이터 확인</text>
+
+  <!-- Commit / rollback -->
+  <rect x="54" y="1452" width="520" height="92" rx="13" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
+  <text x="314" y="1480" class="box-title">예 · COMMIT</text>
+  <text x="314" y="1509" class="sql">COMMIT;</text>
+  <text x="314" y="1532" class="result-ok">삭제 내용을 최종 확정</text>
+
+  <rect x="626" y="1452" width="520" height="92" rx="13" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
+  <text x="886" y="1480" class="box-title">아니오 · ROLLBACK</text>
+  <text x="886" y="1509" class="sql">ROLLBACK;</text>
+  <text x="886" y="1532" class="result-no">삭제를 취소하고 대상·FK 정책을 다시 점검</text>
+
+  <path d="M452 1394H314V1452" class="flow"/>
+  <path d="M748 1394H886V1452" class="flow"/>
+  <text x="398" y="1434" class="result-ok">예</text>
+  <text x="802" y="1434" class="result-no">아니오</text>
+  <path d="M886 1544V1560H22V336H94" class="retry"/>
+
+  <!-- Notes -->
+  <rect x="54" y="1570" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="226" y="1596" class="note-title">WHERE 없는 DELETE</text>
+  <text x="226" y="1619" class="note-text">모든 행이 대상이 되므로 특별한 의도가 없다면 실행하지 않는다</text>
+
+  <rect x="428" y="1570" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1596" class="note-title">자동 커밋 주의</text>
+  <text x="600" y="1619" class="note-text">검증 후 취소하려면 명시적 트랜잭션 또는 자동 커밋 해제가 필요하다</text>
+
+  <rect x="802" y="1570" width="344" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="974" y="1596" class="note-title">소프트 삭제 대안</text>
+  <text x="974" y="1619" class="note-text">status와 deleted_at을 UPDATE하여 이력과 복구 가능성을 남긴다</text>
+
+  <!-- Principle -->
+  <rect x="80" y="1662" width="1040" height="42" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1662" width="190" height="42" rx="11" fill="#dcf7e5"/>
+  <line x1="270" y1="1671" x2="270" y2="1695" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1689" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1689" class="principle-main">정책 확인 → BEGIN → 대상 잠금·FK 점검 → DELETE RETURNING → COMMIT 또는 ROLLBACK</text>
+</svg>
