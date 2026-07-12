@@ -413,6 +413,35 @@ def main() -> None:
         ROOT / "book/chapter15/chapter15.md": {
             "![최종 프로젝트 진행 흐름](../../images/chapter15/ch15_01_final_project_flow.svg)": "![데이터베이스 서비스 프로젝트 진행 흐름](../../images/chapter15/ch15_01_service_project_flow.svg)",
             "![최종 제출 체크리스트](../../images/chapter15/ch15_08_final_checklist.svg)": "![프로젝트 완성도 체크리스트](../../images/chapter15/ch15_08_completion_checklist.svg)",
+            """```text
+문제를 정의한다.
+→ 사용자와 범위를 정한다.
+→ 요구사항을 작성한다.
+→ 엔터티와 관계를 찾는다.
+→ ERD와 테이블을 설계한다.
+→ PostgreSQL DDL로 구현한다.
+→ 샘플 데이터로 실제 상황을 만든다.
+→ JOIN, 집계와 검증 쿼리로 확인한다.
+→ 트랜잭션, 인덱스, 보안과 복구를 검토한다.
+→ AI가 만든 초안과 사람이 수정한 결과를 비교한다.
+→ 필요한 기술만 선택적으로 확장한다.
+→ 다른 사람이 다시 실행할 수 있도록 문서화한다.
+```""": """```text
+문제를 정의한다.
+→ 사용자와 프로젝트 범위를 정한다.
+→ 요구사항을 작성한다.
+→ 엔터티와 관계를 찾는다.
+→ ERD를 설계한다.
+→ PostgreSQL DDL로 구현한다.
+→ 샘플 데이터로 실제 상황을 만든다.
+→ 핵심 SQL로 설계를 검증한다.
+→ 트랜잭션, 인덱스와 성능을 검토한다.
+→ 보안, 백업과 복구를 검토한다.
+→ AI 초안을 검토하고 수정한 뒤 실행 결과로 검증한다.
+→ 간단한 웹 CRUD를 구현한다.
+→ GitHub 저장소를 정리한다.
+→ 검증 보고서와 재현 문서를 작성한다.
+```""",
         },
     }
     for path, replacements in text_replacements.items():
