@@ -1,18 +1,80 @@
-flowchart LR
-    A[ERD draft] --> B[CREATE TABLE]
-    B --> C[INSERT sample data]
-    C --> D[SELECT tables]
-    D --> E[JOIN validation]
-    E --> F[CRUD SQL]
+flowchart TB
+    A[검증 목표 정의<br/>요구사항이 ERD·DDL·데이터·SQL 결과로 재현되는지 확인] --> B[검증 가능한 기준선 준비]
 
-    F --> G[SELECT before UPDATE]
-    G --> H[UPDATE]
-    H --> I[SELECT after UPDATE]
+    B --> B1[ERD<br/>테이블·PK·FK·카디널리티·선택성]
+    B --> B2[schema.sql<br/>DROP·CREATE·제약조건]
+    B --> B3[요구사항별 예상 결과<br/>성공해야 할 상황과 차단되어야 할 상황]
 
-    F --> J[SELECT before DELETE]
-    J --> K[DELETE or status update]
-    K --> L[SELECT after DELETE]
+    B1 --> C[1. 구조 검증]
+    B2 --> C
+    B3 --> C
+    C --> C1[부모부터 CREATE TABLE 실행]
+    C --> C2[컬럼·자료형·NULL·기본키 확인]
+    C --> C3[FK 참조 대상과 UNIQUE·CHECK 확인]
+    C --> C4[같은 schema.sql을 다시 실행해도 초기화되는지 확인]
 
-    E --> M{Can answer requirements?}
-    M -- No --> A
-    M -- Yes --> N[Design validated]
+    C1 --> D[2. 테스트 데이터 설계]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    D --> D1[정상 시나리오<br/>한 강사의 여러 강의]
+    D --> D2[관계 시나리오<br/>한 학생의 여러 신청·한 강의의 여러 학생]
+    D --> D3[경계 시나리오<br/>서로 다른 상태·금액·선택 입력 description]
+    D --> D4[오류 시나리오<br/>중복 이메일·없는 FK·음수 금액·잘못된 상태]
+    D --> D5[각 INSERT마다 기대 결과 기록<br/>성공·실패·예상 행 수]
+
+    D1 --> E[3. 저장 결과와 기본 조회 확인]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+    E --> E1[테이블별 SELECT와 COUNT]
+    E --> E2[FK 값이 실제 부모 행을 가리키는지 확인]
+    E --> E3[오류 데이터가 정확한 제약조건에서 차단되는지 확인]
+    E --> E4[샘플의 ID를 추측하지 말고 조회 결과로 확인]
+
+    E1 --> F[4. JOIN으로 업무 결과 복원]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    F --> F1[enrollments.student_id = students.id]
+    F --> F2[enrollments.course_id = courses.id]
+    F --> F3[courses.instructor_id = instructors.id]
+    F --> F4[학생명·강의명·강사명·상태·결제액·신청일 출력]
+    F --> F5[예상 행 수·중복·누락·NULL을 요구사항과 비교]
+
+    F1 --> G[5. CRUD와 안전한 변경 검증]
+    F2 --> G
+    F3 --> G
+    F4 --> G
+    F5 --> G
+    G --> G1[INSERT 후 관계와 건수 재확인]
+    G --> G2[UPDATE 전 같은 WHERE의 SELECT로 대상 확인]
+    G --> G3[UPDATE 후 변경 행 수와 값 재확인]
+    G --> G4[취소는 DELETE보다 상태 변경을 먼저 검토]
+    G --> G5[DELETE 전·후 SELECT와 관련 부모 정보 보존 확인]
+
+    G1 --> H{예상 결과와 실제 결과가 모두 일치하는가?}
+    G2 --> H
+    G3 --> H
+    G4 --> H
+    G5 --> H
+
+    H -- 아니요 --> I[실패 원인 분류]
+    I --> I1[구조 오류<br/>컬럼·타입·PK·FK·제약조건]
+    I --> I2[데이터 오류<br/>입력 순서·값·누락·잘못된 ID]
+    I --> I3[조회 오류<br/>JOIN 조건·필터·중복·집계]
+    I --> I4[요구사항 오류<br/>재신청·취소·상태 같은 규칙 미정]
+    I1 --> J[해당 원본을 수정하고 전체 검증을 처음부터 재실행]
+    I2 --> J
+    I3 --> J
+    I4 --> J
+    J --> B
+
+    H -- 예 --> OK[검증된 설계 기준선<br/>ERD · schema.sql · seed.sql · validation.sql · 예상 결과 기록]
+
+    N1[샘플 데이터 원칙<br/>행 수를 채우는 값이 아니라 1:N·N:M·상태·오류 규칙을 드러내는 테스트 데이터] --- D
+    N2[JOIN 진단 원칙<br/>결과가 틀리면 긴 JOIN 전체보다 각 FK 연결을 두 테이블씩 먼저 확인] --- F
+    N3[변경 안전 원칙<br/>UPDATE·DELETE는 실행 전 대상 SELECT와 실행 후 결과 확인을 한 세트로 사용] --- G
+    N4[재현성 원칙<br/>빈 데이터베이스에서 schema→seed→validation 순서로 실행해 같은 결과가 나와야 함] --- OK
+    N5[핵심<br/>SQL이 오류 없이 실행되는 것과 업무 요구사항을 올바르게 재현하는 것은 다르다] --- H
