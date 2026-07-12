@@ -1,1 +1,210 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1210" viewBox="0 0 1200 1210" role="img" aria-labelledby="title desc"><title id="title">AI 생성 ERD 검토 흐름</title><desc id="desc">AI가 생성한 ERD를 요구사항 추적, 엔터티와 속성, 키와 관계, 중복과 선택성, PostgreSQL 구현, 정상·예외 데이터와 JOIN 결과로 반복 검증한 뒤 근거와 함께 채택하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.start{fill:#eef5ff;stroke:#6fa2e8}.review{fill:#f8fafc;stroke:#a8b3c4}.build{fill:#fff8e8;stroke:#d69e2e}.test{fill:#f2fbf5;stroke:#8bc9a0}.pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.red{stroke:#d9534f}.purple{stroke:#7c5cc4}.gray{stroke:#64748b}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.3px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:12.5px;font-weight:700;text-anchor:middle;fill:#334155}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:14px;font-weight:700;text-anchor:middle}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.4px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.3px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1210" fill="#fff"/><text x="600" y="40" class="t">AI 생성 ERD 검토 흐름</text><text x="600" y="68" class="s">AI 제안은 검증되지 않은 가설이며, 요구사항과 실행 결과가 뒷받침할 때만 설계로 채택한다</text><rect x="35" y="100" width="1130" height="190" class="panel start"/><text x="60" y="132" class="pt">1. AI 초안을 원문 요구사항과 대조</text><rect x="60" y="160" width="300" height="82" class="box blue"/><text x="210" y="187" class="h">AI 생성 ERD 초안</text><text x="210" y="211" class="m">빠른 시작점이지만 누락·오해·가정이 포함될 수 있음</text><rect x="450" y="160" width="300" height="82" class="box purple"/><text x="600" y="187" class="h">원문과 업무 시나리오</text><text x="600" y="211" class="m">회원·책·대여·반납·미반납·중복·잘못된 참조</text><rect x="840" y="160" width="300" height="82" class="box green"/><text x="990" y="187" class="h">요구사항 추적표</text><text x="990" y="211" class="m">각 문장 → 테이블·컬럼·관계·제약조건으로 연결</text><path d="M360 201H450" class="arr"/><path d="M750 201H840" class="arr"/><text x="600" y="267" class="m">그림이 그럴듯한지보다 요구사항의 모든 문장을 어디에 반영했는지 설명할 수 있어야 함</text><rect x="35" y="320" width="1130" height="300" class="panel review"/><text x="60" y="352" class="pt">2. 구조를 다섯 관점에서 검토</text><rect x="55" y="385" width="330" height="92" class="box blue"/><text x="220" y="411" class="h">엔터티</text><text x="220" y="434" class="m">독립적으로 식별·관리할 대상인가?</text><text x="220" y="456" class="code">members · books · loans</text><rect x="435" y="385" width="330" height="92" class="box purple"/><text x="600" y="411" class="h">속성 소유자</text><text x="600" y="434" class="m">email은 members, title은 books</text><text x="600" y="456" class="code">borrowed_at은 loans</text><rect x="815" y="385" width="330" height="92" class="box orange"/><text x="980" y="411" class="h">키와 제약조건</text><text x="980" y="434" class="m">PK·FK·NOT NULL·UNIQUE</text><text x="980" y="456" class="m">NULL 허용이 업무 규칙과 맞는가?</text><rect x="245" y="505" width="330" height="78" class="box red"/><text x="410" y="531" class="h">관계와 선택성</text><text x="410" y="554" class="m">1:N·N:M 변환, 0..N·정확히 1을</text><text x="410" y="574" class="m">문장으로 설명할 수 있는가?</text><rect x="625" y="505" width="330" height="78" class="box green"/><text x="790" y="531" class="h">중복과 확장성</text><text x="790" y="554" class="m">회원·책 정보가 대여마다 반복되지 않고</text><text x="790" y="574" class="m">새 관계 속성을 loans에 추가할 수 있는가?</text><text x="600" y="607" class="m">자주 발생하는 오류: members.book_id 하나로 N:M을 표현하거나 대여 날짜를 members·books에 잘못 배치</text><rect x="35" y="650" width="1130" height="165" class="panel build"/><text x="60" y="682" class="pt">3. PostgreSQL로 구현 가능한지 확인</text><rect x="60" y="715" width="315" height="62" class="box gray"/><text x="217" y="739" class="h">타입과 길이</text><text x="217" y="763" class="code">SERIAL · VARCHAR · INT · DATE</text><rect x="442" y="715" width="315" height="62" class="box blue"/><text x="599" y="739" class="h">생성 순서와 참조</text><text x="599" y="763" class="m">members·books 먼저 → loans 나중</text><rect x="825" y="715" width="315" height="62" class="box orange"/><text x="982" y="739" class="h">CREATE TABLE 제약조건</text><text x="982" y="763" class="m">PK·UK·FK·NOT NULL·NULL 허용 명시</text><text x="600" y="801" class="m">ERD를 고치면 SQL도 바꾸고, SQL에서 발견한 규칙은 ERD와 추적표에 되돌려 반영</text><path d="M600 620V650" class="arr"/><rect x="35" y="845" width="1130" height="170" class="panel test"/><text x="60" y="877" class="pt">4. 정상·선택·오류 데이터와 JOIN으로 검증</text><rect x="55" y="910" width="250" height="62" class="box green"/><text x="180" y="934" class="h">정상 사례</text><text x="180" y="958" class="m">한 회원의 여러 대여·한 책의 여러 대여</text><rect x="330" y="910" width="250" height="62" class="box orange"/><text x="455" y="934" class="h">선택 상태</text><text x="455" y="958" class="code">returned_at = NULL</text><rect x="605" y="910" width="250" height="62" class="box red"/><text x="730" y="934" class="h">오류 사례</text><text x="730" y="958" class="m">중복 email·isbn, 없는 FK 차단</text><rect x="880" y="910" width="250" height="62" class="box blue"/><text x="1005" y="934" class="h">조회 사례</text><text x="1005" y="958" class="m">JOIN으로 회원·책·대여일 복원</text><text x="600" y="998" class="m">생성 성공만 보지 않고 실제 저장 결과와 오류 차단, 필요한 조회 결과가 모두 예상과 같은지 확인</text><path d="M600 815V845" class="arr"/><polygon points="600,1035 725,1070 600,1105 475,1070" class="decision"/><text x="600" y="1065" class="dt">요구사항·ERD·SQL·결과가 일치하는가?</text><text x="600" y="1085" class="m">불일치하면 원인 단계를 구분해 다시 검토</text><path d="M180 972V1015H600V1035" class="arr"/><path d="M455 972V1035" class="arr"/><path d="M730 972V1015H600" class="arr"/><path d="M1005 972V1015H600" class="arr"/><rect x="55" y="1125" width="470" height="52" class="box red"/><text x="290" y="1147" class="h">아니요 · 수정 후 재검토</text><text x="290" y="1167" class="m">요구사항 해석·AI 초안·ERD·SQL·테스트 중 원인 확인</text><rect x="675" y="1125" width="470" height="52" class="box green"/><text x="910" y="1147" class="h">예 · 검토된 ERD 채택</text><text x="910" y="1167" class="m">요구사항·ERD·SQL·샘플·검증 결과를 같은 버전으로 기록</text><path d="M475 1070H290V1125" class="back"/><path d="M725 1070H910V1125" class="arr"/><path d="M55 1151H20V201H60" class="back"/><rect x="120" y="1190" width="960" height="16" class="core"/><text x="600" y="1203" class="cv">AI 초안 → 요구사항 추적 → 구조 검토 → SQL 구현 → 데이터 검증 → 근거와 함께 채택</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1990" viewBox="0 0 1200 1990" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">AI 생성 ERD 검토 흐름</title>
+  <desc id="desc">AI가 만든 ERD를 검증되지 않은 설계 가설로 보고 원문 요구사항, 범위와 가정을 먼저 분리한다. 엔터티와 속성, 키와 제약조건, 관계의 카디널리티와 선택성, 정규화와 업무 규칙을 검토하고 PostgreSQL DDL, 메타데이터, 정상·경계·오류 데이터와 JOIN 결과로 검증한 뒤 근거가 일치할 때만 설계 기준선으로 채택하는 흐름을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.4px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .decision{font-size:14px;font-weight:700;text-anchor:middle}
+      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.4px;text-anchor:middle;fill:#475569}
+      .principle-main{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1990" fill="#ffffff"/>
+  <text x="600" y="42" class="title">AI 생성 ERD 검토 흐름</text>
+  <text x="600" y="72" class="subtitle">AI 결과는 설계 가설이다. 요구사항 근거와 실행 검증이 일치할 때만 ERD 기준선으로 채택한다</text>
+
+  <rect x="34" y="98" width="1132" height="306" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 원문 요구사항·AI 초안·가정을 분리</text>
+  <text x="410" y="132" class="section-sub">AI가 추가한 내용과 요구사항에 실제로 적힌 내용을 같은 사실처럼 취급하지 않는다</text>
+
+  <rect x="58" y="160" width="330" height="116" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="188" r="15" fill="#2f6fad"/><text x="88" y="188" class="badge">1</text>
+  <text x="223" y="191" class="card-title">원문 요구사항</text>
+  <text x="223" y="220" class="card-text">회원·도서·대여·반납을 관리</text>
+  <text x="223" y="244" class="card-text">이메일·ISBN 중복 금지</text>
+  <text x="223" y="266" class="card-text-small">각 문장에 ID를 붙여 추적 기준으로 사용</text>
+
+  <rect x="435" y="160" width="330" height="116" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <circle cx="465" cy="188" r="15" fill="#7c5cc4"/><text x="465" y="188" class="badge">2</text>
+  <text x="600" y="191" class="card-title">AI 생성 ERD 전체</text>
+  <text x="600" y="220" class="card-text">테이블·컬럼·키·관계 기호 확인</text>
+  <text x="600" y="244" class="card-text">생략된 설명과 암묵적 가정 분리</text>
+  <text x="600" y="266" class="card-text-small">그럴듯한 이름도 요구사항 근거가 없을 수 있음</text>
+
+  <rect x="812" y="160" width="330" height="116" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="842" cy="188" r="15" fill="#b7791f"/><text x="842" y="188" class="badge">3</text>
+  <text x="977" y="191" class="card-title">범위·가정·미확정 질문</text>
+  <text x="977" y="220" class="card-text">복본 구분 여부·동시 대여 정책</text>
+  <text x="977" y="244" class="card-text">삭제 정책·보존 기간·상태 정의</text>
+  <text x="977" y="266" class="card-text-small">모호하면 임의 결정하지 말고 질문으로 남김</text>
+
+  <rect x="90" y="306" width="1020" height="64" rx="10" fill="#fff5f5" stroke="#d9534f" stroke-width="1.4"/>
+  <text x="600" y="332" class="card-title">먼저 표시할 세 가지</text>
+  <text x="600" y="356" class="card-text">누락된 요구사항 · AI가 추가한 근거 없는 구조 · 서로 충돌하는 가정</text>
+  <path d="M600 404V428" class="flow"/>
+
+  <rect x="34" y="428" width="1132" height="474" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="462" class="section-title">2. 구조를 여섯 관점에서 검토</text>
+  <text x="360" y="462" class="section-sub">각 요소가 어디에서 왔고 어떤 규칙을 표현하는지 문장으로 설명할 수 있어야 한다</text>
+
+  <rect x="54" y="494" width="344" height="118" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="226" y="522" class="card-title">① 엔터티와 한 행의 의미</text>
+  <text x="226" y="551" class="card-text">독립적으로 식별·관리할 대상인가?</text>
+  <text x="226" y="575" class="mono">members · books · loans</text>
+  <text x="226" y="598" class="card-text-small">모든 명사가 테이블이 되는 것은 아님</text>
+
+  <rect x="428" y="494" width="344" height="118" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="522" class="card-title">② 속성과 소유자</text>
+  <text x="600" y="551" class="card-text">값이 어느 대상 또는 사건을 설명하는가?</text>
+  <text x="600" y="575" class="mono">email → members · borrowed_at → loans</text>
+  <text x="600" y="598" class="card-text-small">파생값·다중값·반복 속성 여부 확인</text>
+
+  <rect x="802" y="494" width="344" height="118" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="974" y="522" class="card-title">③ 식별자·키·제약조건</text>
+  <text x="974" y="551" class="card-text">PK·후보키·FK·UNIQUE·NOT NULL</text>
+  <text x="974" y="575" class="card-text">NULL 허용과 업무상 중복 기준</text>
+  <text x="974" y="598" class="card-text-small">id가 있다고 식별 규칙이 모두 해결되지는 않음</text>
+
+  <rect x="54" y="638" width="344" height="132" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="226" y="666" class="card-title">④ 관계·카디널리티·선택성</text>
+  <text x="226" y="695" class="card-text">1:1 · 1:N · N:M이 맞는가?</text>
+  <text x="226" y="719" class="card-text">최소 0 또는 1, 최대 1 또는 N인가?</text>
+  <text x="226" y="744" class="card-text-small">FK는 1:N의 N쪽에 배치되는가?</text>
+  <text x="226" y="763" class="card-text-small">각 loans는 회원·도서 정확히 1개 참조</text>
+
+  <rect x="428" y="638" width="344" height="132" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="600" y="666" class="card-title">⑤ 중복·정규화·사건 엔터티</text>
+  <text x="600" y="695" class="card-text">같은 사실이 여러 행에 반복되는가?</text>
+  <text x="600" y="719" class="card-text">N:M을 loans 같은 연관 엔터티로 해소했는가?</text>
+  <text x="600" y="744" class="card-text-small">관계 속성은 부모가 아니라 사건에 저장</text>
+  <text x="600" y="763" class="card-text-small">재대여를 고려해 두 FK를 무조건 UNIQUE로 두지 않음</text>
+
+  <rect x="802" y="638" width="344" height="132" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="974" y="666" class="card-title">⑥ 확장성·이력·운영 규칙</text>
+  <text x="974" y="695" class="card-text">복본·예약·연체·취소가 추가되면?</text>
+  <text x="974" y="719" class="card-text">삭제·보존·감사·상태 전이는 어떻게 되는가?</text>
+  <text x="974" y="744" class="card-text-small">현재 범위 밖 기능은 가정 또는 후속 설계로 분리</text>
+  <text x="974" y="763" class="card-text-small">모든 규칙이 ERD 기호만으로 표현되지는 않음</text>
+
+  <rect x="106" y="798" width="988" height="70" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.3"/>
+  <text x="600" y="824" class="card-title">AI ERD에서 자주 발견되는 오류</text>
+  <text x="600" y="849" class="card-text">가짜 컬럼 추가 · FK 위치 반대 · N:M 직접 연결 · 카디널리티 누락 · NULL/UNIQUE 과잉 지정 · 관계 속성의 잘못된 소유</text>
+
+  <path d="M600 902V926" class="flow"/>
+
+  <rect x="34" y="926" width="1132" height="308" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="960" class="section-title">3. 요구사항 추적표로 누락과 과잉 설계를 확인</text>
+  <text x="455" y="960" class="section-sub">모든 요구사항은 구조 또는 별도 규칙에 연결되고, 모든 구조에는 근거가 있어야 한다</text>
+
+  <rect x="58" y="992" width="330" height="164" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="1020" class="card-title">요구사항 → 설계 요소</text>
+  <text x="223" y="1050" class="card-text">회원 이메일 중복 금지</text>
+  <text x="223" y="1075" class="mono">members.email UNIQUE NOT NULL</text>
+  <text x="223" y="1105" class="card-text">미반납 상태 표현</text>
+  <text x="223" y="1130" class="mono">loans.returned_at NULL</text>
+  <text x="223" y="1150" class="card-text-small">요구사항마다 구현·검증 위치를 연결</text>
+
+  <rect x="435" y="992" width="330" height="164" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="1020" class="card-title">설계 요소 → 요구사항 근거</text>
+  <text x="600" y="1050" class="card-text">AI가 status 컬럼을 추가했다면</text>
+  <text x="600" y="1075" class="card-text">상태 종류·전이·중복 정보 여부를 질문</text>
+  <text x="600" y="1105" class="card-text">근거가 없으면 제거하거나 가정으로 분리</text>
+  <text x="600" y="1130" class="card-text-small">편의상 추가한 컬럼도 데이터 원천과 책임이 필요</text>
+
+  <rect x="812" y="992" width="330" height="164" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="977" y="1020" class="card-title">미확정·충돌 항목</text>
+  <text x="977" y="1050" class="card-text">“책 한 권”이 도서 정보인가 복본인가?</text>
+  <text x="977" y="1075" class="card-text">동일 도서의 동시 대여를 허용하는가?</text>
+  <text x="977" y="1105" class="card-text">회원 삭제 시 대여 이력을 보존하는가?</text>
+  <text x="977" y="1130" class="card-text-small">결정권자 확인 전 임의 확정하지 않음</text>
+
+  <rect x="124" y="1180" width="952" height="30" rx="9" fill="#fff5f5" stroke="#d9534f" stroke-width="1.2"/>
+  <text x="600" y="1200" class="note-text">추적표의 빈칸은 누락, 근거 없는 설계 요소는 과잉 설계, 서로 다른 답은 요구사항 충돌을 뜻한다</text>
+
+  <path d="M600 1234V1258" class="flow"/>
+
+  <rect x="34" y="1258" width="1132" height="356" rx="16" fill="#eefbf2" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="58" y="1292" class="section-title">4. PostgreSQL DDL과 데이터로 실행 가능성을 검증</text>
+  <text x="470" y="1292" class="section-sub">그림이 아니라 실제 제약조건과 조회 결과가 업무 규칙을 지키는지 확인한다</text>
+
+  <rect x="58" y="1324" width="330" height="138" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="223" y="1352" class="card-title">DDL·메타데이터</text>
+  <text x="223" y="1381" class="card-text">부모 members·books → 자식 loans 순서</text>
+  <text x="223" y="1406" class="card-text">타입·PK·UK·FK·NULL 허용 확인</text>
+  <text x="223" y="1431" class="card-text-small">생성 성공만으로 규칙의 정확성을 보장하지 않음</text>
+  <text x="223" y="1453" class="card-text-small">ERD와 실제 DB 메타데이터를 비교</text>
+
+  <rect x="435" y="1324" width="330" height="138" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="600" y="1352" class="card-title">정상·경계 데이터</text>
+  <text x="600" y="1381" class="card-text">한 회원의 여러 대여·한 도서의 재대여</text>
+  <text x="600" y="1406" class="card-text">대여 0건·1건·여러 건·NULL 상태</text>
+  <text x="600" y="1431" class="card-text-small">기간·상태·수량의 경계값도 확인</text>
+  <text x="600" y="1453" class="card-text-small">복본 미구분 가정이 테스트와 일치하는지 확인</text>
+
+  <rect x="812" y="1324" width="330" height="138" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="977" y="1352" class="card-title">오류·무결성 데이터</text>
+  <text x="977" y="1381" class="card-text">중복 email·isbn 차단</text>
+  <text x="977" y="1406" class="card-text">없는 member_id·book_id FK 차단</text>
+  <text x="977" y="1431" class="card-text-small">NOT NULL·CHECK·삭제 정책의 실패 확인</text>
+  <text x="977" y="1453" class="card-text-small">예상한 이유로 실패하는지가 핵심</text>
+
+  <rect x="90" y="1490" width="1020" height="86" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="600" y="1518" class="card-title">주요 JOIN과 업무 질의</text>
+  <text x="600" y="1547" class="mono">loans JOIN members ON loans.member_id = members.id</text>
+  <text x="600" y="1570" class="card-text-small">회원·도서·대여일·반납상태가 필요한 형태로 복원되고, 누락·중복 행이 없는지 확인</text>
+
+  <path d="M600 1614V1638" class="flow"/>
+
+  <polygon points="600,1638 770,1686 600,1734 430,1686" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1681" class="decision">요구사항·ERD·DDL·데이터·질의 결과가 일치하는가?</text>
+  <text x="600" y="1705" class="card-text">누락·과잉·충돌·예상 밖 결과가 하나라도 있으면 원인 단계로 되돌아간다</text>
+
+  <rect x="54" y="1760" width="520" height="88" rx="13" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
+  <text x="314" y="1789" class="card-title">아니오 · 수정 후 재검토</text>
+  <text x="314" y="1817" class="no">요구사항 해석·가정·ERD·DDL·테스트 중 원인을 구분</text>
+  <text x="314" y="1839" class="card-text-small">AI에게 다시 요청하더라도 수정 근거와 금지 조건을 함께 제공</text>
+
+  <rect x="626" y="1760" width="520" height="88" rx="13" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
+  <text x="886" y="1789" class="card-title">예 · 검토된 ERD 기준선 채택</text>
+  <text x="886" y="1817" class="ok">요구사항·가정·ERD·DDL·테스트 근거를 같은 버전으로 저장</text>
+  <text x="886" y="1839" class="card-text-small">이후 변경은 영향 분석과 재검증을 거쳐 새 기준선으로 갱신</text>
+
+  <path d="M430 1686H314V1760" class="retry"/>
+  <path d="M770 1686H886V1760" class="flow"/>
+  <text x="392" y="1743" class="no">아니오</text>
+  <text x="808" y="1743" class="ok">예</text>
+  <path d="M314 1848V1862H20V338H90" class="retry"/>
+
+  <rect x="54" y="1872" width="344" height="38" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="226" y="1897" class="note-title">AI는 누락된 업무 지식을 알 수 없다</text>
+
+  <rect x="428" y="1872" width="344" height="38" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="1897" class="note-title">ERD 기호만으로 모든 규칙을 표현할 수 없다</text>
+
+  <rect x="802" y="1872" width="344" height="38" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="974" y="1897" class="note-title">실행 결과가 설계 검토의 최종 증거다</text>
+
+  <rect x="80" y="1932" width="1040" height="44" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="600" y="1960" class="principle-main">AI 초안 → 근거 분리 → 구조·추적성 검토 → PostgreSQL 구현 → 데이터·질의 검증 → 기준선 채택</text>
+</svg>
