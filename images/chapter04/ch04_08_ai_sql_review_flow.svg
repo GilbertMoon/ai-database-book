@@ -1,1 +1,203 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc"><title id="title">AI 생성 SQL 검토 흐름</title><desc id="desc">AI가 생성한 SQL을 현재 PostgreSQL 환경과 대조하고 SELECT, INSERT, UPDATE, DELETE 유형별로 영향 범위를 검토한 뒤 한 문장씩 실행하여 실제 결과를 검증하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.start{fill:#eef5ff;stroke:#6fa2e8}.types{fill:#f8fafc;stroke:#a8b3c4}.common{fill:#fff8e8;stroke:#d69e2e}.verify{fill:#f2fbf5;stroke:#8bc9a0}.pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.green{stroke:#3c9a5f}.orange{stroke:#d69e2e}.red{stroke:#d9534f}.purple{stroke:#7c5cc4}.gray{stroke:#64748b}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.3px;text-anchor:middle;fill:#475569}.sql{font-family:Consolas,D2Coding,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:14px;font-weight:700;text-anchor:middle}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.6px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.5px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1040" fill="#fff"/><text x="600" y="40" class="t">AI 생성 SQL 검토 흐름</text><text x="600" y="68" class="s">AI 결과는 초안이며, 현재 환경·영향 범위·실제 실행 결과를 사람이 확인한 뒤 채택한다</text><rect x="35" y="100" width="1130" height="175" class="panel start"/><text x="60" y="132" class="pt">1. 요청과 현재 환경 대조</text><rect x="65" y="160" width="315" height="78" class="box blue"/><text x="222" y="187" class="h">원래 목표</text><text x="222" y="213" class="m">무엇을 조회·추가·수정·삭제하려는가</text><rect x="442" y="160" width="315" height="78" class="box green"/><text x="599" y="187" class="h">실제 연결</text><text x="599" y="213" class="m">PostgreSQL · 현재 DB · 스키마 확인</text><rect x="820" y="160" width="315" height="78" class="box orange"/><text x="977" y="187" class="h">문장 전체</text><text x="977" y="213" class="m">다중 문장·주석·예상 밖 DDL 확인</text><rect x="35" y="310" width="1130" height="260" class="panel types"/><text x="60" y="342" class="pt">2. SQL 유형별 영향 검토</text><rect x="55" y="375" width="255" height="150" class="box blue"/><text x="182" y="404" class="h">SELECT</text><text x="182" y="432" class="m">테이블·컬럼·WHERE</text><text x="182" y="454" class="m">정렬·행 수·민감 컬럼</text><text x="182" y="492" class="m">조회만 하더라도 과도한</text><text x="182" y="513" class="m">데이터 노출 여부 확인</text><rect x="335" y="375" width="255" height="150" class="box green"/><text x="462" y="404" class="h">INSERT</text><text x="462" y="432" class="m">컬럼·값 개수와 순서</text><text x="462" y="454" class="m">타입·기본값·제약조건</text><text x="462" y="492" class="m">예상 행 수와 자동 생성값</text><text x="462" y="513" class="m">검증 방법 확인</text><rect x="615" y="375" width="255" height="150" class="box orange"/><text x="742" y="404" class="h">UPDATE</text><text x="742" y="432" class="m">SET 값·WHERE 존재</text><text x="742" y="454" class="m">예상 대상 행 수</text><text x="742" y="492" class="m">같은 WHERE로 먼저 SELECT</text><text x="742" y="513" class="m">현재 값과 대상 확인</text><rect x="895" y="375" width="255" height="150" class="box red"/><text x="1022" y="404" class="h">DELETE</text><text x="1022" y="432" class="m">WHERE·삭제 대상·참조 관계</text><text x="1022" y="454" class="m">복구 가능성 확인</text><text x="1022" y="492" class="m">같은 WHERE로 먼저 SELECT</text><text x="1022" y="513" class="m">전체 값과 행 수 확인</text><path d="M222 238V290H182V375" class="arr"/><path d="M599 238V290H462V375" class="arr"/><path d="M599 238V290H742V375" class="arr"/><path d="M977 238V290H1022V375" class="arr"/><rect x="35" y="605" width="1130" height="150" class="panel common"/><text x="60" y="637" class="pt">3. 공통 검토</text><rect x="60" y="670" width="245" height="54" class="box gray"/><text x="182" y="692" class="h">문법·객체 존재</text><text x="182" y="713" class="m">PostgreSQL 문법과 실제 컬럼</text><rect x="335" y="670" width="245" height="54" class="box blue"/><text x="457" y="692" class="h">현재 연결</text><text x="457" y="713" class="m">의도한 DB·스키마인지 확인</text><rect x="610" y="670" width="245" height="54" class="box orange"/><text x="732" y="692" class="h">예상 영향</text><text x="732" y="713" class="m">결과와 영향 행 수 설명 가능</text><rect x="885" y="670" width="245" height="54" class="box red"/><text x="1007" y="692" class="h">민감정보 제외</text><text x="1007" y="713" class="m">비밀번호·접속 정보·개인정보 없음</text><polygon points="600,785 735,825 600,865 465,825" class="decision"/><text x="600" y="821" class="dt">안전하고 이해한 한 문장인가?</text><text x="600" y="843" class="m">모호하거나 예상 밖 문장이 있으면 수정 후 다시 검토</text><path d="M182 525V585H600V605" class="arr"/><path d="M462 525V585H600" class="arr"/><path d="M742 525V585H600" class="arr"/><path d="M1022 525V585H600" class="arr"/><path d="M182 724V765H600V785" class="arr"/><path d="M457 724V765H600" class="arr"/><path d="M732 724V765H600" class="arr"/><path d="M1007 724V765H600" class="arr"/><rect x="55" y="885" width="500" height="95" class="panel verify"/><text x="80" y="917" class="pt">4. 한 문장씩 실행</text><text x="305" y="943" class="h">연습·검증 환경에서 필요한 문장만 선택</text><text x="305" y="966" class="m">현재 연결과 실행 범위를 다시 확인한 뒤 실행</text><rect x="645" y="885" width="500" height="95" class="panel verify"/><text x="670" y="917" class="pt">5. 실제 결과 검증</text><text x="895" y="943" class="h">조회 결과·영향 행 수·저장값·오류 확인</text><text x="895" y="966" class="m">예상과 다르면 추가 실행을 멈추고 새 증거로 재검토</text><path d="M465 825H305V885" class="arr"/><path d="M555 932H645" class="arr"/><path d="M735 825H1170V199H1135" class="back"/><path d="M895 980V995H25V199H65" class="back"/><rect x="55" y="995" width="350" height="30" class="note"/><text x="230" y="1015" class="nt">AI가 생성했다는 사실은 실행 안전성을 보장하지 않음</text><rect x="425" y="995" width="350" height="30" class="note"/><text x="600" y="1015" class="nt">여러 문장을 한 번에 실행하지 않고 범위를 확인</text><rect x="795" y="995" width="350" height="30" class="core"/><text x="970" y="1015" class="cv">최종 선택·실행·검증 책임은 사용자</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1840" viewBox="0 0 1200 1840" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">AI 생성 SQL 검토 흐름</title>
+  <desc id="desc">AI가 생성한 SQL을 실행 가능한 정답이 아닌 초안으로 보고, 요청 목적과 PostgreSQL 환경을 대조한 뒤 SELECT, INSERT, UPDATE, DELETE 유형별 위험과 영향 범위를 확인한다. 실행 전 대상 행과 예상 결과를 기록하고, 검증 환경 또는 명시적 트랜잭션에서 한 문장씩 실행하여 실제 결과가 예상과 일치할 때만 채택하거나 커밋하는 흐름을 설명한다.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .sql{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#243b53}
+      .sql-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.3px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .decision{font-size:14px;font-weight:700;text-anchor:middle}
+      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      .principle-main{font-size:17px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1840" fill="#ffffff"/>
+  <text x="600" y="42" class="title">AI 생성 SQL 검토 흐름</text>
+  <text x="600" y="72" class="subtitle">AI가 만든 SQL은 초안이다. 사람이 의미·환경·영향 범위·실행 결과를 확인한 뒤에만 채택한다</text>
+
+  <rect x="34" y="98" width="1132" height="318" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 요청·AI 답변·현재 환경을 나란히 대조</text>
+  <text x="430" y="132" class="section-sub">SQL 문법이 맞아 보여도 실제 스키마와 업무 의도에 맞는지는 별도로 확인한다</text>
+
+  <rect x="58" y="160" width="330" height="112" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="188" r="15" fill="#2f6fad"/><text x="88" y="188" class="badge">1</text>
+  <text x="223" y="191" class="card-title">원래 요청과 성공 기준</text>
+  <text x="223" y="222" class="card-text">조회·추가·수정·삭제 중 무엇인가?</text>
+  <text x="223" y="246" class="card-text">대상 행 수와 기대 결과는 무엇인가?</text>
+  <text x="223" y="264" class="card-text-small">예: 학생 1명의 grade만 3 → 4</text>
+
+  <rect x="435" y="160" width="330" height="112" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <circle cx="465" cy="188" r="15" fill="#7c5cc4"/><text x="465" y="188" class="badge">2</text>
+  <text x="600" y="191" class="card-title">AI가 생성한 전체 SQL</text>
+  <text x="600" y="222" class="card-text">코드 블록을 처음부터 끝까지 읽기</text>
+  <text x="600" y="246" class="card-text">여러 문장·주석·추가 명령을 분리</text>
+  <text x="600" y="264" class="card-text-small">생략 기호·가짜 컬럼·플레이스홀더 확인</text>
+
+  <rect x="812" y="160" width="330" height="112" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="842" cy="188" r="15" fill="#2f855a"/><text x="842" y="188" class="badge">3</text>
+  <text x="977" y="191" class="card-title">현재 PostgreSQL 환경</text>
+  <text x="977" y="220" class="sql-small">SELECT current_database(),</text>
+  <text x="977" y="243" class="sql-small">current_schema();</text>
+  <text x="977" y="264" class="card-text-small">DB·스키마·권한·테이블 구조 대조</text>
+
+  <rect x="82" y="302" width="1036" height="82" rx="11" fill="#fff5f5" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="600" y="329" class="card-title">예상하지 않은 문장이 있으면 실행 전 중단</text>
+  <text x="600" y="354" class="card-text">DROP · TRUNCATE · ALTER · GRANT/REVOKE · 확장 설치 · 여러 문장 일괄 실행</text>
+  <text x="600" y="375" class="card-text-small">요청하지 않은 DDL·DCL이나 위험 함수가 섞여 있으면 삭제하지 말고 목적부터 다시 확인한다</text>
+
+  <rect x="34" y="448" width="1132" height="360" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="482" class="section-title">2. SQL 유형에 따라 위험과 검토 항목을 구분</text>
+  <text x="430" y="482" class="section-sub">읽기 SQL도 데이터 노출과 과도한 조회 위험이 있으며, 변경 SQL은 대상과 복구 방법이 필요하다</text>
+
+  <rect x="54" y="512" width="260" height="218" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="84" cy="540" r="16" fill="#2f6fad"/><text x="84" y="540" class="badge">R</text>
+  <text x="184" y="544" class="card-title">SELECT · 읽기</text>
+  <text x="184" y="578" class="card-text">테이블·컬럼·JOIN·WHERE 확인</text>
+  <text x="184" y="603" class="card-text">필요한 컬럼만 선택</text>
+  <text x="184" y="628" class="card-text">민감정보와 반환 행 수 점검</text>
+  <text x="184" y="662" class="sql-small">ORDER BY ... LIMIT ...</text>
+  <text x="184" y="690" class="card-text-small">LIMIT은 반환량을 줄일 뿐</text>
+  <text x="184" y="711" class="card-text-small">쿼리 비용 자체를 보장하지는 않음</text>
+
+  <rect x="330" y="512" width="260" height="218" rx="12" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="360" cy="540" r="16" fill="#2f855a"/><text x="360" y="540" class="badge">C</text>
+  <text x="460" y="544" class="card-title">INSERT · 추가</text>
+  <text x="460" y="578" class="card-text">컬럼과 VALUES 순서·개수</text>
+  <text x="460" y="603" class="card-text">타입·NOT NULL·UNIQUE·FK</text>
+  <text x="460" y="628" class="card-text">중복 입력과 자동값 확인</text>
+  <text x="460" y="662" class="sql-small">INSERT ... RETURNING ...</text>
+  <text x="460" y="690" class="card-text-small">예상 추가 건수와 생성된 id를</text>
+  <text x="460" y="711" class="card-text-small">실행 결과로 다시 확인</text>
+
+  <rect x="606" y="512" width="260" height="218" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="636" cy="540" r="16" fill="#b7791f"/><text x="636" y="540" class="badge">U</text>
+  <text x="736" y="544" class="card-title">UPDATE · 수정</text>
+  <text x="736" y="578" class="card-text">SET 값과 WHERE 존재 확인</text>
+  <text x="736" y="603" class="card-text">같은 조건으로 먼저 SELECT</text>
+  <text x="736" y="628" class="card-text">PK·UNIQUE로 대상 고정</text>
+  <text x="736" y="662" class="sql-small">UPDATE ... RETURNING ...</text>
+  <text x="736" y="690" class="card-text-small">WHERE가 없거나 범위를 설명하지</text>
+  <text x="736" y="711" class="card-text-small">못하면 실행하지 않음</text>
+
+  <rect x="882" y="512" width="260" height="218" rx="12" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <circle cx="912" cy="540" r="16" fill="#c2413b"/><text x="912" y="540" class="badge">D</text>
+  <text x="1012" y="544" class="card-title">DELETE · 삭제</text>
+  <text x="1012" y="578" class="card-text">같은 조건으로 먼저 SELECT</text>
+  <text x="1012" y="603" class="card-text">FK·CASCADE 영향 확인</text>
+  <text x="1012" y="628" class="card-text">소프트 삭제·복구 가능성 검토</text>
+  <text x="1012" y="662" class="sql-small">DELETE ... RETURNING ...</text>
+  <text x="1012" y="690" class="card-text-small">WHERE 없는 DELETE와 예상하지 않은</text>
+  <text x="1012" y="711" class="card-text-small">연쇄 삭제는 즉시 중단</text>
+
+  <rect x="128" y="754" width="944" height="34" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.3"/>
+  <text x="600" y="776" class="note-title">CREATE·ALTER·DROP·TRUNCATE·권한 변경은 구조·데이터·접근권한을 바꾸므로 별도의 고위험 검토가 필요하다</text>
+
+  <rect x="34" y="840" width="1132" height="380" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="874" class="section-title">3. 실행 전에 대상·예상 결과·안전장치를 증거로 확인</text>
+  <text x="500" y="874" class="section-sub">“괜찮아 보인다”가 아니라 몇 행이 어떻게 바뀌는지 설명할 수 있어야 한다</text>
+
+  <rect x="58" y="904" width="1084" height="116" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="600" y="932" class="card-title">UPDATE·DELETE 대상 미리보기 예시</text>
+  <text x="600" y="963" class="sql">SELECT id, name, grade FROM students WHERE grade = 1;</text>
+  <text x="600" y="992" class="sql">SELECT COUNT(*) FROM students WHERE grade = 1;</text>
+  <text x="600" y="1014" class="card-text-small">행의 실제 값과 대상 건수를 모두 확인하고, 가능하면 PK 조건으로 실행 SQL을 다시 좁힌다</text>
+
+  <rect x="58" y="1048" width="330" height="136" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="223" y="1078" class="card-title">객체·문법 검증</text>
+  <text x="223" y="1108" class="card-text">실제 테이블·컬럼·타입 존재</text>
+  <text x="223" y="1133" class="card-text">PostgreSQL 문법과 따옴표 확인</text>
+  <text x="223" y="1158" class="card-text">제약조건·기본값·FK 대조</text>
+
+  <rect x="435" y="1048" width="330" height="136" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="1078" class="card-title">영향 범위 기록</text>
+  <text x="600" y="1108" class="card-text">예상 행 수·대상 PK·변경 전후 값</text>
+  <text x="600" y="1133" class="card-text">유지되어야 할 컬럼과 자식 행</text>
+  <text x="600" y="1158" class="card-text">오류 또는 0건일 때 중단 기준</text>
+
+  <rect x="812" y="1048" width="330" height="136" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="977" y="1078" class="card-title">보안·입력 검증</text>
+  <text x="977" y="1108" class="card-text">비밀번호·접속 문자열을 AI에 제공하지 않기</text>
+  <text x="977" y="1133" class="card-text">개인정보와 결과 노출 범위 최소화</text>
+  <text x="977" y="1158" class="card-text">앱에서는 문자열 결합 대신 파라미터 사용</text>
+
+  <path d="M600 1220V1244" class="flow"/>
+  <polygon points="600,1244 758,1288 600,1332 442,1288" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1283" class="decision">문장의 의미와 영향 범위를 스스로 설명할 수 있는가?</text>
+  <text x="600" y="1306" class="card-text">대상·건수·변경값·복구 또는 중단 기준까지 확인</text>
+  <path d="M758 1288H1168V343H1118" class="retry"/>
+  <text x="802" y="1275" class="no">아니오 · SQL 또는 요청 수정</text>
+  <path d="M600 1332V1368" class="flow"/>
+  <text x="620" y="1356" class="ok">예</text>
+
+  <rect x="34" y="1368" width="1132" height="226" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
+  <text x="58" y="1402" class="section-title">4. 검증 환경 또는 트랜잭션에서 한 문장씩 실행</text>
+  <text x="485" y="1402" class="section-sub">운영 데이터에서 처음 시도하지 않고, 실행 전후 증거를 비교한다</text>
+
+  <rect x="58" y="1432" width="250" height="126" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <circle cx="88" cy="1460" r="15" fill="#64748b"/><text x="88" y="1460" class="badge">1</text>
+  <text x="183" y="1464" class="card-title">안전한 실행 공간</text>
+  <text x="183" y="1496" class="sql">BEGIN;</text>
+  <text x="183" y="1522" class="card-text">또는 복제·실습 DB 사용</text>
+  <text x="183" y="1544" class="card-text-small">자동 커밋 상태 확인</text>
+
+  <rect x="337" y="1432" width="526" height="126" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.6"/>
+  <circle cx="367" cy="1460" r="15" fill="#7c5cc4"/><text x="367" y="1460" class="badge">2</text>
+  <text x="600" y="1464" class="card-title">검토한 SQL 한 문장 실행</text>
+  <text x="600" y="1495" class="card-text">전체 AI 답변을 한 번에 실행하지 않고 필요한 문장만 선택</text>
+  <text x="600" y="1520" class="card-text">변경 SQL은 가능하면 RETURNING으로 실제 변경 행 확인</text>
+  <text x="600" y="1544" class="card-text-small">경고·오류가 나오면 임의로 다음 문장을 계속 실행하지 않음</text>
+
+  <rect x="892" y="1432" width="250" height="126" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="922" cy="1460" r="15" fill="#2f855a"/><text x="922" y="1460" class="badge">3</text>
+  <text x="1017" y="1464" class="card-title">실제 결과 수집</text>
+  <text x="1017" y="1494" class="card-text">조회·반환 행</text>
+  <text x="1017" y="1518" class="card-text">영향받은 행 수</text>
+  <text x="1017" y="1542" class="card-text">오류·제약조건·실행 시간</text>
+
+  <path d="M308 1495H337" class="flow"/>
+  <path d="M863 1495H892" class="flow"/>
+
+  <path d="M600 1594V1618" class="flow"/>
+  <polygon points="600,1618 750,1660 600,1702 450,1660" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1655" class="decision">실제 결과가 기록한 예상과 일치하는가?</text>
+  <text x="600" y="1678" class="card-text">행 수·대상 PK·변경값·유지 데이터·오류를 비교</text>
+
+  <rect x="54" y="1720" width="520" height="72" rx="13" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
+  <text x="314" y="1748" class="card-title">예 · 채택 또는 COMMIT</text>
+  <text x="314" y="1774" class="ok">결과와 검토 근거를 남기고 다음 단계로 진행</text>
+
+  <rect x="626" y="1720" width="520" height="72" rx="13" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
+  <text x="886" y="1748" class="card-title">아니오 · 중단 또는 ROLLBACK</text>
+  <text x="886" y="1774" class="no">추가 실행을 멈추고 실제 결과를 바탕으로 SQL을 다시 검토</text>
+
+  <path d="M450 1660H314V1720" class="flow"/>
+  <path d="M750 1660H886V1720" class="flow"/>
+  <text x="397" y="1708" class="ok">예</text>
+  <text x="803" y="1708" class="no">아니오</text>
+  <path d="M886 1792V1804H24V964H58" class="retry"/>
+
+  <rect x="80" y="1808" width="1040" height="24" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="600" y="1825" class="principle-main">AI SQL은 생성 속도를 높이지만, 실행 여부와 데이터 결과에 대한 책임은 검토하고 실행한 사람에게 있다</text>
+</svg>
