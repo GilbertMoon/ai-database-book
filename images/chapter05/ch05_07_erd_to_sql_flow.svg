@@ -1,1 +1,243 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc"><title id="title">ERD에서 SQL로 변환</title><desc id="desc">도서 대여 ERD의 엔터티, 속성, 키, 관계, 선택성을 PostgreSQL 테이블, 컬럼, 데이터 타입, 제약조건으로 변환하고 부모부터 생성한 뒤 샘플 데이터와 JOIN으로 검증하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.map{fill:#eef5ff;stroke:#6fa2e8}.design{fill:#f8fafc;stroke:#a8b3c4}.run{fill:#fff8e8;stroke:#d69e2e}.test{fill:#f2fbf5;stroke:#8bc9a0}.pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.red{stroke:#d9534f}.purple{stroke:#7c5cc4}.gray{stroke:#64748b}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.2px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:12.4px;font-weight:700;text-anchor:middle;fill:#334155}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:14px;font-weight:700;text-anchor:middle}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.4px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.3px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1120" fill="#fff"/><text x="600" y="40" class="t">ERD에서 SQL로 변환</text><text x="600" y="68" class="s">ERD의 각 요소를 PostgreSQL 문법으로 대응하고, 생성 순서와 제약조건까지 실행 결과로 검증한다</text><rect x="35" y="100" width="1130" height="205" class="panel map"/><text x="60" y="132" class="pt">1. ERD 요소를 SQL 요소로 대응</text><rect x="55" y="165" width="200" height="95" class="box blue"/><text x="155" y="190" class="h">엔터티</text><text x="155" y="215" class="m">members · books · loans</text><text x="155" y="240" class="code">CREATE TABLE</text><rect x="275" y="165" width="200" height="95" class="box purple"/><text x="375" y="190" class="h">속성</text><text x="375" y="215" class="m">name · email · due_at</text><text x="375" y="240" class="code">컬럼명 + 데이터 타입</text><rect x="495" y="165" width="200" height="95" class="box blue"/><text x="595" y="190" class="h">행 식별</text><text x="595" y="215" class="m">각 테이블의 id</text><text x="595" y="240" class="code">SERIAL PRIMARY KEY</text><rect x="715" y="165" width="200" height="95" class="box orange"/><text x="815" y="190" class="h">1:N 관계</text><text x="815" y="215" class="m">N쪽 loans에 FK 배치</text><text x="815" y="240" class="code">REFERENCES 부모(id)</text><rect x="935" y="165" width="200" height="95" class="box green"/><text x="1035" y="190" class="h">업무 규칙</text><text x="1035" y="215" class="m">필수·고유·선택값</text><text x="1035" y="240" class="code">NOT NULL · UNIQUE · NULL</text><rect x="35" y="335" width="1130" height="320" class="panel design"/><text x="60" y="367" class="pt">2. PostgreSQL 물리 설계와 CREATE TABLE 작성</text><rect x="55" y="405" width="330" height="190" class="box blue"/><text x="220" y="432" class="h">members · 부모 테이블</text><text x="220" y="460" class="code">id SERIAL PRIMARY KEY</text><text x="220" y="487" class="code">name VARCHAR(50) NOT NULL</text><text x="220" y="514" class="code">email VARCHAR(100)</text><text x="220" y="537" class="code">UNIQUE NOT NULL</text><text x="220" y="566" class="code">joined_at DATE NOT NULL</text><rect x="435" y="405" width="330" height="190" class="box blue"/><text x="600" y="432" class="h">books · 부모 테이블</text><text x="600" y="460" class="code">id SERIAL PRIMARY KEY</text><text x="600" y="487" class="code">title VARCHAR(200) NOT NULL</text><text x="600" y="514" class="code">author VARCHAR(100) NOT NULL</text><text x="600" y="537" class="code">published_year INT</text><text x="600" y="566" class="code">isbn VARCHAR(20) UNIQUE NOT NULL</text><rect x="815" y="390" width="330" height="220" class="box orange"/><text x="980" y="417" class="h">loans · 자식 테이블</text><text x="980" y="445" class="code">id SERIAL PRIMARY KEY</text><text x="980" y="472" class="code">member_id INT NOT NULL</text><text x="980" y="495" class="code">REFERENCES members(id)</text><text x="980" y="522" class="code">book_id INT NOT NULL</text><text x="980" y="545" class="code">REFERENCES books(id)</text><text x="980" y="572" class="code">borrowed_at · due_at NOT NULL</text><text x="980" y="595" class="code">returned_at DATE · NULL 가능</text><path d="M385 500H410V630H980V610" class="arr"/><path d="M765 500H790V630H980" class="arr"/><text x="600" y="635" class="m">생성 순서: 참조되는 부모 members·books 먼저 → 참조하는 자식 loans 나중</text><rect x="35" y="685" width="1130" height="155" class="panel run"/><text x="60" y="717" class="pt">3. 실행 전후 구조 검증</text><rect x="60" y="750" width="245" height="55" class="box gray"/><text x="182" y="772" class="h">문장 검토</text><text x="182" y="793" class="m">타입·쉼표·괄호·참조 이름</text><rect x="335" y="750" width="245" height="55" class="box blue"/><text x="457" y="772" class="h">순서대로 실행</text><text x="457" y="793" class="m">members → books → loans</text><rect x="610" y="750" width="245" height="55" class="box orange"/><text x="732" y="772" class="h">실패 원인 확인</text><text x="732" y="793" class="m">오류 전체·기존 객체·생성 순서</text><rect x="885" y="750" width="245" height="55" class="box green"/><text x="1007" y="772" class="h">메타데이터 확인</text><text x="1007" y="793" class="m">PK·UK·FK·NULL 허용 비교</text><path d="M305 777H335" class="arr"/><path d="M580 777H610" class="arr"/><path d="M855 777H885" class="arr"/><text x="600" y="825" class="m">반복 실행을 위해 DROP할 때는 자식 loans부터 부모 books·members 방향으로 삭제</text><rect x="35" y="870" width="1130" height="145" class="panel test"/><text x="60" y="902" class="pt">4. 샘플 데이터와 JOIN으로 요구사항 검증</text><rect x="55" y="935" width="250" height="50" class="box green"/><text x="180" y="956" class="h">정상 입력</text><text x="180" y="976" class="m">회원·책 먼저, 대여 기록 나중</text><rect x="330" y="935" width="250" height="50" class="box orange"/><text x="455" y="956" class="h">선택값 입력</text><text x="455" y="976" class="m">returned_at = NULL 허용</text><rect x="605" y="935" width="250" height="50" class="box red"/><text x="730" y="956" class="h">오류 입력</text><text x="730" y="976" class="m">중복 email·isbn, 없는 FK 차단</text><rect x="880" y="935" width="250" height="50" class="box blue"/><text x="1005" y="956" class="h">JOIN 검증</text><text x="1005" y="976" class="m">회원·책·대여일을 한 결과로 조회</text><polygon points="600,1025 710,1055 600,1085 490,1055" class="decision"/><text x="600" y="1051" class="dt">요구사항·ERD·SQL·결과가 일치하는가?</text><text x="600" y="1071" class="m">불일치하면 원인 단계를 구분해 함께 수정</text><path d="M180 985V1005H600V1025" class="arr"/><path d="M455 985V1025" class="arr"/><path d="M730 985V1005H600" class="arr"/><path d="M1005 985V1005H600" class="arr"/><path d="M490 1055H20V212H55" class="back"/><rect x="55" y="1092" width="350" height="24" class="note"/><text x="230" y="1109" class="nt">테이블 생성 성공만으로 제약조건의 정확성을 보장하지 않음</text><rect x="425" y="1092" width="350" height="24" class="note"/><text x="600" y="1109" class="nt">SQL 수정 사항은 ERD와 요구사항에도 함께 반영</text><rect x="795" y="1092" width="350" height="24" class="core"/><text x="970" y="1109" class="cv">대응 → 구현 → 순서 실행 → 데이터 검증</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1900" viewBox="0 0 1200 1900" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">ERD에서 PostgreSQL SQL로 변환</title>
+  <desc id="desc">도서 대여 시스템 ERD의 엔터티, 속성, 식별자, 관계, 카디널리티와 선택성을 PostgreSQL 테이블, 컬럼, 데이터 타입, 기본키, 외래키, NOT NULL과 UNIQUE 제약조건으로 변환한다. 부모 테이블을 먼저 만들고 자식 테이블을 나중에 생성한 뒤 메타데이터, 정상·오류 데이터와 JOIN 결과로 요구사항과 구현의 일치 여부를 검증하는 절차를 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .card-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .sql{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:13.4px;font-weight:700;text-anchor:middle;fill:#243b53}
+      .sql-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.9px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .decision{font-size:14px;font-weight:700;text-anchor:middle}
+      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.3px;text-anchor:middle;fill:#475569}
+      .principle-main{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1900" fill="#ffffff"/>
+  <text x="600" y="42" class="title">ERD에서 PostgreSQL SQL로 변환</text>
+  <text x="600" y="72" class="subtitle">ERD의 의미를 SQL 문법에 대응하고, 생성 순서·제약조건·실제 데이터 결과까지 검증한다</text>
+
+  <rect x="34" y="98" width="1132" height="292" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. ERD 요소를 SQL 요소에 대응</text>
+  <text x="340" y="132" class="section-sub">논리 모델의 의미를 유지하면서 PostgreSQL에서 실행 가능한 구조로 구체화한다</text>
+
+  <rect x="50" y="162" width="210" height="98" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="78" cy="190" r="15" fill="#2f6fad"/><text x="78" y="190" class="badge">1</text>
+  <text x="155" y="193" class="card-title">엔터티</text>
+  <text x="155" y="222" class="card-text">members · books · loans</text>
+  <text x="155" y="247" class="sql">CREATE TABLE</text>
+
+  <rect x="275" y="162" width="210" height="98" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <circle cx="303" cy="190" r="15" fill="#7c5cc4"/><text x="303" y="190" class="badge">2</text>
+  <text x="380" y="193" class="card-title">속성·도메인</text>
+  <text x="380" y="222" class="card-text">name · email · due_at</text>
+  <text x="380" y="247" class="sql-small">컬럼명 + VARCHAR / DATE</text>
+
+  <rect x="500" y="162" width="210" height="98" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="528" cy="190" r="15" fill="#2f6fad"/><text x="528" y="190" class="badge">3</text>
+  <text x="605" y="193" class="card-title">식별자</text>
+  <text x="605" y="222" class="card-text">각 테이블의 id</text>
+  <text x="605" y="247" class="sql-small">SERIAL PRIMARY KEY</text>
+
+  <rect x="725" y="162" width="210" height="98" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="753" cy="190" r="15" fill="#b7791f"/><text x="753" y="190" class="badge">4</text>
+  <text x="830" y="193" class="card-title">1:N 관계</text>
+  <text x="830" y="222" class="card-text">N쪽 loans에 FK</text>
+  <text x="830" y="247" class="sql-small">REFERENCES 부모(id)</text>
+
+  <rect x="950" y="162" width="200" height="98" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="978" cy="190" r="15" fill="#2f855a"/><text x="978" y="190" class="badge">5</text>
+  <text x="1050" y="193" class="card-title">규칙·선택성</text>
+  <text x="1050" y="222" class="card-text">필수·고유·NULL 허용</text>
+  <text x="1050" y="247" class="sql-small">NOT NULL · UNIQUE · NULL</text>
+
+  <rect x="70" y="286" width="1060" height="72" rx="11" fill="#ffffff" stroke="#6fa2e8" stroke-width="1.3"/>
+  <text x="600" y="313" class="card-title">카디널리티와 선택성을 SQL로 읽는 예</text>
+  <text x="600" y="338" class="card-text">회원은 대여 기록이 없어도 되지만, 각 대여 기록은 회원 1명과 도서 1건을 반드시 참조한다</text>
+  <text x="600" y="356" class="sql-small">members 1 : 0..N loans → loans.member_id INT NOT NULL REFERENCES members(id)</text>
+
+  <path d="M600 390V414" class="flow"/>
+
+  <rect x="34" y="414" width="1132" height="238" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="448" class="section-title">2. 물리 설계 결정을 먼저 기록</text>
+  <text x="340" y="448" class="section-sub">ERD에 없는 DBMS별 선택도 근거와 함께 결정한 뒤 DDL에 반영한다</text>
+
+  <rect x="58" y="480" width="330" height="126" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="508" class="card-title">이름·타입·기본값</text>
+  <text x="223" y="538" class="card-text">복수형 테이블 · snake_case 컬럼</text>
+  <text x="223" y="563" class="card-text">VARCHAR 길이 · DATE · SERIAL</text>
+  <text x="223" y="588" class="card-small">논리 속성의 의미와 허용 범위를 유지</text>
+
+  <rect x="435" y="480" width="330" height="126" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="508" class="card-title">제약조건·참조 정책</text>
+  <text x="600" y="538" class="card-text">PK · FK · NOT NULL · UNIQUE</text>
+  <text x="600" y="563" class="card-text">삭제·수정 시 RESTRICT/CASCADE 여부</text>
+  <text x="600" y="588" class="card-small">현재 장의 기본 DDL은 ON DELETE를 생략</text>
+
+  <rect x="812" y="480" width="330" height="126" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="977" y="508" class="card-title">별도 업무 규칙</text>
+  <text x="977" y="538" class="card-text">due_at ≥ borrowed_at</text>
+  <text x="977" y="563" class="card-text">동일 도서의 동시 활성 대여 방지</text>
+  <text x="977" y="588" class="card-small">DDL에 없으면 앱·트랜잭션·추가 제약으로 관리</text>
+
+  <rect x="146" y="620" width="908" height="20" rx="7" fill="#fff1cf" stroke="#d69e2e" stroke-width="1.1"/>
+  <text x="600" y="634" class="card-small">ERD와 DDL의 차이는 오류가 아니라 물리 설계 결정일 수 있으므로, 결정 이유와 적용 위치를 함께 기록한다</text>
+
+  <path d="M600 652V676" class="flow"/>
+
+  <rect x="34" y="676" width="1132" height="478" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="710" class="section-title">3. 부모 테이블부터 자식 테이블 순서로 DDL 작성</text>
+  <text x="470" y="710" class="section-sub">외래키가 참조하는 테이블이 먼저 존재해야 한다</text>
+
+  <rect x="48" y="742" width="344" height="304" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="78" cy="770" r="15" fill="#2f6fad"/><text x="78" y="770" class="badge">1</text>
+  <text x="220" y="774" class="card-title">members · 부모</text>
+  <text x="220" y="810" class="sql-small">CREATE TABLE members (</text>
+  <text x="220" y="835" class="sql-small">id SERIAL PRIMARY KEY,</text>
+  <text x="220" y="860" class="sql-small">name VARCHAR(50) NOT NULL,</text>
+  <text x="220" y="885" class="sql-small">email VARCHAR(100) UNIQUE NOT NULL,</text>
+  <text x="220" y="910" class="sql-small">joined_at DATE NOT NULL</text>
+  <text x="220" y="935" class="sql-small">);</text>
+  <text x="220" y="978" class="card-text">회원 행을 먼저 생성</text>
+  <text x="220" y="1004" class="card-small">email은 업무상 중복 금지</text>
+
+  <rect x="428" y="742" width="344" height="304" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="458" cy="770" r="15" fill="#2f6fad"/><text x="458" y="770" class="badge">2</text>
+  <text x="600" y="774" class="card-title">books · 부모</text>
+  <text x="600" y="810" class="sql-small">CREATE TABLE books (</text>
+  <text x="600" y="835" class="sql-small">id SERIAL PRIMARY KEY,</text>
+  <text x="600" y="860" class="sql-small">title VARCHAR(200) NOT NULL,</text>
+  <text x="600" y="885" class="sql-small">author VARCHAR(100) NOT NULL,</text>
+  <text x="600" y="910" class="sql-small">published_year INT,</text>
+  <text x="600" y="935" class="sql-small">isbn VARCHAR(20) UNIQUE NOT NULL</text>
+  <text x="600" y="960" class="sql-small">);</text>
+  <text x="600" y="994" class="card-text">도서 행을 먼저 생성</text>
+  <text x="600" y="1020" class="card-small">단순 예제는 동일 ISBN 복본을 구분하지 않음</text>
+
+  <rect x="808" y="730" width="344" height="328" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.6"/>
+  <circle cx="838" cy="758" r="15" fill="#b7791f"/><text x="838" y="758" class="badge">3</text>
+  <text x="980" y="762" class="card-title">loans · 자식</text>
+  <text x="980" y="798" class="sql-small">CREATE TABLE loans (</text>
+  <text x="980" y="823" class="sql-small">id SERIAL PRIMARY KEY,</text>
+  <text x="980" y="848" class="sql-small">member_id INT NOT NULL</text>
+  <text x="980" y="873" class="sql-small">REFERENCES members(id),</text>
+  <text x="980" y="898" class="sql-small">book_id INT NOT NULL</text>
+  <text x="980" y="923" class="sql-small">REFERENCES books(id),</text>
+  <text x="980" y="948" class="sql-small">borrowed_at DATE NOT NULL,</text>
+  <text x="980" y="973" class="sql-small">due_at DATE NOT NULL,</text>
+  <text x="980" y="998" class="sql-small">returned_at DATE</text>
+  <text x="980" y="1023" class="sql-small">);</text>
+  <text x="980" y="1048" class="card-small">NULL returned_at = 아직 미반납</text>
+
+  <path d="M392 894H410V1090H980V1058" class="flow"/>
+  <path d="M772 894H790V1090H980" class="flow"/>
+  <text x="600" y="1118" class="card-text">생성: members → books → loans · 삭제 또는 초기화: loans → books → members</text>
+  <text x="600" y="1140" class="card-small">DROP TABLE IF EXISTS를 사용하더라도 의존 관계와 데이터 손실 범위를 먼저 확인한다</text>
+
+  <path d="M600 1154V1178" class="flow"/>
+
+  <rect x="34" y="1178" width="1132" height="262" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="1212" class="section-title">4. 실행 성공이 아니라 실제 구조를 검증</text>
+  <text x="386" y="1212" class="section-sub">ERD와 PostgreSQL 메타데이터가 같은 의미를 표현하는지 확인한다</text>
+
+  <rect x="58" y="1244" width="250" height="132" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="183" y="1272" class="card-title">문법·객체</text>
+  <text x="183" y="1302" class="card-text">쉼표·괄호·타입·이름 확인</text>
+  <text x="183" y="1327" class="card-text">기존 테이블과 스키마 확인</text>
+  <text x="183" y="1352" class="card-small">오류 전체 메시지를 읽고 원인 수정</text>
+
+  <rect x="337" y="1244" width="250" height="132" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="462" y="1272" class="card-title">컬럼 구조</text>
+  <text x="462" y="1302" class="card-text">컬럼명·타입·NULL 허용</text>
+  <text x="462" y="1327" class="card-text">기본값·길이·순서 비교</text>
+  <text x="462" y="1352" class="card-small">도구의 Columns/DDL 화면으로 확인</text>
+
+  <rect x="616" y="1244" width="250" height="132" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="741" y="1272" class="card-title">키·제약조건</text>
+  <text x="741" y="1302" class="card-text">PK · UNIQUE · FK · NOT NULL</text>
+  <text x="741" y="1327" class="card-text">FK의 부모 테이블·컬럼 확인</text>
+  <text x="741" y="1352" class="card-small">제약 이름보다 의미와 대상이 중요</text>
+
+  <rect x="895" y="1244" width="247" height="132" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="1018" y="1272" class="card-title">ERD 동기화</text>
+  <text x="1018" y="1302" class="card-text">DDL 변경을 ERD에도 반영</text>
+  <text x="1018" y="1327" class="card-text">가정·제외 범위·규칙 갱신</text>
+  <text x="1018" y="1352" class="card-small">둘 중 하나만 최신 상태로 두지 않음</text>
+
+  <rect x="100" y="1394" width="1000" height="28" rx="8" fill="#dfeeff" stroke="#6fa2e8" stroke-width="1.1"/>
+  <text x="600" y="1413" class="note-text">CREATE TABLE 성공은 시작일 뿐이며, 예상한 PK·FK·UNIQUE·NULL 규칙이 실제로 만들어졌는지 확인해야 한다</text>
+
+  <path d="M600 1440V1464" class="flow"/>
+
+  <rect x="34" y="1464" width="1132" height="250" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="58" y="1498" class="section-title">5. 샘플 데이터와 주요 질의로 요구사항 검증</text>
+  <text x="445" y="1498" class="section-sub">제약조건은 성공 입력과 실패 입력을 모두 실행해야 검증할 수 있다</text>
+
+  <rect x="58" y="1530" width="250" height="126" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="183" y="1558" class="card-title">정상 입력</text>
+  <text x="183" y="1587" class="card-text">회원·도서를 먼저 INSERT</text>
+  <text x="183" y="1612" class="card-text">유효한 두 FK로 loans 저장</text>
+  <text x="183" y="1637" class="card-small">저장된 값과 생성된 id 확인</text>
+
+  <rect x="337" y="1530" width="250" height="126" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="462" y="1558" class="card-title">상태·선택값</text>
+  <text x="462" y="1587" class="card-text">미반납은 returned_at = NULL</text>
+  <text x="462" y="1612" class="card-text">반납 후 실제 날짜 저장</text>
+  <text x="462" y="1637" class="card-small">NULL의 업무 의미를 질의로 확인</text>
+
+  <rect x="616" y="1530" width="250" height="126" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="741" y="1558" class="card-title">오류 입력</text>
+  <text x="741" y="1587" class="card-text">중복 email·isbn 차단</text>
+  <text x="741" y="1612" class="card-text">없는 member_id·book_id 차단</text>
+  <text x="741" y="1637" class="card-small">실패가 의도한 제약에서 발생하는지 확인</text>
+
+  <rect x="895" y="1530" width="247" height="126" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="1018" y="1558" class="card-title">JOIN 검증</text>
+  <text x="1018" y="1587" class="sql-small">members.id = loans.member_id</text>
+  <text x="1018" y="1612" class="sql-small">books.id = loans.book_id</text>
+  <text x="1018" y="1637" class="card-small">회원·도서·대여일을 한 결과로 조회</text>
+
+  <rect x="104" y="1674" width="992" height="26" rx="8" fill="#dcf7e5" stroke="#62b47a" stroke-width="1.1"/>
+  <text x="600" y="1692" class="note-text">검증 결과가 요구사항과 다르면 SQL만 임시 수정하지 말고 ERD·규칙·테스트도 함께 갱신한다</text>
+
+  <path d="M600 1714V1738" class="flow"/>
+  <polygon points="600,1738 748,1782 600,1826 452,1782" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1777" class="decision">요구사항·ERD·DDL·데이터 결과가 모두 일치하는가?</text>
+  <text x="600" y="1801" class="card-text">테이블 구조, 제약조건, 정상·오류 입력과 JOIN 결과를 함께 비교</text>
+
+  <path d="M452 1782H20V322H70" class="retry"/>
+  <text x="390" y="1769" class="no">아니오 · 원인이 생긴 단계부터 수정</text>
+
+  <rect x="790" y="1750" width="352" height="64" rx="11" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="966" y="1775" class="card-title">예 · 구현 기준선 확정</text>
+  <text x="966" y="1800" class="card-small">ERD·DDL·샘플·검증 근거를 같은 버전으로 저장</text>
+  <path d="M748 1782H790" class="flow"/>
+  <text x="770" y="1769" class="ok">예</text>
+
+  <rect x="54" y="1844" width="344" height="38" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="226" y="1868" class="note-title">생성 순서: 부모 → 자식</text>
+
+  <rect x="428" y="1844" width="344" height="38" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="1868" class="note-title">삭제 순서: 자식 → 부모</text>
+
+  <rect x="802" y="1844" width="344" height="38" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.4"/>
+  <text x="974" y="1868" class="principle-main">대응 → 구현 → 구조 검증 → 데이터 검증</text>
+</svg>
