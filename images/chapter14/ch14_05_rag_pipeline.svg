@@ -1,1 +1,152 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">RAG 기본 파이프라인</text><rect x="80" y="100" width="190" height="60" class="b y"/><text x="175" y="130" class="s">문서 수집</text><rect x="310" y="100" width="190" height="60" class="b y"/><text x="405" y="130" class="s">청킹</text><rect x="540" y="100" width="190" height="60" class="b y"/><text x="635" y="130" class="s">임베딩</text><rect x="770" y="100" width="190" height="60" class="b y"/><text x="865" y="130" class="s">Vector DB 저장</text><rect x="170" y="320" width="220" height="60" class="b m"/><text x="280" y="350" class="s">사용자 질문</text><rect x="470" y="320" width="220" height="60" class="b m"/><text x="580" y="350" class="s">질문 임베딩</text><rect x="770" y="320" width="220" height="60" class="b g"/><text x="880" y="350" class="s">유사도 검색</text><rect x="170" y="540" width="220" height="60" class="b g"/><text x="280" y="570" class="s">검색된 문서</text><rect x="470" y="540" width="220" height="60" class="b p"/><text x="580" y="570" class="s">근거 포함 프롬프트</text><rect x="770" y="540" width="220" height="60" class="b p"/><text x="880" y="570" class="s">LLM 답변 생성</text><rect x="470" y="690" width="260" height="60" class="b r"/><text x="600" y="720" class="s">답변 근거성 검토</text><line x1="270" y1="130" x2="310" y2="130" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="500" y1="130" x2="540" y2="130" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="730" y1="130" x2="770" y2="130" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="390" y1="350" x2="470" y2="350" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="690" y1="350" x2="770" y2="350" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="865" y1="160" x2="880" y2="320" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="880" y1="380" x2="280" y2="540" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="390" y1="570" x2="470" y2="570" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="690" y1="570" x2="770" y2="570" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="880" y1="600" x2="600" y2="690" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="280" y1="600" x2="600" y2="690" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+  <title id="title">RAG 기본 파이프라인</title>
+  <desc id="desc">문서를 수집하고 청킹과 임베딩을 거쳐 저장하는 사전 처리 단계와, 사용자 질문을 임베딩하여 관련 청크를 검색하고 LLM 답변을 생성한 뒤 근거와 출처를 검토하는 실행 단계 및 재검색 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .group{stroke-width:1.5;rx:16}
+      .index-group{fill:#fffaf0;stroke:#dfbb68}
+      .retrieve-group{fill:#f4f8ff;stroke:#93b4e6}
+      .generate-group{fill:#f2fbf5;stroke:#8bc9a0}
+      .group-title{font-size:18px;font-weight:700}
+      .group-sub{font-size:13px;fill:#475569}
+      .stage{fill:#fff;stroke-width:1.7;rx:12}
+      .index-stage{stroke:#d69e2e}.retrieve-stage{stroke:#3b82c4}.generate-stage{stroke:#3c9a5f}.review-stage{stroke:#7c5cc4}
+      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-index{fill:#b7791f}.badge-retrieve{fill:#2f6fad}.badge-generate{fill:#2f855a}.badge-review{fill:#6b46a8}
+      .stage-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .stage-main{font-size:13px;font-weight:600;text-anchor:middle}
+      .stage-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .data-arrow{stroke:#3c9a5f;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
+      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .decision-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .branch-label{font-size:14px;font-weight:700}
+      .adjust{fill:#fff5f5;stroke:#d9534f;stroke-width:1.7;rx:12}
+      .final{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.7;rx:12}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1040" fill="#fff"/>
+  <text x="600" y="40" class="title">RAG 기본 파이프라인</text>
+  <text x="600" y="68" class="subtitle">문서를 미리 검색 가능한 형태로 준비하고, 질문 시 관련 근거를 찾아 답변과 함께 검토한다</text>
+
+  <rect x="34" y="90" width="1132" height="214" class="group index-group"/>
+  <text x="58" y="121" class="group-title">1. 문서 준비·색인</text>
+  <text x="220" y="121" class="group-sub">사전 처리 — 문서가 추가되거나 변경될 때 수행</text>
+
+  <rect x="50" y="150" width="250" height="112" class="stage index-stage"/>
+  <circle cx="74" cy="174" r="14" class="badge-index"/><text x="74" y="174" class="badge">1</text>
+  <text x="175" y="181" class="stage-title">문서 수집</text>
+  <text x="175" y="214" class="stage-main">공지 · 규정 · FAQ · 매뉴얼</text>
+  <text x="175" y="239" class="stage-sub">출처와 최신 버전 확인</text>
+
+  <rect x="330" y="150" width="250" height="112" class="stage index-stage"/>
+  <circle cx="354" cy="174" r="14" class="badge-index"/><text x="354" y="174" class="badge">2</text>
+  <text x="455" y="181" class="stage-title">정제·청킹</text>
+  <text x="455" y="214" class="stage-main">의미 단위로 문서 분할</text>
+  <text x="455" y="239" class="stage-sub">제목·문단·문서 ID와 순서 유지</text>
+
+  <rect x="610" y="150" width="250" height="112" class="stage index-stage"/>
+  <circle cx="634" cy="174" r="14" class="badge-index"/><text x="634" y="174" class="badge">3</text>
+  <text x="735" y="181" class="stage-title">청크 임베딩 생성</text>
+  <text x="735" y="214" class="stage-main">각 청크를 숫자 벡터로 변환</text>
+  <text x="735" y="239" class="stage-sub">동일한 모델과 버전 사용</text>
+
+  <rect x="890" y="150" width="250" height="112" class="stage index-stage"/>
+  <circle cx="914" cy="174" r="14" class="badge-index"/><text x="914" y="174" class="badge">4</text>
+  <text x="1015" y="181" class="stage-title">원문·메타데이터·벡터 저장</text>
+  <text x="1015" y="214" class="stage-main">Vector DB 또는 pgvector</text>
+  <text x="1015" y="239" class="stage-sub">chunk_id · source · updated_at</text>
+
+  <path d="M 300 206 H 330" class="arrow"/>
+  <path d="M 580 206 H 610" class="arrow"/>
+  <path d="M 860 206 H 890" class="arrow"/>
+
+  <rect x="34" y="328" width="1132" height="236" class="group retrieve-group"/>
+  <text x="58" y="359" class="group-title">2. 질문·검색</text>
+  <text x="173" y="359" class="group-sub">실행 시 — 사용자가 질문할 때마다 수행</text>
+
+  <rect x="50" y="388" width="250" height="122" class="stage retrieve-stage"/>
+  <circle cx="74" cy="412" r="14" class="badge-retrieve"/><text x="74" y="412" class="badge">5</text>
+  <text x="175" y="419" class="stage-title">사용자 질문</text>
+  <text x="175" y="451" class="stage-main">“프리미엄 이용권은</text>
+  <text x="175" y="473" class="stage-main">언제 환불할 수 있나요?”</text>
+
+  <rect x="330" y="388" width="250" height="122" class="stage retrieve-stage"/>
+  <circle cx="354" cy="412" r="14" class="badge-retrieve"/><text x="354" y="412" class="badge">6</text>
+  <text x="455" y="419" class="stage-title">질문 임베딩 생성</text>
+  <text x="455" y="452" class="stage-main">질문을 같은 벡터 공간으로 변환</text>
+  <text x="455" y="480" class="stage-sub">문서와 같은 임베딩 모델 사용</text>
+
+  <rect x="610" y="388" width="250" height="122" class="stage retrieve-stage"/>
+  <circle cx="634" cy="412" r="14" class="badge-retrieve"/><text x="634" y="412" class="badge">7</text>
+  <text x="735" y="419" class="stage-title">유사도 검색·필터</text>
+  <text x="735" y="452" class="stage-main">거리 · Top-k · 임계값</text>
+  <text x="735" y="480" class="stage-sub">권한·문서 유형·최신성 조건 적용 가능</text>
+
+  <rect x="890" y="388" width="250" height="122" class="stage retrieve-stage"/>
+  <circle cx="914" cy="412" r="14" class="badge-retrieve"/><text x="914" y="412" class="badge">8</text>
+  <text x="1015" y="419" class="stage-title">관련 청크와 출처</text>
+  <text x="1015" y="452" class="stage-main">환불 기준 · 구독 취소 안내</text>
+  <text x="1015" y="480" class="stage-sub">원문·문서명·chunk_id 함께 반환</text>
+
+  <path d="M 300 449 H 330" class="arrow"/>
+  <path d="M 580 449 H 610" class="arrow"/>
+  <path d="M 860 449 H 890" class="arrow"/>
+  <path d="M 1015 262 V 330 H 735 V 388" class="data-arrow"/>
+
+  <rect x="34" y="588" width="1132" height="352" class="group generate-group"/>
+  <text x="58" y="619" class="group-title">3. 답변 생성·검토</text>
+  <text x="216" y="619" class="group-sub">검색 결과와 답변을 모두 확인</text>
+
+  <rect x="70" y="660" width="290" height="112" class="stage generate-stage"/>
+  <circle cx="94" cy="684" r="14" class="badge-generate"/><text x="94" y="684" class="badge">9</text>
+  <text x="215" y="691" class="stage-title">근거 포함 프롬프트 구성</text>
+  <text x="215" y="724" class="stage-main">사용자 질문 + 검색 청크</text>
+  <text x="215" y="749" class="stage-sub">“검색된 문서만 근거로 답변하세요”</text>
+
+  <rect x="455" y="660" width="290" height="112" class="stage generate-stage"/>
+  <circle cx="479" cy="684" r="14" class="badge-generate"/><text x="479" y="684" class="badge">10</text>
+  <text x="600" y="691" class="stage-title">LLM 답변 생성</text>
+  <text x="600" y="724" class="stage-main">검색된 내용을 요약·조합</text>
+  <text x="600" y="749" class="stage-sub">근거에 없는 내용은 추가하지 않도록 지시</text>
+
+  <polygon points="990,654 1110,716 990,778 870,716" class="decision"/>
+  <text x="990" y="710" class="decision-text">검토 통과?</text>
+  <text x="990" y="735" class="decision-sub">검색 적합성 · 근거 충실성 · 출처</text>
+
+  <path d="M 360 716 H 455" class="arrow"/>
+  <path d="M 745 716 H 870" class="arrow"/>
+  <path d="M 1015 510 V 620 H 215 V 660" class="data-arrow"/>
+  <path d="M 175 510 V 632 H 140 V 660" class="arrow"/>
+
+  <rect x="60" y="824" width="340" height="82" class="adjust"/>
+  <text x="230" y="854" class="stage-title">검색·설정 조정</text>
+  <text x="230" y="881" class="stage-sub">질문 표현·필터·Top-k·임계값·청킹 수정</text>
+
+  <rect x="810" y="824" width="330" height="82" class="final"/>
+  <text x="975" y="854" class="stage-title">근거와 출처를 포함한 최종 답변</text>
+  <text x="975" y="881" class="stage-sub">답변 내용과 사용된 문서를 함께 제공</text>
+
+  <path d="M 990 778 V 824" class="arrow"/>
+  <text x="1004" y="807" class="branch-label">예</text>
+  <path d="M 870 716 H 790 V 865 H 400" class="arrow"/>
+  <text x="802" y="701" class="branch-label">아니요</text>
+  <path d="M 60 865 H 20 V 449 H 610" class="feedback"/>
+  <text x="38" y="646" class="branch-label" fill="#b42318">조정 후 재검색</text>
+
+  <rect x="190" y="970" width="820" height="46" class="principle"/>
+  <text x="216" y="991" class="principle-label">핵심 원칙</text>
+  <text x="620" y="993" class="principle-text">RAG의 품질은 답변 모델뿐 아니라 문서 준비, 검색 결과와 근거 검토에 의해 결정된다</text>
+</svg>
