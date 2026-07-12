@@ -1,18 +1,56 @@
 flowchart TB
-    A[정규화된 테이블 구조] --> B[students]
-    A --> C[courses]
-    A --> D[instructors]
-    A --> E[enrollments]
+    A[업무 질문<br/>누가 어떤 강의를 어느 강사에게 신청했고<br/>현재 상태와 결제 금액은 얼마인가?] --> G[조회 결과의 기준 행 결정]
+    G --> G1[수강신청 한 건당 한 행<br/>기준 테이블 = enrollments]
 
-    B --> F[학생 이름]
-    C --> G[강의 제목]
-    D --> H[강사 이름]
-    E --> I[수강상태와 결제금액]
+    G1 --> N[필요한 값의 실제 저장 위치 확인]
+    N --> S[students<br/>id PK · name · email]
+    N --> E[enrollments<br/>id PK · student_id FK · course_id FK<br/>enrolled_at · status · paid_amount]
+    N --> C[courses<br/>id PK · instructor_id FK · title · price]
+    N --> I[instructors<br/>id PK · name · specialty]
 
-    F --> J[수강신청 현황 조회]
-    G --> J
-    H --> J
-    I --> J
+    E --> P{enrollments 한 행만으로<br/>업무 질문에 답할 수 있는가?}
+    P -- 아니요 --> P1[student_id와 course_id는 알지만<br/>학생명·강의명·강사명은 알 수 없음]
+    P1 --> J[FK와 PK를 따라 JOIN 경로 구성]
 
-    J --> K[JOIN 필요]
-    K --> L[사용자가 이해할 수 있는 결과]
+    E --> J1[e.student_id = s.id]
+    S --> J1
+    E --> J2[e.course_id = c.id]
+    C --> J2
+    C --> J3[c.instructor_id = i.id]
+    I --> J3
+
+    J1 --> SQL[JOIN SQL]
+    J2 --> SQL
+    J3 --> SQL
+    SQL --> SQL1[FROM enrollments AS e]
+    SQL --> SQL2[JOIN students AS s<br/>ON e.student_id = s.id]
+    SQL --> SQL3[JOIN courses AS c<br/>ON e.course_id = c.id]
+    SQL --> SQL4[JOIN instructors AS i<br/>ON c.instructor_id = i.id]
+
+    SQL1 --> R[조회 시점에 결과 집합 생성]
+    SQL2 --> R
+    SQL3 --> R
+    SQL4 --> R
+    R --> R1[김민지 · 데이터베이스 입문 · 문길래<br/>수강중 · 100000 · 2026-04-02]
+    R --> R2[원본 테이블을 합치거나 값을 복사하지 않음]
+
+    R1 --> V[JOIN 결과 검증]
+    R2 --> V
+    V --> V1[관계 경로<br/>실제 FK → 참조 PK를 연결했는가?]
+    V --> V2[예상 행 수<br/>수강신청 한 건당 결과 한 행인가?]
+    V --> V3[누락·중복<br/>중간 관계를 빠뜨리거나 잘못 연결하지 않았는가?]
+    V --> V4[포함 범위<br/>일치 행만 필요하면 INNER JOIN<br/>왼쪽 전체가 필요하면 LEFT JOIN 검토]
+    V --> V5[출력 컬럼<br/>SELECT *보다 필요한 컬럼과 별칭 사용]
+
+    V1 --> Q{업무 질문·JOIN 경로·ON 조건·행 수와<br/>조회 결과가 모두 일치하는가?}
+    V2 --> Q
+    V3 --> Q
+    V4 --> Q
+    V5 --> Q
+    Q -- 아니요 --> X[기준 테이블·FK 값·ON 조건·JOIN 종류를<br/>두 테이블씩 다시 확인]
+    X --> J
+    Q -- 예 --> OK[검증된 수강신청 현황 조회]
+
+    N1[저장과 조회<br/>정규화는 사실을 나누어 안전하게 저장하고<br/>JOIN은 관계를 따라 필요한 의미를 다시 조립] --- R2
+    N2[작성 순서<br/>업무 질문 → 기준 행 → 필요한 컬럼 → 관계 경로<br/>→ ON 조건 → 예상 행 수 → 결과 검증] --- Q
+    N3[주의<br/>컬럼 이름이 비슷하다는 이유로 연결하거나<br/>ON 조건을 생략하면 잘못된 조합·카테시안 곱 발생] --- V3
