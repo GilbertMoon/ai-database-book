@@ -1,9 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1320" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1510" viewBox="0 0 1200 1510" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
   <title id="title">안전한 UPDATE 실행 절차</title>
-  <desc id="desc">UPDATE 실행 전 SELECT로 대상 행을 확인하고 기본키로 대상을 고정한 뒤, 명시적 트랜잭션 안에서 UPDATE RETURNING을 실행하고 영향받은 행 수와 변경 결과를 검증하여 COMMIT 또는 ROLLBACK하는 절차를 설명한다.</desc>
+  <desc id="desc">수정할 값과 대상 조건을 분리하고, 명시적 트랜잭션을 시작한 뒤 SELECT FOR UPDATE로 대상 행을 확인하고 잠근 다음, 기본키로 UPDATE RETURNING을 실행하여 결과를 검증하고 COMMIT 또는 ROLLBACK하는 절차를 설명한다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
-    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/></marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
     <style>
       text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
       .title{font-size:30px;font-weight:700;text-anchor:middle}
@@ -12,6 +16,7 @@
       .section-sub{font-size:14px;fill:#475569}
       .box-title{font-size:15px;font-weight:700;text-anchor:middle}
       .box-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .box-text-left{font-size:13px;fill:#475569}
       .sql{font-family:Consolas,D2Coding,Menlo,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#243b53}
       .sql-small{font-family:Consolas,D2Coding,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
       .header{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
@@ -29,113 +34,149 @@
     </style>
   </defs>
 
-  <rect width="1200" height="1320" fill="#ffffff"/>
+  <rect width="1200" height="1510" fill="#ffffff"/>
   <text x="600" y="42" class="title">안전한 UPDATE 실행 절차</text>
-  <text x="600" y="72" class="subtitle">실행 전 대상을 확인하고, 트랜잭션 안에서 수정한 뒤 영향받은 행과 변경 결과를 검증한다</text>
+  <text x="600" y="72" class="subtitle">대상 확인과 수정·검증을 하나의 트랜잭션에서 수행하고, 결과에 따라 COMMIT 또는 ROLLBACK한다</text>
 
-  <rect x="34" y="98" width="1132" height="300" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 수정 목표와 대상 조건을 분리</text>
-  <text x="356" y="132" class="section-sub">SET은 바꿀 값, WHERE는 바꿀 행을 결정한다</text>
+  <rect x="34" y="100" width="1132" height="270" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="135" class="section-title">1. 수정할 값과 대상 조건을 분리</text>
+  <text x="375" y="135" class="section-sub">SET은 바꿀 값, WHERE는 바꿀 행을 결정한다</text>
 
-  <rect x="58" y="160" width="330" height="88" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="188" r="15" fill="#2f6fad"/><text x="88" y="188" class="badge">1</text>
-  <text x="223" y="190" class="box-title">대상 테이블</text>
-  <text x="223" y="222" class="sql">students</text>
+  <rect x="58" y="165" width="330" height="88" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="193" r="15" fill="#2f6fad"/><text x="88" y="193" class="badge">1</text>
+  <text x="223" y="195" class="box-title">대상 테이블</text>
+  <text x="223" y="228" class="sql">students</text>
 
-  <rect x="435" y="160" width="330" height="88" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <circle cx="465" cy="188" r="15" fill="#7c5cc4"/><text x="465" y="188" class="badge">2</text>
-  <text x="600" y="190" class="box-title">변경 내용 · SET</text>
-  <text x="600" y="222" class="sql">grade = 4</text>
+  <rect x="435" y="165" width="330" height="88" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <circle cx="465" cy="193" r="15" fill="#7c5cc4"/><text x="465" y="193" class="badge">2</text>
+  <text x="600" y="195" class="box-title">변경 내용 · SET</text>
+  <text x="600" y="228" class="sql">grade = 4</text>
 
-  <rect x="812" y="160" width="330" height="88" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="842" cy="188" r="15" fill="#b7791f"/><text x="842" y="188" class="badge">3</text>
-  <text x="977" y="190" class="box-title">대상 조건 · WHERE</text>
-  <text x="977" y="222" class="sql-small">email = 'junho@example.com'</text>
+  <rect x="812" y="165" width="330" height="88" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="842" cy="193" r="15" fill="#b7791f"/><text x="842" y="193" class="badge">3</text>
+  <text x="977" y="195" class="box-title">후보 조건 · WHERE</text>
+  <text x="977" y="228" class="sql-small">email = 'junho@example.com'</text>
 
-  <rect x="144" y="278" width="912" height="86" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="600" y="305" class="sql">SELECT id, name, email, grade FROM students</text>
-  <text x="600" y="331" class="sql">WHERE email = 'junho@example.com';</text>
-  <text x="600" y="354" class="box-text">UPDATE 전에 현재 값, 대상 행 수, 식별 가능한 기본키 id를 먼저 확인한다</text>
+  <rect x="180" y="282" width="840" height="58" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="1.4"/>
+  <text x="600" y="306" class="sql">UPDATE students SET grade = 4 WHERE id = ?;</text>
+  <text x="600" y="329" class="box-text">후보 행을 조회해 기본키 id를 확인한 뒤 실제 UPDATE 조건에 사용한다</text>
 
-  <path d="M223 248V262H600V278" class="flow"/>
-  <path d="M600 248V278" class="flow"/>
-  <path d="M977 248V262H600" class="flow"/>
+  <path d="M600 370V398" class="flow"/>
 
-  <path d="M600 398V420" class="flow"/>
-  <polygon points="600,420 748,462 600,504 452,462" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
-  <text x="600" y="457" class="decision">의도한 행이 정확히 1건인가?</text>
-  <text x="600" y="480" class="box-text">0건·여러 건·다른 행이면 WHERE를 수정</text>
+  <rect x="34" y="398" width="1132" height="382" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="433" class="section-title">2. 트랜잭션을 시작하고 대상 행을 조회·잠금</text>
+  <text x="485" y="433" class="section-sub">동시 수정이 우려되면 SELECT … FOR UPDATE로 검증 중 대상 행을 잠근다</text>
 
-  <rect x="34" y="540" width="1132" height="356" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
-  <text x="58" y="574" class="section-title">2. 기본키로 대상을 고정하고 트랜잭션 안에서 UPDATE</text>
-  <text x="548" y="574" class="section-sub">조회에서 확인한 id를 사용하면 수정 대상을 더 명확하게 지정할 수 있다</text>
+  <rect x="58" y="466" width="220" height="106" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <circle cx="88" cy="494" r="15" fill="#64748b"/><text x="88" y="494" class="badge">1</text>
+  <text x="168" y="498" class="box-title">트랜잭션 시작</text>
+  <text x="168" y="535" class="sql">BEGIN;</text>
+  <text x="168" y="558" class="box-text">검증 전까지 확정하지 않음</text>
 
-  <rect x="58" y="604" width="250" height="112" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <circle cx="88" cy="632" r="15" fill="#64748b"/><text x="88" y="632" class="badge">1</text>
-  <text x="183" y="636" class="box-title">트랜잭션 시작</text>
-  <text x="183" y="672" class="sql">BEGIN;</text>
-  <text x="183" y="698" class="box-text">검증 전까지 확정하지 않음</text>
+  <rect x="306" y="456" width="570" height="150" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
+  <circle cx="336" cy="484" r="15" fill="#2f6fad"/><text x="336" y="484" class="badge">2</text>
+  <text x="591" y="488" class="box-title">수정 후보 조회</text>
+  <text x="591" y="522" class="sql">SELECT id, name, email, grade</text>
+  <text x="591" y="548" class="sql">FROM students</text>
+  <text x="591" y="574" class="sql">WHERE email = 'junho@example.com' FOR UPDATE;</text>
+  <text x="591" y="597" class="box-text">현재 값과 대상 행 수를 확인하고 해당 행을 트랜잭션 종료까지 잠금</text>
 
-  <rect x="337" y="604" width="526" height="178" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.6"/>
-  <circle cx="367" cy="632" r="15" fill="#7c5cc4"/><text x="367" y="632" class="badge">2</text>
-  <text x="600" y="636" class="box-title">UPDATE 실행</text>
-  <text x="600" y="671" class="sql">UPDATE students</text>
-  <text x="600" y="698" class="sql">SET grade = 4</text>
-  <text x="600" y="725" class="sql">WHERE id = 2 AND grade = 3</text>
-  <text x="600" y="752" class="sql">RETURNING id, name, email, grade;</text>
-  <text x="600" y="774" class="box-text">기존 값 조건을 함께 쓰면 예상과 다른 상태의 덮어쓰기를 줄일 수 있다</text>
+  <rect x="904" y="466" width="238" height="106" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="934" cy="494" r="15" fill="#2f855a"/><text x="934" y="494" class="badge">3</text>
+  <text x="1023" y="498" class="box-title">조회 결과</text>
+  <text x="1023" y="530" class="box-text">id = 2 · grade = 3</text>
+  <text x="1023" y="554" class="result-ok">대상 행 1건</text>
 
-  <rect x="892" y="604" width="250" height="112" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="922" cy="632" r="15" fill="#2f855a"/><text x="922" y="632" class="badge">3</text>
-  <text x="1017" y="636" class="box-title">결과 확인</text>
-  <text x="1017" y="672" class="box-text">RETURNING 행 1건</text>
-  <text x="1017" y="698" class="box-text">grade 3 → 4 확인</text>
+  <path d="M278 519H306" class="flow"/>
+  <path d="M876 519H904" class="flow"/>
 
-  <path d="M308 660H337" class="flow"/>
-  <path d="M863 660H892" class="flow"/>
+  <polygon points="600,640 750,684 600,728 450,684" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="679" class="decision">의도한 행이 정확히 1건인가?</text>
+  <text x="600" y="703" class="box-text">0건·여러 건·다른 행이면 수정하지 않는다</text>
+  <path d="M1023 572V620H600V640" class="flow"/>
 
-  <rect x="140" y="814" width="920" height="58" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.4"/>
-  <text x="600" y="838" class="box-title">영향받은 행 수와 반환된 값을 함께 검증</text>
-  <text x="600" y="860" class="box-text">행 수가 1이어도 새 값이 기존 값과 같을 수 있으므로 실제 반환 값까지 확인한다</text>
+  <rect x="70" y="668" width="300" height="76" rx="11" fill="#fff5f5" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="220" y="694" class="box-title">아니오 · ROLLBACK</text>
+  <text x="220" y="720" class="sql-small">ROLLBACK; 후 WHERE 재검토</text>
+  <path d="M450 684H370" class="retry"/>
+  <text x="410" y="672" class="result-no">아니오</text>
+  <path d="M600 728V814" class="flow"/>
+  <text x="620" y="770" class="result-ok">예</text>
 
-  <path d="M600 896V918" class="flow"/>
-  <polygon points="600,918 748,960 600,1002 452,960" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
-  <text x="600" y="955" class="decision">행 수와 변경 결과가 모두 예상과 일치하는가?</text>
-  <text x="600" y="978" class="box-text">1건·대상 id·변경 값·유지되어야 할 값 확인</text>
+  <rect x="34" y="814" width="1132" height="370" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
+  <text x="58" y="849" class="section-title">3. 기본키로 UPDATE하고 RETURNING 결과 검증</text>
+  <text x="490" y="849" class="section-sub">조회에서 확인한 PK를 사용하고, 반환된 행과 변경 전후 값을 함께 확인한다</text>
 
-  <rect x="54" y="1034" width="520" height="132" rx="15" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
-  <text x="314" y="1066" class="box-title">예 · COMMIT</text>
-  <text x="314" y="1098" class="sql">COMMIT;</text>
-  <text x="314" y="1124" class="result-ok">변경 내용을 최종 확정</text>
-  <text x="314" y="1148" class="box-text">필요하면 같은 id로 다시 SELECT해 최종 상태 확인</text>
+  <rect x="58" y="882" width="600" height="194" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.6"/>
+  <circle cx="88" cy="910" r="15" fill="#7c5cc4"/><text x="88" y="910" class="badge">4</text>
+  <text x="358" y="914" class="box-title">UPDATE 실행</text>
+  <text x="358" y="950" class="sql">UPDATE students</text>
+  <text x="358" y="978" class="sql">SET grade = 4</text>
+  <text x="358" y="1006" class="sql">WHERE id = 2</text>
+  <text x="358" y="1034" class="sql">RETURNING id, name, email, grade;</text>
+  <text x="358" y="1062" class="box-text">잠근 행의 기본키를 사용하므로 수정 대상이 명확하다</text>
 
-  <rect x="626" y="1034" width="520" height="132" rx="15" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
-  <text x="886" y="1066" class="box-title">아니오 · ROLLBACK</text>
-  <text x="886" y="1098" class="sql">ROLLBACK;</text>
-  <text x="886" y="1124" class="result-no">변경 내용을 취소하고 원인 확인</text>
-  <text x="886" y="1148" class="box-text">WHERE·현재 값·접속 DB·동시 변경 여부를 점검</text>
+  <rect x="690" y="882" width="452" height="194" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.6"/>
+  <circle cx="720" cy="910" r="15" fill="#2f855a"/><text x="720" y="910" class="badge">5</text>
+  <text x="916" y="914" class="box-title">RETURNING 결과</text>
+  <rect x="720" y="944" width="392" height="74" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.2"/>
+  <rect x="720" y="944" width="392" height="32" fill="#e8eef7"/>
+  <line x1="786" y1="944" x2="786" y2="1018" stroke="#cbd5e1"/>
+  <line x1="872" y1="944" x2="872" y2="1018" stroke="#cbd5e1"/>
+  <line x1="1025" y1="944" x2="1025" y2="1018" stroke="#cbd5e1"/>
+  <text x="753" y="960" class="header">id</text>
+  <text x="829" y="960" class="header">name</text>
+  <text x="948" y="960" class="header">email</text>
+  <text x="1068" y="960" class="header">grade</text>
+  <text x="753" y="997" class="cell">2</text>
+  <text x="829" y="997" class="cell">이준호</text>
+  <text x="948" y="997" class="cell">junho@example.com</text>
+  <text x="1068" y="997" class="cell">4</text>
+  <text x="916" y="1048" class="result-ok">반환 행 1건 · grade 3 → 4</text>
+  <text x="916" y="1068" class="box-text">유지되어야 할 값도 함께 확인</text>
 
-  <path d="M452 960H314V1034" class="flow"/>
-  <path d="M748 960H886V1034" class="flow"/>
-  <text x="398" y="994" class="result-ok">예</text>
-  <text x="802" y="994" class="result-no">아니오</text>
-  <path d="M886 1166V1184H22V320H144" class="retry"/>
+  <path d="M658 979H690" class="flow"/>
 
-  <rect x="54" y="1190" width="344" height="66" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="226" y="1216" class="note-title">WHERE 없는 UPDATE</text>
-  <text x="226" y="1239" class="note-text">모든 행이 대상이 되므로 특별한 의도가 없다면 실행하지 않는다</text>
+  <polygon points="600,1094 750,1138 600,1182 450,1138" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1133" class="decision">반환 행 수와 값이 모두 예상과 일치하는가?</text>
+  <text x="600" y="1157" class="box-text">대상 id · 새 값 · 유지 값 · 오류 여부 확인</text>
+  <path d="M916 1076V1086H600V1094" class="flow"/>
 
-  <rect x="428" y="1190" width="344" height="66" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1216" class="note-title">자동 커밋 주의</text>
-  <text x="600" y="1239" class="note-text">검증 후 ROLLBACK하려면 명시적 트랜잭션을 쓰거나 자동 커밋을 꺼야 한다</text>
+  <rect x="54" y="1220" width="520" height="124" rx="15" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
+  <text x="314" y="1252" class="box-title">예 · COMMIT</text>
+  <text x="314" y="1284" class="sql">COMMIT;</text>
+  <text x="314" y="1310" class="result-ok">변경 내용을 최종 확정</text>
+  <text x="314" y="1332" class="box-text">필요하면 같은 id로 다시 SELECT해 최종 상태 확인</text>
 
-  <rect x="802" y="1190" width="344" height="66" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="974" y="1216" class="note-title">식별 조건 권장</text>
-  <text x="974" y="1239" class="note-text">중복 가능한 이름보다 PK 또는 UNIQUE 값을 사용한다</text>
+  <rect x="626" y="1220" width="520" height="124" rx="15" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
+  <text x="886" y="1252" class="box-title">아니오 · ROLLBACK</text>
+  <text x="886" y="1284" class="sql">ROLLBACK;</text>
+  <text x="886" y="1310" class="result-no">변경 내용을 취소하고 원인 확인</text>
+  <text x="886" y="1332" class="box-text">WHERE·현재 값·접속 DB·동시 변경 여부를 점검</text>
 
-  <rect x="80" y="1272" width="1040" height="34" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
-  <rect x="80" y="1272" width="190" height="34" rx="11" fill="#dcf7e5"/>
-  <line x1="270" y1="1280" x2="270" y2="1298" stroke="#62b47a" stroke-width="1.3"/>
-  <text x="175" y="1295" class="principle-label">핵심 원칙</text>
-  <text x="695" y="1295" class="principle-main">SELECT로 대상 확인 → PK로 UPDATE → 결과 검증 → COMMIT 또는 ROLLBACK</text>
+  <path d="M450 1138H314V1220" class="flow"/>
+  <path d="M750 1138H886V1220" class="flow"/>
+  <text x="397" y="1172" class="result-ok">예</text>
+  <text x="803" y="1172" class="result-no">아니오</text>
+
+  <rect x="54" y="1365" width="344" height="82" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="226" y="1391" class="note-title">WHERE 없는 UPDATE</text>
+  <text x="226" y="1415" class="note-text">모든 행이 대상이 된다</text>
+  <text x="226" y="1437" class="note-text">특별한 의도가 없다면 실행하지 않는다</text>
+
+  <rect x="428" y="1365" width="344" height="82" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1391" class="note-title">잠금과 동시성</text>
+  <text x="600" y="1415" class="note-text">FOR UPDATE는 트랜잭션 종료까지 행을 잠근다</text>
+  <text x="600" y="1437" class="note-text">짧게 검증하고 신속히 COMMIT·ROLLBACK한다</text>
+
+  <rect x="802" y="1365" width="344" height="82" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="974" y="1391" class="note-title">DBMS별 차이</text>
+  <text x="974" y="1415" class="note-text">RETURNING은 PostgreSQL에서 지원한다</text>
+  <text x="974" y="1437" class="note-text">다른 DBMS는 영향 행 수와 재조회로 검증한다</text>
+
+  <rect x="80" y="1462" width="1040" height="36" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1462" width="190" height="36" rx="11" fill="#dcf7e5"/>
+  <line x1="270" y1="1470" x2="270" y2="1490" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1486" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1486" class="principle-main">BEGIN → 대상 조회·잠금 → PK UPDATE → 결과 검증 → COMMIT 또는 ROLLBACK</text>
 </svg>
