@@ -1,8 +1,5 @@
 flowchart LR
-    M[members<br/>PK id]
-    L[loans<br/>FK member_id]
-    N[N쪽 테이블에 FK 배치]
-
+    M[members · 1쪽<br/>PK id<br/>name]
+    L[loans · N쪽<br/>PK id<br/>FK member_id<br/>borrowed_at]
     M -- "1 : 0..N" --> L
     L -. "member_id → members.id" .-> M
-    L --> N
