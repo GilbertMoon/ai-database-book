@@ -115,7 +115,10 @@
   <text x="600" y="1114" class="noteTitle">사람이 책임질 일</text><text x="600" y="1138" class="noteText">업무 규칙 · 데이터 의미 · 설계 선택</text><text x="600" y="1157" class="noteText">실행 결과 판정과 최종 승인</text>
 
   <rect x="815" y="1088" width="330" height="76" class="record"/>
-  <text x="980" y="1114" class="noteTitle" fill="#1d4f91">ai_review.md 기록</text><text x="980" y="1138" class="noteText">프롬프트 · AI 제안 · 발견 문제 · 수정 전후</text><text x="980" y="1157" class="noteText">수정 이유 · 오류 메시지 · 재실행 결과</text>
+  <text x="980" y="1114" class="noteTitle" fill="#1d4f91">6. 최종 판단·ai_review.md 기록</text><text x="980" y="1138" class="noteText">프롬프트 · AI 제안 · 발견 문제 · 수정 전후</text><text x="980" y="1157" class="noteText">수정 이유 · 재실행 결과 · 최종 문서 동기화</text>
+
+  <path d="M925 1012V1050H980V1088" class="flow"/><text x="955" y="1044" class="branch" fill="#166534">검증 통과</text>
+  <path d="M980 1164V1197H650V1212" class="flow"/>
 
   <rect x="145" y="1212" width="910" height="38" class="core"/>
   <text x="172" y="1236" class="coreLabel">핵심 원칙</text><text x="650" y="1237" class="coreText">AI는 설계 결정을 대신하지 않으며 사람의 검토와 실행 근거로 채택 여부를 결정한다</text>
