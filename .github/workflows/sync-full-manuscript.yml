@@ -34,6 +34,7 @@ jobs:
           python-version: "3.12"
 
       - name: Migrate project image assets
+        if: github.event_name == 'workflow_dispatch'
         run: python scripts/migrate_project_image_assets.py
 
       - name: Normalize chapter headers
