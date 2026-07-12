@@ -1,1 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="40" text-anchor="middle" class="t">ROLLBACK 전후 비교</text><rect x="420" y="90" width="360" height="60" class="b m"/><text x="600" y="120" class="l">트랜잭션 내부 임시 변경</text><rect x="90" y="240" width="250" height="75" class="b y"/><text x="215" y="268" class="l">enrollments 변경</text><text x="215" y="292" class="s">임시 저장</text><rect x="475" y="240" width="250" height="75" class="b y"/><text x="600" y="268" class="l">payments 변경</text><text x="600" y="292" class="s">임시 저장</text><rect x="860" y="240" width="250" height="75" class="b y"/><text x="985" y="268" class="l">courses 변경</text><text x="985" y="292" class="s">임시 저장</text><rect x="455" y="410" width="290" height="70" class="b r"/><text x="600" y="438" class="l">결제 검증 실패</text><text x="600" y="462" class="s">ROLLBACK 실행</text><rect x="420" y="590" width="360" height="60" class="b g"/><text x="600" y="620" class="l">원래 상태로 복구</text><line x1="520" y1="150" x2="215" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="150" x2="600" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="150" x2="985" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="215" y1="315" x2="520" y2="410" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="315" x2="600" y2="410" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="985" y1="315" x2="680" y2="410" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="480" x2="600" y2="590" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/></svg>
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">ROLLBACK 전후 상태 비교</title>
+  <desc id="desc">트랜잭션 시작 전, 트랜잭션 내부 임시 변경, ROLLBACK 후의 courses, enrollments, payments 상태를 비교한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+    <style>.ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+.mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
+.title { font-size: 28px; font-weight: 700; }
+.subtitle { font-size: 15px; fill: #4b5563; }
+.box-title { font-size: 18px; font-weight: 700; }
+.body { font-size: 14px; }
+.small { font-size: 12.5px; fill: #4b5563; }
+.card { stroke: #64748b; stroke-width: 1.8; rx: 14; ry: 14; }
+.start { fill: #eaf3ff; }
+.work { fill: #eef5ff; }
+.review { fill: #fff6d8; }
+.ok { fill: #eaf8ee; }
+.fail { fill: #ffeaea; }
+.rule { fill: #f2ecff; }
+.lock { fill: #fff0d9; }
+.line { stroke: #475569; stroke-width: 2.2; fill: none; }
+.dash { stroke: #b45309; stroke-width: 2.2; stroke-dasharray: 7 6; fill: none; }
+.retry { stroke: #b91c1c; stroke-width: 2.2; stroke-dasharray: 7 6; fill: none; }</style>
+  </defs>
+  <rect x="0" y="0" width="1200" height="540" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="ko title"><tspan x="600" dy="0">ROLLBACK 전후 상태 비교</tspan></text>
+  <text x="600" y="70" text-anchor="middle" class="ko subtitle"><tspan x="600" dy="0">ROLLBACK은 아직 확정되지 않은 현재 트랜잭션의 변경을 취소합니다.</tspan></text>
+  <rect x="45" y="140" width="350" height="255" rx="14" ry="14" class="card start"/>
+  <text x="220" y="185" text-anchor="middle" class="ko box-title"><tspan x="220" dy="0">트랜잭션 시작 전</tspan></text>
+  <text x="220" y="240" text-anchor="middle" class="ko body"><tspan x="220" dy="0">신청 없음</tspan><tspan x="220" dy="38">결제 없음</tspan><tspan x="220" dy="38">좌석 N</tspan></text>
+  <rect x="425" y="140" width="350" height="255" rx="14" ry="14" class="card review"/>
+  <text x="600" y="185" text-anchor="middle" class="ko box-title"><tspan x="600" dy="0">트랜잭션 내부</tspan></text>
+  <text x="600" y="240" text-anchor="middle" class="ko body"><tspan x="600" dy="0">신청 추가</tspan><tspan x="600" dy="38">결제 추가</tspan><tspan x="600" dy="38">좌석 N-1</tspan></text>
+  <rect x="805" y="140" width="350" height="255" rx="14" ry="14" class="card ok"/>
+  <text x="980" y="185" text-anchor="middle" class="ko box-title"><tspan x="980" dy="0">ROLLBACK 후</tspan></text>
+  <text x="980" y="240" text-anchor="middle" class="ko body"><tspan x="980" dy="0">신청 없음</tspan><tspan x="980" dy="38">결제 없음</tspan><tspan x="980" dy="38">좌석 N</tspan></text>
+  <line x1="395" y1="267" x2="425" y2="267" class="line" marker-end="url(#arrow)"/>
+  <line x1="775" y1="267" x2="805" y2="267" class="line" marker-end="url(#arrow)"/>
+  <text x="410" y="245" text-anchor="middle" class="ko small"><tspan x="410" dy="0">BEGIN</tspan></text>
+  <text x="790" y="245" text-anchor="middle" class="ko small"><tspan x="790" dy="0">ROLLBACK</tspan></text>
+  <rect x="300" y="445" width="600" height="55" rx="14" ry="14" class="card rule"/>
+  <text x="600" y="478" text-anchor="middle" class="ko body"><tspan x="600" dy="0">ROLLBACK 후 SELECT로 세 테이블이 원래 상태인지 확인</tspan></text>
+</svg>
