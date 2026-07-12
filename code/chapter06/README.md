@@ -2,35 +2,29 @@
 
 ## 정규화와 좋은 테이블 설계
 
-이 폴더는 Chapter 06의 정규화 실습 SQL 파일을 관리합니다.
-
----
-
-## 파일 목록
-
 | 파일 | 설명 |
 | --- | --- |
-| `normalization_practice.sql` | 정규화 전 `library_records` 테이블과 정규화 후 `members`, `books`, `loans` 구조를 비교하는 실습 |
+| `normalization_practice.sql` | 정규화 전 `library_records`와 정규화 후 `members`, `books`, `loans`를 비교하고 JOIN으로 결과를 검증하는 실습 |
 
----
-
-## 실행 순서
-
-1. DBeaver에서 `ai_database_book` 데이터베이스에 연결합니다.
-2. SQL Editor를 엽니다.
-3. `normalization_practice.sql`을 실행합니다.
-4. 정규화 전 `library_records` 테이블의 중복 데이터를 확인합니다.
-5. 정규화 후 `members`, `books`, `loans` 테이블 구조를 확인합니다.
-6. JOIN 결과가 정규화 전 조회 결과와 어떻게 연결되는지 확인합니다.
-7. 회원 이메일 수정 예시를 통해 수정 이상이 줄어드는지 확인합니다.
-
----
-
-## 주의 사항
+## 실행 전 주의
 
 ```text
-- 이 파일은 반복 실습을 위해 DROP TABLE IF EXISTS 구문을 포함합니다.
-- 실제 서비스 데이터베이스에서는 DROP TABLE을 함부로 실행하면 안 됩니다.
-- 정규화 전 테이블은 의도적으로 중복과 이상 현상을 보여 주기 위한 나쁜 예시입니다.
-- 정규화 후 구조에서는 JOIN을 통해 필요한 조회 결과를 만든다는 점을 확인합니다.
+- 이 파일은 loans, books, members, library_records를 삭제하고 다시 생성합니다.
+- 개인 실습용 ai_database_book 데이터베이스에서만 실행합니다.
+- 먼저 SELECT current_database();로 연결 대상을 확인합니다.
+- 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+- 삭제 이상 비교용 DELETE는 주석 상태로 유지합니다.
 ```
+
+## 실행 흐름
+
+1. 현재 데이터베이스 확인
+2. 정규화 전 `library_records` 생성과 3행 입력
+3. 중복 회원·도서 정보 확인
+4. 정규화 후 `members` 2행, `books` 2행, `loans` 3행 생성
+5. JOIN으로 원래 업무 결과 3행 복원
+6. `members` 한 행만 이메일 수정
+7. 수정 후 JOIN 결과 재확인
+8. 삭제 이상 예시는 주석으로 검토
+
+`joined_at`, `published_year`, `isbn`은 정규화 전 테이블에서 자동으로 생기는 값이 아니라 Chapter 05의 추가 요구사항 속성입니다.
