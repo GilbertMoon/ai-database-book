@@ -1,201 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1720" viewBox="0 0 1200 1720" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">N:M 관계와 중간 테이블</title>
-  <desc id="desc">회원과 도서는 시간에 따라 다대다 관계를 가지지만 관계형 데이터베이스에서는 loans 연관 엔터티를 두어 members와 loans, books와 loans의 두 개 일대다 관계로 구현한다. 각 대여 행은 정확히 한 회원과 한 도서를 외래키로 참조하고 대여일, 반납예정일, 실제반납일 같은 관계 속성을 저장하며, 재대여와 동시 대여 방지 규칙을 설명한다.</desc>
-  <defs>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
-    </marker>
-    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#b7791f"/>
-    </marker>
-    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
-    </marker>
-    <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
-      .mono-left{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.2px;fill:#334155}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .table-sub{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .cell{font-size:12px;fill:#334155}
-      .key{font-size:12px;font-weight:700;fill:#1d4ed8}
-      .fk{font-size:12px;font-weight:700;fill:#92400e}
-      .relation{stroke:#64748b;stroke-width:2.2;fill:none}
-      .fk-blue{stroke:#2f6fad;stroke-width:2.2;fill:none;marker-end:url(#arrow-blue)}
-      .fk-orange{stroke:#b7791f;stroke-width:2.2;fill:none;marker-end:url(#arrow-orange)}
-      .retry{stroke:#c2413b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.3px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">N:M 관계를 연결 테이블로 풀기</title>
+  <desc id="desc">회원과 책의 개념상 다대다 관계를 loans 연결 테이블로 두 개의 일대다 관계로 구현하는 구조</desc>
+  <style>
+      .ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+      .mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #4b5563; }
+      .box-title { font-size: 18px; font-weight: 700; }
+      .body { font-size: 14px; }
+      .small { font-size: 12.5px; }
+      .card { stroke: #64748b; stroke-width: 1.6; rx: 14; ry: 14; }
+      .entity { fill: #eaf3ff; }
+      .attribute { fill: #ecf9ef; }
+      .relation { fill: #f2ecff; }
+      .decision { fill: #fff6d8; }
+      .danger { fill: #ffeaea; }
+      .ok { fill: #eaf8ee; }
+      .pk { fill: #1d4ed8; font-weight: 700; }
+      .fk { fill: #c2410c; font-weight: 700; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; }
+      .dash { stroke: #64748b; stroke-width: 2; stroke-dasharray: 7 6; fill: none; }
     </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
   </defs>
-
-  <rect width="1200" height="1720" fill="#ffffff"/>
-  <text x="600" y="42" class="title">N:M 관계와 중간 테이블</text>
-  <text x="600" y="72" class="subtitle">개념상의 다대다 관계를 관계 한 건씩 저장하는 연관 엔터티로 바꾸면 두 개의 1:N 관계로 구현할 수 있다</text>
-
-  <!-- 1. Conceptual relationship -->
-  <rect x="34" y="98" width="1132" height="270" rx="16" fill="#fff5f5" stroke="#d9534f" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 업무에서는 회원과 도서가 시간에 따라 N:M 관계</text>
-  <text x="458" y="132" class="section-sub">한 회원은 여러 도서를 빌릴 수 있고, 한 도서도 기간이 다르면 여러 회원에게 대여될 수 있다</text>
-
-  <rect x="76" y="166" width="340" height="104" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="246" y="194" class="card-title">회원 관점</text>
-  <text x="246" y="225" class="card-text">회원 1명 → 대여한 도서 0개 이상</text>
-  <text x="246" y="250" class="card-small">동시에 또는 시간에 따라 여러 도서와 연결</text>
-
-  <rect x="784" y="166" width="340" height="104" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="954" y="194" class="card-title">도서 관점</text>
-  <text x="954" y="225" class="card-text">도서 1권 → 대여한 회원 0명 이상</text>
-  <text x="954" y="250" class="card-small">같은 도서도 서로 다른 시점에 반복 대여 가능</text>
-
-  <line x1="416" y1="218" x2="784" y2="218" class="relation"/>
-  <text x="458" y="204" class="card-small">0..N</text>
-  <text x="742" y="204" class="card-small">0..N</text>
-  <rect x="490" y="184" width="220" height="68" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="208" class="card-title">직접 N:M 저장 불가</text>
-  <text x="600" y="233" class="card-small">관계마다 별도 행이 필요</text>
-
-  <rect x="124" y="294" width="952" height="44" rx="10" fill="#ffffff" stroke="#d9534f" stroke-width="1.3"/>
-  <text x="600" y="313" class="card-title">부모 테이블에 ID 목록을 저장하지 않는다</text>
-  <text x="600" y="332" class="card-small">한 컬럼에 여러 값을 넣으면 원자성·검색·제약조건·추가·삭제 관리가 모두 어려워진다</text>
-
-  <!-- 2. Bridge model -->
-  <rect x="34" y="400" width="1132" height="520" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="434" class="section-title">2. loans를 중간 테이블이자 대여 사건 엔터티로 배치</text>
-  <text x="500" y="434" class="section-sub">각 관계 행이 한 회원과 한 도서를 연결하고 관계 자체의 속성을 함께 저장한다</text>
-
-  <!-- Members table -->
-  <rect x="54" y="474" width="300" height="278" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
-  <rect x="54" y="474" width="300" height="58" rx="12" fill="#dcecff"/>
-  <rect x="54" y="520" width="300" height="12" fill="#dcecff"/>
-  <text x="204" y="498" class="table-title">members · 1쪽</text>
-  <text x="204" y="520" class="table-sub">회원은 대여가 없어도 존재 가능</text>
-  <line x1="54" y1="532" x2="354" y2="532" stroke="#cbd5e1"/>
-  <line x1="54" y1="586" x2="354" y2="586" stroke="#cbd5e1"/>
-  <line x1="54" y1="640" x2="354" y2="640" stroke="#cbd5e1"/>
-  <text x="78" y="565" class="key">id = 1 · PK</text><text x="210" y="565" class="cell">김민지</text>
-  <text x="78" y="619" class="key">id = 2 · PK</text><text x="210" y="619" class="cell">이준호</text>
-  <text x="78" y="673" class="key">id = 3 · PK</text><text x="210" y="673" class="cell">박서연</text>
-  <text x="204" y="718" class="card-small">회원 1명은 loans 0..N건</text>
-  <text x="204" y="740" class="card-small">members.id는 중복되지 않음</text>
-
-  <!-- Loans table -->
-  <rect x="420" y="456" width="360" height="350" rx="12" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.7"/>
-  <rect x="420" y="456" width="360" height="58" rx="12" fill="#ece4ff"/>
-  <rect x="420" y="502" width="360" height="12" fill="#ece4ff"/>
-  <text x="600" y="480" class="table-title">loans · 연관/사건 엔터티</text>
-  <text x="600" y="502" class="table-sub">대여 사건 한 건마다 한 행</text>
-  <line x1="420" y1="514" x2="780" y2="514" stroke="#cbd5e1"/>
-  <line x1="420" y1="558" x2="780" y2="558" stroke="#cbd5e1"/>
-  <line x1="420" y1="602" x2="780" y2="602" stroke="#cbd5e1"/>
-  <line x1="420" y1="646" x2="780" y2="646" stroke="#cbd5e1"/>
-  <line x1="420" y1="690" x2="780" y2="690" stroke="#cbd5e1"/>
-  <line x1="420" y1="734" x2="780" y2="734" stroke="#cbd5e1"/>
-  <text x="444" y="542" class="key">id · PK</text><text x="620" y="542" class="cell">대여 사건 식별</text>
-  <text x="444" y="586" class="fk">member_id · FK · NOT NULL</text><text x="670" y="586" class="cell">→ members.id</text>
-  <text x="444" y="630" class="fk">book_id · FK · NOT NULL</text><text x="670" y="630" class="cell">→ books.id</text>
-  <text x="444" y="674" class="cell">borrowed_at</text><text x="620" y="674" class="cell">대여 시각</text>
-  <text x="444" y="718" class="cell">due_at</text><text x="620" y="718" class="cell">반납 예정</text>
-  <text x="444" y="762" class="cell">returned_at</text><text x="620" y="762" class="cell">실제 반납 · 미반납은 NULL</text>
-  <text x="600" y="793" class="card-small">각 loans 행은 정확히 회원 1명·도서 1권에 속함</text>
-
-  <!-- Books table -->
-  <rect x="846" y="474" width="300" height="278" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.6"/>
-  <rect x="846" y="474" width="300" height="58" rx="12" fill="#fff1cf"/>
-  <rect x="846" y="520" width="300" height="12" fill="#fff1cf"/>
-  <text x="996" y="498" class="table-title">books · 1쪽</text>
-  <text x="996" y="520" class="table-sub">이 예제의 한 행은 대여 가능한 한 권</text>
-  <line x1="846" y1="532" x2="1146" y2="532" stroke="#cbd5e1"/>
-  <line x1="846" y1="586" x2="1146" y2="586" stroke="#cbd5e1"/>
-  <line x1="846" y1="640" x2="1146" y2="640" stroke="#cbd5e1"/>
-  <text x="870" y="565" class="key">id = 10 · PK</text><text x="1008" y="565" class="cell">DB 입문</text>
-  <text x="870" y="619" class="key">id = 20 · PK</text><text x="1008" y="619" class="cell">SQL 기초</text>
-  <text x="870" y="673" class="key">id = 30 · PK</text><text x="1008" y="673" class="cell">ERD 설계</text>
-  <text x="996" y="718" class="card-small">도서 1권은 loans 0..N건</text>
-  <text x="996" y="740" class="card-small">시간에 따라 반복 대여 가능</text>
-
-  <!-- FK arrows: child -> parent -->
-  <path d="M420 586H386V565H354" class="fk-blue"/>
-  <path d="M780 630H814V565H846" class="fk-orange"/>
-  <text x="386" y="548" class="card-small">FK → PK</text>
-  <text x="814" y="548" class="card-small">FK → PK</text>
-
-  <rect x="198" y="832" width="804" height="58" rx="11" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.4"/>
-  <text x="600" y="855" class="card-title">관계 구조</text>
-  <text x="600" y="879" class="mono">members 1 ── 0..N loans 0..N ── 1 books</text>
-
-  <!-- 3. Rows -->
-  <rect x="34" y="952" width="1132" height="272" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="986" class="section-title">3. loans의 각 행이 N:M 연결 한 건을 표현</text>
-  <text x="403" y="986" class="section-sub">동일한 회원과 동일한 도서 ID가 여러 행에서 반복될 수 있지만 각 대여 사건은 별도 PK로 구분한다</text>
-
-  <rect x="58" y="1018" width="330" height="132" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="223" y="1046" class="mono">loan id = 1001</text>
-  <text x="223" y="1074" class="card-text">member_id = 1 · book_id = 10</text>
-  <text x="223" y="1099" class="card-text">김민지 → DB 입문</text>
-  <text x="223" y="1125" class="card-small">2026-07-01 대여 · 2026-07-07 반납</text>
-
-  <rect x="435" y="1018" width="330" height="132" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="600" y="1046" class="mono">loan id = 1002</text>
-  <text x="600" y="1074" class="card-text">member_id = 1 · book_id = 20</text>
-  <text x="600" y="1099" class="card-text">김민지 → SQL 기초</text>
-  <text x="600" y="1125" class="card-small">같은 회원이 다른 도서도 대여</text>
-
-  <rect x="812" y="1018" width="330" height="132" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="977" y="1046" class="mono">loan id = 1003</text>
-  <text x="977" y="1074" class="card-text">member_id = 2 · book_id = 10</text>
-  <text x="977" y="1099" class="card-text">이준호 → DB 입문</text>
-  <text x="977" y="1125" class="card-small">책 10이 반납된 뒤 다른 회원에게 재대여</text>
-
-  <rect x="126" y="1170" width="948" height="34" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.2"/>
-  <text x="600" y="1192" class="note-text">UNIQUE(member_id, book_id)는 같은 회원의 재대여까지 막으므로 일반적인 대여 이력 모델에는 적합하지 않다</text>
-
-  <!-- 4. Constraints -->
-  <rect x="34" y="1256" width="1132" height="276" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <text x="58" y="1290" class="section-title">4. 중간 테이블에서 검증해야 할 무결성 규칙</text>
-  <text x="427" y="1290" class="section-sub">외래키 존재 여부뿐 아니라 업무상 허용되는 중복과 동시 상태도 구분한다</text>
-
-  <rect x="58" y="1322" width="330" height="154" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="223" y="1350" class="card-title">참조 무결성</text>
-  <text x="223" y="1379" class="card-text">없는 member_id 또는 book_id 차단</text>
-  <text x="223" y="1404" class="card-text">두 FK는 일반적으로 NOT NULL</text>
-  <text x="223" y="1429" class="card-text">부모 삭제 정책은 업무 규칙에 맞게 결정</text>
-  <text x="223" y="1454" class="card-small">대여 이력 보존 시 RESTRICT/NO ACTION 검토</text>
-
-  <rect x="435" y="1322" width="330" height="154" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="600" y="1350" class="card-title">재대여와 중복 규칙</text>
-  <text x="600" y="1379" class="card-text">같은 회원·도서 조합의 재등장 허용</text>
-  <text x="600" y="1404" class="card-text">각 사건은 loans.id로 구분</text>
-  <text x="600" y="1429" class="card-text">필요하면 업무상 중복 기준을 별도 정의</text>
-  <text x="600" y="1454" class="card-small">예: 동일 요청의 중복 등록 방지 키</text>
-
-  <rect x="812" y="1322" width="330" height="154" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="977" y="1350" class="card-title">동시 대여 방지 · PostgreSQL</text>
-  <text x="977" y="1378" class="mono">CREATE UNIQUE INDEX</text>
-  <text x="977" y="1401" class="mono">uq_loans_active_book</text>
-  <text x="977" y="1424" class="mono">ON loans(book_id)</text>
-  <text x="977" y="1447" class="mono">WHERE returned_at IS NULL;</text>
-  <text x="977" y="1469" class="card-small">한 도서의 활성 대여를 최대 1건으로 제한</text>
-
-  <rect x="126" y="1492" width="948" height="24" rx="8" fill="#fff1cf" stroke="#d69e2e" stroke-width="1.1"/>
-  <text x="600" y="1509" class="card-small">도서 제목과 실제 복본을 분리한다면 활성 대여 제한은 book_id가 아니라 book_copy_id에 적용한다</text>
-
-  <!-- 5. Query / core -->
-  <rect x="34" y="1564" width="1132" height="94" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="1596" class="section-title">5. JOIN으로 세 테이블을 다시 결합</text>
-  <text x="390" y="1596" class="section-sub">중간 테이블을 기준으로 회원 정보·도서 정보·대여 상태를 함께 조회한다</text>
-  <text x="600" y="1630" class="mono">members.id = loans.member_id  AND  books.id = loans.book_id</text>
-  <text x="600" y="1650" class="card-small">FK 컬럼은 JOIN과 참조 확인에 자주 사용되므로 실제 질의와 실행계획을 보고 인덱스를 검토한다</text>
-
-  <rect x="80" y="1680" width="1040" height="28" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="600" y="1699" class="principle">N:M 업무 관계 → 관계 한 건을 중간 테이블 행으로 저장 → 두 개의 1:N 관계로 구현</text>
+  <rect x="0" y="0" width="1200" height="650" fill="#ffffff"/>
+  <text x="600.0" y="42" text-anchor="middle" class="ko title">
+    <tspan x="600.0" dy="0">N:M 관계를 연결 테이블로 풀기</tspan>
+  </text>
+  <text x="600.0" y="70" text-anchor="middle" class="ko subtitle">
+    <tspan x="600.0" dy="0">관계 한 건마다 loans에 한 행을 생성합니다.</tspan>
+  </text>
+  <rect x="250" y="105" width="700" height="100" rx="14" ry="14" class="card decision"/>
+  <text x="600" y="145" text-anchor="middle" class="ko box-title">
+    <tspan x="600" dy="0">개념 관계</tspan>
+    <tspan x="600" dy="30">members  N ───────── M  books</tspan>
+  </text>
+  <line x1="600" y1="205" x2="600" y2="265" class="line" marker-end="url(#arrow)"/>
+  <rect x="80" y="300" width="260" height="170" rx="14" ry="14" class="card entity"/>
+  <text x="210" y="345" text-anchor="middle" class="ko box-title">
+    <tspan x="210" dy="0">members</tspan>
+  </text>
+  <text x="130" y="395" text-anchor="start" class="mono body">
+    <tspan x="130" dy="0" class="pk">PK  id</tspan>
+    <tspan x="130" dy="32">name</tspan>
+  </text>
+  <rect x="470" y="260" width="260" height="250" rx="14" ry="14" class="card relation"/>
+  <text x="600" y="305" text-anchor="middle" class="ko box-title">
+    <tspan x="600" dy="0">loans</tspan>
+  </text>
+  <text x="520" y="350" text-anchor="start" class="mono body">
+    <tspan x="520" dy="0" class="pk">PK  id</tspan>
+    <tspan x="520" dy="28" class="fk">FK  member_id</tspan>
+    <tspan x="520" dy="28" class="fk">FK  book_id</tspan>
+    <tspan x="520" dy="28">borrowed_at</tspan>
+    <tspan x="520" dy="28">due_at</tspan>
+    <tspan x="520" dy="28">returned_at</tspan>
+  </text>
+  <rect x="860" y="300" width="260" height="170" rx="14" ry="14" class="card entity"/>
+  <text x="990" y="345" text-anchor="middle" class="ko box-title">
+    <tspan x="990" dy="0">books</tspan>
+  </text>
+  <text x="910" y="395" text-anchor="start" class="mono body">
+    <tspan x="910" dy="0" class="pk">PK  id</tspan>
+    <tspan x="910" dy="32">title</tspan>
+  </text>
+  <line x1="340" y1="385" x2="470" y2="385" class="line" marker-end="url(#arrow)"/>
+  <text x="375" y="362" text-anchor="middle" class="ko box-title">
+    <tspan x="375" dy="0">1</tspan>
+  </text>
+  <text x="435" y="362" text-anchor="middle" class="ko box-title">
+    <tspan x="435" dy="0">N</tspan>
+  </text>
+  <line x1="730" y1="385" x2="860" y2="385" class="line" marker-end="url(#arrow)"/>
+  <text x="765" y="362" text-anchor="middle" class="ko box-title">
+    <tspan x="765" dy="0">N</tspan>
+  </text>
+  <text x="825" y="362" text-anchor="middle" class="ko box-title">
+    <tspan x="825" dy="0">1</tspan>
+  </text>
+  <rect x="170" y="550" width="860" height="60" rx="14" ry="14" class="card attribute"/>
+  <text x="600" y="586" text-anchor="middle" class="ko body">
+    <tspan x="600" dy="0">ID 목록을 부모 컬럼에 저장하지 않고, 두 FK와 날짜 속성을 가진 사건 행으로 기록합니다.</tspan>
+  </text>
 </svg>
