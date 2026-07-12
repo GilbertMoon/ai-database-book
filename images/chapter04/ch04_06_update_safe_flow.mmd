@@ -1,16 +1,37 @@
-flowchart TD
-    A[UPDATE 필요] --> B[1단계 SELECT로 대상 확인]
-    B --> C{대상이 맞는가?}
+flowchart TB
+    A[수정 목표 정의<br/>이준호의 grade를 3에서 4로 변경] --> B[대상 테이블·변경 컬럼·새 값·식별 조건 분리]
+    B --> B1[테이블<br/>students]
+    B --> B2[SET<br/>grade = 4]
+    B --> B3[WHERE<br/>email = 'junho@example.com']
 
-    C -- 아니오 --> D[WHERE 조건 수정]
-    D --> B
+    B3 --> C[실행 전 같은 WHERE로 SELECT<br/>현재 값과 대상 행 수 확인]
+    C --> D{정확히 의도한<br/>1행인가?}
 
-    C -- 예 --> E[2단계 UPDATE 실행]
-    E --> F[3단계 SELECT로 결과 확인]
-    F --> G{의도대로 수정되었는가?}
+    D -- 0행 --> D1[조건값·현재 DB·기존 데이터 확인]
+    D -- 2행 이상 --> D2[조건을 더 구체화하거나<br/>id·UNIQUE email 같은 식별자 사용]
+    D -- 다른 행 --> D3[WHERE 컬럼과 값을 수정]
+    D1 --> C
+    D2 --> C
+    D3 --> C
 
-    G -- 예 --> H[실습 결과 기록]
-    G -- 아니오 --> I[원인 확인]
+    D -- 예 --> E[UPDATE 문장 최종 검토<br/>UPDATE students<br/>SET grade = 4<br/>WHERE email = 'junho@example.com']
+    E --> F{WHERE가 있고<br/>SET과 대상이 맞는가?}
+    F -- 아니요 --> B
+    F -- 예 --> G[UPDATE 실행]
 
-    I --> J[조건 / 값 / 테이블 확인]
-    J --> B
+    G --> H[실행 메시지 확인<br/>영향받은 행 수가 예상한 1행인지 확인]
+    H --> I{영향받은 행 수가<br/>예상과 같은가?}
+    I -- 아니요 --> I1[추가 변경을 멈추고<br/>조건·동시 변경·현재 데이터 상태 확인]
+    I1 --> C
+
+    I -- 예 --> J[같은 WHERE로 다시 SELECT<br/>grade가 4인지·다른 값이 유지되었는지 확인]
+    J --> K{변경 전후가<br/>의도와 일치하는가?}
+    K -- 아니요 --> K1[원인과 복구값 확인<br/>무작정 추가 UPDATE하지 않음]
+    K1 --> C
+    K -- 예 --> L[수정 완료 기록<br/>대상·이전값·새값·조건·영향 행 수·검증 결과]
+
+    W[위험한 예<br/>UPDATE students SET grade = 1;<br/>WHERE가 없으므로 모든 행이 변경 대상] --- F
+    N1[식별 조건<br/>이름처럼 중복될 수 있는 값보다<br/>기본키 id 또는 UNIQUE email을 우선 사용] --- B3
+    N2[검증 기준<br/>SQL 성공 여부뿐 아니라 영향받은 행 수와<br/>변경 전후 값을 함께 확인] --- H
+    N3[제약조건<br/>새 값이 데이터 타입·NOT NULL·CHECK·FK 등의 규칙을 위반하면<br/>UPDATE가 실패하고 오류 메시지가 반환될 수 있음] --- G
+    N4[핵심<br/>같은 WHERE로 실행 전 대상 확인 → UPDATE → 실행 후 결과 확인] --- J
