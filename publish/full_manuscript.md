@@ -4937,7 +4937,7 @@ Chapter 07에서는 지금까지 다룬 요구사항 분석, ERD, SQL, 정규화
 
 ![프로젝트 진행 흐름](../images/chapter07/ch07_01_project_flow.svg)
 
-그림 7-1 온라인 강의 데이터베이스 프로젝트 진행 흐름
+그림 7-1 온라인 강의 데이터베이스 프로젝트 핵심 흐름
 
 이 프로젝트의 핵심은 SQL을 많이 작성하는 데 있지 않습니다. 서비스 설명을 데이터 구조로 바꾸고, 그 구조가 실제로 동작하는지 증명하는 데 있습니다.
 
@@ -4963,10 +4963,10 @@ enrollments
 | 항목 | 이 장의 선택 | 다른 선택 가능성 |
 | --- | --- | --- |
 | 학생과 강사 | 별도 테이블 | 공통 users 테이블과 역할 테이블 사용 |
-| 결제 금액 | enrollments에 저장 | payments 테이블로 분리 |
-| 수강 상태 | 문자열 열로 저장 | CHECK, ENUM, 상태 코드 테이블 사용 |
+| 결제 금액 | 신청 시점의 실제 금액을 enrollments에 저장 | 결제 시도·성공·실패·환불 이력을 payments로 분리 |
+| 수강 상태 | VARCHAR(20)과 CHECK 제약조건으로 관리 | PostgreSQL ENUM 또는 상태 코드 테이블 사용 |
 | 취소 처리 | 상태 변경 우선 | 행 삭제 또는 별도 이력 테이블 사용 |
-| 같은 강의 재신청 | 기본 버전에서는 별도 제한 없음 | `(student_id, course_id)` UNIQUE 추가 |
+| 같은 강의 재신청 | 기본 버전에서는 별도 제한 없음 | 정책이 확정된 경우만 UNIQUE 또는 이력 모델 검토 |
 
 초기 프로젝트에서는 단순한 구조가 유리합니다. 하지만 단순함과 부정확함은 다릅니다. 생략한 기능과 선택한 범위를 의식적으로 구분해야 합니다.
 
@@ -5018,7 +5018,7 @@ enrollments
 
 ![요구사항에서 엔터티 도출](../images/chapter07/ch07_02_requirement_to_entities.svg)
 
-그림 7-2 요구사항을 엔터티와 속성으로 바꾸는 과정
+그림 7-2 요구사항을 데이터 구조로 바꾸기
 
 모든 명사가 테이블이 되는 것은 아닙니다.
 
@@ -5034,6 +5034,8 @@ enrollments
 | 결제 금액 | 속성 | 수강신청 시점과 조건에 따라 달라질 수 있는 값 |
 
 여기서 `enrollments`가 중요한 이유는 단순히 두 테이블을 연결하기 때문만이 아닙니다. 수강신청에는 신청일, 상태, 결제 금액처럼 **관계 자체의 정보**가 있기 때문입니다.
+
+이 예제는 원 단위의 정수 금액만 저장한다고 가정하므로 `courses.price`와 `enrollments.paid_amount`를 `INT`로 둡니다. 소수점 통화, 여러 통화, 더 큰 금액 범위가 필요하다면 `NUMERIC` 같은 타입을 별도로 검토해야 합니다. `courses.price`는 강의의 현재 기본 수강료이고, `enrollments.paid_amount`는 특정 신청 시점의 실제 결제 금액입니다. 두 값은 의미와 시점이 다르므로 불필요한 중복으로 보지 않습니다.
 
 ---
 
@@ -5098,7 +5100,7 @@ students 1:N enrollments N:1 courses
 
 ![학생-강의 N:M 관계 해소](../images/chapter07/ch07_04_many_to_many_enrollments.svg)
 
-그림 7-3 연결 테이블로 학생과 강의의 N:M 관계를 표현하는 방식
+그림 7-3 enrollments로 학생-강의 N:M 관계 해소
 
 ---
 
@@ -5139,7 +5141,7 @@ enrollments
 
 ![온라인 강의 수강신청 ERD](../images/chapter07/ch07_03_online_course_erd.svg)
 
-그림 7-4 온라인 강의 수강신청 데이터베이스 ERD
+그림 7-4 온라인 강의 수강신청 핵심 ERD
 
 ERD를 확인할 때는 선의 모양보다 다음 질문이 더 중요합니다.
 
@@ -5160,6 +5162,10 @@ N:M 관계가 연결 테이블로 해소되었는가?
 ```text
 code/chapter07/online_course_project.sql
 ```
+
+> **실습 DB 확인**
+>
+> `online_course_project.sql`은 `enrollments`, `courses`, `instructors`, `students` 테이블을 삭제하고 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 실행 전에 `SELECT current_database();`로 현재 연결 대상을 확인합니다. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
 
 핵심 DDL은 다음과 같습니다.
 
@@ -5278,6 +5284,8 @@ VALUES
 
 샘플 데이터는 단순히 행 수를 채우는 값이 아니라 요구사항을 검증하는 테스트 데이터입니다.
 
+기본 샘플 데이터 입력 직후에는 `students` 3행, `instructors` 2행, `courses` 3행, `enrollments` 4행이 있어야 합니다. 이 상태가 첫 번째 전체 JOIN 검증의 기준입니다.
+
 ---
 
 ## 9. JOIN으로 사용 가능한 정보 만들기
@@ -5314,6 +5322,8 @@ courses.instructor_id → instructors.id
 ![SQL 기반 설계 검증 흐름](../images/chapter07/ch07_05_sql_validation_flow.svg)
 
 그림 7-5 샘플 데이터와 JOIN으로 설계를 검증하는 흐름
+
+이 시점의 전체 JOIN 결과는 수강신청 4건입니다. 아직 CRUD 예제에서 신규 수강신청을 추가하기 전의 기준선입니다.
 
 JOIN 결과가 예상과 다르다면 SQL 문법만 보지 말고 다음 항목도 확인해야 합니다.
 
@@ -5379,15 +5389,30 @@ WHERE id = 4;
 행을 실제로 삭제해야 한다면 같은 조건의 `SELECT`로 대상을 먼저 확인합니다.
 
 ```sql
-SELECT *
-FROM enrollments
-WHERE id = 4;
-
-DELETE FROM enrollments
-WHERE id = 4;
+-- SELECT *
+-- FROM enrollments
+-- WHERE id = 4;
+--
+-- DELETE FROM enrollments
+-- WHERE id = 4;
 ```
 
 `UPDATE`와 `DELETE`에서 가장 중요한 습관은 실행 전에 대상 행을 확인하는 것입니다.
+
+실제 `online_course_project.sql`에서는 DELETE 예제를 주석으로 남겨 둡니다. 기본 흐름에서는 취소 이력을 지우지 않고 `status = '취소'` 상태 변경으로 보존합니다.
+
+### 실행 단계별 데이터 상태
+
+| 실행 시점 | students | instructors | courses | enrollments | 주요 변화 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 기본 샘플 입력 직후 | 3 | 2 | 3 | 4 | 첫 번째 JOIN 검증 기준 |
+| 신규 수강신청 추가 후 | 3 | 2 | 3 | 5 | 이준호의 정규화 실습 신청 추가 |
+| 상태 변경 후 | 3 | 2 | 3 | 5 | id 1 완료, id 4 취소 |
+| 실제 DELETE 예시 | 변경 없음 | 변경 없음 | 변경 없음 | 실행하지 않음 | DELETE 문은 주석 상태 |
+
+> 이 장의 첫 번째 JOIN 예시는 기본 샘플 4건을 기준으로 합니다. 전체 SQL 파일을 끝까지 실행하면 신규 신청 1건이 추가되어 다음 장에서 사용하는 수강신청 데이터는 5건이 됩니다.
+
+이 장의 숫자 ID 예시는 SQL 파일을 처음부터 실행해 테이블을 새로 만든 상태를 기준으로 합니다. 일부 구간만 반복 실행하거나 기존 데이터를 유지한 상태에서는 실제 ID가 달라질 수 있으므로 먼저 `SELECT` 결과를 확인해야 합니다.
 
 ---
 
@@ -5397,7 +5422,7 @@ WHERE id = 4;
 
 ![프로젝트 정규화 검토](../images/chapter07/ch07_06_normalization_review_flow.svg)
 
-그림 7-6 데이터 중복과 이상 현상을 확인하는 흐름
+그림 7-6 온라인 강의 프로젝트 정규화 점검
 
 | 검토 항목 | 현재 구조 | 효과 |
 | --- | --- | --- |
@@ -5444,7 +5469,7 @@ N:M 관계, 중복 데이터, 삽입·수정·삭제 이상 가능성도 검토�
 
 ![AI 활용 및 검토 흐름](../images/chapter07/ch07_07_ai_review_flow.svg)
 
-그림 7-7 AI 제안을 실행 가능한 설계로 검증하는 흐름
+그림 7-7 AI 제안을 검토된 설계로 바꾸기
 
 AI가 만든 결과는 다음 기준으로 확인합니다.
 
@@ -5466,6 +5491,10 @@ AI가 만든 결과는 다음 기준으로 확인합니다.
 ## 13. 프로젝트 완성도 점검
 
 이 프로젝트의 결과는 다음 항목으로 스스로 점검할 수 있습니다.
+
+![온라인 강의 DB 프로젝트 완성도 점검](../images/chapter07/ch07_08_project_completion_checklist.svg)
+
+그림 7-8 온라인 강의 데이터베이스 프로젝트 완성도 점검
 
 | 영역 | 확인 기준 |
 | --- | --- |
@@ -5595,85 +5624,76 @@ HAVING
 
 ## 이 장에서 살펴볼 내용
 
-이 장에서는 여러 테이블의 데이터를 함께 조회하는 **JOIN**과 데이터를 요약하는 **집계 쿼리**를 살펴봅니다.
+이 장에서는 여러 테이블의 데이터를 함께 조회하는 JOIN과 데이터를 요약하는 집계 쿼리를 다룹니다.
 
-Chapter 07에서는 온라인 강의 수강신청 시스템을 설계했습니다. 그 결과 `students`, `instructors`, `courses`, `enrollments` 테이블이 만들어졌습니다. 하지만 테이블이 나뉘어 있으면 한 테이블만 조회해서는 원하는 정보를 모두 볼 수 없습니다.
+Chapter 07에서는 온라인 강의 수강신청 시스템의 `students`, `instructors`, `courses`, `enrollments` 테이블을 만들었습니다. 하지만 실제 업무 질문에 답하려면 한 테이블만 보는 것으로는 충분하지 않습니다.
 
-예를 들어 수강신청 현황을 보려면 다음 정보가 함께 필요합니다.
+예를 들어 수강신청 현황 한 행에는 다음 정보가 함께 필요합니다.
 
 ```text
-- 학생 이름: students 테이블
-- 강의 제목: courses 테이블
-- 강사 이름: instructors 테이블
-- 수강상태와 결제금액: enrollments 테이블
+- 학생 이름: students
+- 강의 제목: courses
+- 강사 이름: instructors
+- 수강 상태와 결제금액: enrollments
 ```
 
-이처럼 나뉘어 있는 테이블을 연결하는 방법이 JOIN입니다. 그리고 수강생 수, 강의별 매출, 상태별 인원처럼 데이터를 요약하는 방법이 집계 쿼리입니다.
+이처럼 정규화되어 나뉘어 저장된 사실을 조회 시점에 연결하는 방법이 JOIN입니다. 그리고 여러 행을 묶어 건수, 합계, 평균처럼 요약하는 방법이 집계 쿼리입니다.
 
 이 장에서 다룰 내용은 다음과 같습니다.
 
 - INNER JOIN
 - LEFT JOIN
-- 여러 테이블 JOIN
-- 테이블 별칭 사용
+- 다중 JOIN
+- 테이블 별칭
 - COUNT, SUM, AVG
 - GROUP BY
 - HAVING
-- ORDER BY와 집계 결과 정렬
-- JOIN과 집계를 함께 사용하는 방법
-- AI가 만든 JOIN/집계 SQL 검토하기
+- COALESCE
+- COUNT DISTINCT
+- AI SQL 검토
 
 ---
 
 ## 1. 왜 JOIN과 집계 쿼리를 배워야 하는가
 
-정규화된 데이터베이스에서는 데이터를 여러 테이블에 나누어 저장합니다. 이 구조는 중복을 줄이고 데이터 일관성을 높입니다. 하지만 조회할 때는 테이블을 다시 연결해야 합니다.
+정규화된 데이터베이스는 같은 사실을 여러 번 저장하지 않도록 데이터를 나누어 보관합니다. 이 구조는 입력과 수정에는 유리하지만, 조회 시에는 필요한 값을 다시 조립해야 합니다.
 
-![JOIN이 필요한 이유](../images/chapter08/ch08_01_join_why_needed.svg)
+![정규화된 테이블에 JOIN이 필요한 이유](../images/chapter08/ch08_01_join_why_needed.svg)
 
-그림 8-1 JOIN이 필요한 이유
+그림 8-1 정규화된 테이블에 JOIN이 필요한 이유
 
-예를 들어 `enrollments` 테이블에는 `student_id`와 `course_id`만 저장되어 있습니다.
-
-| id | student_id | course_id | status | paid_amount |
-| ---: | ---: | ---: | --- | ---: |
-| 1 | 1 | 1 | 수강중 | 100000 |
-| 2 | 1 | 2 | 신청 | 120000 |
-
-이 값만 보면 `student_id = 1`이 누구인지, `course_id = 2`가 어떤 강의인지 바로 알 수 없습니다.
-
-따라서 `students`와 `courses` 테이블을 연결해야 합니다.
+수강신청 한 건을 보면 `student_id`, `course_id`, `status`, `paid_amount`는 알 수 있어도 학생 이름, 강의 제목, 강사 이름은 바로 알 수 없습니다. 이때 JOIN은 컬럼 이름이 비슷한 테이블을 아무렇게나 붙이는 기능이 아니라, 실제 PK와 FK 관계를 따라 필요한 값을 찾아오는 방법입니다.
 
 ```sql
 SELECT
-    students.name AS student_name,
-    courses.title AS course_title,
-    enrollments.status
-FROM enrollments
-JOIN students ON enrollments.student_id = students.id
-JOIN courses ON enrollments.course_id = courses.id;
+    e.id AS enrollment_id,
+    s.name AS student_name,
+    c.title AS course_title,
+    i.name AS instructor_name,
+    e.status,
+    e.paid_amount
+FROM enrollments AS e
+JOIN students AS s ON e.student_id = s.id
+JOIN courses AS c ON e.course_id = c.id
+JOIN instructors AS i ON c.instructor_id = i.id;
 ```
 
-JOIN은 정규화된 데이터베이스를 실제로 사용하는 데 필수적인 기술입니다.
+중요한 점은 JOIN이 테이블을 실제로 합쳐 저장하는 것이 아니라는 점입니다. 원본 값은 각 테이블에 그대로 유지되고, 조회 결과만 필요에 맞게 만들어집니다.
 
-집계 쿼리는 데이터를 요약할 때 사용합니다.
+집계 쿼리는 이런 질문에 답할 때 사용합니다.
 
 ```text
-- 강의별 수강생 수는 몇 명인가?
-- 강의별 총 결제금액은 얼마인가?
-- 수강상태별 인원은 몇 명인가?
-- 강사별 개설 강의 수는 몇 개인가?
+- 전체 수강신청 수는 몇 건인가?
+- 상태별 수강신청 수는 몇 건인가?
+- 강의별 수강신청 건수와 고유 학생 수는 어떻게 다른가?
+- 강의별 결제금액 합계는 얼마인가?
 ```
-
-이런 질문은 단순 SELECT만으로는 답하기 어렵고, `GROUP BY`와 집계 함수가 필요합니다.
 
 ---
 
 ## 2. 실습에 사용할 테이블 구조
 
-이 장에서는 Chapter 07에서 사용한 온라인 강의 수강신청 시스템을 계속 사용합니다.
-
-기본 테이블은 다음과 같습니다.
+이 장은 Chapter 07과 같은 네 테이블 구조를 사용합니다.
 
 ```text
 students(id, name, email, joined_at)
@@ -5691,63 +5711,97 @@ courses 1:N enrollments
 students N:M courses는 enrollments로 해소
 ```
 
-실습 전에 `code/chapter07/midterm_project_template.sql`을 실행해도 되고, Chapter 08 전용 실습 파일을 사용할 수도 있습니다.
+Chapter 08은 Chapter 07과 같은 테이블 구조를 사용하지만, JOIN과 집계 차이를 분명히 확인하기 위해 전용 샘플 데이터를 다시 입력합니다. 따라서 Chapter 07의 마지막 데이터 상태를 그대로 이어 쓰는 것이 아니라 Chapter 08 실습 파일이 테이블을 초기화하고 확장된 테스트 데이터를 구성합니다.
 
----
-
-## 3. INNER JOIN 이해하기
-
-`INNER JOIN`은 양쪽 테이블에서 조건이 일치하는 데이터만 조회합니다.
-
-![INNER JOIN 개념](../images/chapter08/ch08_02_inner_join_concept.svg)
-
-그림 8-2 INNER JOIN 개념
-
-학생과 수강신청을 연결해 보겠습니다.
-
-```sql
-SELECT
-    students.name AS student_name,
-    enrollments.course_id,
-    enrollments.status
-FROM students
-INNER JOIN enrollments ON students.id = enrollments.student_id;
-```
-
-이 SQL은 다음 의미입니다.
+이 장의 실습은 다음 파일을 기준으로 진행합니다.
 
 ```text
-students.id 값과 enrollments.student_id 값이 같은 행만 연결한다.
+code/chapter08/join_aggregation_practice.sql
 ```
 
-결과는 다음과 같은 형태가 됩니다.
+Chapter 07의 프로젝트 SQL을 비교 참고할 때는 실제 파일 경로인 `code/chapter07/online_course_project.sql`만 사용합니다. 하지만 Chapter 08 실행 기준은 `join_aggregation_practice.sql`로 통일합니다.
 
-| student_name | course_id | status |
+### Chapter 08 샘플 데이터 기준
+
+| 테이블 | 행 수 | JOIN·집계 실습에서의 역할 |
 | --- | ---: | --- |
-| 김민지 | 1 | 수강중 |
-| 김민지 | 2 | 신청 |
-| 이준호 | 1 | 수강중 |
+| `students` | 4 | 최현우는 수강신청이 없어 LEFT JOIN 검증에 사용 |
+| `instructors` | 3 | 강사별 개설 강의 수 집계 |
+| `courses` | 4 | `집계 쿼리 실습`은 수강신청이 없는 강의 |
+| `enrollments` | 5 | JOIN 결과의 기본 기준 행 |
 
-`INNER JOIN`에서는 수강신청 기록이 없는 학생은 결과에 나오지 않습니다.
+### 주요 예상 결과
+
+| 검증 항목 | 예상 결과 |
+| --- | --- |
+| INNER JOIN 수강신청 결과 | 5행 |
+| 학생 기준 LEFT JOIN 결과 | 6행 |
+| 수강신청이 없는 학생 | 최현우 1명 |
+| 전체 수강신청 수 | 5 |
+| 전체 결제금액 합계 | 620000 |
+| 평균 결제금액 | 124000 |
+| 신청 상태 건수 | 2 |
+| 수강중 상태 건수 | 2 |
+| 완료 상태 건수 | 1 |
+| 수강신청이 없는 강의 | 집계 쿼리 실습 |
+| 수강신청 2건 이상 강의 | 데이터베이스 입문, 파이썬 데이터 분석 |
 
 ---
 
-## 4. 테이블 별칭 사용하기
+## 3. 실습 파일 안내와 안전 확인
 
-JOIN 쿼리는 여러 테이블이 등장하므로 SQL이 길어집니다. 이때 테이블 별칭을 사용하면 읽기 쉬워집니다.
+`join_aggregation_practice.sql`은 네 테이블을 삭제하고 다시 생성합니다.
+
+> **실습 DB 확인**
+>
+> `join_aggregation_practice.sql`은 `enrollments`, `courses`, `instructors`, `students` 테이블을 삭제하고 다시 생성합니다.
+>
+> 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 실행 전에 `SELECT current_database();`로 현재 연결 대상을 확인합니다.
+>
+> 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+
+Chapter 08 SQL 파일의 맨 위에는 현재 데이터베이스 확인과 DROP TABLE 경고가 포함되어 있습니다.
+
+---
+
+## 4. INNER JOIN 이해하기
+
+`INNER JOIN`은 양쪽 테이블에서 조건이 일치하는 행만 결과에 포함합니다.
+
+![INNER JOIN은 일치하는 행만 포함한다](../images/chapter08/ch08_02_inner_join_concept.svg)
+
+그림 8-2 INNER JOIN은 일치하는 행만 포함한다
 
 ```sql
 SELECT
     s.name AS student_name,
-    e.course_id,
+    c.title AS course_title,
     e.status
 FROM students AS s
-JOIN enrollments AS e ON s.id = e.student_id;
+JOIN enrollments AS e ON s.id = e.student_id
+JOIN courses AS c ON e.course_id = c.id
+ORDER BY s.id, c.id;
 ```
 
-여기서 `students AS s`는 `students` 테이블을 `s`라는 짧은 이름으로 부르겠다는 뜻입니다.
+이 SQL의 기준 행은 학생이 아니라 수강신청과 일치한 결과 행입니다. 한 학생에 일치하는 수강신청이 여러 개면 결과도 여러 행이 됩니다.
 
-초급 단계에서는 별칭을 사용할 때 다음 원칙을 지키면 좋습니다.
+Chapter 08 샘플 데이터에서 실제 결과는 5행입니다.
+
+| student_name | course_title | status |
+| --- | --- | --- |
+| 김민지 | 데이터베이스 입문 | 수강중 |
+| 김민지 | 정규화 실습 | 신청 |
+| 이준호 | 데이터베이스 입문 | 수강중 |
+| 이준호 | 파이썬 데이터 분석 | 완료 |
+| 박서연 | 파이썬 데이터 분석 | 신청 |
+
+최현우는 수강신청이 없으므로 INNER JOIN 결과에 포함되지 않습니다.
+
+---
+
+## 5. 테이블 별칭과 다중 JOIN
+
+JOIN이 많아질수록 테이블 이름을 짧게 줄여 쓰는 편이 읽기 쉽습니다.
 
 | 테이블 | 권장 별칭 |
 | --- | --- |
@@ -5756,17 +5810,11 @@ JOIN enrollments AS e ON s.id = e.student_id;
 | courses | c |
 | enrollments | e |
 
-별칭을 쓰면 긴 JOIN 쿼리도 훨씬 읽기 쉬워집니다.
+수강신청 현황 한 행을 만들려면 `enrollments`에서 시작해 학생, 강의, 강사 정보를 순서대로 연결합니다.
 
----
+![수강신청 현황을 만드는 다중 JOIN 경로](../images/chapter08/ch08_03_multi_table_join_path.svg)
 
-## 5. 여러 테이블 JOIN
-
-수강신청 현황을 제대로 보려면 학생, 수강신청, 강의, 강사 테이블을 모두 연결해야 합니다.
-
-![여러 테이블 JOIN 경로](../images/chapter08/ch08_03_multi_table_join_path.svg)
-
-그림 8-3 여러 테이블 JOIN 경로
+그림 8-3 수강신청 현황을 만드는 다중 JOIN 경로
 
 ```sql
 SELECT
@@ -5784,7 +5832,7 @@ JOIN instructors AS i ON c.instructor_id = i.id
 ORDER BY e.id;
 ```
 
-이 SQL은 다음 관계를 따라갑니다.
+정확한 FK 경로는 다음과 같습니다.
 
 ```text
 enrollments.student_id -> students.id
@@ -5792,19 +5840,17 @@ enrollments.course_id -> courses.id
 courses.instructor_id -> instructors.id
 ```
 
-여러 테이블 JOIN에서 가장 중요한 것은 `ON` 조건을 빠뜨리지 않는 것입니다. JOIN 조건이 잘못되면 결과 행이 비정상적으로 많아질 수 있습니다.
+강사는 `enrollments`에서 직접 연결하지 않습니다. 반드시 `courses`를 거쳐 `instructors`로 이동해야 합니다.
 
 ---
 
 ## 6. LEFT JOIN 이해하기
 
-`LEFT JOIN`은 왼쪽 테이블의 모든 행을 유지하고, 오른쪽 테이블에서 일치하는 값이 있으면 함께 보여 줍니다.
+`LEFT JOIN`은 왼쪽 테이블의 행을 모두 유지합니다. 다만 결과 행 수가 항상 왼쪽 테이블의 행 수와 같은 것은 아닙니다.
 
-![LEFT JOIN과 NULL 결과](../images/chapter08/ch08_04_left_join_null_rows.svg)
+![LEFT JOIN은 왼쪽 행을 모두 유지한다](../images/chapter08/ch08_04_left_join_null_rows.svg)
 
-그림 8-4 LEFT JOIN과 NULL 결과
-
-예를 들어 모든 학생을 조회하되, 수강신청이 있으면 함께 보여 주고 싶다고 가정합니다.
+그림 8-4 LEFT JOIN은 왼쪽 행을 모두 유지한다
 
 ```sql
 SELECT
@@ -5814,21 +5860,37 @@ SELECT
 FROM students AS s
 LEFT JOIN enrollments AS e ON s.id = e.student_id
 LEFT JOIN courses AS c ON e.course_id = c.id
-ORDER BY s.id;
+ORDER BY s.id, c.id;
 ```
 
-이 경우 수강신청이 없는 학생도 결과에 나타납니다. 다만 강의 제목과 수강상태는 `NULL`로 표시될 수 있습니다.
-
-`LEFT JOIN`은 다음 상황에서 자주 사용합니다.
+Chapter 08 데이터 기준으로 학생별 일치 행 수는 다음과 같습니다.
 
 ```text
-- 수강신청이 없는 학생 찾기
-- 아직 수강생이 없는 강의 찾기
-- 주문이 없는 고객 찾기
-- 댓글이 없는 게시글 찾기
+김민지: 2건
+이준호: 2건
+박서연: 1건
+최현우: 0건
 ```
 
-수강신청이 없는 학생만 찾고 싶다면 다음처럼 작성할 수 있습니다.
+따라서 학생 기준 LEFT JOIN 결과는 `2 + 2 + 1 + 1`로 총 6행입니다.
+
+> LEFT JOIN은 왼쪽 테이블의 행 수만큼만 결과가 나온다는 뜻이 아닙니다.
+>
+> 왼쪽 행에 오른쪽 일치 행이 여러 개 있으면 결과도 여러 행이 되며,
+>
+> 일치 행이 하나도 없을 때는 오른쪽 컬럼이 NULL인 행 하나가 생성됩니다.
+
+최현우의 결과는 다음처럼 나타납니다.
+
+```text
+student_name = 최현우
+course_title = NULL
+status = NULL
+```
+
+이 NULL은 `students` 원본에 저장된 값이 아니라, JOIN 과정에서 대응하는 오른쪽 행이 없어 생성된 결과값입니다.
+
+수강신청이 없는 학생만 찾고 싶다면 다음처럼 작성합니다.
 
 ```sql
 SELECT
@@ -5842,52 +5904,45 @@ WHERE e.id IS NULL;
 
 ---
 
-## 7. 집계 함수 이해하기
+## 7. 집계 함수와 기본 검산
 
 집계 함수는 여러 행을 하나의 요약값으로 계산합니다.
 
-대표적인 집계 함수는 다음과 같습니다.
-
-| 함수 | 의미 | 예시 |
+| 함수 | 의미 | 이 장의 예 |
 | --- | --- | --- |
-| COUNT | 행 개수 계산 | 수강신청 수 |
-| SUM | 합계 계산 | 총 결제금액 |
+| COUNT | 행 수 계산 | 수강신청 건수 |
+| SUM | 합계 계산 | 결제금액 합계 |
 | AVG | 평균 계산 | 평균 결제금액 |
-| MIN | 최솟값 | 가장 낮은 수강료 |
-| MAX | 최댓값 | 가장 높은 수강료 |
 
-전체 수강신청 수를 구하려면 다음처럼 작성합니다.
+전체 수강신청과 결제금액은 다음처럼 먼저 검산할 수 있습니다.
 
 ```sql
-SELECT COUNT(*) AS enrollment_count
+SELECT
+    COUNT(*) AS enrollment_count,
+    SUM(paid_amount) AS total_paid_amount,
+    AVG(paid_amount) AS avg_paid_amount
 FROM enrollments;
 ```
 
-전체 결제금액 합계를 구하려면 다음처럼 작성합니다.
+이 장의 예상값은 다음과 같습니다.
 
-```sql
-SELECT SUM(paid_amount) AS total_paid_amount
-FROM enrollments;
-```
+| 항목 | 값 |
+| --- | ---: |
+| enrollment_count | 5 |
+| total_paid_amount | 620000 |
+| avg_paid_amount | 124000 |
 
-평균 결제금액은 다음과 같습니다.
-
-```sql
-SELECT AVG(paid_amount) AS avg_paid_amount
-FROM enrollments;
-```
+이런 기본 검산은 이후 JOIN과 집계 결과를 AI가 제안했을 때도 기준선으로 활용됩니다.
 
 ---
 
 ## 8. GROUP BY 이해하기
 
-`GROUP BY`는 같은 값을 가진 행을 그룹으로 묶고, 그룹별로 집계합니다.
+`GROUP BY`는 같은 값을 가진 행을 그룹으로 묶고 그룹별 결과 한 행을 만듭니다.
 
-![GROUP BY와 집계 흐름](../images/chapter08/ch08_05_group_by_aggregation_flow.svg)
+![GROUP BY로 상태별 행 묶기](../images/chapter08/ch08_05_group_by_aggregation_flow.svg)
 
-그림 8-5 GROUP BY와 집계 흐름
-
-예를 들어 수강상태별 인원을 구해 보겠습니다.
+그림 8-5 GROUP BY로 상태별 행 묶기
 
 ```sql
 SELECT
@@ -5898,110 +5953,104 @@ GROUP BY status
 ORDER BY status;
 ```
 
-결과는 다음과 같은 형태입니다.
+Chapter 08 샘플 데이터의 상태별 결과는 다음과 같습니다.
 
 | status | enrollment_count |
 | --- | ---: |
 | 신청 | 2 |
 | 수강중 | 2 |
+| 완료 | 1 |
 
-`GROUP BY`를 사용할 때 중요한 규칙이 있습니다.
+실제 출력 순서는 데이터베이스의 정렬 규칙에 따라 달라질 수 있으므로, 위 표는 논리적 결과 예시로 이해하면 됩니다.
+
+`GROUP BY`에서 기억할 규칙은 다음 한 문장입니다.
 
 ```text
-SELECT에 집계 함수가 아닌 컬럼을 쓰면, 그 컬럼은 GROUP BY에도 포함되어야 한다.
+SELECT의 일반 컬럼은 GROUP BY 기준에 포함되어야 한다.
 ```
-
-예를 들어 다음 SQL은 올바릅니다.
-
-```sql
-SELECT
-    status,
-    COUNT(*)
-FROM enrollments
-GROUP BY status;
-```
-
-하지만 `status`를 `GROUP BY`에 넣지 않으면 오류가 발생합니다.
 
 ---
 
-## 9. 강의별 수강생 수 구하기
+## 9. 강의별 수강신청 건수와 고유 학생 수 구하기
 
-강의별 수강생 수를 구하려면 `courses`와 `enrollments`를 JOIN한 뒤 `courses` 기준으로 그룹화합니다.
-
-![강의별 수강생 수와 매출 집계](../images/chapter08/ch08_06_course_revenue_summary.svg)
-
-그림 8-6 강의별 수강생 수와 매출 집계
-
-```sql
-SELECT
-    c.id AS course_id,
-    c.title AS course_title,
-    COUNT(e.id) AS student_count
-FROM courses AS c
-JOIN enrollments AS e ON c.id = e.course_id
-GROUP BY c.id, c.title
-ORDER BY c.id;
-```
-
-이 SQL은 다음 의미입니다.
+강의별 집계를 할 때는 `COUNT(*)`, `COUNT(e.id)`, `COUNT(DISTINCT e.student_id)`를 구분해야 합니다.
 
 ```text
-1. courses와 enrollments를 course_id 기준으로 연결한다.
-2. 강의별로 그룹을 만든다.
-3. 각 그룹의 수강신청 수를 COUNT로 계산한다.
+COUNT(*)
+결과 행 전체 수
+
+COUNT(e.id)
+NULL이 아닌 실제 수강신청 행 수
+
+COUNT(DISTINCT e.student_id)
+중복을 제거한 고유 학생 수
 ```
 
-수강생이 없는 강의도 포함하려면 `LEFT JOIN`을 사용합니다.
+현재 데이터베이스는 같은 학생의 같은 강의 중복 신청을 기본적으로 금지하지 않습니다. 따라서 `COUNT(e.id)`를 항상 수강생 수라고 부르면 의미가 흐려질 수 있습니다.
 
 ```sql
 SELECT
     c.id AS course_id,
     c.title AS course_title,
-    COUNT(e.id) AS student_count
+    COUNT(e.id) AS enrollment_count,
+    COUNT(DISTINCT e.student_id) AS student_count
 FROM courses AS c
 LEFT JOIN enrollments AS e ON c.id = e.course_id
 GROUP BY c.id, c.title
 ORDER BY c.id;
 ```
 
-`COUNT(*)`가 아니라 `COUNT(e.id)`를 사용하는 이유는 수강신청이 없는 강의에서 잘못된 1건으로 계산되는 것을 피하기 위해서입니다.
+| course_id | course_title | enrollment_count | student_count |
+| ---: | --- | ---: | ---: |
+| 1 | 데이터베이스 입문 | 2 | 2 |
+| 2 | 정규화 실습 | 1 | 1 |
+| 3 | 파이썬 데이터 분석 | 2 | 2 |
+| 4 | 집계 쿼리 실습 | 0 | 0 |
+
+설명은 다음처럼 구분하는 편이 정확합니다.
+
+```text
+- enrollment_count: 수강신청 행 수
+- student_count: 고유 학생 수
+- 현재 샘플에서는 값이 같을 수 있다.
+- 재신청 데이터가 생기면 두 값은 달라질 수 있다.
+- 수강신청이 없는 강의는 두 값 모두 0이다.
+```
 
 ---
 
-## 10. 강의별 매출 구하기
+## 10. 강의별 결제금액 합계 구하기
 
-강의별 매출은 수강신청의 `paid_amount` 합계로 구할 수 있습니다.
+이 장에서는 `SUM(paid_amount)`를 강의별 결제금액 합계로 설명합니다.
 
-```sql
-SELECT
-    c.title AS course_title,
-    SUM(e.paid_amount) AS total_amount
-FROM courses AS c
-JOIN enrollments AS e ON c.id = e.course_id
-GROUP BY c.id, c.title
-ORDER BY total_amount DESC;
-```
+![강의별 신청 건수와 결제금액 집계](../images/chapter08/ch08_06_course_revenue_summary.svg)
 
-수강신청이 없는 강의까지 포함하고 싶다면 `LEFT JOIN`과 `COALESCE`를 함께 사용할 수 있습니다.
+그림 8-6 강의별 신청 건수와 결제금액 집계
 
 ```sql
 SELECT
+    c.id AS course_id,
     c.title AS course_title,
-    COALESCE(SUM(e.paid_amount), 0) AS total_amount
+    COALESCE(SUM(e.paid_amount), 0) AS total_paid_amount
 FROM courses AS c
 LEFT JOIN enrollments AS e ON c.id = e.course_id
 GROUP BY c.id, c.title
-ORDER BY total_amount DESC;
+ORDER BY c.id;
 ```
 
-`COALESCE`는 값이 `NULL`일 때 대신 사용할 값을 지정합니다. 여기서는 매출이 없는 강의를 0으로 표시하기 위해 사용했습니다.
+`COALESCE`를 사용하는 이유는 수강신청이 없는 강의의 `SUM` 결과가 `NULL`이기 때문입니다. 이를 0으로 바꾸면 비교와 해석이 쉬워집니다.
+
+> 이 예제의 `SUM(paid_amount)`는 저장된 결제금액의 단순 합계입니다.
+>
+> 실제 매출을 계산하려면 취소, 환불, 결제 성공 여부와 매출 인식 기준을 별도로 반영해야 합니다.
+
+따라서 이 장에서는 가능하면 `결제금액 합계`, `total_paid_amount`라는 표현을 우선 사용합니다.
 
 ---
 
-## 11. 강사별 강의 수 구하기
+## 11. 강사별 개설 강의 수 구하기
 
-강사별로 개설한 강의 수를 구하려면 `instructors`와 `courses`를 JOIN합니다.
+강사별 개설 강의 수는 다음처럼 구할 수 있습니다.
 
 ```sql
 SELECT
@@ -6010,197 +6059,172 @@ SELECT
 FROM instructors AS i
 LEFT JOIN courses AS c ON i.id = c.instructor_id
 GROUP BY i.id, i.name
-ORDER BY course_count DESC;
+ORDER BY i.id;
 ```
 
-여기서는 `LEFT JOIN`을 사용했습니다. 아직 강의를 개설하지 않은 강사도 결과에 포함할 수 있기 때문입니다.
+이 예제에서는 세 강사 모두 강의를 하나 이상 가지고 있으므로 결과는 3행입니다. 아직 강의를 개설하지 않은 강사도 포함하려면 LEFT JOIN이 적절합니다.
 
 ---
 
-## 12. HAVING 이해하기
+## 12. HAVING과 WHERE의 차이
 
-`WHERE`는 그룹을 만들기 전에 행을 필터링합니다. 반면 `HAVING`은 그룹을 만든 뒤 집계 결과를 기준으로 필터링합니다.
+`WHERE`는 그룹화 전에 개별 행을 필터링하고, `HAVING`은 그룹화 후 집계 결과를 필터링합니다.
 
-![SQL 실행 순서: WHERE, GROUP BY, HAVING](../images/chapter08/ch08_07_where_group_having_order.svg)
+![집계 쿼리의 논리적 처리 흐름](../images/chapter08/ch08_07_where_group_having_order.svg)
 
-그림 8-7 SQL 실행 순서: WHERE, GROUP BY, HAVING
-
-예를 들어 수강생이 2명 이상인 강의만 조회하려면 다음처럼 작성합니다.
+그림 8-7 집계 쿼리의 논리적 처리 흐름
 
 ```sql
 SELECT
     c.title AS course_title,
-    COUNT(e.id) AS student_count
+    COUNT(e.id) AS enrollment_count
 FROM courses AS c
 JOIN enrollments AS e ON c.id = e.course_id
 GROUP BY c.id, c.title
 HAVING COUNT(e.id) >= 2
-ORDER BY student_count DESC;
+ORDER BY c.id;
 ```
 
-`HAVING COUNT(e.id) >= 2`는 그룹별 수강생 수가 2명 이상인 결과만 남깁니다.
+이 결과는 `데이터베이스 입문`, `파이썬 데이터 분석` 두 강의입니다.
 
-초급자가 자주 헷갈리는 차이는 다음과 같습니다.
+논리적 처리 흐름은 다음처럼 이해할 수 있습니다.
 
-| 구분 | 사용 시점 | 예시 |
-| --- | --- | --- |
-| WHERE | 그룹화 전 개별 행 필터링 | status = '수강중' |
-| HAVING | 그룹화 후 집계 결과 필터링 | COUNT(*) >= 2 |
+```text
+FROM / JOIN
+-> WHERE
+-> GROUP BY + 집계 계산
+-> HAVING
+-> SELECT
+-> ORDER BY
+```
 
----
+> 이 순서는 초급 학습을 위한 논리적 처리 흐름입니다.
+>
+> SQL을 작성하는 문법 순서와 데이터베이스 내부의 물리적 실행 계획을 완전히 동일하게 표현한 것은 아닙니다.
 
-## 13. WHERE와 GROUP BY 함께 사용하기
-
-수강상태가 `수강중`인 신청만 대상으로 강의별 수강생 수를 구할 수 있습니다.
+수강중 상태만 대상으로 강의별 수강신청 건수를 구하면 다음과 같습니다.
 
 ```sql
 SELECT
     c.title AS course_title,
-    COUNT(e.id) AS active_student_count
+    COUNT(e.id) AS enrollment_count
 FROM courses AS c
 JOIN enrollments AS e ON c.id = e.course_id
 WHERE e.status = '수강중'
 GROUP BY c.id, c.title
-ORDER BY active_student_count DESC;
+ORDER BY c.id;
 ```
 
-실행 순서를 단순화하면 다음과 같습니다.
-
-```text
-1. FROM/JOIN으로 테이블을 연결한다.
-2. WHERE로 필요한 행만 남긴다.
-3. GROUP BY로 그룹을 만든다.
-4. COUNT/SUM/AVG로 계산한다.
-5. HAVING으로 집계 결과를 필터링한다.
-6. ORDER BY로 정렬한다.
-```
+이 장의 샘플에서는 `데이터베이스 입문` 2건만 남습니다.
 
 ---
 
-## 14. AI가 만든 JOIN/집계 SQL 검토하기
+## 13. AI가 만든 JOIN·집계 SQL 검토하기
 
-AI에게 다음처럼 요청할 수 있습니다.
+AI에게 SQL 초안을 요청할 수는 있지만, JOIN과 집계 쿼리는 작은 조건 차이만으로도 결과가 크게 달라집니다.
 
-```text
-students, courses, enrollments, instructors 테이블을 사용해서
-강의별 수강생 수와 총 결제금액을 조회하는 PostgreSQL SQL을 작성해 주세요.
-```
+![AI 생성 JOIN·집계 SQL 검토 흐름](../images/chapter08/ch08_08_ai_join_sql_review_flow.svg)
 
-AI가 SQL을 만들어 주더라도 다음을 반드시 검토해야 합니다.
+그림 8-8 AI 생성 JOIN·집계 SQL 검토 흐름
 
-![AI 생성 JOIN/집계 SQL 검토](../images/chapter08/ch08_08_ai_join_sql_review_flow.svg)
-
-그림 8-8 AI 생성 JOIN/집계 SQL 검토
+검토할 핵심 기준은 다음과 같습니다.
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
-| JOIN 조건 | ON 조건이 빠지지 않았는가? |
-| 관계 방향 | enrollments.student_id와 students.id가 연결되었는가? |
-| 중복 집계 | JOIN으로 인해 같은 금액이 중복 합산되지 않는가? |
-| GROUP BY | SELECT의 일반 컬럼이 GROUP BY에 포함되었는가? |
-| COUNT 대상 | LEFT JOIN에서 COUNT(*)를 잘못 쓰지 않았는가? |
-| NULL 처리 | 매출이 없는 경우 NULL을 0으로 처리해야 하는가? |
-| 실행 검증 | DBeaver에서 실제 실행했는가? |
+| 실제 FK 경로 | JOIN이 실제 PK·FK 관계를 따라 연결되는가? |
+| JOIN 종류 | INNER JOIN과 LEFT JOIN 중 요구사항에 맞는가? |
+| 기준 행 | 결과 한 행의 기준이 enrollments인지 students인지 분명한가? |
+| GROUP BY | 일반 컬럼이 GROUP BY에 맞게 작성되었는가? |
+| COUNT 대상 | COUNT(*)인지 COUNT(e.id)인지 의도가 분명한가? |
+| DISTINCT 필요 여부 | 고유 학생 수라면 COUNT(DISTINCT e.student_id)가 필요한가? |
+| NULL 처리 | 수강신청이 없는 강의의 합계를 0으로 보여야 하는가? |
+| 검산 | 원본 행 수와 수동 계산으로 결과를 다시 확인했는가? |
 
-AI가 만든 SQL은 답안이 아니라 초안입니다. 특히 JOIN과 집계는 작은 조건 오류로 결과가 크게 달라질 수 있습니다.
-
----
-
-## 15. 자주 하는 실수
-
-### 실수 1. JOIN 조건을 빠뜨린다
-
-JOIN 조건이 빠지면 모든 행이 서로 조합되어 결과가 비정상적으로 많아질 수 있습니다.
-
-### 실수 2. 어떤 테이블의 id인지 구분하지 않는다
-
-여러 테이블에 `id` 컬럼이 있으므로 `students.id`, `courses.id`처럼 테이블명이나 별칭을 함께 써야 합니다.
-
-### 실수 3. GROUP BY 없이 일반 컬럼과 집계 함수를 함께 쓴다
-
-`SELECT status, COUNT(*) FROM enrollments;`처럼 쓰면 오류가 발생합니다. `status`를 기준으로 그룹화해야 합니다.
-
-### 실수 4. LEFT JOIN에서 COUNT(*)를 무조건 사용한다
-
-수강생이 없는 강의까지 포함할 때는 `COUNT(e.id)`처럼 오른쪽 테이블의 실제 값이 있는 컬럼을 세는 것이 안전합니다.
-
-### 실수 5. HAVING과 WHERE를 혼동한다
-
-개별 행 조건은 `WHERE`, 집계 결과 조건은 `HAVING`을 사용합니다.
+AI SQL은 정답이 아니라 초안입니다. 문법만 맞는지 보는 것으로는 충분하지 않습니다. JOIN으로 행이 중복되면 SUM이 커질 수 있고, LEFT JOIN에서 COUNT(*)를 쓰면 없는 신청도 1건처럼 보일 수 있습니다. 따라서 기본 건수, 합계, 개별 원본 행을 별도 SQL로 반드시 다시 검산해야 합니다.
 
 ---
 
-## 16. 스스로 확인하기
+## 14. 자주 하는 실수
 
-### 16.1 개념 확인
+### 실수 1. 컬럼 이름이 비슷하다는 이유로 JOIN한다
 
-1. INNER JOIN과 LEFT JOIN의 차이를 설명해 보세요.
-2. GROUP BY가 필요한 이유를 설명해 보세요.
-3. WHERE와 HAVING의 차이를 설명해 보세요.
-4. LEFT JOIN에서 COUNT(*) 대신 COUNT(e.id)를 사용할 때의 장점을 설명해 보세요.
-5. AI가 만든 JOIN SQL을 검토할 때 확인해야 할 항목을 3가지 이상 정리해 보세요.
+JOIN은 이름이 비슷한 컬럼을 대충 연결하는 기능이 아니라 실제 FK와 PK 관계를 따라 연결하는 작업입니다.
 
-### 16.2 SQL 작성 문제
+### 실수 2. 기준 행을 먼저 정하지 않는다
 
-다음 SQL을 작성해 보세요.
+수강신청 현황을 본다면 기준 행은 `enrollments` 한 건입니다. 기준 행을 정하지 않으면 결과 행 수 해석이 흔들립니다.
+
+### 실수 3. LEFT JOIN 결과를 왼쪽 테이블 행 수와 항상 같다고 생각한다
+
+왼쪽 한 행에 오른쪽 일치 행이 여러 개면 결과도 여러 행입니다.
+
+### 실수 4. COUNT(*)와 COUNT(e.id)를 같은 의미로 설명한다
+
+LEFT JOIN에서는 두 표현이 다른 결과를 만들 수 있습니다.
+
+### 실수 5. 결제금액 합계를 최종 매출로 단정한다
+
+`SUM(paid_amount)`는 저장된 값의 합계일 뿐이며, 실제 매출 정책은 별도로 검토해야 합니다.
+
+---
+
+## 15. 스스로 확인하기
+
+### 15.1 개념 확인
+
+1. INNER JOIN과 LEFT JOIN의 포함 범위 차이를 설명해 보세요.
+2. Chapter 08에서 기준 행이 `enrollments`라고 말하는 이유를 설명해 보세요.
+3. `COUNT(*)`, `COUNT(e.id)`, `COUNT(DISTINCT e.student_id)`의 차이를 설명해 보세요.
+4. `COALESCE(SUM(e.paid_amount), 0)`이 필요한 이유를 설명해 보세요.
+5. AI가 만든 JOIN·집계 SQL을 검토할 때 기본 건수와 합계를 왜 다시 확인해야 하는지 설명해 보세요.
+
+### 15.2 SQL 작성 문제
 
 ```text
 1. 학생별 수강신청 수를 조회한다.
-2. 강의별 총 결제금액을 조회한다.
+2. 강의별 결제금액 합계를 조회한다.
 3. 수강상태별 수강신청 수를 조회한다.
 4. 강사별 개설 강의 수를 조회한다.
-5. 수강생이 2명 이상인 강의만 조회한다.
+5. 수강신청 2건 이상인 강의만 조회한다.
 ```
 
 ---
 
-## 17. 정리
+## 16. 정리
 
-이번 장에서는 JOIN과 집계 쿼리를 살펴보았습니다.
-
-핵심 내용을 정리하면 다음과 같습니다.
+이번 장의 핵심은 다음과 같습니다.
 
 ```text
-1. JOIN은 여러 테이블에 나뉜 데이터를 연결해 조회하는 방법이다.
-2. INNER JOIN은 양쪽 테이블에 모두 일치하는 데이터만 보여 준다.
-3. LEFT JOIN은 왼쪽 테이블의 모든 행을 유지한다.
-4. 테이블 별칭을 사용하면 JOIN 쿼리를 읽기 쉽게 만들 수 있다.
-5. COUNT, SUM, AVG는 데이터를 요약하는 집계 함수이다.
-6. GROUP BY는 같은 값을 가진 행을 그룹으로 묶는다.
-7. HAVING은 집계 결과를 기준으로 필터링할 때 사용한다.
-8. JOIN과 집계를 함께 사용할 때는 중복 집계와 NULL 처리에 주의해야 한다.
-9. AI가 만든 SQL도 반드시 사람이 실행하고 결과를 검토해야 한다.
+1. JOIN은 정규화로 나뉜 사실을 조회 시점에 관계를 따라 연결하는 기술이다.
+2. INNER JOIN은 일치하는 행만 포함하고, LEFT JOIN은 왼쪽 행을 모두 유지한다.
+3. 결과 한 행의 기준을 먼저 정해야 행 수와 중복을 정확히 해석할 수 있다.
+4. GROUP BY는 행을 그룹으로 묶고 그룹별 결과 한 행을 만든다.
+5. COUNT(*)와 COUNT(e.id), COUNT(DISTINCT e.student_id)는 서로 다른 질문에 답한다.
+6. 결제금액 합계는 실제 회계 매출과 같다고 단정할 수 없다.
+7. AI SQL은 원본 행 수와 수동 계산으로 반드시 검증해야 한다.
 ```
 
-### JOIN/집계 SQL 실행 전 확인표
+### JOIN·집계 SQL 실행 전 확인표
 
 | 확인 항목 | 확인 질문 |
 | --- | --- |
-| JOIN 대상 | 어떤 테이블들을 연결해야 하는가? |
-| JOIN 조건 | ON 조건이 외래키 관계와 맞는가? |
+| JOIN 대상 | 어떤 테이블을 연결해야 하는가? |
+| JOIN 조건 | ON 조건이 실제 FK 관계와 맞는가? |
 | JOIN 종류 | INNER JOIN과 LEFT JOIN 중 어느 것이 요구사항에 맞는가? |
-| 집계 기준 | 어떤 컬럼을 기준으로 GROUP BY해야 하는가? |
-| 집계 함수 | COUNT, SUM, AVG 중 어떤 함수를 사용해야 하는가? |
-| COUNT 대상 | LEFT JOIN에서 COUNT(*) 대신 COUNT(오른쪽_테이블.id)가 필요한가? |
-| 필터 위치 | 개별 행 조건은 WHERE, 집계 결과 조건은 HAVING에 작성했는가? |
-| 결과 검증 | 결과 행 수와 합계가 요구사항과 맞는가? |
-| AI 검토 | AI가 만든 SQL을 그대로 쓰지 않고 실행 결과를 확인했는가? |
-
-이 장에서 가장 중요한 문장은 다음입니다.
-
-```text
-JOIN과 집계 쿼리는 정규화된 테이블을 실제 분석 가능한 정보로 바꾸는 기술이다.
-```
+| 기준 행 | 결과 한 행의 기준이 무엇인가? |
+| 집계 함수 | COUNT, SUM, AVG 중 어떤 계산이 필요한가? |
+| COUNT 대상 | COUNT(*)와 COUNT(오른쪽 테이블 컬럼)을 구분했는가? |
+| GROUP BY | 일반 컬럼이 GROUP BY에 포함되었는가? |
+| NULL 처리 | COALESCE가 필요한가? |
+| 결과 검증 | 예상 행 수와 합계를 실제로 다시 확인했는가? |
 
 ---
 
-## 18. 다음 장에서는
+## 17. 다음 장에서는
 
-다음 장에서는 트랜잭션과 데이터 정합성을 살펴봅니다.
+다음 장에서는 트랜잭션과 데이터 정합성을 다룹니다.
 
-Chapter 09에서는 데이터베이스에서 여러 작업이 하나의 단위로 처리되어야 하는 이유를 살펴봅니다.
-
-예를 들어 수강신청과 결제 처리는 함께 성공하거나 함께 실패해야 합니다. 이를 위해 트랜잭션, COMMIT, ROLLBACK, 데이터 정합성 개념을 다룹니다.
+Chapter 09에서는 Chapter 08에서 조회와 집계로 확인한 데이터를 바탕으로, 여러 변경 작업이 함께 성공하거나 함께 실패해야 하는 이유를 살펴봅니다.
 
 ---
 
