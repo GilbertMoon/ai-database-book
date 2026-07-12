@@ -1,20 +1,58 @@
 flowchart TB
-    A[students] --> A1[한 학생은 여러 강의 신청]
-    B[courses] --> B1[한 강의에는 여러 학생 등록]
+    A[업무 규칙<br/>학생은 여러 강의를 신청하고<br/>강의에는 여러 학생이 등록된다] --> B{students와 courses를<br/>어떻게 연결할 것인가?}
 
-    A1 --> C{N:M 관계}
-    B1 --> C
+    B --> W[잘못된 직접 저장]
+    W --> W1[students.course_ids = '1,3,5']
+    W --> W2[courses.student_ids 배열·문자열]
+    W1 --> WP[문제]
+    W2 --> WP
+    WP --> WP1[한 셀에 여러 값<br/>정확한 검색·수정·집계가 어려움]
+    WP --> WP2[각 값에 FK·NOT NULL을 적용할 수 없음]
+    WP --> WP3[신청일·상태·결제 금액을<br/>학생-강의 조합별로 저장하기 어려움]
 
-    C --> D[중간 테이블 필요]
-    D --> E[enrollments]
+    B --> N[N:M 관계를 독립된 업무 사건으로 모델링]
+    N --> E[enrollments<br/>수강신청 한 건당 한 행]
+    E --> E1[id PK]
+    E --> E2[student_id FK NOT NULL<br/>references students.id]
+    E --> E3[course_id FK NOT NULL<br/>references courses.id]
+    E --> E4[enrolled_at · status · paid_amount<br/>관계 자체의 속성]
 
-    E --> E1[student_id FK]
-    E --> E2[course_id FK]
-    E --> E3[enrolled_at]
-    E --> E4[status]
-    E --> E5[paid_amount]
+    E2 --> S[students 1 : 0..N enrollments]
+    E3 --> C[courses 1 : 0..N enrollments]
+    S --> S1[학생은 신청이 없어도 되고 여러 건을 가질 수 있음]
+    C --> C1[강의는 등록 학생이 없어도 되고 여러 신청을 가질 수 있음]
+    E --> R[각 enrollments 행은<br/>학생 정확히 1명과 강의 정확히 1개를 참조]
 
-    A --> F[1:N]
-    F --> E
-    E --> G[N:1]
-    G --> B
+    E --> D[실제 행으로 관계 확인]
+    D --> D1[101 · student 1 · course 10<br/>2026-04-02 · 수강중 · 100000]
+    D --> D2[102 · student 1 · course 20<br/>2026-04-06 · 신청 · 120000]
+    D --> D3[103 · student 2 · course 10<br/>2026-04-03 · 수강중 · 100000]
+    D1 --> P1[student 1의 여러 강의 신청]
+    D2 --> P1
+    D1 --> P2[course 10의 여러 학생 등록]
+    D3 --> P2
+
+    E --> U{같은 학생의 같은 강의<br/>재신청을 허용하는가?}
+    U -- 허용하지 않음 --> U1[UNIQUE student_id, course_id 검토]
+    U -- 취소 후 재신청·이력 보존 --> U2[단순 UNIQUE를 넣지 말고<br/>상태·신청회차·부분 UNIQUE 등 정책 설계]
+    U1 --> UV[업무 규칙과 테스트로 결정]
+    U2 --> UV
+
+    E --> V[SQL 검증]
+    V --> V1[정상 INSERT<br/>한 학생 여러 강의·한 강의 여러 학생]
+    V --> V2[없는 student_id·course_id는 FK 오류]
+    V --> V3[JOIN으로 학생명·강의명·신청 상태 복원]
+    V --> V4[학생별·강의별 신청 건수 GROUP BY 확인]
+
+    V1 --> Q{요구사항·카디널리티·제약조건·조회 결과가<br/>같은 관계를 설명하는가?}
+    V2 --> Q
+    V3 --> Q
+    V4 --> Q
+    UV --> Q
+    Q -- 아니요 --> Q1[FK 위치·선택성·관계 속성·중복 신청 정책 재검토]
+    Q1 --> B
+    Q -- 예 --> OK[N:M 해소 완료<br/>students 1:N enrollments N:1 courses]
+
+    N1[핵심<br/>enrollments는 단순 연결용 표가 아니라<br/>신청일·상태·결제 금액을 가진 업무 엔터티] --- E
+    N2[주의<br/>N:M이라는 이유만으로 FK 두 개의 조합에<br/>무조건 UNIQUE를 추가하지 않는다] --- U
+    N3[저장과 조회<br/>설명값을 반복 저장하지 않고 FK로 연결한 뒤<br/>필요한 화면은 JOIN으로 복원한다] --- V3
