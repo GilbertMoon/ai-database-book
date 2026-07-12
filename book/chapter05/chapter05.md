@@ -455,7 +455,8 @@ SELECT
     loans.returned_at
 FROM loans
 JOIN members ON loans.member_id = members.id
-JOIN books ON loans.book_id = books.id;
+JOIN books ON loans.book_id = books.id
+ORDER BY loans.id;
 ```
 
 예상 결과는 다음과 같습니다.
