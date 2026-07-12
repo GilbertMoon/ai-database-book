@@ -1,27 +1,6 @@
-erDiagram
-    MEMBERS ||--o{ LOANS : "has"
-    BOOKS ||--o{ LOANS : "appears in"
-
-    MEMBERS {
-        int id PK "SERIAL; member identity"
-        string name "NOT NULL"
-        string email UK "NOT NULL"
-        date joined_at "NOT NULL"
-    }
-
-    BOOKS {
-        int id PK "SERIAL; book identity"
-        string title "NOT NULL"
-        string author "NOT NULL"
-        int published_year "NULL allowed"
-        string isbn UK "NOT NULL"
-    }
-
-    LOANS {
-        int id PK "SERIAL; loan event identity"
-        int member_id FK "NOT NULL; references MEMBERS.id"
-        int book_id FK "NOT NULL; references BOOKS.id"
-        date borrowed_at "NOT NULL"
-        date due_at "NOT NULL"
-        date returned_at "NULL means not returned"
-    }
+flowchart LR
+    M[members<br/>PK id<br/>name<br/>email UNIQUE<br/>joined_at]
+    L[loans<br/>PK id<br/>FK member_id<br/>FK book_id<br/>borrowed_at<br/>due_at<br/>returned_at NULL 가능]
+    B[books<br/>PK id<br/>title<br/>author<br/>published_year<br/>isbn UNIQUE]
+    M -- "1 : 0..N" --> L
+    B -- "1 : 0..N" --> L
