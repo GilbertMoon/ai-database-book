@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1240" viewBox="0 0 1200 1240" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">외래키로 연결되는 학생·강의·수강신청 관계</title>
-  <desc id="desc">students와 courses의 기본키를 enrollments의 student_id와 course_id 외래키가 참조하여 학생과 강의의 다대다 관계를 두 개의 일대다 관계로 표현하고, 존재하지 않는 참조 값은 외래키 제약조건으로 거부되는 구조를 설명한다.</desc>
+  <title id="title">외래키가 기본키를 참조하는 학생·강의·수강신청 관계</title>
+  <desc id="desc">enrollments의 student_id와 course_id 외래키가 각각 students와 courses의 기본키 id를 참조하여 학생과 강의의 다대다 관계를 두 개의 일대다 관계로 표현하고, 존재하지 않는 참조 값은 외래키 제약조건으로 거부되는 구조를 설명한다.</desc>
 
   <defs>
     <marker id="arrow-purple" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
@@ -21,6 +21,7 @@
       .pk-text{fill:#1e4f91}.fk-text{fill:#5b3a96}
       .relation{stroke:#6b46a8;stroke-width:2.6;fill:none;marker-end:url(#arrow-purple)}
       .relation-label{font-size:13px;font-weight:700;text-anchor:middle;fill:#5b3a96}
+      .direction-label{font-size:12px;font-weight:700;text-anchor:middle;fill:#6b46a8}
       .cardinality{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
       .explain-title{font-size:15px;font-weight:700;text-anchor:middle}
       .explain-text{font-size:13px;text-anchor:middle;fill:#475569}
@@ -38,19 +39,19 @@
 
   <rect width="1200" height="1240" fill="#ffffff"/>
 
-  <text x="600" y="42" class="title">외래키로 연결되는 학생·강의·수강신청 관계</text>
-  <text x="600" y="72" class="subtitle">기본키는 자기 테이블의 행을 식별하고, 외래키는 다른 테이블의 기존 행을 참조해 관계와 참조 무결성을 만든다</text>
+  <text x="600" y="42" class="title">외래키가 기본키를 참조하는 학생·강의·수강신청 관계</text>
+  <text x="600" y="72" class="subtitle">기본키는 자기 테이블의 행을 식별하고, 외래키는 부모 테이블의 기존 행을 참조해 관계와 참조 무결성을 만든다</text>
 
   <!-- Section 1 -->
   <rect x="34" y="98" width="1132" height="760" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
   <text x="58" y="132" class="section-title">1. 학생과 강의를 수강신청 테이블로 연결</text>
-  <text x="422" y="132" class="section-sub">학생과 강의의 N:M 관계를 연결 테이블을 이용해 두 개의 1:N 관계로 표현</text>
+  <text x="422" y="132" class="section-sub">보라색 화살표: 자식 FK → 부모 PK · N:M 관계를 두 개의 1:N 관계로 표현</text>
 
   <!-- students -->
   <rect x="70" y="168" width="350" height="260" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
   <path d="M83 168H407A13 13 0 0 1 420 181V226H70V181A13 13 0 0 1 83 168Z" fill="#eef5ff" stroke="#3b82c4" stroke-width="1.7"/>
   <text x="245" y="194" class="entity-title">students</text>
-  <text x="245" y="216" class="entity-sub">학생 기본 데이터</text>
+  <text x="245" y="216" class="entity-sub">부모 테이블 · 학생 기본 데이터</text>
 
   <rect x="92" y="248" width="84" height="38" fill="#e9eef5" stroke="#94a3b8"/>
   <rect x="176" y="248" width="222" height="38" fill="#e9eef5" stroke="#94a3b8"/>
@@ -75,7 +76,7 @@
   <rect x="780" y="168" width="350" height="260" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
   <path d="M793 168H1117A13 13 0 0 1 1130 181V226H780V181A13 13 0 0 1 793 168Z" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.7"/>
   <text x="955" y="194" class="entity-title">courses</text>
-  <text x="955" y="216" class="entity-sub">강의 기본 데이터</text>
+  <text x="955" y="216" class="entity-sub">부모 테이블 · 강의 기본 데이터</text>
 
   <rect x="802" y="248" width="84" height="38" fill="#e9eef5" stroke="#94a3b8"/>
   <rect x="886" y="248" width="222" height="38" fill="#e9eef5" stroke="#94a3b8"/>
@@ -100,7 +101,7 @@
   <rect x="285" y="500" width="630" height="235" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
   <path d="M298 500H902A13 13 0 0 1 915 513V558H285V513A13 13 0 0 1 298 500Z" fill="#f5f1ff" stroke="#7c5cc4" stroke-width="1.7"/>
   <text x="600" y="526" class="entity-title">enrollments</text>
-  <text x="600" y="548" class="entity-sub">학생과 강의를 연결하고 수강 관계 자체의 정보를 저장</text>
+  <text x="600" y="548" class="entity-sub">자식·연결 테이블 · 학생과 강의를 연결하고 수강 관계 자체의 정보를 저장</text>
 
   <rect x="307" y="580" width="64" height="38" fill="#e9eef5" stroke="#94a3b8"/>
   <rect x="371" y="580" width="116" height="38" fill="#e9eef5" stroke="#94a3b8"/>
@@ -146,15 +147,15 @@
   <text x="604" y="726" class="key-text fk-text">FK</text>
   <text x="634" y="729" class="entity-sub" text-anchor="start">course_id</text>
 
-  <!-- parent PK to child FK connectors -->
-  <path d="M134 428V468H429V578" class="relation"/>
-  <path d="M844 428V468H545V578" class="relation"/>
-  <text x="282" y="460" class="relation-label">students.id → enrollments.student_id</text>
-  <text x="728" y="460" class="relation-label">courses.id → enrollments.course_id</text>
-  <text x="146" y="451" class="cardinality">1</text>
-  <text x="415" y="493" class="cardinality">N</text>
-  <text x="830" y="451" class="cardinality">1</text>
-  <text x="559" y="493" class="cardinality">N</text>
+  <!-- child FK to parent PK reference direction -->
+  <path d="M429 500V468H134V428" class="relation"/>
+  <path d="M545 500V468H844V428" class="relation"/>
+  <text x="282" y="458" class="relation-label">student_id → students.id</text>
+  <text x="728" y="458" class="relation-label">course_id → courses.id</text>
+  <text x="146" y="448" class="cardinality">1</text>
+  <text x="415" y="494" class="cardinality">N</text>
+  <text x="830" y="448" class="cardinality">1</text>
+  <text x="559" y="494" class="cardinality">N</text>
 
   <!-- explanation cards -->
   <rect x="58" y="765" width="330" height="70" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
@@ -172,7 +173,7 @@
   <!-- Section 2 -->
   <rect x="34" y="882" width="1132" height="190" rx="16" fill="#f4f8ff" stroke="#93b4e6" stroke-width="1.6"/>
   <text x="58" y="916" class="section-title">2. 외래키 제약조건의 참조 무결성 검사</text>
-  <text x="433" y="916" class="section-sub">NULL을 허용하지 않는 FK라면, 입력 값은 부모 테이블에 실제로 존재해야 한다</text>
+  <text x="433" y="916" class="section-sub">FK 값이 NULL이 아니라면 부모 테이블의 참조 대상 키 값과 일치해야 한다</text>
 
   <rect x="58" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
   <text x="223" y="970" class="check-title">student_id=2, course_id=10</text>
@@ -180,31 +181,31 @@
   <text x="223" y="1022" class="result-ok">INSERT 허용</text>
 
   <rect x="435" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="600" y="970" class="check-title">student_id=99</text>
+  <text x="600" y="970" class="check-title">student_id=99, course_id=10</text>
   <text x="600" y="995" class="check-text">students.id에 99가 존재하지 않음</text>
   <text x="600" y="1022" class="result-no">외래키 위반으로 거부</text>
 
   <rect x="812" y="944" width="330" height="100" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="977" y="970" class="check-title">course_id=999</text>
+  <text x="977" y="970" class="check-title">student_id=2, course_id=999</text>
   <text x="977" y="995" class="check-text">courses.id에 999가 존재하지 않음</text>
   <text x="977" y="1022" class="result-no">외래키 위반으로 거부</text>
 
   <!-- notes -->
   <rect x="54" y="1092" width="535" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
   <text x="76" y="1118" class="note-title">중복 신청</text>
-  <text x="154" y="1118" class="note-text">FK만으로는 중복 수강신청을 막지 않는다.</text>
+  <text x="154" y="1118" class="note-text">FK만으로는 같은 학생·강의 조합의 중복을 막지 않는다.</text>
   <text x="154" y="1139" class="note-text">필요하면 UNIQUE(student_id, course_id)를 추가한다.</text>
 
   <rect x="611" y="1092" width="535" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
   <text x="633" y="1118" class="note-title">삭제 규칙</text>
-  <text x="711" y="1118" class="note-text">부모 행 삭제 시 RESTRICT·CASCADE·SET NULL 등</text>
-  <text x="711" y="1139" class="note-text">ON DELETE 동작을 관계의 의미에 맞게 별도로 설계한다.</text>
+  <text x="711" y="1118" class="note-text">부모 행 삭제 시 RESTRICT·CASCADE·SET NULL 등을 설계한다.</text>
+  <text x="711" y="1139" class="note-text">SET NULL은 해당 FK 열이 NULL을 허용할 때 사용할 수 있다.</text>
 
   <!-- principle -->
   <rect x="80" y="1170" width="1040" height="54" rx="12" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
   <rect x="80" y="1170" width="190" height="54" rx="12" fill="#dcf7e5"/>
   <line x1="270" y1="1181" x2="270" y2="1213" stroke="#62b47a" stroke-width="1.3"/>
   <text x="175" y="1202" class="principle-label">핵심 원칙</text>
-  <text x="695" y="1193" class="principle-main">PK는 행을 식별하고, FK는 존재하는 부모 행을 참조한다</text>
-  <text x="695" y="1214" class="principle-sub">외래키 제약조건은 테이블 간 관계의 참조 무결성을 유지한다</text>
+  <text x="695" y="1193" class="principle-main">FK는 자식 행에서 부모의 기존 키 값을 참조한다</text>
+  <text x="695" y="1214" class="principle-sub">외래키 제약조건은 잘못된 참조를 차단해 테이블 간 참조 무결성을 유지한다</text>
 </svg>
