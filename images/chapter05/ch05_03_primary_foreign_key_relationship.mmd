@@ -1,51 +1,6 @@
-flowchart TB
-    A[도서 대여 데이터의 행을<br/>각각 식별하고 서로 연결해야 함] --> B[기본키 PK와 외래키 FK 설계]
-
-    B --> M[members]
-    B --> L[loans]
-    B --> K[books]
-
-    M --> M1[id PK<br/>회원 한 명을 유일하게 식별]
-    M --> M2[name·email·joined_at]
-
-    K --> K1[id PK<br/>책 한 권을 유일하게 식별]
-    K --> K2[title·author·isbn]
-
-    L --> L1[id PK<br/>대여 기록 한 건을 유일하게 식별]
-    L --> L2[member_id FK<br/>members.id 참조]
-    L --> L3[book_id FK<br/>books.id 참조]
-    L --> L4[borrowed_at·due_at·returned_at]
-
-    L2 -->|값이 1이면| MR[members에서 id = 1인<br/>회원 행 한 건을 가리킴]
-    L3 -->|값이 2이면| BR[books에서 id = 2인<br/>책 행 한 건을 가리킴]
-
-    M1 --> MR
-    K1 --> BR
-
-    MR --> R[대여 기록 해석<br/>회원 1이 책 2를 대여한 한 건]
-    BR --> R
-    L1 --> R
-    L4 --> R
-
-    B --> P[PK 규칙]
-    P --> P1[한 테이블에서 값이 중복되지 않음]
-    P --> P2[NULL이 될 수 없음]
-    P --> P3[행의 다른 속성이 바뀌어도<br/>같은 행을 안정적으로 식별]
-
-    B --> F[FK 규칙]
-    F --> F1[참조 대상 PK에 실제 존재하는 값이어야 함]
-    F --> F2[여러 자식 행이 같은 부모를 참조할 수 있어<br/>FK 값은 반복 가능]
-    F --> F3[이 설계의 member_id·book_id는 NOT NULL이므로<br/>모든 대여 기록은 회원과 책을 반드시 가리킴]
-
-    R --> V{새 loans 행이<br/>키 규칙을 만족하는가?}
-    V -- id가 기존 loans.id와 중복 --> E1[PK 오류<br/>대여 기록을 유일하게 식별할 수 없음]
-    V -- member_id 또는 book_id가 부모 테이블에 없음 --> E2[FK 오류<br/>존재하지 않는 회원·책을 참조]
-    V -- 모두 유효 --> OK[행 저장<br/>세 테이블 사이의 참조 무결성 유지]
-
-    OK --> Q[JOIN에서 FK와 PK를 연결<br/>loans.member_id = members.id<br/>loans.book_id = books.id]
-
-    N1[방향<br/>외래키는 관계의 자식 쪽인 loans에 두며<br/>members와 books가 loans의 id 목록을 직접 저장하지 않음] --- L
-    N2[역할 구분<br/>loans.id는 대여 기록 자체의 PK이고<br/>member_id·book_id는 다른 행을 가리키는 FK] --- L1
-    N3[삭제·변경 주의<br/>참조되는 부모 PK를 삭제하거나 바꾸려 하면<br/>FK 정책에 따라 차단·연쇄 처리 등이 발생할 수 있음] --- F1
-    N4[키와 업무값<br/>email·isbn도 UNIQUE일 수 있지만<br/>이 설계에서는 각 테이블의 id가 기본키] --- P
-    N5[핵심<br/>PK는 자기 행의 정체성을 보장하고<br/>FK는 존재하는 부모 행과의 연결을 보장] --- OK
+flowchart LR
+    M[members<br/>PK id<br/>name]
+    L[loans<br/>PK id<br/>FK member_id<br/>FK book_id<br/>borrowed_at]
+    B[books<br/>PK id<br/>title]
+    L -. "member_id → id" .-> M
+    L -. "book_id → id" .-> B
