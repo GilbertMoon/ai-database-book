@@ -1,95 +1,132 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1260" viewBox="0 0 1200 1260" role="img" aria-labelledby="title desc">
   <title id="title">DB 설계 검증 흐름</title>
-  <desc id="desc">요구사항부터 ERD, PostgreSQL DDL, 검증 데이터와 SQL 실행 결과를 확인하고 수정 필요 여부에 따라 반복 검증하거나 결과를 기록하는 흐름</desc>
+  <desc id="desc">요구사항을 검증 가능한 규칙으로 정리하고 ERD와 PostgreSQL DDL의 일치성을 확인한 뒤, 깨끗한 작업용 데이터베이스에서 스키마, 샘플 데이터, 정상 SQL, 제약조건 위반 테스트와 검증 SQL을 실행하고 예상 결과와 실제 결과를 비교하여 원인 단계별로 수정하는 흐름</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
-    </marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
     <style>
       text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:27px;font-weight:700;text-anchor:middle}
-      .box{fill:#fff;stroke:#64748b;stroke-width:1.8;rx:12}
-      .box-design{fill:#f4f8ff;stroke:#3b82c4}
-      .box-data{fill:#fffaf0;stroke:#d69e2e}
-      .box-check{fill:#f2fbf5;stroke:#3c9a5f}
-      .box-fix{fill:#fff5f5;stroke:#d9534f}
-      .box-record{fill:#f3f0ff;stroke:#7c5cc4}
-      .badge-design{fill:#2f6fad}.badge-data{fill:#b7791f}.badge-check{fill:#2f855a}
-      .step-number{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .step-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .step-sub{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
-      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
-      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
-      .branch-label{font-size:14px;font-weight:700}
-      .footer{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}.subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .section{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}.sectionTitle{font-size:18px;font-weight:700}.sectionSub{font-size:12.5px;fill:#475569}
+      .box{fill:#fff;stroke-width:1.6;rx:11}.req{stroke:#3b82c4}.erd{stroke:#d69e2e}.ddl{stroke:#3c9a5f}.test{stroke:#7c5cc4}.warn{stroke:#d9534f}
+      .boxTitle{font-size:14.5px;font-weight:700;text-anchor:middle}.boxMain{font-size:12.3px;font-weight:600;text-anchor:middle}.boxSub{font-size:11.3px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:11.5px;text-anchor:middle;fill:#334155}
+      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.feedback{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}.relation{stroke:#94a3b8;stroke-width:1.5;fill:none;stroke-dasharray:6 5;marker-end:url(#arrow)}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.decisionText{font-size:14px;font-weight:700;text-anchor:middle}.decisionSub{font-size:11.3px;text-anchor:middle;fill:#475569}.branch{font-size:12.5px;font-weight:700}
+      .result{fill:#fff;stroke-width:1.5;rx:10}.pass{fill:#f2fbf5;stroke:#62b47a}.expectedFail{fill:#fffaf0;stroke:#d69e2e}.inspect{fill:#f5f1ff;stroke:#7c5cc4}
+      .resultTitle{font-size:13.5px;font-weight:700;text-anchor:middle}.resultText{font-size:11.5px;text-anchor:middle;fill:#475569}
+      .cause{fill:#fff5f5;stroke:#d9534f;stroke-width:1.4;rx:9}.causeTitle{font-size:12.5px;font-weight:700;text-anchor:middle}.causeText{font-size:11px;text-anchor:middle;fill:#475569}
+      .record{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.6;rx:11}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.noteTitle{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#92400e}.noteText{font-size:11.1px;text-anchor:middle;fill:#475569}
+      .core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.coreLabel{font-size:14px;font-weight:700;fill:#166534}.coreText{font-size:15.5px;font-weight:700;text-anchor:middle;fill:#166534}
     </style>
   </defs>
 
-  <rect width="1200" height="860" fill="#fff"/>
-  <text x="600" y="42" class="title">DB 설계 검증 흐름</text>
+  <rect width="1200" height="1260" fill="#fff"/>
+  <text x="600" y="40" class="title">DB 설계 검증 흐름</text>
+  <text x="600" y="68" class="subtitle">요구사항이 ERD·제약조건·샘플 데이터·SQL 실행 결과로 실제 증명되는지 단계별로 확인한다</text>
 
-  <rect x="350" y="80" width="500" height="62" class="box box-design"/>
-  <circle cx="377" cy="101" r="14" class="badge-design"/>
-  <text x="377" y="101" class="step-number">1</text>
-  <text x="600" y="111" class="step-text">요구사항 확인</text>
+  <rect x="34" y="92" width="1132" height="274" class="section"/>
+  <text x="58" y="125" class="sectionTitle">1. 요구사항·ERD·DDL의 일치성 검증</text>
+  <text x="390" y="125" class="sectionSub">같은 업무 규칙이 문장, 관계와 실행 가능한 제약조건으로 이어져야 한다</text>
 
-  <rect x="350" y="165" width="500" height="62" class="box box-design"/>
-  <circle cx="377" cy="186" r="14" class="badge-design"/>
-  <text x="377" y="186" class="step-number">2</text>
-  <text x="600" y="196" class="step-text">ERD 관계 점검</text>
+  <rect x="52" y="154" width="260" height="142" class="box req"/>
+  <text x="182" y="183" class="boxTitle">1. 검증 가능한 요구사항</text>
+  <text x="182" y="212" class="boxMain">REQ-01 학생은 질문을 등록한다</text>
+  <text x="182" y="236" class="boxMain">REQ-02 상태값은 세 종류만 허용</text>
+  <text x="182" y="263" class="boxSub">주체 · 동작 · 대상 · 업무 규칙</text>
 
-  <rect x="350" y="250" width="500" height="72" class="box box-design"/>
-  <circle cx="377" cy="271" r="14" class="badge-design"/>
-  <text x="377" y="271" class="step-number">3</text>
-  <text x="600" y="278" class="step-text">PostgreSQL DDL·제약조건 점검</text>
-  <text x="600" y="302" class="step-sub">PK · FK · NOT NULL · UNIQUE · CHECK · DEFAULT</text>
+  <rect x="342" y="154" width="260" height="142" class="box erd"/>
+  <text x="472" y="183" class="boxTitle">2. ERD 관계 점검</text>
+  <text x="472" y="212" class="boxMain">students 1:N questions</text>
+  <text x="472" y="236" class="boxMain">questions 1:N answers</text>
+  <text x="472" y="263" class="boxSub">PK · FK 방향 · N:M 중간 테이블</text>
 
-  <rect x="350" y="345" width="500" height="72" class="box box-data"/>
-  <circle cx="377" cy="366" r="14" class="badge-data"/>
-  <text x="377" y="366" class="step-number">4</text>
-  <text x="600" y="373" class="step-text">검증 시나리오 데이터 입력</text>
-  <text x="600" y="397" class="step-sub">정상·경계·관계·모순 상황 포함</text>
+  <rect x="632" y="154" width="260" height="142" class="box ddl"/>
+  <text x="762" y="183" class="boxTitle">3. PostgreSQL DDL 점검</text>
+  <text x="762" y="212" class="code">PRIMARY KEY · FOREIGN KEY</text>
+  <text x="762" y="236" class="code">NOT NULL · UNIQUE · CHECK</text>
+  <text x="762" y="263" class="boxSub">타입 · DEFAULT · 삭제·갱신 정책</text>
 
-  <rect x="350" y="440" width="500" height="72" class="box box-data"/>
-  <circle cx="377" cy="461" r="14" class="badge-data"/>
-  <text x="377" y="461" class="step-number">5</text>
-  <text x="600" y="468" class="step-text">조회·JOIN·집계·검증 SQL 실행</text>
-  <text x="600" y="492" class="step-sub">SELECT · JOIN · GROUP BY · HAVING</text>
+  <polygon points="1030,148 1142,225 1030,302 918,225" class="decision"/>
+  <text x="1030" y="217" class="decisionText">세 문서가 같은</text><text x="1030" y="238" class="decisionText">규칙을 표현하는가?</text>
 
-  <rect x="350" y="535" width="500" height="72" class="box box-check"/>
-  <circle cx="377" cy="556" r="14" class="badge-check"/>
-  <text x="377" y="556" class="step-number">6</text>
-  <text x="600" y="563" class="step-text">실행 결과와 업무 규칙 비교</text>
-  <text x="600" y="587" class="step-sub">요구사항·관계·데이터 정합성 확인</text>
+  <path d="M312 225H342" class="flow"/><path d="M602 225H632" class="flow"/><path d="M892 225H918" class="flow"/>
+  <path d="M1030 302V338H472V296" class="feedback"/><text x="1043" y="326" class="branch" fill="#b42318">아니요: 함께 수정</text>
+  <text x="1112" y="322" class="branch" fill="#166534">예</text>
 
-  <path d="M 600 142 V 165" class="arrow"/>
-  <path d="M 600 227 V 250" class="arrow"/>
-  <path d="M 600 322 V 345" class="arrow"/>
-  <path d="M 600 417 V 440" class="arrow"/>
-  <path d="M 600 512 V 535" class="arrow"/>
-  <path d="M 600 607 V 630" class="arrow"/>
+  <rect x="34" y="390" width="1132" height="462" class="section"/>
+  <text x="58" y="423" class="sectionTitle">2. 깨끗한 환경에서 정상·오류·검증 시나리오 실행</text>
+  <text x="510" y="423" class="sectionSub">수정 후에는 항상 schema → seed → queries 순으로 다시 실행한다</text>
 
-  <polygon points="600,630 720,690 600,750 480,690" class="decision"/>
-  <text x="600" y="690" class="decision-text">수정 필요?</text>
+  <rect x="50" y="456" width="250" height="108" class="box ddl"/>
+  <text x="175" y="485" class="boxTitle">4. schema.sql 실행</text>
+  <text x="175" y="514" class="boxMain">작업용 DB에서 구조 생성</text>
+  <text x="175" y="540" class="boxSub">구문 · 참조 순서 · 제약조건 확인</text>
 
-  <rect x="105" y="650" width="320" height="82" class="box box-fix"/>
-  <text x="265" y="678" class="step-text">원인 단계 수정</text>
-  <text x="265" y="706" class="step-sub">요구사항·ERD·DDL·데이터·SQL</text>
+  <rect x="330" y="456" width="250" height="108" class="box erd"/>
+  <text x="455" y="485" class="boxTitle">5. seed.sql 실행</text>
+  <text x="455" y="514" class="boxMain">정상·관계·상태·경계 상황</text>
+  <text x="455" y="540" class="boxSub">연결 없는 부모와 모순 사례 포함</text>
 
-  <rect x="775" y="650" width="320" height="82" class="box box-record"/>
-  <text x="935" y="678" class="step-text">검증 결과 기록</text>
-  <text x="935" y="706" class="step-sub">확인 결과·수정 내용·검증 근거</text>
+  <rect x="610" y="456" width="250" height="108" class="box req"/>
+  <text x="735" y="485" class="boxTitle">6. 정상 흐름 SQL</text>
+  <text x="735" y="514" class="boxMain">기본·조건·JOIN·LEFT JOIN·집계</text>
+  <text x="735" y="540" class="boxSub">상태 변경 전후 대상도 확인</text>
 
-  <path d="M 480 690 H 425" class="arrow"/>
-  <text x="438" y="675" class="branch-label">예</text>
-  <path d="M 720 690 H 775" class="arrow"/>
-  <text x="744" y="675" class="branch-label">아니요</text>
+  <rect x="890" y="456" width="250" height="108" class="box warn"/>
+  <text x="1015" y="485" class="boxTitle">7. 오류 차단 테스트</text>
+  <text x="1015" y="514" class="boxMain">중복 · 잘못된 상태 · FK · NULL</text>
+  <text x="1015" y="540" class="boxSub">한 건씩 분리 실행해 예상 실패 확인</text>
 
-  <path d="M 105 691 H 55 V 111 H 350" class="feedback"/>
-  <text x="72" y="430" class="branch-label" fill="#b42318">수정 후 다시 검증</text>
+  <path d="M300 510H330" class="flow"/><path d="M580 510H610" class="flow"/><path d="M860 510H890" class="flow"/>
+  <path d="M1030 302V370H175V456" class="flow"/>
 
-  <rect x="260" y="795" width="680" height="42" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6" rx="11"/>
-  <text x="600" y="816" class="footer">검증은 SQL 실행 성공이 아니라 요구사항과 데이터 규칙의 일치 여부를 확인하는 과정이다</text>
+  <rect x="80" y="608" width="300" height="110" class="box test"/>
+  <text x="230" y="638" class="boxTitle">8. 검증 SQL 실행</text>
+  <text x="230" y="667" class="boxMain">누락 · 모순 · 고아 관계 검색</text>
+  <text x="230" y="693" class="boxSub">업무 규칙 위반 가능성을 조회 결과로 찾음</text>
+
+  <rect x="450" y="608" width="300" height="110" class="box test"/>
+  <text x="600" y="638" class="boxTitle">9. 예상 결과와 실제 결과 비교</text>
+  <text x="600" y="667" class="boxMain">REQ ID · SQL · 예상 행 · 실제 행</text>
+  <text x="600" y="693" class="boxSub">단순 실행 성공이 아니라 의미를 판정</text>
+
+  <polygon points="970,596 1125,663 970,730 815,663" class="decision"/>
+  <text x="970" y="656" class="decisionText">모든 검증 기준을</text><text x="970" y="677" class="decisionText">충족하는가?</text>
+
+  <path d="M1015 564V584H230V608" class="flow"/><path d="M380 663H450" class="flow"/><path d="M750 663H815" class="flow"/>
+
+  <rect x="58" y="758" width="325" height="68" class="result pass"/>
+  <text x="220" y="783" class="resultTitle">정상 기능 결과</text><text x="220" y="807" class="resultText">조회·JOIN·집계가 요구사항과 일치하면 통과</text>
+  <rect x="438" y="758" width="325" height="68" class="result expectedFail"/>
+  <text x="600" y="783" class="resultTitle">잘못된 입력의 예상 실패</text><text x="600" y="807" class="resultText">제약조건 오류가 발생해야 설계가 값을 차단한 것</text>
+  <rect x="818" y="758" width="325" height="68" class="result inspect"/>
+  <text x="980" y="783" class="resultTitle">검증 쿼리 예상 행</text><text x="980" y="807" class="resultText">고아 FK는 0건, 의도한 모순은 지정 행 조회</text>
+
+  <rect x="34" y="876" width="1132" height="244" class="section"/>
+  <text x="58" y="909" class="sectionTitle">3. 실패 원인을 분류하고 해당 단계부터 다시 검증</text>
+
+  <rect x="55" y="942" width="250" height="92" class="cause"/>
+  <text x="180" y="969" class="causeTitle">요구사항 문제</text><text x="180" y="993" class="causeText">규칙이 모호하거나 누락됨</text><text x="180" y="1012" class="causeText">requirements부터 다시 정의</text>
+  <rect x="335" y="942" width="250" height="92" class="cause"/>
+  <text x="460" y="969" class="causeTitle">ERD·DDL 문제</text><text x="460" y="993" class="causeText">관계·타입·제약조건이 부족함</text><text x="460" y="1012" class="causeText">ERD와 schema를 함께 수정</text>
+  <rect x="615" y="942" width="250" height="92" class="cause"/>
+  <text x="740" y="969" class="causeTitle">샘플 데이터 문제</text><text x="740" y="993" class="causeText">검증할 상황이 재현되지 않음</text><text x="740" y="1012" class="causeText">seed 시나리오를 보완</text>
+  <rect x="895" y="942" width="250" height="92" class="cause"/>
+  <text x="1020" y="969" class="causeTitle">SQL 문제</text><text x="1020" y="993" class="causeText">JOIN·조건·집계·NULL 처리 오류</text><text x="1020" y="1012" class="causeText">queries를 수정하고 재실행</text>
+
+  <path d="M900 712V732H600V758" class="feedback"/><text x="870" y="738" class="branch" fill="#b42318">아니요: 원인 분류</text>
+  <path d="M970 730V852H600V876" class="feedback"/>
+  <path d="M55 988H18V225H52" class="feedback"/><path d="M335 988H22V510H50" class="feedback"/><path d="M615 988H26V510H330" class="feedback"/><path d="M895 988H30V510H610" class="feedback"/>
+
+  <rect x="140" y="1058" width="920" height="42" class="record"/>
+  <text x="600" y="1084" class="boxTitle">검증 근거 기록: 요구사항 ID · 실행 SQL · 예상 결과 · 실제 결과 · 실패 사례 · 수정 내용 · 재실행 결과</text>
+
+  <rect x="55" y="1144" width="340" height="68" class="note"/>
+  <text x="225" y="1168" class="noteTitle">LEFT JOIN 집계</text><text x="225" y="1191" class="noteText">관계 건수는 COUNT(*)보다 자식 PK의 COUNT(child_id)로 확인</text>
+  <rect x="430" y="1144" width="340" height="68" class="note"/>
+  <text x="600" y="1168" class="noteTitle">오류 테스트 분리</text><text x="600" y="1191" class="noteText">실패를 유도하는 입력은 기본 흐름과 분리해 한 건씩 실행</text>
+  <rect x="805" y="1144" width="340" height="68" class="note"/>
+  <text x="975" y="1168" class="noteTitle">재실행 기준</text><text x="975" y="1191" class="noteText">수정 후 깨끗한 초기 상태에서 전체 순서를 다시 검증</text>
+
+  <rect x="130" y="1226" width="940" height="26" class="core"/>
+  <text x="155" y="1244" class="coreLabel">핵심</text><text x="635" y="1245" class="coreText">검증은 SQL 실행 성공보다 요구사항이 제약조건과 조회 결과로 증명되는지 확인하는 과정이다</text>
 </svg>
