@@ -1,27 +1,27 @@
 erDiagram
-    MEMBERS ||--o{ LOANS : borrows
-    BOOKS ||--o{ LOANS : is_borrowed_in
+    MEMBERS ||--o{ LOANS : "has"
+    BOOKS ||--o{ LOANS : "appears in"
 
     MEMBERS {
-        int id PK
-        string name
-        string email
-        date joined_at
+        int id PK "SERIAL; member identity"
+        string name "NOT NULL"
+        string email UK "NOT NULL"
+        date joined_at "NOT NULL"
     }
 
     BOOKS {
-        int id PK
-        string title
-        string author
-        int published_year
-        string isbn
+        int id PK "SERIAL; book identity"
+        string title "NOT NULL"
+        string author "NOT NULL"
+        int published_year "NULL allowed"
+        string isbn UK "NOT NULL"
     }
 
     LOANS {
-        int id PK
-        int member_id FK
-        int book_id FK
-        date borrowed_at
-        date due_at
-        date returned_at
+        int id PK "SERIAL; loan event identity"
+        int member_id FK "NOT NULL; references MEMBERS.id"
+        int book_id FK "NOT NULL; references BOOKS.id"
+        date borrowed_at "NOT NULL"
+        date due_at "NOT NULL"
+        date returned_at "NULL means not returned"
     }
