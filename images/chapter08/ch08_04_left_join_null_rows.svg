@@ -1,1 +1,122 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.r{fill:#fff5f5;stroke:#e53e3e}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="40" text-anchor="middle" class="t">LEFT JOIN과 NULL 결과</text><rect x="100" y="120" width="280" height="260" class="b m"/><text x="240" y="155" class="l">students 기준</text><text x="240" y="210" class="s">김민지</text><text x="240" y="255" class="s">이준호</text><text x="240" y="300" class="s">최현우</text><rect x="820" y="120" width="280" height="190" class="b y"/><text x="960" y="155" class="l">enrollments</text><text x="960" y="220" class="s">김민지 수강신청</text><text x="960" y="265" class="s">이준호 수강신청</text><rect x="455" y="190" width="290" height="70" class="b g"/><text x="600" y="220" class="l">매칭 성공</text><text x="600" y="245" class="s">강의 정보 표시</text><rect x="455" y="340" width="290" height="70" class="b r"/><text x="600" y="370" class="l">매칭 없음</text><text x="600" y="395" class="s">NULL 표시</text><rect x="390" y="550" width="420" height="65" class="b g"/><text x="600" y="580" class="l">LEFT JOIN 결과</text><text x="600" y="602" class="s">왼쪽 테이블의 모든 행 유지</text><line x1="380" y1="210" x2="455" y2="220" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="820" y1="220" x2="745" y2="220" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="380" y1="255" x2="455" y2="245" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="820" y1="265" x2="745" y2="245" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="380" y1="300" x2="455" y2="375" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="410" x2="600" y2="550" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="260" x2="600" y2="550" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2040" viewBox="0 0 1200 2040" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">LEFT JOIN과 NULL 결과</title>
+  <desc id="desc">students를 왼쪽 기준 테이블로 두고 enrollments와 courses를 LEFT JOIN하면 수강신청이 있는 학생은 일치하는 수강신청 수만큼 결과 행이 만들어지고, 수강신청이 없는 학생도 한 행 유지되며 오른쪽 테이블에서 가져온 컬럼은 NULL로 채워진다. Chapter 08 샘플 데이터에서 학생 4명과 수강신청 5건이 결과 6행이 되는 과정, NULL이 원본 저장값이 아니라 조인 과정에서 생성될 수 있다는 점, WHERE 조건 위치와 COUNT 사용 시 주의사항을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#2f855a"/></marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/></marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}.subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}.section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}.card-text{font-size:13px;text-anchor:middle;fill:#475569}.card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.7px;text-anchor:middle;fill:#334155}
+      .mono-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.3px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#fff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.match{stroke:#2f855a;stroke-width:2.2;fill:none;marker-end:url(#arrow-green)}
+      .unmatched{stroke:#c2413b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .table-title{font-size:16px;font-weight:700;text-anchor:middle}.th{font-size:11.2px;font-weight:700;text-anchor:middle;fill:#334155}
+      .cell{font-size:11.2px;text-anchor:middle;fill:#334155}.cell-green{font-size:11.2px;font-weight:700;text-anchor:middle;fill:#166534}.cell-red{font-size:11.2px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .pk{font-size:11px;font-weight:700;text-anchor:middle;fill:#1d4ed8}.fk{font-size:11px;font-weight:700;text-anchor:middle;fill:#92400e}.null{font-size:11.4px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .line{stroke:#cbd5e1;stroke-width:1}.result-head{font-size:11.3px;font-weight:700;text-anchor:middle;fill:#334155}.result-cell{font-size:11.2px;text-anchor:middle;fill:#334155}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}.note-text{font-size:12.2px;text-anchor:middle;fill:#475569}
+      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}.ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}.warn{font-size:12.4px;font-weight:700;text-anchor:middle;fill:#b42318}
+    </style>
+  </defs>
+  <rect width="1200" height="2040" fill="#fff"/>
+  <text x="600" y="42" class="title">LEFT JOIN과 NULL 결과</text>
+  <text x="600" y="72" class="subtitle">왼쪽 테이블의 모든 행을 유지하고, 일치하는 오른쪽 행은 연결하며 매칭이 없으면 오른쪽 컬럼을 NULL로 확장한다</text>
+
+  <rect x="34" y="98" width="1132" height="260" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 기준 테이블과 결과 한 행의 의미를 먼저 정한다</text>
+  <text x="445" y="132" class="section-sub">이 예제는 모든 학생을 유지하면서 수강신청과 강의 정보를 붙인다</text>
+  <rect x="58" y="164" width="330" height="120" rx="11" fill="#fff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="192" r="15" fill="#2f6fad"/><text x="88" y="192" class="badge">L</text>
+  <text x="223" y="196" class="card-title">왼쪽 · 반드시 유지</text><text x="223" y="228" class="mono">students AS s</text><text x="223" y="254" class="card-text">학생 한 명당 최소 결과 1행</text>
+  <rect x="435" y="164" width="330" height="120" rx="11" fill="#fff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="465" cy="192" r="15" fill="#2f855a"/><text x="465" y="192" class="badge">ON</text>
+  <text x="600" y="196" class="card-title">일치 조건</text><text x="600" y="228" class="mono">s.id = e.student_id</text><text x="600" y="254" class="card-text">일치 건수만큼 결과 행 생성</text>
+  <rect x="812" y="164" width="330" height="120" rx="11" fill="#fff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="842" cy="192" r="15" fill="#b7791f"/><text x="842" y="192" class="badge">R</text>
+  <text x="977" y="196" class="card-title">오른쪽 · 선택적으로 연결</text><text x="977" y="228" class="mono">enrollments AS e</text><text x="977" y="254" class="card-text">매칭이 없으면 e.*가 NULL</text>
+  <rect x="146" y="306" width="908" height="30" rx="9" fill="#fff" stroke="#6fa2e8" stroke-width="1.2"/>
+  <text x="600" y="326" class="card-text-small">LEFT OUTER JOIN과 LEFT JOIN은 같은 의미이며, “왼쪽 한 행당 결과 한 행”을 보장하지는 않는다</text>
+  <path d="M600 358V382" class="flow"/>
+
+  <rect x="34" y="382" width="1132" height="590" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="416" class="section-title">2. 일치 행은 모두 연결하고, 일치하지 않는 왼쪽 행도 한 번 유지한다</text>
+  <text x="585" y="416" class="section-sub">Chapter 08 샘플: 학생 4명 · 수강신청 5건</text>
+  <rect x="54" y="452" width="388" height="348" rx="11" fill="#fff" stroke="#3b82c4" stroke-width="1.5"/>
+  <rect x="54" y="452" width="388" height="44" rx="11" fill="#dcecff"/><text x="248" y="480" class="table-title">students · 왼쪽</text>
+  <text x="110" y="526" class="th">id · PK</text><text x="240" y="526" class="th">name</text><text x="365" y="526" class="th">매칭 수</text>
+  <line x1="54" y1="542" x2="442" y2="542" class="line"/><line x1="54" y1="600" x2="442" y2="600" class="line"/><line x1="54" y1="658" x2="442" y2="658" class="line"/><line x1="54" y1="716" x2="442" y2="716" class="line"/><line x1="54" y1="774" x2="442" y2="774" class="line"/>
+  <line x1="166" y1="496" x2="166" y2="800" class="line"/><line x1="312" y1="496" x2="312" y2="800" class="line"/>
+  <text x="110" y="578" class="pk">1</text><text x="240" y="578" class="cell">김민지</text><text x="377" y="578" class="cell-green">2건</text>
+  <text x="110" y="636" class="pk">2</text><text x="240" y="636" class="cell">이준호</text><text x="377" y="636" class="cell-green">2건</text>
+  <text x="110" y="694" class="pk">3</text><text x="240" y="694" class="cell">박서연</text><text x="377" y="694" class="cell-green">1건</text>
+  <text x="110" y="752" class="pk">4</text><text x="240" y="752" class="cell">최현우</text><text x="377" y="752" class="cell-red">0건</text>
+  <text x="248" y="790" class="card-text-small">모든 학생이 최종 결과에 포함되어야 함</text>
+
+  <rect x="478" y="478" width="244" height="288" rx="13" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="600" y="507" class="card-title">LEFT JOIN 처리</text><text x="600" y="543" class="mono-small">학생 1 → 매칭 2건</text><text x="600" y="575" class="mono-small">학생 2 → 매칭 2건</text><text x="600" y="607" class="mono-small">학생 3 → 매칭 1건</text><text x="600" y="639" class="mono-small">학생 4 → 매칭 0건</text>
+  <rect x="502" y="668" width="196" height="66" rx="10" fill="#fff5f5" stroke="#d9534f" stroke-width="1.3"/>
+  <text x="600" y="692" class="card-title">NULL 확장 행 생성</text><text x="600" y="716" class="card-text-small">학생 4 + e.* = NULL</text>
+
+  <rect x="758" y="452" width="388" height="348" rx="11" fill="#fff" stroke="#d69e2e" stroke-width="1.5"/>
+  <rect x="758" y="452" width="388" height="44" rx="11" fill="#fff1cf"/><text x="952" y="480" class="table-title">enrollments · 오른쪽</text>
+  <text x="805" y="526" class="th">id · PK</text><text x="900" y="526" class="th">student_id · FK</text><text x="1010" y="526" class="th">course_id</text><text x="1100" y="526" class="th">status</text>
+  <line x1="758" y1="542" x2="1146" y2="542" class="line"/><line x1="758" y1="588" x2="1146" y2="588" class="line"/><line x1="758" y1="634" x2="1146" y2="634" class="line"/><line x1="758" y1="680" x2="1146" y2="680" class="line"/><line x1="758" y1="726" x2="1146" y2="726" class="line"/><line x1="758" y1="772" x2="1146" y2="772" class="line"/>
+  <line x1="850" y1="496" x2="850" y2="800" class="line"/><line x1="960" y1="496" x2="960" y2="800" class="line"/><line x1="1060" y1="496" x2="1060" y2="800" class="line"/>
+  <text x="805" y="572" class="pk">1</text><text x="905" y="572" class="fk">1</text><text x="1010" y="572" class="cell">1</text><text x="1100" y="572" class="cell">수강중</text>
+  <text x="805" y="618" class="pk">2</text><text x="905" y="618" class="fk">1</text><text x="1010" y="618" class="cell">2</text><text x="1100" y="618" class="cell">신청</text>
+  <text x="805" y="664" class="pk">3</text><text x="905" y="664" class="fk">2</text><text x="1010" y="664" class="cell">1</text><text x="1100" y="664" class="cell">수강중</text>
+  <text x="805" y="710" class="pk">4</text><text x="905" y="710" class="fk">3</text><text x="1010" y="710" class="cell">3</text><text x="1100" y="710" class="cell">신청</text>
+  <text x="805" y="756" class="pk">5</text><text x="905" y="756" class="fk">2</text><text x="1010" y="756" class="cell">3</text><text x="1100" y="756" class="cell">완료</text>
+  <text x="952" y="790" class="card-text-small">student_id = 4인 행은 없음</text>
+
+  <path d="M442 578H478" class="match"/><path d="M442 636H466V575H478" class="match"/><path d="M442 694H458V607H478" class="match"/><path d="M442 752H470V701H502" class="unmatched"/>
+  <path d="M722 543H744V572H758" class="match"/><path d="M722 575H738V618H758" class="match"/><path d="M722 607H734V664H758" class="match"/><path d="M722 639H730V710H758" class="match"/><path d="M722 671H726V756H758" class="match"/>
+
+  <rect x="120" y="824" width="960" height="110" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="850" class="card-title">결과 행 수 계산</text><text x="600" y="879" class="mono">2 + 2 + 1 + MAX(1, 0) = 6행</text><text x="600" y="908" class="card-text">일치가 여러 건이면 왼쪽 행이 반복되고, 일치가 0건이면 NULL 확장 행 한 건이 추가된다</text>
+  <path d="M600 972V996" class="flow"/>
+
+  <rect x="34" y="996" width="1132" height="548" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="1030" class="section-title">3. 연속 LEFT JOIN으로 강의 정보까지 붙인 결과</text>
+  <text x="430" y="1030" class="section-sub">첫 번째 JOIN에서 보존한 최현우 행은 두 번째 JOIN에서도 NULL 상태로 유지된다</text>
+  <rect x="58" y="1062" width="1084" height="140" rx="11" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="600" y="1090" class="card-title">모든 학생과 수강신청·강의 정보 조회</text>
+  <text x="600" y="1120" class="mono">SELECT s.name AS student_name, c.title AS course_title, e.status</text>
+  <text x="600" y="1146" class="mono">FROM students AS s LEFT JOIN enrollments AS e ON s.id = e.student_id</text>
+  <text x="600" y="1172" class="mono">LEFT JOIN courses AS c ON e.course_id = c.id ORDER BY s.id, c.id</text>
+
+  <rect x="58" y="1230" width="1084" height="264" rx="11" fill="#fff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <rect x="58" y="1230" width="1084" height="40" rx="11" fill="#dcf7e5"/>
+  <text x="240" y="1256" class="result-head">student_name</text><text x="590" y="1256" class="result-head">course_title</text><text x="960" y="1256" class="result-head">status</text>
+  <line x1="58" y1="1270" x2="1142" y2="1270" class="line"/><line x1="420" y1="1230" x2="420" y2="1494" class="line"/><line x1="800" y1="1230" x2="800" y2="1494" class="line"/>
+  <line x1="58" y1="1306" x2="1142" y2="1306" class="line"/><line x1="58" y1="1342" x2="1142" y2="1342" class="line"/><line x1="58" y1="1378" x2="1142" y2="1378" class="line"/><line x1="58" y1="1414" x2="1142" y2="1414" class="line"/><line x1="58" y1="1450" x2="1142" y2="1450" class="line"/>
+  <text x="240" y="1296" class="result-cell">김민지</text><text x="590" y="1296" class="result-cell">데이터베이스 입문</text><text x="960" y="1296" class="result-cell">수강중</text>
+  <text x="240" y="1332" class="result-cell">김민지</text><text x="590" y="1332" class="result-cell">정규화 실습</text><text x="960" y="1332" class="result-cell">신청</text>
+  <text x="240" y="1368" class="result-cell">이준호</text><text x="590" y="1368" class="result-cell">데이터베이스 입문</text><text x="960" y="1368" class="result-cell">수강중</text>
+  <text x="240" y="1404" class="result-cell">이준호</text><text x="590" y="1404" class="result-cell">파이썬 데이터 분석</text><text x="960" y="1404" class="result-cell">완료</text>
+  <text x="240" y="1440" class="result-cell">박서연</text><text x="590" y="1440" class="result-cell">파이썬 데이터 분석</text><text x="960" y="1440" class="result-cell">신청</text>
+  <text x="240" y="1476" class="result-cell">최현우</text><text x="590" y="1476" class="null">NULL</text><text x="960" y="1476" class="null">NULL</text>
+  <rect x="150" y="1506" width="900" height="24" rx="8" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.1"/>
+  <text x="600" y="1523" class="ok">학생 4명 중 3명은 총 5개 수강신청 행으로 확장되고, 최현우의 NULL 확장 행까지 포함해 총 6행</text>
+  <path d="M600 1544V1568" class="flow"/>
+
+  <rect x="34" y="1568" width="1132" height="376" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="58" y="1602" class="section-title">4. NULL 해석과 조건 위치를 검토한다</text>
+  <text x="360" y="1602" class="section-sub">LEFT JOIN의 목적은 보존 대상과 필터 조건에 따라 쉽게 달라질 수 있다</text>
+  <rect x="58" y="1634" width="330" height="154" rx="11" fill="#fff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="1662" class="card-title">NULL의 의미</text><text x="223" y="1692" class="card-text">최현우의 e.status NULL은 원본 저장값이 아님</text><text x="223" y="1717" class="card-text">매칭되는 오른쪽 행이 없어 JOIN이 생성한 값</text><text x="223" y="1742" class="mono-small">e.id IS NULL → 수강신청 없음</text><text x="223" y="1768" class="card-text-small">nullable 업무 컬럼과 구분해 판정</text>
+  <rect x="435" y="1634" width="330" height="154" rx="11" fill="#fff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="600" y="1662" class="card-title">WHERE 조건 함정</text><text x="600" y="1692" class="mono-small">WHERE e.status = '수강중'</text><text x="600" y="1717" class="warn">NULL 확장 행이 제거되어 최현우가 사라짐</text><text x="600" y="1742" class="mono-small">ON ... AND e.status = '수강중'</text><text x="600" y="1768" class="card-text-small">모든 학생을 유지하려면 조건을 ON에 검토</text>
+  <rect x="812" y="1634" width="330" height="154" rx="11" fill="#fff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="977" y="1662" class="card-title">건수 집계</text><text x="977" y="1692" class="mono-small">COUNT(*) = 결과 행 수</text><text x="977" y="1717" class="mono-small">COUNT(e.id) = 실제 매칭 수</text><text x="977" y="1742" class="card-text">수강신청 없는 학생도 0으로 세려면</text><text x="977" y="1768" class="card-text-small">LEFT JOIN + GROUP BY + COUNT(e.id)</text>
+
+  <rect x="106" y="1812" width="988" height="72" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="1837" class="note-title">LEFT JOIN 결과 검증</text><text x="600" y="1862" class="note-text">왼쪽 PK 누락 여부 · 기준 행별 예상 매칭 수 · NULL 생성 원인 · WHERE/ON 조건 위치 · COUNT 대상 컬럼을 함께 확인한다</text>
+  <rect x="78" y="1970" width="1044" height="36" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="600" y="1993" class="principle">일치하면 모든 행 쌍 생성 · 불일치하면 왼쪽 행 + 오른쪽 NULL 한 행 생성</text>
+</svg>
