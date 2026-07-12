@@ -1,1 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:25px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0;stroke-width:2;rx:12}.g{fill:#f0fff4;stroke:#38a169;stroke-width:2;rx:12}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:12px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">프로젝트 정규화 검토 흐름</text><line x1="245" y1="161.0" x2="280" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="470" y1="161.0" x2="505" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="695" y1="161.0" x2="730" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="920" y1="161.0" x2="955" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="1050.0" y1="197" x2="150.0" y2="350" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="245" y1="386.0" x2="280" y2="386.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="470" y1="386.0" x2="505" y2="386.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><rect x="55" y="125" width="190" height="72" class="m"/><text x="150.0" y="161" class="l">프로젝트 설계</text><rect x="280" y="125" width="190" height="72" class="b"/><text x="375.0" y="161" class="l">엔터티 분리</text><rect x="505" y="125" width="190" height="72" class="b"/><text x="600.0" y="161" class="l">중복 확인</text><rect x="730" y="125" width="190" height="72" class="b"/><text x="825.0" y="161" class="l">N:M 관계</text><rect x="955" y="125" width="190" height="72" class="b"/><text x="1050.0" y="161" class="l">외래키</text><rect x="55" y="350" width="190" height="72" class="b"/><text x="150.0" y="377" class="l">이상 현상</text><text x="150.0" y="400" class="s">삽입·수정·삭제</text><rect x="280" y="350" width="190" height="72" class="b"/><text x="375.0" y="386" class="l">JOIN 검증</text><rect x="505" y="350" width="190" height="72" class="g"/><text x="600.0" y="386" class="l">정규화 완료</text><rect x="330" y="520" width="540" height="58" class="g"/><text x="600" y="549" class="l">중복을 줄이면서 필요한 관계와 조회가 유지되는지 확인한다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1465" viewBox="0 0 1200 1465" role="img" aria-labelledby="title desc">
+  <title id="title">프로젝트 정규화 검토 흐름</title>
+  <desc id="desc">온라인 강의 데이터베이스의 students, instructors, courses, enrollments에서 한 행의 의미와 값의 소유자를 확인하고 1정규형, 중복, 관계, 이상 현상, 제약조건, 재신청 정책과 과도한 분리를 검토한 뒤 INSERT, UPDATE, DELETE, JOIN 결과로 정규화 효과를 검증하는 도식</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}
+      .panel{stroke-width:1.5;rx:15}.base{fill:#eef5ff;stroke:#6fa2e8}.review{fill:#fff8e8;stroke:#d69e2e}.effect{fill:#f8fafc;stroke:#a8b3c4}.verify{fill:#f2fbf5;stroke:#8bc9a0}
+      .pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.purple{stroke:#7c5cc4}.red{stroke:#d9534f}.gray{stroke:#64748b}
+      .h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.1px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
+      .arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}
+      .tagB{fill:#dcecff}.tagO{fill:#fff1cf}.tagG{fill:#dcfce7}.tagP{fill:#ede9fe}.tagR{fill:#fee2e2}.tagX{fill:#e2e8f0}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:13.7px;font-weight:700;text-anchor:middle}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:13.7px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+  <rect width="1200" height="1465" fill="#fff"/>
+  <text x="600" y="40" class="t">프로젝트 정규화 검토 흐름</text>
+  <text x="600" y="68" class="s">테이블 수가 아니라 각 사실의 주인·수명·변경 이유와 실제 SQL 결과를 기준으로 검토한다</text>
+
+  <rect x="35" y="100" width="1130" height="210" class="panel base"/>
+  <text x="60" y="132" class="pt">1. 현재 구조에서 각 테이블 한 행의 의미를 먼저 고정</text>
+  <rect x="55" y="165" width="250" height="112" class="box blue"/>
+  <rect x="55" y="165" width="250" height="32" class="tagB" rx="10"/>
+  <text x="180" y="187" class="h">students</text><text x="180" y="220" class="h">학생 한 명당 한 행</text><text x="180" y="245" class="m">name · email · joined_at</text><text x="180" y="266" class="m">학생 정보의 유일한 주인</text>
+  <rect x="335" y="165" width="250" height="112" class="box purple"/>
+  <rect x="335" y="165" width="250" height="32" class="tagP" rx="10"/>
+  <text x="460" y="187" class="h">instructors</text><text x="460" y="220" class="h">강사 한 명당 한 행</text><text x="460" y="245" class="m">name · email · specialty</text><text x="460" y="266" class="m">강사 정보의 유일한 주인</text>
+  <rect x="615" y="165" width="250" height="112" class="box orange"/>
+  <rect x="615" y="165" width="250" height="32" class="tagO" rx="10"/>
+  <text x="740" y="187" class="h">courses</text><text x="740" y="220" class="h">강의 하나당 한 행</text><text x="740" y="245" class="m">담당 강사 · 제목 · 기본 가격</text><text x="740" y="266" class="m">강의 정보의 유일한 주인</text>
+  <rect x="895" y="165" width="250" height="112" class="box green"/>
+  <rect x="895" y="165" width="250" height="32" class="tagG" rx="10"/>
+  <text x="1020" y="187" class="h">enrollments</text><text x="1020" y="220" class="h">수강신청 한 건당 한 행</text><text x="1020" y="245" class="m">신청일 · 상태 · 실제 결제액</text><text x="1020" y="266" class="m">학생-강의 관계 자체의 정보</text>
+  <rect x="180" y="283" width="840" height="18" class="box green"/><text x="600" y="297" class="code">students 1:N enrollments N:1 courses · instructors 1:N courses</text>
+
+  <rect x="35" y="340" width="1130" height="400" class="panel review"/>
+  <text x="60" y="372" class="pt">2. 1NF·값의 소유자·관계를 순서대로 점검</text>
+  <rect x="55" y="410" width="245" height="135" class="box blue"/>
+  <rect x="55" y="410" width="245" height="32" class="tagB" rx="10"/>
+  <text x="177" y="432" class="h">1NF와 식별</text><text x="177" y="470" class="m">한 셀에 하나의 값인가?</text><text x="177" y="493" class="m">course_ids·student_ids 목록이 없는가?</text><text x="177" y="516" class="m">모든 행을 PK로 식별하는가?</text>
+  <rect x="335" y="410" width="245" height="135" class="box purple"/>
+  <rect x="335" y="410" width="245" height="32" class="tagP" rx="10"/>
+  <text x="457" y="432" class="h">학생·강사 정보</text><text x="457" y="470" class="m">이름·이메일은 각 사람의 ID에 의존</text><text x="457" y="493" class="m">courses·enrollments에 다시 저장하지 않음</text><text x="457" y="516" class="m">변경은 원본 한 행에서 수행</text>
+  <rect x="615" y="410" width="245" height="135" class="box orange"/>
+  <rect x="615" y="410" width="245" height="32" class="tagO" rx="10"/>
+  <text x="737" y="432" class="h">강의 정보</text><text x="737" y="470" class="m">제목·설명·난이도·기본 가격은</text><text x="737" y="493" class="m">courses.id가 결정</text><text x="737" y="516" class="m">신청 행마다 제목을 반복하지 않음</text>
+  <rect x="895" y="410" width="245" height="135" class="box green"/>
+  <rect x="895" y="410" width="245" height="32" class="tagG" rx="10"/>
+  <text x="1017" y="432" class="h">수강신청 정보</text><text x="1017" y="470" class="m">날짜·상태·실제 결제액은</text><text x="1017" y="493" class="m">신청 한 건에 의존</text><text x="1017" y="516" class="m">학생이나 강의 속성으로 이동하지 않음</text>
+
+  <rect x="120" y="585" width="445" height="120" class="box gray"/>
+  <text x="342" y="613" class="h">N:M과 외래키 위치</text><text x="342" y="642" class="code">students 1:N enrollments N:1 courses</text><text x="342" y="668" class="m">student_id와 course_id는 enrollments에 배치</text><text x="342" y="690" class="m">instructor_id는 강의를 담당하는 courses에 배치</text>
+  <rect x="635" y="585" width="445" height="120" class="box orange"/>
+  <text x="857" y="613" class="h">같아 보이는 값도 의미가 다를 수 있음</text><text x="857" y="642" class="code">courses.price ≠ enrollments.paid_amount</text><text x="857" y="668" class="m">현재 기본 가격과 신청 당시 실제 결제액은</text><text x="857" y="690" class="m">시점·변경 이유가 달라 의도적으로 함께 보존</text>
+  <rect x="180" y="715" width="840" height="18" class="box red"/><text x="600" y="729" class="m">중복은 값이 같아 보이는지가 아니라 의미·시점·변경 이유와 갱신 책임이 같은지로 판단한다</text>
+
+  <rect x="35" y="770" width="1130" height="300" class="panel effect"/>
+  <text x="60" y="802" class="pt">3. 삽입·수정·삭제 이상과 데이터베이스 제약조건 확인</text>
+  <rect x="55" y="840" width="330" height="105" class="box blue"/>
+  <rect x="55" y="840" width="330" height="32" class="tagB" rx="10"/>
+  <text x="220" y="862" class="h">수정 이상이 줄었는가?</text><text x="220" y="898" class="m">학생 이메일은 students 한 행만 변경</text><text x="220" y="922" class="m">모든 JOIN 결과가 새 이메일로 일치</text>
+  <rect x="435" y="840" width="330" height="105" class="box orange"/>
+  <rect x="435" y="840" width="330" height="32" class="tagO" rx="10"/>
+  <text x="600" y="862" class="h">삽입 이상이 줄었는가?</text><text x="600" y="898" class="m">수강신청 없이 학생·강의 등록 가능</text><text x="600" y="922" class="m">강사와 강의도 독립 수명으로 관리</text>
+  <rect x="815" y="840" width="330" height="105" class="box purple"/>
+  <rect x="815" y="840" width="330" height="32" class="tagP" rx="10"/>
+  <text x="980" y="862" class="h">삭제 이상이 줄었는가?</text><text x="980" y="898" class="m">수강신청 삭제 후 학생·강의 유지</text><text x="980" y="922" class="m">다른 신청과 강사 정보도 보존</text>
+
+  <rect x="55" y="975" width="250" height="62" class="box purple"/><text x="180" y="999" class="h">UNIQUE</text><text x="180" y="1023" class="m">학생·강사 이메일 중복 차단</text>
+  <rect x="330" y="975" width="250" height="62" class="box blue"/><text x="455" y="999" class="h">FOREIGN KEY</text><text x="455" y="1023" class="m">없는 학생·강의·강사 참조 차단</text>
+  <rect x="605" y="975" width="250" height="62" class="box green"/><text x="730" y="999" class="h">NOT NULL</text><text x="730" y="1023" class="m">필수 관계와 필수값 누락 차단</text>
+  <rect x="880" y="975" width="250" height="62" class="box red"/><text x="1005" y="999" class="h">CHECK</text><text x="1005" y="1023" class="m">음수 금액·잘못된 상태 차단</text>
+
+  <rect x="35" y="1100" width="1130" height="280" class="panel verify"/>
+  <text x="60" y="1132" class="pt">4. 업무 규칙·과도한 분리·SQL 결과를 함께 검증</text>
+  <polygon points="230,1160 350,1190 230,1220 110,1190" class="decision"/>
+  <text x="230" y="1185" class="dt">같은 학생의 같은 강의</text><text x="230" y="1205" class="m">재신청을 허용하는가?</text>
+  <rect x="390" y="1155" width="330" height="70" class="box purple"/><text x="555" y="1180" class="h">허용하지 않음</text><text x="555" y="1205" class="code">UNIQUE (student_id, course_id)</text>
+  <rect x="760" y="1155" width="350" height="70" class="box orange"/><text x="935" y="1180" class="h">취소 후 재신청·이력 보존</text><text x="935" y="1205" class="m">상태·신청회차·부분 UNIQUE 등 별도 정책</text>
+  <path d="M350 1190H390" class="arr"/><path d="M350 1202H760" class="arr"/>
+
+  <rect x="55" y="1250" width="330" height="80" class="box gray"/><text x="220" y="1276" class="h">과도한 분리 점검</text><text x="220" y="1301" class="m">독립 수명·권한·반복 구조가 없다면</text><text x="220" y="1321" class="m">불필요한 1:1 테이블을 만들지 않음</text>
+  <rect x="435" y="1250" width="330" height="80" class="box green"/><text x="600" y="1276" class="h">SQL 시나리오 검증</text><text x="600" y="1301" class="m">INSERT·UPDATE·DELETE·JOIN·GROUP BY</text><text x="600" y="1321" class="m">건수·중복·NULL·부모 정보 보존 확인</text>
+  <rect x="815" y="1250" width="330" height="80" class="box blue"/><text x="980" y="1276" class="h">복원과 동기화</text><text x="980" y="1301" class="m">JOIN으로 학생명·강의명·강사명 복원</text><text x="980" y="1321" class="m">ERD·DDL·샘플·검토 근거 함께 수정</text>
+
+  <polygon points="600,1345 755,1378 600,1411 445,1378" class="decision"/>
+  <text x="600" y="1373" class="dt">중복을 줄이면서 변경이 독립적이고</text><text x="600" y="1393" class="m">필요한 조회와 업무 이력이 정확히 유지되는가?</text>
+  <path d="M445 1378H30V450H55" class="back"/>
+
+  <rect x="55" y="1425" width="350" height="28" class="note"/><text x="230" y="1444" class="nt">정규화는 사실을 올바른 주인에게 배치</text>
+  <rect x="425" y="1425" width="350" height="28" class="note"/><text x="600" y="1444" class="nt">형태가 아니라 실제 이상 현상으로 검증</text>
+  <rect x="795" y="1425" width="350" height="28" class="core"/><text x="970" y="1444" class="cv">중복 제거와 과도한 분리 사이의 균형</text>
+</svg>
