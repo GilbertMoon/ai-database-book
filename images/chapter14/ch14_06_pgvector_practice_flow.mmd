@@ -1,12 +1,23 @@
-flowchart LR
-    A[CREATE EXTENSION vector] --> B[Create table]
-    B --> C[Store title content embedding]
-    C --> D[Question vector]
-    D --> E[Distance search]
-    E --> F[ORDER BY embedding distance]
-    F --> G[LIMIT top-k]
-    G --> H[Review retrieved chunks]
+flowchart TB
+    A[실습 환경과 권한 확인] --> B{pgvector 사용 가능?}
 
-    B --> B1[document_embeddings]
-    C --> C1[embedding vector 3]
-    E --> E1[smaller distance means closer]
+    B -- 예 --> C[CREATE EXTENSION IF NOT EXISTS vector]
+    C --> D[벡터 테이블 생성<br/>원문·출처·chunk_no·embedding vector(3)]
+
+    B -- 아니요 --> E[대체 실습 테이블 생성<br/>embedding_x·embedding_y·embedding_z]
+
+    D --> F[샘플 문서 청크와 3차원 벡터 입력]
+    E --> F
+    F --> G[저장 데이터와 벡터 차원 확인]
+
+    G --> H[질문과 질문 벡터 준비]
+    H --> I[문서별 거리 계산<br/>embedding <-> query AS distance]
+    I --> J[거리 오름차순 정렬<br/>ORDER BY distance ASC]
+    J --> K[Top-k 제한<br/>LIMIT k]
+    K --> L[title·content·source·distance 결과 검토]
+    L --> M{질문과 관련된 문서인가?}
+    M -- 예 --> N[검색 결과와 실행 근거 기록]
+    M -- 아니요 --> O[질문 벡터·데이터·검색 조건 점검]
+    O --> H
+
+    P[주의<br/>vector(3)은 개념 확인용 축약 예시이며<br/>실제 임베딩은 더 높은 차원을 사용] --- D
