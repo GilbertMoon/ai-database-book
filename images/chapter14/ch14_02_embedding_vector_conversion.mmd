@@ -1,14 +1,18 @@
 flowchart TB
-    A[Text document] --> B[Embedding model]
-    B --> C[Vector]
-    C --> D[Store with document]
+    A[텍스트 입력<br/>문장·문서·청크] --> B[임베딩 모델<br/>텍스트 의미 패턴을 숫자로 변환]
+    B --> C[고정 차원 벡터<br/>예: 1536차원]
+    C --> D[원문·메타데이터와 함께 저장<br/>document_id·chunk_id·embedding]
 
-    A1[Subscription refund policy] --> B
-    A2[Service update guide] --> B
-    A3[SQL JOIN note] --> B
+    A1[구독 취소 방법] --> B
+    A2[서비스 이용을 중단하는 방법] --> B
+    A3[PostgreSQL JOIN 사용법] --> B
 
-    C --> C1[[0.90, 0.10, 0.20]]
-    C --> C2[[0.20, 0.75, 0.25]]
-    C --> C3[[0.15, 0.30, 0.90]]
+    C --> C1[[0.88, 0.12, 0.20, ...]]
+    C --> C2[[0.86, 0.14, 0.18, ...]]
+    C --> C3[[0.15, 0.30, 0.90, ...]]
 
-    D --> E[Vector DB or pgvector]
+    C1 --> E[의미가 비슷한 문장은 벡터 공간에서 가까움]
+    C2 --> E
+    C3 --> F[주제가 다른 문장은 상대적으로 멀리 위치]
+
+    D --> G[Vector DB 또는 PostgreSQL pgvector]
