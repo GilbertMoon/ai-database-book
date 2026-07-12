@@ -1,40 +1,52 @@
 erDiagram
-    MEMBER ||--o{ ENROLLMENT : makes
-    COURSE ||--o{ ENROLLMENT : has
     INSTRUCTOR ||--o{ COURSE : teaches
-    ENROLLMENT ||--o| PAYMENT : may_have
+    MEMBER ||--o{ ENROLLMENT : applies
+    COURSE ||--o{ ENROLLMENT : receives
+    ENROLLMENT ||--o{ PAYMENT : has_history
 
     MEMBER {
-        int member_id PK
+        bigint member_id PK
         string name
-        string email
+        string email UK
+        string member_status
+        datetime created_at
     }
 
     INSTRUCTOR {
-        int instructor_id PK
+        bigint instructor_id PK
         string name
-        string email
+        string email UK
+        datetime created_at
     }
 
     COURSE {
-        int course_id PK
-        int instructor_id FK
+        bigint course_id PK
+        bigint instructor_id FK
         string title
-        int price
+        decimal price
+        string course_status
     }
 
     ENROLLMENT {
-        int enrollment_id PK
-        int member_id FK
-        int course_id FK
-        date enrolled_at
-        string status
+        bigint enrollment_id PK
+        bigint member_id FK
+        bigint course_id FK
+        datetime enrolled_at
+        string enrollment_status
+        string member_course_pair UK
     }
 
     PAYMENT {
-        int payment_id PK
-        int enrollment_id FK
-        int amount
+        bigint payment_id PK
+        bigint enrollment_id FK
+        string payment_type
+        decimal amount
         string payment_status
-        date paid_at
+        datetime processed_at
     }
+
+%% 핵심 업무 규칙
+%% 1. MEMBER와 COURSE의 N:M 관계를 ENROLLMENT가 해소한다.
+%% 2. ENROLLMENT의 member_id + course_id 조합을 UNIQUE로 관리해 중복 수강신청을 막는다.
+%% 3. PAYMENT는 결제 시도와 환불 이력을 보존할 수 있도록 ENROLLMENT와 1:N으로 연결한다.
+%% 4. 이름·강의명 대신 PK/FK로 관계를 연결해 값 변경과 중복 저장 문제를 줄인다.
