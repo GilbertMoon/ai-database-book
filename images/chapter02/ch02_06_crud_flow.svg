@@ -1,16 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.box{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}.main{fill:#ebf8ff;stroke:#2b6cb0}.sql{fill:#fffaf0;stroke:#d69e2e}.db{fill:#f0fff4;stroke:#38a169}.label{font-size:17px;text-anchor:middle;dominant-baseline:middle}.small{font-size:14px;text-anchor:middle;dominant-baseline:middle}</style></defs>
-  <rect width="100%" height="100%" fill="white"/>
-  <text x="600" y="40" text-anchor="middle" class="title">CRUD와 SQL 명령어 흐름</text>
-  <rect x="70" y="120" width="170" height="70" class="box main"/><text x="155" y="155" class="label">Create</text><text x="155" y="178" class="small">학생 등록</text>
-  <rect x="330" y="120" width="170" height="70" class="box main"/><text x="415" y="155" class="label">Read</text><text x="415" y="178" class="small">학생 조회</text>
-  <rect x="590" y="120" width="170" height="70" class="box main"/><text x="675" y="155" class="label">Update</text><text x="675" y="178" class="small">이메일 수정</text>
-  <rect x="850" y="120" width="170" height="70" class="box main"/><text x="935" y="155" class="label">Delete</text><text x="935" y="178" class="small">학생 삭제</text>
-  <rect x="70" y="280" width="170" height="58" class="box sql"/><text x="155" y="309" class="label">INSERT</text>
-  <rect x="330" y="280" width="170" height="58" class="box sql"/><text x="415" y="309" class="label">SELECT</text>
-  <rect x="590" y="280" width="170" height="58" class="box sql"/><text x="675" y="309" class="label">UPDATE</text>
-  <rect x="850" y="280" width="170" height="58" class="box sql"/><text x="935" y="309" class="label">DELETE</text>
-  <rect x="410" y="450" width="380" height="80" class="box db"/><text x="600" y="490" class="label">Database</text><text x="600" y="515" class="small">테이블의 데이터를 생성·조회·수정·삭제</text>
-  <line x1="155" y1="190" x2="155" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="415" y1="190" x2="415" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="675" y1="190" x2="675" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="935" y1="190" x2="935" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="155" y1="338" x2="500" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="415" y1="338" x2="560" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="675" y1="338" x2="640" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="935" y1="338" x2="700" y2="450" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="960" viewBox="0 0 1200 960" role="img" aria-labelledby="title desc">
+  <title id="title">CRUD와 SQL 명령어 흐름</title>
+  <desc id="desc">서비스의 생성·조회·수정·삭제 요청이 INSERT·SELECT·UPDATE·DELETE 또는 상태 변경 작업으로 연결되고, DBMS의 문법·제약조건·권한·트랜잭션 검사를 거쳐 결과를 확인하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:28px;font-weight:700;text-anchor:middle}.sub{font-size:15px;text-anchor:middle;fill:#475569}
+      .panel{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:15}.pt{font-size:18px;font-weight:700}.ps{font-size:13px;fill:#475569}
+      .req{fill:#24497a;stroke:#17355c;stroke-width:1.8;rx:12}.reqt{font-size:17px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .card{fill:#fff;stroke-width:1.6;rx:11}.c{stroke:#3c9a5f}.r{stroke:#3b82c4}.u{stroke:#d69e2e}.d{stroke:#d9534f}
+      .ct{font-size:17px;font-weight:700;text-anchor:middle}.cm{font-size:13px;font-weight:600;text-anchor:middle}.cs{font-size:11.8px;text-anchor:middle;fill:#475569}
+      .cmd{fill:#fff;stroke-width:1.4;rx:9}.cmdt{font-size:18px;font-weight:700;text-anchor:middle}.cmds{font-size:11.8px;text-anchor:middle;fill:#475569}
+      .arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .engine{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:10}.et{font-size:14px;font-weight:700;text-anchor:middle}.es{font-size:11.5px;text-anchor:middle;fill:#475569}
+      .db{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.7;rx:12}.dt{font-size:16px;font-weight:700;text-anchor:middle}.ds{font-size:12px;text-anchor:middle;fill:#475569}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}.nt{font-size:13px;font-weight:700;fill:#92400e}.ns{font-size:11.8px;fill:#475569}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.7}.deci{font-size:13px;font-weight:700;text-anchor:middle}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.pl{font-size:14px;font-weight:700;fill:#166534}.pv{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+  <rect width="1200" height="960" fill="#fff"/>
+  <text x="600" y="40" class="title">CRUD와 SQL 명령어 흐름</text>
+  <text x="600" y="68" class="sub">CRUD는 서비스 관점의 작업이고 SQL은 그 작업을 DBMS에 전달하는 구체적인 명령이다</text>
+
+  <rect x="400" y="94" width="400" height="56" class="req"/><text x="600" y="122" class="reqt">사용자·서비스의 데이터 처리 요청</text>
+  <path d="M600 150V182" class="arr"/>
+
+  <rect x="34" y="182" width="1132" height="365" class="panel"/>
+  <text x="58" y="213" class="pt">1. 서비스 기능을 CRUD와 SQL로 연결</text><text x="382" y="213" class="ps">행을 다루는 네 가지 기본 작업</text>
+
+  <rect x="55" y="242" width="250" height="112" class="card c"/><text x="180" y="272" class="ct">Create · 생성</text><text x="180" y="301" class="cm">새 학생 등록</text><text x="180" y="327" class="cs">새로운 행을 추가</text>
+  <rect x="55" y="376" width="250" height="88" class="cmd c"/><text x="180" y="409" class="cmdt">INSERT</text><text x="180" y="439" class="cmds">입력값으로 새 행 생성</text>
+
+  <rect x="335" y="242" width="250" height="112" class="card r"/><text x="460" y="272" class="ct">Read · 조회</text><text x="460" y="301" class="cm">학생 목록·상세 조회</text><text x="460" y="327" class="cs">필요한 행과 열을 읽음</text>
+  <rect x="335" y="376" width="250" height="88" class="cmd r"/><text x="460" y="409" class="cmdt">SELECT</text><text x="460" y="439" class="cmds">조건에 맞는 행 반환</text>
+
+  <rect x="615" y="242" width="250" height="112" class="card u"/><text x="740" y="272" class="ct">Update · 수정</text><text x="740" y="301" class="cm">이메일·전공 변경</text><text x="740" y="327" class="cs">기존 행의 특정 열을 변경</text>
+  <rect x="615" y="376" width="250" height="88" class="cmd u"/><text x="740" y="409" class="cmdt">UPDATE</text><text x="740" y="439" class="cmds">조건으로 대상 행 선택 후 수정</text>
+
+  <rect x="895" y="242" width="250" height="112" class="card d"/><text x="1020" y="272" class="ct">Delete · 삭제</text><text x="1020" y="301" class="cm">학생 삭제·비활성화</text><text x="1020" y="327" class="cs">정책에 따라 물리 또는 소프트 삭제</text>
+  <rect x="895" y="376" width="250" height="88" class="cmd d"/><text x="1020" y="409" class="cmdt">DELETE / UPDATE</text><text x="1020" y="439" class="cmds">행 제거 또는 상태값 변경</text>
+
+  <path d="M180 354V376" class="arr"/><path d="M460 354V376" class="arr"/><path d="M740 354V376" class="arr"/><path d="M1020 354V376" class="arr"/>
+  <rect x="180" y="487" width="840" height="42" class="note"/><text x="202" y="512" class="nt">용어 구분</text><text x="282" y="512" class="ns">CRUD의 Create는 행을 추가하는 INSERT이며, CREATE TABLE은 구조를 만드는 DDL이다.</text>
+
+  <path d="M180 547V590H600" class="arr"/><path d="M460 547V590H600" class="arr"/><path d="M740 547V590H600" class="arr"/><path d="M1020 547V590H600" class="arr"/>
+
+  <rect x="34" y="588" width="1132" height="224" class="panel"/>
+  <text x="58" y="619" class="pt">2. DBMS 실행과 결과 검증</text><text x="290" y="619" class="ps">명령 실행 전후에 대상, 규칙과 결과를 확인</text>
+  <rect x="58" y="654" width="235" height="94" class="engine"/><text x="175.5" y="682" class="et">문법·대상 확인</text><text x="175.5" y="711" class="es">테이블·열·조건 확인</text><text x="175.5" y="732" class="es">수정·삭제 대상 행 점검</text>
+  <rect x="316" y="654" width="235" height="94" class="engine"/><text x="433.5" y="682" class="et">제약조건 검사</text><text x="433.5" y="711" class="es">PK·FK·NOT NULL·UNIQUE</text><text x="433.5" y="732" class="es">CHECK 규칙 검사</text>
+  <rect x="574" y="654" width="235" height="94" class="engine"/><text x="691.5" y="682" class="et">권한·트랜잭션</text><text x="691.5" y="711" class="es">권한·잠금 상태 확인</text><text x="691.5" y="732" class="es">성공 시 반영·실패 시 롤백</text>
+  <rect x="832" y="654" width="276" height="94" class="db"/><text x="970" y="682" class="dt">students 테이블</text><text x="970" y="711" class="ds">행 추가·조회·수정·삭제</text><text x="970" y="732" class="ds">또는 상태값 변경</text>
+  <path d="M293 701H316" class="arr"/><path d="M551 701H574" class="arr"/><path d="M809 701H832" class="arr"/>
+
+  <rect x="310" y="765" width="330" height="34" class="engine"/><text x="475" y="786" class="et">결과: 조회값·영향받은 행 수·오류</text>
+  <polygon points="805,759 920,782 805,805 690,782" class="decision"/><text x="805" y="786" class="deci">요구사항과 결과 일치?</text>
+  <path d="M970 748V765H920" class="arr"/><path d="M640 782H690" class="arr"/><path d="M690 782H270V122H400" class="back"/>
+
+  <rect x="54" y="837" width="535" height="54" class="note"/><text x="76" y="860" class="nt">수정·삭제 안전</text><text x="174" y="860" class="ns">실행 전에 같은 조건으로 대상 행을 조회해 확인한다.</text><text x="174" y="879" class="ns">영향받은 행 수가 예상과 다르면 즉시 점검한다.</text>
+  <rect x="611" y="837" width="535" height="54" class="note"/><text x="633" y="860" class="nt">삭제 정책</text><text x="711" y="860" class="ns">복구·감사·법적 보존이 필요하면 상태 변경을 검토한다.</text><text x="711" y="879" class="ns">연결된 FK와 개인정보 정책도 함께 확인한다.</text>
+
+  <rect x="145" y="913" width="910" height="30" class="principle"/><text x="171" y="932" class="pl">핵심 원칙</text><text x="620" y="932" class="pv">CRUD 요청은 SQL과 DBMS 검사를 거쳐 실제 결과까지 확인해야 완료된다</text>
 </svg>
