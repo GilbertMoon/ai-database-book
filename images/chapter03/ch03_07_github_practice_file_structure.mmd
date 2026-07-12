@@ -1,19 +1,57 @@
-flowchart TD
-    A[ai-database-book 저장소] --> B[code]
-    B --> C[chapter03]
-    C --> C1[README.md]
-    C --> C2[setup_check.sql]
+flowchart TB
+    A[ai-database-book 저장소<br/>실습 파일·설명·도식을 함께 버전 관리]
 
-    A --> D[book]
-    D --> D1[chapter03]
-    D1 --> D2[chapter03.md]
-    D1 --> D3[chapter03_activity.md]
+    subgraph CODE[1. 실행 가능한 실습 원본]
+        C[code/chapter03]
+        C1[setup_check.sql<br/>서버·현재 DB 확인<br/>테이블 생성·샘플 데이터·제약조건 실습]
+        C2[README.md<br/>목적·실행 순서·예상 결과·재실행 주의]
+        C --> C1
+        C --> C2
+    end
 
-    A --> E[images]
-    E --> E1[chapter03]
-    E1 --> E2[도식 원본 .mmd]
-    E1 --> E3[도식 이미지 .svg]
+    subgraph BOOK[2. 독자가 읽는 학습 자료]
+        B[book/chapter03]
+        B1[chapter03.md<br/>개념·설치·연결·실습 설명<br/>SQL과 그림 링크]
+        B2[chapter03_activity.md<br/>직접 실행할 활동·결과 기록·확인 질문]
+        B --> B1
+        B --> B2
+    end
 
-    C2 -. 실행 .-> F[DBeaver SQL Editor]
-    F -. 결과 확인 .-> G[PostgreSQL]
-    G -. 결과 기록 .-> D3
+    subgraph IMAGE[3. 도식 원본과 결과물]
+        I[images/chapter03]
+        I1[*.mmd<br/>수정 가능한 Mermaid 원본]
+        I2[*.svg<br/>본문에 삽입하는 렌더링 결과]
+        I3[README.md<br/>도식 목록·삽입 위치·점검 기준]
+        I --> I1
+        I1 -->|같은 개념으로 렌더링·검토| I2
+        I --> I3
+    end
+
+    A --> C
+    A --> B
+    A --> I
+
+    C1 --> D[DBeaver SQL Editor<br/>파일을 열거나 필요한 문장만 선택 실행]
+    D --> P[(PostgreSQL<br/>SQL 처리·데이터 저장·제약조건 검사)]
+    P --> R[실행 결과와 오류 확인<br/>현재 DB·행 수·자동값·예상 제약조건 오류]
+    R --> B2
+    R --> C2
+
+    C1 --> B1
+    C2 --> B1
+    I2 --> B1
+    I2 --> B2
+
+    R --> Q{파일과 설명이<br/>실제 결과와 일치하는가?}
+    Q -- 아니요 --> X[SQL·설명·도식 중 원인을 구분해 수정]
+    X --> C1
+    X --> C2
+    X --> I1
+    Q -- 예 --> G[작은 단위로 커밋<br/>무엇을 왜 바꿨는지 메시지에 기록]
+    G --> H[GitHub에서 변경 이력·비교·복구·다른 환경 재사용]
+
+    N1[저장 대상<br/>SQL·Markdown·Mermaid·SVG·예시 환경변수 파일처럼<br/>다른 사람이 재현하는 데 필요한 텍스트와 도식] --- A
+    N2[저장 금지<br/>DB 비밀번호·전체 접속 URL·API Key·실제 .env·개인정보·운영 데이터 덤프는 공개 저장소에 올리지 않음] --- G
+    N3[주의<br/>GitHub에는 PostgreSQL의 실제 데이터가 자동 저장되지 않음<br/>DB 상태를 재현하려면 스키마·초기 데이터 SQL과 실행 절차를 파일로 남김] --- P
+    N4[원본 관리<br/>도식 수정은 .mmd에서 개념을 먼저 정리하고 .svg를 함께 갱신해 두 파일의 의미를 일치시킴] --- I1
+    N5[핵심<br/>실행 파일·설명·활동 기록·도식이 실제 결과를 중심으로 서로 연결될 때 재현 가능한 학습 저장소가 됨] --- Q
