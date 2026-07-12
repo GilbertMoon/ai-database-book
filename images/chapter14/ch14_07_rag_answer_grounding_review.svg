@@ -1,1 +1,184 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">RAG 답변 근거성 검토</text><rect x="110" y="100" width="250" height="65" class="b m"/><text x="235" y="132" class="l">사용자 질문</text><rect x="475" y="100" width="250" height="65" class="b g"/><text x="600" y="132" class="l">검색된 문서</text><rect x="840" y="100" width="250" height="65" class="b y"/><text x="965" y="132" class="l">생성 답변</text><rect x="410" y="300" width="380" height="70" class="b p"/><text x="600" y="328" class="l">근거성 검토</text><text x="600" y="352" class="s">답변이 검색 문서에 근거하는가?</text><rect x="210" y="500" width="260" height="65" class="b g"/><text x="340" y="528" class="l">근거 있는 답변</text><text x="340" y="552" class="s">출처와 함께 제공</text><rect x="730" y="500" width="260" height="65" class="b r"/><text x="860" y="528" class="l">근거 없는 주장</text><text x="860" y="552" class="s">프롬프트·검색 수정</text><rect x="455" y="650" width="290" height="60" class="b m"/><text x="600" y="680" class="l">다시 검색 또는 답변 수정</text><line x1="360" y1="132" x2="475" y2="132" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="725" y1="132" x2="840" y2="132" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="165" x2="600" y2="300" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="965" y1="165" x2="600" y2="300" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="535" y1="370" x2="340" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="665" y1="370" x2="860" y2="500" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="860" y1="565" x2="600" y2="650" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="650" x2="600" y2="370" stroke="#2b6cb0" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1100" viewBox="0 0 1200 1100" role="img" aria-labelledby="title desc">
+  <title id="title">RAG 답변 근거성 검토</title>
+  <desc id="desc">사용자 질문, 검색된 청크와 생성 답변을 함께 놓고 검색 적합성, 누락, 근거 충실성, 환각, 출처, 최신성, 개인정보와 권한을 검토한 뒤 문제 유형에 따라 검색이나 답변 또는 문서를 수정하고 재검토하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .group{stroke-width:1.5;rx:16}
+      .input-group{fill:#f8fafc;stroke:#a8b3c4}
+      .review-group{fill:#f4f8ff;stroke:#93b4e6}
+      .group-title{font-size:18px;font-weight:700}
+      .group-sub{font-size:13px;fill:#475569}
+      .box{fill:#fff;stroke-width:1.7;rx:12}
+      .question-box{stroke:#3b82c4}.evidence-box{stroke:#3c9a5f}.answer-box{stroke:#d69e2e}
+      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-question{fill:#2f6fad}.badge-evidence{fill:#2f855a}.badge-answer{fill:#b7791f}
+      .box-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .box-main{font-size:13.5px;font-weight:600;text-anchor:middle}
+      .box-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .review-card{fill:#fff;stroke-width:1.6;rx:11}
+      .retrieval-card{stroke:#3b82c4}.grounding-card{stroke:#3c9a5f}.governance-card{stroke:#7c5cc4}
+      .review-no{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .no-retrieval{fill:#2f6fad}.no-grounding{fill:#2f855a}.no-governance{fill:#6b46a8}
+      .review-title{font-size:14px;font-weight:700;text-anchor:middle}
+      .review-question{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
+      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .branch-label{font-size:14px;font-weight:700}
+      .issue{fill:#fff5f5;stroke:#d9534f;stroke-width:1.7;rx:12}
+      .issue-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .issue-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .correction-panel{fill:#fff5f5;stroke:#d9534f;stroke-width:1.5;rx:14}
+      .correction-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .correction-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .divider{stroke:#f1a5a2;stroke-width:1.2}
+      .final{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.7;rx:12}
+      .record{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.7;rx:12}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1100" fill="#fff"/>
+  <text x="600" y="40" class="title">RAG 답변 근거성 검토</text>
+  <text x="600" y="68" class="subtitle">답변만 읽지 말고 질문, 검색 문서, 답변 주장을 서로 대조하여 검토한다</text>
+
+  <rect x="34" y="90" width="1132" height="205" class="group input-group"/>
+  <text x="58" y="121" class="group-title">1. 검토 대상</text>
+  <text x="178" y="121" class="group-sub">세 요소를 같은 화면이나 검토 기록에서 함께 확인</text>
+
+  <rect x="55" y="146" width="330" height="112" class="box question-box"/>
+  <circle cx="79" cy="170" r="14" class="badge-question"/><text x="79" y="170" class="badge">1</text>
+  <text x="220" y="177" class="box-title">사용자 질문</text>
+  <text x="220" y="210" class="box-main">“프리미엄 이용권은 언제</text>
+  <text x="220" y="232" class="box-main">환불할 수 있나요?”</text>
+
+  <rect x="435" y="146" width="330" height="112" class="box evidence-box"/>
+  <circle cx="459" cy="170" r="14" class="badge-evidence"/><text x="459" y="170" class="badge">2</text>
+  <text x="600" y="177" class="box-title">검색된 청크와 출처</text>
+  <text x="600" y="210" class="box-main">chunk 2 · 환불 기준</text>
+  <text x="600" y="235" class="box-sub">service_notice.md · 버전·날짜·권한 포함</text>
+
+  <rect x="815" y="146" width="330" height="112" class="box answer-box"/>
+  <circle cx="839" cy="170" r="14" class="badge-answer"/><text x="839" y="170" class="badge">3</text>
+  <text x="980" y="177" class="box-title">생성 답변</text>
+  <text x="980" y="210" class="box-main">검증 가능한 문장·주장 단위로 분리</text>
+  <text x="980" y="235" class="box-sub">각 주장에 대응하는 근거가 있는지 확인</text>
+
+  <path d="M 220 258 V 328 H 185 V 360" class="arrow"/>
+  <path d="M 600 258 V 328 H 465 V 360" class="arrow"/>
+  <path d="M 980 258 V 328 H 745 V 360" class="arrow"/>
+
+  <rect x="34" y="320" width="1132" height="420" class="group review-group"/>
+  <text x="58" y="351" class="group-title">2. 검토 기준</text>
+  <text x="178" y="351" class="group-sub">검색 품질, 답변 근거성과 문서 관리 기준을 모두 통과해야 함</text>
+
+  <rect x="50" y="378" width="250" height="118" class="review-card retrieval-card"/>
+  <circle cx="74" cy="402" r="14" class="no-retrieval"/><text x="74" y="402" class="review-no">1</text>
+  <text x="175" y="410" class="review-title">검색 적합성</text>
+  <text x="175" y="443" class="review-question">검색된 문서가 질문의</text>
+  <text x="175" y="465" class="review-question">의도와 직접 관련 있는가?</text>
+
+  <rect x="330" y="378" width="250" height="118" class="review-card retrieval-card"/>
+  <circle cx="354" cy="402" r="14" class="no-retrieval"/><text x="354" y="402" class="review-no">2</text>
+  <text x="455" y="410" class="review-title">누락 여부</text>
+  <text x="455" y="443" class="review-question">중요한 근거나 관련 문서가</text>
+  <text x="455" y="465" class="review-question">검색에서 빠지지 않았는가?</text>
+
+  <rect x="610" y="378" width="250" height="118" class="review-card grounding-card"/>
+  <circle cx="634" cy="402" r="14" class="no-grounding"/><text x="634" y="402" class="review-no">3</text>
+  <text x="735" y="410" class="review-title">근거 충실성</text>
+  <text x="735" y="443" class="review-question">각 답변 주장을 검색 문서의</text>
+  <text x="735" y="465" class="review-question">문장이 실제로 뒷받침하는가?</text>
+
+  <rect x="890" y="378" width="250" height="118" class="review-card grounding-card"/>
+  <circle cx="914" cy="402" r="14" class="no-grounding"/><text x="914" y="402" class="review-no">4</text>
+  <text x="1015" y="410" class="review-title">환각 가능성</text>
+  <text x="1015" y="443" class="review-question">문서에 없는 수치·조건·해석이</text>
+  <text x="1015" y="465" class="review-question">답변에 추가되지 않았는가?</text>
+
+  <path d="M 300 437 H 330" class="arrow"/>
+  <path d="M 580 437 H 610" class="arrow"/>
+  <path d="M 860 437 H 890" class="arrow"/>
+
+  <rect x="160" y="538" width="260" height="118" class="review-card governance-card"/>
+  <circle cx="184" cy="562" r="14" class="no-governance"/><text x="184" y="562" class="review-no">5</text>
+  <text x="290" y="570" class="review-title">출처 추적성</text>
+  <text x="290" y="603" class="review-question">답변 문장과 chunk_id·문서명을</text>
+  <text x="290" y="625" class="review-question">연결하여 확인할 수 있는가?</text>
+
+  <rect x="470" y="538" width="260" height="118" class="review-card governance-card"/>
+  <circle cx="494" cy="562" r="14" class="no-governance"/><text x="494" y="562" class="review-no">6</text>
+  <text x="600" y="570" class="review-title">최신성</text>
+  <text x="600" y="603" class="review-question">검색 문서가 최신 버전이며</text>
+  <text x="600" y="625" class="review-question">현재도 유효한 기준인가?</text>
+
+  <rect x="780" y="538" width="260" height="118" class="review-card governance-card"/>
+  <circle cx="804" cy="562" r="14" class="no-governance"/><text x="804" y="562" class="review-no">7</text>
+  <text x="910" y="570" class="review-title">개인정보·접근 권한</text>
+  <text x="910" y="603" class="review-question">민감정보가 노출되거나 권한 없는</text>
+  <text x="910" y="625" class="review-question">문서가 검색되지 않았는가?</text>
+
+  <path d="M 1015 496 V 518 H 290 V 538" class="arrow"/>
+  <path d="M 420 597 H 470" class="arrow"/>
+  <path d="M 730 597 H 780" class="arrow"/>
+  <path d="M 910 656 V 694 H 600 V 750" class="arrow"/>
+
+  <polygon points="600,750 735,815 600,880 465,815" class="decision"/>
+  <text x="600" y="815" class="decision-text">모든 기준 통과?</text>
+
+  <rect x="40" y="765" width="340" height="100" class="issue"/>
+  <text x="210" y="798" class="issue-title">문제 유형 확인</text>
+  <text x="210" y="827" class="issue-sub">검색 품질 · 답변 근거 · 문서 관리 중</text>
+  <text x="210" y="849" class="issue-sub">어느 단계에서 문제가 발생했는지 구분</text>
+
+  <rect x="820" y="765" width="340" height="100" class="final"/>
+  <text x="990" y="798" class="issue-title">근거와 출처를 포함한 최종 답변</text>
+  <text x="990" y="827" class="issue-sub">답변 내용과 사용된 문서·청크를 함께 제공</text>
+  <text x="990" y="849" class="issue-sub">근거가 부족하면 모른다고 답하도록 처리</text>
+
+  <path d="M 465 815 H 380" class="arrow"/>
+  <text x="414" y="799" class="branch-label">아니요</text>
+  <path d="M 735 815 H 820" class="arrow"/>
+  <text x="775" y="799" class="branch-label">예</text>
+
+  <rect x="40" y="892" width="730" height="128" class="correction-panel"/>
+  <text x="405" y="918" class="correction-title">문제 유형별 수정</text>
+  <line x1="283" y1="932" x2="283" y2="1004" class="divider"/>
+  <line x1="527" y1="932" x2="527" y2="1004" class="divider"/>
+
+  <text x="161" y="950" class="correction-title">검색 품질 문제</text>
+  <text x="161" y="976" class="correction-sub">질문 표현·필터·Top-k·임계값</text>
+  <text x="161" y="997" class="correction-sub">청킹을 조정하고 다시 검색</text>
+
+  <text x="405" y="950" class="correction-title">답변 근거 문제</text>
+  <text x="405" y="976" class="correction-sub">근거 없는 주장을 제거하고</text>
+  <text x="405" y="997" class="correction-sub">프롬프트·답변을 다시 생성</text>
+
+  <text x="649" y="950" class="correction-title">문서 관리 문제</text>
+  <text x="649" y="976" class="correction-sub">오래되거나 권한 없는 문서를 제외하고</text>
+  <text x="649" y="997" class="correction-sub">문서 갱신·재임베딩·재검색</text>
+
+  <rect x="820" y="892" width="340" height="128" class="record"/>
+  <text x="990" y="925" class="issue-title">검토 기록</text>
+  <text x="990" y="954" class="issue-sub">질문 · 검색 문서 · 생성 답변</text>
+  <text x="990" y="976" class="issue-sub">검토 판정 · 발견 문제 · 수정 근거</text>
+  <text x="990" y="998" class="issue-sub">최종 답변과 사용한 출처를 함께 보존</text>
+
+  <path d="M 210 865 V 892" class="arrow"/>
+  <path d="M 990 865 V 892" class="arrow"/>
+  <path d="M 40 956 H 18 V 437 H 50" class="feedback"/>
+  <text x="34" y="707" class="branch-label" fill="#b42318">수정 후 재검색·재생성·재검토</text>
+
+  <rect x="180" y="1044" width="840" height="44" class="principle"/>
+  <text x="206" y="1065" class="principle-label">핵심 원칙</text>
+  <text x="620" y="1066" class="principle-text">좋은 RAG 답변은 모든 주장에 확인 가능한 근거가 있고 검색 문서와 출처도 안전해야 한다</text>
+</svg>
