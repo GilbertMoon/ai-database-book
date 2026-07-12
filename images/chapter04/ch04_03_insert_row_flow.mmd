@@ -1,23 +1,52 @@
-flowchart TD
-    A[INSERT INTO students] --> B[컬럼 지정]
-    B --> B1[name]
-    B --> B2[email]
-    B --> B3[major]
-    B --> B4[grade]
+flowchart TB
+    A[추가할 학생 데이터 준비<br/>name·email·major·grade] --> B[대상 테이블과 컬럼 목록 확인<br/>INSERT INTO students<br/>(name, email, major, grade)]
+    B --> C[VALUES 작성<br/>컬럼 위치와 값 위치를 1:1로 대응]
 
-    A --> C[VALUES]
-    C --> C1['김민지']
-    C --> C2['minji@example.com']
-    C --> C3['컴퓨터공학']
-    C --> C4[2]
+    C --> C1[name ↔ '김민지'<br/>문자열은 작은따옴표]
+    C --> C2[email ↔ 'minji@example.com'<br/>UNIQUE 중복 여부 확인]
+    C --> C3[major ↔ '컴퓨터공학'<br/>문자열 또는 NULL 가능]
+    C --> C4[grade ↔ 2<br/>정수 값]
 
-    B1 --> D[새 행 생성]
-    B2 --> D
-    B3 --> D
-    B4 --> D
-    C1 --> D
-    C2 --> D
-    C3 --> D
-    C4 --> D
+    C1 --> V[DBMS가 INSERT 문장 검사]
+    C2 --> V
+    C3 --> V
+    C4 --> V
 
-    D --> E[(students 테이블에 새 행 추가)]
+    V --> V1[컬럼 수와 값 수가 같은가?]
+    V --> V2[각 값이 컬럼 데이터 타입에 맞는가?]
+    V --> V3[NOT NULL·UNIQUE 등 제약조건을 만족하는가?]
+    V --> V4[생략한 컬럼의 처리 규칙이 있는가?]
+
+    V4 --> O1[id 생략<br/>SERIAL 기본값으로 새 번호 생성]
+    V4 --> O2[created_at 생략<br/>DEFAULT CURRENT_TIMESTAMP 적용]
+    V4 --> O3[nullable 컬럼 생략<br/>기본값이 없으면 NULL]
+    V4 --> O4[NOT NULL 컬럼 생략<br/>기본값도 없으면 오류]
+
+    V1 --> G{모든 검사를<br/>통과했는가?}
+    V2 --> G
+    V3 --> G
+    O1 --> G
+    O2 --> G
+    O3 --> G
+    O4 --> G
+
+    G -- 예 --> S[새 행 저장<br/>기존 행은 유지되고 행 수가 1 증가]
+    G -- 아니요 --> E[INSERT 실패<br/>오류 메시지 반환·잘못된 행 미저장]
+
+    S --> Q[SELECT로 결과 확인<br/>입력값·생성된 id·created_at·전체 행 수]
+    E --> F{오류 유형}
+    F -- 컬럼·값 개수 --> F1[목록과 VALUES의 항목 수·순서 수정]
+    F -- 문자열·타입 --> F2[작은따옴표와 데이터 타입 수정]
+    F -- UNIQUE·NOT NULL --> F3[기존 데이터와 필수값 확인]
+    F1 --> C
+    F2 --> C
+    F3 --> C
+
+    M[여러 행 입력<br/>VALUES 뒤에 여러 튜플 작성] --> M1[모든 튜플은 같은 컬럼 수·순서를 사용]
+    M1 --> M2[한 튜플이라도 제약조건을 위반하면<br/>일반적인 한 INSERT 문장 전체가 실패]
+    M2 --> V
+
+    N1[권장<br/>컬럼 목록을 생략한 INSERT보다<br/>입력할 컬럼을 명시하면 구조 변경과 순서 오류에 안전] --- B
+    N2[구분<br/>입력하지 않은 값과 명시적으로 NULL을 넣은 값은 다르며<br/>DEFAULT는 보통 컬럼을 생략하거나 DEFAULT를 지정할 때 적용] --- V4
+    N3[검증<br/>실행 성공 메시지만 보지 말고 SELECT 결과와 영향받은 행 수를 확인] --- Q
+    N4[핵심<br/>INSERT는 값만 나열하는 명령이 아니라<br/>컬럼·값 대응과 테이블 규칙을 통과한 새 행을 추가하는 과정] --- G
