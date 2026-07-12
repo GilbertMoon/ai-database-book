@@ -1,19 +1,134 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="760" viewBox="0 0 1100 760">
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.title{font-size:24px;font-weight:700}.box{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:10;ry:10}.main{fill:#ebf8ff;stroke:#2b6cb0}.db{fill:#fffaf0;stroke:#d69e2e}.tbl{fill:#f0fff4;stroke:#38a169}.label{font-size:17px;text-anchor:middle;dominant-baseline:middle}.small{font-size:14px;text-anchor:middle;dominant-baseline:middle}</style></defs>
-  <rect width="100%" height="100%" fill="white"/>
-  <text x="550" y="40" text-anchor="middle" class="title">DBMS, 데이터베이스, 테이블의 계층 구조</text>
-  <rect x="390" y="80" width="320" height="70" class="box main"/><text x="550" y="115" class="label">PostgreSQL</text><text x="550" y="137" class="small">DBMS</text>
-  <rect x="180" y="230" width="280" height="70" class="box db"/><text x="320" y="265" class="label">school_db</text><text x="320" y="287" class="small">데이터베이스</text>
-  <rect x="640" y="230" width="280" height="70" class="box db"/><text x="780" y="265" class="label">shop_db</text><text x="780" y="287" class="small">데이터베이스</text>
-  <line x1="480" y1="150" x2="320" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="620" y1="150" x2="780" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="80" y="380" width="180" height="58" class="box tbl"/><text x="170" y="410" class="label">students</text>
-  <rect x="290" y="380" width="180" height="58" class="box tbl"/><text x="380" y="410" class="label">courses</text>
-  <rect x="500" y="380" width="180" height="58" class="box tbl"/><text x="590" y="410" class="label">enrollments</text>
-  <rect x="640" y="380" width="180" height="58" class="box tbl"/><text x="730" y="410" class="label">members</text>
-  <rect x="850" y="380" width="180" height="58" class="box tbl"/><text x="940" y="410" class="label">orders</text>
-  <line x1="320" y1="300" x2="170" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="320" y1="300" x2="380" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="320" y1="300" x2="590" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="780" y1="300" x2="730" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="780" y1="300" x2="940" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="100" y="540" width="230" height="58" class="box"/><text x="215" y="570" class="label">행 Row</text><text x="215" y="592" class="small">김민지 학생 한 줄</text>
-  <rect x="370" y="540" width="230" height="58" class="box"/><text x="485" y="570" class="label">열 Column</text><text x="485" y="592" class="small">id, name, email</text>
-  <line x1="170" y1="438" x2="215" y2="540" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="170" y1="438" x2="485" y2="540" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="160" y="660" width="780" height="50" class="box main"/><text x="550" y="685" class="label">DBMS는 여러 데이터베이스를 관리하고, 데이터베이스 안에는 여러 테이블이 존재한다.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
+  <title id="title">DBMS, 데이터베이스, 스키마와 테이블의 계층 구조</title>
+  <desc id="desc">사용자와 데이터베이스 도구가 PostgreSQL DBMS에 연결하고, DBMS가 여러 데이터베이스를 관리하며, 각 데이터베이스 안의 스키마가 테이블을 구분하고, 테이블은 열 구조에 맞는 여러 행을 저장하는 계층 구조</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:28px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .layer{stroke-width:1.6;rx:15}
+      .client-layer{fill:#f8fafc;stroke:#94a3b8}
+      .dbms-layer{fill:#eef5ff;stroke:#3b82c4}
+      .database-layer{fill:#fff8e8;stroke:#d69e2e}
+      .schema-layer{fill:#f5f1ff;stroke:#7c5cc4}
+      .table-layer{fill:#f2fbf5;stroke:#3c9a5f}
+      .record-layer{fill:#ffffff;stroke:#64748b}
+      .layer-title{font-size:18px;font-weight:700;text-anchor:middle}
+      .layer-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .badge{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-client{fill:#64748b}.badge-dbms{fill:#2f6fad}.badge-db{fill:#b7791f}.badge-schema{fill:#6b46a8}.badge-table{fill:#2f855a}
+      .box{fill:#fff;stroke-width:1.5;rx:11}
+      .db-box{stroke:#d69e2e}.schema-box{stroke:#7c5cc4}.table-box{stroke:#3c9a5f}.record-box{stroke:#64748b}
+      .box-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .box-main{font-size:12.5px;font-weight:600;text-anchor:middle}
+      .box-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.1;fill:none;marker-end:url(#arrow)}
+      .brace{stroke:#94a3b8;stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}
+      .note-title{font-size:13px;font-weight:700;fill:#92400e}
+      .note-text{font-size:12px;fill:#475569}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1080" fill="#fff"/>
+  <text x="600" y="40" class="title">DBMS, 데이터베이스, 스키마와 테이블의 계층 구조</text>
+  <text x="600" y="68" class="subtitle">서버에 연결하고 데이터베이스를 선택한 뒤, 스키마 안의 테이블에서 행과 열을 조회한다</text>
+
+  <rect x="365" y="96" width="470" height="84" class="layer client-layer"/>
+  <circle cx="393" cy="122" r="14" class="badge-client"/><text x="393" y="122" class="badge">1</text>
+  <text x="600" y="126" class="layer-title">사용자·애플리케이션·DBeaver</text>
+  <text x="600" y="153" class="layer-sub">연결 정보를 사용해 SQL을 보내고 실행 결과를 확인</text>
+
+  <path d="M600 180V214" class="arrow"/>
+
+  <rect x="260" y="214" width="680" height="118" class="layer dbms-layer"/>
+  <circle cx="288" cy="240" r="14" class="badge-dbms"/><text x="288" y="240" class="badge">2</text>
+  <text x="600" y="246" class="layer-title">PostgreSQL 서버 · 관계형 DBMS</text>
+  <text x="600" y="275" class="box-main">여러 데이터베이스를 생성·관리하고 SQL 실행을 처리</text>
+  <text x="600" y="301" class="layer-sub">연결 · 권한 · 동시성 · 트랜잭션 · 백업 · 복구 관리</text>
+
+  <path d="M500 332V370H300" class="arrow"/>
+  <path d="M700 332V370H900" class="arrow"/>
+
+  <rect x="70" y="370" width="460" height="206" class="layer database-layer"/>
+  <circle cx="98" cy="396" r="14" class="badge-db"/><text x="98" y="396" class="badge">3A</text>
+  <text x="300" y="402" class="layer-title">school_db 데이터베이스</text>
+  <text x="300" y="429" class="layer-sub">학교 서비스 데이터가 저장되는 논리적 공간</text>
+
+  <rect x="670" y="370" width="460" height="206" class="layer database-layer"/>
+  <circle cx="698" cy="396" r="14" class="badge-db"/><text x="698" y="396" class="badge">3B</text>
+  <text x="900" y="402" class="layer-title">shop_db 데이터베이스</text>
+  <text x="900" y="429" class="layer-sub">쇼핑 서비스 데이터가 저장되는 별도의 논리적 공간</text>
+
+  <rect x="105" y="462" width="390" height="88" class="box schema-box"/>
+  <circle cx="129" cy="486" r="13" class="badge-schema"/><text x="129" y="486" class="badge">4</text>
+  <text x="300" y="491" class="box-title">public 또는 app 스키마</text>
+  <text x="300" y="520" class="box-main">테이블·뷰 등을 이름 공간으로 구분</text>
+  <text x="300" y="541" class="box-sub">PostgreSQL의 기본 스키마는 public</text>
+
+  <rect x="705" y="462" width="390" height="88" class="box schema-box"/>
+  <circle cx="729" cy="486" r="13" class="badge-schema"/><text x="729" y="486" class="badge">4</text>
+  <text x="900" y="491" class="box-title">public 또는 sales 스키마</text>
+  <text x="900" y="520" class="box-main">같은 데이터베이스 안의 객체를 그룹화</text>
+  <text x="900" y="541" class="box-sub">서로 같은 테이블 이름도 스키마로 구분 가능</text>
+
+  <path d="M300 550V606" class="arrow"/>
+  <path d="M900 550V606" class="arrow"/>
+
+  <rect x="50" y="606" width="500" height="142" class="layer table-layer"/>
+  <circle cx="78" cy="632" r="14" class="badge-table"/><text x="78" y="632" class="badge">5A</text>
+  <text x="300" y="638" class="layer-title">school_db의 테이블</text>
+  <rect x="75" y="666" width="135" height="54" class="box table-box"/>
+  <text x="142.5" y="688" class="box-title">students</text>
+  <text x="142.5" y="708" class="box-sub">학생</text>
+  <rect x="232" y="666" width="135" height="54" class="box table-box"/>
+  <text x="299.5" y="688" class="box-title">courses</text>
+  <text x="299.5" y="708" class="box-sub">강의</text>
+  <rect x="389" y="666" width="135" height="54" class="box table-box"/>
+  <text x="456.5" y="688" class="box-title">enrollments</text>
+  <text x="456.5" y="708" class="box-sub">수강신청</text>
+
+  <rect x="650" y="606" width="500" height="142" class="layer table-layer"/>
+  <circle cx="678" cy="632" r="14" class="badge-table"/><text x="678" y="632" class="badge">5B</text>
+  <text x="900" y="638" class="layer-title">shop_db의 테이블</text>
+  <rect x="675" y="666" width="135" height="54" class="box table-box"/>
+  <text x="742.5" y="688" class="box-title">members</text>
+  <text x="742.5" y="708" class="box-sub">회원</text>
+  <rect x="832" y="666" width="135" height="54" class="box table-box"/>
+  <text x="899.5" y="688" class="box-title">orders</text>
+  <text x="899.5" y="708" class="box-sub">주문</text>
+  <rect x="989" y="666" width="135" height="54" class="box table-box"/>
+  <text x="1056.5" y="688" class="box-title">products</text>
+  <text x="1056.5" y="708" class="box-sub">상품</text>
+
+  <path d="M142 720V786H300" class="arrow"/>
+
+  <rect x="80" y="786" width="440" height="154" class="layer record-layer"/>
+  <text x="300" y="816" class="layer-title">students 테이블 내부</text>
+  <rect x="105" y="842" width="180" height="72" class="box record-box"/>
+  <text x="195" y="867" class="box-title">열 Column</text>
+  <text x="195" y="891" class="box-main">id · name · email · major</text>
+  <text x="195" y="909" class="box-sub">모든 행이 따르는 항목과 구조</text>
+  <rect x="315" y="842" width="180" height="72" class="box record-box"/>
+  <text x="405" y="867" class="box-title">행 Row</text>
+  <text x="405" y="891" class="box-main">1 · 김민지 · 이메일 · 전공</text>
+  <text x="405" y="909" class="box-sub">학생 한 명에 대한 기록</text>
+
+  <rect x="570" y="786" width="560" height="72" class="note"/>
+  <text x="592" y="811" class="note-title">연결·탐색 순서</text>
+  <text x="592" y="835" class="note-text">서버 연결 → 데이터베이스 선택 → 스키마 탐색 → 테이블 선택 → 행 조회</text>
+
+  <rect x="570" y="874" width="560" height="66" class="note"/>
+  <text x="592" y="899" class="note-title">전체 이름 예시</text>
+  <text x="592" y="923" class="note-text">같은 데이터베이스 안에서는 public.students처럼 schema.table로 객체를 구분한다.</text>
+
+  <rect x="135" y="976" width="930" height="52" class="principle"/>
+  <text x="161" y="1005" class="principle-label">핵심 원칙</text>
+  <text x="620" y="1005" class="principle-text">DBMS는 데이터베이스를 관리하고, 데이터베이스는 스키마를, 스키마는 테이블을 포함하며, 테이블은 열 구조에 맞는 여러 행을 저장한다</text>
 </svg>
