@@ -1,1 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc"><title id="title">기본키와 외래키 관계</title><desc id="desc">members와 books의 기본키를 loans의 member_id와 book_id가 참조하여 대여 기록을 연결하고, 기본키의 유일성과 외래키의 참조 무결성 및 잘못된 값 차단을 설명하는 도식</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.schema{fill:#f8fafc;stroke:#a8b3c4}.rules{fill:#fff8e8;stroke:#d69e2e}.verify{fill:#f2fbf5;stroke:#8bc9a0}.pt{font-size:19px;font-weight:700}.table{fill:#fff;stroke:#64748b;stroke-width:1.5;rx:10}.headB{fill:#dcecff}.headO{fill:#fff1cf}.th{font-size:16px;font-weight:700;text-anchor:middle}.subh{font-size:11px;text-anchor:middle;fill:#475569}.row{stroke:#cbd5e1;stroke-width:1}.cell{font-size:11.2px;fill:#334155}.key{font-size:11.2px;font-weight:700;fill:#1d4ed8}.fk{font-size:11.2px;font-weight:700;fill:#92400e}.sample{font-size:10.7px;fill:#475569}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.red{stroke:#d9534f}.purple{stroke:#7c5cc4}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.4px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#334155}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.refL{stroke:#3b82c4;stroke-width:2.2;fill:none;stroke-dasharray:7 5;marker-end:url(#a)}.refR{stroke:#d69e2e;stroke-width:2.2;fill:none;stroke-dasharray:7 5;marker-end:url(#a)}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.5px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1120" fill="#fff"/><text x="600" y="40" class="t">기본키와 외래키 관계</text><text x="600" y="68" class="s">PK는 자기 행을 유일하게 식별하고, FK는 존재하는 부모 행을 가리켜 테이블 사이의 연결을 보장한다</text><rect x="35" y="100" width="1130" height="530" class="panel schema"/><text x="60" y="132" class="pt">1. 도서 대여 시스템의 키 구조</text><rect x="55" y="165" width="300" height="320" class="table"/><rect x="55" y="165" width="300" height="58" class="headB"/><text x="205" y="190" class="th">members</text><text x="205" y="211" class="subh">회원 한 명을 한 행으로 관리</text><line x1="55" y1="223" x2="355" y2="223" class="row"/><line x1="55" y1="278" x2="355" y2="278" class="row"/><line x1="55" y1="333" x2="355" y2="333" class="row"/><line x1="55" y1="388" x2="355" y2="388" class="row"/><line x1="55" y1="443" x2="355" y2="443" class="row"/><text x="75" y="250" class="key">id · PK</text><text x="230" y="250" class="sample">예: 1</text><text x="75" y="305" class="cell">name</text><text x="230" y="305" class="sample">김민지</text><text x="75" y="360" class="cell">email · UNIQUE</text><text x="230" y="360" class="sample">minji@example.com</text><text x="75" y="415" class="cell">joined_at</text><text x="230" y="415" class="sample">2026-03-01</text><text x="205" y="470" class="m">id는 회원 행의 정체성</text><rect x="450" y="145" width="300" height="380" class="table"/><rect x="450" y="145" width="300" height="58" class="headO"/><text x="600" y="170" class="th">loans</text><text x="600" y="191" class="subh">회원과 책을 연결하는 대여 기록</text><line x1="450" y1="203" x2="750" y2="203" class="row"/><line x1="450" y1="253" x2="750" y2="253" class="row"/><line x1="450" y1="303" x2="750" y2="303" class="row"/><line x1="450" y1="353" x2="750" y2="353" class="row"/><line x1="450" y1="403" x2="750" y2="403" class="row"/><line x1="450" y1="453" x2="750" y2="453" class="row"/><text x="470" y="229" class="key">id · PK</text><text x="635" y="229" class="sample">예: 10</text><text x="470" y="279" class="fk">member_id · FK</text><text x="635" y="279" class="sample">1 → members.id</text><text x="470" y="329" class="fk">book_id · FK</text><text x="635" y="329" class="sample">2 → books.id</text><text x="470" y="379" class="cell">borrowed_at</text><text x="635" y="379" class="sample">2026-04-01</text><text x="470" y="429" class="cell">due_at</text><text x="635" y="429" class="sample">2026-04-15</text><text x="470" y="479" class="cell">returned_at</text><text x="635" y="479" class="sample">NULL</text><text x="600" y="510" class="m">id는 대여 기록 자체, 두 FK는 부모 행을 가리킴</text><rect x="845" y="165" width="300" height="320" class="table"/><rect x="845" y="165" width="300" height="58" class="headB"/><text x="995" y="190" class="th">books</text><text x="995" y="211" class="subh">책 한 권을 한 행으로 관리</text><line x1="845" y1="223" x2="1145" y2="223" class="row"/><line x1="845" y1="278" x2="1145" y2="278" class="row"/><line x1="845" y1="333" x2="1145" y2="333" class="row"/><line x1="845" y1="388" x2="1145" y2="388" class="row"/><line x1="845" y1="443" x2="1145" y2="443" class="row"/><text x="865" y="250" class="key">id · PK</text><text x="1020" y="250" class="sample">예: 2</text><text x="865" y="305" class="cell">title</text><text x="1020" y="305" class="sample">SQL 기초</text><text x="865" y="360" class="cell">author</text><text x="1020" y="360" class="sample">홍길동</text><text x="865" y="415" class="cell">isbn · UNIQUE</text><text x="1020" y="415" class="sample">ISBN-002</text><text x="995" y="470" class="m">id는 책 행의 정체성</text><path d="M450 278H385V250H355" class="refL"/><path d="M750 328H815V250H845" class="refR"/><rect x="250" y="555" width="700" height="48" class="box green"/><text x="600" y="577" class="h">대여 기록 id 10 = 회원 id 1이 책 id 2를 빌린 한 건</text><text x="600" y="596" class="m">JOIN은 loans.member_id = members.id, loans.book_id = books.id 조건으로 상세 정보를 복원</text><rect x="35" y="660" width="1130" height="205" class="panel rules"/><text x="60" y="692" class="pt">2. PK와 FK가 보장하는 규칙</text><rect x="60" y="725" width="500" height="105" class="box blue"/><text x="310" y="752" class="h">기본키 PK</text><text x="310" y="777" class="m">한 테이블 안에서 값이 중복되지 않고 NULL이 될 수 없음</text><text x="310" y="800" class="m">이름·상태가 바뀌어도 같은 행을 안정적으로 식별</text><text x="310" y="821" class="m">members.id · books.id · loans.id는 서로 다른 테이블의 PK</text><rect x="640" y="725" width="500" height="105" class="box orange"/><text x="890" y="752" class="h">외래키 FK</text><text x="890" y="777" class="m">부모 PK에 실제 존재하는 값만 저장 가능</text><text x="890" y="800" class="m">여러 loans 행이 같은 회원·책을 가리킬 수 있어 값 반복 가능</text><text x="890" y="821" class="m">이 설계에서는 NOT NULL이므로 모든 대여 기록에 회원·책이 필수</text><rect x="35" y="895" width="1130" height="125" class="panel verify"/><text x="60" y="927" class="pt">3. 새 대여 기록 저장 시 검증</text><rect x="60" y="950" width="330" height="45" class="box red"/><text x="225" y="970" class="h">loans.id 중복</text><text x="225" y="989" class="m">PK 오류 · 행 정체성 충돌</text><rect x="435" y="950" width="330" height="45" class="box red"/><text x="600" y="970" class="h">member_id = 999</text><text x="600" y="989" class="m">FK 오류 · 존재하지 않는 회원</text><rect x="810" y="950" width="330" height="45" class="box green"/><text x="975" y="970" class="h">PK·FK 모두 유효</text><text x="975" y="989" class="m">행 저장 · 참조 무결성 유지</text><rect x="55" y="1045" width="350" height="38" class="note"/><text x="230" y="1069" class="nt">FK는 자식 테이블 loans에 둔다</text><rect x="425" y="1045" width="350" height="38" class="note"/><text x="600" y="1069" class="nt">부모 PK 삭제·변경은 FK 정책의 영향을 받는다</text><rect x="795" y="1045" width="350" height="38" class="core"/><text x="970" y="1069" class="cv">PK는 행의 정체성 · FK는 존재하는 부모와의 연결</text><rect x="120" y="1095" width="960" height="18" class="core"/><text x="600" y="1108" class="cv">loans.id와 member_id·book_id의 역할을 구분해야 관계와 무결성을 정확히 설명할 수 있다</text></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">기본키와 외래키로 테이블 연결하기</title>
+  <desc id="desc">loans의 기본키와 두 외래키가 members와 books의 기본키를 참조하는 방향을 보여 주는 도식</desc>
+  <style>
+      .ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+      .mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #4b5563; }
+      .box-title { font-size: 18px; font-weight: 700; }
+      .body { font-size: 14px; }
+      .small { font-size: 12.5px; }
+      .card { stroke: #64748b; stroke-width: 1.6; rx: 14; ry: 14; }
+      .entity { fill: #eaf3ff; }
+      .attribute { fill: #ecf9ef; }
+      .relation { fill: #f2ecff; }
+      .decision { fill: #fff6d8; }
+      .danger { fill: #ffeaea; }
+      .ok { fill: #eaf8ee; }
+      .pk { fill: #1d4ed8; font-weight: 700; }
+      .fk { fill: #c2410c; font-weight: 700; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; }
+      .dash { stroke: #64748b; stroke-width: 2; stroke-dasharray: 7 6; fill: none; }
+    </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="620" fill="#ffffff"/>
+  <text x="600.0" y="42" text-anchor="middle" class="ko title">
+    <tspan x="600.0" dy="0">기본키와 외래키로 테이블 연결하기</tspan>
+  </text>
+  <text x="600.0" y="70" text-anchor="middle" class="ko subtitle">
+    <tspan x="600.0" dy="0">PK는 자기 행을 식별하고, FK는 다른 테이블의 기존 행을 참조합니다.</tspan>
+  </text>
+  <rect x="80" y="150" width="270" height="210" rx="14" ry="14" class="card entity"/>
+  <text x="215" y="190" text-anchor="middle" class="ko box-title">
+    <tspan x="215" dy="0">members</tspan>
+  </text>
+  <text x="118" y="240" text-anchor="start" class="mono body">
+    <tspan x="118" dy="0" class="pk">PK  id</tspan>
+    <tspan x="118" dy="34">name</tspan>
+  </text>
+  <rect x="455" y="150" width="270" height="270" rx="14" ry="14" class="card relation"/>
+  <text x="590" y="190" text-anchor="middle" class="ko box-title">
+    <tspan x="590" dy="0">loans</tspan>
+  </text>
+  <text x="493" y="240" text-anchor="start" class="mono body">
+    <tspan x="493" dy="0" class="pk">PK  id</tspan>
+    <tspan x="493" dy="34" class="fk">FK  member_id</tspan>
+    <tspan x="493" dy="34" class="fk">FK  book_id</tspan>
+    <tspan x="493" dy="34">borrowed_at</tspan>
+  </text>
+  <rect x="850" y="150" width="270" height="210" rx="14" ry="14" class="card entity"/>
+  <text x="985" y="190" text-anchor="middle" class="ko box-title">
+    <tspan x="985" dy="0">books</tspan>
+  </text>
+  <text x="888" y="240" text-anchor="start" class="mono body">
+    <tspan x="888" dy="0" class="pk">PK  id</tspan>
+    <tspan x="888" dy="34">title</tspan>
+  </text>
+  <path d="M 455 275 C 400 275, 400 255, 350 255" class="dash" marker-end="url(#arrow)"/>
+  <text x="400" y="240" text-anchor="middle" class="ko small">
+    <tspan x="400" dy="0">FK 참조</tspan>
+  </text>
+  <path d="M 725 330 C 790 330, 790 255, 850 255" class="dash" marker-end="url(#arrow)"/>
+  <text x="790" y="305" text-anchor="middle" class="ko small">
+    <tspan x="790" dy="0">FK 참조</tspan>
+  </text>
+  <line x1="350" y1="380" x2="455" y2="380" class="line"/>
+  <line x1="725" y1="380" x2="850" y2="380" class="line"/>
+  <text x="402" y="404" text-anchor="middle" class="ko small">
+    <tspan x="402" dy="0">관계</tspan>
+  </text>
+  <text x="788" y="404" text-anchor="middle" class="ko small">
+    <tspan x="788" dy="0">관계</tspan>
+  </text>
+  <rect x="105" y="480" width="990" height="90" rx="14" ry="14" class="card decision"/>
+  <text x="600" y="515" text-anchor="middle" class="ko body">
+    <tspan x="600" dy="0">loans.id: 대여 기록 자체 식별  ·  loans.member_id: 회원 참조</tspan>
+    <tspan x="600" dy="26">loans.book_id: 도서 참조  ·  존재하지 않는 ID는 FK 오류 가능</tspan>
+  </text>
+</svg>
