@@ -1,92 +1,159 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
   <title id="title">저장 방식 선택 매트릭스</title>
-  <desc id="desc">데이터 복잡성과 운영 범위를 기준으로 파일, 스프레드시트, 관계형 DB를 비교하고 특수 목적 저장소는 별도 조건으로 검토하는 매트릭스</desc>
+  <desc id="desc">파일, 스프레드시트와 관계형 데이터베이스를 적합한 업무, 사용자와 변경 방식, 관계와 정합성, 대표 사례로 비교하고 세션·캐시와 의미 검색 같은 특수 목적 요구에는 Key-Value 데이터베이스나 벡터 검색 계층을 추가 검토하는 매트릭스</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
     </marker>
     <style>
-      text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill:#1f2937; }
-      .title { font-size:30px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
-      .grid { fill:#ffffff; stroke:#475569; stroke-width:2; }
-      .axis { stroke:#475569; stroke-width:2.2; fill:none; marker-end:url(#arrow); }
-      .axis-line { stroke:#94a3b8; stroke-width:1.8; }
-      .axis-label { font-size:17px; font-weight:700; text-anchor:middle; fill:#334155; }
-      .quad-title { font-size:18px; font-weight:700; text-anchor:middle; }
-      .quad-body { font-size:14.5px; text-anchor:middle; }
-      .q-file { fill:#f0fff4; stroke:#2f9a58; stroke-width:2; }
-      .q-sheet { fill:#eef5ff; stroke:#3b82f6; stroke-width:2; }
-      .q-db { fill:#f5f0ff; stroke:#7c4dcb; stroke-width:2; }
-      .q-db2 { fill:#fff7e6; stroke:#d97706; stroke-width:2; }
-      .dot { fill:#2b6cb0; stroke:#ffffff; stroke-width:2; }
-      .dot-label { font-size:14.5px; fill:#1f2937; }
-      .assist { fill:#ffffff; stroke:#94a3b8; stroke-width:1.8; }
-      .assist-title { font-size:17px; font-weight:700; fill:#475569; text-anchor:middle; }
-      .assist-text { font-size:14.5px; text-anchor:start; fill:#334155; }
-      .message { fill:#eef5ff; stroke:#4d86d7; stroke-width:2.4; }
-      .message-title { font-size:21px; font-weight:700; fill:#0f2d5c; text-anchor:middle; }
-      .message-text { font-size:16px; text-anchor:middle; }
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:28px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .panel{stroke-width:1.5;rx:16}
+      .base-panel{fill:#f8fafc;stroke:#a8b3c4}
+      .special-panel{fill:#f4f8ff;stroke:#93b4e6}
+      .section-title{font-size:18px;font-weight:700}
+      .section-sub{font-size:13px;fill:#475569}
+      .table-head{fill:#e9eef5;stroke:#94a3b8;stroke-width:1.2}
+      .head-text{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .row{stroke-width:1.5;rx:11}
+      .file-row{fill:#f2fbf5;stroke:#62b47a}
+      .sheet-row{fill:#eef5ff;stroke:#6fa2e8}
+      .db-row{fill:#f5f1ff;stroke:#9b7bd2}
+      .choice-title{font-size:17px;font-weight:700;text-anchor:middle}
+      .choice-sub{font-size:11.5px;text-anchor:middle;fill:#64748b}
+      .cell-title{font-size:13.5px;font-weight:700;text-anchor:middle}
+      .cell-text{font-size:12px;text-anchor:middle;fill:#475569}
+      .vline{stroke:#d5dce6;stroke-width:1.1}
+      .badge{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .file-badge{fill:#2f855a}.sheet-badge{fill:#2f6fad}.db-badge{fill:#6b46a8}
+      .special-card{fill:#fff;stroke-width:1.7;rx:12}
+      .kv-card{stroke:#d69e2e}.vector-card{stroke:#3c9a5f}
+      .special-title{font-size:17px;font-weight:700;text-anchor:middle}
+      .special-main{font-size:13px;font-weight:600;text-anchor:middle}
+      .special-sub{font-size:12px;text-anchor:middle;fill:#475569}
+      .not-replace{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}
+      .not-replace-text{font-size:12px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .example-panel{fill:#fff;stroke:#94a3b8;stroke-width:1.4;rx:13}
+      .example-title{font-size:16px;font-weight:700}
+      .chip{stroke-width:1.2;rx:10}
+      .chip-file{fill:#f2fbf5;stroke:#62b47a}.chip-sheet{fill:#eef5ff;stroke:#6fa2e8}.chip-db{fill:#f5f1ff;stroke:#9b7bd2}.chip-kv{fill:#fff8e8;stroke:#d69e2e}.chip-vector{fill:#ecfdf3;stroke:#62b47a}
+      .chip-text{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .flow-box{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.4;rx:10}
+      .flow-title{font-size:13px;font-weight:700;text-anchor:middle}
+      .flow-sub{font-size:11.5px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:11}
+      .note-title{font-size:14px;font-weight:700;fill:#92400e}
+      .note-text{font-size:13px;fill:#475569}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
     </style>
   </defs>
 
-  <rect width="1200" height="900" fill="#ffffff"/>
-  <text x="600" y="46" class="title">저장 방식 선택 매트릭스</text>
+  <rect width="1200" height="1040" fill="#fff"/>
+  <text x="600" y="40" class="title">저장 방식 선택 매트릭스</text>
+  <text x="600" y="68" class="subtitle">데이터 양보다 관계, 정확성, 동시성, 편집 방식과 운영 책임을 함께 비교한다</text>
 
-  <rect x="170" y="110" width="800" height="560" class="grid"/>
-  <line x1="570" y1="110" x2="570" y2="670" class="axis-line"/>
-  <line x1="170" y1="390" x2="970" y2="390" class="axis-line"/>
+  <rect x="34" y="92" width="1132" height="480" class="panel base-panel"/>
+  <text x="58" y="123" class="section-title">1. 기본 저장 방식 비교</text>
+  <text x="248" y="123" class="section-sub">같은 기준으로 비교한 뒤 현재 요구와 예상 확장 비용에 맞는 기본 저장소를 선택</text>
 
-  <line x1="170" y1="704" x2="970" y2="704" class="axis"/>
-  <text x="210" y="735" class="axis-label">단순한 데이터</text>
-  <text x="920" y="735" class="axis-label">복잡한 관계 데이터</text>
+  <rect x="54" y="148" width="1092" height="50" class="table-head"/>
+  <text x="144" y="173" class="head-text">선택지</text>
+  <text x="360" y="173" class="head-text">적합한 데이터·업무</text>
+  <text x="610" y="173" class="head-text">사용자·변경 방식</text>
+  <text x="850" y="173" class="head-text">관계·정확성 관리</text>
+  <text x="1062" y="173" class="head-text">대표 사례</text>
 
-  <line x1="124" y1="670" x2="124" y2="110" class="axis"/>
-  <text x="78" y="640" class="axis-label" transform="rotate(-90 78 640)">개인·소규모</text>
-  <text x="78" y="170" class="axis-label" transform="rotate(-90 78 170)">다중 사용자·서비스 운영</text>
+  <rect x="54" y="210" width="1092" height="102" class="row file-row"/>
+  <circle cx="82" cy="238" r="14" class="file-badge"/><text x="82" y="238" class="badge">1</text>
+  <text x="144" y="242" class="choice-title">파일</text>
+  <text x="144" y="269" class="choice-sub">TXT · Markdown · JSON · CSV</text>
+  <text x="360" y="238" class="cell-title">문서·설정값·단순 기록</text>
+  <text x="360" y="263" class="cell-text">작은 데이터 교환과 고정된 목록</text>
+  <text x="610" y="238" class="cell-title">한 사람 또는 매우 적은 사용자</text>
+  <text x="610" y="263" class="cell-text">변경이 적고 순차적으로 편집</text>
+  <text x="850" y="238" class="cell-title">관계와 제약이 거의 없음</text>
+  <text x="850" y="263" class="cell-text">정확성은 프로그램이나 사람이 직접 관리</text>
+  <text x="1062" y="238" class="cell-title">개인 메모</text>
+  <text x="1062" y="263" class="cell-text">설정 파일 · 고정 메뉴</text>
 
-  <rect x="220" y="470" width="300" height="92" rx="14" ry="14" class="q-file"/>
-  <text x="370" y="500" class="quad-title" fill="#1f7a42">파일 / JSON / CSV</text>
-  <text x="370" y="526" class="quad-body">개인 메모, 설정값,</text>
-  <text x="370" y="548" class="quad-body">작은 데이터 교환</text>
+  <rect x="54" y="326" width="1092" height="102" class="row sheet-row"/>
+  <circle cx="82" cy="354" r="14" class="sheet-badge"/><text x="82" y="354" class="badge">2</text>
+  <text x="144" y="358" class="choice-title">스프레드시트</text>
+  <text x="144" y="385" class="choice-sub">Excel · Google Sheets</text>
+  <text x="360" y="354" class="cell-title">사람이 직접 편집·계산하는 표</text>
+  <text x="360" y="379" class="cell-text">소규모 명단과 공유 목록</text>
+  <text x="610" y="354" class="cell-title">소수 사용자·수기 변경</text>
+  <text x="610" y="379" class="cell-text">사람이 눈으로 확인하며 운영</text>
+  <text x="850" y="354" class="cell-title">단순한 관계와 입력 규칙</text>
+  <text x="850" y="379" class="cell-text">수식·유효성 검사에 의존</text>
+  <text x="1062" y="354" class="cell-title">학생 명단</text>
+  <text x="1062" y="379" class="cell-text">행사 신청 목록</text>
 
-  <rect x="220" y="150" width="310" height="94" rx="14" ry="14" class="q-sheet"/>
-  <text x="375" y="181" class="quad-title" fill="#1f5fb8">스프레드시트</text>
-  <text x="375" y="207" class="quad-body">소규모 명단, 공유 목록,</text>
-  <text x="375" y="229" class="quad-body">사람이 관리하는 표</text>
+  <rect x="54" y="442" width="1092" height="102" class="row db-row"/>
+  <circle cx="82" cy="470" r="14" class="db-badge"/><text x="82" y="470" class="badge">3</text>
+  <text x="144" y="474" class="choice-title">관계형 DB</text>
+  <text x="144" y="501" class="choice-sub">PostgreSQL · MySQL</text>
+  <text x="360" y="470" class="cell-title">웹·앱의 지속적인 업무 데이터</text>
+  <text x="360" y="495" class="cell-text">회원·신청·주문·결제·재고</text>
+  <text x="610" y="470" class="cell-title">여러 사용자·빈번한 변경</text>
+  <text x="610" y="495" class="cell-text">API와 서비스가 계속 조회·수정</text>
+  <text x="850" y="470" class="cell-title">PK/FK·제약·트랜잭션</text>
+  <text x="850" y="495" class="cell-text">관계·무결성·권한·복구를 체계적으로 관리</text>
+  <text x="1062" y="470" class="cell-title">수강신청</text>
+  <text x="1062" y="495" class="cell-text">쇼핑몰 주문·결제</text>
 
-  <rect x="640" y="470" width="300" height="92" rx="14" ry="14" class="q-db"/>
-  <text x="790" y="500" class="quad-title" fill="#5b34a2">관계형 DB 검토</text>
-  <text x="790" y="526" class="quad-body">개인 앱이라도 관계와</text>
-  <text x="790" y="548" class="quad-body">무결성이 중요할 때</text>
+  <line x1="234" y1="148" x2="234" y2="544" class="vline"/>
+  <line x1="486" y1="148" x2="486" y2="544" class="vline"/>
+  <line x1="732" y1="148" x2="732" y2="544" class="vline"/>
+  <line x1="970" y1="148" x2="970" y2="544" class="vline"/>
 
-  <rect x="640" y="150" width="300" height="94" rx="14" ry="14" class="q-db2"/>
-  <text x="790" y="181" class="quad-title" fill="#9a6700">관계형 DB 우선</text>
-  <text x="790" y="207" class="quad-body">수강신청, 주문, 결제처럼</text>
-  <text x="790" y="229" class="quad-body">관계가 많은 서비스</text>
+  <rect x="34" y="594" width="1132" height="214" class="panel special-panel"/>
+  <text x="58" y="625" class="section-title">2. 특수 목적 요구가 있을 때 추가 검토</text>
+  <text x="355" y="625" class="section-sub">기본 저장소를 먼저 정하고 필요한 기능을 보조 계층으로 결합</text>
 
-  <circle cx="300" cy="622" r="8" class="dot"/>
-  <text x="318" y="627" class="dot-label">개인 메모</text>
-  <circle cx="382" cy="596" r="8" class="dot"/>
-  <text x="400" y="601" class="dot-label">카페 메뉴</text>
-  <circle cx="412" cy="340" r="8" class="dot"/>
-  <text x="430" y="345" class="dot-label">학생 명단</text>
-  <circle cx="760" cy="312" r="8" class="dot"/>
-  <text x="778" y="317" class="dot-label">온라인 강의 수강신청</text>
-  <circle cx="838" cy="272" r="8" class="dot"/>
-  <text x="856" y="277" class="dot-label">쇼핑몰 주문·결제·재고</text>
-  <circle cx="720" cy="616" r="8" class="dot"/>
-  <text x="738" y="621" class="dot-label">개인 프로젝트 데이터</text>
+  <rect x="58" y="656" width="520" height="126" class="special-card kv-card"/>
+  <text x="318" y="685" class="special-title">Key-Value DB</text>
+  <text x="318" y="714" class="special-main">세션 · 캐시 · 만료 TTL · 초고속 키 조회</text>
+  <text x="318" y="739" class="special-sub">예: Redis — 로그인 상태나 임시 데이터를 빠르게 읽고 자동 만료</text>
+  <rect x="120" y="751" width="396" height="22" class="not-replace"/>
+  <text x="318" y="762" class="not-replace-text">회원·주문 같은 기준 데이터의 관계형 DB를 대체하기보다 보조</text>
 
-  <rect x="1000" y="270" width="170" height="246" rx="14" ry="14" class="assist"/>
-  <text x="1085" y="302" class="assist-title">추가 요구 조건</text>
-  <text x="1020" y="338" class="assist-text">• 세션·만료·초고속</text>
-  <text x="1034" y="360" class="assist-text">키 조회가 중요하면</text>
-  <text x="1034" y="382" class="assist-text">Key-Value DB 검토</text>
-  <text x="1020" y="424" class="assist-text">• 의미 기반 검색이</text>
-  <text x="1034" y="446" class="assist-text">필요하면 Vector 기능</text>
-  <text x="1034" y="468" class="assist-text">또는 Vector DB 추가</text>
+  <rect x="622" y="656" width="520" height="126" class="special-card vector-card"/>
+  <text x="882" y="685" class="special-title">벡터 검색 기능·Vector DB</text>
+  <text x="882" y="714" class="special-main">문서 의미 검색 · 유사도 검색 · RAG</text>
+  <text x="882" y="739" class="special-sub">예: PostgreSQL pgvector 또는 전용 Vector DB</text>
+  <rect x="684" y="751" width="396" height="22" class="not-replace"/>
+  <text x="882" y="762" class="not-replace-text">원문과 업무 데이터를 대체하지 않고 의미 검색 계층으로 추가</text>
 
-  <rect x="100" y="792" width="1000" height="70" rx="18" ry="18" class="message"/>
-  <text x="600" y="820" class="message-title">핵심 메시지</text>
-  <text x="600" y="846" class="message-text">기본 선택은 데이터 복잡성과 운영 범위로 판단하고, 특수 목적 저장소는 별도 요구 조건으로 추가 검토한다.</text>
+  <rect x="34" y="830" width="1132" height="94" class="example-panel"/>
+  <text x="58" y="858" class="example-title">사례별 선택 예시</text>
+  <rect x="190" y="844" width="130" height="34" class="chip chip-file"/><text x="255" y="861" class="chip-text">개인 메모 → 파일</text>
+  <rect x="334" y="844" width="155" height="34" class="chip chip-sheet"/><text x="411.5" y="861" class="chip-text">소규모 명단 → 시트</text>
+  <rect x="503" y="844" width="190" height="34" class="chip chip-db"/><text x="598" y="861" class="chip-text">온라인 수강신청 → RDB</text>
+  <rect x="707" y="844" width="170" height="34" class="chip chip-kv"/><text x="792" y="861" class="chip-text">로그인 세션 → Key-Value</text>
+  <rect x="891" y="844" width="220" height="34" class="chip chip-vector"/><text x="1001" y="861" class="chip-text">문서 의미 검색 → 벡터 검색</text>
+
+  <rect x="200" y="882" width="220" height="32" class="flow-box"/>
+  <text x="310" y="895" class="flow-title">① 기본 저장 방식 선택</text>
+  <text x="310" y="908" class="flow-sub">관계·정확성·동시성 기준</text>
+  <rect x="490" y="882" width="220" height="32" class="flow-box"/>
+  <text x="600" y="895" class="flow-title">② 특수 기능 추가</text>
+  <text x="600" y="908" class="flow-sub">캐시·TTL·의미 검색 요구</text>
+  <rect x="780" y="882" width="220" height="32" class="flow-box"/>
+  <text x="890" y="895" class="flow-title">③ 운영 중 재평가</text>
+  <text x="890" y="908" class="flow-sub">성장·변경·전환 비용 확인</text>
+  <path d="M420 898H490" class="arrow"/>
+  <path d="M710 898H780" class="arrow"/>
+
+  <rect x="54" y="944" width="1092" height="46" class="note"/>
+  <text x="78" y="966" class="note-title">주의</text>
+  <text x="136" y="966" class="note-text">파일 → 스프레드시트 → DB가 반드시 순차적 단계는 아니다. 확장이 확실하고 정합성이 중요하면 작은 서비스도 처음부터 관계형 DB를 선택할 수 있다.</text>
+
+  <rect x="175" y="1004" width="850" height="24" class="principle"/>
+  <text x="201" y="1019" class="principle-label">핵심 원칙</text>
+  <text x="620" y="1019" class="principle-text">기본 저장소와 특수 목적 검색·캐시 계층을 구분해 조합한다</text>
 </svg>
