@@ -3778,9 +3778,20 @@ AI 시대에도 데이터 모델링은 중요합니다. ChatGPT가 테이블 초
 9. 샘플 데이터를 넣고 검증한다.
 ```
 
-![데이터 모델링 전체 흐름](../images/chapter05/ch05_01_modeling_process.svg)
+| 단계 | 핵심 질문 | 주요 산출물 |
+| --- | --- | --- |
+| 요구사항 분석 | 무엇을 관리하고 어떤 규칙이 있는가? | 요구사항·업무 규칙 목록 |
+| 엔터티 찾기 | 독립적으로 관리할 대상은 무엇인가? | 테이블 후보 |
+| 속성 정리 | 각 대상은 어떤 정보를 가지는가? | 컬럼 후보 |
+| 관계 분석 | 대상들은 어떻게 연결되는가? | 1:1, 1:N, N:M 관계 |
+| 키 설계 | 행과 관계를 어떻게 식별하는가? | PK와 FK |
+| ERD 작성 | 구조를 한눈에 어떻게 표현하는가? | ERD 초안 |
+| SQL 구현 | PostgreSQL에서 어떻게 생성하는가? | CREATE TABLE SQL |
+| 검증 | 요구사항을 실제 데이터로 표현할 수 있는가? | 샘플 데이터와 JOIN 결과 |
 
-그림 5-1 데이터 모델링 전체 흐름
+![요구사항에서 데이터베이스 구조까지의 모델링 흐름](../images/chapter05/ch05_01_modeling_process.svg)
+
+그림 5-1 요구사항에서 데이터베이스 구조까지의 모델링 흐름
 
 초급 단계에서는 완벽한 모델링보다 다음 질문에 답하는 것이 중요합니다.
 
@@ -3839,9 +3850,9 @@ loans
 
 엔터티는 테이블이 되고, 속성은 컬럼이 됩니다.
 
-![엔터티와 속성 구분](../images/chapter05/ch05_02_entity_attribute_classification.svg)
+![엔터티와 속성 구분하기](../images/chapter05/ch05_02_entity_attribute_classification.svg)
 
-그림 5-2 엔터티와 속성 구분
+그림 5-2 엔터티와 속성 구분하기
 
 도서관 예제에서는 다음처럼 정리할 수 있습니다.
 
@@ -3887,9 +3898,9 @@ members.id  ← loans.member_id
 books.id    ← loans.book_id
 ```
 
-![기본키와 외래키 관계](../images/chapter05/ch05_03_primary_foreign_key_relationship.svg)
+![기본키와 외래키로 테이블 연결하기](../images/chapter05/ch05_03_primary_foreign_key_relationship.svg)
 
-그림 5-3 기본키와 외래키 관계
+그림 5-3 기본키와 외래키로 테이블 연결하기
 
 이 구조를 사용하면 다음을 표현할 수 있습니다.
 
@@ -3926,9 +3937,9 @@ books.id    ← loans.book_id
 loans.member_id → members.id
 ```
 
-![1:N 관계 구조](../images/chapter05/ch05_04_one_to_many_relationship.svg)
+![1:N 관계와 외래키 위치](../images/chapter05/ch05_04_one_to_many_relationship.svg)
 
-그림 5-4 1:N 관계 구조
+그림 5-4 1:N 관계와 외래키 위치
 
 ### 6.2 N:M 관계
 
@@ -3941,9 +3952,9 @@ N:M 관계는 직접 표현하지 않고 중간 테이블을 둡니다.
 
 이 관계를 `loans` 테이블이 중간에서 연결합니다.
 
-![N:M 관계와 중간 테이블](../images/chapter05/ch05_05_many_to_many_bridge_table.svg)
+![N:M 관계를 연결 테이블로 풀기](../images/chapter05/ch05_05_many_to_many_bridge_table.svg)
 
-그림 5-5 N:M 관계와 중간 테이블
+그림 5-5 N:M 관계를 연결 테이블로 풀기
 
 ---
 
@@ -4010,6 +4021,8 @@ ERD는 이 구조를 한눈에 볼 수 있게 해 줍니다.
 | books | 도서 정보를 독립적으로 관리해야 함 |
 | loans | 회원이 책을 대여한 기록을 관리해야 함 |
 
+이 장의 단순 예제에서는 `books` 한 행을 하나의 대여 대상 도서 레코드로 취급하며, 동일 ISBN의 여러 복본을 구분하는 기능은 범위에서 제외합니다.
+
 ---
 
 ## 9. ERD 초안 작성하기
@@ -4020,9 +4033,9 @@ ERD는 이 구조를 한눈에 볼 수 있게 해 줍니다.
 members 1 ─── N loans N ─── 1 books
 ```
 
-![도서 대여 시스템 ERD](../images/chapter05/ch05_06_library_erd_overview.svg)
+![도서 대여 시스템 핵심 ERD](../images/chapter05/ch05_06_library_erd_overview.svg)
 
-그림 5-6 도서 대여 시스템 ERD
+그림 5-6 도서 대여 시스템 핵심 ERD
 
 관계를 문장으로 풀어 쓰면 다음과 같습니다.
 
@@ -4041,9 +4054,20 @@ members 1 ─── N loans N ─── 1 books
 
 ERD 초안을 PostgreSQL 테이블로 바꾸면 다음과 같습니다.
 
-![ERD에서 SQL로 변환](../images/chapter05/ch05_07_erd_to_sql_flow.svg)
+| ERD 요소 | PostgreSQL 구현 |
+| --- | --- |
+| 엔터티 | `CREATE TABLE` |
+| 속성 | 컬럼명과 데이터 타입 |
+| 식별자 | `PRIMARY KEY` |
+| 1:N 관계 | N쪽 테이블의 `FOREIGN KEY` |
+| 반드시 필요한 값 | `NOT NULL` |
+| 중복되면 안 되는 값 | `UNIQUE` |
+| 비어 있을 수 있는 값 | NULL 허용 |
+| 부모·자식 생성 순서 | 부모 테이블 생성 후 자식 테이블 생성 |
 
-그림 5-7 ERD에서 SQL로 변환
+![ERD를 PostgreSQL 테이블로 변환하기](../images/chapter05/ch05_07_erd_to_sql_flow.svg)
+
+그림 5-7 ERD를 PostgreSQL 테이블로 변환하기
 
 ```sql
 DROP TABLE IF EXISTS loans;
@@ -4094,18 +4118,21 @@ book_id INT NOT NULL REFERENCES books(id)
 INSERT INTO members (name, email, joined_at)
 VALUES
     ('김민지', 'minji@example.com', '2026-03-01'),
-    ('이준호', 'junho@example.com', '2026-03-05');
+    ('이준호', 'junho@example.com', '2026-03-05'),
+    ('박서연', 'seoyeon@example.com', '2026-03-10');
 
 INSERT INTO books (title, author, published_year, isbn)
 VALUES
     ('데이터베이스 입문', '문길래', 2026, 'ISBN-001'),
-    ('SQL 기초', '홍길동', 2025, 'ISBN-002');
+    ('SQL 기초', '홍길동', 2025, 'ISBN-002'),
+    ('ERD 설계 연습', '이몽룡', 2024, 'ISBN-003');
 
 INSERT INTO loans (member_id, book_id, borrowed_at, due_at, returned_at)
 VALUES
     (1, 1, '2026-04-01', '2026-04-15', NULL),
     (1, 2, '2026-04-02', '2026-04-16', '2026-04-10'),
-    (2, 1, '2026-04-03', '2026-04-17', NULL);
+    (2, 1, '2026-04-03', '2026-04-17', NULL),
+    (3, 3, '2026-04-05', '2026-04-19', NULL);
 ```
 
 이 데이터는 다음을 검증합니다.
@@ -4132,7 +4159,8 @@ SELECT
     loans.returned_at
 FROM loans
 JOIN members ON loans.member_id = members.id
-JOIN books ON loans.book_id = books.id;
+JOIN books ON loans.book_id = books.id
+ORDER BY loans.id;
 ```
 
 예상 결과는 다음과 같습니다.
@@ -4142,6 +4170,7 @@ JOIN books ON loans.book_id = books.id;
 | 1 | 김민지 | 데이터베이스 입문 | 2026-04-01 | 2026-04-15 | NULL |
 | 2 | 김민지 | SQL 기초 | 2026-04-02 | 2026-04-16 | 2026-04-10 |
 | 3 | 이준호 | 데이터베이스 입문 | 2026-04-03 | 2026-04-17 | NULL |
+| 4 | 박서연 | ERD 설계 연습 | 2026-04-05 | 2026-04-19 | NULL |
 
 JOIN은 다음 장에서 더 자세히 다룹니다. 여기서는 ERD가 실제 데이터 조회를 가능하게 하는지 확인하는 용도로만 사용합니다.
 
