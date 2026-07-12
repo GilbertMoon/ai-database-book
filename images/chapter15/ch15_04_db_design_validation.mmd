@@ -1,13 +1,10 @@
 flowchart TB
-    A[Requirements] --> B[ERD check]
-    B --> C[DDL check]
-    C --> D[Seed data]
-    D --> E[Core SQL]
-    E --> F[Validation result]
-
-    B --> B1[Entities relationships N:M]
-    C --> C1[PK FK NOT NULL UNIQUE CHECK]
-    D --> D1[Normal and relation data]
-    E --> E1[SELECT JOIN GROUP BY]
-    F --> F1[Revise design if needed]
-    F1 --> B
+    A[요구사항 확인] --> B[ERD 관계 점검]
+    B --> C[PostgreSQL DDL·제약조건 점검]
+    C --> D[검증 시나리오 데이터 입력]
+    D --> E[조회·JOIN·집계·검증 SQL 실행]
+    E --> F[실행 결과와 업무 규칙 비교]
+    F --> G{수정 필요?}
+    G -- 예 --> H[원인 단계 수정<br/>요구사항·ERD·DDL·데이터·SQL]
+    H --> A
+    G -- 아니요 --> I[검증 결과와 수정 근거 기록]
