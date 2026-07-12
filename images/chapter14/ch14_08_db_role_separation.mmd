@@ -1,15 +1,29 @@
 flowchart TB
-    A[AI service data] --> B[Relational DB]
-    A --> C[Document storage]
-    A --> D[Vector DB]
-    A --> E[Log storage]
+    subgraph ROLE[1. 데이터별 저장 역할]
+        R[관계형 DB<br/>회원·구독·결제·권한<br/>정합성과 트랜잭션의 기준 데이터]
+        O[문서 저장소 또는 문서 테이블<br/>공지·규정·매뉴얼 원문<br/>버전·출처·수정일 관리]
+        V[벡터 검색 계층<br/>chunk_id·embedding·검색 메타데이터<br/>Vector DB 또는 PostgreSQL pgvector]
+        L[로그·검토 저장소<br/>질문·검색 결과·거리·답변·검토 판정<br/>품질 분석과 추적]
+    end
 
-    B --> B1[members subscriptions payments]
-    C --> C1[notices manuals service guides]
-    D --> D1[document embeddings]
-    E --> E1[questions searches answer reviews]
+    O --> P[청킹·임베딩 생성]
+    P --> V
 
-    B1 --> F[Data consistency]
-    C1 --> G[Original evidence]
-    D1 --> H[Semantic search]
-    E1 --> I[Quality monitoring]
+    subgraph QUERY[2. 사용자 질문 처리]
+        Q[사용자 질문] --> A[사용자 권한·구조화 조건 확인]
+        R --> A
+        A --> S[의미 검색과 메타데이터 필터]
+        V --> S
+        S --> I[관련 chunk_id·순위·거리 반환]
+        I --> F[원문 청크와 출처 조회]
+        O --> F
+        F --> G[근거 기반 답변 생성]
+        G --> H[답변·출처 제공]
+    end
+
+    Q --> L
+    I --> L
+    G --> L
+    H --> L
+
+    N[핵심<br/>관계형 DB와 문서 원문은 기준 데이터이고<br/>임베딩 벡터는 다시 만들 수 있는 파생 검색 데이터] --- V
