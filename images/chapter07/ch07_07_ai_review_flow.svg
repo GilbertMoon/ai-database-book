@@ -1,1 +1,110 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:25px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0;stroke-width:2;rx:12}.g{fill:#f0fff4;stroke:#38a169;stroke-width:2;rx:12}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:12px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">AI 제안을 실행 가능한 설계로 바꾸는 검토 흐름</text><line x1="245" y1="161.0" x2="280" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="470" y1="161.0" x2="505" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="695" y1="161.0" x2="730" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="920" y1="161.0" x2="955" y2="161.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="1050.0" y1="197" x2="150.0" y2="350" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="245" y1="386.0" x2="280" y2="386.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><line x1="470" y1="386.0" x2="505" y2="386.0" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/><rect x="55" y="125" width="190" height="72" class="m"/><text x="150.0" y="161" class="l">요구사항 입력</text><rect x="280" y="125" width="190" height="72" class="b"/><text x="375.0" y="161" class="l">AI 설계 초안</text><rect x="505" y="125" width="190" height="72" class="b"/><text x="600.0" y="161" class="l">테이블·관계</text><rect x="730" y="125" width="190" height="72" class="b"/><text x="825.0" y="161" class="l">PK·FK·제약</text><rect x="955" y="125" width="190" height="72" class="b"/><text x="1050.0" y="161" class="l">SQL 실행</text><rect x="55" y="350" width="190" height="72" class="b"/><text x="150.0" y="386" class="l">오류·결과 확인</text><rect x="280" y="350" width="190" height="72" class="b"/><text x="375.0" y="386" class="l">사람이 수정</text><rect x="505" y="350" width="190" height="72" class="g"/><text x="600.0" y="386" class="l">검토 기록</text><rect x="330" y="520" width="540" height="58" class="g"/><text x="600" y="549" class="l">AI 결과는 초안이며 실행 결과와 데이터베이스 원리로 검증한다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1480" viewBox="0 0 1200 1480" role="img" aria-labelledby="title desc">
+  <title id="title">AI 제안을 실행 가능한 설계로 바꾸는 검토 흐름</title>
+  <desc id="desc">온라인 강의 데이터베이스 요구사항과 범위를 AI에 구조적으로 전달하고, AI 초안을 요구사항 충실도, 데이터 모델, 키와 제약조건, PostgreSQL 실행 결과로 검토한 뒤 불일치 원인을 분류해 사람이 수정하고 근거를 기록하는 반복 흐름</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}
+      .panel{stroke-width:1.5;rx:15}.input{fill:#eef5ff;stroke:#6fa2e8}.draft{fill:#fff8e8;stroke:#d69e2e}.review{fill:#f8fafc;stroke:#a8b3c4}.run{fill:#f3f0ff;stroke:#a995d6}.result{fill:#f2fbf5;stroke:#8bc9a0}
+      .pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.purple{stroke:#7c5cc4}.red{stroke:#d9534f}.gray{stroke:#64748b}
+      .h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.2px;text-anchor:middle;fill:#475569}.code{font-family:Consolas,D2Coding,monospace;font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
+      .arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}
+      .tagB{fill:#dcecff}.tagO{fill:#fff1cf}.tagG{fill:#dcfce7}.tagP{fill:#ede9fe}.tagR{fill:#fee2e2}.tagX{fill:#e2e8f0}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:13.7px;font-weight:700;text-anchor:middle}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:13.7px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+  <rect width="1200" height="1480" fill="#fff"/>
+  <text x="600" y="40" class="t">AI 제안을 실행 가능한 설계로 바꾸는 검토 흐름</text>
+  <text x="600" y="68" class="s">AI 결과를 정답으로 채택하지 않고, 원문 요구사항과 실행 결과로 검증하는 설계 가설로 다룬다</text>
+
+  <rect x="35" y="100" width="1130" height="205" class="panel input"/>
+  <text x="60" y="132" class="pt">1. AI에 묻기 전에 사람이 검증 기준과 범위를 준비</text>
+  <rect x="55" y="165" width="250" height="105" class="box blue"/>
+  <rect x="55" y="165" width="250" height="32" class="tagB" rx="10"/>
+  <text x="180" y="187" class="h">원문 요구사항</text>
+  <text x="180" y="222" class="m">학생 · 강사 · 강의 · 수강신청</text><text x="180" y="245" class="m">1:N · N:M · 상태 · 금액 · 이메일 규칙</text><text x="180" y="264" class="m">문장 자체를 기준 문서로 보존</text>
+  <rect x="335" y="165" width="250" height="105" class="box orange"/>
+  <rect x="335" y="165" width="250" height="32" class="tagO" rx="10"/>
+  <text x="460" y="187" class="h">포함·제외 범위</text>
+  <text x="460" y="222" class="m">포함 · 4개 핵심 테이블과 SQL 검증</text><text x="460" y="245" class="m">제외 · 환불·진도율·수료증·결제 이력</text><text x="460" y="264" class="m">미정 규칙은 미정으로 표시</text>
+  <rect x="615" y="165" width="250" height="105" class="box purple"/>
+  <rect x="615" y="165" width="250" height="32" class="tagP" rx="10"/>
+  <text x="740" y="187" class="h">출력 형식 요청</text>
+  <text x="740" y="222" class="m">한 행 의미 · PK · FK · 선택성</text><text x="740" y="245" class="m">PostgreSQL DDL · 샘플 · JOIN</text><text x="740" y="264" class="m">오류 테스트와 가정 목록</text>
+  <rect x="895" y="165" width="250" height="105" class="box red"/>
+  <rect x="895" y="165" width="250" height="32" class="tagR" rx="10"/>
+  <text x="1020" y="187" class="h">명시적 금지</text>
+  <text x="1020" y="222" class="m">근거 없는 테이블·컬럼·기능 확정 금지</text><text x="1020" y="245" class="m">미정 규칙을 자연스럽게 추측하지 않기</text><text x="1020" y="264" class="m">가정은 사실과 분리해 표시</text>
+
+  <rect x="35" y="335" width="1130" height="175" class="panel draft"/>
+  <text x="60" y="367" class="pt">2. AI 초안은 빠르게 생성하되 네 종류의 산출물로 분리</text>
+  <rect x="55" y="405" width="245" height="75" class="box blue"/>
+  <text x="177" y="430" class="h">요구사항 요약</text><text x="177" y="458" class="m">사용자·데이터·행동·업무 규칙</text>
+  <rect x="335" y="405" width="245" height="75" class="box orange"/>
+  <text x="457" y="430" class="h">설계 후보</text><text x="457" y="458" class="m">테이블·컬럼·관계·키·제약조건</text>
+  <rect x="615" y="405" width="245" height="75" class="box purple"/>
+  <text x="737" y="430" class="h">실행 후보</text><text x="737" y="458" class="m">DDL·샘플 데이터·JOIN·CRUD</text>
+  <rect x="895" y="405" width="245" height="75" class="box gray"/>
+  <text x="1017" y="430" class="h">가정·미정 항목</text><text x="1017" y="458" class="m">재신청·취소 이력·추가 기능 등</text>
+  <path d="M300 442H335" class="arr"/><path d="M580 442H615" class="arr"/><path d="M860 442H895" class="arr"/>
+
+  <rect x="35" y="540" width="1130" height="390" class="panel review"/>
+  <text x="60" y="572" class="pt">3. 자연스러운 설명보다 요구사항 충실도·모델·제약조건을 근거로 검토</text>
+  <rect x="55" y="610" width="330" height="130" class="box blue"/>
+  <rect x="55" y="610" width="330" height="32" class="tagB" rx="10"/>
+  <text x="220" y="632" class="h">요구사항 충실도</text>
+  <text x="220" y="669" class="m">원문 데이터와 규칙이 빠지지 않았는가?</text><text x="220" y="692" class="m">범위 밖 기능을 임의로 추가하지 않았는가?</text><text x="220" y="715" class="m">미정 업무 규칙을 확정하지 않았는가?</text>
+  <rect x="435" y="610" width="330" height="130" class="box orange"/>
+  <rect x="435" y="610" width="330" height="32" class="tagO" rx="10"/>
+  <text x="600" y="632" class="h">데이터 모델·정규화</text>
+  <text x="600" y="669" class="m">각 테이블 한 행과 값의 소유자가 분명한가?</text><text x="600" y="692" class="m">학생–강의 N:M을 enrollments로 해소했는가?</text><text x="600" y="715" class="m">설명값 반복과 과도한 분리가 없는가?</text>
+  <rect x="815" y="610" width="330" height="130" class="box purple"/>
+  <rect x="815" y="610" width="330" height="32" class="tagP" rx="10"/>
+  <text x="980" y="632" class="h">키·제약조건·선택성</text>
+  <text x="980" y="669" class="m">PK와 FK 방향·NOT NULL이 올바른가?</text><text x="980" y="692" class="m">이메일 UNIQUE, 상태·금액 CHECK가 있는가?</text><text x="980" y="715" class="m">재신청 UNIQUE가 실제 정책과 맞는가?</text>
+
+  <rect x="75" y="775" width="500" height="115" class="box red"/>
+  <text x="325" y="802" class="h">자주 발견되는 AI 오류</text>
+  <text x="325" y="833" class="m">환불·진도율 테이블을 요구 없이 추가 · email을 PK로 사용</text><text x="325" y="856" class="m">N:M을 문자열 목록으로 저장 · FK 방향 반대 · CHECK 누락</text><text x="325" y="879" class="m">같은 강의 재신청을 묻지 않고 UNIQUE를 자동 추가</text>
+  <rect x="625" y="775" width="500" height="115" class="box green"/>
+  <text x="875" y="802" class="h">사람이 확인할 설계 근거</text>
+  <text x="875" y="833" class="code">students 1:N enrollments N:1 courses</text><text x="875" y="856" class="m">신청일·상태·실제 결제액은 enrollments의 속성</text><text x="875" y="879" class="m">문서 규칙은 UNIQUE·FK·NOT NULL·CHECK로 구현</text>
+
+  <rect x="35" y="960" width="1130" height="235" class="panel run"/>
+  <text x="60" y="992" class="pt">4. PostgreSQL에서 정상·오류·조회·변경 시나리오로 실행 검증</text>
+  <rect x="55" y="1030" width="245" height="120" class="box blue"/>
+  <rect x="55" y="1030" width="245" height="32" class="tagB" rx="10"/>
+  <text x="177" y="1052" class="h">구조 실행</text>
+  <text x="177" y="1088" class="m">빈 DB에서 부모부터 CREATE</text><text x="177" y="1111" class="m">타입·PK·FK·제약조건 확인</text><text x="177" y="1134" class="m">DROP 후 재실행 가능성 확인</text>
+  <rect x="335" y="1030" width="245" height="120" class="box orange"/>
+  <rect x="335" y="1030" width="245" height="32" class="tagO" rx="10"/>
+  <text x="457" y="1052" class="h">정상 데이터</text>
+  <text x="457" y="1088" class="m">한 강사의 여러 강의</text><text x="457" y="1111" class="m">한 학생의 여러 신청</text><text x="457" y="1134" class="m">한 강의의 여러 학생</text>
+  <rect x="615" y="1030" width="245" height="120" class="box red"/>
+  <rect x="615" y="1030" width="245" height="32" class="tagR" rx="10"/>
+  <text x="737" y="1052" class="h">오류 데이터</text>
+  <text x="737" y="1088" class="m">중복 email · 없는 FK</text><text x="737" y="1111" class="m">음수 금액 · 잘못된 status</text><text x="737" y="1134" class="m">예상 제약조건에서 차단되는지 확인</text>
+  <rect x="895" y="1030" width="245" height="120" class="box purple"/>
+  <rect x="895" y="1030" width="245" height="32" class="tagP" rx="10"/>
+  <text x="1017" y="1052" class="h">조회·변경</text>
+  <text x="1017" y="1088" class="m">JOIN으로 학생·강의·강사 복원</text><text x="1017" y="1111" class="m">예상 행 수·중복·누락 비교</text><text x="1017" y="1134" class="m">UPDATE·DELETE 전후 SELECT</text>
+  <rect x="165" y="1162" width="870" height="22" class="box purple"/>
+  <text x="600" y="1178" class="m">SQL이 오류 없이 실행된다는 사실과 요구사항을 올바르게 재현한다는 사실은 다르다</text>
+
+  <rect x="35" y="1225" width="1130" height="160" class="panel result"/>
+  <text x="60" y="1257" class="pt">5. 불일치는 원인을 분류해 사람이 수정하고 근거를 남김</text>
+  <rect x="55" y="1285" width="300" height="65" class="box red"/>
+  <text x="205" y="1309" class="h">누락·환각</text><text x="205" y="1333" class="m">원문·범위·미정 규칙과 비교</text>
+  <polygon points="600,1280 735,1317 600,1354 465,1317" class="decision"/>
+  <text x="600" y="1312" class="dt">요구사항·ERD·DDL·실행 결과가</text><text x="600" y="1332" class="m">같은 업무 규칙을 설명하는가?</text>
+  <rect x="845" y="1285" width="300" height="65" class="box green"/>
+  <text x="995" y="1309" class="h">승인 가능한 기준선</text><text x="995" y="1333" class="code">AI 초안 · 수정본 · ERD · SQL · 결과</text>
+  <path d="M465 1317H355" class="back"/><path d="M735 1317H845" class="arr"/>
+  <path d="M205 1285V1210H18V660H55" class="back"/>
+
+  <rect x="55" y="1405" width="350" height="34" class="note"/><text x="230" y="1427" class="nt">AI는 후보 생성 · 범위와 최종 책임은 사람</text>
+  <rect x="425" y="1405" width="350" height="34" class="note"/><text x="600" y="1427" class="nt">채택·거절·보류와 수정 이유를 기록</text>
+  <rect x="795" y="1405" width="350" height="34" class="core"/><text x="970" y="1427" class="cv">AI 결과는 답이 아니라 테스트 가능한 설계 가설</text>
+</svg>
