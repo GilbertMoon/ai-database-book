@@ -1,14 +1,25 @@
-flowchart LR
-    A[students 테이블] --> B{SELECT 범위}
+flowchart TB
+    A[(students 테이블<br/>id·name·email·major·grade<br/>학생 행 3개)] --> B[FROM students<br/>조회할 입력 테이블 결정]
+    B --> C{SELECT 목록은?}
 
-    B --> C[SELECT *]
-    B --> D[SELECT name, email, major]
+    C -- 모든 열 --> D[SELECT *<br/>현재 테이블의 모든 컬럼 요청]
+    C -- 필요한 열 명시 --> E[SELECT name, major<br/>출력할 컬럼과 순서를 직접 지정]
 
-    C --> C1[모든 컬럼 조회]
-    D --> D1[필요한 컬럼만 조회]
+    D --> D1[결과 열<br/>id·name·email·major·grade]
+    E --> E1[결과 열<br/>name·major]
 
-    C1 --> E[결과: id, name, email, major, grade, created_at]
-    D1 --> F[결과: name, email, major]
+    D1 --> R1[결과 행<br/>WHERE가 없으므로 원본 학생 행 3개 유지]
+    E1 --> R2[결과 행<br/>WHERE가 없으므로 원본 학생 행 3개 유지]
 
-    E --> G[편리하지만 불필요한 데이터 포함 가능]
-    F --> H[명확하고 필요한 데이터만 확인]
+    R1 --> V1[장점<br/>빠른 탐색·테이블 구조 확인에 편리]
+    R1 --> W1[주의<br/>불필요한 열·민감정보 포함 가능<br/>새 컬럼 추가 시 결과 구조가 달라질 수 있음]
+
+    R2 --> V2[장점<br/>의도가 명확하고 전송·표시할 데이터가 줄어듦]
+    R2 --> W2[확인<br/>컬럼명 오타·존재 여부·출력 순서를 결과 그리드에서 검증]
+
+    E --> O[SELECT major, name처럼<br/>작성 순서를 바꾸면 결과 컬럼 순서도 바뀜]
+
+    N1[개념 구분<br/>FROM은 어느 테이블에서 읽을지 정하고<br/>SELECT 목록은 결과에 표시할 열을 정함] --- B
+    N2[행과 열<br/>이 그림은 컬럼 선택인 projection을 설명하며<br/>행을 제한하는 WHERE는 별도의 filtering 단계] --- C
+    N3[권장<br/>학습·탐색에는 SELECT *를 사용할 수 있지만<br/>반복 사용하거나 공유하는 SQL은 필요한 컬럼을 명시] --- D
+    N4[핵심<br/>SELECT 결과는 원본 테이블 자체가 아니라<br/>요청한 열과 행으로 만들어진 별도의 결과 집합] --- E1
