@@ -1,11 +1,7 @@
 flowchart LR
-    A[BEGIN] --> B[SQL 1 실행]
-    B --> C[SQL 2 실행]
-    C --> D[SQL 3 실행]
-
-    D --> E{문제 없음?}
-    E -- 예 --> F[COMMIT]
-    E -- 아니오 --> G[ROLLBACK]
-
-    F --> H[변경 내용 확정]
-    G --> I[변경 내용 취소]
+    A[변경 전 SELECT] --> B[BEGIN]
+    B --> C[여러 변경 SQL]
+    C --> D[COMMIT 전 SELECT 검증]
+    D --> E{예상 결과와 일치하는가?}
+    E -- 예 --> F[COMMIT · 변경 확정]
+    E -- 아니요 --> G[ROLLBACK · 변경 취소]
