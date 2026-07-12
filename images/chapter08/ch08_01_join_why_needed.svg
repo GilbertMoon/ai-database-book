@@ -1,1 +1,209 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="40" text-anchor="middle" class="t">JOIN이 필요한 이유</text><rect x="420" y="90" width="360" height="60" class="b m"/><text x="600" y="120" class="l">정규화된 테이블 구조</text><rect x="80" y="240" width="220" height="70" class="b"/><text x="190" y="268" class="l">students</text><text x="190" y="292" class="s">학생 이름</text><rect x="355" y="240" width="220" height="70" class="b"/><text x="465" y="268" class="l">courses</text><text x="465" y="292" class="s">강의 제목</text><rect x="630" y="240" width="220" height="70" class="b"/><text x="740" y="268" class="l">instructors</text><text x="740" y="292" class="s">강사 이름</text><rect x="905" y="240" width="220" height="70" class="b"/><text x="1015" y="268" class="l">enrollments</text><text x="1015" y="292" class="s">상태 / 결제금액</text><rect x="360" y="460" width="480" height="70" class="b y"/><text x="600" y="490" class="l">수강신청 현황 조회</text><text x="600" y="515" class="s">나뉜 정보를 하나의 결과로 연결</text><rect x="440" y="610" width="320" height="55" class="b g"/><text x="600" y="638" class="l">JOIN 필요</text><line x1="540" y1="150" x2="190" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="580" y1="150" x2="465" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="620" y1="150" x2="740" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="660" y1="150" x2="1015" y2="240" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="190" y1="310" x2="430" y2="460" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="465" y1="310" x2="530" y2="460" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="740" y1="310" x2="670" y2="460" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="1015" y1="310" x2="770" y2="460" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="530" x2="600" y2="610" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1660" viewBox="0 0 1200 1660" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">JOIN이 필요한 이유</title>
+  <desc id="desc">정규화된 온라인 강의 수강신청 데이터베이스에서 학생, 수강신청, 강의, 강사 정보가 서로 다른 테이블에 저장되는 이유와, enrollments의 외래키와 courses의 외래키를 각 부모 테이블의 기본키에 연결하여 수강신청 현황을 하나의 결과로 복원하는 과정을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#b7791f"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
+      .mono-small{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:11.5px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .ref-blue{stroke:#2f6fad;stroke-width:2.3;fill:none;marker-end:url(#arrow-blue)}
+      .ref-orange{stroke:#b7791f;stroke-width:2.3;fill:none;marker-end:url(#arrow-orange)}
+      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .th{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
+      .cell{font-size:11.3px;text-anchor:middle;fill:#334155}
+      .pk{font-size:11px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
+      .fk{font-size:11px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .result-head{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
+      .result-cell{font-size:11.5px;text-anchor:middle;fill:#334155}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.3px;text-anchor:middle;fill:#475569}
+      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
+      .line{stroke:#cbd5e1;stroke-width:1}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1660" fill="#ffffff"/>
+  <text x="600" y="42" class="title">JOIN이 필요한 이유</text>
+  <text x="600" y="72" class="subtitle">정규화로 나누어 저장한 사실을 FK와 PK 관계에 따라 연결해, 업무에 필요한 하나의 조회 결과로 복원한다</text>
+
+  <!-- 1. Business question -->
+  <rect x="34" y="98" width="1132" height="236" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 먼저 답하려는 업무 질문을 정한다</text>
+  <text x="360" y="132" class="section-sub">수강신청 현황 한 행에는 서로 다른 테이블의 정보가 함께 필요하다</text>
+
+  <rect x="74" y="164" width="1052" height="54" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="600" y="187" class="card-title">누가 어떤 강의를 어느 강사에게 신청했고, 현재 상태와 결제금액은 얼마인가?</text>
+  <text x="600" y="208" class="card-text-small">조회 결과의 기준 행은 “수강신청 한 건”이며, 필요한 컬럼만 선택한다</text>
+
+  <rect x="58" y="246" width="250" height="62" rx="10" fill="#ffffff" stroke="#3b82c4" stroke-width="1.4"/>
+  <text x="183" y="270" class="card-title">학생</text>
+  <text x="183" y="294" class="mono">students.name</text>
+
+  <rect x="336" y="246" width="250" height="62" rx="10" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.4"/>
+  <text x="461" y="270" class="card-title">강의</text>
+  <text x="461" y="294" class="mono">courses.title</text>
+
+  <rect x="614" y="246" width="250" height="62" rx="10" fill="#ffffff" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="739" y="270" class="card-title">강사</text>
+  <text x="739" y="294" class="mono">instructors.name</text>
+
+  <rect x="892" y="246" width="250" height="62" rx="10" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.4"/>
+  <text x="1017" y="270" class="card-title">수강신청 사실</text>
+  <text x="1017" y="294" class="mono-small">enrollments.status · paid_amount</text>
+
+  <path d="M600 334V358" class="flow"/>
+
+  <!-- 2. Normalized storage and join path -->
+  <rect x="34" y="358" width="1132" height="462" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="392" class="section-title">2. 정규화된 테이블에는 각 사실이 한 곳에 저장된다</text>
+  <text x="485" y="392" class="section-sub">JOIN은 같은 값을 복사하는 작업이 아니라 참조 관계를 따라 행을 대응시키는 조회 연산이다</text>
+
+  <!-- students -->
+  <rect x="52" y="430" width="250" height="230" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <rect x="52" y="430" width="250" height="44" rx="11" fill="#dcecff"/>
+  <text x="177" y="458" class="table-title">students</text>
+  <text x="78" y="506" class="pk">PK</text><text x="150" y="506" class="mono-small">id</text>
+  <line x1="52" y1="522" x2="302" y2="522" class="line"/>
+  <text x="150" y="552" class="mono-small">name</text>
+  <line x1="52" y1="568" x2="302" y2="568" class="line"/>
+  <text x="150" y="598" class="mono-small">email</text>
+  <line x1="52" y1="614" x2="302" y2="614" class="line"/>
+  <text x="177" y="642" class="card-text-small">학생 한 명의 기준 정보</text>
+
+  <!-- enrollments -->
+  <rect x="334" y="414" width="270" height="270" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <rect x="334" y="414" width="270" height="44" rx="11" fill="#dcf7e5"/>
+  <text x="469" y="442" class="table-title">enrollments</text>
+  <text x="360" y="490" class="pk">PK</text><text x="450" y="490" class="mono-small">id</text>
+  <line x1="334" y1="506" x2="604" y2="506" class="line"/>
+  <text x="360" y="536" class="fk">FK</text><text x="470" y="536" class="mono-small">student_id</text>
+  <line x1="334" y1="552" x2="604" y2="552" class="line"/>
+  <text x="360" y="582" class="fk">FK</text><text x="470" y="582" class="mono-small">course_id</text>
+  <line x1="334" y1="598" x2="604" y2="598" class="line"/>
+  <text x="469" y="628" class="mono-small">status · paid_amount</text>
+  <line x1="334" y1="644" x2="604" y2="644" class="line"/>
+  <text x="469" y="671" class="card-text-small">수강신청 한 건의 사건 정보</text>
+
+  <!-- courses -->
+  <rect x="636" y="414" width="270" height="270" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <rect x="636" y="414" width="270" height="44" rx="11" fill="#ede9fe"/>
+  <text x="771" y="442" class="table-title">courses</text>
+  <text x="662" y="490" class="pk">PK</text><text x="752" y="490" class="mono-small">id</text>
+  <line x1="636" y1="506" x2="906" y2="506" class="line"/>
+  <text x="662" y="536" class="fk">FK</text><text x="772" y="536" class="mono-small">instructor_id</text>
+  <line x1="636" y1="552" x2="906" y2="552" class="line"/>
+  <text x="771" y="582" class="mono-small">title</text>
+  <line x1="636" y1="598" x2="906" y2="598" class="line"/>
+  <text x="771" y="628" class="mono-small">level · price</text>
+  <line x1="636" y1="644" x2="906" y2="644" class="line"/>
+  <text x="771" y="671" class="card-text-small">강의 한 개의 기준 정보</text>
+
+  <!-- instructors -->
+  <rect x="938" y="430" width="210" height="230" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <rect x="938" y="430" width="210" height="44" rx="11" fill="#fff1cf"/>
+  <text x="1043" y="458" class="table-title">instructors</text>
+  <text x="964" y="506" class="pk">PK</text><text x="1032" y="506" class="mono-small">id</text>
+  <line x1="938" y1="522" x2="1148" y2="522" class="line"/>
+  <text x="1043" y="552" class="mono-small">name</text>
+  <line x1="938" y1="568" x2="1148" y2="568" class="line"/>
+  <text x="1043" y="598" class="mono-small">specialty</text>
+  <line x1="938" y1="614" x2="1148" y2="614" class="line"/>
+  <text x="1043" y="642" class="card-text-small">강사 한 명의 기준 정보</text>
+
+  <!-- reference arrows: child FK -> parent PK -->
+  <path d="M334 536H318V506H302" class="ref-blue"/>
+
+  <path d="M604 582H620V490H636" class="ref-blue"/>
+
+  <path d="M906 536H922V506H938" class="ref-orange"/>
+
+  <rect x="120" y="696" width="960" height="30" rx="9" fill="#ffffff" stroke="#64748b" stroke-width="1.2"/>
+  <text x="600" y="716" class="mono-small">e.student_id → s.id · e.course_id → c.id · c.instructor_id → i.id</text>
+
+  <rect x="126" y="740" width="948" height="62" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="764" class="card-title">enrollments 한 행만 보면 ID와 수강신청 사실은 알 수 있지만 이름·강의명·강사명은 알 수 없다</text>
+  <text x="600" y="788" class="mono">student_id = 1 · course_id = 20 · status = '수강중' · paid_amount = 100000</text>
+
+  <path d="M600 820V844" class="flow"/>
+
+  <!-- 3. Join predicates and result -->
+  <rect x="34" y="844" width="1132" height="432" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="878" class="section-title">3. FK와 PK가 같은 행을 ON 조건으로 연결한다</text>
+  <text x="430" y="878" class="section-sub">필요한 관계 경로만 따라가고, 컬럼 이름이 비슷하다는 이유로 임의 연결하지 않는다</text>
+
+  <rect x="58" y="910" width="1084" height="128" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="600" y="938" class="card-title">수강신청 현황을 복원하는 JOIN 조건</text>
+  <text x="600" y="970" class="mono">FROM enrollments AS e</text>
+  <text x="600" y="995" class="mono">JOIN students AS s ON e.student_id = s.id</text>
+  <text x="600" y="1020" class="mono">JOIN courses AS c ON e.course_id = c.id · JOIN instructors AS i ON c.instructor_id = i.id</text>
+
+  <rect x="58" y="1066" width="1084" height="154" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <rect x="58" y="1066" width="1084" height="40" rx="11" fill="#dcf7e5"/>
+  <text x="166" y="1092" class="result-head">student_name</text>
+  <text x="388" y="1092" class="result-head">course_title</text>
+  <text x="606" y="1092" class="result-head">instructor_name</text>
+  <text x="802" y="1092" class="result-head">status</text>
+  <text x="1010" y="1092" class="result-head">paid_amount</text>
+  <line x1="58" y1="1106" x2="1142" y2="1106" class="line"/>
+  <line x1="274" y1="1066" x2="274" y2="1220" class="line"/>
+  <line x1="502" y1="1066" x2="502" y2="1220" class="line"/>
+  <line x1="710" y1="1066" x2="710" y2="1220" class="line"/>
+  <line x1="900" y1="1066" x2="900" y2="1220" class="line"/>
+  <text x="166" y="1145" class="result-cell">김민지</text>
+  <text x="388" y="1145" class="result-cell">데이터베이스 입문</text>
+  <text x="606" y="1145" class="result-cell">문길래</text>
+  <text x="802" y="1145" class="result-cell">수강중</text>
+  <text x="1010" y="1145" class="result-cell">100000</text>
+  <line x1="58" y1="1170" x2="1142" y2="1170" class="line"/>
+  <text x="600" y="1200" class="card-text-small">원본 테이블을 물리적으로 합치거나 중복 저장하지 않고, 쿼리를 실행하는 동안 결과 집합을 만든다</text>
+
+  <path d="M600 1276V1300" class="flow"/>
+
+  <!-- 4. Review rules -->
+  <rect x="34" y="1300" width="1132" height="270" rx="16" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="58" y="1334" class="section-title">4. JOIN 결과를 검토할 때 확인할 것</text>
+  <text x="365" y="1334" class="section-sub">연결 성공보다 결과의 의미와 행 수가 업무 질문에 맞는지가 중요하다</text>
+
+  <rect x="58" y="1366" width="330" height="126" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="1394" class="card-title">관계 경로</text>
+  <text x="223" y="1423" class="card-text">실제 FK → 참조 PK를 연결했는가?</text>
+  <text x="223" y="1448" class="card-text">중간 테이블이나 관계를 빠뜨리지 않았는가?</text>
+  <text x="223" y="1474" class="card-text-small">잘못된 ON은 틀린 행 조합을 만든다</text>
+
+  <rect x="435" y="1366" width="330" height="126" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1394" class="card-title">행 수와 관계 수</text>
+  <text x="600" y="1423" class="card-text">1:N 연결에서는 부모 행이 반복될 수 있다</text>
+  <text x="600" y="1448" class="card-text">잘못된 조건·CROSS JOIN은 카테시안 곱으로 행을 폭증시킨다</text>
+  <text x="600" y="1474" class="card-text-small">기준 행 한 건당 예상 결과 수를 먼저 정한다</text>
+
+  <rect x="812" y="1366" width="330" height="126" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="977" y="1394" class="card-title">포함 범위와 컬럼</text>
+  <text x="977" y="1423" class="card-text">일치 행만 필요하면 INNER JOIN</text>
+  <text x="977" y="1448" class="card-text">왼쪽 전체를 유지하려면 LEFT JOIN 검토</text>
+  <text x="977" y="1474" class="card-text-small">SELECT * 대신 필요한 컬럼과 별칭 사용</text>
+
+  <rect x="112" y="1516" width="976" height="34" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="600" y="1538" class="principle">정규화는 사실을 나누어 안전하게 저장하고, JOIN은 관계를 따라 필요한 의미를 다시 조립한다</text>
+
+  <rect x="150" y="1584" width="900" height="44" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.4"/>
+  <text x="600" y="1603" class="note-title">핵심 기억</text>
+  <text x="600" y="1621" class="note-text">업무 질문 → 기준 테이블 → 필요한 관계 경로 → ON 조건 → 예상 행 수 → 결과 검증 순서로 작성한다</text>
+</svg>
