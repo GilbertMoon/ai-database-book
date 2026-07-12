@@ -1,1 +1,162 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">pgvector 실습 흐름</text><rect x="80" y="110" width="230" height="60" class="b y"/><text x="195" y="140" class="s">CREATE EXTENSION vector</text><rect x="370" y="110" width="230" height="60" class="b y"/><text x="485" y="140" class="s">벡터 테이블 생성</text><rect x="660" y="110" width="230" height="60" class="b y"/><text x="775" y="140" class="s">문서+임베딩 저장</text><rect x="950" y="110" width="180" height="60" class="b y"/><text x="1040" y="140" class="s">질문 벡터</text><rect x="180" y="330" width="250" height="70" class="b m"/><text x="305" y="358" class="l">document_embeddings</text><text x="305" y="382" class="s">title · content · embedding</text><rect x="520" y="330" width="250" height="70" class="b g"/><text x="645" y="358" class="l">거리 검색</text><text x="645" y="382" class="s">embedding &lt;-&gt; query</text><rect x="860" y="330" width="250" height="70" class="b p"/><text x="985" y="358" class="l">ORDER BY + LIMIT</text><text x="985" y="382" class="s">Top-k 결과</text><rect x="430" y="570" width="340" height="65" class="b g"/><text x="600" y="598" class="l">검색된 문서 조각 검토</text><text x="600" y="622" class="s">distance가 작을수록 가까움</text><line x1="310" y1="140" x2="370" y2="140" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="140" x2="660" y2="140" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="890" y1="140" x2="950" y2="140" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="485" y1="170" x2="305" y2="330" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="775" y1="170" x2="305" y2="330" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="1040" y1="170" x2="645" y2="330" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="430" y1="365" x2="520" y2="365" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="770" y1="365" x2="860" y2="365" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="985" y1="400" x2="600" y2="570" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+  <title id="title">pgvector 실습 흐름</title>
+  <desc id="desc">PostgreSQL 실습 환경에서 pgvector 사용 가능 여부를 확인하고, 벡터 테이블 또는 3차원 대체 테이블을 준비한 뒤 문서 벡터를 입력하고 질문 벡터와의 거리를 계산하여 Top-k 결과와 관련성을 검토하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .group{stroke-width:1.5;rx:16}
+      .setup-group{fill:#fffaf0;stroke:#dfbb68}
+      .search-group{fill:#f4f8ff;stroke:#93b4e6}
+      .review-group{fill:#f2fbf5;stroke:#8bc9a0}
+      .group-title{font-size:18px;font-weight:700}
+      .group-sub{font-size:13px;fill:#475569}
+      .stage{fill:#fff;stroke-width:1.7;rx:12}
+      .setup-stage{stroke:#d69e2e}.search-stage{stroke:#3b82c4}.review-stage{stroke:#3c9a5f}.fallback-stage{stroke:#7c5cc4}
+      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-setup{fill:#b7791f}.badge-search{fill:#2f6fad}.badge-review{fill:#2f855a}.badge-fallback{fill:#6b46a8}
+      .stage-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .stage-main{font-size:13.5px;font-weight:600;text-anchor:middle}
+      .stage-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,D2Coding,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .data-arrow{stroke:#3b82c4;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
+      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .branch-label{font-size:14px;font-weight:700}
+      .result-card{fill:#fff;stroke:#7b8794;stroke-width:1.5;rx:11}
+      .result-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .result-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:11}
+      .note-title{font-size:14px;font-weight:700;fill:#92400e}
+      .note-text{font-size:13px;fill:#475569}
+      .final{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.7;rx:12}
+      .adjust{fill:#fff5f5;stroke:#d9534f;stroke-width:1.7;rx:12}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1040" fill="#fff"/>
+  <text x="600" y="40" class="title">pgvector 실습 흐름</text>
+  <text x="600" y="68" class="subtitle">확장 설치 여부를 확인한 뒤 벡터 저장, 거리 계산, Top-k 검색과 결과 검토를 단계별로 수행한다</text>
+
+  <rect x="34" y="90" width="1132" height="292" class="group setup-group"/>
+  <text x="58" y="121" class="group-title">1. 환경 확인·테이블 준비</text>
+  <text x="275" y="121" class="group-sub">실습용 데이터베이스에서 실행하고 운영 데이터와 민감정보는 사용하지 않는다</text>
+
+  <rect x="54" y="154" width="250" height="104" class="stage setup-stage"/>
+  <circle cx="78" cy="178" r="14" class="badge-setup"/><text x="78" y="178" class="badge">1</text>
+  <text x="179" y="185" class="stage-title">실습 환경·권한 확인</text>
+  <text x="179" y="216" class="stage-main">PostgreSQL 연결과 대상 DB 확인</text>
+  <text x="179" y="240" class="stage-sub">확장 생성 권한과 pgvector 설치 여부 점검</text>
+
+  <polygon points="448,148 570,206 448,264 326,206" class="decision"/>
+  <text x="448" y="206" class="decision-text">pgvector 사용 가능?</text>
+
+  <rect x="630" y="140" width="500" height="112" class="stage setup-stage"/>
+  <circle cx="654" cy="164" r="14" class="badge-setup"/><text x="654" y="164" class="badge">2A</text>
+  <text x="880" y="171" class="stage-title">pgvector 확장과 벡터 테이블 생성</text>
+  <text x="880" y="201" class="code">CREATE EXTENSION IF NOT EXISTS vector;</text>
+  <text x="880" y="226" class="stage-sub">title · chunk_text · source_name · chunk_no · embedding vector(3)</text>
+
+  <rect x="630" y="270" width="500" height="86" class="stage fallback-stage"/>
+  <circle cx="654" cy="294" r="14" class="badge-fallback"/><text x="654" y="294" class="badge">2B</text>
+  <text x="880" y="301" class="stage-title">pgvector 없는 환경의 대체 실습</text>
+  <text x="880" y="330" class="stage-sub">embedding_x · embedding_y · embedding_z 컬럼으로 거리 계산 원리 확인</text>
+
+  <path d="M 304 206 H 326" class="arrow"/>
+  <path d="M 570 194 H 630" class="arrow"/>
+  <text x="594" y="180" class="branch-label">예</text>
+  <path d="M 448 264 V 313 H 630" class="arrow"/>
+  <text x="470" y="292" class="branch-label">아니요</text>
+
+  <rect x="34" y="406" width="1132" height="350" class="group search-group"/>
+  <text x="58" y="437" class="group-title">2. 데이터 입력·벡터 검색</text>
+  <text x="266" y="437" class="group-sub">3차원 벡터는 개념 확인용 축약 예시</text>
+
+  <rect x="52" y="470" width="250" height="112" class="stage search-stage"/>
+  <circle cx="76" cy="494" r="14" class="badge-search"/><text x="76" y="494" class="badge">3</text>
+  <text x="177" y="501" class="stage-title">샘플 문서 청크 입력</text>
+  <text x="177" y="532" class="stage-main">원문·출처·순서·3차원 벡터 저장</text>
+  <text x="177" y="557" class="stage-sub">환불·업데이트·JOIN 등 서로 다른 주제</text>
+
+  <rect x="332" y="470" width="250" height="112" class="stage search-stage"/>
+  <circle cx="356" cy="494" r="14" class="badge-search"/><text x="356" y="494" class="badge">4</text>
+  <text x="457" y="501" class="stage-title">저장 데이터 확인</text>
+  <text x="457" y="532" class="stage-main">title · source_name · chunk_no</text>
+  <text x="457" y="557" class="stage-sub">NULL, 벡터 차원과 입력 행 수 확인</text>
+
+  <rect x="612" y="470" width="250" height="112" class="stage search-stage"/>
+  <circle cx="636" cy="494" r="14" class="badge-search"/><text x="636" y="494" class="badge">5</text>
+  <text x="737" y="501" class="stage-title">질문 벡터 준비</text>
+  <text x="737" y="532" class="stage-main">예: [0.18, 0.78, 0.22]</text>
+  <text x="737" y="557" class="stage-sub">문서 벡터와 동일한 차원 사용</text>
+
+  <rect x="892" y="470" width="250" height="112" class="stage search-stage"/>
+  <circle cx="916" cy="494" r="14" class="badge-search"/><text x="916" y="494" class="badge">6</text>
+  <text x="1017" y="501" class="stage-title">문서별 거리 계산</text>
+  <text x="1017" y="532" class="code">embedding &lt;-&gt; query AS distance</text>
+  <text x="1017" y="557" class="stage-sub">거리값을 결과 컬럼으로 직접 확인</text>
+
+  <path d="M 302 526 H 332" class="arrow"/>
+  <path d="M 582 526 H 612" class="arrow"/>
+  <path d="M 862 526 H 892" class="arrow"/>
+  <path d="M 880 252 V 414 H 177 V 470" class="data-arrow"/>
+  <path d="M 880 356 V 430 H 220 V 470" class="data-arrow"/>
+
+  <rect x="130" y="622" width="270" height="96" class="result-card"/>
+  <text x="265" y="650" class="result-title">7. 가까운 순서로 정렬</text>
+  <text x="265" y="678" class="code">ORDER BY distance ASC</text>
+  <text x="265" y="702" class="result-sub">거리값이 작을수록 질문 벡터와 가까움</text>
+
+  <rect x="465" y="622" width="270" height="96" class="result-card"/>
+  <text x="600" y="650" class="result-title">8. Top-k 결과 제한</text>
+  <text x="600" y="678" class="code">LIMIT 3</text>
+  <text x="600" y="702" class="result-sub">가장 가까운 문서 청크 k개 선택</text>
+
+  <rect x="800" y="622" width="270" height="96" class="result-card"/>
+  <text x="935" y="650" class="result-title">9. 결과 행 확인</text>
+  <text x="935" y="678" class="stage-main">title · chunk_text · source · distance</text>
+  <text x="935" y="702" class="result-sub">순위뿐 아니라 내용과 출처도 함께 검토</text>
+
+  <path d="M 1017 582 V 602 H 265 V 622" class="arrow"/>
+  <path d="M 400 670 H 465" class="arrow"/>
+  <path d="M 735 670 H 800" class="arrow"/>
+
+  <rect x="34" y="780" width="1132" height="194" class="group review-group"/>
+  <text x="58" y="811" class="group-title">3. 실행 결과 검토</text>
+  <text x="220" y="811" class="group-sub">SQL 성공 여부뿐 아니라 검색 의미도 확인</text>
+
+  <rect x="60" y="838" width="330" height="92" class="stage review-stage"/>
+  <text x="225" y="869" class="stage-title">질문과 관련된 문서인가?</text>
+  <text x="225" y="897" class="stage-sub">상위 결과의 제목·본문·출처와 거리값 확인</text>
+
+  <polygon points="600,826 720,884 600,942 480,884" class="decision"/>
+  <text x="600" y="884" class="decision-text">결과 적절?</text>
+
+  <rect x="810" y="838" width="330" height="92" class="final"/>
+  <text x="975" y="869" class="stage-title">검색 결과와 실행 근거 기록</text>
+  <text x="975" y="897" class="stage-sub">질문 벡터·SQL·순위·거리·선정 문서</text>
+
+  <rect x="60" y="950" width="330" height="62" class="adjust"/>
+  <text x="225" y="974" class="stage-title">질문 벡터·데이터·검색 조건 점검</text>
+  <text x="225" y="998" class="stage-sub">수정 후 거리 검색 다시 실행</text>
+
+  <path d="M 390 884 H 480" class="arrow"/>
+  <path d="M 720 884 H 810" class="arrow"/>
+  <text x="758" y="868" class="branch-label">예</text>
+  <path d="M 520 925 H 420 V 981 H 390" class="arrow"/>
+  <text x="438" y="946" class="branch-label">아니요</text>
+  <path d="M 60 981 H 22 V 526 H 612" class="feedback"/>
+
+  <rect x="72" y="1018" width="1056" height="18" class="principle"/>
+  <text x="98" y="1027" class="principle-label">핵심 원칙</text>
+  <text x="620" y="1028" class="principle-text">pgvector 실습은 벡터 저장과 거리 기반 검색 원리를 실행 결과로 확인하는 과정이다</text>
+</svg>
