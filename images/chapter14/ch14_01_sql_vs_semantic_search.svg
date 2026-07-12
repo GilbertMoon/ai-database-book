@@ -1,1 +1,104 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">일반 SQL 검색과 의미 기반 검색 비교</text><rect x="430" y="80" width="340" height="60" class="b m"/><text x="600" y="110" class="l">사용자 검색 요구</text><rect x="130" y="220" width="330" height="70" class="b y"/><text x="295" y="248" class="l">SQL 검색</text><text x="295" y="272" class="s">정확한 값·키워드·조건</text><rect x="740" y="220" width="330" height="70" class="b g"/><text x="905" y="248" class="l">의미 기반 검색</text><text x="905" y="272" class="s">문장 의미·임베딩·거리</text><rect x="80" y="400" width="180" height="60" class="b"/><text x="170" y="430" class="s">email = 값</text><rect x="290" y="400" width="180" height="60" class="b"/><text x="380" y="430" class="s">LIKE 키워드</text><rect x="500" y="400" width="180" height="60" class="b"/><text x="590" y="430" class="s">status 조건</text><rect x="710" y="400" width="180" height="60" class="b"/><text x="800" y="430" class="s">의미 유사성</text><rect x="920" y="400" width="180" height="60" class="b"/><text x="1010" y="430" class="s">Top-k 문서</text><rect x="190" y="590" width="260" height="65" class="b p"/><text x="320" y="620" class="l">정형 데이터 검색</text><text x="320" y="642" class="s">회원·주문·상태값</text><rect x="750" y="590" width="260" height="65" class="b p"/><text x="880" y="620" class="l">문서 의미 검색</text><text x="880" y="642" class="s">환불·공지·규정</text><line x1="540" y1="140" x2="295" y2="220" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="660" y1="140" x2="905" y2="220" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="295" y1="290" x2="170" y2="400" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="295" y1="290" x2="380" y2="400" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="295" y1="290" x2="590" y2="400" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="905" y1="290" x2="800" y2="400" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="905" y1="290" x2="1010" y2="400" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="320" y1="460" x2="320" y2="590" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="880" y1="460" x2="880" y2="590" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">일반 SQL 검색과 의미 기반 검색 비교</title>
+  <desc id="desc">SQL 조건과 키워드 검색은 정확한 값과 명시적 조건을 찾고, 의미 기반 벡터 검색은 표현이 달라도 의미가 비슷한 문서를 찾으며, 두 방식은 혼합 검색으로 함께 사용할 수 있음을 비교한 도식</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .request{fill:#f8fafc;stroke:#64748b;stroke-width:1.8;rx:12}
+      .request-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .panel{stroke-width:1.6;rx:16}
+      .sql-panel{fill:#f4f8ff;stroke:#8fb5e5}
+      .semantic-panel{fill:#f2fbf5;stroke:#8bc9a0}
+      .panel-title{font-size:19px;font-weight:700;text-anchor:middle}
+      .panel-sub{font-size:14px;text-anchor:middle;fill:#475569}
+      .card{fill:#fff;stroke-width:1.5;rx:11}
+      .sql-card{stroke:#4f88c6}
+      .semantic-card{stroke:#4c9f68}
+      .card-title{font-size:14px;font-weight:700;text-anchor:middle}
+      .card-main{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,D2Coding,monospace;font-size:13px;text-anchor:middle;fill:#334155}
+      .arrow{stroke:#475569;stroke-width:2.1;fill:none;marker-end:url(#arrow)}
+      .hybrid{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.8;rx:14}
+      .hybrid-title{font-size:17px;font-weight:700;text-anchor:middle}
+      .hybrid-sub{font-size:14px;text-anchor:middle;fill:#475569}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="900" fill="#fff"/>
+  <text x="600" y="40" class="title">일반 SQL 검색과 의미 기반 검색 비교</text>
+  <text x="600" y="68" class="subtitle">검색 목적에 따라 찾는 기준과 처리 방식이 다르다</text>
+
+  <rect x="390" y="88" width="420" height="58" class="request"/>
+  <text x="600" y="117" class="request-text">사용자 검색 요구</text>
+
+  <path d="M 535 146 L 310 180" class="arrow"/>
+  <path d="M 665 146 L 890 180" class="arrow"/>
+
+  <rect x="40" y="180" width="540" height="520" class="panel sql-panel"/>
+  <text x="310" y="215" class="panel-title">SQL 조건·키워드 검색</text>
+  <text x="310" y="241" class="panel-sub">정확한 값과 명시적 조건을 찾는다</text>
+
+  <rect x="70" y="265" width="480" height="72" class="card sql-card"/>
+  <text x="310" y="288" class="card-title">검색 기준</text>
+  <text x="310" y="315" class="card-main">값 일치 · 범위 · 패턴</text>
+
+  <rect x="70" y="355" width="480" height="88" class="card sql-card"/>
+  <text x="310" y="378" class="card-title">처리 흐름</text>
+  <text x="310" y="404" class="card-main">조건식 → 인덱스·테이블 조회 → 일치 행</text>
+  <text x="310" y="427" class="card-sub">WHERE · JOIN · ORDER BY · GROUP BY</text>
+
+  <rect x="70" y="461" width="480" height="90" class="card sql-card"/>
+  <text x="310" y="484" class="card-title">강점과 적합한 데이터</text>
+  <text x="310" y="510" class="card-main">정확한 필터링 · 정렬 · 집계</text>
+  <text x="310" y="533" class="card-sub">회원 · 주문 · 상태값 같은 정형 데이터</text>
+
+  <rect x="70" y="569" width="480" height="104" class="card sql-card"/>
+  <text x="310" y="592" class="card-title">예시</text>
+  <text x="310" y="619" class="code">email = 'kim@example.com'</text>
+  <text x="310" y="643" class="code">status = 'completed'</text>
+  <text x="310" y="665" class="code">title LIKE '%환불%'</text>
+
+  <rect x="620" y="180" width="540" height="520" class="panel semantic-panel"/>
+  <text x="890" y="215" class="panel-title">의미 기반 벡터 검색</text>
+  <text x="890" y="241" class="panel-sub">표현이 달라도 의미가 비슷한 문서를 찾는다</text>
+
+  <rect x="650" y="265" width="480" height="72" class="card semantic-card"/>
+  <text x="890" y="288" class="card-title">검색 기준</text>
+  <text x="890" y="315" class="card-main">임베딩 벡터의 의미 유사도</text>
+
+  <rect x="650" y="355" width="480" height="88" class="card semantic-card"/>
+  <text x="890" y="378" class="card-title">처리 흐름</text>
+  <text x="890" y="404" class="card-main">질문 임베딩 → 거리 계산 → Top-k 문서</text>
+  <text x="890" y="427" class="card-sub">코사인 유사도 또는 벡터 거리 사용</text>
+
+  <rect x="650" y="461" width="480" height="90" class="card semantic-card"/>
+  <text x="890" y="484" class="card-title">강점과 적합한 데이터</text>
+  <text x="890" y="510" class="card-main">유사 표현 · 자연어 질문 · 문서 탐색</text>
+  <text x="890" y="533" class="card-sub">공지 · 규정 · FAQ · 내부 문서</text>
+
+  <rect x="650" y="569" width="480" height="104" class="card semantic-card"/>
+  <text x="890" y="592" class="card-title">예시</text>
+  <text x="890" y="618" class="card-sub">질문: “돈을 돌려받을 수 있나요?”</text>
+  <text x="890" y="643" class="card-main">의미가 비슷함</text>
+  <text x="890" y="665" class="card-sub">문서: “구독 취소 시 환불 규정...”</text>
+
+  <path d="M 310 700 V 735 H 500" class="arrow"/>
+  <path d="M 890 700 V 735 H 700" class="arrow"/>
+
+  <rect x="260" y="735" width="680" height="84" class="hybrid"/>
+  <text x="600" y="766" class="hybrid-title">혼합 검색(Hybrid Search)</text>
+  <text x="600" y="794" class="hybrid-sub">SQL 조건으로 범위를 좁힌 뒤 의미 검색으로 관련 문서 Top-k를 찾을 수 있다</text>
+
+  <rect x="210" y="842" width="780" height="42" class="principle"/>
+  <text x="234" y="862" class="principle-label">핵심 원칙</text>
+  <text x="620" y="863" class="principle-text">Vector DB는 SQL을 대체하기보다 의미 검색 기능을 보완한다</text>
+</svg>
