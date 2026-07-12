@@ -1,15 +1,24 @@
 flowchart TB
-    A[Documents] --> B[Chunking]
-    B --> C[Embedding]
-    C --> D[Vector DB]
+    subgraph INDEX[1. 문서 준비·색인 — 사전 처리]
+        A[문서 수집] --> B[정제·청킹]
+        B --> C[청크별 임베딩 생성]
+        C --> D[원문·메타데이터·벡터 저장]
+    end
 
-    E[User question] --> F[Question embedding]
-    F --> G[Similarity search]
-    D --> G
-    G --> H[Retrieved chunks]
-    H --> I[Prompt with evidence]
-    I --> J[LLM answer]
-    J --> K[Grounding review]
+    subgraph RETRIEVE[2. 질문·검색 — 실행 시]
+        E[사용자 질문] --> F[질문 임베딩 생성]
+        F --> G[유사도 검색·메타데이터 필터]
+        D --> G
+        G --> H[Top-k 관련 청크와 출처]
+    end
 
-    H --> K
-    K --> L[Final answer with source]
+    subgraph GENERATE[3. 답변 생성·검토]
+        E --> I[질문·검색 청크·답변 지침 결합]
+        H --> I
+        I --> J[LLM 답변 생성]
+        J --> K{검토 통과?}
+        H --> K
+        K -- 예 --> L[근거와 출처를 포함한 최종 답변]
+        K -- 아니요 --> M[질문 표현·필터·Top-k·청킹 조정]
+        M --> G
+    end
