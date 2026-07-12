@@ -1,1 +1,102 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680"><defs><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:25px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0;stroke-width:2;rx:12}.g{fill:#f0fff4;stroke:#38a169;stroke-width:2;rx:12}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:12px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">재현 가능한 데이터베이스 프로젝트 구조</text><rect x="65" y="130" width="245" height="78" class="m"/><text x="187.5" y="159" class="l">README.md</text><text x="187.5" y="184" class="s">목적·환경·실행 순서</text><rect x="345" y="130" width="245" height="78" class="b"/><text x="467.5" y="159" class="l">requirements.md</text><text x="467.5" y="184" class="s">사용자·기능·규칙</text><rect x="625" y="130" width="245" height="78" class="g"/><text x="747.5" y="159" class="l">erd.md / erd.png</text><text x="747.5" y="184" class="s">테이블과 관계</text><rect x="905" y="130" width="245" height="78" class="m"/><text x="1027.5" y="159" class="l">schema.sql</text><text x="1027.5" y="184" class="s">반복 실행 가능한 DDL</text><rect x="65" y="283" width="245" height="78" class="b"/><text x="187.5" y="312" class="l">seed.sql</text><text x="187.5" y="337" class="s">검증 시나리오 데이터</text><rect x="345" y="283" width="245" height="78" class="g"/><text x="467.5" y="312" class="l">queries.sql</text><text x="467.5" y="337" class="s">조회·JOIN·검증</text><rect x="625" y="283" width="245" height="78" class="m"/><text x="747.5" y="312" class="l">ai_review.md</text><text x="747.5" y="337" class="s">AI 제안과 수정 근거</text><rect x="905" y="283" width="245" height="78" class="b"/><text x="1027.5" y="312" class="l">project_notes.md</text><text x="1027.5" y="337" class="s">한계와 다음 계획</text><rect x="300" y="545" width="600" height="62" class="g"/><text x="600" y="576" class="l">다른 사람이 파일 순서와 설계 이유를 이해하고 다시 실행할 수 있어야 한다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1180" viewBox="0 0 1200 1180" role="img" aria-labelledby="title desc">
+  <title id="title">재현 가능한 데이터베이스 프로젝트 구조</title>
+  <desc id="desc">프로젝트 폴더의 README, 요구사항, ERD, 스키마, 샘플 데이터, 검증 SQL, AI 검토 기록과 프로젝트 노트가 어떤 역할을 맡고 서로 어떻게 연결되는지 보여 주며 다른 사람이 작업용 PostgreSQL 데이터베이스에서 같은 순서로 다시 실행하는 흐름을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}.subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .section{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}.sectionTitle{font-size:18px;font-weight:700}.sectionSub{font-size:12.5px;fill:#475569}
+      .root{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.7;rx:11}.file{fill:#fff;stroke-width:1.5;rx:10}.doc{stroke:#3b82c4}.design{stroke:#d69e2e}.sql{stroke:#3c9a5f}.review{stroke:#7c5cc4}
+      .fileName{font-family:Consolas,D2Coding,monospace;font-size:13.5px;font-weight:700;text-anchor:middle}.fileRole{font-size:11.5px;text-anchor:middle;fill:#475569}
+      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.relation{stroke:#94a3b8;stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#arrow)}
+      .run{fill:#fff;stroke:#3b82c4;stroke-width:1.5;rx:10}.runTitle{font-size:13.5px;font-weight:700;text-anchor:middle}.runText{font-size:11.5px;text-anchor:middle;fill:#475569}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.decisionText{font-size:14px;font-weight:700;text-anchor:middle}.branch{font-size:12.5px;font-weight:700}
+      .fix{fill:#fff5f5;stroke:#d9534f;stroke-width:1.5;rx:10}.done{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.6;rx:10}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.noteTitle{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#92400e}.noteText{font-size:11.2px;text-anchor:middle;fill:#475569}
+      .core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.coreLabel{font-size:14px;font-weight:700;fill:#166534}.coreText{font-size:15.5px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1180" fill="#fff"/>
+  <text x="600" y="40" class="title">재현 가능한 데이터베이스 프로젝트 구조</text>
+  <text x="600" y="68" class="subtitle">파일 목록만 모으지 않고 설계 이유, 실행 순서와 검증 결과가 서로 연결되도록 구성한다</text>
+
+  <rect x="34" y="92" width="1132" height="430" class="section"/>
+  <text x="58" y="125" class="sectionTitle">1. 프로젝트 폴더의 파일별 책임</text>
+  <text x="350" y="125" class="sectionSub">각 파일은 하나의 역할을 맡고, 문서와 SQL 사이의 연결 관계를 유지한다</text>
+
+  <rect x="430" y="146" width="340" height="62" class="root"/>
+  <text x="600" y="171" class="fileName">project/</text><text x="600" y="193" class="fileRole">설계·실행 SQL·검토 근거를 함께 관리하는 루트</text>
+
+  <rect x="50" y="238" width="250" height="92" class="file doc"/>
+  <text x="175" y="267" class="fileName">README.md</text><text x="175" y="292" class="fileRole">목적 · 환경 · 준비 조건</text><text x="175" y="312" class="fileRole">실행 순서 · 예상 결과</text>
+
+  <rect x="330" y="238" width="250" height="92" class="file design"/>
+  <text x="455" y="267" class="fileName">requirements.md</text><text x="455" y="292" class="fileRole">사용자 · 기능 · 데이터</text><text x="455" y="312" class="fileRole">업무 규칙 · 제외 범위</text>
+
+  <rect x="610" y="238" width="250" height="92" class="file design"/>
+  <text x="735" y="267" class="fileName">erd.md / erd.png</text><text x="735" y="292" class="fileRole">테이블 · 컬럼 · 관계</text><text x="735" y="312" class="fileRole">카디널리티와 중간 테이블</text>
+
+  <rect x="890" y="238" width="250" height="92" class="file sql"/>
+  <text x="1015" y="267" class="fileName">schema.sql</text><text x="1015" y="292" class="fileRole">테이블과 제약조건 생성</text><text x="1015" y="312" class="fileRole">PK/FK · NOT NULL · UNIQUE · CHECK</text>
+
+  <rect x="50" y="368" width="250" height="92" class="file sql"/>
+  <text x="175" y="397" class="fileName">seed.sql</text><text x="175" y="422" class="fileRole">관계·상태·경계 상황을</text><text x="175" y="442" class="fileRole">재현하는 가상 샘플 데이터</text>
+
+  <rect x="330" y="368" width="250" height="92" class="file sql"/>
+  <text x="455" y="397" class="fileName">queries.sql</text><text x="455" y="422" class="fileRole">기본 조회 · 조건 · JOIN · 집계</text><text x="455" y="442" class="fileRole">누락·모순을 찾는 검증 SQL</text>
+
+  <rect x="610" y="368" width="250" height="92" class="file review"/>
+  <text x="735" y="397" class="fileName">ai_review.md</text><text x="735" y="422" class="fileRole">AI 제안 · 발견한 문제</text><text x="735" y="442" class="fileRole">사람의 수정 · 근거 · 실행 결과</text>
+
+  <rect x="890" y="368" width="250" height="92" class="file review"/>
+  <text x="1015" y="397" class="fileName">project_notes.md</text><text x="1015" y="422" class="fileRole">한계 · 성능 · 보안 · 복구</text><text x="1015" y="442" class="fileRole">다음 버전 계획</text>
+
+  <rect x="430" y="476" width="340" height="34" class="file review"/>
+  <text x="600" y="498" class="fileName">screenshots/ — 필요한 실행 결과만 보조 증거로 저장</text>
+
+  <path d="M600 208V222H175V238" class="relation"/><path d="M600 208V222H455V238" class="relation"/><path d="M600 208V222H735V238" class="relation"/><path d="M600 208V222H1015V238" class="relation"/>
+  <path d="M455 330V346H735V330" class="flow"/><path d="M735 330V346H1015V330" class="flow"/>
+  <path d="M1015 330V350H175V368" class="flow"/><path d="M300 414H330" class="flow"/>
+  <path d="M580 414H610" class="relation"/><path d="M580 414H890" class="relation"/><path d="M600 476V460" class="relation"/>
+
+  <rect x="34" y="546" width="1132" height="316" class="section"/>
+  <text x="58" y="579" class="sectionTitle">2. 다른 사람이 다시 실행하는 순서</text>
+  <text x="360" y="579" class="sectionSub">README를 시작점으로 사용하고 작업용 데이터베이스에서 실행 결과를 비교한다</text>
+
+  <rect x="50" y="618" width="180" height="88" class="run"/>
+  <text x="140" y="647" class="runTitle">1. 환경 준비</text><text x="140" y="674" class="runText">작업용 PostgreSQL DB</text><text x="140" y="694" class="runText">운영 DB가 아닌지 확인</text>
+  <rect x="250" y="618" width="180" height="88" class="run"/>
+  <text x="340" y="647" class="runTitle">2. 구조 생성</text><text x="340" y="674" class="runText">schema.sql 실행</text><text x="340" y="694" class="runText">테이블·제약조건 확인</text>
+  <rect x="450" y="618" width="180" height="88" class="run"/>
+  <text x="540" y="647" class="runTitle">3. 상황 재현</text><text x="540" y="674" class="runText">seed.sql 실행</text><text x="540" y="694" class="runText">행 수·관계·상태 확인</text>
+  <rect x="650" y="618" width="180" height="88" class="run"/>
+  <text x="740" y="647" class="runTitle">4. 요구사항 증명</text><text x="740" y="674" class="runText">queries.sql 실행</text><text x="740" y="694" class="runText">조회·JOIN·집계·검증</text>
+  <polygon points="1020,606 1140,662 1020,718 900,662" class="decision"/>
+  <text x="1020" y="656" class="decisionText">예상 결과와</text><text x="1020" y="677" class="decisionText">실제 결과가 일치?</text>
+  <path d="M230 662H250" class="flow"/><path d="M430 662H450" class="flow"/><path d="M630 662H650" class="flow"/><path d="M830 662H900" class="flow"/>
+
+  <rect x="140" y="758" width="360" height="72" class="fix"/>
+  <text x="320" y="786" class="runTitle">요구사항·ERD·SQL을 함께 수정</text><text x="320" y="811" class="runText">한 파일만 임시로 고치지 않고 연결된 문서를 동시에 갱신</text>
+  <rect x="700" y="758" width="360" height="72" class="done"/>
+  <text x="880" y="786" class="runTitle">재현 성공</text><text x="880" y="811" class="runText">같은 순서로 같은 결과를 만들고 설계 이유까지 설명 가능</text>
+  <path d="M960 708V742H500V794" class="flow"/><text x="875" y="733" class="branch" fill="#b42318">아니요</text>
+  <path d="M1080 708V742H880V758" class="flow"/><text x="1090" y="733" class="branch" fill="#166534">예</text>
+  <path d="M140 758H20V662H250" class="flow"/>
+
+  <rect x="34" y="886" width="1132" height="198" class="section"/>
+  <text x="58" y="919" class="sectionTitle">3. 재현성을 지키는 핵심 규칙</text>
+
+  <rect x="55" y="946" width="250" height="106" class="note"/>
+  <text x="180" y="974" class="noteTitle">설계 일치성</text><text x="180" y="998" class="noteText">requirements ↔ ERD ↔ schema.sql의</text><text x="180" y="1017" class="noteText">이름·관계·제약조건을 동일하게 유지</text>
+  <rect x="335" y="946" width="250" height="106" class="note"/>
+  <text x="460" y="974" class="noteTitle">SQL 파일 책임 분리</text><text x="460" y="998" class="noteText">schema는 구조, seed는 상황</text><text x="460" y="1017" class="noteText">queries는 요구사항을 증명</text>
+  <rect x="615" y="946" width="250" height="106" class="note"/>
+  <text x="740" y="974" class="noteTitle">실행 증거 우선</text><text x="740" y="998" class="noteText">스크린샷은 SQL과 실행 절차를</text><text x="740" y="1017" class="noteText">대신하지 않고 필요한 결과만 보조</text>
+  <rect x="895" y="946" width="250" height="106" class="note"/>
+  <text x="1020" y="974" class="noteTitle">접속 정보 보호</text><text x="1020" y="998" class="noteText">비공개 접속 정보와 실제 사용자 데이터를</text><text x="1020" y="1017" class="noteText">저장소에 포함하지 않음</text><text x="1020" y="1036" class="noteText">공개 가능한 설정 예시와 제외 규칙 사용</text>
+
+  <rect x="145" y="1104" width="910" height="46" class="core"/>
+  <text x="172" y="1132" class="coreLabel">핵심 원칙</text><text x="650" y="1133" class="coreText">재현 가능한 프로젝트는 설계 이유·실행 순서·검증 결과가 하나의 흐름으로 연결되어야 한다</text>
+</svg>
