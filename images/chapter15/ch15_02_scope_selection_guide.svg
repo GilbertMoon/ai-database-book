@@ -59,6 +59,7 @@
   <path d="M460 524V574H235V592" class="flow"/><text x="474" y="557" class="branch" fill="#166534">예</text>
   <path d="M740 524V592H600" class="flow"/><text x="754" y="558" class="branch" fill="#166534">예</text>
   <path d="M1020 524V592H965" class="flow"/><text x="1034" y="558" class="branch" fill="#166534">예</text>
+  <path d="M900 462H880V610H600V592" class="flow"/><text x="885" y="485" class="branch" fill="#b42318">아니요</text>
 
   <rect x="34" y="666" width="1132" height="252" class="section"/>
   <text x="58" y="699" class="sectionTitle">3. 이번 버전의 범위선을 명확히 기록한다</text>
