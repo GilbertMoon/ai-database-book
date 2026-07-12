@@ -1,17 +1,20 @@
 flowchart TB
-    A[User question] --> B[Question embedding]
-    B --> C[Compare with document vectors]
+    A[사용자 질문] --> B[질문 임베딩 생성]
+    B --> C[저장된 문서 벡터와 거리 계산]
 
-    C --> D[Document 1 distance 0.04]
-    C --> E[Document 2 distance 0.18]
-    C --> F[Document 3 distance 0.65]
-    C --> G[Document 4 distance 0.91]
+    C --> D1[문서 1<br/>환불 규정<br/>거리 0.04]
+    C --> D2[문서 2<br/>구독 취소 안내<br/>거리 0.18]
+    C --> D3[문서 3<br/>서비스 업데이트<br/>거리 0.65]
+    C --> D4[문서 4<br/>SQL JOIN 노트<br/>거리 0.91]
 
-    D --> H[Top-1]
-    E --> I[Top-2]
-    F --> J[Top-3]
+    D1 --> E[거리 오름차순 정렬<br/>작을수록 질문과 가까움]
+    D2 --> E
+    D3 --> E
+    D4 --> E
 
-    H --> K[Retrieved context]
-    I --> K
-    J --> K
-    K --> L[Use for RAG answer]
+    E --> F[Top-k 후보 선택<br/>예: k = 3]
+    F --> G[선택적 임계값 적용<br/>예: 거리 0.50 이하]
+    G --> H[최종 검색 문서<br/>문서 1·문서 2]
+    H --> I[RAG 답변의 근거 컨텍스트로 전달]
+
+    J[주의<br/>코사인 유사도는 클수록 유사하고<br/>거리값은 작을수록 가까움] --- E
