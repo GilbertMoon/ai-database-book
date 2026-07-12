@@ -1,1 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">DB 설계 검증 흐름</text><rect x="80" y="110" width="200" height="65" class="b m"/><text x="180" y="142" class="l">요구사항</text><rect x="360" y="110" width="200" height="65" class="b y"/><text x="460" y="142" class="l">ERD 점검</text><rect x="640" y="110" width="200" height="65" class="b y"/><text x="740" y="142" class="l">DDL 점검</text><rect x="920" y="110" width="200" height="65" class="b y"/><text x="1020" y="142" class="l">샘플 데이터</text><rect x="220" y="360" width="220" height="70" class="b g"/><text x="330" y="388" class="l">핵심 SQL</text><text x="330" y="412" class="s">SELECT JOIN GROUP BY</text><rect x="500" y="360" width="220" height="70" class="b p"/><text x="610" y="388" class="l">실행 결과 확인</text><text x="610" y="412" class="s">데이터 정합성 검증</text><rect x="780" y="360" width="220" height="70" class="b r"/><text x="890" y="388" class="l">수정 필요 여부</text><text x="890" y="412" class="s">오류 발견 시 재설계</text><rect x="420" y="610" width="360" height="60" class="b m"/><text x="600" y="640" class="l">검증 결과를 보고서에 기록</text><line x1="280" y1="142" x2="360" y2="142" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="560" y1="142" x2="640" y2="142" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="840" y1="142" x2="920" y2="142" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="1020" y1="175" x2="330" y2="360" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="440" y1="395" x2="500" y2="395" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="720" y1="395" x2="780" y2="395" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="890" y1="430" x2="460" y2="175" stroke="#e53e3e" stroke-width="2" stroke-dasharray="7 7" marker-end="url(#a)"/><line x1="610" y1="430" x2="600" y2="610" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc">
+  <title id="title">DB 설계 검증 흐름</title>
+  <desc id="desc">요구사항부터 ERD, PostgreSQL DDL, 검증 데이터와 SQL 실행 결과를 확인하고 수정 필요 여부에 따라 반복 검증하거나 결과를 기록하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .box{fill:#fff;stroke:#64748b;stroke-width:1.8;rx:12}
+      .box-design{fill:#f4f8ff;stroke:#3b82c4}
+      .box-data{fill:#fffaf0;stroke:#d69e2e}
+      .box-check{fill:#f2fbf5;stroke:#3c9a5f}
+      .box-fix{fill:#fff5f5;stroke:#d9534f}
+      .box-record{fill:#f3f0ff;stroke:#7c5cc4}
+      .badge-design{fill:#2f6fad}.badge-data{fill:#b7791f}.badge-check{fill:#2f855a}
+      .step-number{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .step-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .step-sub{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
+      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .branch-label{font-size:14px;font-weight:700}
+      .footer{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="860" fill="#fff"/>
+  <text x="600" y="42" class="title">DB 설계 검증 흐름</text>
+
+  <rect x="350" y="80" width="500" height="62" class="box box-design"/>
+  <circle cx="377" cy="101" r="14" class="badge-design"/>
+  <text x="377" y="101" class="step-number">1</text>
+  <text x="600" y="111" class="step-text">요구사항 확인</text>
+
+  <rect x="350" y="165" width="500" height="62" class="box box-design"/>
+  <circle cx="377" cy="186" r="14" class="badge-design"/>
+  <text x="377" y="186" class="step-number">2</text>
+  <text x="600" y="196" class="step-text">ERD 관계 점검</text>
+
+  <rect x="350" y="250" width="500" height="72" class="box box-design"/>
+  <circle cx="377" cy="271" r="14" class="badge-design"/>
+  <text x="377" y="271" class="step-number">3</text>
+  <text x="600" y="278" class="step-text">PostgreSQL DDL·제약조건 점검</text>
+  <text x="600" y="302" class="step-sub">PK · FK · NOT NULL · UNIQUE · CHECK · DEFAULT</text>
+
+  <rect x="350" y="345" width="500" height="72" class="box box-data"/>
+  <circle cx="377" cy="366" r="14" class="badge-data"/>
+  <text x="377" y="366" class="step-number">4</text>
+  <text x="600" y="373" class="step-text">검증 시나리오 데이터 입력</text>
+  <text x="600" y="397" class="step-sub">정상·경계·관계·모순 상황 포함</text>
+
+  <rect x="350" y="440" width="500" height="72" class="box box-data"/>
+  <circle cx="377" cy="461" r="14" class="badge-data"/>
+  <text x="377" y="461" class="step-number">5</text>
+  <text x="600" y="468" class="step-text">조회·JOIN·집계·검증 SQL 실행</text>
+  <text x="600" y="492" class="step-sub">SELECT · JOIN · GROUP BY · HAVING</text>
+
+  <rect x="350" y="535" width="500" height="72" class="box box-check"/>
+  <circle cx="377" cy="556" r="14" class="badge-check"/>
+  <text x="377" y="556" class="step-number">6</text>
+  <text x="600" y="563" class="step-text">실행 결과와 업무 규칙 비교</text>
+  <text x="600" y="587" class="step-sub">요구사항·관계·데이터 정합성 확인</text>
+
+  <path d="M 600 142 V 165" class="arrow"/>
+  <path d="M 600 227 V 250" class="arrow"/>
+  <path d="M 600 322 V 345" class="arrow"/>
+  <path d="M 600 417 V 440" class="arrow"/>
+  <path d="M 600 512 V 535" class="arrow"/>
+  <path d="M 600 607 V 630" class="arrow"/>
+
+  <polygon points="600,630 720,690 600,750 480,690" class="decision"/>
+  <text x="600" y="690" class="decision-text">수정 필요?</text>
+
+  <rect x="105" y="650" width="320" height="82" class="box box-fix"/>
+  <text x="265" y="678" class="step-text">원인 단계 수정</text>
+  <text x="265" y="706" class="step-sub">요구사항·ERD·DDL·데이터·SQL</text>
+
+  <rect x="775" y="650" width="320" height="82" class="box box-record"/>
+  <text x="935" y="678" class="step-text">검증 결과 기록</text>
+  <text x="935" y="706" class="step-sub">확인 결과·수정 내용·검증 근거</text>
+
+  <path d="M 480 690 H 425" class="arrow"/>
+  <text x="438" y="675" class="branch-label">예</text>
+  <path d="M 720 690 H 775" class="arrow"/>
+  <text x="744" y="675" class="branch-label">아니요</text>
+
+  <path d="M 105 691 H 55 V 111 H 350" class="feedback"/>
+  <text x="72" y="430" class="branch-label" fill="#b42318">수정 후 다시 검증</text>
+
+  <rect x="260" y="795" width="680" height="42" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6" rx="11"/>
+  <text x="600" y="816" class="footer">검증은 SQL 실행 성공이 아니라 요구사항과 데이터 규칙의 일치 여부를 확인하는 과정이다</text>
+</svg>
