@@ -1,1 +1,137 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="680" viewBox="0 0 1100 680"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:16px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="550" y="40" text-anchor="middle" class="t">ORDER BY sort flow</text><rect x="390" y="90" width="320" height="60" class="b m"/><text x="550" y="120" class="l">students result</text><rect x="390" y="210" width="320" height="60" class="b y"/><text x="550" y="240" class="l">ORDER BY grade</text><rect x="150" y="340" width="280" height="230" class="b g"/><text x="290" y="370" class="l">ASC</text><text x="290" y="410" class="s">grade 1</text><text x="290" y="445" class="s">grade 2</text><text x="290" y="480" class="s">grade 3</text><text x="290" y="515" class="s">grade 4</text><text x="290" y="548" class="s">small to large</text><rect x="670" y="340" width="280" height="230" class="b g"/><text x="810" y="370" class="l">DESC</text><text x="810" y="410" class="s">grade 4</text><text x="810" y="445" class="s">grade 3</text><text x="810" y="480" class="s">grade 2</text><text x="810" y="515" class="s">grade 1</text><text x="810" y="548" class="s">large to small</text><line x1="550" y1="150" x2="550" y2="210" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="520" y1="270" x2="290" y2="340" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="580" y1="270" x2="810" y2="340" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><rect x="250" y="610" width="600" height="40" class="b m"/><text x="550" y="630" class="s">ORDER BY changes the output order, not the stored table order.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1160" viewBox="0 0 1200 1160" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">ORDER BY로 조회 결과 정렬하기</title>
+  <desc id="desc">students 테이블의 조회 결과에 ORDER BY grade를 적용하여 ASC 오름차순과 DESC 내림차순으로 정렬되는 과정, 다중 열 정렬과 저장 순서와 결과 순서의 차이를 설명한다.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:18px;font-weight:700;text-anchor:middle}
+      .card-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .header{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .cell{font-size:13px;text-anchor:middle;dominant-baseline:middle}
+      .cell-strong{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .sql{font-family:Consolas,Menlo,monospace;font-size:14px;text-anchor:middle;fill:#243b53}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .note-title{font-size:14px;font-weight:700;fill:#92400e}
+      .note-text{font-size:12.5px;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;fill:#166534;text-anchor:middle}
+      .principle-main{font-size:18px;font-weight:700;fill:#166534;text-anchor:middle}
+      .principle-sub{font-size:13px;fill:#3f6f50;text-anchor:middle}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1160" fill="#ffffff"/>
+
+  <text x="600" y="42" class="title">ORDER BY로 조회 결과 정렬하기</text>
+  <text x="600" y="72" class="subtitle">ORDER BY는 SELECT 결과의 표시 순서를 정하며, 테이블에 저장된 행의 물리적 순서를 바꾸지 않는다</text>
+
+  <rect x="34" y="98" width="1132" height="670" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 하나의 정렬 기준을 ASC와 DESC로 적용</text>
+  <text x="430" y="132" class="section-sub">정렬 방향을 생략하면 ASC가 기본값</text>
+
+  <rect x="380" y="160" width="440" height="228" rx="13" fill="#ffffff" stroke="#64748b" stroke-width="1.7"/>
+  <path d="M393 160H807A13 13 0 0 1 820 173V215H380V173A13 13 0 0 1 393 160Z" fill="#eef5ff" stroke="#3b82c4" stroke-width="1.7"/>
+  <circle cx="410" cy="188" r="16" fill="#2f6fad"/>
+  <text x="410" y="188" class="badge">1</text>
+  <text x="600" y="186" class="card-title">정렬 전 조회 결과</text>
+  <text x="600" y="207" class="card-sub">정렬 기준이 없으면 행 순서를 보장할 수 없음</text>
+
+  <rect x="405" y="238" width="80" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="485" y="238" width="210" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="695" y="238" width="100" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="445" y="255" class="header">id</text>
+  <text x="590" y="255" class="header">name</text>
+  <text x="745" y="255" class="header">grade</text>
+
+  <g>
+    <rect x="405" y="272" width="80" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="485" y="272" width="210" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="695" y="272" width="100" height="25" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="445" y="284.5" class="cell">3</text><text x="590" y="284.5" class="cell">박서연</text><text x="745" y="284.5" class="cell-strong">2</text>
+    <rect x="405" y="297" width="80" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="485" y="297" width="210" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="695" y="297" width="100" height="25" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="445" y="309.5" class="cell">1</text><text x="590" y="309.5" class="cell">김민지</text><text x="745" y="309.5" class="cell-strong">4</text>
+    <rect x="405" y="322" width="80" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="485" y="322" width="210" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="695" y="322" width="100" height="25" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="445" y="334.5" class="cell">4</text><text x="590" y="334.5" class="cell">최유진</text><text x="745" y="334.5" class="cell-strong">1</text>
+    <rect x="405" y="347" width="80" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="485" y="347" width="210" height="25" fill="#ffffff" stroke="#cbd5e1"/><rect x="695" y="347" width="100" height="25" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="445" y="359.5" class="cell">2</text><text x="590" y="359.5" class="cell">이준호</text><text x="745" y="359.5" class="cell-strong">3</text>
+  </g>
+
+  <path d="M600 388V418" class="flow"/>
+  <rect x="260" y="418" width="680" height="76" rx="12" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.7"/>
+  <circle cx="290" cy="446" r="16" fill="#b7791f"/>
+  <text x="290" y="446" class="badge">2</text>
+  <text x="600" y="446" class="sql">SELECT id, name, grade FROM students</text>
+  <text x="600" y="475" class="sql">ORDER BY grade ASC | DESC;</text>
+
+  <path d="M540 494V525H300V548" class="flow"/>
+  <path d="M660 494V525H900V548" class="flow"/>
+
+  <rect x="70" y="548" width="460" height="188" rx="13" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.7"/>
+  <path d="M83 548H517A13 13 0 0 1 530 561V600H70V561A13 13 0 0 1 83 548Z" fill="#f2fbf5" stroke="#3c9a5f" stroke-width="1.7"/>
+  <circle cx="100" cy="574" r="16" fill="#2f855a"/>
+  <text x="100" y="574" class="badge">3A</text>
+  <text x="300" y="574" class="card-title">ASC · 오름차순</text>
+  <text x="300" y="594" class="card-sub">작은 값 → 큰 값 · ASC 생략 가능</text>
+
+  <rect x="98" y="620" width="76" height="30" fill="#e9eef5" stroke="#94a3b8"/><rect x="174" y="620" width="218" height="30" fill="#e9eef5" stroke="#94a3b8"/><rect x="392" y="620" width="110" height="30" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="136" y="635" class="header">id</text><text x="283" y="635" class="header">name</text><text x="447" y="635" class="header">grade</text>
+  <g>
+    <rect x="98" y="650" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="174" y="650" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="392" y="650" width="110" height="20" fill="#ecfdf3" stroke="#3c9a5f"/><text x="136" y="660" class="cell">4</text><text x="283" y="660" class="cell">최유진</text><text x="447" y="660" class="cell-strong">1</text>
+    <rect x="98" y="670" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="174" y="670" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="392" y="670" width="110" height="20" fill="#ecfdf3" stroke="#3c9a5f"/><text x="136" y="680" class="cell">3</text><text x="283" y="680" class="cell">박서연</text><text x="447" y="680" class="cell-strong">2</text>
+    <rect x="98" y="690" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="174" y="690" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="392" y="690" width="110" height="20" fill="#ecfdf3" stroke="#3c9a5f"/><text x="136" y="700" class="cell">2</text><text x="283" y="700" class="cell">이준호</text><text x="447" y="700" class="cell-strong">3</text>
+    <rect x="98" y="710" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="174" y="710" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="392" y="710" width="110" height="20" fill="#ecfdf3" stroke="#3c9a5f"/><text x="136" y="720" class="cell">1</text><text x="283" y="720" class="cell">김민지</text><text x="447" y="720" class="cell-strong">4</text>
+  </g>
+
+  <rect x="670" y="548" width="460" height="188" rx="13" fill="#ffffff" stroke="#d9534f" stroke-width="1.7"/>
+  <path d="M683 548H1117A13 13 0 0 1 1130 561V600H670V561A13 13 0 0 1 683 548Z" fill="#fff4f2" stroke="#d9534f" stroke-width="1.7"/>
+  <circle cx="700" cy="574" r="16" fill="#c2413b"/>
+  <text x="700" y="574" class="badge">3B</text>
+  <text x="900" y="574" class="card-title">DESC · 내림차순</text>
+  <text x="900" y="594" class="card-sub">큰 값 → 작은 값 · DESC를 명시</text>
+
+  <rect x="698" y="620" width="76" height="30" fill="#e9eef5" stroke="#94a3b8"/><rect x="774" y="620" width="218" height="30" fill="#e9eef5" stroke="#94a3b8"/><rect x="992" y="620" width="110" height="30" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="736" y="635" class="header">id</text><text x="883" y="635" class="header">name</text><text x="1047" y="635" class="header">grade</text>
+  <g>
+    <rect x="698" y="650" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="774" y="650" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="992" y="650" width="110" height="20" fill="#fff4f2" stroke="#d9534f"/><text x="736" y="660" class="cell">1</text><text x="883" y="660" class="cell">김민지</text><text x="1047" y="660" class="cell-strong">4</text>
+    <rect x="698" y="670" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="774" y="670" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="992" y="670" width="110" height="20" fill="#fff4f2" stroke="#d9534f"/><text x="736" y="680" class="cell">2</text><text x="883" y="680" class="cell">이준호</text><text x="1047" y="680" class="cell-strong">3</text>
+    <rect x="698" y="690" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="774" y="690" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="992" y="690" width="110" height="20" fill="#fff4f2" stroke="#d9534f"/><text x="736" y="700" class="cell">3</text><text x="883" y="700" class="cell">박서연</text><text x="1047" y="700" class="cell-strong">2</text>
+    <rect x="698" y="710" width="76" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="774" y="710" width="218" height="20" fill="#fff" stroke="#cbd5e1"/><rect x="992" y="710" width="110" height="20" fill="#fff4f2" stroke="#d9534f"/><text x="736" y="720" class="cell">4</text><text x="883" y="720" class="cell">최유진</text><text x="1047" y="720" class="cell-strong">1</text>
+  </g>
+
+  <rect x="34" y="792" width="1132" height="212" rx="16" fill="#f4f8ff" stroke="#93b4e6" stroke-width="1.6"/>
+  <text x="58" y="826" class="section-title">2. 여러 열을 정렬 기준으로 사용할 때</text>
+  <text x="386" y="826" class="section-sub">앞쪽 기준이 같을 때만 다음 기준을 적용하며, 왼쪽에서 오른쪽 순서로 판단</text>
+
+  <rect x="58" y="852" width="520" height="120" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="318" y="880" class="card-title">다중 열 정렬</text>
+  <text x="318" y="910" class="sql">ORDER BY grade DESC, name ASC;</text>
+  <text x="318" y="940" class="card-sub">① grade가 큰 행부터 정렬</text>
+  <text x="318" y="962" class="card-sub">② grade가 같으면 name을 오름차순으로 정렬</text>
+
+  <rect x="606" y="852" width="536" height="120" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="874" y="880" class="card-title">정렬할 때 기억할 점</text>
+  <text x="636" y="910" class="note-text">• 결과 순서가 필요하면 ORDER BY를 반드시 명시한다.</text>
+  <text x="636" y="934" class="note-text">• 문자와 날짜도 지정한 열의 값에 따라 정렬할 수 있다.</text>
+  <text x="636" y="958" class="note-text">• NULL의 기본 정렬 위치는 DBMS마다 다를 수 있다.</text>
+
+  <rect x="54" y="1024" width="535" height="48" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="76" y="1053" class="note-title">저장 순서와 구분</text>
+  <text x="196" y="1053" class="note-text">ORDER BY는 조회 결과만 정렬하며 테이블 행의 저장 위치를 변경하지 않는다.</text>
+
+  <rect x="611" y="1024" width="535" height="48" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="633" y="1053" class="note-title">LIMIT과 함께 사용</text>
+  <text x="757" y="1053" class="note-text">상위·하위 N건을 구할 때는 ORDER BY 뒤에 LIMIT을 적용한다.</text>
+
+  <rect x="80" y="1090" width="1040" height="54" rx="12" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1090" width="190" height="54" rx="12" fill="#dcf7e5"/>
+  <line x1="270" y1="1101" x2="270" y2="1133" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1122" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1113" class="principle-main">ORDER BY 열 [ASC | DESC]</text>
+  <text x="695" y="1134" class="principle-sub">필요한 결과 순서는 정렬 기준과 방향을 SQL에 명시해야 보장된다</text>
+</svg>
