@@ -1,224 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1900" viewBox="0 0 1200 1900" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">3정규형(3NF): 이행적 종속 분리</title>
-  <desc id="desc">회원 테이블에서 member_id가 zip_code를 결정하고 zip_code가 city를 결정하여 city가 기본키에 이행적으로 종속되는 예를 설명한다. 이 예제에서는 하나의 우편번호가 하나의 도시를 결정한다는 업무 규칙을 전제로 하며, members와 zip_codes로 분해해 수정·삽입·삭제 이상을 줄이고 외래키와 JOIN으로 원래 의미를 검증한다.</desc>
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">3정규형: 비키 컬럼 간 의존 분리</title>
+  <desc id="desc">member_id가 zip_code를 결정하고 zip_code가 city를 결정하는 의존 사슬에서 city를 zip_codes 테이블로 분리하는 구조와 단순화 가정을 보여 준다.</desc>
+
+  <style>
+    .ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+    .mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
+    .title { font-size: 28px; font-weight: 700; }
+    .sub { font-size: 15px; fill: #4b5563; }
+    .h { font-size: 18px; font-weight: 700; }
+    .b { font-size: 14px; }
+    .s { font-size: 12.5px; }
+    .box { stroke: #64748b; stroke-width: 1.7; rx: 14; ry: 14; }
+    .problem { fill: #fff1f1; }
+    .insert { fill: #fff6d8; }
+    .update { fill: #ffeaea; }
+    .delete { fill: #f3edff; }
+    .nf1 { fill: #eaf3ff; }
+    .nf2 { fill: #fff0df; }
+    .nf3 { fill: #f2ecff; }
+    .good { fill: #eaf8ee; }
+    .review { fill: #eaf3ff; }
+    .ai { fill: #f2ecff; }
+    .note { fill: #fff6d8; }
+    .pk { fill: #1d4ed8; font-weight: 700; }
+    .fk { fill: #c2410c; font-weight: 700; }
+    .line { stroke: #475569; stroke-width: 2; fill: none; }
+    .dash { stroke: #64748b; stroke-width: 2; stroke-dasharray: 7 6; fill: none; }
+    .hot { fill: #b91c1c; font-weight: 700; }
+  </style>
+
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
     </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#2f6fad"/>
-    </marker>
-    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#b7791f"/>
-    </marker>
-    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
-    </marker>
-    <style>
-      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
-      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#334155}
-      .table-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .table-sub{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .cell{font-size:12px;text-anchor:middle;fill:#334155}
-      .cell-left{font-size:12px;fill:#334155}
-      .key{font-size:12px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
-      .repeat{font-size:12px;font-weight:700;text-anchor:middle;fill:#b91c1c}
-      .line{stroke:#cbd5e1;stroke-width:1}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .dep-blue{stroke:#2f6fad;stroke-width:2.2;fill:none;marker-end:url(#arrow-blue)}
-      .dep-orange{stroke:#b7791f;stroke-width:2.2;fill:none;marker-end:url(#arrow-orange)}
-      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
-      .decision{font-size:14px;font-weight:700;text-anchor:middle}
-      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
-      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
-      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .note-text{font-size:12.3px;text-anchor:middle;fill:#475569}
-      .principle{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
-    </style>
   </defs>
+  <rect x="0" y="0" width="1200" height="620" fill="#ffffff"/>
+  <text x="600" y="44" text-anchor="middle" class="ko title">3정규형: 비키 컬럼 간 의존 분리</text>
 
-  <rect width="1200" height="1900" fill="#ffffff"/>
-  <text x="600" y="42" class="title">3정규형(3NF): 이행적 종속 분리</text>
-  <text x="600" y="72" class="subtitle">2NF를 만족한 뒤, 비키 속성이 다른 비키 속성을 통해 키에 간접 의존하는지 확인한다</text>
-
-  <rect x="34" y="98" width="1132" height="332" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <text x="58" y="132" class="section-title">1. 먼저 업무 규칙과 함수 종속을 확인</text>
-  <text x="395" y="132" class="section-sub">값이 우연히 반복된다는 사실만으로 분리하지 않고, 어떤 값이 다른 값을 항상 결정하는지 확인한다</text>
-
-  <rect x="58" y="160" width="1084" height="74" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="187" class="card-title">이 예제의 업무 가정</text>
-  <text x="600" y="213" class="card-text">하나의 zip_code는 하나의 city를 결정한다. 즉 같은 우편번호에는 항상 같은 도시명이 저장되어야 한다.</text>
-
-  <rect x="58" y="258" width="330" height="110" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="88" cy="286" r="15" fill="#2f6fad"/><text x="88" y="286" class="badge">1</text>
-  <text x="223" y="289" class="card-title">키가 회원 사실을 결정</text>
-  <text x="223" y="320" class="mono">member_id → member_name</text>
-  <text x="223" y="346" class="card-text-small">회원 이름은 회원 키에 직접 의존</text>
-
-  <rect x="435" y="258" width="330" height="110" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <circle cx="465" cy="286" r="15" fill="#2f6fad"/><text x="465" y="286" class="badge">2</text>
-  <text x="600" y="289" class="card-title">키가 현재 우편번호를 결정</text>
-  <text x="600" y="320" class="mono">member_id → zip_code</text>
-  <text x="600" y="346" class="card-text-small">회원 한 명의 현재 우편번호를 저장</text>
-
-  <rect x="812" y="258" width="330" height="110" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <circle cx="842" cy="286" r="15" fill="#b7791f"/><text x="842" y="286" class="badge">3</text>
-  <text x="977" y="289" class="card-title">비키 속성이 다른 속성을 결정</text>
-  <text x="977" y="320" class="mono">zip_code → city</text>
-  <text x="977" y="346" class="card-text-small">city는 zip_code를 통해 키에 간접 의존</text>
-
-  <path d="M765 313H812" class="dep-orange"/>
-  <rect x="176" y="384" width="848" height="28" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.2"/>
-  <text x="600" y="403" class="mono">member_id → zip_code → city  ·  member_id → city는 이행적 종속</text>
-
-  <path d="M600 430V454" class="flow"/>
-
-  <rect x="34" y="454" width="1132" height="426" rx="16" fill="#fff5f5" stroke="#d9534f" stroke-width="1.6"/>
-  <text x="58" y="488" class="section-title">2. 적용 전: 한 테이블에 회원 사실과 우편번호 기준정보가 혼재</text>
-  <text x="520" y="488" class="section-sub">같은 우편번호의 도시명이 회원 행마다 반복되어 이상 현상의 원인이 된다</text>
-
-  <rect x="70" y="522" width="1060" height="190" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <rect x="70" y="522" width="1060" height="42" rx="11" fill="#fee2e2"/>
-  <rect x="70" y="553" width="1060" height="11" fill="#fee2e2"/>
-  <text x="600" y="549" class="table-title">members_before</text>
-  <line x1="70" y1="564" x2="1130" y2="564" class="line"/>
-  <line x1="70" y1="611" x2="1130" y2="611" class="line"/>
-  <line x1="70" y1="658" x2="1130" y2="658" class="line"/>
-  <line x1="220" y1="564" x2="220" y2="712" class="line"/>
-  <line x1="500" y1="564" x2="500" y2="712" class="line"/>
-  <line x1="790" y1="564" x2="790" y2="712" class="line"/>
-  <text x="145" y="592" class="key">member_id · PK</text>
-  <text x="360" y="592" class="cell">member_name</text>
-  <text x="645" y="592" class="cell">zip_code</text>
-  <text x="960" y="592" class="cell">city</text>
-  <text x="145" y="639" class="cell">1</text><text x="360" y="639" class="cell">김민지</text><text x="645" y="639" class="repeat">04524</text><text x="960" y="639" class="repeat">서울</text>
-  <text x="145" y="686" class="cell">2</text><text x="360" y="686" class="cell">이준호</text><text x="645" y="686" class="repeat">04524</text><text x="960" y="686" class="repeat">서울</text>
-
-  <rect x="58" y="744" width="330" height="100" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="223" y="773" class="card-title">수정 이상</text>
-  <text x="223" y="801" class="card-text">도시명이 바뀌면 04524인</text>
-  <text x="223" y="824" class="card-text">모든 회원 행을 수정해야 함</text>
-
-  <rect x="435" y="744" width="330" height="100" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="773" class="card-title">삽입 이상</text>
-  <text x="600" y="801" class="card-text">회원 없이 새 우편번호·도시</text>
-  <text x="600" y="824" class="card-text">기준정보만 등록하기 어려움</text>
-
-  <rect x="812" y="744" width="330" height="100" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="977" y="773" class="card-title">삭제 이상</text>
-  <text x="977" y="801" class="card-text">마지막 회원 행을 삭제하면</text>
-  <text x="977" y="824" class="card-text">우편번호·도시 지식도 사라질 수 있음</text>
-
-  <path d="M600 880V904" class="flow"/>
-
-  <rect x="34" y="904" width="1132" height="462" rx="16" fill="#eefbf2" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="58" y="938" class="section-title">3. 3NF 적용: 서로 다른 사실의 결정자를 키로 분리</text>
-  <text x="470" y="938" class="section-sub">회원 사실은 members에, 우편번호 기준정보는 zip_codes에 한 번만 저장한다</text>
-
-  <rect x="66" y="976" width="454" height="250" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
-  <rect x="66" y="976" width="454" height="48" rx="11" fill="#dcecff"/>
-  <rect x="66" y="1013" width="454" height="11" fill="#dcecff"/>
-  <text x="293" y="1006" class="table-title">members</text>
-  <line x1="66" y1="1024" x2="520" y2="1024" class="line"/>
-  <line x1="66" y1="1073" x2="520" y2="1073" class="line"/>
-  <line x1="66" y1="1122" x2="520" y2="1122" class="line"/>
-  <line x1="66" y1="1171" x2="520" y2="1171" class="line"/>
-  <text x="92" y="1055" class="key">PK</text><text x="150" y="1055" class="cell-left">id</text><text x="382" y="1055" class="cell">회원 식별자</text>
-  <text x="92" y="1104" class="cell-left">name</text><text x="382" y="1104" class="cell">회원 이름</text>
-  <text x="92" y="1153" class="key">FK</text><text x="150" y="1153" class="cell-left">zip_code</text><text x="382" y="1153" class="cell">zip_codes.zip_code 참조</text>
-  <text x="293" y="1202" class="card-text-small">김민지·이준호 행은 04524만 저장</text>
-
-  <rect x="680" y="976" width="454" height="250" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.6"/>
-  <rect x="680" y="976" width="454" height="48" rx="11" fill="#fff1cf"/>
-  <rect x="680" y="1013" width="454" height="11" fill="#fff1cf"/>
-  <text x="907" y="1006" class="table-title">zip_codes</text>
-  <line x1="680" y1="1024" x2="1134" y2="1024" class="line"/>
-  <line x1="680" y1="1073" x2="1134" y2="1073" class="line"/>
-  <line x1="680" y1="1122" x2="1134" y2="1122" class="line"/>
-  <line x1="680" y1="1171" x2="1134" y2="1171" class="line"/>
-  <text x="706" y="1055" class="key">PK</text><text x="770" y="1055" class="cell-left">zip_code</text><text x="1000" y="1055" class="cell">우편번호 결정자</text>
-  <text x="706" y="1104" class="cell-left">city</text><text x="1000" y="1104" class="cell">도시 기준정보</text>
-  <text x="770" y="1153" class="cell-left">04524</text><text x="1000" y="1153" class="cell">서울</text>
-  <text x="770" y="1202" class="cell-left">48058</text><text x="1000" y="1202" class="cell">부산</text>
-
-  <path d="M520 1148H680" class="dep-blue"/>
-  <text x="600" y="1128" class="card-text-small">FK 참조 · N : 1</text>
-
-  <rect x="174" y="1250" width="852" height="72" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="600" y="1277" class="mono">members.zip_code → zip_codes.zip_code</text>
-  <text x="600" y="1304" class="card-text">도시 값은 zip_codes에 한 번만 저장하고, JOIN으로 회원·우편번호·도시를 복원한다</text>
-
-  <rect x="98" y="1334" width="1004" height="20" rx="7" fill="#dcf7e5" stroke="#62b47a" stroke-width="1.1"/>
-  <text x="600" y="1348" class="card-text-small">zip_code가 회원에게 필수라면 FK를 NOT NULL로, 선택 정보라면 NULL 허용으로 설계한다</text>
-
-  <path d="M600 1366V1390" class="flow"/>
-
-  <rect x="34" y="1390" width="1132" height="282" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
-  <text x="58" y="1424" class="section-title">4. 분해 결과를 데이터와 질의로 검증</text>
-  <text x="375" y="1424" class="section-sub">테이블을 나눈 것만으로 끝내지 않고 중복 감소, 무결성, 원래 의미 복원을 확인한다</text>
-
-  <rect x="58" y="1456" width="250" height="128" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="183" y="1484" class="card-title">수정 검증</text>
-  <text x="183" y="1513" class="card-text">도시 변경은 기준 테이블</text>
-  <text x="183" y="1537" class="card-text">한 행만 수정</text>
-  <text x="183" y="1565" class="ok">중복 수정 제거</text>
-
-  <rect x="337" y="1456" width="250" height="128" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="462" y="1484" class="card-title">삽입·삭제 검증</text>
-  <text x="462" y="1513" class="card-text">우편번호 기준정보를 독립 등록</text>
-  <text x="462" y="1537" class="card-text">회원 삭제 후에도 기준정보 유지</text>
-  <text x="462" y="1565" class="ok">이상 현상 감소</text>
-
-  <rect x="616" y="1456" width="250" height="128" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="741" y="1484" class="card-title">참조 무결성</text>
-  <text x="741" y="1513" class="card-text">존재하는 zip_code만 참조</text>
-  <text x="741" y="1537" class="card-text">삭제 정책도 업무 규칙에 맞춤</text>
-  <text x="741" y="1565" class="ok">FK로 일관성 유지</text>
-
-  <rect x="895" y="1456" width="247" height="128" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="1018" y="1484" class="card-title">무손실 JOIN 확인</text>
-  <text x="1018" y="1513" class="card-text">zip_code PK로 JOIN하면</text>
-  <text x="1018" y="1537" class="card-text">원래 회원·도시 사실 복원</text>
-  <text x="1018" y="1565" class="ok">불필요한 행 생성 없음</text>
-
-  <rect x="114" y="1606" width="972" height="42" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="1.2"/>
-  <text x="600" y="1623" class="mono">SELECT m.id, m.name, m.zip_code, z.city</text>
-  <text x="600" y="1641" class="mono">FROM members m JOIN zip_codes z ON m.zip_code = z.zip_code;</text>
-
-  <path d="M600 1672V1696" class="flow"/>
-  <polygon points="600,1696 760,1740 600,1784 440,1740" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
-  <text x="600" y="1735" class="decision">비키 속성이 또 다른 비키 속성을 결정하는가?</text>
-  <text x="600" y="1758" class="card-text">업무 규칙과 모든 후보키를 기준으로 다시 확인</text>
-
-  <path d="M440 1740H24V304H58" class="retry"/>
-  <text x="382" y="1727" class="no">예 · 결정 관계와 분해 다시 검토</text>
-
-  <rect x="795" y="1708" width="347" height="64" rx="11" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
-  <text x="968" y="1733" class="card-title">아니오 · 3NF 검토 통과</text>
-  <text x="968" y="1758" class="card-text-small">각 사실이 자기 테이블의 키에 직접 의존</text>
-  <path d="M760 1740H795" class="flow"/>
-  <text x="779" y="1727" class="ok">아니오</text>
-
-  <rect x="54" y="1810" width="344" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="226" y="1835" class="note-title">업무 규칙 우선</text>
-  <text x="226" y="1858" class="note-text">zip_code → city가 실제 범위에서 성립하는지 검증</text>
-
-  <rect x="428" y="1810" width="344" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="600" y="1835" class="note-title">전제 조건</text>
-  <text x="600" y="1858" class="note-text">1NF와 2NF를 만족한 뒤 이행적 종속을 검토</text>
-
-  <rect x="802" y="1810" width="344" height="58" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="974" y="1835" class="note-title">정확한 기준</text>
-  <text x="974" y="1858" class="note-text">단순 PK뿐 아니라 모든 후보키를 기준으로 판단</text>
-
-  <rect x="80" y="1880" width="1040" height="20" rx="10" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.5"/>
-  <text x="600" y="1894" class="principle">핵심 · 같은 사실을 한 곳에 저장하고, 비키 → 비키 결정 관계가 있으면 결정자를 키로 하는 분리를 검토한다</text>
+  <text x="600" y="72" text-anchor="middle" class="ko sub">전제: 먼저 2NF를 만족하며, 이 예제에서는 zip_code 하나가 city 하나를 결정한다고 가정합니다.</text>
+  <rect x="70" y="125" width="380" height="260" class="box problem"/>
+  <text x="260" y="165" text-anchor="middle" class="ko h">정규화 전 members</text>
+  <text x="125" y="220" class="mono b pk">member_id PK</text>
+  <text x="125" y="260" class="mono b">member_name</text>
+  <text x="125" y="300" class="mono b">zip_code</text>
+  <text x="125" y="340" class="mono b hot">city</text>
+  <rect x="485" y="170" width="230" height="150" class="box note"/>
+  <text x="600" y="215" text-anchor="middle" class="mono h">member_id → zip_code</text>
+  <text x="600" y="255" text-anchor="middle" class="mono h">zip_code → city</text>
+  <text x="600" y="295" text-anchor="middle" class="ko b">city는 zip_code에 직접 의존</text>
+  <line x1="715" y1="245" x2="780" y2="245" class="line" marker-end="url(#arrow)"/>
+  <rect x="790" y="110" width="340" height="180" class="box nf3"/>
+  <text x="960" y="150" text-anchor="middle" class="mono h">members</text>
+  <text x="850" y="200" class="mono b pk">id PK</text><text x="850" y="235" class="mono b">name</text><text x="850" y="270" class="mono b fk">zip_code FK</text>
+  <rect x="790" y="330" width="340" height="150" class="box nf3"/>
+  <text x="960" y="370" text-anchor="middle" class="mono h">zip_codes</text>
+  <text x="850" y="420" class="mono b pk">zip_code PK</text><text x="850" y="455" class="mono b">city</text>
+  <line x1="960" y1="290" x2="960" y2="330" class="dash" marker-end="url(#arrow)"/>
+  <rect x="170" y="520" width="860" height="55" class="box good"/>
+  <text x="600" y="553" text-anchor="middle" class="ko b">단순 반복이 아니라 비키 컬럼 간 결정 관계라는 업무 규칙을 확인한 뒤 분리합니다.</text>
 </svg>
