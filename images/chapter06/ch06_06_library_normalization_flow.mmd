@@ -1,64 +1,7 @@
-flowchart TB
-    A[정규화 전 library_records<br/>한 행에 회원·책·대여 사실이 함께 저장] --> A1[컬럼<br/>loan_id · member_name · member_email · book_title · author<br/>borrowed_at · due_at · returned_at]
-
-    A1 --> B[샘플과 반복값 확인]
-    B --> B1[김민지의 이름·이메일이<br/>대여 건마다 반복]
-    B --> B2[같은 책의 제목·저자가<br/>대여 건마다 반복]
-    B --> B3[대여 날짜와 반납 상태는<br/>대여 한 건마다 달라짐]
-
-    B1 --> C[각 컬럼이 설명하는 사실의 주인 찾기]
-    B2 --> C
-    B3 --> C
-    C --> C1[회원 사실<br/>name · email · joined_at]
-    C --> C2[책 사실<br/>title · author · published_year · isbn]
-    C --> C3[대여 사건 사실<br/>borrowed_at · due_at · returned_at]
-
-    C1 --> D[식별자와 업무 규칙 설계]
-    C2 --> D
-    C3 --> D
-    D --> D1[members.id PK<br/>email UNIQUE NOT NULL]
-    D --> D2[books.id PK<br/>isbn UNIQUE NOT NULL]
-    D --> D3[loans.id PK<br/>returned_at은 미반납이면 NULL]
-
-    D1 --> E[정규화된 테이블로 분리]
-    D2 --> E
-    D3 --> E
-    E --> M[members<br/>id · name · email · joined_at]
-    E --> K[books<br/>id · title · author · published_year · isbn]
-    E --> L[loans<br/>id · member_id FK · book_id FK<br/>borrowed_at · due_at · returned_at]
-
-    M --> R[관계 연결]
-    K --> R
-    L --> R
-    R --> R1[members 1 : 0..N loans]
-    R --> R2[books 1 : 0..N loans]
-    R --> R3[각 loans 행은 회원 1명과 책 1권을<br/>NOT NULL FK로 반드시 참조]
-
-    R1 --> P[기존 데이터 정리와 이관]
-    R2 --> P
-    R3 --> P
-    P --> P1[회원 중복 후보 정리<br/>동일 이메일·동명이인·오타 확인 후 members 생성]
-    P --> P2[책 중복 후보 정리<br/>ISBN 우선, 제목·저자만으로 섣불리 합치지 않음]
-    P --> P3[기존 대여 행마다 새 member_id·book_id를 연결해<br/>loans로 이관]
-
-    P1 --> V[정규화 결과 검증]
-    P2 --> V
-    P3 --> V
-    V --> V1[이관 전후 대여 건수와 날짜·반납 상태가 동일]
-    V --> V2[email·isbn 중복은 UNIQUE 정책과 충돌하지 않음]
-    V --> V3[존재하지 않는 member_id·book_id는 FK가 차단]
-    V --> V4[JOIN으로 회원명·책 제목·대여일을 원본 의미대로 복원]
-
-    V1 --> Q{중복은 줄고<br/>업무 의미와 모든 대여 기록이 보존됐는가?}
-    V2 --> Q
-    V3 --> Q
-    V4 --> Q
-    Q -- 아니요 --> Q1[중복 판정·키 매핑·테이블 경계·제약조건을 다시 확인]
-    Q1 --> C
-    Q -- 예 --> OK[정규화된 설계 기준선<br/>ERD · CREATE TABLE · 이관 규칙 · 검증 SQL을 함께 기록]
-
-    N1[분리 원칙<br/>컬럼 수가 많아서가 아니라 회원·책·대여처럼<br/>서로 다른 사실과 변경 이유를 기준으로 테이블을 나눔] --- C
-    N2[키 도입<br/>원본에 member_id·book_id가 없더라도 정규화 과정에서<br/>안정적인 PK를 만들고 loans에는 설명값 대신 FK를 저장] --- D
-    N3[중복 제거 주의<br/>이름이나 제목이 같다는 이유만으로 같은 대상이라 단정하지 않고<br/>email·isbn과 업무 확인을 이용해 병합 기준을 정함] --- P
-    N4[정규형 해석<br/>1NF·2NF·3NF 이름을 기계적으로 끼워 맞추기보다<br/>다중값·부분 종속·이행 종속과 업무 주제를 실제 데이터에서 확인] --- E
-    N5[핵심<br/>회원과 책의 사실은 한 번만 저장하고<br/>loans는 두 FK와 대여 사건 속성만 보존] --- OK
+flowchart LR
+    A[library_records<br/>회원 정보 + 도서 정보 + 대여 정보] --> B[사실의 주인별 분리]
+    B --> C[members<br/>id PK<br/>name · email]
+    B --> D[loans<br/>id PK<br/>member_id FK<br/>book_id FK<br/>대여 날짜]
+    B --> E[books<br/>id PK<br/>title · author]
+    C --> D
+    E --> D
