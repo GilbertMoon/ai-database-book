@@ -1,1 +1,216 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1140" viewBox="0 0 1200 1140" role="img" aria-labelledby="title desc"><title id="title">데이터 모델링 전체 흐름</title><desc id="desc">도서 대여 시스템의 요구사항과 업무 시나리오에서 명사, 동사, 규칙을 찾아 엔터티, 속성, 관계로 분류하고 ERD와 PostgreSQL 테이블을 작성한 뒤 정상·예외 데이터로 검증하는 반복 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:1.5;rx:15}.req{fill:#eef5ff;stroke:#6fa2e8}.model{fill:#fff8e8;stroke:#d69e2e}.design{fill:#f5f1ff;stroke:#9b7bd2}.test{fill:#f2fbf5;stroke:#8bc9a0}.pt{font-size:19px;font-weight:700}.box{fill:#fff;stroke-width:1.4;rx:10}.blue{stroke:#3b82c4}.orange{stroke:#d69e2e}.green{stroke:#3c9a5f}.purple{stroke:#7c5cc4}.red{stroke:#d9534f}.gray{stroke:#64748b}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.3px;text-anchor:middle;fill:#475569}.sql{font-family:Consolas,D2Coding,monospace;font-size:13px;font-weight:700;text-anchor:middle}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:14px;font-weight:700;text-anchor:middle}.entity{fill:#fff;stroke:#3b82c4;stroke-width:1.5;rx:8}.event{fill:#fff;stroke:#d69e2e;stroke-width:1.5;rx:8}.rel{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#a)}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.4px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.5px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1140" fill="#fff"/><text x="600" y="40" class="t">데이터 모델링 전체 흐름</text><text x="600" y="68" class="s">요구사항을 테이블로 바로 옮기지 않고 업무 대상·관계·규칙을 분리한 뒤 데이터와 질의로 검증한다</text><rect x="35" y="100" width="1130" height="230" class="panel req"/><text x="60" y="132" class="pt">1. 요구사항과 업무 시나리오 분석</text><rect x="70" y="160" width="1060" height="58" class="box blue"/><text x="600" y="184" class="h">도서관은 회원과 책을 관리하고, 회원은 여러 책을 대여·반납할 수 있다</text><text x="600" y="207" class="m">등록·조회·대여·반납·미반납·중복 입력 같은 정상과 예외 상황을 함께 정리</text><rect x="70" y="245" width="320" height="62" class="box blue"/><text x="230" y="269" class="h">명사 · 대상과 값 후보</text><text x="230" y="292" class="m">회원·책·대여 기록·이메일·ISBN·대여일</text><rect x="440" y="245" width="320" height="62" class="box orange"/><text x="600" y="269" class="h">동사 · 관계와 사건 후보</text><text x="600" y="292" class="m">관리한다·대여한다·반납한다</text><rect x="810" y="245" width="320" height="62" class="box green"/><text x="970" y="269" class="h">수량·조건·상태 · 업무 규칙</text><text x="970" y="292" class="m">여러 권·고유값·필수값·미반납은 NULL</text><path d="M230 218V245" class="arr"/><path d="M600 218V245" class="arr"/><path d="M970 218V245" class="arr"/><rect x="35" y="360" width="1130" height="250" class="panel model"/><text x="60" y="392" class="pt">2. 엔터티·속성·관계로 분류하고 개념 모델 작성</text><rect x="70" y="425" width="300" height="72" class="box blue"/><text x="220" y="451" class="h">엔터티</text><text x="220" y="475" class="m">독립적으로 식별하고 관리하는 대상</text><text x="220" y="491" class="m">members · books</text><rect x="450" y="425" width="300" height="72" class="box purple"/><text x="600" y="451" class="h">속성</text><text x="600" y="475" class="m">대상을 설명하는 값</text><text x="600" y="491" class="m">name · email · title · isbn</text><rect x="830" y="425" width="300" height="72" class="box orange"/><text x="980" y="451" class="h">관계·사건 엔터티</text><text x="980" y="475" class="m">대상 사이의 연결과 발생 정보</text><text x="980" y="491" class="m">loans · borrowed_at · returned_at</text><rect x="105" y="530" width="250" height="52" class="entity"/><text x="230" y="553" class="h">members</text><text x="230" y="573" class="m">회원 한 명을 식별·관리</text><rect x="475" y="520" width="250" height="72" class="event"/><text x="600" y="545" class="h">loans</text><text x="600" y="566" class="m">누가 어떤 책을 언제 대여했는지</text><text x="600" y="583" class="m">회원과 책을 연결하는 사건 기록</text><rect x="845" y="530" width="250" height="52" class="entity"/><text x="970" y="553" class="h">books</text><text x="970" y="573" class="m">책 한 권을 식별·관리</text><path d="M355 556H475" class="rel"/><path d="M725 556H845" class="rel"/><path d="M230 330V345H220V425" class="arr"/><path d="M600 330V425" class="arr"/><path d="M970 330V345H980V425" class="arr"/><rect x="35" y="640" width="1130" height="200" class="panel design"/><text x="60" y="672" class="pt">3. 논리 설계 → ERD 검토 → PostgreSQL 구현</text><rect x="65" y="705" width="300" height="90" class="box purple"/><text x="215" y="731" class="h">논리 설계</text><text x="215" y="755" class="m">테이블·컬럼·PK·FK·관계 수</text><text x="215" y="776" class="m">NOT NULL·UNIQUE·NULL 허용</text><rect x="450" y="705" width="300" height="90" class="box orange"/><text x="600" y="731" class="h">ERD 검토</text><text x="600" y="755" class="m">누락·중복·관계 방향·카디널리티</text><text x="600" y="776" class="m">요구사항을 그림으로 설명할 수 있는지 확인</text><rect x="835" y="705" width="300" height="90" class="box green"/><text x="985" y="731" class="h">물리 설계와 SQL</text><text x="985" y="755" class="m">PostgreSQL 타입·DEFAULT·제약조건</text><text x="985" y="776" class="sql">members → books → loans</text><path d="M365 750H450" class="arr"/><path d="M750 750H835" class="arr"/><rect x="35" y="870" width="1130" height="120" class="panel test"/><text x="60" y="902" class="pt">4. 샘플 데이터와 테스트 시나리오로 검증</text><rect x="65" y="925" width="300" height="42" class="box green"/><text x="215" y="951" class="m">정상 · 회원·도서·대여 저장과 JOIN 조회</text><rect x="450" y="925" width="300" height="42" class="box orange"/><text x="600" y="951" class="m">선택 상태 · 미반납 returned_at = NULL</text><rect x="835" y="925" width="300" height="42" class="box red"/><text x="985" y="951" class="m">잘못된 값 · 중복 email·isbn·없는 FK 차단</text><polygon points="600,1010 710,1040 600,1070 490,1040" class="decision"/><text x="600" y="1036" class="dt">요구사항과 규칙을 만족하는가?</text><text x="600" y="1055" class="m">모델·SQL·테스트 결과를 함께 비교</text><text x="455" y="1026" class="m">아니요</text><text x="745" y="1026" class="m">예</text><path d="M215 967V990H600V1010" class="arr"/><path d="M600 967V1010" class="arr"/><path d="M985 967V990H600" class="arr"/><path d="M490 1040H15V276H70" class="back"/><rect x="55" y="1085" width="360" height="34" class="note"/><text x="235" y="1107" class="nt">명사 찾기는 시작점이며 모든 명사가 테이블은 아님</text><rect x="785" y="1085" width="360" height="34" class="core"/><text x="965" y="1107" class="cv">요구사항 ↔ ERD ↔ SQL ↔ 검증 결과를 연결해 기록</text><path d="M710 1040H965V1085" class="arr"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1810" viewBox="0 0 1200 1810" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">데이터 모델링 전체 흐름</title>
+  <desc id="desc">도서 대여 시스템의 요구사항을 분석해 개념 모델, 논리 모델, 물리 모델로 구체화하고 PostgreSQL에 구현한 뒤 정상·경계·오류 시나리오와 실제 질의로 검증하여 반복 개선하는 흐름을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,NanumSquare,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:15px;font-weight:700;text-anchor:middle}
+      .card-text{font-size:13px;text-anchor:middle;fill:#475569}
+      .card-text-small{font-size:12px;text-anchor:middle;fill:#475569}
+      .mono{font-family:Consolas,D2Coding,Noto Sans Mono CJK KR,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
+      .relation{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .decision{font-size:14px;font-weight:700;text-anchor:middle}
+      .ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
+      .no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      .principle-main{font-size:16.5px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1810" fill="#ffffff"/>
+  <text x="600" y="42" class="title">데이터 모델링 전체 흐름</text>
+  <text x="600" y="72" class="subtitle">요구사항을 바로 테이블로 옮기지 않고, 개념 → 논리 → 물리 모델로 구체화한 뒤 데이터와 질의로 검증한다</text>
+
+  <rect x="34" y="98" width="1132" height="258" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 요구사항·범위·업무 규칙 확인</text>
+  <text x="366" y="132" class="section-sub">누가 무엇을 언제 처리하며, 어떤 상태와 예외를 저장해야 하는지 문장으로 합의한다</text>
+
+  <rect x="58" y="160" width="1084" height="70" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="600" y="186" class="card-title">업무 시나리오 예시</text>
+  <text x="600" y="211" class="card-text">회원은 대여 가능한 책을 빌리고 반납한다. 이메일과 ISBN은 중복되지 않으며, 미반납이면 실제 반납일이 비어 있다.</text>
+
+  <rect x="58" y="254" width="330" height="72" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <circle cx="88" cy="280" r="15" fill="#2f6fad"/><text x="88" y="280" class="badge">1</text>
+  <text x="223" y="282" class="card-title">대상·용어 후보</text>
+  <text x="223" y="308" class="card-text">회원 · 책 · 대여 기록 · 이메일 · ISBN</text>
+
+  <rect x="435" y="254" width="330" height="72" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <circle cx="465" cy="280" r="15" fill="#b7791f"/><text x="465" y="280" class="badge">2</text>
+  <text x="600" y="282" class="card-title">행위·상태 후보</text>
+  <text x="600" y="308" class="card-text">대여 · 반납 · 대여중 · 연체 · 취소</text>
+
+  <rect x="812" y="254" width="330" height="72" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <circle cx="842" cy="280" r="15" fill="#2f855a"/><text x="842" y="280" class="badge">3</text>
+  <text x="977" y="282" class="card-title">규칙·예외 후보</text>
+  <text x="977" y="308" class="card-text">필수값 · 고유값 · 수량 · 기간 · 허용/금지</text>
+
+  <path d="M600 356V380" class="flow"/>
+
+  <rect x="34" y="380" width="1132" height="300" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="58" y="414" class="section-title">2. 개념 모델: 엔터티·관계·카디널리티 표현</text>
+  <text x="456" y="414" class="section-sub">기술 구현보다 업무 의미에 집중하고, 각 대상을 독립적으로 식별할 필요가 있는지 판단한다</text>
+
+  <rect x="58" y="444" width="330" height="92" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
+  <text x="223" y="470" class="card-title">엔터티</text>
+  <text x="223" y="496" class="card-text">독립적으로 식별하고 관리할 대상</text>
+  <text x="223" y="520" class="mono">members · books · loans</text>
+
+  <rect x="435" y="444" width="330" height="92" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="470" class="card-title">속성</text>
+  <text x="600" y="496" class="card-text">대상을 설명하거나 상태를 기록하는 값</text>
+  <text x="600" y="520" class="mono">email · isbn · borrowed_at · returned_at</text>
+
+  <rect x="812" y="444" width="330" height="92" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="977" y="470" class="card-title">관계·카디널리티·선택성</text>
+  <text x="977" y="496" class="card-text">1:1 · 1:N · N:M과 필수/선택 참여</text>
+  <text x="977" y="520" class="card-text-small">예: 회원 1명은 대여 기록 0개 이상</text>
+
+  <rect x="90" y="570" width="260" height="70" rx="10" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
+  <text x="220" y="596" class="card-title">members</text>
+  <text x="220" y="620" class="card-text">회원 1명</text>
+
+  <rect x="470" y="556" width="260" height="98" rx="10" fill="#ffffff" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="600" y="584" class="card-title">loans</text>
+  <text x="600" y="609" class="card-text">누가 어떤 책을 언제 빌렸는지</text>
+  <text x="600" y="633" class="card-text-small">N:M 관계를 사건 엔터티로 해소</text>
+
+  <rect x="850" y="570" width="260" height="70" rx="10" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
+  <text x="980" y="596" class="card-title">books</text>
+  <text x="980" y="620" class="card-text">대여 가능한 책 1권</text>
+
+  <path d="M350 605H470" class="relation"/>
+  <path d="M730 605H850" class="relation"/>
+  <text x="410" y="591" class="card-text-small">1 : N</text>
+  <text x="790" y="591" class="card-text-small">N : 1</text>
+
+  <path d="M600 680V704" class="flow"/>
+
+  <rect x="34" y="704" width="1132" height="292" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
+  <text x="58" y="738" class="section-title">3. 논리 모델: 속성·식별자·키·제약조건 구체화</text>
+  <text x="480" y="738" class="section-sub">특정 DBMS와 무관하게 중복, 종속성, 관계 규칙을 구조로 정리한다</text>
+
+  <rect x="58" y="770" width="330" height="156" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="223" y="798" class="card-title">식별자와 속성</text>
+  <text x="223" y="828" class="mono">members(id, name, email, joined_at)</text>
+  <text x="223" y="853" class="mono">books(id, title, isbn)</text>
+  <text x="223" y="878" class="mono">loans(id, member_id, book_id, ...)</text>
+  <text x="223" y="908" class="card-text-small">각 행을 식별할 PK와 속성의 의미를 정의</text>
+
+  <rect x="435" y="770" width="330" height="156" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="798" class="card-title">관계와 업무 규칙</text>
+  <text x="600" y="828" class="card-text">loans.member_id → members.id</text>
+  <text x="600" y="853" class="card-text">loans.book_id → books.id</text>
+  <text x="600" y="878" class="card-text">email·isbn 고유, 필수값·NULL 허용</text>
+  <text x="600" y="908" class="card-text-small">삭제·변경 시 참조 정책도 함께 결정</text>
+
+  <rect x="812" y="770" width="330" height="156" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="977" y="798" class="card-title">정규화와 추적성</text>
+  <text x="977" y="828" class="card-text">반복되는 사실과 다중값 분리</text>
+  <text x="977" y="853" class="card-text">속성은 한 가지 의미만 갖도록 정의</text>
+  <text x="977" y="878" class="card-text">각 요구사항이 어느 구조로 구현되는지 기록</text>
+  <text x="977" y="908" class="card-text-small">모든 명사가 테이블이 되는 것은 아님</text>
+
+  <rect x="100" y="944" width="1000" height="34" rx="9" fill="#ffffff" stroke="#9b7bd2" stroke-width="1.2"/>
+  <text x="600" y="966" class="card-text">산출물: 엔터티별 속성 목록 · PK/FK · 카디널리티 · 선택성 · 고유/필수 규칙이 표시된 논리 ERD</text>
+
+  <path d="M600 996V1020" class="flow"/>
+
+  <rect x="34" y="1020" width="1132" height="272" rx="16" fill="#eefbf2" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="58" y="1054" class="section-title">4. 물리 모델: PostgreSQL 구현 방식 결정</text>
+  <text x="420" y="1054" class="section-sub">논리 모델을 실제 타입, 이름, 제약조건, 인덱스와 운영 정책으로 변환한다</text>
+
+  <rect x="58" y="1086" width="330" height="148" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="223" y="1114" class="card-title">타입·기본값·이름</text>
+  <text x="223" y="1144" class="mono">BIGINT / VARCHAR / DATE / TIMESTAMP</text>
+  <text x="223" y="1169" class="mono">GENERATED ... AS IDENTITY</text>
+  <text x="223" y="1194" class="mono">DEFAULT CURRENT_TIMESTAMP</text>
+  <text x="223" y="1219" class="card-text-small">테이블 복수형·컬럼 snake_case</text>
+
+  <rect x="435" y="1086" width="330" height="148" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
+  <text x="600" y="1114" class="card-title">제약조건·참조 정책</text>
+  <text x="600" y="1144" class="card-text">PRIMARY KEY · FOREIGN KEY</text>
+  <text x="600" y="1169" class="card-text">NOT NULL · UNIQUE · CHECK</text>
+  <text x="600" y="1194" class="card-text">ON DELETE RESTRICT / CASCADE / SET NULL</text>
+  <text x="600" y="1219" class="card-text-small">업무 규칙과 맞는 정책을 명시</text>
+
+  <rect x="812" y="1086" width="330" height="148" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="977" y="1114" class="card-title">성능·운영 고려</text>
+  <text x="977" y="1144" class="card-text">조회·JOIN·정렬 조건 기반 인덱스</text>
+  <text x="977" y="1169" class="card-text">감사·소프트 삭제·보존 기간</text>
+  <text x="977" y="1194" class="card-text">마이그레이션·권한·백업 영향</text>
+  <text x="977" y="1219" class="card-text-small">인덱스는 실제 질의로 검증</text>
+
+  <path d="M600 1292V1316" class="flow"/>
+
+  <rect x="34" y="1316" width="1132" height="218" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="1350" class="section-title">5. 구현·샘플 데이터·질의로 모델 검증</text>
+  <text x="400" y="1350" class="section-sub">DDL이 실행된다는 사실만으로 모델이 올바른 것은 아니다</text>
+
+  <rect x="58" y="1382" width="330" height="104" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
+  <text x="223" y="1410" class="card-title">정상 시나리오</text>
+  <text x="223" y="1438" class="card-text">회원·책·대여·반납 저장</text>
+  <text x="223" y="1463" class="card-text">JOIN으로 필요한 업무 화면 조회</text>
+
+  <rect x="435" y="1382" width="330" height="104" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1410" class="card-title">경계·상태 시나리오</text>
+  <text x="600" y="1438" class="card-text">미반납: returned_at IS NULL</text>
+  <text x="600" y="1463" class="card-text">대여 가능 수량·기간·상태 전이 확인</text>
+
+  <rect x="812" y="1382" width="330" height="104" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
+  <text x="977" y="1410" class="card-title">오류·무결성 시나리오</text>
+  <text x="977" y="1438" class="card-text">중복 email·isbn, 없는 FK 차단</text>
+  <text x="977" y="1463" class="card-text">삭제 정책과 동시 처리 결과 확인</text>
+
+  <rect x="78" y="1496" width="1044" height="28" rx="9" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.2"/>
+  <text x="600" y="1515" class="note-text">예제에서 books 한 행은 대여 가능한 한 권을 뜻한다. 같은 도서의 여러 복본을 관리하면 book_titles와 book_copies 분리를 검토한다.</text>
+
+  <path d="M600 1534V1558" class="flow"/>
+  <polygon points="600,1558 752,1602 600,1646 448,1602" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
+  <text x="600" y="1597" class="decision">요구사항·규칙·주요 질의를 모두 만족하는가?</text>
+  <text x="600" y="1620" class="card-text">모델 구조, DDL, 샘플 데이터와 조회 결과를 함께 비교</text>
+
+  <path d="M448 1602H20V196H58" class="retry"/>
+  <text x="394" y="1589" class="no">아니오 · 이전 단계로 되돌아가 수정</text>
+
+  <rect x="654" y="1570" width="488" height="64" rx="11" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.6"/>
+  <text x="898" y="1595" class="card-title">예 · 모델 기준선 확정</text>
+  <text x="898" y="1619" class="card-text-small">ERD·DDL·규칙·테스트 근거와 변경 이력을 함께 저장</text>
+  <path d="M752 1602H654" class="flow"/>
+  <text x="782" y="1589" class="ok">예</text>
+
+  <rect x="54" y="1670" width="344" height="78" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="226" y="1697" class="note-title">명사 찾기의 한계</text>
+  <text x="226" y="1721" class="note-text">명사는 후보일 뿐이며 모든 명사가</text>
+  <text x="226" y="1741" class="note-text">엔터티나 테이블이 되는 것은 아니다</text>
+
+  <rect x="428" y="1670" width="344" height="78" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1697" class="note-title">표현되지 않는 업무 규칙</text>
+  <text x="600" y="1721" class="note-text">모든 규칙을 PK·FK·CHECK만으로</text>
+  <text x="600" y="1741" class="note-text">강제할 수 있는 것은 아니므로 별도 기록한다</text>
+
+  <rect x="802" y="1670" width="344" height="78" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="974" y="1697" class="note-title">요구사항 추적성</text>
+  <text x="974" y="1721" class="note-text">각 요구사항이 어느 엔터티·제약조건·</text>
+  <text x="974" y="1741" class="note-text">테스트로 확인되는지 연결해 기록한다</text>
+
+  <rect x="80" y="1768" width="1040" height="30" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1768" width="190" height="30" rx="11" fill="#dcf7e5"/>
+  <line x1="270" y1="1775" x2="270" y2="1791" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1789" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1789" class="principle-main">요구사항 ↔ 개념 ↔ 논리 ↔ 물리 모델 ↔ 검증 결과를 연결하고 반복 개선한다</text>
+</svg>
