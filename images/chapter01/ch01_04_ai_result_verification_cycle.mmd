@@ -1,27 +1,35 @@
-flowchart TD
-    A[요구사항 정리 후 AI에게 요청] --> B[AI 초안 생성<br/>ERD·테이블·SQL]
-    B --> C[사람이 요구사항과 설계 기준으로 검토]
-    C --> D[PostgreSQL 실행·DBeaver 확인]
-    D --> E{문제가 있는가?}
+flowchart TB
+    A[요구사항·업무 규칙 정리<br/>입력·출력·예외·금지 조건] --> B[AI에 초안 요청<br/>ERD·DDL·SQL·CRUD·설명]
+    B --> C[AI 초안과 가정 확인<br/>모르는 부분·생략된 조건·임의 판단 표시]
 
-    C -. 검토 체크리스트 .-> C1[요구사항·PK/FK·중복·위험 SQL 확인]
-    D -. 실행 체크리스트 .-> C1
+    C --> D1[요구사항 검토<br/>누락·오해·업무 규칙 불일치]
+    C --> D2[데이터 구조 검토<br/>엔터티·관계·PK/FK·중복·확장성]
+    C --> D3[SQL·코드 안전성 검토<br/>데이터 손실·권한·비밀정보·예외 처리]
 
-    E -- 예 --> F[문제 기록]
-    F --> G[프롬프트 또는 설계 수정]
-    G --> A
+    D1 --> E[격리된 실습 환경에서 실행]
+    D2 --> E
+    D3 --> E
 
-    E -- 아니오 --> H[검증 완료]
-    H --> I[GitHub에 결과와 수정 이유 기록]
+    E --> F1[실행 가능성 확인<br/>문법 오류·의존성·초기화 순서]
+    E --> F2[구조·데이터 상태 확인<br/>제약조건·샘플 데이터·트랜잭션]
+    E --> F3[예상 결과와 실제 결과 비교<br/>정상·경계·오류 시나리오]
 
-    classDef step fill:#f8fafc,stroke:#64748b,stroke-width:2px;
-    classDef review fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
-    classDef decision fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
-    classDef fix fill:#fff7e6,stroke:#d97706,stroke-width:2px;
-    classDef done fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    F1 --> G{모든 검증 기준을<br/>통과했는가?}
+    F2 --> G
+    F3 --> G
 
-    class A,B step;
-    class C,D,C1 review;
-    class E decision;
-    class F,G fix;
-    class H,I done;
+    G -- 예 --> H[검증 완료 결과 채택]
+    H --> I[검증 근거 기록<br/>프롬프트·AI 초안·실행 결과·수정 이유·한계]
+
+    G -- 아니요 --> J{문제 유형}
+    J -- 요구사항 문제 --> K[요구사항·업무 규칙 보완]
+    J -- 설계 문제 --> L[ERD·제약조건·데이터 구조 수정]
+    J -- 구현 문제 --> M[SQL·코드·실행 순서 수정]
+    J -- 검증 문제 --> N[샘플 데이터·테스트 시나리오 보강]
+
+    K --> B
+    L --> B
+    M --> E
+    N --> E
+
+    O[원칙<br/>AI 결과는 실행된다고 정답이 아니며<br/>사람이 요구사항과 실제 결과를 비교하고 책임져야 함] --- G
