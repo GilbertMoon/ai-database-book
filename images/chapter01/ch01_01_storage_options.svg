@@ -1,128 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="960" viewBox="0 0 1200 960" role="img" aria-labelledby="title desc">
-  <title id="title">데이터 저장 방식의 선택지</title>
-  <desc id="desc">파일, 스프레드시트와 데이터베이스를 대표 형식, 적합한 상황, 강점과 주의점의 동일한 기준으로 비교하고 관계형 데이터베이스, NoSQL과 벡터 검색 활용을 함께 설명한 도식</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">데이터 저장 방식 선택 흐름</title>
+  <desc id="desc">작고 단순한 데이터인지, 한 사람이 주로 관리하는지, 사람이 표를 직접 편집하고 계산하는지를 기준으로 파일, 스프레드시트, 데이터베이스를 고르는 선택 흐름도</desc>
   <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
     <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .panel{fill:#fff;stroke-width:1.8;rx:16}
-      .file-panel{stroke:#3c9a5f}.sheet-panel{stroke:#3b82c4}.db-panel{stroke:#7c5cc4}
-      .header{stroke:none;rx:14}
-      .file-header{fill:#eaf8ef}.sheet-header{fill:#eef5ff}.db-header{fill:#f5f1ff}
-      .header-title{font-size:21px;font-weight:700;text-anchor:middle}
-      .file-title{fill:#166534}.sheet-title{fill:#1e4f91}.db-title{fill:#5b3a96}
-      .header-sub{font-size:13px;text-anchor:middle;fill:#475569}
-      .section-label{font-size:13px;font-weight:700;fill:#475569}
-      .main-text{font-size:14px;font-weight:600}
-      .sub-text{font-size:13px;fill:#475569}
-      .divider{stroke:#d8dee8;stroke-width:1.2}
-      .pill{stroke-width:1.2;rx:9}
-      .file-pill{fill:#f2fbf5;stroke:#8bc9a0}.sheet-pill{fill:#f4f8ff;stroke:#93b4e6}.db-pill{fill:#faf7ff;stroke:#b7a1e4}
-      .pill-text{font-size:12.5px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .db-type{fill:#faf7ff;stroke:#b7a1e4;stroke-width:1.3;rx:10}
-      .db-type-title{font-size:13px;font-weight:700;text-anchor:middle}
-      .db-type-sub{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .criteria{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:14}
-      .criteria-title{font-size:16px;font-weight:700;fill:#334155}
-      .criteria-text{font-size:14px;fill:#475569}
-      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:12}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .q{fill:#f8fafc;stroke:#64748b;stroke-width:2.2}.file{fill:#eef9f1;stroke:#2f9a58;stroke-width:2.4}.sheet{fill:#eef5ff;stroke:#3b82f6;stroke-width:2.4}.db{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2.4}
+      .note{fill:#fbf8ff;stroke:#b7a1e4;stroke-width:1.8}.msg{fill:#eef5ff;stroke:#4d86d7;stroke-width:2.2}
+      .head{font-size:21px;font-weight:700;text-anchor:middle}.body{font-size:16px;text-anchor:middle;fill:#334155}.result{font-size:24px;font-weight:700;text-anchor:middle}
+      .file-t{fill:#1f7a42}.sheet-t{fill:#1f5fb8}.db-t{fill:#5b34a2}.label{font-size:15px;font-weight:700;text-anchor:middle;fill:#334155}.kw{font-size:15px;font-weight:700;text-anchor:middle;fill:#5b34a2}.msgtext{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .line{stroke:#475569;stroke-width:2.3;fill:none;stroke-linecap:round;marker-end:url(#arrow)}.plain{stroke:#475569;stroke-width:2.3;fill:none;stroke-linecap:round}
     </style>
   </defs>
+  <rect width="1200" height="675" fill="#fff"/>
+  <text x="600" y="48" class="title">데이터 저장 방식 선택 흐름</text>
 
-  <rect width="1200" height="960" fill="#fff"/>
-  <text x="600" y="42" class="title">데이터 저장 방식의 선택지</text>
-  <text x="600" y="70" class="subtitle">가장 강력한 도구가 아니라 데이터의 크기, 관계, 사용자 수와 운영 요구에 맞는 방식을 선택한다</text>
+  <rect x="410" y="78" width="380" height="80" rx="16" class="q"/>
+  <text x="600" y="110" class="head">작고 단순한 데이터인가?</text>
+  <text x="600" y="136" class="body">관계가 거의 없고 변경도 많지 않은가?</text>
 
-  <rect x="40" y="104" width="340" height="650" class="panel file-panel"/>
-  <rect x="40" y="104" width="340" height="82" class="header file-header"/>
-  <text x="210" y="138" class="header-title file-title">파일</text>
-  <text x="210" y="164" class="header-sub">작고 단순한 데이터를 가장 가볍게 저장</text>
+  <line x1="600" y1="158" x2="600" y2="190" class="plain"/>
+  <line x1="290" y1="190" x2="910" y2="190" class="plain"/>
+  <line x1="290" y1="190" x2="290" y2="226" class="line"/>
+  <line x1="910" y1="190" x2="910" y2="226" class="line"/>
+  <text x="260" y="181" class="label">예</text>
+  <text x="942" y="181" class="label">아니오</text>
 
-  <text x="65" y="218" class="section-label">대표 형식</text>
-  <rect x="65" y="235" width="66" height="34" class="pill file-pill"/><text x="98" y="252" class="pill-text">TXT</text>
-  <rect x="141" y="235" width="86" height="34" class="pill file-pill"/><text x="184" y="252" class="pill-text">Markdown</text>
-  <rect x="237" y="235" width="58" height="34" class="pill file-pill"/><text x="266" y="252" class="pill-text">JSON</text>
-  <rect x="305" y="235" width="50" height="34" class="pill file-pill"/><text x="330" y="252" class="pill-text">CSV</text>
-  <line x1="65" y1="292" x2="355" y2="292" class="divider"/>
+  <rect x="110" y="226" width="360" height="80" rx="16" class="q"/>
+  <text x="290" y="258" class="head">한 사람이 주로 관리하는가?</text>
+  <text x="290" y="284" class="body">개인 기록이나 작은 설정값인가?</text>
 
-  <text x="65" y="325" class="section-label">잘 맞는 상황</text>
-  <text x="65" y="354" class="main-text">한 사람이 관리하는 작은 데이터</text>
-  <text x="65" y="379" class="sub-text">개인 메모·설정값·간단한 데이터 교환</text>
-  <line x1="65" y1="405" x2="355" y2="405" class="divider"/>
+  <rect x="730" y="226" width="360" height="80" rx="16" class="q"/>
+  <text x="910" y="258" class="head">사람이 표를 직접</text>
+  <text x="910" y="284" class="head">편집·계산하는가?</text>
 
-  <text x="65" y="438" class="section-label">강점</text>
-  <text x="65" y="467" class="main-text">설치 없이 바로 만들고 이동 가능</text>
-  <text x="65" y="492" class="sub-text">구조가 단순하고 버전 관리도 쉬움</text>
-  <line x1="65" y1="518" x2="355" y2="518" class="divider"/>
+  <line x1="290" y1="306" x2="290" y2="350" class="line"/>
+  <text x="262" y="334" class="label">예</text>
+  <rect x="140" y="350" width="300" height="92" rx="18" class="file"/>
+  <text x="290" y="386" class="result file-t">파일</text>
+  <text x="290" y="415" class="body">TXT · Markdown · JSON · CSV</text>
 
-  <text x="65" y="551" class="section-label">주의점</text>
-  <text x="65" y="580" class="main-text">동시 수정과 관계 관리가 어려움</text>
-  <text x="65" y="605" class="sub-text">중복·잘못된 값·변경 충돌을 막기 어려움</text>
-  <text x="65" y="630" class="sub-text">반복 검색과 부분 수정이 복잡해질 수 있음</text>
+  <path d="M380 306 V330 H555 V350" class="line"/>
+  <text x="416" y="323" class="label">아니오</text>
+  <rect x="470" y="350" width="300" height="92" rx="18" class="sheet"/>
+  <text x="620" y="386" class="result sheet-t">스프레드시트</text>
+  <text x="620" y="415" class="body">소규모 표 · 명단 · 간단한 통계</text>
 
-  <rect x="430" y="104" width="340" height="650" class="panel sheet-panel"/>
-  <rect x="430" y="104" width="340" height="82" class="header sheet-header"/>
-  <text x="600" y="138" class="header-title sheet-title">스프레드시트</text>
-  <text x="600" y="164" class="header-sub">사람이 직접 편집하고 계산하는 표 중심 도구</text>
+  <line x1="910" y1="306" x2="910" y2="350" class="line"/>
+  <text x="882" y="334" class="label">예</text>
+  <rect x="800" y="350" width="300" height="92" rx="18" class="sheet"/>
+  <text x="950" y="386" class="result sheet-t">스프레드시트</text>
+  <text x="950" y="415" class="body">사람이 직접 관리하는 표</text>
 
-  <text x="455" y="218" class="section-label">대표 도구</text>
-  <rect x="455" y="235" width="110" height="34" class="pill sheet-pill"/><text x="510" y="252" class="pill-text">Microsoft Excel</text>
-  <rect x="579" y="235" width="166" height="34" class="pill sheet-pill"/><text x="662" y="252" class="pill-text">Google Sheets</text>
-  <line x1="455" y1="292" x2="745" y2="292" class="divider"/>
+  <path d="M1000 306 V472 H910 V504" class="line"/>
+  <text x="1032" y="334" class="label">아니오</text>
+  <rect x="730" y="504" width="360" height="92" rx="18" class="db"/>
+  <text x="910" y="540" class="result db-t">데이터베이스</text>
+  <text x="910" y="569" class="body">서비스와 여러 사용자를 위한 구조적 저장</text>
 
-  <text x="455" y="325" class="section-label">잘 맞는 상황</text>
-  <text x="455" y="354" class="main-text">소규모 표·명단·공유 목록</text>
-  <text x="455" y="379" class="sub-text">사람이 직접 확인하고 수정하는 업무</text>
-  <line x1="455" y1="405" x2="745" y2="405" class="divider"/>
+  <rect x="110" y="504" width="500" height="92" rx="16" class="note"/>
+  <text x="360" y="532" class="head db-t">데이터베이스가 필요한 신호</text>
+  <text x="202" y="566" class="kw">여러 사용자</text>
+  <text x="298" y="566" class="kw">데이터 관계</text>
+  <text x="390" y="566" class="kw">정확성</text>
+  <text x="478" y="566" class="kw">동시 수정</text>
+  <text x="360" y="590" class="kw">반복 검색·집계</text>
 
-  <text x="455" y="438" class="section-label">강점</text>
-  <text x="455" y="467" class="main-text">계산·정렬·필터·차트가 편리</text>
-  <text x="455" y="492" class="sub-text">별도 프로그램 개발 없이 협업 가능</text>
-  <line x1="455" y1="518" x2="745" y2="518" class="divider"/>
-
-  <text x="455" y="551" class="section-label">주의점</text>
-  <text x="455" y="580" class="main-text">데이터 증가와 복잡한 관계에 한계</text>
-  <text x="455" y="605" class="sub-text">수식·열 구조가 쉽게 깨질 수 있음</text>
-  <text x="455" y="630" class="sub-text">여러 사용자의 동시 변경과 권한 관리가 제한적</text>
-
-  <rect x="820" y="104" width="340" height="650" class="panel db-panel"/>
-  <rect x="820" y="104" width="340" height="82" class="header db-header"/>
-  <text x="990" y="138" class="header-title db-title">데이터베이스</text>
-  <text x="990" y="164" class="header-sub">지속적으로 운영되는 데이터와 관계를 체계적으로 관리</text>
-
-  <text x="845" y="218" class="section-label">주요 유형과 활용</text>
-  <rect x="845" y="235" width="290" height="68" class="db-type"/>
-  <text x="990" y="258" class="db-type-title">관계형 DB · PostgreSQL·MySQL</text>
-  <text x="990" y="282" class="db-type-sub">회원·수강신청·주문·결제처럼 정합성이 중요한 데이터</text>
-
-  <rect x="845" y="314" width="290" height="68" class="db-type"/>
-  <text x="990" y="337" class="db-type-title">NoSQL · Redis·MongoDB</text>
-  <text x="990" y="361" class="db-type-sub">캐시·세션·유연한 문서형 데이터 등 목적별 확장</text>
-
-  <rect x="845" y="393" width="290" height="68" class="db-type"/>
-  <text x="990" y="416" class="db-type-title">벡터 검색 · pgvector·전용 Vector DB</text>
-  <text x="990" y="440" class="db-type-sub">의미 기반 문서 검색과 RAG에 사용하는 검색 계층</text>
-  <line x1="845" y1="482" x2="1135" y2="482" class="divider"/>
-
-  <text x="845" y="515" class="section-label">잘 맞는 상황·강점</text>
-  <text x="845" y="544" class="main-text">여러 사용자가 계속 조회·수정하는 서비스</text>
-  <text x="845" y="569" class="sub-text">관계·제약조건·동시성·권한·검색 관리</text>
-  <text x="845" y="594" class="sub-text">데이터가 커져도 일관된 방식으로 운영 가능</text>
-  <line x1="845" y1="620" x2="1135" y2="620" class="divider"/>
-
-  <text x="845" y="653" class="section-label">주의점</text>
-  <text x="845" y="682" class="main-text">설계·설치·백업·권한 관리가 필요</text>
-  <text x="845" y="707" class="sub-text">작고 단순한 문제에는 관리 비용이 더 클 수 있음</text>
-
-  <rect x="40" y="782" width="1120" height="76" class="criteria"/>
-  <text x="64" y="811" class="criteria-title">선택 기준</text>
-  <text x="160" y="811" class="criteria-text">데이터 크기 · 변경 빈도 · 사용자 수 · 데이터 간 관계 · 정확성 · 동시성 · 검색과 수정 요구 · 운영 비용</text>
-  <text x="160" y="838" class="criteria-text">처음에는 단순한 방식으로 시작하되 요구가 커지면 데이터베이스로 이전할 수 있도록 데이터 구조를 명확히 관리한다.</text>
-
-  <rect x="190" y="884" width="820" height="48" class="principle"/>
-  <text x="216" y="913" class="principle-label">핵심 원칙</text>
-  <text x="620" y="913" class="principle-text">관계·정확성·동시성·반복 검색이 중요해질수록 데이터베이스가 필요하다</text>
+  <rect x="145" y="622" width="910" height="34" rx="16" class="msg"/>
+  <text x="600" y="644" class="msgtext">상세 비교는 표에서 확인하고, 흐름도는 빠른 선택 기준으로 활용한다.</text>
 </svg>

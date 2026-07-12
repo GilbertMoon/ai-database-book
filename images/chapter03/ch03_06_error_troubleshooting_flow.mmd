@@ -1,34 +1,14 @@
-flowchart TB
-    A[오류 발생] --> B[작업과 증거 수집<br/>무엇을 하려 했는지·실행한 SQL·전체 오류 메시지·발생 시점]
-    B --> C[환경과 현재 상태 확인<br/>운영체제·PostgreSQL 위치·DBeaver 연결·현재 DB·스키마·서버 실행 여부]
-    C --> D{오류 계층 분류}
-
-    D -- 연결·네트워크 --> N1[connection refused·timeout<br/>서버 실행·Host·Port·방화벽·IP 허용·인터넷 확인]
-    D -- 인증·권한 --> N2[password authentication failed·permission denied<br/>Username·Password·권한·Caps Lock 확인]
-    D -- 대상 DB·스키마 --> N3[database does not exist·relation does not exist·테이블 미표시<br/>DB 이름·current_database·schema·새로고침 확인]
-    D -- SQL·데이터 규칙 --> N4[syntax error·already exists·UNIQUE/FK/NOT NULL 위반<br/>문법·실행 순서·기존 객체·입력값 확인]
-    D -- 도구·명령 환경 --> N5[psql not recognized·JDBC driver 오류<br/>PATH·설치 경로·드라이버·DBeaver 연결 가능 여부 확인]
-
-    N1 --> P[가설과 확인 방법 작성<br/>가능성이 높은 원인부터 정렬]
-    N2 --> P
-    N3 --> P
-    N4 --> P
-    N5 --> P
-
-    P --> S[한 번에 한 가지 설정·SQL만 변경]
-    S --> T[같은 단계로 다시 실행<br/>성공·오류 메시지 변화·새 부작용 확인]
-    T --> R{원래 작업이<br/>예상대로 완료되었는가?}
-
-    R -- 아니요 --> R1{증거가 바뀌었는가?}
-    R1 -- 예 --> D
-    R1 -- 아니요 --> H[도움 요청 준비<br/>환경·목표·실행한 작업·전체 오류·이미 확인한 항목·재현 단계]
-    H --> A1[ChatGPT·문서·동료에게 질문<br/>가능한 원인과 확인 순서를 요청]
-    A1 --> P
-
-    R -- 예 --> G[해결 방법과 근거 기록<br/>원인·변경한 한 가지·검증 결과·되돌리는 방법]
-    G --> Z[같은 환경에서 한 번 더 재현 확인]
-
-    N6[안전<br/>데이터 삭제·초기화·설정 덮어쓰기 명령은<br/>목적·대상·백업·복구 방법을 이해하기 전 실행하지 않음] --- S
-    N7[AI 질문 보안<br/>비밀번호·전체 접속 문자열·API Key·실제 개인정보는 제거하고<br/>Host 등도 필요 최소한으로 익명화] --- H
-    N8[오류 해석<br/>예상한 UNIQUE·FK 오류처럼 일부 오류는 실패가 아니라<br/>데이터 규칙이 정상 작동한다는 검증 결과일 수 있음] --- N4
-    N9[핵심<br/>오류 해결은 추측으로 여러 설정을 바꾸는 일이 아니라<br/>증거 수집 → 계층 분류 → 한 가지 변경 → 재검증의 반복] --- R
+flowchart TD
+    A[하려던 작업 정리]
+    B[전체 오류 메시지 확인]
+    C[현재 환경과 연결 상태 확인]
+    D[오류 범주 분류<br/>연결·인증·DB·SQL·도구]
+    E[가능성이 높은 원인부터 확인]
+    F[한 번에 한 가지 수정]
+    G[같은 작업 재실행]
+    H{예상 결과가 나왔는가?}
+    I[새 증거로 다시 분류]
+    J[원인과 해결 방법 기록]
+    A --> B --> C --> D --> E --> F --> G --> H
+    H -- 아니요 --> I --> D
+    H -- 예 --> J

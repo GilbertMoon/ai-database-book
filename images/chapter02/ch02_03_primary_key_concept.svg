@@ -1,174 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1240" viewBox="0 0 1200 1240" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
   <title id="title">기본키가 행을 구분하는 방식</title>
-  <desc id="desc">같은 이름을 가진 학생 행을 기본키 id로 구분하고, name과 email과 id를 기본키 후보로 비교하며, 기본키의 고유성, 필수성, 식별성, 안정성과 INSERT 시 DBMS의 검사, UNIQUE 및 자동 증가와의 차이를 설명한다.</desc>
-
+  <desc id="desc">같은 이름을 가진 두 학생 행을 서로 다른 id 기본키로 구분하고, 중복 기본키 입력은 저장 거부되는 과정을 보여 주는 도식</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .head-text{font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .cell-text{font-size:14px;text-anchor:middle;dominant-baseline:middle}
-      .pk-text{font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
-      .candidate-title{font-size:18px;font-weight:700;text-anchor:middle}
-      .candidate-main{font-size:14px;font-weight:600;text-anchor:middle}
-      .candidate-sub{font-size:13px;text-anchor:middle;fill:#475569}
-      .status{font-size:12.5px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .property-no{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .property-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .property-sub{font-size:12.6px;text-anchor:middle;fill:#475569}
-      .check-title{font-size:17px;font-weight:700;text-anchor:middle;fill:#92400e}
-      .check-main{font-size:14px;font-weight:700;text-anchor:middle}
-      .check-sub{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .note-title{font-size:14px;font-weight:700;fill:#334155}
-      .note-text{font-size:12.8px;fill:#475569}
-      .principle-label{font-size:15px;font-weight:700;fill:#166534;text-anchor:middle}
-      .principle-main{font-size:17px;font-weight:700;fill:#166534;text-anchor:middle}
-      .principle-sub{font-size:13px;fill:#2f6b45;text-anchor:middle}
-      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .cell{fill:#fff;stroke:#64748b;stroke-width:1.5}
+      .head{fill:#e9f2fe;font-weight:700}
+      .pk{fill:#e8f2ff;stroke:#1f5fb8;stroke-width:2}
+      .same{fill:#fff4e5;stroke:#d97706;stroke-width:2}
+      .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2}
+      .ok{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .label{font-size:16px;font-weight:700;text-anchor:middle}
+      .t{font-size:16px;text-anchor:middle}
+      .small{font-size:14px;text-anchor:middle;fill:#475569}
+      .line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .note{font-size:17px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
+  <rect width="1200" height="640" fill="#fff"/>
+  <text x="600" y="48" class="title">기본키가 행을 구분하는 방식</text>
 
-  <rect width="1200" height="1240" fill="#ffffff"/>
+  <text x="600" y="92" class="label">students</text>
+  <rect x="260" y="115" width="180" height="58" class="cell head"/><text x="350" y="151" class="label">id (PK)</text>
+  <rect x="440" y="115" width="220" height="58" class="cell head"/><text x="550" y="151" class="label">name</text>
+  <rect x="660" y="115" width="280" height="58" class="cell head"/><text x="800" y="151" class="label">email</text>
 
-  <text x="600" y="42" class="title">기본키가 행을 구분하는 방식</text>
-  <text x="600" y="72" class="subtitle">이름이 같아도 기본키 값이 다르면 서로 다른 행이며, DBMS는 기본키의 중복과 NULL을 허용하지 않는다</text>
+  <rect x="260" y="173" width="180" height="74" class="pk"/><text x="350" y="217" class="label">1</text>
+  <rect x="440" y="173" width="220" height="74" class="same"/><text x="550" y="217" class="t">김민지</text>
+  <rect x="660" y="173" width="280" height="74" class="cell"/><text x="800" y="217" class="t">minji@example.com</text>
 
-  <!-- 1. 같은 이름을 가진 행 구분 -->
-  <rect x="34" y="98" width="1132" height="286" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.7"/>
-  <text x="58" y="132" class="section-title">1. 같은 이름을 가진 행 구분</text>
-  <text x="294" y="132" class="section-sub">사람이 읽는 이름과 행을 식별하는 값은 역할이 다르다</text>
+  <rect x="260" y="247" width="180" height="74" class="pk"/><text x="350" y="291" class="label">2</text>
+  <rect x="440" y="247" width="220" height="74" class="same"/><text x="550" y="291" class="t">김민지</text>
+  <rect x="660" y="247" width="280" height="74" class="cell"/><text x="800" y="291" class="t">minji2@example.com</text>
 
-  <rect x="120" y="158" width="960" height="168" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.6"/>
-  <rect x="145" y="180" width="170" height="44" fill="#e9f2fe" stroke="#3b82c4" stroke-width="1.3"/>
-  <rect x="315" y="180" width="250" height="44" fill="#e9f2fe" stroke="#3b82c4" stroke-width="1.3"/>
-  <rect x="565" y="180" width="490" height="44" fill="#e9f2fe" stroke="#3b82c4" stroke-width="1.3"/>
-  <text x="230" y="202" class="head-text">id · PRIMARY KEY</text>
-  <text x="440" y="202" class="head-text">name</text>
-  <text x="810" y="202" class="head-text">email · UNIQUE</text>
+  <rect x="65" y="175" width="150" height="66" rx="12" class="ok"/><text x="140" y="204" class="label">학생 A</text><text x="140" y="226" class="small">id = 1</text>
+  <path d="M215 208H260" class="line"/>
+  <rect x="985" y="250" width="150" height="66" rx="12" class="ok"/><text x="1060" y="279" class="label">학생 B</text><text x="1060" y="301" class="small">id = 2</text>
+  <path d="M985 284H940" class="line"/>
 
-  <rect x="145" y="224" width="170" height="50" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.8"/>
-  <rect x="315" y="224" width="250" height="50" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <rect x="565" y="224" width="490" height="50" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="230" y="249" class="pk-text">1</text>
-  <text x="440" y="249" class="cell-text">김민지</text>
-  <text x="810" y="249" class="cell-text">minji@example.com</text>
+  <rect x="210" y="390" width="260" height="84" rx="12" class="bad"/>
+  <text x="340" y="423" class="label">id = 1인 새 행 추가</text>
+  <text x="340" y="449" class="small">기존 기본키와 중복</text>
+  <path d="M470 432H570" class="line"/>
+  <rect x="570" y="390" width="220" height="84" rx="12" class="bad"/>
+  <text x="680" y="423" class="label">PRIMARY KEY 중복</text>
+  <text x="680" y="449" class="small">규칙 위반</text>
+  <path d="M790 432H890" class="line"/>
+  <rect x="890" y="390" width="170" height="84" rx="12" class="bad"/>
+  <text x="975" y="423" class="label">저장 거부</text>
+  <text x="975" y="449" class="small">오류 반환</text>
 
-  <rect x="145" y="274" width="170" height="50" fill="#ecfdf3" stroke="#3c9a5f" stroke-width="1.8"/>
-  <rect x="315" y="274" width="250" height="50" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <rect x="565" y="274" width="490" height="50" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="230" y="299" class="pk-text">2</text>
-  <text x="440" y="299" class="cell-text">김민지</text>
-  <text x="810" y="299" class="cell-text">minji2@example.com</text>
-
-  <rect x="314" y="338" width="572" height="30" rx="15" fill="#eef5ff" stroke="#93b4e6" stroke-width="1.2"/>
-  <text x="600" y="354" class="section-sub" text-anchor="middle">name은 같지만 id가 1과 2로 다르므로 두 행을 정확히 구분할 수 있다</text>
-
-  <path d="M600 384 V414" class="arrow"/>
-
-  <!-- 2. 기본키 후보 비교 -->
-  <rect x="34" y="414" width="1132" height="238" rx="16" fill="#f4f8ff" stroke="#93b4e6" stroke-width="1.7"/>
-  <text x="58" y="448" class="section-title">2. 기본키 후보 비교</text>
-  <text x="248" y="448" class="section-sub">고유성뿐 아니라 변경 가능성, 단순성, 참조 용이성을 함께 검토한다</text>
-
-  <rect x="58" y="478" width="330" height="142" rx="12" fill="#ffffff" stroke="#d9534f" stroke-width="1.7"/>
-  <text x="223" y="510" class="candidate-title">name</text>
-  <text x="223" y="542" class="candidate-main">같은 이름이 존재할 수 있음</text>
-  <text x="223" y="568" class="candidate-sub">오타 수정·개명으로 값이 바뀔 수도 있음</text>
-  <rect x="133" y="586" width="180" height="24" rx="12" fill="#fdecec"/>
-  <text x="223" y="598" class="status" fill="#b42318">기본키로 부적합</text>
-
-  <rect x="435" y="478" width="330" height="142" rx="12" fill="#ffffff" stroke="#d69e2e" stroke-width="1.7"/>
-  <text x="600" y="510" class="candidate-title">email</text>
-  <text x="600" y="542" class="candidate-main">고유값으로 사용할 수 있음</text>
-  <text x="600" y="568" class="candidate-sub">변경 가능성이 있어 대표 식별자로는 주의 필요</text>
-  <rect x="486" y="586" width="228" height="24" rx="12" fill="#fff4d8"/>
-  <text x="600" y="598" class="status" fill="#92400e">PK 가능 · UNIQUE 권장</text>
-
-  <rect x="812" y="478" width="330" height="142" rx="12" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.8"/>
-  <text x="977" y="510" class="candidate-title">id</text>
-  <text x="977" y="542" class="candidate-main">각 행에 부여하는 단순 식별자</text>
-  <text x="977" y="568" class="candidate-sub">업무 값이 바뀌어도 행의 정체성을 유지</text>
-  <rect x="873" y="586" width="208" height="24" rx="12" fill="#e6f7ec"/>
-  <text x="977" y="598" class="status" fill="#166534">PRIMARY KEY에 적합</text>
-
-  <text x="600" y="638" class="section-sub" text-anchor="middle">기본키가 반드시 id일 필요는 없지만, 변경이 적고 단순한 값을 선택하는 것이 일반적이다</text>
-
-  <path d="M600 652 V674" class="arrow"/>
-
-  <!-- 3. 기본키의 핵심 특성 -->
-  <rect x="34" y="674" width="1132" height="188" rx="16" fill="#f2fbf5" stroke="#8bc9a0" stroke-width="1.7"/>
-  <text x="58" y="708" class="section-title">3. 기본키의 핵심 특성</text>
-  <text x="256" y="708" class="section-sub">고유성과 NULL 금지는 DBMS가 보장하고, 안정성은 설계자가 판단한다</text>
-
-  <rect x="58" y="738" width="250" height="98" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="82" cy="762" r="14" fill="#2f855a"/><text x="82" y="762" class="property-no">1</text>
-  <text x="183" y="768" class="property-title">고유성</text>
-  <text x="183" y="796" class="property-sub">같은 PK 값을 가진 두 행 금지</text>
-  <text x="183" y="818" class="property-sub">DBMS가 직접 검사</text>
-
-  <rect x="336" y="738" width="250" height="98" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="360" cy="762" r="14" fill="#2f855a"/><text x="360" y="762" class="property-no">2</text>
-  <text x="461" y="768" class="property-title">필수성</text>
-  <text x="461" y="796" class="property-sub">PRIMARY KEY는 NULL 불가</text>
-  <text x="461" y="818" class="property-sub">DBMS가 직접 검사</text>
-
-  <rect x="614" y="738" width="250" height="98" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="638" cy="762" r="14" fill="#2f855a"/><text x="638" y="762" class="property-no">3</text>
-  <text x="739" y="768" class="property-title">식별성</text>
-  <text x="739" y="796" class="property-sub">PK 값으로 특정 행을 조회</text>
-  <text x="739" y="818" class="property-sub">다른 테이블의 FK가 참조</text>
-
-  <rect x="892" y="738" width="250" height="98" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="916" cy="762" r="14" fill="#2f855a"/><text x="916" y="762" class="property-no">4</text>
-  <text x="1017" y="768" class="property-title">안정성</text>
-  <text x="1017" y="796" class="property-sub">운영 중 자주 바뀌지 않는 값</text>
-  <text x="1017" y="818" class="property-sub">설계자가 판단하는 품질 기준</text>
-
-  <!-- 4. INSERT 검사 -->
-  <rect x="34" y="888" width="1132" height="142" rx="14" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.7"/>
-  <text x="600" y="920" class="check-title">4. INSERT 시 DBMS의 PRIMARY KEY 검사</text>
-
-  <rect x="70" y="944" width="315" height="64" rx="10" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <circle cx="96" cy="976" r="15" fill="#2f855a"/>
-  <text x="96" y="976" class="property-no">✓</text>
-  <text x="227" y="968" class="check-main">새로운 id = 3</text>
-  <text x="227" y="991" class="check-sub">고유하고 NULL이 아니므로 허용</text>
-
-  <rect x="442" y="944" width="315" height="64" rx="10" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <circle cx="468" cy="976" r="15" fill="#d9534f"/>
-  <text x="468" y="976" class="property-no">×</text>
-  <text x="599" y="968" class="check-main">중복 id = 1</text>
-  <text x="599" y="991" class="check-sub">고유성 위반으로 INSERT 거부</text>
-
-  <rect x="814" y="944" width="315" height="64" rx="10" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <circle cx="840" cy="976" r="15" fill="#d9534f"/>
-  <text x="840" y="976" class="property-no">×</text>
-  <text x="971" y="968" class="check-main">id에 NULL 직접 입력</text>
-  <text x="971" y="991" class="check-sub">필수성 위반으로 INSERT 거부</text>
-
-  <!-- Notes -->
-  <rect x="54" y="1052" width="535" height="84" rx="11" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
-  <rect x="72" y="1068" width="58" height="24" rx="12" fill="#eef2f7"/>
-  <text x="101" y="1080" class="note-title" text-anchor="middle">주의</text>
-  <text x="148" y="1082" class="note-text">PRIMARY KEY가 자동 증가를 뜻하지는 않는다.</text>
-  <text x="148" y="1107" class="note-text">PostgreSQL의 IDENTITY는 값을 생성하는 별도 기능이다.</text>
-
-  <rect x="611" y="1052" width="535" height="84" rx="11" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
-  <rect x="629" y="1068" width="58" height="24" rx="12" fill="#eef2f7"/>
-  <text x="658" y="1080" class="note-title" text-anchor="middle">확장</text>
-  <text x="705" y="1082" class="note-text">기본키는 한 열뿐 아니라 여러 열의 조합으로도</text>
-  <text x="705" y="1107" class="note-text">정의할 수 있으며, 이를 복합 기본키라고 한다.</text>
-
-  <!-- Core principle -->
-  <rect x="116" y="1160" width="968" height="62" rx="13" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.8"/>
-  <line x1="280" y1="1172" x2="280" y2="1210" stroke="#62b47a" stroke-width="1.2"/>
-  <text x="198" y="1192" class="principle-label">핵심 원칙</text>
-  <text x="682" y="1188" class="principle-main">PRIMARY KEY의 핵심: 행 식별 · UNIQUE · NOT NULL</text>
-  <text x="682" y="1210" class="principle-sub">UNIQUE는 업무상 중복을 막고, 자동 증가는 값을 생성하는 별도 방식이다</text>
+  <text x="600" y="555" class="note">기본키는 각 행을 고유하게 식별하며 중복과 NULL을 허용하지 않는다.</text>
 </svg>

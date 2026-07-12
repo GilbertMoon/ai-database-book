@@ -1,1 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1020" viewBox="0 0 1200 1020" role="img" aria-labelledby="title desc"><title id="title">기본 SQL 실행 확인 흐름</title><desc id="desc">DBeaver에서 ai_database_book 연결의 SQL 편집기를 열고 서버 버전, 현재 데이터베이스, 간단한 계산을 실행하여 서버 응답, 연결 대상과 결과 표시를 확인하고 오류 유형별로 점검하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.step{fill:#fff;stroke-width:1.6;rx:11}.blue{fill:#eef5ff;stroke:#3b82c4}.green{fill:#f2fbf5;stroke:#3c9a5f}.orange{fill:#fff8e8;stroke:#d69e2e}.purple{fill:#f5f1ff;stroke:#7c5cc4}.red{fill:#fff5f5;stroke:#d9534f}.h{font-size:15px;font-weight:700;text-anchor:middle}.m{font-size:11.8px;text-anchor:middle;fill:#475569}.panel{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:15}.pt{font-size:18px;font-weight:700}.sql{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:10}.sqlt{font-family:Consolas,D2Coding,monospace;font-size:15px;text-anchor:middle;fill:#334155}.result{fill:#fff;stroke-width:1.4;rx:10}.rh{font-size:13.5px;font-weight:700;text-anchor:middle}.rm{font-size:11.5px;text-anchor:middle;fill:#475569}.decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.dt{font-size:14px;font-weight:700;text-anchor:middle}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.back{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#a)}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}.nt{font-size:12px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:10}.cv{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1020" fill="#fff"/><text x="600" y="40" class="t">기본 SQL 실행 확인 흐름</text><text x="600" y="68" class="s">서버 응답, 현재 데이터베이스, SQL 실행과 결과 표시를 각각 따로 확인한다</text><rect x="120" y="100" width="410" height="72" class="step blue"/><text x="325" y="128" class="h">1. ai_database_book 연결 선택</text><text x="325" y="151" class="m">Database Navigator에서 사용할 연결을 명확히 선택</text><rect x="670" y="100" width="410" height="72" class="step purple"/><text x="875" y="128" class="h">2. 해당 연결의 SQL Editor 열기</text><text x="875" y="151" class="m">데이터 소스와 연결 상태, 실행할 문장 범위 확인</text><path d="M530 136H670" class="arr"/><rect x="35" y="205" width="1130" height="510" class="panel"/><text x="60" y="237" class="pt">세 가지 기본 SQL로 환경 확인</text><rect x="70" y="270" width="310" height="92" class="sql"/><text x="225" y="305" class="sqlt">SELECT version();</text><text x="225" y="337" class="m">선택한 PostgreSQL 서버가 SQL 요청에 응답하는지 확인</text><rect x="445" y="270" width="310" height="92" class="sql"/><text x="600" y="305" class="sqlt">SELECT current_database();</text><text x="600" y="337" class="m">현재 SQL Editor가 연결된 데이터베이스 확인</text><rect x="820" y="270" width="310" height="92" class="sql"/><text x="975" y="305" class="sqlt">SELECT 1 + 1 AS result;</text><text x="975" y="337" class="m">SQL 실행과 결과 그리드 표시 확인</text><rect x="70" y="405" width="310" height="88" class="result green"/><text x="225" y="435" class="rh">예상 결과</text><text x="225" y="462" class="rm">PostgreSQL 버전 문자열 반환</text><text x="225" y="482" class="rm">서버 응답 정상</text><rect x="445" y="405" width="310" height="88" class="result orange"/><text x="600" y="435" class="rh">예상 결과</text><text x="600" y="462" class="rm">ai_database_book 반환</text><text x="600" y="482" class="rm">작업 DB 연결 확인</text><rect x="820" y="405" width="310" height="88" class="result green"/><text x="975" y="435" class="rh">예상 결과</text><text x="975" y="462" class="rm">result 열에 2 표시</text><text x="975" y="482" class="rm">실행·결과 표시 정상</text><path d="M225 362V405" class="arr"/><path d="M600 362V405" class="arr"/><path d="M975 362V405" class="arr"/><polygon points="600,535 735,580 600,625 465,580" class="decision"/><text x="600" y="575" class="dt">세 결과가 모두 예상과 일치하는가?</text><text x="600" y="598" class="m">서버·현재 DB·SQL 실행 결과를 함께 판단</text><path d="M225 493V535H600" class="arr"/><path d="M600 493V535" class="arr"/><path d="M975 493V535H600" class="arr"/><rect x="110" y="645" width="390" height="48" class="result red"/><text x="305" y="674" class="rh">아니요 → 오류와 실행 상태 확인</text><rect x="700" y="645" width="390" height="48" class="result green"/><text x="895" y="674" class="rh">예 → 기본 SQL 환경 확인 완료</text><path d="M465 580H305V645" class="back"/><path d="M735 580H895V645" class="arr"/><rect x="35" y="745" width="1130" height="150" class="panel"/><text x="60" y="777" class="pt">문제가 있을 때 확인 순서</text><rect x="60" y="810" width="250" height="58" class="result red"/><text x="185" y="833" class="rh">연결 오류</text><text x="185" y="854" class="rm">서버·Host·Port·인증·네트워크</text><rect x="335" y="810" width="250" height="58" class="result red"/><text x="460" y="833" class="rh">잘못된 데이터베이스</text><text x="460" y="854" class="rm">SQL Editor의 연결 대상 변경</text><rect x="610" y="810" width="250" height="58" class="result red"/><text x="735" y="833" class="rh">SQL 실행 오류</text><text x="735" y="854" class="rm">오타·문장 선택·세미콜론·실행 위치</text><rect x="885" y="810" width="250" height="58" class="result red"/><text x="1010" y="833" class="rh">결과 미표시</text><text x="1010" y="854" class="rm">Results·Error 패널과 실행 범위</text><path d="M305 693V745" class="back"/><rect x="55" y="920" width="520" height="46" class="note"/><text x="315" y="948" class="nt">긴 스크립트에서는 실행할 문장만 선택하거나 커서를 정확한 문장에 둔다</text><rect x="625" y="920" width="520" height="46" class="note"/><text x="885" y="948" class="nt">세 쿼리 성공은 기본 연결 확인이며 테이블 권한·제약조건은 별도 검증한다</text><rect x="140" y="988" width="920" height="24" class="core"/><text x="600" y="1004" class="cv">서버 응답 → 현재 DB → SQL 실행 결과를 분리해 확인하고 결과값을 기준으로 판단한다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">기본 SQL로 데이터베이스 환경 확인하기</title>
+  <desc id="desc">ai_database_book 연결 선택 후 세 가지 기본 SQL을 순서대로 실행하여 PostgreSQL 버전, 현재 DB, 계산 결과를 확인하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .box{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
+      .sql{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .decision{fill:#fffceb;stroke:#d6a600;stroke-width:2}
+      .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2}
+      .ok{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .name{font-size:18px;font-weight:700;text-anchor:middle}
+      .sub{font-size:14px;text-anchor:middle;fill:#475569}
+      .mono{font-size:15px;font-weight:700;text-anchor:middle;font-family:Consolas,D2Coding,"Courier New",monospace;fill:#0f2d5c}
+      .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#d64545;stroke-width:2.3;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .label{font-size:16px;font-weight:700;text-anchor:middle}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#fff"/>
+  <text x="600" y="48" class="title">기본 SQL로 데이터베이스 환경 확인하기</text>
+
+  <rect x="420" y="82" width="360" height="58" rx="14" class="box"/><text x="600" y="118" class="name">ai_database_book 연결 선택</text>
+  <rect x="420" y="170" width="360" height="58" rx="14" class="box"/><text x="600" y="206" class="name">SQL Editor 열기</text>
+
+  <rect x="390" y="258" width="420" height="76" rx="14" class="sql"/>
+  <text x="600" y="287" class="mono">SELECT version();</text>
+  <text x="600" y="313" class="sub">PostgreSQL 버전 문자열 확인</text>
+
+  <rect x="390" y="365" width="420" height="76" rx="14" class="sql"/>
+  <text x="600" y="394" class="mono">SELECT current_database();</text>
+  <text x="600" y="420" class="sub">현재 DB: ai_database_book</text>
+
+  <rect x="390" y="472" width="420" height="76" rx="14" class="sql"/>
+  <text x="600" y="501" class="mono">SELECT 1 + 1 AS result;</text>
+  <text x="600" y="527" class="sub">계산 결과: 2</text>
+
+  <rect x="390" y="580" width="420" height="68" rx="14" class="decision"/>
+  <text x="600" y="609" class="name">세 결과가 예상과 일치하는가?</text>
+  <text x="600" y="633" class="sub">버전 · 현재 DB · 계산 결과 확인</text>
+  <rect x="105" y="590" width="240" height="58" rx="14" class="bad"/>
+  <text x="225" y="625" class="name">연결·DB·실행 상태 재확인</text>
+  <rect x="855" y="590" width="240" height="58" rx="14" class="ok"/>
+  <text x="975" y="625" class="name">기본 환경 준비 완료</text>
+
+  <path d="M600 140V170" class="line"/><path d="M600 228V258" class="line"/>
+  <path d="M600 334V365" class="line"/><path d="M600 441V472" class="line"/>
+  <path d="M600 548V580" class="line"/>
+  <path d="M390 614H345" class="loop"/><text x="365" y="600" class="label" fill="#b42323">아니요</text>
+  <path d="M225 590V111H420" class="loop"/>
+  <path d="M810 614H855" class="line"/><text x="833" y="600" class="label" fill="#166534">예</text>
+</svg>

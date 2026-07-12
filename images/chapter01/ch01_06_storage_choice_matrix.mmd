@@ -1,32 +1,25 @@
-flowchart TB
-    A[저장 방식 선택<br/>데이터 크기 하나가 아니라 관계·정확성·동시성·운영 방식을 함께 판단]
+flowchart TD
+    A[① 기본 저장소 선택]
+    A --> F[파일<br/>문서·설정값·단순 기록]
+    A --> S[스프레드시트<br/>사람이 편집하는 소규모 표]
+    A --> R[관계형 DB<br/>지속적 업무 데이터]
 
-    subgraph BASE[1. 기본 저장 방식]
-        F[파일<br/>적합: 문서·설정값·단순 기록·데이터 교환<br/>운영: 한 사람·변경 적음<br/>관계/정합성: 거의 없음·애플리케이션이 직접 관리<br/>사례: 개인 메모·고정 메뉴]
-        S[스프레드시트<br/>적합: 사람이 직접 편집·계산하는 표와 목록<br/>운영: 소수 사용자·수기 변경<br/>관계/정합성: 단순 관계·수식과 입력 규칙으로 관리<br/>사례: 소규모 명단·공유 목록]
-        R[관계형 DB<br/>적합: 웹·앱의 지속적인 업무 데이터<br/>운영: 여러 사용자·빈번한 변경·API 연결<br/>관계/정합성: PK/FK·제약조건·트랜잭션<br/>사례: 수강신청·주문·결제·재고]
-    end
-
-    A --> F
-    A --> S
-    A --> R
-
-    F --> B[기본 저장소 선택]
+    F --> B[② 특수 기능이 필요한가?]
     S --> B
     R --> B
 
-    subgraph SPECIAL[2. 특수 목적 요구가 있을 때 추가 검토]
-        K[Key-Value DB<br/>세션·캐시·만료 TTL·초고속 키 조회<br/>예: Redis<br/>기준 데이터 저장소를 대체하기보다 보조 계층으로 사용]
-        V[벡터 검색 기능·Vector DB<br/>문서 의미 검색·유사도·RAG<br/>예: PostgreSQL pgvector·전용 Vector DB<br/>원문·업무 데이터와 함께 사용하는 검색 계층]
-    end
+    B --> K[세션·캐시<br/>Key-Value DB 추가 검토]
+    B --> V[의미 검색<br/>벡터 검색 계층 추가 검토]
+    K --> C[③ 운영 중 재평가]
+    V --> C
 
-    B --> C{특수 목적 요구가 있는가?}
-    C -- 세션·캐시·TTL --> K
-    C -- 의미 검색·RAG --> V
-    C -- 없음 --> D[선택한 기본 저장 방식으로 시작]
-    K --> D
-    V --> D
-
-    D --> E[운영 중 재평가<br/>사용자 수·변경 빈도·관계·정확성·검색 요구가 커지면 구조와 저장 방식을 조정]
-
-    N[주의<br/>파일→스프레드시트→DB가 항상 순차적 단계는 아니며<br/>현재 요구와 예상 확장 비용을 비교해 처음부터 관계형 DB를 선택할 수도 있음] --- B
+    classDef file fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    classDef sheet fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef db fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
+    classDef special fill:#fff7e6,stroke:#d97706,stroke-width:2px;
+    classDef stage fill:#f8fafc,stroke:#64748b,stroke-width:2px;
+    class A,B,C stage;
+    class F file;
+    class S sheet;
+    class R db;
+    class K,V special;

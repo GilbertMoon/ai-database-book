@@ -66,7 +66,7 @@ PostgreSQL + DBeaver + GitHub
 | ChatGPT | 개념 설명, 오류 메시지 해석, 검토 질문 작성 보조 |
 | Codex | SQL 파일과 코드 초안 생성, 수정, 테스트 보조 |
 
-![전체 실습 환경 구조](../../images/chapter03/ch03_01_practice_environment_flow.svg)
+![전체 데이터베이스 작업 환경](../../images/chapter03/ch03_01_practice_environment_flow.svg)
 
 그림 3-1 전체 데이터베이스 작업 환경
 
@@ -139,9 +139,9 @@ PostgreSQL을 사용하는 방법은 크게 두 가지입니다.
 | 로컬 PostgreSQL | 자신의 컴퓨터에 직접 설치 | 인터넷 없이 사용 가능, 서버 구조 이해에 유리 | 설치 권한과 환경 설정이 필요함 |
 | 클라우드 PostgreSQL | 외부 서비스가 제공하는 PostgreSQL 사용 | 설치 부담이 적고 여러 기기에서 접속 가능 | 인터넷과 계정이 필요하며 접속 정보 관리가 중요함 |
 
-![로컬 PostgreSQL과 클라우드 PostgreSQL 비교](../../images/chapter03/ch03_02_local_vs_cloud_db.svg)
+![로컬 PostgreSQL과 클라우드 PostgreSQL 연결 구조](../../images/chapter03/ch03_02_local_vs_cloud_db.svg)
 
-그림 3-2 로컬 환경과 클라우드 환경 비교
+그림 3-2 로컬 환경과 클라우드 환경의 연결 구조
 
 이 책의 기본 설명은 로컬 PostgreSQL을 기준으로 합니다. 자신의 컴퓨터에서 서버가 실행되고 DBeaver가 그 서버에 연결되는 구조를 이해하기 좋기 때문입니다.
 
@@ -177,13 +177,22 @@ PostgreSQL 설치 과정에서 설정한 비밀번호는 DBeaver 연결에 필�
 비밀번호는 기억에만 의존하지 말고 안전한 비밀번호 관리 도구에 보관한다.
 ```
 
-다만 비밀번호를 다음 위치에 그대로 기록해서는 안 됩니다.
+비밀번호와 전체 접속 문자열은 SQL 파일, README, 화면 캡처, AI 질문에 그대로 넣지 않습니다.
 
-- 공개 GitHub 저장소
-- SQL 파일
-- README 문서
-- 화면 캡처
-- AI 질문에 첨부하는 전체 접속 문자열
+### 실습 환경 준비 체크리스트
+
+| 단계 | 확인 항목 | 통과 기준 |
+| --- | --- | --- |
+| PostgreSQL 준비 | 로컬 설치 또는 클라우드 DB 준비 | 접속 가능한 PostgreSQL 서버가 있음 |
+| 서버 상태 | 로컬 서비스 실행 여부 확인 | PostgreSQL 서비스가 실행 중 |
+| 연결 정보 | Host, Port, Database, Username 확인 | 입력할 값의 출처를 알고 있음 |
+| 비밀번호 | 안전한 위치에 보관 | 공개 문서나 저장소에 기록하지 않음 |
+| DBeaver | PostgreSQL 연결 생성 | Test Connection 성공 |
+| 작업 DB | `ai_database_book` 생성 및 연결 | `current_database()` 결과 일치 |
+| SQL 실행 | 기본 SQL 세 개 실행 | 버전, DB 이름, 계산 결과 확인 |
+| 테이블 실습 | `students` 생성·입력·조회 | 행 세 개와 자동 생성값 확인 |
+| 제약조건 | 중복 이메일 입력 | 예상한 UNIQUE 오류 발생 |
+| 파일 관리 | `setup_check.sql` 저장 | 비밀정보 없이 재실행 가능한 파일 존재 |
 
 ---
 
@@ -313,9 +322,9 @@ DBeaver에서 새 연결을 만드는 일반적인 흐름은 다음과 같습니
 7. 연결 설정을 저장한다.
 ```
 
-![DBeaver에서 PostgreSQL 연결 흐름](../../images/chapter03/ch03_03_dbeaver_connection_flow.svg)
+![DBeaver에서 PostgreSQL 연결하기](../../images/chapter03/ch03_03_dbeaver_connection_flow.svg)
 
-그림 3-3 DBeaver에서 PostgreSQL에 연결하는 흐름
+그림 3-3 DBeaver에서 PostgreSQL 연결하기
 
 처음 연결할 때는 `Database` 항목에 `postgres`를 사용할 수 있습니다. `postgres`는 설치 과정에서 기본으로 만들어지는 관리용 데이터베이스입니다.
 
@@ -328,6 +337,13 @@ DBeaver에서 새 연결을 만드는 일반적인 흐름은 다음과 같습니
 | Database | 연결할 데이터베이스 이름 |
 | Username | 접속 권한을 가진 사용자 |
 | Password | 해당 사용자의 인증 정보 |
+
+> **보안 경고**
+>
+> 데이터베이스 비밀번호, 전체 접속 URL, API Key, Access Token,
+> 실제 값이 들어 있는 `.env` 파일은 SQL, README, 공개 GitHub,
+> 화면 캡처 또는 AI 질문에 포함하지 않습니다.
+> 예시에는 실제 값 대신 마스킹하거나 자리표시자를 사용합니다.
 
 연결 테스트가 성공하면 DBeaver의 Database Navigator에 PostgreSQL 연결이 표시됩니다.
 
@@ -403,9 +419,9 @@ SELECT current_database();
 
 데이터베이스 연결이 끝났다면 간단한 SQL을 실행해 환경이 정상인지 확인합니다.
 
-![기본 SQL 실행 확인 흐름](../../images/chapter03/ch03_04_sql_execution_check_flow.svg)
+![기본 SQL로 데이터베이스 환경 확인하기](../../images/chapter03/ch03_04_sql_execution_check_flow.svg)
 
-그림 3-4 기본 SQL 실행 확인 흐름
+그림 3-4 기본 SQL로 데이터베이스 환경 확인하기
 
 ### 12.1 PostgreSQL 버전 확인
 
@@ -569,9 +585,9 @@ VALUES ('중복학생', 'minji@example.com');
 code/chapter03/setup_check.sql
 ```
 
-![setup_check.sql 실행 흐름](../../images/chapter03/ch03_05_setup_check_sql_flow.svg)
+![setup_check.sql 실행과 재실행 흐름](../../images/chapter03/ch03_05_setup_check_sql_flow.svg)
 
-그림 3-5 환경 확인 SQL 파일의 실행 흐름
+그림 3-5 setup_check.sql 실행과 재실행 흐름
 
 파일 내용은 다음과 같이 구성할 수 있습니다.
 
@@ -627,9 +643,9 @@ code/
     └── erd_schema.sql
 ```
 
-![GitHub 실습 파일 관리 구조](../../images/chapter03/ch03_07_github_practice_file_structure.svg)
+![SQL 실습 파일과 GitHub 기록 흐름](../../images/chapter03/ch03_07_github_practice_file_structure.svg)
 
-그림 3-6 장별 SQL 파일 관리 구조
+그림 3-6 SQL 실습 파일과 GitHub 기록 흐름
 
 GitHub에 파일을 보관하면 다음과 같은 장점이 있습니다.
 
@@ -639,7 +655,7 @@ GitHub에 파일을 보관하면 다음과 같은 장점이 있습니다.
 - 다른 컴퓨터에서도 같은 파일을 사용할 수 있다.
 - 프로젝트의 데이터베이스 구조를 코드와 함께 관리할 수 있다.
 
-단, SQL 파일과 저장소에는 비밀번호나 실제 접속 URL을 넣지 않습니다.
+커밋하기 전에는 SQL 파일과 README에 비밀번호, 실제 접속 URL, 실제 `.env` 값이 들어 있지 않은지 다시 확인합니다.
 
 ---
 
@@ -653,7 +669,7 @@ postgresql://username:password@host:5432/database
 
 이 문자열에는 사용자 이름, 비밀번호, 서버 주소가 모두 포함될 수 있습니다. 그대로 GitHub에 올리면 다른 사람이 데이터베이스에 접속할 위험이 있습니다.
 
-공개하면 안 되는 정보는 다음과 같습니다.
+앞에서 정리한 보안 경고를 실제 파일 관리에도 그대로 적용합니다. 공개하면 안 되는 정보는 다음과 같습니다.
 
 - 데이터베이스 비밀번호
 - 전체 접속 URL
@@ -716,9 +732,9 @@ SSL 사용 여부
 
 설치와 연결 과정에서 발생하는 오류는 대부분 몇 가지 범주로 나눌 수 있습니다.
 
-![오류 메시지 해결 흐름](../../images/chapter03/ch03_06_error_troubleshooting_flow.svg)
+![데이터베이스 오류 해결 기본 흐름](../../images/chapter03/ch03_06_error_troubleshooting_flow.svg)
 
-그림 3-7 오류 메시지 점검 흐름
+그림 3-7 데이터베이스 오류 해결 기본 흐름
 
 ### 20.1 연결이 거부되는 경우
 
@@ -826,7 +842,7 @@ Test Connection을 실행하면 다음 오류가 발생합니다.
 각 원인을 확인할 방법을 단계별로 알려 주세요.
 ```
 
-비밀번호와 전체 클라우드 접속 URL은 질문에 포함하지 않습니다.
+질문에는 비밀번호, 전체 클라우드 접속 URL, API Key, Access Token을 포함하지 않습니다.
 
 AI가 해결 방법을 제안하면 다음을 검토합니다.
 
@@ -861,7 +877,7 @@ PostgreSQL 기준으로 다음 내용을 포함해 주세요.
 
 ![ChatGPT와 Codex를 활용한 실습 보조 흐름](../../images/chapter03/ch03_08_ai_help_prompt_flow.svg)
 
-그림 3-8 AI를 활용한 오류 분석과 SQL 파일 작성 흐름
+그림 3-8 ChatGPT와 Codex를 활용한 실습 보조 흐름
 
 Codex가 파일을 만들었다면 반드시 직접 실행하고 확인합니다.
 

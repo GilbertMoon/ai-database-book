@@ -1,189 +1,85 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1020" viewBox="0 0 1200 1020" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
   <title id="title">온라인 강의 서비스 데이터 관계</title>
-  <desc id="desc">회원, 강사, 강의, 수강신청과 결제 엔터티의 기본키·외래키·고유 제약조건과 관계를 보여 주고, 수강신청이 회원과 강의의 다대다 관계를 해소하며 결제와 환불 이력을 보존하는 구조를 설명한 도식</desc>
+  <desc id="desc">회원, 강사, 강의, 수강신청, 결제 엔터티의 핵심 키와 관계를 보여 주는 단순 ERD</desc>
   <defs>
     <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .entity{fill:#fff;stroke:#64748b;stroke-width:1.8;rx:13}
-      .entity-head{fill:#eef5ff;stroke:#3b82c4;stroke-width:1.8;rx:13}
-      .bridge-head{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.8;rx:13}
-      .payment-head{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.8;rx:13}
-      .entity-title{font-size:18px;font-weight:700;text-anchor:middle}
-      .entity-name{font-size:12px;font-weight:700;text-anchor:middle;fill:#475569}
-      .field{font-size:13.5px}
-      .field-note{font-size:11.8px;fill:#64748b}
-      .divider{stroke:#d8dee8;stroke-width:1.1}
-      .key-pill{stroke-width:1;rx:7}
-      .pk-pill{fill:#e8f2ff;stroke:#3b82c4}.fk-pill{fill:#f3edff;stroke:#7c5cc4}.uk-pill{fill:#fff6df;stroke:#d69e2e}
-      .key-text{font-size:10.5px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .pk-text{fill:#1e4f91}.fk-text{fill:#5b3a96}.uk-text{fill:#92400e}
-      .rel{stroke:#475569;stroke-width:2.1;fill:none;stroke-linecap:round;stroke-linejoin:round}
-      .cardinality{font-size:14px;font-weight:700;fill:#334155;text-anchor:middle}
-      .rel-label{font-size:12.5px;font-weight:700;fill:#475569;text-anchor:middle}
-      .bridge-band{fill:#faf7ff;stroke:#b7a1e4;stroke-width:1.5;rx:11}
-      .bridge-title{font-size:15px;font-weight:700;text-anchor:middle;fill:#5b3a96}
-      .bridge-text{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .legend{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.4;rx:10}
-      .legend-title{font-size:13px;font-weight:700;fill:#334155}
-      .legend-text{font-size:12px;fill:#475569}
-      .rule-panel{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:15}
-      .rule-title{font-size:17px;font-weight:700}
-      .rule-card{fill:#fff;stroke-width:1.4;rx:10}
-      .rule-blue{stroke:#3b82c4}.rule-purple{stroke:#7c5cc4}.rule-green{stroke:#3c9a5f}.rule-orange{stroke:#d69e2e}
-      .rule-no{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .no-blue{fill:#2f6fad}.no-purple{fill:#6b46a8}.no-green{fill:#2f855a}.no-orange{fill:#b7791f}
-      .rule-card-title{font-size:13.5px;font-weight:700;text-anchor:middle}
-      .rule-card-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .entity{fill:#f8fafc;stroke:#475569;stroke-width:2}
+      .head{fill:#e9f2fe;stroke:#3174d0;stroke-width:2}
+      .name{font-size:20px;font-weight:700;text-anchor:middle}
+      .type{font-size:13px;font-weight:700;text-anchor:middle;fill:#475569}
+      .pk{font-size:15px;font-weight:700;fill:#1f5fb8}
+      .fk{font-size:15px;font-weight:700;fill:#7c4dcb}
+      .field{font-size:15px;fill:#475569}
+      .rel{stroke:#475569;stroke-width:2.3;fill:none;stroke-linecap:round}
+      .card{font-size:17px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .label{font-size:15px;font-weight:700;text-anchor:middle;fill:#334155}
+      .note{fill:#eef5ff;stroke:#4d86d7;stroke-width:2}
+      .note-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
+  <rect width="1200" height="680" fill="#fff"/>
+  <text x="600" y="48" class="title">온라인 강의 서비스 데이터 관계</text>
 
-  <rect width="1200" height="1020" fill="#fff"/>
-  <text x="600" y="40" class="title">온라인 강의 서비스 데이터 관계</text>
-  <text x="600" y="68" class="subtitle">성격이 다른 데이터를 분리하고 PK와 FK로 연결해 중복을 줄이며 업무 규칙과 이력을 보존한다</text>
+  <rect x="70" y="100" width="260" height="122" rx="12" class="entity"/>
+  <rect x="70" y="100" width="260" height="48" rx="12" class="head"/>
+  <text x="200" y="122" class="name">회원</text>
+  <text x="200" y="141" class="type">MEMBER</text>
+  <text x="95" y="176" class="pk">member_id (PK)</text>
+  <text x="95" y="202" class="field">name · email · status</text>
 
-  <!-- MEMBER -->
-  <rect x="50" y="118" width="280" height="244" class="entity"/>
-  <rect x="50" y="118" width="280" height="60" class="entity-head"/>
-  <text x="190" y="144" class="entity-title">회원</text>
-  <text x="190" y="165" class="entity-name">MEMBER</text>
-  <rect x="70" y="197" width="34" height="20" class="key-pill pk-pill"/><text x="87" y="207" class="key-text pk-text">PK</text>
-  <text x="116" y="212" class="field">member_id</text>
-  <line x1="70" y1="226" x2="310" y2="226" class="divider"/>
-  <text x="70" y="250" class="field">name</text>
-  <rect x="70" y="266" width="34" height="20" class="key-pill uk-pill"/><text x="87" y="276" class="key-text uk-text">UK</text>
-  <text x="116" y="281" class="field">email</text>
-  <text x="70" y="315" class="field">member_status</text>
-  <text x="70" y="341" class="field-note">created_at · 가입과 상태 정보</text>
+  <rect x="470" y="100" width="280" height="122" rx="12" class="entity"/>
+  <rect x="470" y="100" width="280" height="48" rx="12" class="head"/>
+  <text x="610" y="122" class="name">강사</text>
+  <text x="610" y="141" class="type">INSTRUCTOR</text>
+  <text x="495" y="176" class="pk">instructor_id (PK)</text>
+  <text x="495" y="202" class="field">name · email</text>
 
-  <!-- INSTRUCTOR -->
-  <rect x="460" y="118" width="280" height="218" class="entity"/>
-  <rect x="460" y="118" width="280" height="60" class="entity-head"/>
-  <text x="600" y="144" class="entity-title">강사</text>
-  <text x="600" y="165" class="entity-name">INSTRUCTOR</text>
-  <rect x="480" y="197" width="34" height="20" class="key-pill pk-pill"/><text x="497" y="207" class="key-text pk-text">PK</text>
-  <text x="526" y="212" class="field">instructor_id</text>
-  <line x1="480" y1="226" x2="720" y2="226" class="divider"/>
-  <text x="480" y="250" class="field">name</text>
-  <rect x="480" y="266" width="34" height="20" class="key-pill uk-pill"/><text x="497" y="276" class="key-text uk-text">UK</text>
-  <text x="526" y="281" class="field">email</text>
-  <text x="480" y="315" class="field-note">created_at · 강사 기본 정보</text>
+  <rect x="470" y="320" width="280" height="138" rx="12" class="entity"/>
+  <rect x="470" y="320" width="280" height="48" rx="12" class="head"/>
+  <text x="610" y="342" class="name">강의</text>
+  <text x="610" y="361" class="type">COURSE</text>
+  <text x="495" y="393" class="pk">course_id (PK)</text>
+  <text x="495" y="419" class="fk">instructor_id (FK)</text>
+  <text x="495" y="445" class="field">title · price</text>
 
-  <!-- COURSE -->
-  <rect x="870" y="118" width="280" height="244" class="entity"/>
-  <rect x="870" y="118" width="280" height="60" class="entity-head"/>
-  <text x="1010" y="144" class="entity-title">강의</text>
-  <text x="1010" y="165" class="entity-name">COURSE</text>
-  <rect x="890" y="197" width="34" height="20" class="key-pill pk-pill"/><text x="907" y="207" class="key-text pk-text">PK</text>
-  <text x="936" y="212" class="field">course_id</text>
-  <rect x="890" y="230" width="34" height="20" class="key-pill fk-pill"/><text x="907" y="240" class="key-text fk-text">FK</text>
-  <text x="936" y="245" class="field">instructor_id</text>
-  <line x1="890" y1="260" x2="1130" y2="260" class="divider"/>
-  <text x="890" y="285" class="field">title</text>
-  <text x="890" y="313" class="field">price</text>
-  <text x="890" y="341" class="field">course_status</text>
+  <rect x="70" y="455" width="310" height="132" rx="12" class="entity"/>
+  <rect x="70" y="455" width="310" height="48" rx="12" class="head"/>
+  <text x="225" y="477" class="name">수강신청</text>
+  <text x="225" y="496" class="type">ENROLLMENT</text>
+  <text x="95" y="528" class="pk">enrollment_id (PK)</text>
+  <text x="95" y="553" class="fk">member_id · course_id (FK)</text>
+  <text x="95" y="578" class="field">status · enrolled_at</text>
 
-  <!-- Instructor-Course relation -->
-  <path d="M740 225H870" class="rel"/>
-  <text x="762" y="214" class="cardinality">1</text>
-  <text x="848" y="214" class="cardinality">N</text>
-  <text x="805" y="248" class="rel-label">한 강사가 여러 강의를 담당</text>
+  <rect x="850" y="455" width="280" height="132" rx="12" class="entity"/>
+  <rect x="850" y="455" width="280" height="48" rx="12" class="head"/>
+  <text x="990" y="477" class="name">결제</text>
+  <text x="990" y="496" class="type">PAYMENT</text>
+  <text x="875" y="528" class="pk">payment_id (PK)</text>
+  <text x="875" y="553" class="fk">enrollment_id (FK)</text>
+  <text x="875" y="578" class="field">amount · status · paid_at</text>
 
-  <rect x="350" y="382" width="500" height="62" class="bridge-band"/>
-  <text x="600" y="406" class="bridge-title">회원 N:M 강의 관계를 수강신청 엔터티로 해소</text>
-  <text x="600" y="430" class="bridge-text">회원 이름과 강의명을 반복 저장하지 않고 각각의 PK를 FK로 연결한다</text>
+  <line x1="610" y1="222" x2="610" y2="320" class="rel"/>
+  <text x="590" y="250" class="card">1</text>
+  <text x="590" y="307" class="card">N</text>
+  <text x="710" y="278" class="label">강사-강의</text>
 
-  <!-- ENROLLMENT -->
-  <rect x="230" y="490" width="360" height="270" class="entity"/>
-  <rect x="230" y="490" width="360" height="60" class="bridge-head"/>
-  <text x="410" y="516" class="entity-title">수강신청</text>
-  <text x="410" y="537" class="entity-name">ENROLLMENT · 연결 엔터티</text>
-  <rect x="252" y="570" width="34" height="20" class="key-pill pk-pill"/><text x="269" y="580" class="key-text pk-text">PK</text>
-  <text x="300" y="585" class="field">enrollment_id</text>
-  <rect x="252" y="603" width="34" height="20" class="key-pill fk-pill"/><text x="269" y="613" class="key-text fk-text">FK</text>
-  <text x="300" y="618" class="field">member_id</text>
-  <rect x="252" y="636" width="34" height="20" class="key-pill fk-pill"/><text x="269" y="646" class="key-text fk-text">FK</text>
-  <text x="300" y="651" class="field">course_id</text>
-  <line x1="252" y1="668" x2="568" y2="668" class="divider"/>
-  <text x="252" y="693" class="field">enrolled_at · enrollment_status</text>
-  <rect x="252" y="712" width="34" height="20" class="key-pill uk-pill"/><text x="269" y="722" class="key-text uk-text">UK</text>
-  <text x="300" y="727" class="field">UNIQUE(member_id, course_id)</text>
-  <text x="252" y="748" class="field-note">같은 회원의 동일 강의 중복 신청 방지</text>
+  <path d="M200 222 V392 H225 V455" class="rel"/>
+  <text x="180" y="250" class="card">1</text>
+  <text x="205" y="440" class="card">N</text>
+  <text x="330" y="386" class="label">회원-수강신청</text>
 
-  <!-- PAYMENT -->
-  <rect x="760" y="490" width="360" height="270" class="entity"/>
-  <rect x="760" y="490" width="360" height="60" class="payment-head"/>
-  <text x="940" y="516" class="entity-title">결제·환불 이력</text>
-  <text x="940" y="537" class="entity-name">PAYMENT</text>
-  <rect x="782" y="570" width="34" height="20" class="key-pill pk-pill"/><text x="799" y="580" class="key-text pk-text">PK</text>
-  <text x="830" y="585" class="field">payment_id</text>
-  <rect x="782" y="603" width="34" height="20" class="key-pill fk-pill"/><text x="799" y="613" class="key-text fk-text">FK</text>
-  <text x="830" y="618" class="field">enrollment_id</text>
-  <line x1="782" y1="636" x2="1098" y2="636" class="divider"/>
-  <text x="782" y="663" class="field">payment_type · amount</text>
-  <text x="782" y="691" class="field">payment_status</text>
-  <text x="782" y="719" class="field">processed_at</text>
-  <text x="782" y="748" class="field-note">결제 시도·성공·취소·환불 기록을 삭제하지 않고 보존</text>
+  <path d="M470 405 H410 V430 H330 V455" class="rel"/>
+  <text x="448" y="397" class="card">1</text>
+  <text x="354" y="446" class="card">N</text>
+  <text x="390" y="420" class="label">강의-수강신청</text>
 
-  <!-- Member-Enrollment relation -->
-  <path d="M190 362V455H330V490" class="rel"/>
-  <text x="176" y="389" class="cardinality">1</text>
-  <text x="314" y="480" class="cardinality">N</text>
-  <text x="270" y="448" class="rel-label">회원별 신청 이력</text>
+  <line x1="380" y1="522" x2="850" y2="522" class="rel"/>
+  <text x="408" y="512" class="card">1</text>
+  <text x="822" y="512" class="card">N</text>
+  <text x="615" y="502" class="label">결제 이력 연결</text>
 
-  <!-- Course-Enrollment relation -->
-  <path d="M1010 362V455H490V490" class="rel"/>
-  <text x="1025" y="389" class="cardinality">1</text>
-  <text x="506" y="480" class="cardinality">N</text>
-  <text x="750" y="448" class="rel-label">강의별 신청자 목록</text>
-
-  <!-- Enrollment-Payment relation -->
-  <path d="M590 625H760" class="rel"/>
-  <text x="616" y="614" class="cardinality">1</text>
-  <text x="731" y="614" class="cardinality">0..N</text>
-  <text x="675" y="650" class="rel-label">결제·환불 이력</text>
-
-  <rect x="50" y="786" width="280" height="86" class="legend"/>
-  <text x="70" y="811" class="legend-title">키 표기</text>
-  <rect x="70" y="825" width="34" height="20" class="key-pill pk-pill"/><text x="87" y="835" class="key-text pk-text">PK</text>
-  <text x="114" y="840" class="legend-text">행을 식별하는 기본키</text>
-  <rect x="70" y="850" width="34" height="20" class="key-pill fk-pill"/><text x="87" y="860" class="key-text fk-text">FK</text>
-  <text x="114" y="865" class="legend-text">다른 엔터티를 참조하는 외래키</text>
-  <rect x="210" y="850" width="34" height="20" class="key-pill uk-pill"/><text x="227" y="860" class="key-text uk-text">UK</text>
-  <text x="254" y="865" class="legend-text">중복 방지</text>
-
-  <rect x="350" y="786" width="800" height="146" class="rule-panel"/>
-  <text x="374" y="814" class="rule-title">핵심 업무 규칙</text>
-
-  <rect x="374" y="832" width="178" height="76" class="rule-card rule-blue"/>
-  <circle cx="394" cy="852" r="12" class="no-blue"/><text x="394" y="852" class="rule-no">1</text>
-  <text x="463" y="857" class="rule-card-title">N:M 관계 해소</text>
-  <text x="463" y="882" class="rule-card-sub">회원과 강의를 수강신청으로 연결</text>
-  <text x="463" y="901" class="rule-card-sub">관계 자체의 상태·날짜 저장</text>
-
-  <rect x="566" y="832" width="178" height="76" class="rule-card rule-purple"/>
-  <circle cx="586" cy="852" r="12" class="no-purple"/><text x="586" y="852" class="rule-no">2</text>
-  <text x="655" y="857" class="rule-card-title">중복 신청 방지</text>
-  <text x="655" y="882" class="rule-card-sub">회원+강의 조합에 UNIQUE</text>
-  <text x="655" y="901" class="rule-card-sub">업무 규칙을 DB가 직접 보장</text>
-
-  <rect x="758" y="832" width="178" height="76" class="rule-card rule-green"/>
-  <circle cx="778" cy="852" r="12" class="no-green"/><text x="778" y="852" class="rule-no">3</text>
-  <text x="847" y="857" class="rule-card-title">결제 이력 보존</text>
-  <text x="847" y="882" class="rule-card-sub">한 신청에 여러 결제 기록 가능</text>
-  <text x="847" y="901" class="rule-card-sub">취소·환불도 이력으로 관리</text>
-
-  <rect x="950" y="832" width="178" height="76" class="rule-card rule-orange"/>
-  <circle cx="970" cy="852" r="12" class="no-orange"/><text x="970" y="852" class="rule-no">4</text>
-  <text x="1039" y="857" class="rule-card-title">PK/FK로 연결</text>
-  <text x="1039" y="882" class="rule-card-sub">이름·강의명 변경과 무관</text>
-  <text x="1039" y="901" class="rule-card-sub">중복 저장과 수정 오류 감소</text>
-
-  <rect x="170" y="954" width="860" height="42" class="principle"/>
-  <text x="196" y="979" class="principle-label">핵심 원칙</text>
-  <text x="620" y="979" class="principle-text">서비스의 업무 규칙은 테이블 분리, 관계, 키와 제약조건으로 데이터 구조에 표현한다</text>
+  <rect x="150" y="620" width="900" height="36" rx="16" class="note"/>
+  <text x="600" y="643" class="note-text">회원과 강의의 N:M 관계는 수강신청으로 풀고, 결제는 수강신청 이력에 연결한다.</text>
 </svg>

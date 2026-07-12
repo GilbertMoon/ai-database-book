@@ -1,28 +1,15 @@
-flowchart TB
-    A[저장하고 운영할 데이터가 있다] --> B[데이터베이스 필요 신호 확인]
+flowchart TD
+    A{동시 접근·관계·정확성·반복 검색·권한이 중요한가?}
+    A -- 예 --> DB[관계형 데이터베이스 우선 검토<br/>PostgreSQL·MySQL]
+    A -- 아니요 --> B{사람이 표로 직접 편집·계산하는가?}
+    B -- 예 --> S[스프레드시트]
+    B -- 아니요 --> F[파일]
 
-    B --> B1[여러 사용자가 동시에<br/>조회·수정하는가?]
-    B --> B2[회원·강의·주문처럼<br/>여러 데이터의 관계가 중요한가?]
-    B --> B3[중복·잘못된 값 차단과<br/>트랜잭션이 필요한가?]
-    B --> B4[조건 검색·집계·API 처리를<br/>반복적으로 수행하는가?]
-    B --> B5[권한·변경 이력·백업·복구가<br/>중요한가?]
-
-    B1 --> C{하나라도 예인가?}
-    B2 --> C
-    B3 --> C
-    B4 --> C
-    B5 --> C
-
-    C -- 아니요 --> D{사람이 표 형태로<br/>직접 편집·계산하는가?}
-    D -- 예 --> E[스프레드시트 우선 검토<br/>소규모 명단·공유 목록·수기 표]
-    D -- 아니요 --> F[파일 우선 검토<br/>문서·설정값·단순 기록·데이터 교환]
-    E --> G[데이터와 운영 요구가 커지면<br/>데이터베이스 전환 재검토]
-    F --> G
-
-    C -- 예 --> H[관계형 DB 우선 검토<br/>PostgreSQL·MySQL]
-    H --> I[PK·FK·제약조건·트랜잭션·권한으로<br/>업무 데이터의 정합성 관리]
-    I --> J{의미 기반 문서 검색이<br/>추가로 필요한가?}
-    J -- 아니요 --> K[관계형 DB 중심으로 운영]
-    J -- 예 --> L[관계형 DB + 벡터 검색 계층<br/>pgvector 또는 전용 Vector DB]
-
-    N[주의<br/>데이터가 작아도 동시성·정확성·복구가 중요하면 DB가 필요할 수 있고<br/>데이터가 많아도 단순 보관만 한다면 파일이 적합할 수 있음] --- C
+    classDef q fill:#f8fafc,stroke:#64748b,stroke-width:2px;
+    classDef db fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
+    classDef sheet fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef file fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    class A,B q;
+    class DB db;
+    class S sheet;
+    class F file;

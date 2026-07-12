@@ -1,199 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
   <title id="title">AI 시대의 데이터베이스 작업 흐름</title>
-  <desc id="desc">요구사항 이해, 데이터 모델링과 구현, PostgreSQL 실행과 검증, 문제 유형별 수정, GitHub 기록과 재현 확인으로 이어지는 데이터베이스 작업 흐름과 AI·사람·도구의 역할 구분</desc>
+  <desc id="desc">요구사항 정리, 데이터 모델링, AI와 Codex를 활용한 구현 초안 작성, PostgreSQL 실행, DBeaver 확인, 수정, GitHub 기록으로 이어지는 전체 작업 흐름</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+      <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .group{stroke-width:1.5;rx:16}
-      .understand-group{fill:#f4f8ff;stroke:#93b4e6}
-      .build-group{fill:#f8fafc;stroke:#a8b3c4}
-      .verify-group{fill:#f2fbf5;stroke:#8bc9a0}
-      .group-title{font-size:18px;font-weight:700}
-      .group-sub{font-size:13px;fill:#475569}
-      .card{fill:#fff;stroke-width:1.6;rx:11}
-      .understand-card{stroke:#3b82c4}.build-card{stroke:#64748b}.verify-card{stroke:#3c9a5f}
-      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .badge-understand{fill:#2f6fad}.badge-build{fill:#58677b}.badge-verify{fill:#2f855a}
-      .card-title{font-size:14px;font-weight:700;text-anchor:middle}
-      .card-main{font-size:12.5px;font-weight:600;text-anchor:middle}
-      .card-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .artifact{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#334155}
-      .arrow{stroke:#475569;stroke-width:2.1;fill:none;marker-end:url(#arrow)}
-      .feedback{stroke:#d9534f;stroke-width:2.1;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
-      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}
-      .decision-title{font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .decision-sub{font-size:11.8px;text-anchor:middle;fill:#475569}
-      .branch{font-size:12.5px;font-weight:700}
-      .issue-panel{fill:#fff5f5;stroke:#d9534f;stroke-width:1.5;rx:14}
-      .issue-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .issue-card{fill:#fff;stroke:#e58e8a;stroke-width:1.3;rx:9}
-      .issue-card-title{font-size:12.5px;font-weight:700;text-anchor:middle}
-      .issue-card-sub{font-size:11px;text-anchor:middle;fill:#475569}
-      .complete{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.7;rx:11}
-      .record{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.7;rx:11}
-      .reproduce{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.7;rx:11}
-      .result-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .result-sub{font-size:12px;text-anchor:middle;fill:#475569}
-      .role-band{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:12}
-      .role-title{font-size:14px;font-weight:700;fill:#92400e}
-      .role-text{font-size:12.8px;fill:#475569}
-      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .step{fill:#f8fafc;stroke:#64748b;stroke-width:2}
+      .ai{fill:#e7fbf6;stroke:#1aa382;stroke-width:2}
+      .exec{fill:#eef5ff;stroke:#3b82f6;stroke-width:2}
+      .check{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2}
+      .fix{fill:#fff7e6;stroke:#d97706;stroke-width:2}
+      .done{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .head{font-size:18px;font-weight:700;text-anchor:middle}
+      .body{font-size:14.5px;text-anchor:middle;fill:#334155}
+      .line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .note{fill:#eef5ff;stroke:#4d86d7;stroke-width:2}
+      .note-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
+  <rect width="1200" height="540" fill="#fff"/>
+  <text x="600" y="46" class="title">AI 시대의 데이터베이스 작업 흐름</text>
 
-  <rect width="1200" height="1120" fill="#fff"/>
-  <text x="600" y="40" class="title">AI 시대의 데이터베이스 작업 흐름</text>
-  <text x="600" y="68" class="subtitle">AI는 초안을 보조하고, 사람은 요구사항과 실제 실행 결과를 비교해 설계와 결과를 책임진다</text>
+  <rect x="60" y="100" width="150" height="82" rx="15" class="step"/>
+  <text x="135" y="132" class="head">요구사항 정리</text>
+  <text x="135" y="158" class="body">업무 규칙 파악</text>
 
-  <rect x="34" y="90" width="1132" height="210" class="group understand-group"/>
-  <text x="58" y="121" class="group-title">1. 문제 이해</text>
-  <text x="175" y="121" class="group-sub">도구를 열기 전에 사용자와 업무 규칙을 먼저 확정</text>
+  <line x1="210" y1="141" x2="255" y2="141" class="line"/>
+  <rect x="255" y="100" width="150" height="82" rx="15" class="step"/>
+  <text x="330" y="132" class="head">데이터 모델링</text>
+  <text x="330" y="158" class="body">엔터티·관계</text>
 
-  <rect x="58" y="150" width="300" height="104" class="card understand-card"/>
-  <circle cx="82" cy="174" r="14" class="badge-understand"/><text x="82" y="174" class="badge">1</text>
-  <text x="208" y="181" class="card-title">요구사항 확인</text>
-  <text x="208" y="211" class="card-main">사용자 · 목적 · 입력 · 출력 · 예외</text>
-  <text x="208" y="235" class="card-sub">무엇을 저장하고 어떤 결과가 필요한지 정의</text>
+  <line x1="405" y1="141" x2="450" y2="141" class="line"/>
+  <rect x="450" y="100" width="190" height="82" rx="15" class="ai"/>
+  <text x="545" y="132" class="head">AI·Codex 초안</text>
+  <text x="545" y="158" class="body">DDL · SQL · 코드</text>
 
-  <rect x="450" y="150" width="300" height="104" class="card understand-card"/>
-  <circle cx="474" cy="174" r="14" class="badge-understand"/><text x="474" y="174" class="badge">2</text>
-  <text x="600" y="181" class="card-title">핵심 업무 규칙 정리</text>
-  <text x="600" y="211" class="card-main">AI가 목록화·질문 생성을 보조</text>
-  <text x="600" y="235" class="card-sub">누락·모호함·충돌하는 조건을 사람이 확인</text>
+  <line x1="640" y1="141" x2="685" y2="141" class="line"/>
+  <rect x="685" y="100" width="150" height="82" rx="15" class="exec"/>
+  <text x="760" y="132" class="head">PostgreSQL</text>
+  <text x="760" y="158" class="body">테스트 실행</text>
 
-  <polygon points="980,140 1110,202 980,264 850,202" class="decision"/>
-  <text x="980" y="196" class="decision-title">규칙이 명확한가?</text>
-  <text x="980" y="221" class="decision-sub">누락과 오해가 없는지 확인</text>
+  <line x1="835" y1="141" x2="880" y2="141" class="line"/>
+  <rect x="880" y="100" width="150" height="82" rx="15" class="check"/>
+  <text x="955" y="132" class="head">DBeaver 확인</text>
+  <text x="955" y="158" class="body">구조·데이터 검토</text>
 
-  <path d="M358 202H450" class="arrow"/>
-  <path d="M750 202H850" class="arrow"/>
-  <path d="M850 202H790V112H208V150" class="feedback"/>
-  <text x="805" y="187" class="branch" fill="#b42318">아니요</text>
-  <path d="M980 264V330H208" class="arrow"/>
-  <text x="995" y="294" class="branch" fill="#166534">예</text>
+  <line x1="955" y1="182" x2="955" y2="232" class="line"/>
+  <rect x="840" y="232" width="230" height="82" rx="15" class="fix"/>
+  <text x="955" y="264" class="head">수정</text>
+  <text x="955" y="290" class="body">문제 발견 시 보완</text>
 
-  <rect x="34" y="324" width="1132" height="238" class="group build-group"/>
-  <text x="58" y="355" class="group-title">2. 데이터 모델링·구현</text>
-  <text x="258" y="355" class="group-sub">업무 규칙을 데이터 구조와 실행 가능한 파일로 변환</text>
+  <line x1="840" y1="273" x2="685" y2="273" class="line"/>
+  <rect x="500" y="232" width="185" height="82" rx="15" class="done"/>
+  <text x="592" y="264" class="head">GitHub 기록</text>
+  <text x="592" y="290" class="body">변경 내용과 근거</text>
 
-  <rect x="48" y="390" width="250" height="120" class="card build-card"/>
-  <circle cx="72" cy="414" r="14" class="badge-build"/><text x="72" y="414" class="badge">3</text>
-  <text x="173" y="422" class="card-title">데이터 모델 설계</text>
-  <text x="173" y="452" class="card-main">엔터티 · 속성 · 관계 · PK/FK</text>
-  <text x="173" y="476" class="card-sub">N:M 관계와 제약조건까지 ERD에 표현</text>
-  <text x="173" y="498" class="artifact">erd.svg / erd.md</text>
-
-  <rect x="332" y="390" width="250" height="120" class="card build-card"/>
-  <circle cx="356" cy="414" r="14" class="badge-build"/><text x="356" y="414" class="badge">4</text>
-  <text x="457" y="422" class="card-title">설계 검토</text>
-  <text x="457" y="452" class="card-main">중복 · 무결성 · 확장성 · 업무 규칙</text>
-  <text x="457" y="476" class="card-sub">요구사항을 테이블과 관계로 추적</text>
-  <text x="457" y="498" class="artifact">검토 질문·수정 근거</text>
-
-  <rect x="616" y="390" width="250" height="120" class="card build-card"/>
-  <circle cx="640" cy="414" r="14" class="badge-build"/><text x="640" y="414" class="badge">5</text>
-  <text x="741" y="422" class="card-title">DDL·SQL·CRUD 초안</text>
-  <text x="741" y="452" class="card-main">AI와 코딩 도구가 작성 보조</text>
-  <text x="741" y="476" class="card-sub">제약조건·오류 처리·안전성은 사람이 검토</text>
-  <text x="741" y="498" class="artifact">실행 가능한 코드 초안</text>
-
-  <rect x="900" y="390" width="250" height="120" class="card build-card"/>
-  <circle cx="924" cy="414" r="14" class="badge-build"/><text x="924" y="414" class="badge">6</text>
-  <text x="1025" y="422" class="card-title">프로젝트 파일 정리</text>
-  <text x="1025" y="452" class="card-main">초기화·데이터·검증 파일 분리</text>
-  <text x="1025" y="476" class="card-sub">실행 순서와 의존성을 명확히 관리</text>
-  <text x="1025" y="498" class="artifact">schema.sql · seed.sql · queries.sql</text>
-
-  <path d="M298 450H332" class="arrow"/>
-  <path d="M582 450H616" class="arrow"/>
-  <path d="M866 450H900" class="arrow"/>
-  <path d="M1025 510V592H173" class="arrow"/>
-
-  <rect x="34" y="586" width="1132" height="270" class="group verify-group"/>
-  <text x="58" y="617" class="group-title">3. 실행·검증</text>
-  <text x="185" y="617" class="group-sub">새로 만들 수 있는 테스트 환경에서 구조와 결과를 반복 확인</text>
-
-  <rect x="48" y="652" width="250" height="120" class="card verify-card"/>
-  <circle cx="72" cy="676" r="14" class="badge-verify"/><text x="72" y="676" class="badge">7</text>
-  <text x="173" y="684" class="card-title">테스트 DB 초기화</text>
-  <text x="173" y="714" class="card-main">격리된 PostgreSQL 환경 사용</text>
-  <text x="173" y="738" class="card-sub">운영 데이터가 아닌 재생성 가능한 DB</text>
-  <text x="173" y="760" class="artifact">초기화 로그</text>
-
-  <rect x="332" y="652" width="250" height="120" class="card verify-card"/>
-  <circle cx="356" cy="676" r="14" class="badge-verify"/><text x="356" y="676" class="badge">8</text>
-  <text x="457" y="684" class="card-title">DDL·샘플 데이터 실행</text>
-  <text x="457" y="714" class="card-main">테이블·제약조건·시나리오 생성</text>
-  <text x="457" y="738" class="card-sub">오류 없이 같은 순서로 재실행되는지 확인</text>
-  <text x="457" y="760" class="artifact">실행 결과</text>
-
-  <rect x="616" y="652" width="250" height="120" class="card verify-card"/>
-  <circle cx="640" cy="676" r="14" class="badge-verify"/><text x="640" y="676" class="badge">9</text>
-  <text x="741" y="684" class="card-title">구조·데이터·쿼리 확인</text>
-  <text x="741" y="714" class="card-main">DB 도구와 실행 로그 활용</text>
-  <text x="741" y="738" class="card-sub">정상·경계·오류 시나리오를 모두 실행</text>
-  <text x="741" y="760" class="artifact">조회 결과·오류 근거</text>
-
-  <rect x="900" y="652" width="250" height="120" class="card verify-card"/>
-  <circle cx="924" cy="676" r="14" class="badge-verify"/><text x="924" y="676" class="badge">10</text>
-  <text x="1025" y="684" class="card-title">요구사항과 결과 비교</text>
-  <text x="1025" y="714" class="card-main">실행 성공이 아니라 업무 의미 확인</text>
-  <text x="1025" y="738" class="card-sub">예상 결과와 실제 결과가 일치하는가?</text>
-  <text x="1025" y="760" class="artifact">검증 판정</text>
-
-  <path d="M298 712H332" class="arrow"/>
-  <path d="M582 712H616" class="arrow"/>
-  <path d="M866 712H900" class="arrow"/>
-
-  <polygon points="600,790 730,850 600,910 470,850" class="decision"/>
-  <text x="600" y="844" class="decision-title">모든 검증 기준 통과?</text>
-  <text x="600" y="869" class="decision-sub">요구사항·구조·실행·결과·안전성</text>
-  <path d="M1025 772V790H600" class="arrow"/>
-
-  <rect x="35" y="872" width="390" height="132" class="issue-panel"/>
-  <text x="230" y="899" class="issue-title">문제 유형별 관련 단계로 복귀</text>
-  <rect x="52" y="920" width="170" height="34" class="issue-card"/>
-  <text x="137" y="942" class="issue-card-title">요구사항 → 1단계</text>
-  <rect x="238" y="920" width="170" height="34" class="issue-card"/>
-  <text x="323" y="942" class="issue-card-title">모델·관계 → 3단계</text>
-  <rect x="52" y="962" width="170" height="28" class="issue-card"/>
-  <text x="137" y="981" class="issue-card-title">DDL·코드 → 5단계</text>
-  <rect x="238" y="962" width="170" height="28" class="issue-card"/>
-  <text x="323" y="981" class="issue-card-title">환경·테스트 → 7단계</text>
-
-  <rect x="780" y="872" width="385" height="58" class="complete"/>
-  <text x="972.5" y="897" class="result-title">검증 완료 결과 확정</text>
-  <text x="972.5" y="918" class="result-sub">통과한 설계·SQL·코드만 채택</text>
-
-  <rect x="780" y="946" width="385" height="58" class="record"/>
-  <text x="972.5" y="971" class="result-title">GitHub 변경 이력 기록</text>
-  <text x="972.5" y="992" class="result-sub">코드·문서·실행 결과·수정 이유·한계</text>
-
-  <path d="M470 850H425" class="arrow"/>
-  <text x="443" y="834" class="branch">아니요</text>
-  <path d="M730 850H780" class="arrow"/>
-  <text x="755" y="834" class="branch">예</text>
-  <path d="M972 930V946" class="arrow"/>
-  <path d="M35 938H14V202H58" class="feedback"/>
-  <text x="30" y="565" class="branch" fill="#b42318">수정 후 다시 실행·검증</text>
-
-  <rect x="400" y="1020" width="400" height="42" class="reproduce"/>
-  <text x="600" y="1040" class="result-title">재현 확인</text>
-  <text x="600" y="1057" class="result-sub">다른 사람이 새 환경에서 같은 구조와 결과를 만드는가?</text>
-  <path d="M972 1004V1041H800" class="arrow"/>
-  <path d="M400 1041H370V450H900" class="feedback"/>
-  <text x="383" y="1025" class="branch" fill="#b42318">재현 실패 시 파일·문서 보완</text>
-
-  <rect x="55" y="1076" width="1090" height="28" class="role-band"/>
-  <text x="79" y="1094" class="role-title">역할 구분</text>
-  <text x="162" y="1094" class="role-text">AI: 정리·초안·오류 분석 보조 / 실행 도구: 실제 상태와 결과 확인 / 사람: 요구사항 판단·설계 선택·최종 검증 책임</text>
-
-  <rect x="190" y="1110" width="820" height="0" class="principle"/>
+  <rect x="165" y="390" width="870" height="50" rx="18" class="note"/>
+  <text x="600" y="421" class="note-text">AI는 초안 생성을 돕고, 사람은 요구사항 판단과 결과 검증을 책임진다.</text>
 </svg>

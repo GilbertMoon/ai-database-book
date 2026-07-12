@@ -1,1 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc"><title id="title">제약조건은 잘못된 데이터를 막는 안전장치</title><desc id="desc">데이터가 제약조건을 통과하면 저장되고 위반하면 거부되며 기본값은 생략된 값을 채운다는 설명</desc><rect width="1200" height="800" fill="white"/><text x="600" y="42" text-anchor="middle" font-size="28" font-weight="700">제약조건은 잘못된 데이터를 막는 안전장치</text><text x="600" y="72" text-anchor="middle" font-size="15" fill="#475569">애플리케이션 검증 뒤 데이터베이스가 핵심 규칙을 최종 확인한다</text><rect x="70" y="110" width="250" height="80" rx="12" fill="#f8fafc" stroke="#64748b" stroke-width="2"/><text x="195" y="145" text-anchor="middle" font-size="17" font-weight="700">입력 데이터</text><text x="195" y="172" text-anchor="middle" font-size="13">웹·앱·관리 도구</text><rect x="475" y="110" width="250" height="80" rx="12" fill="#eef5ff" stroke="#3b82c4" stroke-width="2"/><text x="600" y="145" text-anchor="middle" font-size="17" font-weight="700">입력값 사전 확인</text><text x="600" y="172" text-anchor="middle" font-size="13">사용자에게 빠른 오류 안내</text><rect x="880" y="110" width="250" height="80" rx="12" fill="#fff8e8" stroke="#d69e2e" stroke-width="2"/><text x="1005" y="145" text-anchor="middle" font-size="17" font-weight="700">DB 제약조건 검사</text><text x="1005" y="172" text-anchor="middle" font-size="13">저장 전 핵심 규칙 확인</text><line x1="320" y1="150" x2="475" y2="150" stroke="#475569" stroke-width="2"/><line x1="725" y1="150" x2="880" y2="150" stroke="#475569" stroke-width="2"/><rect x="55" y="245" width="200" height="110" rx="10" fill="#eef5ff" stroke="#3b82c4" stroke-width="2"/><text x="155" y="280" text-anchor="middle" font-size="16" font-weight="700">PRIMARY KEY</text><text x="155" y="310" text-anchor="middle" font-size="13">행을 고유하게 식별</text><text x="155" y="335" text-anchor="middle" font-size="12">중복·빈 값 차단</text><rect x="275" y="245" width="200" height="110" rx="10" fill="#f5f1ff" stroke="#7c5cc4" stroke-width="2"/><text x="375" y="280" text-anchor="middle" font-size="16" font-weight="700">FOREIGN KEY</text><text x="375" y="310" text-anchor="middle" font-size="13">참조 대상 존재 확인</text><text x="375" y="335" text-anchor="middle" font-size="12">없는 행 참조 차단</text><rect x="495" y="245" width="200" height="110" rx="10" fill="#fff5f5" stroke="#d9534f" stroke-width="2"/><text x="595" y="280" text-anchor="middle" font-size="16" font-weight="700">NOT NULL</text><text x="595" y="310" text-anchor="middle" font-size="13">필수 값 누락 차단</text><text x="595" y="335" text-anchor="middle" font-size="12">예: 학생 이름</text><rect x="715" y="245" width="200" height="110" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="2"/><text x="815" y="280" text-anchor="middle" font-size="16" font-weight="700">UNIQUE</text><text x="815" y="310" text-anchor="middle" font-size="13">중복 값 차단</text><text x="815" y="335" text-anchor="middle" font-size="12">필수이면 NOT NULL 병행</text><rect x="935" y="245" width="200" height="110" rx="10" fill="#f2fbf5" stroke="#3c9a5f" stroke-width="2"/><text x="1035" y="280" text-anchor="middle" font-size="16" font-weight="700">CHECK</text><text x="1035" y="310" text-anchor="middle" font-size="13">허용 범위 검사</text><text x="1035" y="335" text-anchor="middle" font-size="12">예: 가격은 0 이상</text><rect x="200" y="405" width="800" height="75" rx="10" fill="#fff8e8" stroke="#d69e2e" stroke-width="2"/><text x="600" y="435" text-anchor="middle" font-size="16" font-weight="700">DEFAULT는 검사형 제약조건과 역할이 다르다</text><text x="600" y="462" text-anchor="middle" font-size="13">값이 생략되었을 때 기본값을 채우며 명시한 빈 값을 자동으로 바꾸지는 않는다</text><polygon points="600,525 740,575 600,625 460,575" fill="#fff8e8" stroke="#b7791f" stroke-width="2"/><text x="600" y="572" text-anchor="middle" font-size="16" font-weight="700">모든 필수 규칙을 만족하는가?</text><text x="600" y="597" text-anchor="middle" font-size="12">하나라도 위반하면 저장하지 않음</text><rect x="100" y="660" width="420" height="80" rx="12" fill="#f2fbf5" stroke="#3c9a5f" stroke-width="2"/><text x="310" y="692" text-anchor="middle" font-size="17" font-weight="700">통과</text><text x="310" y="720" text-anchor="middle" font-size="13">저장 또는 수정 반영</text><rect x="680" y="660" width="420" height="80" rx="12" fill="#fff5f5" stroke="#d9534f" stroke-width="2"/><text x="890" y="692" text-anchor="middle" font-size="17" font-weight="700">실패</text><text x="890" y="720" text-anchor="middle" font-size="13">오류 반환·잘못된 데이터 차단</text><text x="600" y="775" text-anchor="middle" font-size="15" font-weight="700" fill="#166534">검사형 제약조건은 잘못된 값을 차단하고 DEFAULT는 생략된 값을 채운다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">제약조건은 잘못된 데이터를 막는 안전장치</title>
+  <desc id="desc">애플리케이션 입력이 데이터베이스 제약조건 검사를 거쳐 저장되거나 오류로 거부되는 분기 흐름과 DEFAULT의 별도 역할</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .box{fill:#f8fafc;stroke:#64748b;stroke-width:2}
+      .check{fill:#fff5df;stroke:#d89424;stroke-width:2}
+      .ok{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2}
+      .default{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
+      .name{font-size:20px;font-weight:700;text-anchor:middle}
+      .sub{font-size:15px;text-anchor:middle;fill:#475569}
+      .tokens{font-size:16px;font-weight:700;text-anchor:middle;fill:#334155}
+      .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .branch{font-size:18px;font-weight:700;text-anchor:middle}
+      .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+    </style>
+  </defs>
+  <rect width="1200" height="680" fill="#fff"/>
+  <text x="600" y="48" class="title">제약조건은 잘못된 데이터를 막는 안전장치</text>
+
+  <rect x="445" y="90" width="310" height="72" rx="14" class="box"/>
+  <text x="600" y="121" class="name">애플리케이션 입력</text>
+  <text x="600" y="146" class="sub">화면·API에서 전달된 값</text>
+  <path d="M600 162V210" class="line"/>
+
+  <rect x="370" y="215" width="460" height="92" rx="14" class="check"/>
+  <text x="600" y="248" class="name">데이터베이스 제약조건 검사</text>
+  <text x="600" y="278" class="tokens">PK · FK · NOT NULL · UNIQUE · CHECK</text>
+  <path d="M600 307V355" class="line"/>
+
+  <rect x="410" y="360" width="380" height="76" rx="14" class="check"/>
+  <text x="600" y="393" class="name">모든 필수 규칙을 만족하는가?</text>
+  <text x="600" y="417" class="sub">DB가 핵심 규칙을 최종 확인</text>
+
+  <path d="M520 436L330 500" class="line"/>
+  <text x="390" y="462" class="branch" fill="#166534">예</text>
+  <rect x="155" y="502" width="290" height="82" rx="14" class="ok"/>
+  <text x="300" y="535" class="name">저장·수정 반영</text>
+  <text x="300" y="561" class="sub">규칙을 만족한 데이터</text>
+
+  <path d="M680 436L870 500" class="line"/>
+  <text x="810" y="462" class="branch" fill="#b42323">아니요</text>
+  <rect x="755" y="502" width="290" height="82" rx="14" class="bad"/>
+  <text x="900" y="535" class="name">오류 반환·저장 거부</text>
+  <text x="900" y="561" class="sub">위반한 값은 저장하지 않음</text>
+
+  <rect x="60" y="215" width="230" height="92" rx="14" class="default"/>
+  <text x="175" y="248" class="name">값이 생략된 경우</text>
+  <text x="175" y="278" class="sub">DEFAULT가 기본값 입력</text>
+  <path d="M290 261H370" class="line"/>
+
+  <text x="600" y="632" class="note">애플리케이션 검증과 DB 제약조건은 함께 필요하며, 위반한 값은 저장하지 않는다.</text>
+</svg>

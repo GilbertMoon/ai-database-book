@@ -18,12 +18,13 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 
 | 점검 항목 | 상태 | 리뷰 의견 |
 | --- | --- | --- |
-| 이 장에서 다룰 내용가 명확한가 | 통과 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY, AI SQL 검토가 제시됨 |
+| 이 장에서 다룰 내용이 명확한가 | 통과 | SELECT, INSERT, UPDATE, DELETE, WHERE, ORDER BY, AI SQL 검토가 제시됨 |
 | Chapter 03과 연결되는가 | 통과 | ai_database_book, DBeaver, basic_crud.sql 실습 환경을 이어서 사용함 |
 | SQL 기초 흐름이 단계적인가 | 통과 | 테이블 준비 → 조회 → 추가 → 조건 → 정렬 → 수정 → 삭제 순서가 적절함 |
 | CRUD 개념과 연결되는가 | 통과 | INSERT, SELECT, UPDATE, DELETE를 CRUD 흐름으로 정리함 |
 | 활동 자료가 준비되어 있는가 | 통과 | chapter04_activity.md 작성 완료 |
 | 실습 코드가 준비되어 있는가 | 통과 | code/chapter04/basic_crud.sql 작성 완료 |
+| SQL 실행 순서 요약표가 있는가 | 통과 | `basic_crud.sql 실행 순서` 표를 본문 3장 마지막에 추가함 |
 | 다음 장과 연결되는가 | 통과 | Chapter 05 데이터 모델링과 ERD로 자연스럽게 연결됨 |
 
 ---
@@ -51,6 +52,7 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 | 실습 SQL 파일이 본문과 일치하는가 | 통과 | basic_crud.sql이 본문 예제와 연결됨 |
 | UPDATE 전 SELECT 확인이 강조되는가 | 통과 | 안전한 수정 절차가 별도 섹션과 도식으로 제시됨 |
 | DELETE 전 SELECT 확인이 강조되는가 | 통과 | 안전한 삭제 절차가 별도 섹션과 도식으로 제시됨 |
+| SQL 안전 실행 원칙 표가 반영되어 있는가 | 통과 | 정리 절에 SELECT/INSERT/UPDATE/DELETE/AI 생성 SQL 실행 전 확인 항목이 표로 정리됨 |
 | 위험 SQL 검토가 포함되어 있는가 | 통과 | WHERE 없는 UPDATE/DELETE 검토 문제가 포함됨 |
 | AI 생성 SQL 검토 활동이 있는가 | 통과 | 활동 자료에서 AI SQL 검토 활동을 별도로 제시함 |
 
@@ -61,10 +63,12 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 | 점검 항목 | 상태 | 리뷰 의견 |
 | --- | --- | --- |
 | 도식이 본문 흐름과 맞는가 | 통과 | CRUD, SELECT, INSERT, WHERE, ORDER BY, UPDATE, DELETE, AI 검토 순서가 적절함 |
-| 도식이 장식용이 아닌가 | 통과 | 각 도식이 SQL 실행 흐름 또는 안전 검토 절차를 설명함 |
+| 도식이 장식용이 아닌가 | 통과 | 각 도식이 SQL 실행 전후 변화 또는 안전 검토 절차를 설명함 |
 | 그림 번호와 캡션이 있는가 | 통과 | 그림 4-1부터 그림 4-8까지 삽입됨 |
 | 이미지 경로가 일관적인가 | 통과 | ../../images/chapter04/*.svg 형식 사용 |
-| Mermaid 원본과 SVG가 함께 관리되는가 | 통과 | .mmd 원본과 .svg 결과물이 함께 존재함 |
+| Mermaid 원본과 SVG가 함께 관리되는가 | 통과 | .mmd 원본과 .svg 결과물이 함께 존재하며 핵심 노드와 흐름을 맞춤 |
+| SVG가 본문 표와 SQL을 반복하지 않는가 | 통과 | 대형 비교표, 전체 SQL, 상세 예제 테이블을 제거하고 변화와 절차 중심으로 단순화함 |
+| Chapter 범위를 넘는 고급 내용이 제거되었는가 | 통과 | 트랜잭션, 행 잠금, FK 삭제 정책, 소프트 삭제 등은 Chapter 04 도식에서 제거함 |
 
 ---
 
@@ -89,9 +93,10 @@ Chapter 04가 SQL 기초 학습 장으로서 충분한 구조와 실습 흐름�
 
 | 우선순위 | 보완 항목 | 상세 내용 |
 | --- | --- | --- |
-| 높음 | 안전 실행 원칙 요약 박스 추가 | UPDATE/DELETE 전 SELECT 확인 원칙을 정리 부분에 한 번 더 강조 |
-| 중간 | SQL 실행 순서 요약표 추가 | basic_crud.sql 실행 순서를 표로 정리하면 활동 자료와 연결성이 좋아짐 |
-| 낮음 | SVG 렌더링 점검 | PDF/Word/eBook 변환 단계에서 확인 필요 |
+| 완료 | 안전 실행 원칙 요약 박스 추가 | 정리 절의 SQL 안전 실행 원칙 표로 반영됨 |
+| 완료 | SQL 실행 순서 요약표 추가 | 본문 3장 마지막에 `basic_crud.sql 실행 순서` 표를 추가함 |
+| 완료 | SVG 단순화 및 Mermaid 정합성 점검 | 8개 도식 모두 Mermaid 원본과 SVG 결과물의 핵심 흐름을 맞추고 고급 내용을 제거함 |
+| 유지 | PDF/Word/eBook 변환 점검 | 실제 변환 단계에서 SVG 또는 PNG 표시 확인 필요 |
 
 ---
 
@@ -102,8 +107,9 @@ Chapter 04는 SQL 기초 장으로서 1차 원고 사용이 가능하다.
 SELECT, INSERT, WHERE, ORDER BY, UPDATE, DELETE가 단계적으로 설명되어 있고,
 위험한 UPDATE/DELETE를 SELECT 확인 절차와 연결한 점이 좋다.
 
-다만 입문 독자가 안전 실행 원칙을 쉽게 기억할 수 있도록
-정리 부분에 “SQL 안전 실행 원칙” 요약 박스를 추가하면 더 안정적이다.
+입문 독자가 안전 실행 원칙과 파일 실행 순서를 함께 확인할 수 있도록
+정리 부분의 “SQL 안전 실행 원칙” 표와 본문 3장의 “basic_crud.sql 실행 순서” 표를 반영했다.
+또한 8개 SVG를 출간용 원고에 맞게 흐름 중심으로 단순화했다.
 ```
 
 ---
@@ -111,5 +117,6 @@ SELECT, INSERT, WHERE, ORDER BY, UPDATE, DELETE가 단계적으로 설명되어 
 ## 8. 최종 판정
 
 ```text
-보완 후 Chapter 04를 “원고 1차 리뷰 및 보완 완료” 상태로 전환할 수 있다.
+Chapter 04는 SQL 실행 순서표, 안전 실행 원칙, SVG 단순화, Mermaid 정합성 보완을 반영했으므로
+“원고 1차 리뷰 및 보완 완료” 상태로 볼 수 있다.
 ```

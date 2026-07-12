@@ -180,9 +180,9 @@ major
 
 각 열은 일반적으로 이름과 데이터 타입을 가집니다. 예를 들어 `name`은 문자열, `id`는 정수, `created_at`은 날짜와 시간 타입으로 정할 수 있습니다.
 
-![테이블, 행, 열의 구조](../../images/chapter02/ch02_02_table_row_column.svg)
+![테이블, 행, 열과 셀의 구조](../../images/chapter02/ch02_02_table_row_column.svg)
 
-그림 2-2 테이블, 행, 열의 구조
+그림 2-2 테이블, 행, 열과 셀의 구조
 
 다음 문장은 테이블, 행, 열의 관계를 잘 보여 줍니다.
 
@@ -292,9 +292,9 @@ enrollments
 
 `enrollments.student_id`는 `students.id`를 참조하고, `enrollments.course_id`는 `courses.id`를 참조합니다.
 
-![외래키로 연결되는 학생-강의-수강신청 관계](../../images/chapter02/ch02_04_foreign_key_relationship.svg)
+![외래키로 연결되는 학생·강의·수강신청 관계](../../images/chapter02/ch02_04_foreign_key_relationship.svg)
 
-그림 2-4 외래키로 연결되는 학생-강의-수강신청 관계
+그림 2-4 외래키로 연결되는 학생·강의·수강신청 관계
 
 > 기본키는 자신의 테이블 안에서 행을 구분합니다.
 >

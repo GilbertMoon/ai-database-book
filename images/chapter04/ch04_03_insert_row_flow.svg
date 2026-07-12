@@ -1,186 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1320" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
   <title id="title">INSERT로 새 행 추가하기</title>
-  <desc id="desc">INSERT 문에서 컬럼 목록과 VALUES 값을 같은 순서로 대응시키고, DBMS가 문법, 데이터 타입, 제약조건, 생략한 컬럼의 기본값을 검사한 뒤 성공한 행만 저장하며 RETURNING 또는 SELECT로 결과를 확인하는 흐름을 설명한다.</desc>
-
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="arrow-red" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#c2413b"/>
-    </marker>
-    <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
-      .section-title{font-size:19px;font-weight:700}
-      .section-sub{font-size:14px;fill:#475569}
-      .box-title{font-size:15px;font-weight:700;text-anchor:middle}
-      .box-text{font-size:13px;text-anchor:middle;fill:#475569}
-      .box-text-left{font-size:13px;fill:#475569}
-      .sql{font-family:Consolas,D2Coding,Menlo,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#243b53}
-      .sql-small{font-family:Consolas,D2Coding,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
-      .header{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
-      .cell{font-size:12.5px;text-anchor:middle;dominant-baseline:middle}
-      .cell-small{font-size:11.5px;text-anchor:middle;dominant-baseline:middle}
-      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .retry{stroke:#c2413b;stroke-width:2.1;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow-red)}
-      .decision-text{font-size:14px;font-weight:700;text-anchor:middle}
-      .result-title{font-size:18px;font-weight:700;text-anchor:middle}
-      .result-ok{font-size:13px;font-weight:700;text-anchor:middle;fill:#166534}
-      .result-no{font-size:13px;font-weight:700;text-anchor:middle;fill:#b42318}
-      .note-title{font-size:14px;font-weight:700;fill:#92400e}
-      .note-text{font-size:12.5px;fill:#475569}
-      .principle-label{font-size:16px;font-weight:700;fill:#166534;text-anchor:middle}
-      .principle-main{font-size:18px;font-weight:700;fill:#166534;text-anchor:middle}
-      .principle-sub{font-size:13px;fill:#3f6f50;text-anchor:middle}
-      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#fff}
-    </style>
-  </defs>
-
-  <rect width="1200" height="1320" fill="#ffffff"/>
-  <text x="600" y="42" class="title">INSERT로 새 행 추가하기</text>
-  <text x="600" y="72" class="subtitle">컬럼 목록과 VALUES 값을 같은 순서로 대응시키고, 테이블 규칙을 통과한 새 행만 저장한다</text>
-
-  <rect x="34" y="98" width="1132" height="342" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.6"/>
-  <circle cx="61" cy="128" r="15" fill="#2f6fad"/><text x="61" y="128" class="badge">1</text>
-  <text x="88" y="134" class="section-title">INSERT 문에서 컬럼과 값을 1:1로 대응</text>
-  <text x="461" y="134" class="section-sub">컬럼 목록을 명시하면 입력 의도와 값의 위치가 분명해진다</text>
-
-  <rect x="74" y="158" width="1052" height="96" rx="12" fill="#ffffff" stroke="#3b82c4" stroke-width="1.6"/>
-  <text x="600" y="187" class="sql">INSERT INTO students (name, email, major, grade)</text>
-  <text x="600" y="216" class="sql">VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2);</text>
-  <text x="600" y="241" class="box-text">앞의 컬럼 순서와 뒤의 값 순서가 정확히 대응해야 한다</text>
-
-  <path d="M600 254V276H185V296" class="flow"/>
-  <path d="M600 254V276H458V296" class="flow"/>
-  <path d="M600 254V276H731V296" class="flow"/>
-  <path d="M600 254V276H1004V296" class="flow"/>
-
-  <rect x="62" y="296" width="246" height="112" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="185" y="324" class="box-title">name</text>
-  <text x="185" y="350" class="sql-small">'김민지'</text>
-  <text x="185" y="376" class="box-text">문자열은 작은따옴표 사용</text>
-  <text x="185" y="397" class="sql-small">VARCHAR / TEXT</text>
-
-  <rect x="335" y="296" width="246" height="112" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.5"/>
-  <text x="458" y="324" class="box-title">email</text>
-  <text x="458" y="350" class="sql-small">'minji@example.com'</text>
-  <text x="458" y="376" class="box-text">형식과 UNIQUE 중복 검사</text>
-  <text x="458" y="397" class="sql-small">VARCHAR + UNIQUE</text>
-
-  <rect x="608" y="296" width="246" height="112" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="731" y="324" class="box-title">major</text>
-  <text x="731" y="350" class="sql-small">'컴퓨터공학'</text>
-  <text x="731" y="376" class="box-text">문자열 값 또는 NULL 가능</text>
-  <text x="731" y="397" class="sql-small">VARCHAR / nullable</text>
-
-  <rect x="881" y="296" width="246" height="112" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="1004" y="324" class="box-title">grade</text>
-  <text x="1004" y="350" class="sql-small">2</text>
-  <text x="1004" y="376" class="box-text">숫자는 따옴표 없이 입력</text>
-  <text x="1004" y="397" class="sql-small">INTEGER + CHECK 가능</text>
-
-  <rect x="34" y="466" width="1132" height="328" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
-  <circle cx="61" cy="496" r="15" fill="#b7791f"/><text x="61" y="496" class="badge">2</text>
-  <text x="88" y="502" class="section-title">DBMS가 문장과 테이블 정의를 검사</text>
-  <text x="405" y="502" class="section-sub">문법부터 데이터 타입, 제약조건, 생략한 컬럼 처리까지 순서대로 판단한다</text>
-
-  <rect x="58" y="530" width="252" height="96" rx="11" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
-  <text x="184" y="558" class="box-title">① 문법·대상 확인</text>
-  <text x="184" y="585" class="box-text">테이블·컬럼 이름 존재 여부</text>
-  <text x="184" y="607" class="box-text">컬럼 4개 ↔ 값 4개</text>
-
-  <rect x="335" y="530" width="252" height="96" rx="11" fill="#ffffff" stroke="#3b82c4" stroke-width="1.5"/>
-  <text x="461" y="558" class="box-title">② 데이터 타입</text>
-  <text x="461" y="585" class="box-text">문자열·정수·날짜 형식 확인</text>
-  <text x="461" y="607" class="box-text">변환할 수 없는 값은 오류</text>
-
-  <rect x="612" y="530" width="252" height="96" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="738" y="558" class="box-title">③ 제약조건</text>
-  <text x="738" y="585" class="box-text">NOT NULL · UNIQUE · CHECK · FK</text>
-  <text x="738" y="607" class="box-text">규칙 위반 행은 저장하지 않음</text>
-
-  <rect x="889" y="530" width="252" height="96" rx="11" fill="#ffffff" stroke="#b7791f" stroke-width="1.5"/>
-  <text x="1015" y="558" class="box-title">④ 생략한 컬럼</text>
-  <text x="1015" y="585" class="box-text">DEFAULT · NULL · 자동 생성</text>
-  <text x="1015" y="607" class="box-text">처리 방법이 없으면 오류</text>
-
-  <path d="M310 578H335" class="flow"/><path d="M587 578H612" class="flow"/><path d="M864 578H889" class="flow"/>
-
-  <rect x="58" y="658" width="252" height="102" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="184" y="685" class="box-title">id 생략</text>
-  <text x="184" y="712" class="box-text">IDENTITY·SERIAL·DEFAULT 적용</text>
-  <text x="184" y="735" class="box-text">자동 생성 여부는 컬럼 정의에 따름</text>
-
-  <rect x="335" y="658" width="252" height="102" rx="11" fill="#ffffff" stroke="#3c9a5f" stroke-width="1.5"/>
-  <text x="461" y="685" class="box-title">created_at 생략</text>
-  <text x="461" y="712" class="box-text">DEFAULT CURRENT_TIMESTAMP</text>
-  <text x="461" y="735" class="box-text">기본값이 있을 때만 자동 입력</text>
-
-  <rect x="612" y="658" width="252" height="102" rx="11" fill="#ffffff" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="738" y="685" class="box-title">NULL 허용 컬럼 생략</text>
-  <text x="738" y="712" class="box-text">DEFAULT가 없으면 NULL 입력</text>
-  <text x="738" y="735" class="box-text">명시적 NULL도 제약조건 검사</text>
-
-  <rect x="889" y="658" width="252" height="102" rx="11" fill="#ffffff" stroke="#d9534f" stroke-width="1.5"/>
-  <text x="1015" y="685" class="box-title">필수 컬럼 생략</text>
-  <text x="1015" y="712" class="box-text">NOT NULL이고 DEFAULT도 없으면</text>
-  <text x="1015" y="735" class="box-text">오류가 발생해 행 전체 미저장</text>
-
-  <path d="M600 794V824" class="flow"/>
-  <polygon points="600,824 752,868 600,912 448,868" fill="#fff8e8" stroke="#b7791f" stroke-width="1.8"/>
-  <text x="600" y="863" class="decision-text">모든 검사를 통과했는가?</text>
-  <text x="600" y="886" class="box-text">문법 · 타입 · 제약조건 · 기본값</text>
-
-  <rect x="54" y="944" width="520" height="190" rx="15" fill="#f2fbf5" stroke="#62b47a" stroke-width="1.7"/>
-  <text x="314" y="977" class="result-title">성공 · 새 행 1건 저장</text>
-  <text x="314" y="1002" class="result-ok">기존 행은 유지되고 새 행이 추가된다</text>
-
-  <rect x="82" y="1024" width="464" height="66" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.2"/>
-  <rect x="82" y="1024" width="464" height="28" fill="#e8eef7"/>
-  <line x1="132" y1="1024" x2="132" y2="1090" stroke="#cbd5e1"/>
-  <line x1="216" y1="1024" x2="216" y2="1090" stroke="#cbd5e1"/>
-  <line x1="357" y1="1024" x2="357" y2="1090" stroke="#cbd5e1"/>
-  <line x1="461" y1="1024" x2="461" y2="1090" stroke="#cbd5e1"/>
-  <text x="107" y="1038" class="header">id</text><text x="174" y="1038" class="header">name</text><text x="286" y="1038" class="header">email</text><text x="409" y="1038" class="header">major</text><text x="503" y="1038" class="header">grade</text>
-  <text x="107" y="1071" class="cell">3</text><text x="174" y="1071" class="cell">김민지</text><text x="286" y="1071" class="cell-small">minji@example.com</text><text x="409" y="1071" class="cell">컴퓨터공학</text><text x="503" y="1071" class="cell">2</text>
-  <text x="314" y="1115" class="box-text">RETURNING id, created_at 또는 SELECT로 자동 생성 값과 저장 결과를 확인</text>
-
-  <rect x="626" y="944" width="520" height="190" rx="15" fill="#fff5f5" stroke="#d9534f" stroke-width="1.7"/>
-  <text x="886" y="977" class="result-title">실패 · 행 미저장</text>
-  <text x="886" y="1002" class="result-no">오류 원인을 수정한 뒤 다시 실행한다</text>
-  <rect x="660" y="1024" width="452" height="80" rx="10" fill="#ffffff" stroke="#d9534f" stroke-width="1.4"/>
-  <text x="886" y="1048" class="box-title">대표 오류</text>
-  <text x="886" y="1072" class="box-text">컬럼·값 개수 불일치 · 잘못된 타입</text>
-  <text x="886" y="1094" class="box-text">UNIQUE · NOT NULL · CHECK · FK 위반</text>
-  <text x="886" y="1120" class="box-text">한 INSERT 문은 원자적으로 처리되어 일부 행만 저장되지 않는다</text>
-
-  <path d="M448 868H314V944" class="flow"/>
-  <path d="M752 868H886V944" class="flow"/>
-  <text x="398" y="904" class="result-ok">예</text>
-  <text x="802" y="904" class="result-no">아니오</text>
-  <path d="M886 1134V1152H28V352H62" class="retry"/>
-
-  <rect x="54" y="1162" width="344" height="76" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="76" y="1188" class="note-title">여러 행 INSERT</text>
-  <text x="76" y="1212" class="note-text">VALUES (...), (...)처럼 작성하고</text>
-  <text x="76" y="1232" class="note-text">모든 튜플에 같은 컬럼 순서를 적용한다.</text>
-
-  <rect x="428" y="1162" width="344" height="76" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="450" y="1188" class="note-title">DEFAULT와 NULL</text>
-  <text x="450" y="1212" class="note-text">컬럼 생략, DEFAULT 지정, NULL 입력은</text>
-  <text x="450" y="1232" class="note-text">서로 다른 동작이므로 구분한다.</text>
-
-  <rect x="802" y="1162" width="344" height="76" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
-  <text x="824" y="1188" class="note-title">애플리케이션 입력</text>
-  <text x="824" y="1212" class="note-text">문자열 결합 대신 바인드 파라미터를 사용해</text>
-  <text x="824" y="1232" class="note-text">SQL 인젝션과 형식 오류를 줄인다.</text>
-
-  <rect x="80" y="1254" width="1040" height="54" rx="12" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
-  <rect x="80" y="1254" width="190" height="54" rx="12" fill="#dcf7e5"/>
-  <line x1="270" y1="1265" x2="270" y2="1297" stroke="#62b47a" stroke-width="1.3"/>
-  <text x="175" y="1286" class="principle-label">핵심 원칙</text>
-  <text x="695" y="1278" class="principle-main">INSERT는 컬럼·값 대응과 테이블 규칙을 모두 통과해야 한다</text>
-  <text x="695" y="1299" class="principle-sub">성공 후에는 영향받은 행 수와 자동 생성 값을 반드시 확인한다</text>
+  <desc id="desc">INSERT 문에서 컬럼 목록과 값 목록이 같은 위치끼리 대응되고, DBMS 검사를 통과하면 students 테이블에 새 행이 추가되는 흐름</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
+  <style>
+    text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+    .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}.box{fill:#f8fafc;stroke:#64748b;stroke-width:2}
+    .insert{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}.check{fill:#fffceb;stroke:#d6a600;stroke-width:2}
+    .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2}.cell{fill:#fff;stroke:#94a3b8;stroke-width:1.5}.head{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+    .name{font-size:18px;font-weight:700;text-anchor:middle}.t{font-size:14px;text-anchor:middle}.mono{font-size:14px;font-weight:700;text-anchor:middle;font-family:Consolas,D2Coding,"Courier New",monospace;fill:#0f2d5c}
+    .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}.sub{font-size:14px;text-anchor:middle;fill:#475569}.note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+  </style></defs>
+  <rect width="1200" height="720" fill="#fff"/><text x="600" y="48" class="title">INSERT로 새 행 추가하기</text>
+  <rect x="150" y="95" width="900" height="150" rx="16" class="insert"/>
+  <text x="600" y="127" class="name">INSERT 문</text>
+  <rect x="205" y="150" width="190" height="36" class="head"/><text x="300" y="174" class="mono">name</text>
+  <rect x="395" y="150" width="240" height="36" class="head"/><text x="515" y="174" class="mono">email</text>
+  <rect x="635" y="150" width="210" height="36" class="head"/><text x="740" y="174" class="mono">major</text>
+  <rect x="845" y="150" width="110" height="36" class="head"/><text x="900" y="174" class="mono">grade</text>
+  <rect x="205" y="186" width="190" height="40" class="cell"/><text x="300" y="211" class="t">'김민지'</text>
+  <rect x="395" y="186" width="240" height="40" class="cell"/><text x="515" y="211" class="t">'minji@example.com'</text>
+  <rect x="635" y="186" width="210" height="40" class="cell"/><text x="740" y="211" class="t">'컴퓨터공학'</text>
+  <rect x="845" y="186" width="110" height="40" class="cell"/><text x="900" y="211" class="t">2</text>
+  <text x="600" y="268" class="sub">값은 같은 위치의 컬럼과 대응한다. 문자열은 작은따옴표를 사용하고 숫자는 따옴표 없이 표현한다.</text>
+  <path d="M600 285V330" class="line"/>
+  <rect x="380" y="335" width="440" height="72" rx="14" class="check"/><text x="600" y="364" class="name">컬럼 수·순서와 값 확인</text><text x="600" y="389" class="sub">개수와 위치가 맞아야 함</text>
+  <path d="M600 407V450" class="line"/>
+  <rect x="330" y="455" width="540" height="78" rx="14" class="check"/><text x="600" y="485" class="name">데이터 타입·제약조건 검사</text><text x="600" y="512" class="sub">컬럼 수 · 타입 · NOT NULL · UNIQUE · DEFAULT</text>
+  <path d="M600 533V575" class="line"/>
+  <rect x="390" y="580" width="420" height="68" rx="14" class="insert"/><text x="600" y="609" class="name">students 테이블에 새 행 추가</text><text x="600" y="633" class="sub">기존 행을 유지한 채 행 수 증가</text>
+  <rect x="875" y="455" width="220" height="78" rx="14" class="bad"/><text x="985" y="486" class="name">저장 거부</text><text x="985" y="512" class="sub">제약조건 위반</text>
+  <path d="M870 494H875" class="line"/>
+  <text x="600" y="690" class="note">성공한 INSERT도 SELECT로 결과를 확인한다.</text>
 </svg>

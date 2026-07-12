@@ -1,38 +1,48 @@
 # Chapter 03 이미지/도식 설계
 
-## Chapter 03. PostgreSQL과 DBeaver 실습 환경 구축
+## Chapter 03. PostgreSQL과 DBeaver로 데이터베이스 환경 만들기
 
-이 문서는 Chapter 03 본문과 활동 자료에 삽입할 도식 후보를 정리한 이미지 설계 문서입니다.
+이 문서는 Chapter 03 본문에 삽입한 Mermaid 원본과 SVG 결과물을 관리하기 위한 이미지 설계 문서입니다.
 
-Chapter 03은 실습 환경을 구축하는 장이므로, 도식은 **도구 간 역할, 연결 흐름, 설치 확인, SQL 실행 흐름, 오류 해결 과정**을 한눈에 이해할 수 있도록 구성합니다.
+Chapter 03의 도식은 상세 비교표나 SQL 전체 코드를 이미지 안에 반복하지 않고, **도구 연결 구조, 실행 순서, 분기, 반복 검증 흐름**을 보여 주는 보조 자료로 사용합니다.
 
 ---
 
 ## 1. 도식 설계 원칙
 
 ```text
-- 입문 독자가 PostgreSQL과 DBeaver의 역할을 구분할 수 있어야 한다.
-- 로컬 DB와 클라우드 DB의 차이를 시각적으로 비교한다.
-- DBeaver 연결 흐름을 단계별로 보여 준다.
-- 실습 SQL 실행 결과가 어떤 순서로 확인되는지 표현한다.
-- 오류 메시지를 ChatGPT에 질문하고 해결하는 흐름을 보여 준다.
-- 단순 설치 화면 캡처보다 실습 흐름과 판단 기준을 중심으로 구성한다.
+- Markdown 표: 상세 비교, 입력 항목, 점검 기준
+- Markdown 코드 블록: SQL, 폴더 구조, 프롬프트 예시
+- SVG: 연결 구조, 실행 순서, 분기, 반복 검증 흐름
+- Mermaid: SVG의 의미적 원본
+```
+
+공통 SVG 기준은 다음과 같습니다.
+
+```text
+- width="100%"와 viewBox를 사용한다.
+- title, desc, role="img", aria-labelledby를 포함한다.
+- 외부 CSS, 웹폰트, JavaScript, raster 이미지를 사용하지 않는다.
+- 긴 문장, 대형 표, 전체 SQL, 전체 폴더 트리를 SVG 안에 넣지 않는다.
+- 한글은 Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif 순서의 폰트 스택을 사용한다.
 ```
 
 ---
 
 ## 2. 도식 목록
 
-| 번호 | 파일명 | 도식 제목 | 삽입 위치 | 상태 |
+| 본문 번호 | 파일명 | 도식 제목 | 역할 | 상태 |
 | --- | --- | --- | --- | --- |
-| 그림 3-1 | `ch03_01_practice_environment_flow.svg` | 전체 실습 환경 구조 | 2장 전체 실습 환경 구조 | 삽입 완료 |
-| 그림 3-2 | `ch03_02_local_vs_cloud_db.svg` | 로컬 PostgreSQL과 클라우드 PostgreSQL 비교 | 5장 로컬 환경과 클라우드 환경 | 삽입 완료 |
-| 그림 3-3 | `ch03_03_dbeaver_connection_flow.svg` | DBeaver에서 PostgreSQL 연결 흐름 | 10장 DBeaver에서 PostgreSQL 연결하기 | 삽입 완료 |
-| 그림 3-4 | `ch03_04_sql_execution_check_flow.svg` | 기본 SQL 실행 확인 흐름 | 12장 기본 SQL 실행 테스트 | 삽입 완료 |
-| 그림 3-5 | `ch03_05_setup_check_sql_flow.svg` | setup_check.sql 실행 흐름 | 16장 실습 SQL 파일로 저장하기 | 삽입 완료 |
-| 그림 3-6 | `ch03_06_error_troubleshooting_flow.svg` | 오류 메시지 해결 흐름 | 19장 자주 발생하는 오류와 해결 방향 | 삽입 완료 |
-| 그림 3-7 | `ch03_07_github_practice_file_structure.svg` | GitHub 실습 파일 관리 구조 | 17장 GitHub 저장소에서 실습 관리하기 | 삽입 완료 |
-| 그림 3-8 | `ch03_08_ai_help_prompt_flow.svg` | ChatGPT와 Codex를 활용한 실습 보조 흐름 | 20~21장 AI 질문/요청 | 삽입 완료 |
+| 그림 3-1 | `ch03_01_practice_environment_flow.svg` | 전체 데이터베이스 작업 환경 | 전체 작업 환경과 도구 연결 | 보정 완료 |
+| 그림 3-2 | `ch03_02_local_vs_cloud_db.svg` | 로컬 PostgreSQL과 클라우드 PostgreSQL 연결 구조 | 로컬과 클라우드의 연결 구조 | 보정 완료 |
+| 그림 3-3 | `ch03_03_dbeaver_connection_flow.svg` | DBeaver에서 PostgreSQL 연결하기 | DBeaver 연결 생성 순서 | 보정 완료 |
+| 그림 3-4 | `ch03_04_sql_execution_check_flow.svg` | 기본 SQL로 데이터베이스 환경 확인하기 | 기본 SQL 환경 검증 순서 | 보정 완료 |
+| 그림 3-5 | `ch03_05_setup_check_sql_flow.svg` | setup_check.sql 실행과 재실행 흐름 | `setup_check.sql` 실행·재실행 흐름 | 보정 완료 |
+| 그림 3-6 | `ch03_07_github_practice_file_structure.svg` | SQL 실습 파일과 GitHub 기록 흐름 | SQL 파일과 GitHub 기록 흐름 | 보정 완료 |
+| 그림 3-7 | `ch03_06_error_troubleshooting_flow.svg` | 데이터베이스 오류 해결 기본 흐름 | 데이터베이스 오류 해결 반복 흐름 | 보정 완료 |
+| 그림 3-8 | `ch03_08_ai_help_prompt_flow.svg` | ChatGPT와 Codex를 활용한 실습 보조 흐름 | ChatGPT·Codex 활용과 실행 검증 흐름 | 보정 완료 |
+
+> 파일명은 기존 번호를 유지한다. 본문 등장 순서상 그림 3-6은 `ch03_07`, 그림 3-7은 `ch03_06` 파일을 사용한다.
 
 ---
 
@@ -51,26 +61,23 @@ Chapter 03은 실습 환경을 구축하는 장이므로, 도식은 **도구 간
 
 ---
 
-## 4. 도식 제작 후 점검 항목
+## 4. 그림별 검증 상태
 
-```text
-- PostgreSQL과 DBeaver의 역할이 명확하게 구분되는가?
-- 로컬 DB와 클라우드 DB 비교가 입문 독자에게 이해되는가?
-- DBeaver 연결 흐름이 실제 입력 항목과 일치하는가?
-- SQL 실행 확인 흐름이 Chapter 03 본문과 일치하는가?
-- 오류 해결 도식이 오류 메시지 기록과 AI 질문 흐름을 포함하는가?
-- GitHub 실습 파일 구조가 실제 저장소 구조와 일치하는가?
-- 그림 번호와 캡션이 본문에 포함되었는가?
-```
+| 항목 | 상태 |
+| --- | --- |
+| Mermaid와 SVG의 핵심 노드 및 흐름 일치 | 완료 |
+| SVG 접근성 요소 포함 | 완료 |
+| SVG XML 파싱 | 완료 |
+| GitHub 렌더링 기준 검토 | 완료 |
+| 본문 그림 번호와 캡션 정합성 | 완료 |
+| 그림 3-6과 3-7의 파일 연결 정합성 | 완료 |
 
 ---
 
-## 5. 현재 상태 및 다음 작업
+## 5. 변환 시 점검
 
 ```text
-- Chapter 03 도식 후보 8종 정리 완료
-- Chapter 03 Mermaid 원본 8종 작성 완료
-- Chapter 03 SVG 도식 8종 생성 완료
-- Chapter 03 본문 그림 링크와 캡션 삽입 완료
-- 다음 작업: Chapter 03 리뷰 체크리스트 작성
+- Word/PDF/eBook 변환 과정에서 SVG가 PNG로 변환되면 한글, 화살표, 박스 여백을 확인한다.
+- PNG가 흐리거나 한글이 깨지면 SVG 글자 크기와 폰트 스택을 보정한다.
+- 외부 font 파일을 저장소에 추가하지 않는다.
 ```

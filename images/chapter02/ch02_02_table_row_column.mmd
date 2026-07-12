@@ -1,23 +1,9 @@
-flowchart TB
-    T[students 테이블<br/>같은 종류의 학생 기록을 행과 열로 저장]
-
-    T --> C[열 Column<br/>데이터 항목과 구조를 정의]
-    C --> C1[id<br/>INTEGER<br/>학생 식별자]
-    C --> C2[name<br/>VARCHAR<br/>학생 이름]
-    C --> C3[email<br/>VARCHAR<br/>이메일]
-    C --> C4[major<br/>VARCHAR<br/>전공]
-
-    T --> R[행 Row<br/>한 학생에 대한 하나의 완전한 기록]
-    R --> R1[1 | 김민지 | minji@example.com | 컴퓨터공학]
-    R --> R2[2 | 이준호 | junho@example.com | 데이터사이언스]
-    R --> R3[3 | 박서연 | seoyeon@example.com | 경영학]
-
-    C4 --> V[셀 Cell<br/>특정 행과 특정 열이 만나는 하나의 값<br/>예: 김민지 행의 major 값 = 컴퓨터공학]
-    R1 --> V
-
-    T --> Q[SQL 읽기 예시]
-    Q --> Q1[FROM students<br/>어느 테이블에서]
-    Q1 --> Q2[WHERE major = '컴퓨터공학'<br/>어느 열을 기준으로]
-    Q2 --> Q3[김민지 행 반환<br/>조건에 맞는 어떤 행을 찾는가]
-
-    N[핵심<br/>열은 모든 행이 따르는 구조이고<br/>행은 한 대상의 기록이며<br/>셀은 한 행의 특정 열에 저장된 값] --- T
+flowchart LR
+    T[students 테이블<br/>같은 구조를 가진 기록의 집합]
+    R[행<br/>한 학생에 대한 하나의 기록]
+    C[열<br/>모든 행이 따르는 데이터 항목]
+    S[셀<br/>행과 열이 만나는 하나의 값]
+    T --> R
+    T --> C
+    R --> S
+    C --> S

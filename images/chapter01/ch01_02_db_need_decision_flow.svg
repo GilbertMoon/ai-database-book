@@ -1,157 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1030" viewBox="0 0 1200 1030" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
   <title id="title">데이터베이스 필요 여부 판단 흐름</title>
-  <desc id="desc">동시 접근, 데이터 관계, 정합성, 반복 검색과 집계, 권한과 복구 요구를 확인하여 파일, 스프레드시트 또는 관계형 데이터베이스를 선택하고 의미 검색이 필요할 때 벡터 검색 계층을 추가하는 의사결정 흐름</desc>
+  <desc id="desc">동시 접근, 데이터 관계, 정확성, 반복 검색, 권한과 복구가 중요하면 관계형 데이터베이스를 우선 검토하고, 그렇지 않으면 스프레드시트나 파일을 검토하는 흐름도</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+      <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
     </marker>
     <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .group{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}
-      .group-title{font-size:18px;font-weight:700}
-      .group-sub{font-size:13px;fill:#475569}
-      .start{fill:#24497a;stroke:#17355c;stroke-width:2;rx:13}
-      .start-text{font-size:18px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .signal{fill:#fff;stroke:#64748b;stroke-width:1.5;rx:11}
-      .signal-no{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .signal-badge{fill:#58677b}
-      .signal-title{font-size:13.5px;font-weight:700;text-anchor:middle}
-      .signal-sub{font-size:12px;text-anchor:middle;fill:#475569}
-      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .feedback{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
-      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}
-      .decision-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-      .decision-sub{font-size:12px;text-anchor:middle;fill:#475569}
-      .branch{font-size:13px;font-weight:700}
-      .file-box{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.7;rx:12}
-      .sheet-box{fill:#eef5ff;stroke:#3b82c4;stroke-width:1.7;rx:12}
-      .db-box{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.7;rx:12}
-      .result-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .result-main{font-size:13.5px;font-weight:600;text-anchor:middle}
-      .result-sub{font-size:12px;text-anchor:middle;fill:#475569}
-      .recheck{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.4;rx:10}
-      .recheck-text{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#475569}
-      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:11}
-      .note-title{font-size:14px;font-weight:700;fill:#92400e}
-      .note-text{font-size:13px;fill:#475569}
-      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .q{fill:#f8fafc;stroke:#64748b;stroke-width:2.2}
+      .db{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2.4}
+      .sheet{fill:#eef5ff;stroke:#3b82f6;stroke-width:2.4}
+      .file{fill:#eef9f1;stroke:#2f9a58;stroke-width:2.4}
+      .note{fill:#eef5ff;stroke:#4d86d7;stroke-width:2.2}
+      .head{font-size:21px;font-weight:700;text-anchor:middle}
+      .body{font-size:16px;text-anchor:middle;fill:#334155}
+      .kw{font-size:15px;font-weight:700;text-anchor:middle;fill:#5b34a2}
+      .label{font-size:15px;font-weight:700;text-anchor:middle;fill:#334155}
+      .result{font-size:23px;font-weight:700;text-anchor:middle}
+      .dbt{fill:#5b34a2}.sht{fill:#1f5fb8}.flt{fill:#1f7a42}
+      .line{stroke:#475569;stroke-width:2.3;fill:none;stroke-linecap:round;marker-end:url(#arrow)}
+      .plain{stroke:#475569;stroke-width:2.3;fill:none;stroke-linecap:round}
+      .note-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
+  <rect width="1200" height="720" fill="#fff"/>
+  <text x="600" y="48" class="title">데이터베이스 필요 여부 판단 흐름</text>
 
-  <rect width="1200" height="1030" fill="#fff"/>
-  <text x="600" y="40" class="title">데이터베이스 필요 여부 판단 흐름</text>
-  <text x="600" y="68" class="subtitle">데이터 크기만 보지 말고 동시성, 관계, 정확성, 검색과 운영 책임을 기준으로 판단한다</text>
+  <rect x="320" y="82" width="560" height="150" rx="18" ry="18" class="q"/>
+  <text x="600" y="116" class="head">다음 요구가 중요하거나 반복적으로 발생하는가?</text>
+  <text x="380" y="154" class="kw">여러 사용자</text>
+  <text x="500" y="154" class="kw">데이터 관계</text>
+  <text x="620" y="154" class="kw">정확성·트랜잭션</text>
+  <text x="750" y="154" class="kw">반복 검색·집계</text>
+  <text x="600" y="192" class="kw">권한·백업·복구</text>
 
-  <rect x="34" y="90" width="1132" height="342" class="group"/>
-  <text x="58" y="121" class="group-title">1. 데이터베이스 필요 신호 확인</text>
-  <text x="310" y="121" class="group-sub">아래 요구 중 하나라도 있으면 관계형 데이터베이스를 우선 검토</text>
+  <line x1="600" y1="232" x2="600" y2="270" class="plain"/>
+  <line x1="360" y1="270" x2="840" y2="270" class="plain"/>
+  <line x1="840" y1="270" x2="840" y2="318" class="line"/>
+  <line x1="360" y1="270" x2="360" y2="318" class="line"/>
+  <text x="872" y="264" class="label">예</text>
+  <text x="328" y="264" class="label">아니요</text>
 
-  <rect x="430" y="142" width="340" height="54" class="start"/>
-  <text x="600" y="169" class="start-text">저장하고 운영할 데이터가 있다</text>
-  <path d="M600 196V220" class="arrow"/>
+  <rect x="650" y="318" width="380" height="96" rx="18" ry="18" class="db"/>
+  <text x="840" y="356" class="result dbt">관계형 데이터베이스 우선 검토</text>
+  <text x="840" y="386" class="body">PostgreSQL · MySQL</text>
 
-  <rect x="52" y="230" width="200" height="88" class="signal"/>
-  <circle cx="74" cy="252" r="13" class="signal-badge"/><text x="74" y="252" class="signal-no">1</text>
-  <text x="152" y="260" class="signal-title">동시 접근</text>
-  <text x="152" y="288" class="signal-sub">여러 사용자가 동시에</text>
-  <text x="152" y="308" class="signal-sub">조회·수정하는가?</text>
+  <rect x="150" y="318" width="420" height="86" rx="18" ry="18" class="q"/>
+  <text x="360" y="351" class="head">사람이 표로 직접 편집·계산하는가?</text>
+  <text x="360" y="377" class="body">명단, 일정, 간단한 통계처럼 사람이 직접 다루는가?</text>
 
-  <rect x="276" y="230" width="200" height="88" class="signal"/>
-  <circle cx="298" cy="252" r="13" class="signal-badge"/><text x="298" y="252" class="signal-no">2</text>
-  <text x="376" y="260" class="signal-title">데이터 관계</text>
-  <text x="376" y="288" class="signal-sub">회원·강의·주문처럼</text>
-  <text x="376" y="308" class="signal-sub">여러 데이터가 연결되는가?</text>
+  <line x1="360" y1="404" x2="360" y2="452" class="plain"/>
+  <line x1="220" y1="452" x2="500" y2="452" class="plain"/>
+  <line x1="220" y1="452" x2="220" y2="490" class="line"/>
+  <line x1="500" y1="452" x2="500" y2="490" class="line"/>
+  <text x="190" y="444" class="label">아니요</text>
+  <text x="530" y="444" class="label">예</text>
 
-  <rect x="500" y="230" width="200" height="88" class="signal"/>
-  <circle cx="522" cy="252" r="13" class="signal-badge"/><text x="522" y="252" class="signal-no">3</text>
-  <text x="600" y="260" class="signal-title">정합성·트랜잭션</text>
-  <text x="600" y="288" class="signal-sub">중복과 잘못된 값을 막고</text>
-  <text x="600" y="308" class="signal-sub">여러 작업을 함께 처리하는가?</text>
+  <rect x="90" y="490" width="260" height="86" rx="18" ry="18" class="file"/>
+  <text x="220" y="526" class="result flt">파일</text>
+  <text x="220" y="554" class="body">작고 단순한 데이터</text>
 
-  <rect x="724" y="230" width="200" height="88" class="signal"/>
-  <circle cx="746" cy="252" r="13" class="signal-badge"/><text x="746" y="252" class="signal-no">4</text>
-  <text x="824" y="260" class="signal-title">반복 검색·집계</text>
-  <text x="824" y="288" class="signal-sub">조건 조회·통계·API 처리를</text>
-  <text x="824" y="308" class="signal-sub">반복적으로 수행하는가?</text>
+  <rect x="390" y="490" width="260" height="86" rx="18" ry="18" class="sheet"/>
+  <text x="520" y="526" class="result sht">스프레드시트</text>
+  <text x="520" y="554" class="body">사람이 관리하는 표</text>
 
-  <rect x="948" y="230" width="200" height="88" class="signal"/>
-  <circle cx="970" cy="252" r="13" class="signal-badge"/><text x="970" y="252" class="signal-no">5</text>
-  <text x="1048" y="260" class="signal-title">운영 책임</text>
-  <text x="1048" y="288" class="signal-sub">권한·이력·백업·복구가</text>
-  <text x="1048" y="308" class="signal-sub">중요한가?</text>
-
-  <path d="M152 318V352H600" class="arrow"/>
-  <path d="M376 318V352H600" class="arrow"/>
-  <path d="M600 318V352" class="arrow"/>
-  <path d="M824 318V352H600" class="arrow"/>
-  <path d="M1048 318V352H600" class="arrow"/>
-
-  <polygon points="600,350 725,408 600,466 475,408" class="decision"/>
-  <text x="600" y="402" class="decision-text">하나라도 예인가?</text>
-  <text x="600" y="426" class="decision-sub">운영 요구 신호가 있는지 판단</text>
-
-  <path d="M475 408H280V510" class="arrow"/>
-  <text x="374" y="392" class="branch">아니요</text>
-  <path d="M725 408H920V500" class="arrow"/>
-  <text x="819" y="392" class="branch">예</text>
-
-  <polygon points="280,510 395,568 280,626 165,568" class="decision"/>
-  <text x="280" y="559" class="decision-text">사람이 표로 직접</text>
-  <text x="280" y="580" class="decision-text">편집·계산하는가?</text>
-
-  <rect x="38" y="670" width="260" height="118" class="file-box"/>
-  <text x="168" y="702" class="result-title">파일 우선 검토</text>
-  <text x="168" y="733" class="result-main">TXT · Markdown · JSON · CSV</text>
-  <text x="168" y="758" class="result-sub">문서·설정값·단순 기록·데이터 교환</text>
-
-  <rect x="322" y="670" width="260" height="118" class="sheet-box"/>
-  <text x="452" y="702" class="result-title">스프레드시트 우선 검토</text>
-  <text x="452" y="733" class="result-main">Excel · Google Sheets</text>
-  <text x="452" y="758" class="result-sub">소규모 명단·공유 목록·수기 표</text>
-
-  <path d="M215 604V642H168V670" class="arrow"/>
-  <text x="184" y="635" class="branch">아니요</text>
-  <path d="M345 604V642H452V670" class="arrow"/>
-  <text x="394" y="635" class="branch">예</text>
-
-  <rect x="90" y="810" width="440" height="48" class="recheck"/>
-  <text x="310" y="839" class="recheck-text">사용자 수·관계·검색·정확성 요구가 커지면 데이터베이스 전환을 다시 검토</text>
-  <path d="M168 788V810" class="arrow"/>
-  <path d="M452 788V810" class="arrow"/>
-
-  <rect x="740" y="500" width="360" height="112" class="db-box"/>
-  <text x="920" y="534" class="result-title">관계형 DB 우선 검토</text>
-  <text x="920" y="565" class="result-main">PostgreSQL · MySQL</text>
-  <text x="920" y="589" class="result-sub">PK·FK·제약조건·트랜잭션·권한으로 정합성 관리</text>
-
-  <path d="M920 612V644" class="arrow"/>
-  <polygon points="920,644 1040,702 920,760 800,702" class="decision"/>
-  <text x="920" y="693" class="decision-text">의미 기반 문서 검색도</text>
-  <text x="920" y="716" class="decision-text">추가로 필요한가?</text>
-
-  <rect x="650" y="800" width="250" height="94" class="db-box"/>
-  <text x="775" y="832" class="result-title">관계형 DB 중심 운영</text>
-  <text x="775" y="861" class="result-sub">업무 데이터와 일반 SQL 검색 관리</text>
-
-  <rect x="930" y="800" width="250" height="94" class="db-box"/>
-  <text x="1055" y="828" class="result-title">벡터 검색 계층 추가</text>
-  <text x="1055" y="855" class="result-sub">PostgreSQL + pgvector</text>
-  <text x="1055" y="876" class="result-sub">또는 전용 Vector DB</text>
-
-  <path d="M855 738V774H775V800" class="arrow"/>
-  <text x="798" y="773" class="branch">아니요</text>
-  <path d="M985 738V774H1055V800" class="arrow"/>
-  <text x="1025" y="773" class="branch">예</text>
-
-  <rect x="54" y="910" width="1092" height="54" class="note"/>
-  <text x="78" y="932" class="note-title">주의</text>
-  <text x="136" y="932" class="note-text">데이터가 작아도 동시성·정확성·복구가 중요하면 DB가 필요할 수 있고, 데이터가 많아도 단순 보관만 한다면 파일이 더 적합할 수 있다.</text>
-
-  <rect x="190" y="980" width="820" height="38" class="principle"/>
-  <text x="216" y="1003" class="principle-label">핵심 원칙</text>
-  <text x="620" y="1003" class="principle-text">데이터베이스는 데이터 크기가 아니라 운영 책임과 반복 업무를 관리하기 위해 선택한다</text>
+  <rect x="160" y="630" width="880" height="42" rx="18" ry="18" class="note"/>
+  <text x="600" y="657" class="note-text">데이터 크기보다 운영 책임과 반복 업무를 기준으로 판단한다.</text>
 </svg>

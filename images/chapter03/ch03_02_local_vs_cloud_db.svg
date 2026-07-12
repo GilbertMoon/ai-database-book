@@ -1,1 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000" role="img" aria-labelledby="title desc"><title id="title">로컬 PostgreSQL과 클라우드 PostgreSQL 비교</title><desc id="desc">로컬과 관리형 클라우드 PostgreSQL을 실행 위치, 연결 정보, 장점, 사용자 책임과 적합한 상황으로 비교하고 설치 권한, 오프라인 사용과 원격 접속 요구에 따라 선택하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.common{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:12}.ct{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}.panel{stroke-width:1.7;rx:16}.local{fill:#eef5ff;stroke:#6fa2e8}.cloud{fill:#fff8e8;stroke:#d69e2e}.ph{font-size:21px;font-weight:700;text-anchor:middle}.ps{font-size:12.5px;text-anchor:middle;fill:#475569}.row{fill:#fff;stroke-width:1.3;rx:10}.lr{stroke:#3b82c4}.cr{stroke:#d69e2e}.rh{font-size:14px;font-weight:700}.rm{font-size:12px;fill:#475569}.client{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.6;rx:12}.clienth{font-size:16px;font-weight:700;text-anchor:middle}.clientm{font-size:12px;text-anchor:middle;fill:#475569}.decisionPanel{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:15}.pt{font-size:18px;font-weight:700}.box{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:10}.bh{font-size:13.5px;font-weight:700;text-anchor:middle}.bm{font-size:11.5px;text-anchor:middle;fill:#475569}.choiceL{fill:#eef5ff;stroke:#3b82c4;stroke-width:1.5;rx:10}.choiceC{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:10}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}.nt{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:10}.cv{font-size:15px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="1000" fill="#fff"/><text x="600" y="40" class="t">로컬 PostgreSQL과 클라우드 PostgreSQL 비교</text><text x="600" y="68" class="s">SQL 기능은 같지만 서버 위치, 연결 방식, 접속 범위와 사용자가 관리할 책임이 다르다</text><rect x="180" y="94" width="840" height="48" class="common"/><text x="600" y="123" class="ct">공통: DBeaver로 연결해 같은 SQL, 테이블, 관계와 제약조건을 실습할 수 있다</text><rect x="35" y="170" width="545" height="470" class="panel local"/><text x="307" y="208" class="ph">로컬 PostgreSQL</text><text x="307" y="234" class="ps">자신의 컴퓨터에서 PostgreSQL 서버를 직접 실행</text><rect x="60" y="260" width="495" height="64" class="row lr"/><text x="80" y="285" class="rh">실행 위치와 연결</text><text x="80" y="308" class="rm">내 컴퓨터 · 일반적으로 localhost와 5432 사용 · 포트는 설정에 따라 달라질 수 있음</text><rect x="60" y="338" width="495" height="64" class="row lr"/><text x="80" y="363" class="rh">장점</text><text x="80" y="386" class="rm">인터넷 없이 사용할 수 있고 서버·서비스 구조를 직접 이해하기 좋음</text><rect x="60" y="416" width="495" height="80" class="row lr"/><text x="80" y="441" class="rh">사용자가 관리할 항목</text><text x="80" y="464" class="rm">설치 · 서비스 실행 상태 · 포트 · 비밀번호 · 업데이트 · 백업</text><text x="80" y="484" class="rm">PostgreSQL 서버가 중지되면 DBeaver도 연결할 수 없음</text><rect x="60" y="510" width="495" height="96" class="row lr"/><text x="80" y="535" class="rh">적합한 상황</text><text x="80" y="558" class="rm">개인 학습 · 한 기기 중심 실습 · 외부 접속이 필요하지 않은 경우</text><text x="80" y="580" class="rm">설치 권한이 있고 서버가 내 컴퓨터에서 실행되는 구조를 익히려는 경우</text><rect x="620" y="170" width="545" height="470" class="panel cloud"/><text x="892" y="208" class="ph">관리형 클라우드 PostgreSQL</text><text x="892" y="234" class="ps">서비스 제공자의 원격 서버에서 PostgreSQL 실행</text><rect x="645" y="260" width="495" height="64" class="row cr"/><text x="665" y="285" class="rh">실행 위치와 연결</text><text x="665" y="308" class="rm">원격 서버 · 제공된 host, port, database, user, password와 SSL 설정 사용</text><rect x="645" y="338" width="495" height="64" class="row cr"/><text x="665" y="363" class="rh">장점</text><text x="665" y="386" class="rm">로컬 설치 부담이 적고 여러 기기와 원격 애플리케이션에서 접근 가능</text><rect x="645" y="416" width="495" height="80" class="row cr"/><text x="665" y="441" class="rh">사용자가 관리할 항목</text><text x="665" y="464" class="rm">계정 · 접속 권한 · 비밀번호 · 비용과 사용량 · 서비스 정책</text><text x="665" y="484" class="rm">인터넷 연결과 서비스의 접속 허용 설정이 필요함</text><rect x="645" y="510" width="495" height="96" class="row cr"/><text x="665" y="535" class="rh">적합한 상황</text><text x="665" y="558" class="rm">프로그램 설치 권한이 없거나 운영체제별 설치 문제를 피하려는 경우</text><text x="665" y="580" class="rm">여러 기기 또는 웹 서비스에서 같은 데이터베이스에 접속해야 하는 경우</text><rect x="390" y="660" width="420" height="72" class="client"/><text x="600" y="687" class="clienth">DBeaver는 두 환경 모두에 연결하는 클라이언트</text><text x="600" y="711" class="clientm">로컬에서는 localhost, 클라우드에서는 서비스가 제공한 원격 연결 정보를 사용</text><path d="M307 640V680H390" class="arr"/><path d="M892 640V680H810" class="arr"/><rect x="35" y="758" width="1130" height="148" class="decisionPanel"/><text x="60" y="790" class="pt">상황별 선택 기준</text><rect x="60" y="816" width="230" height="62" class="box"/><text x="175" y="840" class="bh">설치 권한이 없는가?</text><text x="175" y="862" class="bm">예 → 클라우드 검토</text><rect x="340" y="816" width="230" height="62" class="box"/><text x="455" y="840" class="bh">오프라인 실습이 중요한가?</text><text x="455" y="862" class="bm">예 → 로컬</text><rect x="620" y="816" width="230" height="62" class="box"/><text x="735" y="840" class="bh">여러 기기·원격 앱 접속?</text><text x="735" y="862" class="bm">예 → 클라우드</text><rect x="900" y="816" width="230" height="62" class="box"/><text x="1015" y="840" class="bh">특별한 원격 요구가 없는가?</text><text x="1015" y="862" class="bm">이 책의 기본 실습은 로컬</text><rect x="75" y="924" width="1050" height="34" class="note"/><text x="600" y="945" class="nt">비밀번호와 전체 접속 문자열은 SQL·README·공개 GitHub·화면 캡처·AI 질문에 기록하지 않는다</text><rect x="170" y="972" width="860" height="20" class="core"/><text x="600" y="986" class="cv">로컬과 클라우드는 우열이 아니라 환경, 접속 범위와 관리 책임에 따른 선택이다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 660" role="img" aria-labelledby="title desc">
+  <title id="title">로컬 PostgreSQL과 클라우드 PostgreSQL 연결 구조</title>
+  <desc id="desc">사용자 컴퓨터 안에서 PostgreSQL 서버가 실행되는 로컬 환경과 인터넷을 통해 관리형 PostgreSQL 서버에 연결하는 클라우드 환경의 차이</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .panel{fill:#f8fafc;stroke:#94a3b8;stroke-width:2}
+      .pc{fill:#fff;stroke:#64748b;stroke-width:2}
+      .dbeaver{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
+      .pg{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
+      .cloud{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2}
+      .name{font-size:20px;font-weight:700;text-anchor:middle}
+      .sub{font-size:14px;text-anchor:middle;fill:#475569}
+      .mono{font-size:15px;font-weight:700;text-anchor:middle;font-family:Consolas,D2Coding,"Courier New",monospace;fill:#0f2d5c}
+      .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+    </style>
+  </defs>
+  <rect width="1200" height="660" fill="#fff"/>
+  <text x="600" y="48" class="title">로컬 PostgreSQL과 클라우드 PostgreSQL 연결 구조</text>
+
+  <rect x="70" y="95" width="500" height="395" rx="18" class="panel"/>
+  <text x="320" y="132" class="name">로컬 환경</text>
+  <rect x="145" y="165" width="350" height="230" rx="16" class="pc"/>
+  <text x="320" y="198" class="name">사용자 컴퓨터</text>
+  <rect x="185" y="235" width="270" height="58" rx="12" class="dbeaver"/>
+  <text x="320" y="271" class="name">DBeaver</text>
+  <rect x="185" y="322" width="270" height="58" rx="12" class="pg"/>
+  <text x="320" y="358" class="name">PostgreSQL 서버</text>
+  <path d="M320 293V322" class="line"/>
+  <text x="320" y="440" class="mono">localhost : 5432</text>
+
+  <rect x="630" y="95" width="500" height="395" rx="18" class="panel"/>
+  <text x="880" y="132" class="name">클라우드 환경</text>
+  <rect x="690" y="165" width="220" height="135" rx="16" class="pc"/>
+  <text x="800" y="198" class="name">사용자 컴퓨터</text>
+  <rect x="720" y="232" width="160" height="52" rx="12" class="dbeaver"/>
+  <text x="800" y="265" class="name">DBeaver</text>
+  <rect x="945" y="220" width="145" height="80" rx="12" class="cloud"/>
+  <text x="1018" y="250" class="name">관리형</text>
+  <text x="1018" y="275" class="name">PostgreSQL</text>
+  <path d="M880 258H945" class="line"/>
+  <text x="912" y="214" class="sub">인터넷·SSL</text>
+  <text x="880" y="440" class="sub">서비스에서 제공한 Host와 계정 사용</text>
+
+  <rect x="160" y="535" width="880" height="56" rx="18" fill="#fffceb" stroke="#d6a600" stroke-width="2"/>
+  <text x="600" y="558" class="note">SQL과 관계형 DB 개념은 동일하며, 서버가 실행되는 위치와 연결 정보가 다르다.</text>
+  <text x="600" y="582" class="sub">설치 권한·오프라인 학습은 로컬, 여러 기기·원격 서비스 연결은 클라우드를 검토한다.</text>
+</svg>

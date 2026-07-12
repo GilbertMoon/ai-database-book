@@ -1,39 +1,20 @@
-flowchart TB
-    subgraph UNDERSTAND[1. 문제 이해]
-        A[요구사항 확인<br/>사용자·목적·입력·출력·예외] --> B[핵심 업무 규칙 정리<br/>AI가 목록화·질문 생성을 보조]
-        B --> C{사람이 규칙의 누락과<br/>오해를 확인했는가?}
-        C -- 아니요 --> A
-    end
+flowchart LR
+    A[요구사항 정리] --> B[데이터 모델링]
+    B --> C[AI·Codex로 구현 초안 작성]
+    C --> D[PostgreSQL 실행]
+    D --> E[DBeaver로 확인]
+    E --> F[수정]
+    F --> G[GitHub 기록]
 
-    C -- 예 --> D
-
-    subgraph BUILD[2. 데이터 모델링·구현]
-        D[데이터 모델 설계<br/>엔터티·속성·관계·PK/FK·ERD] --> E[설계 검토<br/>중복·무결성·확장성·업무 규칙]
-        E --> F[DDL·SQL·CRUD 초안 작성<br/>AI와 코딩 도구가 작성 보조]
-        F --> G[프로젝트 파일 정리<br/>schema.sql·seed.sql·queries.sql]
-    end
-
-    G --> H
-
-    subgraph VERIFY[3. 실행·검증]
-        H[격리된 PostgreSQL 환경 초기화] --> I[DDL과 샘플 데이터 실행]
-        I --> J[구조·데이터·쿼리 결과 확인<br/>DB 도구와 실행 로그 활용]
-        J --> K[요구사항과 실제 결과 비교<br/>정상·경계·오류 시나리오]
-        K --> L{검증 기준을 모두<br/>통과했는가?}
-    end
-
-    L -- 아니요 --> M{문제 유형}
-    M -- 요구사항 --> A
-    M -- 모델·관계 --> D
-    M -- DDL·SQL·코드 --> F
-    M -- 실행 환경·데이터 --> H
-    M -- 테스트 부족 --> K
-
-    L -- 예 --> N[검증 완료 결과 확정]
-    N --> O[GitHub 변경 이력 기록<br/>코드·문서·실행 결과·수정 이유]
-    O --> P[다른 사람이 새 환경에서 재현]
-    P --> Q{재현 가능한가?}
-    Q -- 아니요 --> G
-    Q -- 예 --> R[완료된 데이터베이스 작업]
-
-    X[역할 구분<br/>AI는 정리·초안·오류 분석을 보조하고<br/>사람은 요구사항 판단·설계 선택·실행 검증을 책임] --- L
+    classDef step fill:#f8fafc,stroke:#64748b,stroke-width:2px;
+    classDef ai fill:#e7fbf6,stroke:#1aa382,stroke-width:2px;
+    classDef exec fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef check fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
+    classDef fix fill:#fff7e6,stroke:#d97706,stroke-width:2px;
+    classDef done fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    class A,B step;
+    class C ai;
+    class D exec;
+    class E check;
+    class F fix;
+    class G done;

@@ -1,27 +1,18 @@
-flowchart TB
-    A[데이터 저장 방식 선택<br/>가장 강력한 도구보다 현재 문제에 맞는 도구를 선택]
+flowchart TD
+    A{작고 단순한 데이터인가?}
+    A -- 예 --> B{한 사람이 주로 관리하는가?}
+    A -- 아니오 --> C{사람이 표를 직접<br/>편집·계산하는가?}
+    B -- 예 --> F[파일<br/>TXT·Markdown·JSON·CSV]
+    B -- 아니오 --> S1[스프레드시트<br/>소규모 표·명단·간단한 통계]
+    C -- 예 --> S2[스프레드시트<br/>사람이 직접 관리하는 표]
+    C -- 아니오 --> D[데이터베이스<br/>서비스와 여러 사용자를 위한 구조적 저장]
+    D --- K[필요 신호<br/>여러 사용자·데이터 관계·정확성·동시 수정·반복 검색/집계]
 
-    A --> F[파일]
-    A --> S[스프레드시트]
-    A --> D[데이터베이스]
-
-    F --> F1[대표 형식<br/>TXT·Markdown·JSON·CSV]
-    F --> F2[잘 맞는 상황<br/>한 사람이 관리하는 작고 단순한 데이터]
-    F --> F3[강점<br/>설치 없이 쉽고 이동·공유가 간단]
-    F --> F4[주의<br/>동시 수정·관계·무결성 관리가 어려움]
-
-    S --> S1[대표 도구<br/>Excel·Google Sheets]
-    S --> S2[잘 맞는 상황<br/>사람이 직접 편집하는 소규모 표·목록]
-    S --> S3[강점<br/>표 계산·정렬·필터·공유가 편리]
-    S --> S4[주의<br/>데이터 증가·복잡한 관계·동시 편집에 한계]
-
-    D --> D1[관계형 DB<br/>PostgreSQL·MySQL<br/>회원·주문·수강신청·결제]
-    D --> D2[NoSQL<br/>Redis·MongoDB 등<br/>캐시·세션·유연한 문서 데이터]
-    D --> D3[벡터 검색 기능·Vector DB<br/>pgvector·전용 벡터 저장소<br/>의미 검색·RAG]
-    D --> D4[강점<br/>관계·제약조건·동시성·반복 검색과 수정 관리]
-
-    F4 --> K[선택 기준<br/>데이터 크기·변경 빈도·사용자 수·관계·정확성·검색 요구]
-    S4 --> K
-    D4 --> K
-
-    K --> P[핵심<br/>작고 단순하면 파일·스프레드시트로 시작하고<br/>관계·정확성·동시성·검색이 중요해지면 데이터베이스를 사용]
+    classDef question fill:#f8fafc,stroke:#64748b,stroke-width:2px;
+    classDef file fill:#eef9f1,stroke:#2f9a58,stroke-width:2px;
+    classDef sheet fill:#eef5ff,stroke:#3b82f6,stroke-width:2px;
+    classDef db fill:#f5f0ff,stroke:#7c4dcb,stroke-width:2px;
+    class A,B,C question;
+    class F file;
+    class S1,S2 sheet;
+    class D,K db;

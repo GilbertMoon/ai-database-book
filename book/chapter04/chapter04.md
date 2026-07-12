@@ -125,6 +125,24 @@ CREATE TABLE students (
 
 다만 실제 서비스에서는 함부로 테이블을 삭제하면 안 됩니다. 이 SQL은 실습용으로만 사용합니다.
 
+### basic_crud.sql 실행 순서
+
+`basic_crud.sql`은 다음 흐름으로 실행합니다. 실제 SQL 전체 코드는 파일과 본문 예제에서 확인하고, 여기서는 실행 순서와 확인할 결과만 정리합니다.
+
+| 순서 | 작업 | 대표 SQL | 확인할 결과 |
+| ---: | --- | --- | --- |
+| 1 | 실습 테이블 초기화 | `DROP TABLE IF EXISTS`, `CREATE TABLE` | `students` 구조 생성 |
+| 2 | 샘플 데이터 추가 | `INSERT` | 예상한 행 수와 자동 생성값 |
+| 3 | 전체·일부 컬럼 조회 | `SELECT` | 컬럼명, 컬럼 순서, 행 수 |
+| 4 | 조건 조회 | `WHERE` | 조건에 맞는 행만 반환 |
+| 5 | 결과 정렬 | `ORDER BY` | ASC 또는 DESC 순서 |
+| 6 | 수정 대상 확인 | `SELECT ... WHERE` | 수정 대상과 현재 값 |
+| 7 | 데이터 수정 | `UPDATE ... WHERE` | 의도한 행만 변경 |
+| 8 | 수정 결과 확인 | `SELECT ... WHERE` | 변경값과 영향 범위 |
+| 9 | 삭제 대상 확인 | `SELECT ... WHERE` | 삭제할 행 확인 |
+| 10 | 데이터 삭제 | `DELETE ... WHERE` | 의도한 행만 삭제 |
+| 11 | 삭제 결과 확인 | `SELECT` | 남은 행과 삭제 결과 |
+
 ---
 
 ## 4. SQL의 기본 분류
@@ -149,9 +167,9 @@ DELETE → 데이터 삭제
 
 이 네 가지를 합쳐 CRUD라고 부릅니다.
 
-![SQL 명령어와 CRUD 흐름](../../images/chapter04/ch04_01_sql_crud_overview.svg)
+![SQL DML 명령어와 CRUD 대응](../../images/chapter04/ch04_01_sql_crud_overview.svg)
 
-그림 4-1 SQL 명령어와 CRUD 흐름
+그림 4-1 SQL DML 명령어와 CRUD 대응
 
 ---
 
@@ -184,9 +202,9 @@ FROM students;
 
 이 SQL은 students 테이블에서 `name`과 `major` 컬럼만 가져옵니다.
 
-![SELECT와 컬럼 선택 흐름](../../images/chapter04/ch04_02_select_projection_flow.svg)
+![SELECT로 필요한 컬럼 선택하기](../../images/chapter04/ch04_02_select_projection_flow.svg)
 
-그림 4-2 SELECT와 컬럼 선택 흐름
+그림 4-2 SELECT로 필요한 컬럼 선택하기
 
 ### SELECT 결과 읽기
 
@@ -303,9 +321,9 @@ FROM students
 WHERE major = '컴퓨터공학';
 ```
 
-![WHERE 조건으로 행 필터링](../../images/chapter04/ch04_04_where_filter_flow.svg)
+![WHERE 조건으로 대상 행 필터링하기](../../images/chapter04/ch04_04_where_filter_flow.svg)
 
-그림 4-4 WHERE 조건으로 행 필터링
+그림 4-4 WHERE 조건으로 대상 행 필터링하기
 
 학년이 3학년 이상인 학생을 조회할 수도 있습니다.
 
@@ -380,9 +398,9 @@ FROM students
 ORDER BY grade DESC;
 ```
 
-![ORDER BY 정렬 흐름](../../images/chapter04/ch04_05_order_by_sort_flow.svg)
+![ORDER BY로 조회 결과 정렬하기](../../images/chapter04/ch04_05_order_by_sort_flow.svg)
 
-그림 4-5 ORDER BY 정렬 흐름
+그림 4-5 ORDER BY로 조회 결과 정렬하기
 
 이름순으로 정렬할 수도 있습니다.
 
