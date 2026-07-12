@@ -1,23 +1,31 @@
 flowchart TB
-    A[실습 환경과 권한 확인] --> B{pgvector 사용 가능?}
+    A[1 실습 환경 확인<br/>PostgreSQL 연결·대상 DB·운영 DB 아님 확인] --> B{pgvector 확장이<br/>서버에 설치되어 있고 생성 권한이 있는가?}
 
-    B -- 예 --> C[CREATE EXTENSION IF NOT EXISTS vector]
-    C --> D[벡터 테이블 생성<br/>원문·출처·chunk_no·embedding vector(3)]
+    B -- 예 --> C[2A 확장 활성화<br/>CREATE EXTENSION IF NOT EXISTS vector]
+    C --> D[벡터 테이블 생성<br/>rag_document_embeddings<br/>embedding vector(3)]
 
-    B -- 아니요 --> E[대체 실습 테이블 생성<br/>embedding_x·embedding_y·embedding_z]
+    B -- 아니요 --> E[2B 대체 테이블 생성<br/>simple_document_chunks<br/>embedding_x·embedding_y·embedding_z]
 
-    D --> F[샘플 문서 청크와 3차원 벡터 입력]
+    D --> F[3 샘플 문서 청크 입력<br/>원문·출처·순서·3차원 벡터]
     E --> F
-    F --> G[저장 데이터와 벡터 차원 확인]
+    F --> G[4 저장 데이터 검증<br/>행 수·NULL·출처·chunk_no·벡터 차원 확인]
 
-    G --> H[질문과 질문 벡터 준비]
-    H --> I[문서별 거리 계산<br/>embedding <-> query AS distance]
-    I --> J[거리 오름차순 정렬<br/>ORDER BY distance ASC]
-    J --> K[Top-k 제한<br/>LIMIT k]
-    K --> L[title·content·source·distance 결과 검토]
-    L --> M{질문과 관련된 문서인가?}
-    M -- 예 --> N[검색 결과와 실행 근거 기록]
-    M -- 아니요 --> O[질문 벡터·데이터·검색 조건 점검]
+    G --> H[5 질문과 질문 벡터 준비<br/>서비스 업데이트에는 무엇을 정리해야 하나요?<br/>[0.18, 0.78, 0.22]]
+    H --> I{실행 경로}
+    I -- pgvector --> I1[6A 거리 계산<br/>embedding &lt;-&gt; query AS distance]
+    I -- 대체 실습 --> I2[6B 유클리드 거리 계산<br/>SQRT Σ document - query²]
+    I1 --> J[7 거리 오름차순 정렬<br/>ORDER BY distance ASC]
+    I2 --> J
+    J --> K[8 Top-k 제한<br/>LIMIT 3]
+    K --> L[9 결과 검토<br/>title·chunk_text·source_name·chunk_no·distance]
+    L --> M{질문과 관련된 문서가<br/>상위에 검색되었는가?}
+    M -- 예 --> N[검색 실행 근거 기록<br/>질문·질문 벡터·SQL·순위·거리·선정 문서]
+    M -- 아니요 --> O[샘플 데이터·질문 벡터·차원·검색 SQL 점검]
     O --> H
 
-    P[주의<br/>vector(3)은 개념 확인용 축약 예시이며<br/>실제 임베딩은 더 높은 차원을 사용] --- D
+    N1[확장 명령의 의미<br/>CREATE EXTENSION은 이미 서버에 설치된 pgvector를 DB에서 활성화하며<br/>운영체제 패키지를 새로 설치하는 명령은 아님] --- C
+    N2[축약 예시<br/>vector(3)과 수동 벡터는 거리 검색 원리 확인용이며<br/>실제 텍스트 임베딩 품질을 검증하는 실습은 아님] --- F
+    N3[질문 벡터<br/>이 실습에서는 직접 가정한 값이며<br/>실서비스에서는 문서와 같은 임베딩 모델로 생성] --- H
+    N4[차원 규칙<br/>vector(3) 컬럼에는 길이 3인 벡터만 저장·검색 가능] --- D
+    N5[결과 해석<br/>SQL이 실행되었다는 사실과 검색 결과가 의미상 적절하다는 판단은 별도] --- L
+    N6[핵심<br/>pgvector 실습은 PostgreSQL에서 벡터 저장·거리 계산·Top-k 검색 원리를 확인하는 과정] --- N
