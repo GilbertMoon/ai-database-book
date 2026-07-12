@@ -1,1 +1,180 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title desc"><title id="title">ORDER BY 정렬 흐름</title><desc id="desc">WHERE로 행을 선택한 뒤 grade 기준의 ASC와 DESC 결과를 비교하고 같은 값에는 두 번째 정렬 기준을 추가하는 흐름</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.t{font-size:28px;font-weight:700;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.p{stroke-width:1.5;rx:15}.src{fill:#f8fafc;stroke:#a8b3c4}.asc{fill:#eef5ff;stroke:#6fa2e8}.desc{fill:#fff8e8;stroke:#d69e2e}.tie{fill:#f5f1ff;stroke:#9b7bd2}.pt{font-size:19px;font-weight:700}.b{fill:#fff;stroke:#64748b;stroke-width:1.4;rx:10}.sql{font-family:Consolas,D2Coding,monospace;font-size:15px;font-weight:700;text-anchor:middle}.h{font-size:14px;font-weight:700;text-anchor:middle}.m{font-size:11.5px;text-anchor:middle;fill:#475569}.arr{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}.row{fill:#fff;stroke:#94a3b8;stroke-width:1.2;rx:8}.r1{fill:#dcfce7}.r2{fill:#dbeafe}.r3{fill:#fef3c7}.note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.nt{font-size:11.5px;font-weight:700;text-anchor:middle;fill:#92400e}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.5;rx:10}.cv{font-size:14.5px;font-weight:700;text-anchor:middle;fill:#166534}</style></defs><rect width="1200" height="920" fill="#fff"/><text x="600" y="40" class="t">ORDER BY 정렬 흐름</text><text x="600" y="68" class="s">WHERE는 포함할 행을 정하고 ORDER BY는 그 결과의 표시 순서를 정한다</text><rect x="50" y="100" width="1100" height="170" class="p src"/><text x="75" y="132" class="pt">1. 조회 대상</text><rect x="90" y="155" width="1020" height="70" class="b"/><text x="600" y="181" class="h">students: 김민지 2 · 이준호 3 · 박서연 1 · 최현우 4 · 정하늘 2</text><text x="600" y="207" class="m">WHERE가 있으면 조건에 맞는 행만 먼저 남긴 뒤 정렬</text><rect x="380" y="295" width="440" height="65" class="b"/><text x="600" y="322" class="sql">ORDER BY grade</text><text x="600" y="345" class="m">정렬 컬럼과 방향을 지정</text><path d="M600 270V295" class="arr"/><rect x="50" y="395" width="520" height="300" class="p asc"/><text x="75" y="427" class="pt">2A. ASC · 작은 값부터</text><rect x="100" y="455" width="420" height="50" class="b"/><text x="310" y="486" class="sql">ORDER BY grade ASC</text><rect x="115" y="530" width="390" height="32" class="row r1"/><text x="310" y="551" class="h">1 · 박서연</text><rect x="115" y="570" width="390" height="32" class="row r2"/><text x="310" y="591" class="h">2 · 김민지</text><rect x="115" y="610" width="390" height="32" class="row r2"/><text x="310" y="631" class="h">2 · 정하늘</text><rect x="115" y="650" width="185" height="32" class="row r3"/><text x="207" y="671" class="h">3 · 이준호</text><rect x="320" y="650" width="185" height="32" class="row r1"/><text x="412" y="671" class="h">4 · 최현우</text><rect x="630" y="395" width="520" height="300" class="p desc"/><text x="655" y="427" class="pt">2B. DESC · 큰 값부터</text><rect x="680" y="455" width="420" height="50" class="b"/><text x="890" y="486" class="sql">ORDER BY grade DESC</text><rect x="695" y="530" width="390" height="32" class="row r1"/><text x="890" y="551" class="h">4 · 최현우</text><rect x="695" y="570" width="390" height="32" class="row r3"/><text x="890" y="591" class="h">3 · 이준호</text><rect x="695" y="610" width="390" height="32" class="row r2"/><text x="890" y="631" class="h">2 · 김민지</text><rect x="695" y="650" width="185" height="32" class="row r2"/><text x="787" y="671" class="h">2 · 정하늘</text><rect x="900" y="650" width="185" height="32" class="row r1"/><text x="992" y="671" class="h">1 · 박서연</text><path d="M560 360V378H310V455" class="arr"/><path d="M640 360V378H890V455" class="arr"/><rect x="50" y="730" width="1100" height="100" class="p tie"/><text x="75" y="762" class="pt">3. 같은 grade 값의 순서까지 정하기</text><rect x="90" y="785" width="430" height="32" class="b"/><text x="305" y="806" class="sql">ORDER BY grade ASC</text><rect x="555" y="785" width="555" height="32" class="b"/><text x="832" y="806" class="sql">ORDER BY grade ASC, id ASC</text><text x="305" y="842" class="m">grade가 같은 행의 상대 순서는 보장되지 않음</text><text x="832" y="842" class="m">첫 기준이 같으면 id를 두 번째 기준으로 사용</text><rect x="55" y="855" width="260" height="36" class="note"/><text x="185" y="878" class="nt">ASC는 기본값이지만 명시 권장</text><rect x="330" y="855" width="260" height="36" class="note"/><text x="460" y="878" class="nt">ORDER BY name으로 문자열 정렬 가능</text><rect x="605" y="855" width="260" height="36" class="note"/><text x="735" y="878" class="nt">정렬은 저장된 행 자체를 바꾸지 않음</text><rect x="880" y="855" width="265" height="36" class="note"/><text x="1012" y="878" class="nt">ORDER BY 없이는 행 순서 미보장</text><rect x="130" y="898" width="940" height="18" class="core"/><text x="600" y="911" class="cv">필요한 결과 순서를 보장하려면 정렬 방향과 동률 처리 기준까지 명시한다</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1240" viewBox="0 0 1200 1240" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">ORDER BY로 조회 결과 정렬하기</title>
+  <desc id="desc">students 조회 결과를 grade 기준으로 ASC와 DESC 정렬하고, 같은 grade 값은 두 번째 정렬 기준으로 순서를 결정하며, ORDER BY가 저장 순서를 변경하지 않는다는 점과 NULL 정렬 방식을 설명한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:16px;text-anchor:middle;fill:#475569}
+      .section-title{font-size:19px;font-weight:700}
+      .section-sub{font-size:14px;fill:#475569}
+      .card-title{font-size:18px;font-weight:700;text-anchor:middle}
+      .card-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .sql{font-family:Consolas,D2Coding,Menlo,monospace;font-size:14px;font-weight:700;text-anchor:middle;fill:#243b53}
+      .sql-small{font-family:Consolas,D2Coding,Menlo,monospace;font-size:12.5px;text-anchor:middle;fill:#334155}
+      .header{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .cell{font-size:13px;text-anchor:middle;dominant-baseline:middle}
+      .cell-strong{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .badge{font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .flow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .note-title{font-size:14px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note-text{font-size:12px;text-anchor:middle;fill:#475569}
+      .principle-label{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
+      .principle-main{font-size:17px;font-weight:700;text-anchor:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="1240" fill="#ffffff"/>
+  <text x="600" y="42" class="title">ORDER BY로 조회 결과 정렬하기</text>
+  <text x="600" y="72" class="subtitle">WHERE는 포함할 행을 정하고, ORDER BY는 반환되는 행의 표시 순서를 정한다</text>
+
+  <!-- Section 1 -->
+  <rect x="34" y="98" width="1132" height="300" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.6"/>
+  <text x="58" y="132" class="section-title">1. 정렬 전 조회 결과와 ORDER BY 지정</text>
+  <text x="376" y="132" class="section-sub">ORDER BY가 없으면 DBMS가 반환하는 행 순서는 보장되지 않는다</text>
+
+  <!-- source table -->
+  <rect x="58" y="158" width="500" height="216" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="308" y="184" class="card-title">students 조회 결과 예시</text>
+  <text x="308" y="207" class="card-sub">표시된 순서는 저장 순서나 기본 순서를 의미하지 않음</text>
+
+  <rect x="88" y="224" width="70" height="28" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="158" y="224" width="250" height="28" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="408" y="224" width="120" height="28" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="123" y="238" class="header">id</text>
+  <text x="283" y="238" class="header">name</text>
+  <text x="468" y="238" class="header">grade</text>
+
+  <g>
+    <rect x="88" y="252" width="70" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="158" y="252" width="250" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="408" y="252" width="120" height="24" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="123" y="264" class="cell">3</text><text x="283" y="264" class="cell">박서연</text><text x="468" y="264" class="cell-strong">1</text>
+    <rect x="88" y="276" width="70" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="158" y="276" width="250" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="408" y="276" width="120" height="24" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="123" y="288" class="cell">1</text><text x="283" y="288" class="cell">김민지</text><text x="468" y="288" class="cell-strong">2</text>
+    <rect x="88" y="300" width="70" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="158" y="300" width="250" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="408" y="300" width="120" height="24" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="123" y="312" class="cell">5</text><text x="283" y="312" class="cell">정하늘</text><text x="468" y="312" class="cell-strong">2</text>
+    <rect x="88" y="324" width="70" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="158" y="324" width="250" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="408" y="324" width="120" height="24" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="123" y="336" class="cell">2</text><text x="283" y="336" class="cell">이준호</text><text x="468" y="336" class="cell-strong">3</text>
+    <rect x="88" y="348" width="70" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="158" y="348" width="250" height="24" fill="#ffffff" stroke="#cbd5e1"/><rect x="408" y="348" width="120" height="24" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="123" y="360" class="cell">4</text><text x="283" y="360" class="cell">최현우</text><text x="468" y="360" class="cell-strong">4</text>
+  </g>
+
+  <!-- SQL and logical flow -->
+  <rect x="590" y="158" width="552" height="216" rx="12" fill="#eef5ff" stroke="#3b82c4" stroke-width="1.6"/>
+  <text x="866" y="184" class="card-title">정렬 기준 지정</text>
+  <rect x="622" y="206" width="488" height="50" rx="9" fill="#ffffff" stroke="#3b82c4" stroke-width="1.3"/>
+  <text x="866" y="228" class="sql">SELECT id, name, grade FROM students</text>
+  <text x="866" y="248" class="sql">ORDER BY grade;</text>
+  <rect x="622" y="272" width="145" height="34" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="694.5" y="293" class="card-sub">1. 행 선택</text>
+  <path d="M767 289H815" class="flow"/>
+  <rect x="815" y="272" width="145" height="34" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="887.5" y="293" class="card-sub">2. 결과 정렬</text>
+  <path d="M960 289H1008" class="flow"/>
+  <rect x="1008" y="272" width="102" height="34" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="1059" y="293" class="card-sub">3. 반환</text>
+  <text x="866" y="344" class="card-sub">정렬은 조회 결과에 적용되며, 테이블에 저장된 행의 물리적 배치를 변경하지 않는다</text>
+
+  <!-- central order card -->
+  <path d="M600 398V424" class="flow"/>
+  <rect x="390" y="424" width="420" height="66" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.6"/>
+  <text x="600" y="449" class="card-title">ORDER BY grade</text>
+  <text x="600" y="472" class="card-sub">방향을 생략하면 ASC가 적용되지만, 의도를 명확히 하려면 직접 표기한다</text>
+
+  <!-- branch -->
+  <path d="M560 490V510H300V534" class="flow"/>
+  <path d="M640 490V510H900V534" class="flow"/>
+
+  <!-- ASC panel -->
+  <rect x="50" y="534" width="520" height="336" rx="16" fill="#eef5ff" stroke="#6fa2e8" stroke-width="1.7"/>
+  <circle cx="82" cy="566" r="16" fill="#2f6fad"/><text x="82" y="566" class="badge">ASC</text>
+  <text x="310" y="568" class="card-title">오름차순 · 작은 값부터</text>
+  <rect x="92" y="592" width="436" height="42" rx="8" fill="#ffffff" stroke="#3b82c4"/>
+  <text x="310" y="618" class="sql">ORDER BY grade ASC</text>
+
+  <rect x="92" y="652" width="64" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="156" y="652" width="92" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="248" y="652" width="190" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="438" y="652" width="90" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="124" y="669" class="header">순서</text><text x="202" y="669" class="header">id</text><text x="343" y="669" class="header">name</text><text x="483" y="669" class="header">grade</text>
+
+  <g>
+    <rect x="92" y="686" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="156" y="686" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="248" y="686" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="438" y="686" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="124" y="702" class="cell">1</text><text x="202" y="702" class="cell">3</text><text x="343" y="702" class="cell">박서연</text><text x="483" y="702" class="cell-strong">1</text>
+    <rect x="92" y="718" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="156" y="718" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="248" y="718" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="438" y="718" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="124" y="734" class="cell">2</text><text x="202" y="734" class="cell">1</text><text x="343" y="734" class="cell">김민지</text><text x="483" y="734" class="cell-strong">2</text>
+    <rect x="92" y="750" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="156" y="750" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="248" y="750" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="438" y="750" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="124" y="766" class="cell">3</text><text x="202" y="766" class="cell">5</text><text x="343" y="766" class="cell">정하늘</text><text x="483" y="766" class="cell-strong">2</text>
+    <rect x="92" y="782" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="156" y="782" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="248" y="782" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="438" y="782" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="124" y="798" class="cell">4</text><text x="202" y="798" class="cell">2</text><text x="343" y="798" class="cell">이준호</text><text x="483" y="798" class="cell-strong">3</text>
+    <rect x="92" y="814" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="156" y="814" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="248" y="814" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="438" y="814" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="124" y="830" class="cell">5</text><text x="202" y="830" class="cell">4</text><text x="343" y="830" class="cell">최현우</text><text x="483" y="830" class="cell-strong">4</text>
+  </g>
+  <text x="310" y="860" class="card-sub">1 → 2 → 2 → 3 → 4</text>
+
+  <!-- DESC panel -->
+  <rect x="630" y="534" width="520" height="336" rx="16" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.7"/>
+  <circle cx="666" cy="566" r="19" fill="#b7791f"/><text x="666" y="566" class="badge">DESC</text>
+  <text x="890" y="568" class="card-title">내림차순 · 큰 값부터</text>
+  <rect x="672" y="592" width="436" height="42" rx="8" fill="#ffffff" stroke="#d69e2e"/>
+  <text x="890" y="618" class="sql">ORDER BY grade DESC</text>
+
+  <rect x="672" y="652" width="64" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="736" y="652" width="92" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="828" y="652" width="190" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <rect x="1018" y="652" width="90" height="34" fill="#e9eef5" stroke="#94a3b8"/>
+  <text x="704" y="669" class="header">순서</text><text x="782" y="669" class="header">id</text><text x="923" y="669" class="header">name</text><text x="1063" y="669" class="header">grade</text>
+
+  <g>
+    <rect x="672" y="686" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="736" y="686" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="828" y="686" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="1018" y="686" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="704" y="702" class="cell">1</text><text x="782" y="702" class="cell">4</text><text x="923" y="702" class="cell">최현우</text><text x="1063" y="702" class="cell-strong">4</text>
+    <rect x="672" y="718" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="736" y="718" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="828" y="718" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="1018" y="718" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="704" y="734" class="cell">2</text><text x="782" y="734" class="cell">2</text><text x="923" y="734" class="cell">이준호</text><text x="1063" y="734" class="cell-strong">3</text>
+    <rect x="672" y="750" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="736" y="750" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="828" y="750" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="1018" y="750" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="704" y="766" class="cell">3</text><text x="782" y="766" class="cell">1</text><text x="923" y="766" class="cell">김민지</text><text x="1063" y="766" class="cell-strong">2</text>
+    <rect x="672" y="782" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="736" y="782" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="828" y="782" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="1018" y="782" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="704" y="798" class="cell">4</text><text x="782" y="798" class="cell">5</text><text x="923" y="798" class="cell">정하늘</text><text x="1063" y="798" class="cell-strong">2</text>
+    <rect x="672" y="814" width="64" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="736" y="814" width="92" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="828" y="814" width="190" height="32" fill="#ffffff" stroke="#cbd5e1"/><rect x="1018" y="814" width="90" height="32" fill="#fff8e8" stroke="#d69e2e"/>
+    <text x="704" y="830" class="cell">5</text><text x="782" y="830" class="cell">3</text><text x="923" y="830" class="cell">박서연</text><text x="1063" y="830" class="cell-strong">1</text>
+  </g>
+  <text x="890" y="860" class="card-sub">4 → 3 → 2 → 2 → 1</text>
+
+  <!-- Section 3 -->
+  <rect x="34" y="898" width="1132" height="180" rx="16" fill="#f5f1ff" stroke="#9b7bd2" stroke-width="1.6"/>
+  <text x="58" y="932" class="section-title">3. 같은 값의 순서까지 보장하려면 두 번째 정렬 기준을 추가</text>
+  <text x="570" y="932" class="section-sub">정렬 기준은 왼쪽부터 차례대로 적용된다</text>
+
+  <rect x="58" y="958" width="500" height="92" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.4"/>
+  <circle cx="88" cy="984" r="14" fill="#7c5cc4"/><text x="88" y="984" class="badge">1</text>
+  <text x="308" y="986" class="sql">ORDER BY grade ASC</text>
+  <text x="308" y="1014" class="card-sub">grade가 같은 김민지·정하늘의 상대 순서는 보장되지 않음</text>
+  <text x="308" y="1036" class="card-sub">동일 값이 있을 때 결과 순서가 실행마다 달라질 수 있음</text>
+
+  <rect x="590" y="958" width="552" height="92" rx="11" fill="#ffffff" stroke="#7c5cc4" stroke-width="1.4"/>
+  <circle cx="620" cy="984" r="14" fill="#7c5cc4"/><text x="620" y="984" class="badge">2</text>
+  <text x="866" y="986" class="sql">ORDER BY grade ASC, id ASC</text>
+  <text x="866" y="1014" class="card-sub">먼저 grade로 정렬하고, 같은 grade 안에서는 id로 다시 정렬</text>
+  <text x="866" y="1036" class="card-sub">각 열에 서로 다른 방향도 가능: grade DESC, name ASC</text>
+
+  <!-- notes -->
+  <rect x="54" y="1100" width="350" height="62" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="229" y="1124" class="note-title">저장 순서와 무관</text>
+  <text x="229" y="1146" class="note-text">ORDER BY는 결과 표시 순서만 바꾸며 테이블 행을 재배치하지 않는다</text>
+
+  <rect x="425" y="1100" width="350" height="62" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="600" y="1124" class="note-title">NULL 위치 지정</text>
+  <text x="600" y="1146" class="note-text">PostgreSQL에서는 NULLS FIRST 또는 NULLS LAST로 명시할 수 있다</text>
+
+  <rect x="796" y="1100" width="350" height="62" rx="11" fill="#fff8e8" stroke="#d69e2e" stroke-width="1.5"/>
+  <text x="971" y="1124" class="note-title">LIMIT과 함께 사용</text>
+  <text x="971" y="1146" class="note-text">ORDER BY grade DESC LIMIT 3으로 상위 3개 결과를 조회한다</text>
+
+  <!-- principle -->
+  <rect x="80" y="1182" width="1040" height="38" rx="11" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7"/>
+  <rect x="80" y="1182" width="190" height="38" rx="11" fill="#dcf7e5"/>
+  <line x1="270" y1="1190" x2="270" y2="1212" stroke="#62b47a" stroke-width="1.3"/>
+  <text x="175" y="1206" class="principle-label">핵심 원칙</text>
+  <text x="695" y="1206" class="principle-main">결과 순서를 보장하려면 정렬 방향과 동률 처리 기준까지 ORDER BY에 명시한다</text>
+</svg>
