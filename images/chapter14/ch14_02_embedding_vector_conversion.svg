@@ -1,1 +1,104 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">텍스트 임베딩 변환 흐름</text><rect x="80" y="120" width="280" height="70" class="b y"/><text x="220" y="145" class="l">텍스트 문서</text><text x="220" y="170" class="s">환불 규정 · 프로젝트 안내 · SQL 노트</text><rect x="460" y="120" width="280" height="70" class="b m"/><text x="600" y="155" class="l">임베딩 모델</text><rect x="840" y="120" width="280" height="70" class="b g"/><text x="980" y="145" class="l">숫자 벡터</text><text x="980" y="170" class="s">[0.90, 0.10, 0.20]</text><rect x="120" y="335" width="220" height="60" class="b"/><text x="230" y="365" class="s">구독 취소와 환불</text><rect x="490" y="335" width="220" height="60" class="b"/><text x="600" y="365" class="s">[0.90, 0.10, 0.20]</text><rect x="860" y="335" width="220" height="60" class="b"/><text x="970" y="365" class="s">Vector DB 저장</text><rect x="120" y="460" width="220" height="60" class="b"/><text x="230" y="490" class="s">서비스 업데이트 안내</text><rect x="490" y="460" width="220" height="60" class="b"/><text x="600" y="490" class="s">[0.20, 0.75, 0.25]</text><rect x="860" y="460" width="220" height="60" class="b"/><text x="970" y="490" class="s">원문+벡터</text><rect x="120" y="585" width="220" height="60" class="b"/><text x="230" y="615" class="s">SQL JOIN 복습</text><rect x="490" y="585" width="220" height="60" class="b"/><text x="600" y="615" class="s">[0.15, 0.30, 0.90]</text><rect x="860" y="585" width="220" height="60" class="b p"/><text x="970" y="615" class="s">유사도 검색 가능</text><line x1="360" y1="155" x2="460" y2="155" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="740" y1="155" x2="840" y2="155" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="340" y1="365" x2="490" y2="365" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="710" y1="365" x2="860" y2="365" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="340" y1="490" x2="490" y2="490" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="710" y1="490" x2="860" y2="490" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="340" y1="615" x2="490" y2="615" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="710" y1="615" x2="860" y2="615" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">텍스트 임베딩 변환 흐름</title>
+  <desc id="desc">문장이나 문서 청크를 임베딩 모델로 고정 차원의 숫자 벡터로 변환하고 원문과 메타데이터를 함께 저장하며, 의미가 비슷한 문장은 가까운 벡터가 되는 과정을 설명한 도식</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .stage-group{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}
+      .stage{fill:#fff;stroke-width:1.7;rx:12}
+      .stage-input{stroke:#3b82c4}.stage-model{stroke:#d69e2e}.stage-vector{stroke:#7c5cc4}.stage-store{stroke:#3c9a5f}
+      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-input{fill:#2f6fad}.badge-model{fill:#b7791f}.badge-vector{fill:#6b46a8}.badge-store{fill:#2f855a}
+      .stage-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .stage-main{font-size:14px;font-weight:600;text-anchor:middle}
+      .stage-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .example-group{fill:#fff;stroke:#cbd5e1;stroke-width:1.5;rx:16}
+      .example-title{font-size:18px;font-weight:700}
+      .header{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
+      .row{fill:#fff;stroke:#cbd5e1;stroke-width:1.3;rx:10}
+      .row-similar{fill:#f2fbf5;stroke:#62b47a}
+      .row-other{fill:#f8fafc;stroke:#94a3b8}
+      .row-text{font-size:14px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
+      .vector{font-family:Consolas,D2Coding,monospace;font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .meaning{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
+      .similar-label{font-size:14px;font-weight:700;text-anchor:middle;fill:#166534}
+      .other-label{font-size:14px;font-weight:700;text-anchor:middle;fill:#475569}
+      .note{font-size:13px;text-anchor:middle;fill:#475569}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="900" fill="#fff"/>
+  <text x="600" y="40" class="title">텍스트 임베딩 변환 흐름</text>
+  <text x="600" y="68" class="subtitle">같은 임베딩 모델은 모든 텍스트를 동일한 차원의 숫자 벡터로 변환한다</text>
+
+  <rect x="34" y="92" width="1132" height="230" class="stage-group"/>
+
+  <rect x="54" y="132" width="245" height="142" class="stage stage-input"/>
+  <circle cx="78" cy="156" r="14" class="badge-input"/><text x="78" y="156" class="badge">1</text>
+  <text x="176.5" y="163" class="stage-title">텍스트 입력</text>
+  <text x="176.5" y="197" class="stage-main">문장 · 문서 · 문서 청크</text>
+  <text x="176.5" y="226" class="stage-sub">예: “구독 취소 방법을 알려 주세요”</text>
+
+  <rect x="337" y="132" width="245" height="142" class="stage stage-model"/>
+  <circle cx="361" cy="156" r="14" class="badge-model"/><text x="361" y="156" class="badge">2</text>
+  <text x="459.5" y="163" class="stage-title">임베딩 모델</text>
+  <text x="459.5" y="197" class="stage-main">텍스트의 의미 패턴을 숫자로 변환</text>
+  <text x="459.5" y="226" class="stage-sub">비교할 벡터는 같은 모델·버전을 사용</text>
+
+  <rect x="620" y="132" width="245" height="142" class="stage stage-vector"/>
+  <circle cx="644" cy="156" r="14" class="badge-vector"/><text x="644" y="156" class="badge">3</text>
+  <text x="742.5" y="163" class="stage-title">고정 차원 벡터</text>
+  <text x="742.5" y="197" class="stage-main">[0.88, 0.12, 0.20, ...]</text>
+  <text x="742.5" y="226" class="stage-sub">실제 벡터는 수백~수천 차원일 수 있음</text>
+
+  <rect x="903" y="132" width="245" height="142" class="stage stage-store"/>
+  <circle cx="927" cy="156" r="14" class="badge-store"/><text x="927" y="156" class="badge">4</text>
+  <text x="1025.5" y="163" class="stage-title">원문·메타데이터와 저장</text>
+  <text x="1025.5" y="197" class="stage-main">document_id · chunk_id · embedding</text>
+  <text x="1025.5" y="226" class="stage-sub">Vector DB 또는 PostgreSQL pgvector</text>
+
+  <path d="M 299 203 H 337" class="arrow"/>
+  <path d="M 582 203 H 620" class="arrow"/>
+  <path d="M 865 203 H 903" class="arrow"/>
+
+  <rect x="34" y="344" width="1132" height="420" class="example-group"/>
+  <text x="58" y="378" class="example-title">변환 결과 예시</text>
+  <text x="600" y="378" class="note">아래 숫자는 개념 설명을 위한 축약 예시이며 실제 차원을 그대로 나타내지 않는다</text>
+
+  <text x="245" y="420" class="header">텍스트</text>
+  <text x="600" y="420" class="header">임베딩 벡터</text>
+  <text x="955" y="420" class="header">벡터 공간에서의 관계</text>
+
+  <rect x="70" y="440" width="1060" height="76" class="row row-similar"/>
+  <text x="245" y="478" class="row-text">구독 취소 방법</text>
+  <text x="600" y="478" class="vector">[0.88, 0.12, 0.20, ...]</text>
+  <text x="955" y="478" class="meaning">환불·취소 주제</text>
+
+  <rect x="70" y="532" width="1060" height="76" class="row row-similar"/>
+  <text x="245" y="570" class="row-text">서비스 이용을 중단하는 방법</text>
+  <text x="600" y="570" class="vector">[0.86, 0.14, 0.18, ...]</text>
+  <text x="955" y="570" class="meaning">표현은 다르지만 의미가 비슷함</text>
+
+  <path d="M 1110 476 H 1142 V 572 H 1110" fill="none" stroke="#3c9a5f" stroke-width="2"/>
+  <text x="1068" y="628" class="similar-label">두 벡터는 서로 가까움</text>
+
+  <rect x="70" y="638" width="1060" height="76" class="row row-other"/>
+  <text x="245" y="676" class="row-text">PostgreSQL JOIN 사용법</text>
+  <text x="600" y="676" class="vector">[0.15, 0.30, 0.90, ...]</text>
+  <text x="955" y="676" class="meaning">주제가 달라 상대적으로 멀리 위치</text>
+
+  <text x="600" y="744" class="other-label">벡터의 각 숫자를 직접 해석하기보다 벡터 사이의 거리와 유사도를 검색에 사용한다</text>
+
+  <rect x="205" y="808" width="790" height="46" class="principle"/>
+  <text x="230" y="829" class="principle-label">핵심 원칙</text>
+  <text x="620" y="831" class="principle-text">의미가 비슷한 텍스트는 벡터 공간에서 가까운 위치에 놓인다</text>
+</svg>
