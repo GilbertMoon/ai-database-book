@@ -1,1 +1,129 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">벡터 거리와 Top-k 유사도 검색</text><rect x="430" y="80" width="340" height="60" class="b m"/><text x="600" y="110" class="l">사용자 질문 벡터</text><rect x="80" y="225" width="240" height="70" class="b g"/><text x="200" y="252" class="l">문서 1</text><text x="200" y="276" class="s">거리 0.04</text><rect x="360" y="225" width="240" height="70" class="b g"/><text x="480" y="252" class="l">문서 2</text><text x="480" y="276" class="s">거리 0.18</text><rect x="640" y="225" width="240" height="70" class="b y"/><text x="760" y="252" class="l">문서 3</text><text x="760" y="276" class="s">거리 0.65</text><rect x="920" y="225" width="240" height="70" class="b r"/><text x="1040" y="252" class="l">문서 4</text><text x="1040" y="276" class="s">거리 0.91</text><rect x="120" y="430" width="200" height="60" class="b p"/><text x="220" y="460" class="s">Top-1</text><rect x="390" y="430" width="200" height="60" class="b p"/><text x="490" y="460" class="s">Top-2</text><rect x="660" y="430" width="200" height="60" class="b p"/><text x="760" y="460" class="s">Top-3</text><rect x="400" y="610" width="400" height="65" class="b m"/><text x="600" y="638" class="l">검색된 문서 조각</text><text x="600" y="662" class="s">RAG 답변의 근거로 전달</text><line x1="520" y1="140" x2="200" y2="225" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="580" y1="140" x2="480" y2="225" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="620" y1="140" x2="760" y2="225" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="140" x2="1040" y2="225" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="200" y1="295" x2="220" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="480" y1="295" x2="490" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="760" y1="295" x2="760" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="220" y1="490" x2="600" y2="610" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="490" y1="490" x2="600" y2="610" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="760" y1="490" x2="600" y2="610" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="940" viewBox="0 0 1200 940" role="img" aria-labelledby="title desc">
+  <title id="title">벡터 거리와 Top-k 유사도 검색</title>
+  <desc id="desc">사용자 질문을 임베딩한 뒤 저장된 문서 벡터와 거리를 계산하고, 가까운 순서로 정렬하여 Top-k 후보를 고른 뒤 선택적으로 임계값을 적용해 최종 검색 문서를 RAG 근거로 전달하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .stage{fill:#fff;stroke-width:1.7;rx:12}
+      .question{stroke:#3b82c4}.embedding{stroke:#d69e2e}.compare{stroke:#7c5cc4}.result{stroke:#3c9a5f}
+      .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .badge-question{fill:#2f6fad}.badge-embedding{fill:#b7791f}.badge-compare{fill:#6b46a8}.badge-result{fill:#2f855a}
+      .stage-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .stage-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .panel{fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.5;rx:16}
+      .panel-title{font-size:18px;font-weight:700}
+      .header{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
+      .row{fill:#fff;stroke:#cbd5e1;stroke-width:1.3;rx:10}
+      .near{fill:#f2fbf5;stroke:#62b47a}.mid{fill:#fffaf0;stroke:#d69e2e}.far{fill:#fff5f5;stroke:#d9534f}
+      .rank{font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .doc{font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .topic{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
+      .distance{font-family:Consolas,D2Coding,monospace;font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .status{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .selected{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.7;rx:12}
+      .selected-title{font-size:16px;font-weight:700;text-anchor:middle}
+      .selected-sub{font-size:13px;text-anchor:middle;fill:#475569}
+      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.5;rx:11}
+      .note-title{font-size:14px;font-weight:700;fill:#92400e}
+      .note-text{font-size:13px;fill:#475569}
+      .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}
+      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="940" fill="#fff"/>
+  <text x="600" y="40" class="title">벡터 거리와 Top-k 유사도 검색</text>
+  <text x="600" y="68" class="subtitle">질문 벡터와 가까운 문서를 순서대로 찾고, 필요하면 임계값으로 관련성이 낮은 결과를 제외한다</text>
+
+  <rect x="58" y="100" width="300" height="108" class="stage question"/>
+  <circle cx="82" cy="124" r="14" class="badge-question"/><text x="82" y="124" class="badge">1</text>
+  <text x="208" y="132" class="stage-title">사용자 질문</text>
+  <text x="208" y="164" class="stage-sub">“구독을 취소하면 환불되나요?”</text>
+
+  <rect x="450" y="100" width="300" height="108" class="stage embedding"/>
+  <circle cx="474" cy="124" r="14" class="badge-embedding"/><text x="474" y="124" class="badge">2</text>
+  <text x="600" y="132" class="stage-title">질문 임베딩 생성</text>
+  <text x="600" y="164" class="stage-sub">[0.21, -0.18, 0.77, ...]</text>
+
+  <rect x="842" y="100" width="300" height="108" class="stage compare"/>
+  <circle cx="866" cy="124" r="14" class="badge-compare"/><text x="866" y="124" class="badge">3</text>
+  <text x="992" y="132" class="stage-title">문서 벡터와 거리 계산</text>
+  <text x="992" y="164" class="stage-sub">각 문서가 질문과 얼마나 가까운지 비교</text>
+
+  <path d="M 358 154 H 450" class="arrow"/>
+  <path d="M 750 154 H 842" class="arrow"/>
+  <path d="M 992 208 V 252 H 600" class="arrow"/>
+
+  <rect x="34" y="252" width="1132" height="370" class="panel"/>
+  <text x="58" y="286" class="panel-title">거리 오름차순 정렬 결과</text>
+  <text x="600" y="286" class="stage-sub">이 예시에서는 거리값이 작을수록 질문과 의미가 가깝다</text>
+
+  <text x="120" y="330" class="header">순위</text>
+  <text x="310" y="330" class="header">문서</text>
+  <text x="555" y="330" class="header">주제</text>
+  <text x="790" y="330" class="header">거리</text>
+  <text x="1010" y="330" class="header">판정</text>
+
+  <rect x="70" y="350" width="1060" height="60" class="row near"/>
+  <text x="120" y="380" class="rank">1</text>
+  <text x="310" y="380" class="doc">문서 1</text>
+  <text x="555" y="380" class="topic">구독 환불 규정</text>
+  <text x="790" y="380" class="distance">0.04</text>
+  <text x="1010" y="380" class="status" fill="#166534">매우 가까움</text>
+
+  <rect x="70" y="424" width="1060" height="60" class="row near"/>
+  <text x="120" y="454" class="rank">2</text>
+  <text x="310" y="454" class="doc">문서 2</text>
+  <text x="555" y="454" class="topic">구독 취소 안내</text>
+  <text x="790" y="454" class="distance">0.18</text>
+  <text x="1010" y="454" class="status" fill="#166534">가까움</text>
+
+  <rect x="70" y="498" width="1060" height="60" class="row mid"/>
+  <text x="120" y="528" class="rank">3</text>
+  <text x="310" y="528" class="doc">문서 3</text>
+  <text x="555" y="528" class="topic">서비스 업데이트 안내</text>
+  <text x="790" y="528" class="distance">0.65</text>
+  <text x="1010" y="528" class="status" fill="#92400e">Top-3에는 포함</text>
+
+  <rect x="70" y="572" width="1060" height="60" class="row far"/>
+  <text x="120" y="602" class="rank">4</text>
+  <text x="310" y="602" class="doc">문서 4</text>
+  <text x="555" y="602" class="topic">PostgreSQL JOIN 노트</text>
+  <text x="790" y="602" class="distance">0.91</text>
+  <text x="1010" y="602" class="status" fill="#b42318">관련성 낮음</text>
+
+  <rect x="70" y="656" width="320" height="112" class="selected"/>
+  <text x="230" y="687" class="selected-title">4. Top-k 후보 선택</text>
+  <text x="230" y="716" class="selected-sub">예: k = 3</text>
+  <text x="230" y="741" class="selected-sub">문서 1 · 문서 2 · 문서 3</text>
+
+  <rect x="440" y="656" width="320" height="112" class="selected"/>
+  <text x="600" y="687" class="selected-title">5. 선택적 임계값 적용</text>
+  <text x="600" y="716" class="selected-sub">예: 거리 0.50 이하만 허용</text>
+  <text x="600" y="741" class="selected-sub">문서 3은 제외</text>
+
+  <rect x="810" y="656" width="320" height="112" class="stage result"/>
+  <circle cx="834" cy="680" r="14" class="badge-result"/><text x="834" y="680" class="badge">6</text>
+  <text x="970" y="687" class="selected-title">최종 검색 문서</text>
+  <text x="970" y="716" class="selected-sub">문서 1 · 문서 2</text>
+  <text x="970" y="741" class="selected-sub">RAG 답변의 근거로 전달</text>
+
+  <path d="M 390 712 H 440" class="arrow"/>
+  <path d="M 760 712 H 810" class="arrow"/>
+
+  <rect x="72" y="800" width="1056" height="62" class="note"/>
+  <text x="94" y="824" class="note-title">주의</text>
+  <text x="160" y="824" class="note-text">거리값은 작을수록 가까운 반면, 코사인 유사도 점수는 일반적으로 클수록 비슷하다.</text>
+  <text x="160" y="847" class="note-text">Top-k는 항상 k개를 반환할 수 있으므로, 서비스 목적에 따라 임계값이나 후속 관련성 검토를 함께 사용한다.</text>
+
+  <rect x="205" y="884" width="790" height="42" class="principle"/>
+  <text x="230" y="904" class="principle-label">핵심 원칙</text>
+  <text x="620" y="905" class="principle-text">가까운 문서를 찾는 것과 충분히 관련 있는 문서를 고르는 것은 별도의 판단이다</text>
+</svg>
