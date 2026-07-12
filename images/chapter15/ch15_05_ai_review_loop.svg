@@ -1,1 +1,102 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">AI 활용 및 검토 루프</text><rect x="80" y="120" width="200" height="65" class="b m"/><text x="180" y="152" class="l">AI 도구 사용</text><rect x="360" y="120" width="200" height="65" class="b y"/><text x="460" y="152" class="l">AI 초안</text><rect x="640" y="120" width="200" height="65" class="b p"/><text x="740" y="145" class="l">사람 검토</text><text x="740" y="168" class="s">PK/FK·정규화·보안</text><rect x="920" y="120" width="200" height="65" class="b r"/><text x="1020" y="152" class="l">문제 발견?</text><rect x="360" y="380" width="220" height="70" class="b r"/><text x="470" y="408" class="l">설계/SQL 수정</text><text x="470" y="432" class="s">오류 원인 기록</text><rect x="640" y="380" width="220" height="70" class="b g"/><text x="750" y="408" class="l">실행·테스트</text><text x="750" y="432" class="s">재검증</text><rect x="480" y="610" width="300" height="65" class="b m"/><text x="630" y="638" class="l">AI 검토 보고서</text><text x="630" y="662" class="s">프롬프트·오류·수정·판단</text><line x1="280" y1="152" x2="360" y2="152" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="560" y1="152" x2="640" y2="152" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="840" y1="152" x2="920" y2="152" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="1020" y1="185" x2="470" y2="380" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="580" y1="415" x2="640" y2="415" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="750" y1="380" x2="740" y2="185" stroke="#38a169" stroke-width="2" stroke-dasharray="7 7" marker-end="url(#a)"/><line x1="1020" y1="185" x2="630" y2="610" stroke="#2b6cb0" stroke-width="2" stroke-dasharray="7 7" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980" role="img" aria-labelledby="title desc">
+  <title id="title">AI 활용 및 검토 루프</title>
+  <desc id="desc">검토 기준을 정한 뒤 AI 초안을 사람이 검토하고 PostgreSQL에서 실행하며, 문제가 있으면 수정 후 다시 실행하고 문제가 없으면 활용과 검토 근거를 기록하는 반복 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}
+      .box{fill:#fff;stroke:#64748b;stroke-width:1.8;rx:12}
+      .box-start{fill:#f4f8ff;stroke:#3b82c4}
+      .box-ai{fill:#fff8e8;stroke:#d69e2e}
+      .box-human{fill:#f5f1ff;stroke:#7c5cc4}
+      .box-run{fill:#f2fbf5;stroke:#3c9a5f}
+      .box-fix{fill:#fff5f5;stroke:#d9534f}
+      .box-record{fill:#eef7ff;stroke:#2f6fad}
+      .badge-start{fill:#2f6fad}.badge-ai{fill:#b7791f}.badge-human{fill:#6b46a8}.badge-run{fill:#2f855a}
+      .step-number{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .step-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .step-sub{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
+      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:2}
+      .decision-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#d9534f;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .branch-label{font-size:14px;font-weight:700}
+      .footer{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+    </style>
+  </defs>
+
+  <rect width="1200" height="980" fill="#fff"/>
+  <text x="600" y="42" class="title">AI 활용 및 검토 루프</text>
+
+  <rect x="340" y="75" width="520" height="64" class="box box-start"/>
+  <circle cx="368" cy="97" r="14" class="badge-start"/>
+  <text x="368" y="97" class="step-number">1</text>
+  <text x="600" y="107" class="step-text">검토 목표와 기준 정리</text>
+
+  <rect x="340" y="164" width="520" height="78" class="box box-ai"/>
+  <circle cx="368" cy="186" r="14" class="badge-ai"/>
+  <text x="368" y="186" class="step-number">2</text>
+  <text x="600" y="192" class="step-text">AI에 초안 요청</text>
+  <text x="600" y="218" class="step-sub">요구사항·ERD·DDL·SQL — ChatGPT·Codex 보조</text>
+
+  <rect x="340" y="267" width="520" height="64" class="box box-ai"/>
+  <circle cx="368" cy="289" r="14" class="badge-ai"/>
+  <text x="368" y="289" class="step-number">3</text>
+  <text x="600" y="299" class="step-text">AI 생성 결과 확인</text>
+
+  <rect x="340" y="356" width="520" height="88" class="box box-human"/>
+  <circle cx="368" cy="378" r="14" class="badge-human"/>
+  <text x="368" y="378" class="step-number">4</text>
+  <text x="600" y="382" class="step-text">사람이 요구사항과 DB 원리 검토</text>
+  <text x="600" y="408" class="step-sub">관계·PK/FK·제약조건·NULL·정규화·보안·PostgreSQL 호환성</text>
+
+  <rect x="340" y="469" width="520" height="78" class="box box-run"/>
+  <circle cx="368" cy="491" r="14" class="badge-run"/>
+  <text x="368" y="491" class="step-number">5</text>
+  <text x="600" y="497" class="step-text">PostgreSQL에서 실행·테스트</text>
+  <text x="600" y="523" class="step-sub">DBeaver에서 오류·제약조건·조회 결과 확인</text>
+
+  <rect x="340" y="572" width="520" height="78" class="box box-run"/>
+  <circle cx="368" cy="594" r="14" class="badge-run"/>
+  <text x="368" y="594" class="step-number">6</text>
+  <text x="600" y="600" class="step-text">실행 결과 확인</text>
+  <text x="600" y="626" class="step-sub">요구사항·업무 규칙·데이터 정합성과 일치하는가?</text>
+
+  <path d="M 600 139 V 164" class="arrow"/>
+  <path d="M 600 242 V 267" class="arrow"/>
+  <path d="M 600 331 V 356" class="arrow"/>
+  <path d="M 600 444 V 469" class="arrow"/>
+  <path d="M 600 547 V 572" class="arrow"/>
+  <path d="M 600 650 V 674" class="arrow"/>
+
+  <polygon points="600,674 730,734 600,794 470,734" class="decision"/>
+  <text x="600" y="734" class="decision-text">문제 있음?</text>
+
+  <rect x="70" y="680" width="320" height="78" class="box box-fix"/>
+  <text x="230" y="708" class="step-text">문제 원인과 수정 방향 확인</text>
+  <text x="230" y="734" class="step-sub">누락·충돌·실행 오류·잘못된 결과 분석</text>
+
+  <rect x="70" y="790" width="320" height="82" class="box box-fix"/>
+  <text x="230" y="819" class="step-text">요구사항·ERD·DDL·SQL 수정</text>
+  <text x="230" y="846" class="step-sub">수정 근거를 남기고 다시 실행</text>
+
+  <rect x="810" y="684" width="320" height="104" class="box box-record"/>
+  <text x="970" y="714" class="step-text">AI 활용·검토 기록</text>
+  <text x="970" y="742" class="step-sub">프롬프트·AI 제안·발견한 문제</text>
+  <text x="970" y="766" class="step-sub">수정 내용·판단 근거·실행 결과</text>
+
+  <path d="M 470 734 H 390" class="arrow"/>
+  <text x="423" y="718" class="branch-label">예</text>
+  <path d="M 230 758 V 790" class="arrow"/>
+  <path d="M 730 734 H 810" class="arrow"/>
+  <text x="767" y="718" class="branch-label">아니요</text>
+
+  <path d="M 70 831 H 42 V 508 H 340" class="feedback"/>
+  <text x="58" y="660" class="branch-label" fill="#b42318">수정 후 재실행</text>
+
+  <rect x="220" y="914" width="760" height="44" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.6" rx="11"/>
+  <text x="600" y="936" class="footer">AI 결과는 초안이며, 사람의 검토와 실제 실행 결과로 확인해야 한다</text>
+</svg>
