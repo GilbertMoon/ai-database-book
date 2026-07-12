@@ -85,6 +85,61 @@ def flow_svg(title: str, nodes: list[str], footer: str) -> str:
     )
 
 
+def service_project_flow_svg() -> str:
+    return """<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">AI 기반 데이터베이스 서비스 완성 흐름</title>
+  <desc id="desc">문제 정의부터 데이터베이스 설계, 구현과 검증, 웹 CRUD와 GitHub 문서화까지 이어지는 14단계 프로젝트 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <style>
+      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
+      .title{font-size:27px;font-weight:700;text-anchor:middle}.section-label{font-size:17px;font-weight:700}
+      .step-number{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+      .step-text{font-size:15px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
+      .step-text-small{font-size:14px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
+      .principle-label{font-size:14px;font-weight:700;fill:#166534}.principle-text{font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
+      .group{stroke-width:1.5;rx:16}.planning-group{fill:#f4f8ff;stroke:#93b4e6}.validation-group{fill:#f8fafc;stroke:#a8b3c4}.delivery-group{fill:#f2fbf5;stroke:#8bc9a0}
+      .box{fill:#fff;stroke:#64748b;stroke-width:1.8;rx:12}.box-planning{stroke:#3b82c4}.box-ai{fill:#fff8e8;stroke:#d69e2e}.box-delivery{stroke:#3c9a5f}
+      .badge-planning{fill:#2f6fad}.badge-validation{fill:#58677b}.badge-ai{fill:#b7791f}.badge-delivery{fill:#2f855a}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="820" fill="#fff"/>
+  <text x="600" y="43" class="title">AI 기반 데이터베이스 서비스 완성 흐름</text>
+
+  <rect x="34" y="76" width="1132" height="190" class="group planning-group"/>
+  <text x="58" y="105" class="section-label">1. 기획·설계</text>
+  <rect x="50" y="132" width="190" height="88" class="box box-planning"/><circle cx="70" cy="151" r="14" class="badge-planning"/><text x="70" y="151" class="step-number">1</text><text x="145" y="176" class="step-text">문제 정의</text>
+  <rect x="275" y="132" width="190" height="88" class="box box-planning"/><circle cx="295" cy="151" r="14" class="badge-planning"/><text x="295" y="151" class="step-number">2</text><text x="370" y="168" class="step-text">사용자와</text><text x="370" y="190" class="step-text">프로젝트 범위 정의</text>
+  <rect x="500" y="132" width="190" height="88" class="box box-planning"/><circle cx="520" cy="151" r="14" class="badge-planning"/><text x="520" y="151" class="step-number">3</text><text x="595" y="176" class="step-text">요구사항 정의</text>
+  <rect x="725" y="132" width="190" height="88" class="box box-planning"/><circle cx="745" cy="151" r="14" class="badge-planning"/><text x="745" y="151" class="step-number">4</text><text x="820" y="168" class="step-text">엔터티와</text><text x="820" y="190" class="step-text">관계 찾기</text>
+  <rect x="950" y="132" width="190" height="88" class="box box-planning"/><circle cx="970" cy="151" r="14" class="badge-planning"/><text x="970" y="151" class="step-number">5</text><text x="1045" y="176" class="step-text">ERD 설계</text>
+  <path d="M240 176H275" class="arrow"/><path d="M465 176H500" class="arrow"/><path d="M690 176H725" class="arrow"/><path d="M915 176H950" class="arrow"/>
+
+  <rect x="34" y="286" width="1132" height="218" class="group validation-group"/>
+  <text x="58" y="315" class="section-label">2. 구현·검증</text>
+  <rect x="950" y="350" width="190" height="98" class="box"/><circle cx="970" cy="369" r="14" class="badge-validation"/><text x="970" y="369" class="step-number">6</text><text x="1045" y="391" class="step-text">PostgreSQL</text><text x="1045" y="414" class="step-text">DDL 구현</text>
+  <rect x="725" y="350" width="190" height="98" class="box"/><circle cx="745" cy="369" r="14" class="badge-validation"/><text x="745" y="369" class="step-number">7</text><text x="820" y="399" class="step-text">샘플 데이터 입력</text>
+  <rect x="500" y="350" width="190" height="98" class="box"/><circle cx="520" cy="369" r="14" class="badge-validation"/><text x="520" y="369" class="step-number">8</text><text x="595" y="399" class="step-text">핵심 SQL 검증</text>
+  <rect x="275" y="350" width="190" height="98" class="box"/><circle cx="295" cy="369" r="14" class="badge-validation"/><text x="295" y="369" class="step-number">9</text><text x="370" y="388" class="step-text-small">트랜잭션·인덱스</text><text x="370" y="412" class="step-text-small">성능 검토</text>
+  <rect x="50" y="350" width="190" height="98" class="box"/><circle cx="70" cy="369" r="14" class="badge-validation"/><text x="70" y="369" class="step-number">10</text><text x="145" y="388" class="step-text-small">보안·백업</text><text x="145" y="412" class="step-text-small">복구 검토</text>
+  <path d="M1045 220V350" class="arrow"/><path d="M950 399H915" class="arrow"/><path d="M725 399H690" class="arrow"/><path d="M500 399H465" class="arrow"/><path d="M275 399H240" class="arrow"/>
+
+  <rect x="34" y="524" width="1132" height="194" class="group delivery-group"/>
+  <text x="58" y="553" class="section-label">3. 서비스·문서화</text>
+  <rect x="50" y="590" width="245" height="88" class="box box-ai"/><circle cx="70" cy="609" r="14" class="badge-ai"/><text x="70" y="609" class="step-number">11</text><text x="172.5" y="618" class="step-text-small">AI 초안 검토·수정</text><text x="172.5" y="642" class="step-text-small">실행 결과 검증</text>
+  <rect x="335" y="590" width="245" height="88" class="box box-delivery"/><circle cx="355" cy="609" r="14" class="badge-delivery"/><text x="355" y="609" class="step-number">12</text><text x="457.5" y="634" class="step-text">웹 CRUD 구현</text>
+  <rect x="620" y="590" width="245" height="88" class="box box-delivery"/><circle cx="640" cy="609" r="14" class="badge-delivery"/><text x="640" y="609" class="step-number">13</text><text x="742.5" y="634" class="step-text">GitHub 저장소 정리</text>
+  <rect x="905" y="590" width="245" height="88" class="box box-delivery"/><circle cx="925" cy="609" r="14" class="badge-delivery"/><text x="925" y="609" class="step-number">14</text><text x="1027.5" y="618" class="step-text-small">검증 보고서와</text><text x="1027.5" y="642" class="step-text-small">재현 문서 작성</text>
+  <path d="M145 448V590" class="arrow"/><path d="M295 634H335" class="arrow"/><path d="M580 634H620" class="arrow"/><path d="M865 634H905" class="arrow"/>
+
+  <rect x="235" y="748" width="730" height="48" fill="#ecfdf3" stroke="#62b47a" stroke-width="1.7" rx="12"/>
+  <text x="255" y="768" class="principle-label">핵심 원칙</text><text x="625" y="772" class="principle-text">화면보다 데이터 구조와 검증 근거를 먼저 완성한다</text>
+</svg>"""
+
+
 def grid_svg(title: str, items: list[str], footer: str) -> str:
     width, height = 1200, 680
     box_w, box_h = 245, 78
@@ -230,19 +285,21 @@ def main() -> None:
         "ch15_01_final_project_flow",
         "ch15_01_service_project_flow",
         """flowchart LR
-    A[문제 정의] --> B[사용자와 범위]
-    B --> C[요구사항]
-    C --> D[ERD와 DDL]
-    D --> E[샘플 데이터와 핵심 SQL]
-    E --> F[트랜잭션·성능·보안·복구]
-    F --> G[AI 제안 검토]
-    G --> H[재현 가능한 문서화]
+    A[문제 정의] --> B[사용자와 프로젝트 범위 정의]
+    B --> C[요구사항 정의]
+    C --> D[엔터티와 관계 찾기]
+    D --> E[ERD 설계]
+    E --> F[PostgreSQL DDL 구현]
+    F --> G[샘플 데이터 입력]
+    G --> H[핵심 SQL 검증]
+    H --> I[트랜잭션·인덱스·성능 검토]
+    I --> J[보안·백업·복구 검토]
+    J --> K[AI 초안 검토·수정·실행 검증]
+    K --> L[웹 CRUD 구현]
+    L --> M[GitHub 저장소 정리]
+    M --> N[검증 보고서와 재현 문서 작성]
 """,
-        flow_svg(
-            "AI 기반 데이터베이스 서비스 완성 흐름",
-            ["문제 정의", "사용자·범위", "요구사항", "ERD·DDL", "샘플·핵심 SQL", "트랜잭션·성능", "보안·복구", "AI 제안 검토", "재현 가능한|문서화"],
-            "화면보다 데이터 구조와 검증 근거를 먼저 완성한다",
-        ),
+        service_project_flow_svg(),
     )
 
     changed += migrate_asset(
@@ -401,16 +458,18 @@ def main() -> None:
 
 ## Chapter 15. 실전 프로젝트 2: AI 기반 데이터베이스 서비스 완성하기
 
-이 문서는 Chapter 15 본문과 독자 프로젝트 워크북에 사용하는 도식 자산을 정리합니다. 도식은 프로젝트 범위를 작게 정하고, 데이터 구조를 구현·검증하며, 다른 사람이 다시 실행할 수 있도록 문서화하는 흐름을 보여 줍니다.
+이 문서는 Chapter 15 본문과 독자 프로젝트 워크북에 사용하는 도식 자산을 정리합니다. 도식은 프로젝트 범위를 작게 정하고, 데이터 구조를 구현·검증하며, 간단한 웹 CRUD와 GitHub 정리를 거쳐 다른 사람이 다시 실행할 수 있도록 문서화하는 흐름을 보여 줍니다.
 
 ## 도식 설계 원칙
 
 ```text
 - 화면 구현보다 데이터베이스 설계와 검증을 우선한다.
-- 문제 정의, 범위, 요구사항, ERD, DDL, 샘플 데이터와 핵심 SQL을 연결한다.
-- 웹 CRUD, NoSQL, Vector DB와 RAG는 목적에 따른 선택 확장으로 구분한다.
-- AI 결과는 초안이며 사람이 실행하고 수정하는 흐름을 드러낸다.
-- 프로젝트 구조와 완성도 점검은 제출 형식이나 배점이 아니라 재현성을 기준으로 설명한다.
+- 문제 정의, 범위, 요구사항, 엔터티와 관계, ERD, DDL, 샘플 데이터와 핵심 SQL을 단계별로 연결한다.
+- 트랜잭션, 인덱스, 성능, 보안, 백업과 복구를 검토한다.
+- AI 결과는 초안이며 사람이 검토·수정하고 실행 결과로 검증하는 흐름을 드러낸다.
+- 간단한 웹 CRUD 구현과 GitHub 저장소 정리를 프로젝트 완성 과정에 포함한다.
+- 프로젝트 구조와 완성도 점검은 제출 형식이나 배점이 아니라 검증 근거와 재현성을 기준으로 설명한다.
+- NoSQL, Vector DB와 RAG는 목적에 따른 선택 확장으로 구분한다.
 - 파일명과 도식 내부 문구에 최종고사, 평가, 제출, 배점 표현을 사용하지 않는다.
 ```
 
