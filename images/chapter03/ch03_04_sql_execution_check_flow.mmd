@@ -1,14 +1,34 @@
-flowchart TD
-    A[ai_database_book 데이터베이스 연결] --> B[SQL Editor 열기]
-    B --> C[SELECT version();]
-    C --> C1[PostgreSQL 버전 확인]
-    C1 --> D[SELECT current_database();]
-    D --> D1[현재 DB가 ai_database_book인지 확인]
-    D1 --> E[SELECT 1 + 1 AS result;]
-    E --> E1[결과 2 확인]
-    E1 --> F[students 테이블 생성]
-    F --> G[샘플 데이터 INSERT]
-    G --> H[SELECT * FROM students;]
-    H --> I[조회 결과 확인]
-    I --> J[UNIQUE 오류 실습]
-    J --> K[제약조건 동작 확인]
+flowchart TB
+    A[Database Navigator에서<br/>ai_database_book 연결 선택] --> B[해당 연결의 SQL Editor 열기]
+    B --> C[실행 전 확인<br/>편집기의 데이터 소스·연결 상태·선택한 SQL 범위]
+
+    C --> V1[1. SELECT version(); 실행]
+    V1 --> V2[결과 해석<br/>PostgreSQL 버전 문자열이 반환되면<br/>선택한 서버가 SQL 요청에 응답]
+
+    V2 --> D1[2. SELECT current_database(); 실행]
+    D1 --> D2{결과가<br/>ai_database_book인가?}
+    D2 -- 아니요 --> D3[현재 편집기의 연결 대상 변경<br/>Database 값을 바꾸거나 새 SQL Editor 열기]
+    D3 --> D1
+    D2 -- 예 --> M1[원하는 작업 데이터베이스 연결 확인]
+
+    M1 --> Q1[3. SELECT 1 + 1 AS result; 실행]
+    Q1 --> Q2{결과 그리드에<br/>result = 2가 표시되는가?}
+    Q2 -- 예 --> S[기본 SQL 실행 환경 확인 완료]
+    Q2 -- 아니요 --> E{오류·결과 상태 확인}
+
+    E -- 연결 오류 --> E1[서버 실행 상태·Host·Port·인증·네트워크 점검]
+    E -- SQL 오류 --> E2[선택한 문장·세미콜론·오타·실행 위치 확인]
+    E -- 결과 미표시 --> E3[Results·Error 패널과 실행된 문장 범위 확인]
+    E -- 잘못된 DB --> D3
+    E1 --> C
+    E2 --> C
+    E3 --> C
+
+    S --> R[환경 정보 기록<br/>PostgreSQL 버전·현재 DB·실행 일시·확인 결과]
+    R --> N[다음 검증<br/>테이블 생성·데이터 입력·조회·예상 제약조건 오류]
+
+    N1[각 SQL의 역할<br/>version은 서버 응답, current_database는 연결 대상,<br/>간단한 계산은 SQL 실행과 결과 표시를 확인] --- V1
+    N2[주의<br/>DBeaver에서 연결을 선택했더라도 기존 SQL Editor가<br/>다른 데이터베이스에 연결되어 있을 수 있으므로 결과값을 기준으로 판단] --- D2
+    N3[실행 안전<br/>긴 스크립트에서는 실행할 문장만 선택하거나<br/>커서를 정확한 문장에 두고 실행 범위를 확인] --- C
+    N4[한계<br/>세 쿼리 성공은 기본 연결 확인이며<br/>테이블 생성 권한과 제약조건 동작은 다음 실습에서 별도로 검증] --- S
+    N5[보안<br/>환경 기록에는 비밀번호·전체 접속 문자열을 포함하지 않음] --- R
