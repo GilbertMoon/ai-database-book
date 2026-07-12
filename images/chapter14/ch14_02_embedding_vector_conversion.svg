@@ -1,104 +1,126 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980" role="img" aria-labelledby="title desc">
   <title id="title">텍스트 임베딩 변환 흐름</title>
-  <desc id="desc">문장이나 문서 청크를 임베딩 모델로 고정 차원의 숫자 벡터로 변환하고 원문과 메타데이터를 함께 저장하며, 의미가 비슷한 문장은 가까운 벡터가 되는 과정을 설명한 도식</desc>
+  <desc id="desc">텍스트가 전처리와 임베딩 모델을 거쳐 동일 차원의 숫자 벡터로 변환되고, 원문 및 메타데이터와 함께 저장되는 과정과 의미가 비슷한 문장끼리 벡터 공간에서 가까워지는 원리를 설명한 도식</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
     </marker>
     <style>
       text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
       .title{font-size:27px;font-weight:700;text-anchor:middle}
       .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .stage-group{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}
-      .stage{fill:#fff;stroke-width:1.7;rx:12}
-      .stage-input{stroke:#3b82c4}.stage-model{stroke:#d69e2e}.stage-vector{stroke:#7c5cc4}.stage-store{stroke:#3c9a5f}
+      .stageGroup{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}
+      .stage{fill:#fff;stroke-width:1.6;rx:11}
+      .input{stroke:#3b82c4}.prep{stroke:#64748b}.model{stroke:#d69e2e}.vectorBox{stroke:#7c5cc4}.store{stroke:#3c9a5f}
       .badge{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}
-      .badge-input{fill:#2f6fad}.badge-model{fill:#b7791f}.badge-vector{fill:#6b46a8}.badge-store{fill:#2f855a}
-      .stage-title{font-size:16px;font-weight:700;text-anchor:middle}
-      .stage-main{font-size:14px;font-weight:600;text-anchor:middle}
-      .stage-sub{font-size:13px;text-anchor:middle;fill:#475569}
-      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
-      .example-group{fill:#fff;stroke:#cbd5e1;stroke-width:1.5;rx:16}
-      .example-title{font-size:18px;font-weight:700}
-      .header{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
-      .row{fill:#fff;stroke:#cbd5e1;stroke-width:1.3;rx:10}
-      .row-similar{fill:#f2fbf5;stroke:#62b47a}
-      .row-other{fill:#f8fafc;stroke:#94a3b8}
-      .row-text{font-size:14px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
-      .vector{font-family:Consolas,D2Coding,monospace;font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#334155}
-      .meaning{font-size:13px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
-      .similar-label{font-size:14px;font-weight:700;text-anchor:middle;fill:#166534}
-      .other-label{font-size:14px;font-weight:700;text-anchor:middle;fill:#475569}
-      .note{font-size:13px;text-anchor:middle;fill:#475569}
+      .stageTitle{font-size:15px;font-weight:700;text-anchor:middle}
+      .stageMain{font-size:13px;font-weight:600;text-anchor:middle}
+      .stageSub{font-size:12px;text-anchor:middle;fill:#475569}
+      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .exampleGroup{fill:#fff;stroke:#cbd5e1;stroke-width:1.5;rx:16}
+      .exampleTitle{font-size:18px;font-weight:700}
+      .header{font-size:13px;font-weight:700;text-anchor:middle;fill:#334155}
+      .row{fill:#fff;stroke:#cbd5e1;stroke-width:1.3;rx:9}
+      .similar{fill:#f2fbf5;stroke:#62b47a}.other{fill:#f8fafc;stroke:#94a3b8}
+      .rowText{font-size:13px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
+      .vector{font-family:Consolas,D2Coding,monospace;font-size:12.5px;text-anchor:middle;dominant-baseline:middle;fill:#334155}
+      .meaning{font-size:12.5px;text-anchor:middle;dominant-baseline:middle;fill:#475569}
+      .noteBox{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}
+      .noteTitle{font-size:13px;font-weight:700;text-anchor:middle;fill:#92400e}
+      .note{font-size:12px;text-anchor:middle;fill:#475569}
       .principle{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .principle-label{font-size:14px;font-weight:700;fill:#166534}
-      .principle-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#166534}
+      .principleLabel{font-size:14px;font-weight:700;fill:#166534}
+      .principleText{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
     </style>
   </defs>
 
-  <rect width="1200" height="900" fill="#fff"/>
+  <rect width="1200" height="980" fill="#fff"/>
   <text x="600" y="40" class="title">텍스트 임베딩 변환 흐름</text>
-  <text x="600" y="68" class="subtitle">같은 임베딩 모델은 모든 텍스트를 동일한 차원의 숫자 벡터로 변환한다</text>
+  <text x="600" y="68" class="subtitle">텍스트의 의미적 특징을 같은 차원의 숫자 좌표로 바꾸고, 원문과 함께 저장한다</text>
 
-  <rect x="34" y="92" width="1132" height="230" class="stage-group"/>
+  <rect x="34" y="92" width="1132" height="250" class="stageGroup"/>
 
-  <rect x="54" y="132" width="245" height="142" class="stage stage-input"/>
-  <circle cx="78" cy="156" r="14" class="badge-input"/><text x="78" y="156" class="badge">1</text>
-  <text x="176.5" y="163" class="stage-title">텍스트 입력</text>
-  <text x="176.5" y="197" class="stage-main">문장 · 문서 · 문서 청크</text>
-  <text x="176.5" y="226" class="stage-sub">예: “구독 취소 방법을 알려 주세요”</text>
+  <rect x="50" y="132" width="190" height="150" class="stage input"/>
+  <circle cx="74" cy="156" r="14" fill="#2f6fad"/><text x="74" y="156" class="badge">1</text>
+  <text x="145" y="162" class="stageTitle">텍스트 입력</text>
+  <text x="145" y="198" class="stageMain">문장 · 문서 · 청크</text>
+  <text x="145" y="226" class="stageSub">예: 구독 취소 방법</text>
+  <text x="145" y="248" class="stageSub">비정형 텍스트 원문</text>
 
-  <rect x="337" y="132" width="245" height="142" class="stage stage-model"/>
-  <circle cx="361" cy="156" r="14" class="badge-model"/><text x="361" y="156" class="badge">2</text>
-  <text x="459.5" y="163" class="stage-title">임베딩 모델</text>
-  <text x="459.5" y="197" class="stage-main">텍스트의 의미 패턴을 숫자로 변환</text>
-  <text x="459.5" y="226" class="stage-sub">비교할 벡터는 같은 모델·버전을 사용</text>
+  <rect x="270" y="132" width="190" height="150" class="stage prep"/>
+  <circle cx="294" cy="156" r="14" fill="#64748b"/><text x="294" y="156" class="badge">2</text>
+  <text x="365" y="162" class="stageTitle">전처리·토큰화</text>
+  <text x="365" y="198" class="stageMain">모델 입력 형태로 변환</text>
+  <text x="365" y="226" class="stageSub">길이 제한·토큰 단위 처리</text>
+  <text x="365" y="248" class="stageSub">모델 내부 처리 단계</text>
 
-  <rect x="620" y="132" width="245" height="142" class="stage stage-vector"/>
-  <circle cx="644" cy="156" r="14" class="badge-vector"/><text x="644" y="156" class="badge">3</text>
-  <text x="742.5" y="163" class="stage-title">고정 차원 벡터</text>
-  <text x="742.5" y="197" class="stage-main">[0.88, 0.12, 0.20, ...]</text>
-  <text x="742.5" y="226" class="stage-sub">실제 벡터는 수백~수천 차원일 수 있음</text>
+  <rect x="490" y="132" width="220" height="150" class="stage model"/>
+  <circle cx="514" cy="156" r="14" fill="#b7791f"/><text x="514" y="156" class="badge">3</text>
+  <text x="600" y="162" class="stageTitle">임베딩 모델</text>
+  <text x="600" y="198" class="stageMain">의미적 패턴을 벡터로 변환</text>
+  <text x="600" y="226" class="stageSub">비교할 질문과 문서는</text>
+  <text x="600" y="248" class="stageSub">같은 모델·버전 사용</text>
 
-  <rect x="903" y="132" width="245" height="142" class="stage stage-store"/>
-  <circle cx="927" cy="156" r="14" class="badge-store"/><text x="927" y="156" class="badge">4</text>
-  <text x="1025.5" y="163" class="stage-title">원문·메타데이터와 저장</text>
-  <text x="1025.5" y="197" class="stage-main">document_id · chunk_id · embedding</text>
-  <text x="1025.5" y="226" class="stage-sub">Vector DB 또는 PostgreSQL pgvector</text>
+  <rect x="740" y="132" width="190" height="150" class="stage vectorBox"/>
+  <circle cx="764" cy="156" r="14" fill="#6b46a8"/><text x="764" y="156" class="badge">4</text>
+  <text x="835" y="162" class="stageTitle">고정 차원 벡터</text>
+  <text x="835" y="198" class="stageMain">[0.12, -0.04, 0.88, ...]</text>
+  <text x="835" y="226" class="stageSub">한 모델의 모든 결과는</text>
+  <text x="835" y="248" class="stageSub">동일한 벡터 길이</text>
 
-  <path d="M 299 203 H 337" class="arrow"/>
-  <path d="M 582 203 H 620" class="arrow"/>
-  <path d="M 865 203 H 903" class="arrow"/>
+  <rect x="960" y="132" width="190" height="150" class="stage store"/>
+  <circle cx="984" cy="156" r="14" fill="#2f855a"/><text x="984" y="156" class="badge">5</text>
+  <text x="1055" y="162" class="stageTitle">저장</text>
+  <text x="1055" y="198" class="stageMain">원문·메타데이터·벡터</text>
+  <text x="1055" y="226" class="stageSub">content · chunk_id</text>
+  <text x="1055" y="248" class="stageSub">embedding · source</text>
 
-  <rect x="34" y="344" width="1132" height="420" class="example-group"/>
-  <text x="58" y="378" class="example-title">변환 결과 예시</text>
-  <text x="600" y="378" class="note">아래 숫자는 개념 설명을 위한 축약 예시이며 실제 차원을 그대로 나타내지 않는다</text>
+  <path d="M240 207H270" class="flow"/><path d="M460 207H490" class="flow"/>
+  <path d="M710 207H740" class="flow"/><path d="M930 207H960" class="flow"/>
 
-  <text x="245" y="420" class="header">텍스트</text>
-  <text x="600" y="420" class="header">임베딩 벡터</text>
-  <text x="955" y="420" class="header">벡터 공간에서의 관계</text>
+  <rect x="34" y="366" width="1132" height="390" class="exampleGroup"/>
+  <text x="58" y="400" class="exampleTitle">같은 모델로 변환한 세 문장의 예</text>
+  <text x="600" y="400" class="stageSub">아래 벡터는 개념 설명을 위한 축약 예시이며 실제로는 수백~수천 차원일 수 있다</text>
 
-  <rect x="70" y="440" width="1060" height="76" class="row row-similar"/>
-  <text x="245" y="478" class="row-text">구독 취소 방법</text>
-  <text x="600" y="478" class="vector">[0.88, 0.12, 0.20, ...]</text>
-  <text x="955" y="478" class="meaning">환불·취소 주제</text>
+  <text x="280" y="440" class="header">원문</text>
+  <text x="650" y="440" class="header">임베딩 벡터</text>
+  <text x="980" y="440" class="header">벡터 공간에서의 관계</text>
 
-  <rect x="70" y="532" width="1060" height="76" class="row row-similar"/>
-  <text x="245" y="570" class="row-text">서비스 이용을 중단하는 방법</text>
-  <text x="600" y="570" class="vector">[0.86, 0.14, 0.18, ...]</text>
-  <text x="955" y="570" class="meaning">표현은 다르지만 의미가 비슷함</text>
+  <rect x="70" y="460" width="1060" height="74" class="row similar"/>
+  <text x="280" y="497" class="rowText">A. 구독 취소 방법을 알려 주세요</text>
+  <text x="650" y="497" class="vector">[0.12, -0.04, 0.88, ...]</text>
+  <text x="980" y="497" class="meaning">취소·구독 주제</text>
 
-  <path d="M 1110 476 H 1142 V 572 H 1110" fill="none" stroke="#3c9a5f" stroke-width="2"/>
-  <text x="1068" y="628" class="similar-label">두 벡터는 서로 가까움</text>
+  <rect x="70" y="550" width="1060" height="74" class="row similar"/>
+  <text x="280" y="587" class="rowText">B. 서비스 이용을 취소하려면 어떻게 해야 하나요?</text>
+  <text x="650" y="587" class="vector">[0.10, -0.03, 0.84, ...]</text>
+  <text x="980" y="587" class="meaning">A와 표현은 다르지만 의미가 비슷함</text>
 
-  <rect x="70" y="638" width="1060" height="76" class="row row-other"/>
-  <text x="245" y="676" class="row-text">PostgreSQL JOIN 사용법</text>
-  <text x="600" y="676" class="vector">[0.15, 0.30, 0.90, ...]</text>
-  <text x="955" y="676" class="meaning">주제가 달라 상대적으로 멀리 위치</text>
+  <rect x="70" y="640" width="1060" height="74" class="row other"/>
+  <text x="280" y="677" class="rowText">C. PostgreSQL에서 JOIN은 어떻게 사용하나요?</text>
+  <text x="650" y="677" class="vector">[-0.52, 0.73, 0.11, ...]</text>
+  <text x="980" y="677" class="meaning">주제가 달라 A·B와 상대적으로 멀리 위치</text>
 
-  <text x="600" y="744" class="other-label">벡터의 각 숫자를 직접 해석하기보다 벡터 사이의 거리와 유사도를 검색에 사용한다</text>
+  <text x="600" y="738" class="stageSub">각 숫자를 하나씩 해석하지 않고, 벡터 전체 사이의 거리와 유사도를 비교한다</text>
 
-  <rect x="205" y="808" width="790" height="46" class="principle"/>
-  <text x="230" y="829" class="principle-label">핵심 원칙</text>
-  <text x="620" y="831" class="principle-text">의미가 비슷한 텍스트는 벡터 공간에서 가까운 위치에 놓인다</text>
+  <rect x="34" y="780" width="1132" height="118" rx="16" fill="#f8fafc" stroke="#a8b3c4" stroke-width="1.5"/>
+  <rect x="58" y="804" width="250" height="70" class="noteBox"/>
+  <text x="183" y="829" class="noteTitle">같은 모델·버전</text>
+  <text x="183" y="852" class="note">질문과 문서가 같은 벡터 공간에 있어야 비교 가능</text>
+
+  <rect x="326" y="804" width="250" height="70" class="noteBox"/>
+  <text x="451" y="829" class="noteTitle">동일한 차원</text>
+  <text x="451" y="852" class="note">한 모델이 만든 벡터는 모두 같은 길이</text>
+
+  <rect x="594" y="804" width="250" height="70" class="noteBox"/>
+  <text x="719" y="829" class="noteTitle">모델 변경</text>
+  <text x="719" y="852" class="note">모델·버전을 바꾸면 기존 문서도 재임베딩 권장</text>
+
+  <rect x="862" y="804" width="280" height="70" class="noteBox"/>
+  <text x="1002" y="829" class="noteTitle">저장 방식</text>
+  <text x="1002" y="852" class="note">Vector DB 또는 PostgreSQL pgvector 사용</text>
+
+  <rect x="190" y="922" width="820" height="42" class="principle"/>
+  <text x="216" y="947" class="principleLabel">핵심 원칙</text>
+  <text x="640" y="948" class="principleText">의미가 비슷한 텍스트는 같은 벡터 공간에서 가까운 위치에 놓인다</text>
 </svg>
