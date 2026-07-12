@@ -5,9 +5,9 @@ flowchart TB
     D --> E[원문·메타데이터·벡터 저장<br/>document_id·chunk_id·content·embedding]
     E --> F[Vector DB 또는 PostgreSQL pgvector]
 
-    A1[A<br/>구독 취소 방법을 알려 주세요] --> C
-    A2[B<br/>서비스 이용을 취소하려면 어떻게 해야 하나요?] --> C
-    A3[C<br/>PostgreSQL에서 JOIN은 어떻게 사용하나요?] --> C
+    A1[A<br/>구독 취소 방법을 알려 주세요] -. 입력 예 .-> A
+    A2[B<br/>서비스 이용을 취소하려면 어떻게 해야 하나요?] -. 입력 예 .-> A
+    A3[C<br/>PostgreSQL에서 JOIN은 어떻게 사용하나요?] -. 입력 예 .-> A
 
     D --> D1[A → [0.12, -0.04, 0.88, ...]]
     D --> D2[B → [0.10, -0.03, 0.84, ...]]
