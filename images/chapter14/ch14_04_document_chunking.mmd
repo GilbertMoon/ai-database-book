@@ -1,19 +1,26 @@
 flowchart TB
-    A[Long service notice] --> B[Chunking]
-    B --> C[Chunk 1 usage policy]
-    B --> D[Chunk 2 project notes]
-    B --> E[Chunk 3 service update]
-    B --> F[Chunk 4 refund]
-    B --> G[Chunk 5 questions]
+    A[긴 서비스 운영 안내 문서] --> B[청킹 기준 선택<br/>제목·문단·항목·주제 단위]
+    B --> C[의미 단위 청크 생성]
 
-    C --> H[Embedding 1]
-    D --> I[Embedding 2]
-    E --> J[Embedding 3]
-    F --> K[Embedding 4]
-    G --> L[Embedding 5]
+    C --> C1[chunk 1<br/>이용권 안내]
+    C --> C2[chunk 2<br/>환불 기준]
+    C --> C3[chunk 3<br/>계정 보안 안내]
+    C --> C4[chunk 4<br/>고객지원 문의 방법]
+    C --> C5[chunk 5<br/>환불 및 구독 취소]
+    C --> C6[chunk 6<br/>문의 방법]
 
-    H --> M[Searchable chunks]
-    I --> M
-    J --> M
-    K --> M
-    L --> M
+    C1 --> D[각 청크에 원문·제목·문서 ID·순서 저장]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
+    D --> E[청크별 임베딩 생성·Vector DB 저장]
+
+    Q[사용자 질문<br/>환불 기준은 무엇인가요?] --> R[관련 청크 검색]
+    E --> R
+    R --> S[chunk 2·chunk 5를 근거로 전달]
+
+    L[너무 큰 청크<br/>불필요한 내용 포함] --- B
+    M[너무 작은 청크<br/>문맥 부족] --- B
+    N[의미 단위 청크<br/>검색 정확성과 문맥의 균형] --- B
