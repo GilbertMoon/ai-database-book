@@ -1,14 +1,11 @@
-flowchart LR
-    A[Use AI tool] --> B[AI draft]
-    B --> C[Human review]
-    C --> D{Problems found?}
-    D -->|Yes| E[Revise design or SQL]
-    E --> F[Run and test]
-    F --> C
-    D -->|No| G[Record final decision]
-    G --> H[AI review report]
-
-    C --> C1[PK FK constraints]
-    C --> C2[Normalization]
-    C --> C3[Security and privacy]
-    H --> H1[Prompt result issue revision]
+flowchart TB
+    A[검토 목표와 기준 정리] --> B[AI에 초안 요청<br/>요구사항·ERD·DDL·SQL]
+    B --> C[AI 생성 결과 확인]
+    C --> D[사람이 요구사항과 DB 원리 검토]
+    D --> E[PostgreSQL에서 실행·테스트]
+    E --> F[실행 결과 확인]
+    F --> G{문제 있음?}
+    G -- 예 --> H[문제 원인과 수정 방향 확인]
+    H --> I[요구사항·ERD·DDL·SQL 수정]
+    I --> E
+    G -- 아니요 --> J[AI 활용·검토 기록<br/>프롬프트·제안·문제·수정·실행 결과]
