@@ -1,18 +1,14 @@
 flowchart TB
     A[remaining_seats = 1]
-
-    A --> B[학생 A 신청]
-    A --> C[학생 B 신청]
-
-    B --> D[같은 강의 수정 시도]
-    C --> D
-
-    D --> E[Lock 필요]
-    E --> F[한 트랜잭션 먼저 처리]
-    F --> G[다른 트랜잭션은 대기]
-
-    G --> H{서로 기다리면?}
-    H --> I[Deadlock 가능]
-
-    E --> J[트랜잭션은 짧고 단순하게 유지]
-    I --> J
+    A --> B[트랜잭션 A · 강의 행 Lock]
+    A --> C[트랜잭션 B · 같은 행 변경 시도]
+    B --> D[좌석 확인·차감 후 COMMIT]
+    C --> E[Lock 해제까지 대기]
+    D --> E
+    E --> F[최신 좌석 0 확인]
+    F --> G[ROLLBACK]
+    H[Deadlock 예시]
+    H --> I[A: 강의 1 잠금 → 강의 2 대기]
+    H --> J[B: 강의 2 잠금 → 강의 1 대기]
+    I --> K[순환 대기 · PostgreSQL이 한 트랜잭션 중단 가능]
+    J --> K
