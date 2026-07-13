@@ -1,21 +1,10 @@
 flowchart TB
-    A[DDL review] --> B[PRIMARY KEY]
-    A --> C[FOREIGN KEY]
-    A --> D[NOT NULL]
-    A --> E[UNIQUE]
-    A --> F[CHECK]
-    A --> G[Data type]
-
-    B --> B1[Identify each row]
-    C --> C1[Protect relationships]
-    D --> D1[Prevent missing required values]
-    E --> E1[Prevent duplicates]
-    F --> F1[Limit status and numeric ranges]
-    G --> G1[Use numeric date boolean correctly]
-
-    B1 --> H[Safer schema]
-    C1 --> H
-    D1 --> H
-    E1 --> H
-    F1 --> H
-    G1 --> H
+    A[확인된 업무 규칙] --> B[DB 제약조건 선택]
+    B --> C[PK·FK·NOT NULL·UNIQUE·CHECK]
+    C --> D[정상 입력 확인]
+    C --> E[오류 입력 시도]
+    E --> F{DB가 의도대로 차단하는가?}
+    F -- 예 --> G[메타데이터로 정의 확인]
+    F -- 아니요 --> H[요구사항·DDL 수정]
+    H --> B
+    G --> I[검증 증거 기록]
