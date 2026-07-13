@@ -63,7 +63,7 @@ public
 ## 기준 데이터
 
 ```text
-document_sources 6
+document_sources 7
 document_chunks 9
 query_cases 4
 relevance_judgments 6
@@ -168,7 +168,7 @@ code/chapter14/
 | 파일 | 역할 |
 | --- | --- |
 | `01_rag_lab_schema.sql` | 전용 스키마와 원문·청크·질문·평가 테이블 생성 |
-| `02_rag_lab_seed.sql` | 문서 6·청크 9·질문 4·정답 6 입력 |
+| `02_rag_lab_seed.sql` | 문서 7·청크 9·질문 4·정답 6 입력 |
 | `03_manual_vector_search.sql` | 권한·최신성 필터 후 L2 Top-k 로그 생성 |
 | `04_retrieval_evaluation.sql` | Precision·Recall·RR·MRR 계산 |
 | `05_rag_answer_reviews.sql` | 근거·인용·권한·보류 사례 입력·검증 |
