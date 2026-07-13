@@ -1,0 +1,23 @@
+# Local environment secrets
+.env
+.env.*
+!.env.example
+
+# Database backup artifacts
+backups/
+*.backup
+*.dump
+*.pgdump
+*.bak
+*.sql.gz
+*.sql.zst
+
+# Local PostgreSQL password file copies
+.pgpass
+pgpass.conf
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
