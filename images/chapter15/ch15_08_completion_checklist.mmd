@@ -1,10 +1,6 @@
-flowchart TB
-    A[프로젝트 완성도 점검]
-    A --> B[문제와 범위]
-    A --> C[요구사항과 ERD]
-    A --> D[schema.sql]
-    A --> E[seed.sql]
-    A --> F[queries.sql]
-    A --> G[AI 검토 기록]
-    A --> H[보안과 복구]
-    A --> I[README와 재현성]
+flowchart LR
+A[필수 근거 확인] --> B{모두 있음?}
+B -->|예| C[통합 프로젝트 완료]
+B -->|아니요| D[누락 영역 보완]
+D --> A
+C --> E[선택 확장 판단]

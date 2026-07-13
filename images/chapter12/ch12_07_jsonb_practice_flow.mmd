@@ -1,16 +1,7 @@
-flowchart TB
-    A[PostgreSQL table] --> B[JSONB column]
-    B --> C[Store document]
-    C --> D[Read field]
-    C --> E[Read nested object]
-    C --> F[Search array tag]
-    C --> G[Update field]
-    C --> H[Create index]
-
-    D --> I[Document data taste]
-    E --> I
-    F --> I
-    G --> I
-    H --> I
-
-    I --> J[Decide JSONB or NoSQL]
+flowchart LR
+    A[course_documents] --> B[metadata JSONB]
+    B --> C[-> and ->>]
+    B --> D[? key exists]
+    B --> E[@> contains]
+    B --> F[GIN / expression index]
+    F --> G[decide JSONB or NoSQL]

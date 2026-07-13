@@ -1,13 +1,6 @@
 flowchart LR
-    A[Request] --> B[Cache key]
-    B --> C[Key-Value store]
-    C --> D[Value]
-    D --> E[Fast response]
-
-    B --> B1[user:1001:session]
-    B --> B2[content:popular:top3]
-    B --> B3[feature:recommendation:v1]
-
-    C --> F[Limitation]
-    F --> F1[Hard without key]
-    F --> F2[Not for complex joins]
+    A[cache key] --> B{cache hit?}
+    B -->|yes| C[return cache value]
+    B -->|no| D[read source RDBMS]
+    D --> E[refresh cache]
+    E --> C

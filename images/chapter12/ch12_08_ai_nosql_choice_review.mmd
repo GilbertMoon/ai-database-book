@@ -1,11 +1,9 @@
-flowchart TD
-    A[AI storage recommendation] --> B[Check data structure]
-    B --> C[Check query pattern]
-    C --> D[Check consistency]
-    D --> E[Check transaction need]
-    E --> F[Check scale]
-    F --> G[Check operations skill]
-    G --> H[Check backup and recovery]
-    H --> I{Apply?}
-    I --> J[Use recommendation]
-    I --> K[Revise choice]
+flowchart TB
+    A[AI storage recommendation] --> B[data structure]
+    A --> C[query pattern]
+    A --> D[consistency]
+    A --> E[operation cost]
+    B --> F[accept / revise]
+    C --> F
+    D --> F
+    E --> F

@@ -1,74 +1,41 @@
-# ERD 및 테이블 관계 설명
+# ERD 설명
 
-## 1. 핵심 엔터티 목록
-
-| 엔터티 | 설명 | 주요 속성 |
-| --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
----
-
-## 2. 테이블 목록
-
-| 테이블명 | 역할 | 주요 컬럼 |
-| --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
----
-
-## 3. 관계 설명
-
-| 관계 | 설명 | 관계 유형 |
-| --- | --- | --- |
-| `table_a` → `table_b` |  | 1:N |
-| `table_c` ↔ `table_d` |  | N:M |
-
----
-
-## 4. N:M 관계 처리
+## 테이블 관계
 
 ```text
-N:M 관계가 있다면 중간 테이블을 어떻게 설계했는지 작성하세요.
+students 1:N questions
+questions 1:N answers
+tutors 1:N answers
+questions N:M learning_materials
+questions 1:N question_materials N:1 learning_materials
 ```
 
-| N:M 관계 | 중간 테이블 | 설명 |
-| --- | --- | --- |
-|  |  |  |
+## 테이블별 역할
 
----
+| 테이블 | 역할 | 주요 제약 |
+|---|---|---|
+| `students` | 질문 등록 학생 | PK, email UNIQUE |
+| `tutors` | 답변 작성 튜터 | PK, email UNIQUE |
+| `questions` | 학생 질문 | student_id FK, status CHECK |
+| `answers` | 튜터 답변 | question_id FK, tutor_id FK |
+| `learning_materials` | 학습 자료 | material_type CHECK |
+| `question_materials` | 질문-자료 연결 | 복합 PK, display_order CHECK |
 
-## 5. PK/FK 설계
+## FK 목록
 
-| 테이블 | PK | FK | 설명 |
-| --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
+| 자식 테이블 | 컬럼 | 부모 테이블 |
+|---|---|---|
+| `questions` | `student_id` | `students(id)` |
+| `answers` | `question_id` | `questions(id)` |
+| `answers` | `tutor_id` | `tutors(id)` |
+| `question_materials` | `question_id` | `questions(id)` |
+| `question_materials` | `material_id` | `learning_materials(id)` |
 
----
+FK는 총 5개입니다.
 
-## 6. 정규화 검토
+## 설계 메모
 
-```text
-중복 데이터가 있는지, 테이블 역할이 섞여 있지 않은지 검토하세요.
-```
-
-| 검토 항목 | 결과 | 수정 내용 |
-| --- | --- | --- |
-| 중복 데이터 |  |  |
-| 역할 혼합 |  |  |
-| 다중값 속성 |  |  |
-| 계산 가능한 값 저장 |  |  |
-
----
-
-## 7. ERD 이미지
-
-ERD 이미지를 별도 파일로 관리하는 경우 아래에 파일명을 적으세요.
-
-```text
-erd.png
-```
+- `answers`에 학생 이름, 튜터 이름, 질문 제목을 중복 저장하지 않습니다.
+- 삭제 정책은 요구사항이 없으므로 CASCADE를 사용하지 않습니다.
+- `updated_at`은 자동 갱신되지 않습니다. 애플리케이션 또는 트리거 설계가 필요합니다.
+- FK 컬럼 인덱스는 자동 생성된다고 가정하지 않고 성능 후보로만 검토합니다.

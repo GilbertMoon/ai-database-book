@@ -1,96 +1,110 @@
-# Chapter 15 프로젝트 템플릿
+# AI 튜터링 질문 관리 서비스
 
-## AI 기반 데이터베이스 서비스 만들기
+## 1. 해결하려는 문제
 
-이 폴더는 Chapter 15의 실전 프로젝트를 시작할 때 사용할 수 있는 기본 템플릿입니다. 그대로 완성본으로 사용하는 것이 아니라, 해결하려는 문제와 데이터 구조에 맞게 파일과 내용을 수정합니다.
+학생 질문, 튜터 답변, 학습 자료 연결 관계를 데이터베이스로 관리합니다. 목표는 화면을 많이 만드는 것이 아니라 요구사항, ERD, DDL, 샘플 데이터, 검증 SQL이 서로 일치한다는 근거를 남기는 것입니다.
 
----
+## 2. 주요 사용자
 
-## 권장 프로젝트 구조
+- 학생: 질문을 등록하고 답변을 확인합니다.
+- 튜터: 질문에 답변하고 관련 학습 자료를 안내합니다.
+- 운영자: 질문 상태, 자료 연결, 정합성 문제를 확인합니다.
+
+## 3. 현재 버전의 범위
+
+- 학생과 튜터 정보 관리
+- 질문 등록과 상태 관리
+- 질문별 여러 답변 관리
+- 학습 자료 등록
+- 질문과 학습 자료 N:M 연결
+- 정상, 경계, 오류 시나리오 검증
+
+## 4. 제외한 기능
+
+- 웹 CRUD와 백엔드 API
+- 로그인과 실제 인증
+- 결제, 알림, 추천
+- NoSQL 저장소
+- Vector DB와 RAG
+- 클라우드 배포
+
+## 5. 사용 환경
+
+- PostgreSQL 실습 DB
+- 실제 개인정보가 아닌 가상 데이터
+- 별도 작업용 DB에서 실행
+
+## 6. 프로젝트 파일 구조
 
 ```text
 project/
 ├── README.md
 ├── requirements.md
-├── erd.md 또는 erd.png
+├── erd.md
 ├── schema.sql
 ├── seed.sql
 ├── queries.sql
-├── ai_review.md
-├── project_notes.md
+├── ai_review_report.md
+├── final_report.md
 └── screenshots/
 ```
 
----
+`screenshots/`는 선택 항목입니다.
 
-## 파일 설명
+## 7. 데이터베이스 구조 요약
 
-| 파일 | 설명 |
-| --- | --- |
-| `README.md` | 프로젝트 목적, 사용 환경과 실행 순서 |
-| `requirements.md` | 사용자, 기능, 데이터, 업무 규칙과 제외 범위 |
-| `erd.md` | 텍스트 ERD 또는 테이블 관계 설명 |
-| `schema.sql` | PostgreSQL 테이블과 제약조건 생성 |
-| `seed.sql` | 핵심 상황을 재현하는 가상 샘플 데이터 |
-| `queries.sql` | 기본 조회, JOIN, 집계와 검증 SQL |
-| `ai_review.md` | AI 제안, 발견한 문제와 수정 근거 |
-| `project_notes.md` | 현재 한계, 보안·성능 검토와 다음 버전 계획 |
-| `screenshots/` | 필요한 경우 실행 결과를 보조하는 이미지 |
+| 테이블 | 역할 |
+|---|---|
+| `students` | 질문을 등록하는 학생 |
+| `tutors` | 답변을 작성하는 튜터 |
+| `questions` | 학생 질문과 상태 |
+| `answers` | 질문에 연결된 튜터 답변 |
+| `learning_materials` | 학습 자료 |
+| `question_materials` | 질문과 자료의 N:M 연결 |
 
----
+## 8. 실행 전 확인
 
-## 기본 실행 순서
+- 운영 DB가 아닌지 확인합니다.
+- 현재 DB와 사용자를 확인합니다.
+- `schema.sql`, `seed.sql`, `queries.sql` 순서로 실행합니다.
 
-```text
-1. 작업용 또는 테스트용 PostgreSQL 데이터베이스에 연결한다.
-2. schema.sql을 실행한다.
-3. seed.sql을 실행한다.
-4. queries.sql을 실행한다.
-5. 예상 결과와 실제 결과를 비교한다.
-6. 문제가 있으면 요구사항, ERD와 SQL을 함께 수정한다.
+## 9. 실행 순서
+
+```bash
+psql -U postgres -d ai_tutor_project -f schema.sql
+psql -U postgres -d ai_tutor_project -f seed.sql
+psql -U postgres -d ai_tutor_project -f queries.sql
 ```
 
-운영 데이터베이스에서 템플릿을 바로 실행하지 않습니다.
+## 10. 예상 결과
 
----
+| 항목 | 예상값 |
+|---|---:|
+| students | 4 |
+| tutors | 3 |
+| questions | 5 |
+| answers | 5 |
+| learning_materials | 6 |
+| question_materials | 7 |
+| FK 개수 | 5 |
+| 정합성 이상 | 0 |
+| 질문 없는 학생 | 1 |
+| 연결되지 않은 학습 자료 | 1 |
 
-## 프로젝트 이름 예시
+## 11. 오류 테스트 방법
 
-```text
-ai_tutoring_db
-online_course_db
-library_service_db
-reservation_service_db
-internal_document_search
-```
+`seed.sql` 하단의 오류 테스트 예시는 주석 상태입니다. 별도 트랜잭션에서 하나씩 주석을 해제하고 실패 여부를 확인합니다. 실패 후에는 `ROLLBACK`합니다.
 
-폴더와 데이터베이스 이름은 영문 소문자와 언더스코어를 사용하면 관리하기 쉽습니다.
+## 12. AI 사용 및 검토 기록
 
----
+AI가 만든 초안은 `ai_review_report.md`에 기록합니다. AI 제안은 사람이 검토하고, 실행 결과로 확인한 뒤 반영합니다.
 
-## 완성도 확인
+## 13. 보안 주의
 
-```text
-- README에 문제, 환경과 실행 순서가 설명되어 있는가?
-- requirements.md와 ERD가 일치하는가?
-- ERD와 schema.sql이 일치하는가?
-- schema.sql을 반복 실행할 수 있는가?
-- seed.sql이 관계, 상태와 집계 상황을 재현하는가?
-- queries.sql이 실제 요구사항을 증명하는가?
-- 누락이나 모순을 찾는 검증 SQL이 있는가?
-- AI가 만든 내용과 사람이 수정한 내용이 구분되는가?
-- 비밀번호, API 키, 실제 .env와 개인정보가 포함되지 않았는가?
-- 다른 사람이 같은 순서로 실행할 수 있는가?
-```
+- 실제 학생 이름, 이메일, 전화번호를 사용하지 않습니다.
+- DB 비밀번호와 API 키를 문서에 쓰지 않습니다.
+- 접근 권한과 백업·복구 계획은 최종 보고서에 별도 기록합니다.
 
----
+## 14. 현재 한계와 다음 버전
 
-## 안전 주의
-
-```text
-비밀번호와 접속 URL을 SQL 또는 Markdown 파일에 직접 기록하지 않는다.
-실제 .env 파일을 공개 저장소에 추가하지 않는다.
-실제 사용자 정보를 샘플 데이터로 사용하지 않는다.
-DROP, DELETE, UPDATE는 대상과 조건을 확인한 뒤 실행한다.
-AI가 만든 SQL은 작업용 DB에서 검증한 뒤 사용한다.
-```
+현재 버전은 데이터베이스 설계와 SQL 검증에 집중합니다. 웹 CRUD, API, NoSQL, Vector DB/RAG, 배포는 요구사항이 명확할 때 다음 버전으로 확장합니다.

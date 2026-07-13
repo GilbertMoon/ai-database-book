@@ -1,19 +1,7 @@
 flowchart LR
-    A[Data storage choice] --> B[RDBMS]
-    A --> C[NoSQL]
-
-    B --> B1[Tables]
-    B --> B2[SQL]
-    B --> B3[Strong consistency]
-    B --> B4[Transactions]
-
-    C --> C1[Key-Value]
-    C --> C2[Document]
-    C --> C3[Column-Family]
-    C --> C4[Graph]
-
-    B4 --> D[Good for orders and payments]
-    C1 --> E[Good for cache and sessions]
-    C2 --> F[Good for flexible documents]
-    C3 --> G[Good for large logs]
-    C4 --> H[Good for relationships]
+    A[온라인 강의 데이터] --> B[RDBMS]
+    A --> C[NoSQL 계열]
+    B --> B1[students / courses / enrollments]
+    B --> B2[정합성 / 제약 조건 / 트랜잭션]
+    C --> C1[세션 / 캐시 / 문서 / 이벤트 / 관계]
+    C --> C2[조회 패턴에 맞춘 저장]

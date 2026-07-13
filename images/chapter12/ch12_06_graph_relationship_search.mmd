@@ -1,12 +1,5 @@
 flowchart LR
-    A[Member A] -->|used| B[Content X]
-    A -->|follows| C[Member B]
-    C -->|used| D[Content Y]
-    B -->|related| D
-    B -->|tagged| E[Database]
-    D -->|tagged| F[AI]
-
-    A --> G[Relationship search]
-    G --> H[Recommendation]
-    G --> I[Path finding]
-    G --> J[Similar users]
+    S[Student] -->|ENROLLED| C[Course]
+    S -->|INTERESTED_IN| T[Topic]
+    C -->|RELATED_TO| T
+    T --> R[recommend related courses]

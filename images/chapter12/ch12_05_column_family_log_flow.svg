@@ -1,1 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">Column-Family와 대규모 로그 흐름</text><rect x="90" y="120" width="210" height="60" class="b"/><text x="195" y="150" class="s">페이지 조회</text><rect x="360" y="120" width="210" height="60" class="b"/><text x="465" y="150" class="s">콘텐츠 재생</text><rect x="630" y="120" width="210" height="60" class="b"/><text x="735" y="150" class="s">리뷰 작성</text><rect x="900" y="120" width="210" height="60" class="b"/><text x="1005" y="150" class="s">콘텐츠 이탈</text><rect x="440" y="280" width="320" height="65" class="b y"/><text x="600" y="313" class="l">이벤트 스트림</text><rect x="440" y="430" width="320" height="65" class="b p"/><text x="600" y="463" class="l">Column-Family DB</text><rect x="120" y="610" width="250" height="65" class="b g"/><text x="245" y="638" class="l">시간/사용자 기준 분산</text><rect x="475" y="610" width="250" height="65" class="b g"/><text x="600" y="638" class="l">대량 쓰기 처리</text><rect x="830" y="610" width="250" height="65" class="b g"/><text x="955" y="638" class="l">분석 조회</text><line x1="195" y1="180" x2="520" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="465" y1="180" x2="570" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="735" y1="180" x2="630" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="1005" y1="180" x2="680" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="345" x2="600" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="520" y1="495" x2="245" y2="610" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="495" x2="600" y2="610" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="495" x2="955" y2="610" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="680" viewBox="0 0 1200 680">
+  <title id="title">Column-Family 조회 패턴</title>
+  <desc id="desc">partition key와 sort key를 목표 조회에 맞춰 설계합니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#0f172a}
+      .title{font-size:32px;font-weight:800;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:18}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .yellow{fill:#fffbeb;stroke:#f59e0b}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .label{font-size:20px;font-weight:700;text-anchor:middle}
+      .small{font-size:15px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}
+      .line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <text x="600" y="52" class="title">Column-Family 조회 패턴</text>
+  <text x="600" y="80" class="subtitle">partition key와 sort key를 목표 조회에 맞춰 설계합니다.</text>
+  <rect x="65" y="160" width="250" height="115" class="card blue"/>
+  <text x="190" y="194" class="label">Target Query</text>
+  <text x="190" y="228" class="small">한 학생의 하루 이벤트</text>
+  <rect x="370" y="150" width="260" height="135" class="card green"/>
+  <text x="500" y="184" class="label">Partition Key</text>
+  <text x="500" y="218" class="small">student_id + event_date</text>
+  <text x="500" y="242" class="small">예: 1001 + 2026-07-13</text>
+  <rect x="700" y="150" width="220" height="135" class="card yellow"/>
+  <text x="810" y="184" class="label">Sort Key</text>
+  <text x="810" y="218" class="small">event_time</text>
+  <text x="810" y="242" class="small">시간순 정렬</text>
+  <rect x="470" y="400" width="290" height="120" class="card purple"/>
+  <text x="615" y="434" class="label">Learning Events</text>
+  <text x="615" y="468" class="small">click · video_start</text>
+  <text x="615" y="492" class="small">quiz_submit · finish</text>
+  <line x1="315" y1="218" x2="370" y2="218" class="line"/>
+  <line x1="630" y1="218" x2="700" y2="218" class="line"/>
+  <line x1="810" y1="285" x2="670" y2="400" class="line"/>
+  <text x="600" y="590" class="small">Column-Family 설계는 자유 검색이 아니라 목표 조회 패턴에서 출발합니다.</text>
+</svg>

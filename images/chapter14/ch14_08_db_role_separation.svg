@@ -1,96 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1160" viewBox="0 0 1200 1160" role="img" aria-labelledby="title desc">
-  <title id="title">Vector DB와 기존 DB 역할 분리</title>
-  <desc id="desc">관계형 데이터베이스, 문서 원본 저장소, 벡터 검색 인덱스, 로그 및 검토 저장소의 역할을 기준 데이터와 파생 데이터 관점에서 구분하고, 문서 변경과 삭제 시 벡터 인덱스를 동기화하며 사용자 질문 처리에서 각 저장소를 결합하는 구조를 설명한다.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760">
+  <title id="title">RAG 저장소 역할 분리</title>
+  <desc id="desc">업무 데이터, 문서 원문, 벡터 인덱스, 검색 로그는 역할이 다릅니다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
-    <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}.title{font-size:27px;font-weight:700;text-anchor:middle}.subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .section{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}.sectionTitle{font-size:18px;font-weight:700}.sectionSub{font-size:12.5px;fill:#475569}
-      .role{fill:#fff;stroke-width:1.6;rx:11}.rdb{stroke:#d69e2e}.doc{stroke:#3b82c4}.vector{stroke:#3c9a5f}.log{stroke:#7c5cc4}
-      .roleTitle{font-size:16px;font-weight:700;text-anchor:middle}.tag{font-size:11.5px;font-weight:700;text-anchor:middle}.label{font-size:12px;font-weight:700;text-anchor:middle;fill:#475569}.main{font-size:12.8px;font-weight:600;text-anchor:middle}.sub{font-size:11.5px;text-anchor:middle;fill:#475569}.divider{stroke:#d8dee8;stroke-width:1.1}
-      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.derive{stroke:#2f855a;stroke-width:2;fill:none;marker-end:url(#arrow)}.sync{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
-      .syncBox{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.4;rx:10}.syncTitle{font-size:13.5px;font-weight:700;text-anchor:middle}.syncText{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .process{fill:#fff;stroke:#3b82c4;stroke-width:1.5;rx:10}.processTitle{font-size:13.5px;font-weight:700;text-anchor:middle}.processText{font-size:11.5px;text-anchor:middle;fill:#475569}.answer{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.6;rx:10}.logBox{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.6;rx:10}
-      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.noteTitle{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#92400e}.noteText{font-size:11.2px;text-anchor:middle;fill:#475569}
-      .core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.coreLabel{font-size:14px;font-weight:700;fill:#166534}.coreText{font-size:15.5px;font-weight:700;text-anchor:middle;fill:#166534}
-    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#111827}.t{font-size:30px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:16}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.c{fill:#ecfeff;stroke:#06b6d4}.r{fill:#fff1f2;stroke:#f43f5e}.h{font-size:19px;font-weight:700;text-anchor:middle}.m{font-size:14px;text-anchor:middle;fill:#334155}.code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.soft{stroke:#94a3b8;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
   </defs>
-
-  <rect width="1200" height="1160" fill="#fff"/>
-  <text x="600" y="40" class="title">Vector DB와 기존 DB 역할 분리</text>
-  <text x="600" y="68" class="subtitle">모든 데이터를 한 저장소에 넣지 않고 기준 데이터, 원문 근거, 검색 인덱스와 운영 기록의 책임을 나눈다</text>
-
-  <rect x="34" y="92" width="1132" height="310" class="section"/>
-  <text x="58" y="125" class="sectionTitle">1. 데이터 성격에 따른 논리적 역할</text>
-  <text x="360" y="125" class="sectionSub">기준 데이터와 다시 만들 수 있는 파생 검색 데이터를 구분한다</text>
-
-  <rect x="50" y="150" width="250" height="220" class="role rdb"/>
-  <text x="175" y="180" class="roleTitle">관계형 DB</text><text x="175" y="205" class="tag" fill="#92400e">업무 기준 데이터</text>
-  <text x="175" y="236" class="label">저장 데이터</text><text x="175" y="261" class="main">회원 · 구독 · 결제 · 권한</text>
-  <line x1="70" y1="279" x2="280" y2="279" class="divider"/>
-  <text x="175" y="305" class="label">주요 책임</text><text x="175" y="330" class="main">PK/FK · 트랜잭션 · 정확한 조건</text><text x="175" y="352" class="sub">정합성과 권한 판단의 기준</text>
-
-  <rect x="330" y="150" width="250" height="220" class="role doc"/>
-  <text x="455" y="180" class="roleTitle">문서 원본 저장소</text><text x="455" y="205" class="tag" fill="#1d4f91">근거 기준 데이터</text>
-  <text x="455" y="236" class="label">저장 데이터</text><text x="455" y="261" class="main">공지 · 규정 · 매뉴얼 원문</text>
-  <line x1="350" y1="279" x2="560" y2="279" class="divider"/>
-  <text x="455" y="305" class="label">주요 책임</text><text x="455" y="330" class="main">document_id · 버전 · 출처 · 수정일</text><text x="455" y="352" class="sub">답변이 참조해야 할 실제 원문</text>
-
-  <rect x="610" y="150" width="250" height="220" class="role vector"/>
-  <text x="735" y="180" class="roleTitle">벡터 검색 인덱스</text><text x="735" y="205" class="tag" fill="#166534">파생 검색 데이터</text>
-  <text x="735" y="236" class="label">저장 데이터</text><text x="735" y="261" class="main">chunk_id · embedding · 메타데이터</text>
-  <line x1="630" y1="279" x2="840" y2="279" class="divider"/>
-  <text x="735" y="305" class="label">주요 책임</text><text x="735" y="330" class="main">의미 검색 · 거리 정렬 · Top-k</text><text x="735" y="352" class="sub">원문과 모델 버전으로 재생성 가능</text>
-
-  <rect x="890" y="150" width="250" height="220" class="role log"/>
-  <text x="1015" y="180" class="roleTitle">로그·검토 저장소</text><text x="1015" y="205" class="tag" fill="#5b3b8f">운영 기록 데이터</text>
-  <text x="1015" y="236" class="label">저장 데이터</text><text x="1015" y="261" class="main">질문 · 순위 · 거리 · 답변 · 판정</text>
-  <line x1="910" y1="279" x2="1120" y2="279" class="divider"/>
-  <text x="1015" y="305" class="label">주요 책임</text><text x="1015" y="330" class="main">품질 분석 · 장애 추적 · 감사</text><text x="1015" y="352" class="sub">사용 출처와 수정 이력 보존</text>
-
-  <rect x="34" y="426" width="1132" height="126" class="section"/>
-  <text x="58" y="459" class="sectionTitle">2. 문서 원본과 벡터 인덱스 동기화</text>
-  <rect x="72" y="478" width="300" height="54" class="syncBox"/>
-  <text x="222" y="500" class="syncTitle">원문 신규·변경</text><text x="222" y="520" class="syncText">청킹 → 임베딩 → 모델 버전·updated_at 갱신</text>
-  <rect x="450" y="478" width="300" height="54" class="syncBox"/>
-  <text x="600" y="500" class="syncTitle">원문 삭제</text><text x="600" y="520" class="syncText">해당 document_id의 청크와 벡터 인덱스 제거</text>
-  <rect x="828" y="478" width="300" height="54" class="syncBox"/>
-  <text x="978" y="500" class="syncTitle">동기화 누락 위험</text><text x="978" y="520" class="syncText">오래되거나 삭제된 내용이 검색 결과에 남음</text>
-  <path d="M455 370V438H222V478" class="derive"/><path d="M372 505H450" class="flow"/><path d="M750 505H828" class="sync"/><path d="M978 478V438H735V370" class="derive"/>
-
-  <rect x="34" y="576" width="1132" height="356" class="section"/>
-  <text x="58" y="609" class="sectionTitle">3. 사용자 질문 처리에서 역할 결합</text>
-  <text x="365" y="609" class="sectionSub">정확한 구조화 조건과 의미 검색을 결합하고, 최종 답변은 최신 원문을 근거로 생성한다</text>
-
-  <rect x="48" y="640" width="170" height="94" class="process"/>
-  <text x="133" y="669" class="processTitle">1. 사용자 질문</text><text x="133" y="696" class="processText">자연어 질문 + 사용자 ID</text>
-  <rect x="238" y="640" width="190" height="94" class="process"/>
-  <text x="333" y="669" class="processTitle">2. 권한·업무 조건 확인</text><text x="333" y="696" class="processText">관계형 DB의 정확한 조건</text><text x="333" y="716" class="processText">권한 · 구독 상태 · 기간</text>
-  <rect x="448" y="640" width="190" height="94" class="process"/>
-  <text x="543" y="669" class="processTitle">3. 허용 범위 의미 검색</text><text x="543" y="696" class="processText">질문 임베딩 · 메타데이터 필터</text><text x="543" y="716" class="processText">거리 · Top-k</text>
-  <rect x="658" y="640" width="190" height="94" class="process"/>
-  <text x="753" y="669" class="processTitle">4. 검색 ID 반환</text><text x="753" y="696" class="processText">document_id · chunk_id</text><text x="753" y="716" class="processText">순위 · 거리</text>
-  <rect x="868" y="640" width="274" height="94" class="process"/>
-  <text x="1005" y="669" class="processTitle">5. 최신 원문·출처 조회</text><text x="1005" y="696" class="processText">문서명 · 버전 · 실제 청크 본문</text><text x="1005" y="716" class="processText">벡터가 아닌 원문을 답변 근거로 사용</text>
-  <path d="M218 687H238" class="flow"/><path d="M428 687H448" class="flow"/><path d="M638 687H658" class="flow"/><path d="M848 687H868" class="flow"/>
-  <path d="M175 370V612H333V640" class="flow"/><path d="M735 370V620H543V640" class="derive"/><path d="M455 370V604H1005V640" class="flow"/>
-
-  <rect x="190" y="782" width="300" height="100" class="answer"/>
-  <text x="340" y="812" class="processTitle">6. 근거 기반 답변 생성</text><text x="340" y="840" class="processText">질문 + 최신 원문 + 필요한 업무 데이터</text><text x="340" y="862" class="processText">근거 밖 내용을 단정하지 않도록 제한</text>
-  <rect x="530" y="782" width="300" height="100" class="answer"/>
-  <text x="680" y="812" class="processTitle">7. 답변과 출처 제공</text><text x="680" y="840" class="processText">문서명 · 버전 · chunk_id</text><text x="680" y="862" class="processText">사용자가 근거를 확인할 수 있게 제공</text>
-  <rect x="870" y="782" width="272" height="100" class="logBox"/>
-  <text x="1006" y="812" class="processTitle">8. 로그·검토 기록</text><text x="1006" y="840" class="processText">질문 · 검색 · 답변 · 거리</text><text x="1006" y="862" class="processText">판정 · 사용 출처 · 수정 이력</text>
-  <path d="M1005 734V758H340V782" class="flow"/><path d="M490 832H530" class="flow"/><path d="M830 832H870" class="flow"/>
-  <path d="M1015 370V758H1006V782" class="flow"/><path d="M175 370V748H300V782" class="flow"/>
-
-  <rect x="55" y="958" width="340" height="76" class="note"/>
-  <text x="225" y="984" class="noteTitle">역할 분리는 논리적 개념</text><text x="225" y="1008" class="noteText">반드시 제품을 네 개 사용할 필요는 없음</text><text x="225" y="1026" class="noteText">PostgreSQL + pgvector 안에서도 역할 분리 가능</text>
-  <rect x="430" y="958" width="340" height="76" class="note"/>
-  <text x="600" y="984" class="noteTitle">검색 ID와 근거 원문 구분</text><text x="600" y="1008" class="noteText">벡터 검색은 후보 ID를 찾는 역할</text><text x="600" y="1026" class="noteText">답변은 최신 원문과 출처를 다시 조회해 생성</text>
-  <rect x="805" y="958" width="340" height="76" class="note"/>
-  <text x="975" y="984" class="noteTitle">기준 데이터와 파생 데이터</text><text x="975" y="1008" class="noteText">업무 데이터와 문서 원문은 기준 데이터</text><text x="975" y="1026" class="noteText">임베딩은 다시 생성할 수 있는 검색 인덱스</text>
-
-  <rect x="150" y="1070" width="900" height="48" class="core"/>
-  <text x="177" y="1099" class="coreLabel">핵심 원칙</text><text x="650" y="1100" class="coreText">Vector DB는 기존 DB를 대체하지 않고 의미 검색을 담당하며 업무 데이터·문서 원문·로그와 협력한다</text>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="50" class="t">RAG 저장소 역할 분리</text>
+  <text x="600" y="78" class="s">업무 데이터, 문서 원문, 벡터 인덱스, 검색 로그는 역할이 다릅니다.</text>
+  <rect x="70" y="150" width="230" height="130" class="card b"/>
+  <text x="185" y="184" class="h">업무 RDBMS</text>
+  <text x="185" y="215" class="m">사용자 · 권한</text>
+  <text x="185" y="237" class="m">구조화 데이터</text>
+  <rect x="355" y="150" width="230" height="130" class="card g"/>
+  <text x="470" y="184" class="h">문서 저장소</text>
+  <text x="470" y="215" class="m">원문 · 버전</text>
+  <text x="470" y="237" class="m">출처 · 작성자</text>
+  <rect x="640" y="150" width="230" height="130" class="card p"/>
+  <text x="755" y="184" class="h">벡터 인덱스</text>
+  <text x="755" y="215" class="m">chunk_id · embedding</text>
+  <text x="755" y="237" class="m">거리 정렬 · Top-k</text>
+  <rect x="925" y="150" width="230" height="130" class="card y"/>
+  <text x="1040" y="184" class="h">검색 로그</text>
+  <text x="1040" y="215" class="m">질문 · 거리 · 순위</text>
+  <text x="1040" y="237" class="m">답변 검토</text>
+  <line x1="300" y1="215" x2="355" y2="215" class="line"/>
+  <line x1="585" y1="215" x2="640" y2="215" class="line"/>
+  <line x1="870" y1="215" x2="925" y2="215" class="line"/>
+  <rect x="350" y="430" width="500" height="120" class="card c"/>
+  <text x="600" y="464" class="h">RAG 서비스</text>
+  <text x="600" y="495" class="m">권한 필터 후 검색</text>
+  <text x="600" y="517" class="m">답변과 출처 제공</text>
+  <line x1="185" y1="280" x2="430" y2="430" class="line"/>
+  <line x1="470" y1="280" x2="520" y2="430" class="line"/>
+  <line x1="755" y1="280" x2="680" y2="430" class="line"/>
+  <line x1="1040" y1="280" x2="770" y2="430" class="line"/>
+  <rect x="250" y="640" width="700" height="70" class="card y"/>
+  <text x="600" y="674" class="h">벡터 인덱스는 원문에서 재생성 가능한 파생 데이터입니다.</text>
 </svg>

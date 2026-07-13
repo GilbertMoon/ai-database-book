@@ -1,1 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.node{fill:#ebf8ff;stroke:#2b6cb0;stroke-width:2}.course{fill:#fffaf0;stroke:#d69e2e;stroke-width:2}.tag{fill:#f0fff4;stroke:#38a169;stroke-width:2}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}.edge{font-size:12px;text-anchor:middle;fill:#4a5568}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">Graph DB 관계 탐색</text><circle cx="230" cy="190" r="58" class="node"/><text x="230" y="190" class="l">회원 A</text><circle cx="510" cy="180" r="58" class="course"/><text x="510" y="180" class="l">콘텐츠 X</text><circle cx="230" cy="430" r="58" class="node"/><text x="230" y="430" class="l">회원 B</text><circle cx="510" cy="430" r="58" class="course"/><text x="510" y="430" class="l">콘텐츠 Y</text><circle cx="790" cy="170" r="52" class="tag"/><text x="790" y="170" class="s">Database</text><circle cx="790" cy="440" r="52" class="tag"/><text x="790" y="440" class="s">AI</text><rect x="890" y="255" width="230" height="65" class="b"/><text x="1005" y="284" class="l">관계 탐색</text><text x="1005" y="308" class="s">추천·경로·유사 사용자</text><line x1="288" y1="190" x2="452" y2="180" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><text x="370" y="168" class="edge">이용</text><line x1="230" y1="248" x2="230" y2="372" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><text x="205" y="312" class="edge">팔로우</text><line x1="288" y1="430" x2="452" y2="430" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><text x="370" y="410" class="edge">이용</text><line x1="510" y1="238" x2="510" y2="372" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><text x="555" y="307" class="edge">관련 콘텐츠</text><line x1="568" y1="180" x2="738" y2="170" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><text x="650" y="154" class="edge">태그</text><line x1="568" y1="430" x2="738" y2="440" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><text x="650" y="414" class="edge">태그</text><line x1="842" y1="190" x2="920" y2="255" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="842" y1="420" x2="920" y2="320" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="680" viewBox="0 0 1200 680">
+  <title id="title">Graph 관계 탐색</title>
+  <desc id="desc">Student, Course, Topic 관계를 따라 추천 후보를 찾습니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#0f172a}
+      .title{font-size:32px;font-weight:800;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:18}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .yellow{fill:#fffbeb;stroke:#f59e0b}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .label{font-size:20px;font-weight:700;text-anchor:middle}
+      .small{font-size:15px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}
+      .line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <text x="600" y="52" class="title">Graph 관계 탐색</text>
+  <text x="600" y="80" class="subtitle">Student, Course, Topic 관계를 따라 추천 후보를 찾습니다.</text>
+  <circle cx="230" cy="190" r="70" class="card blue"/>
+  <text x="230" y="197" class="label">Student</text>
+  <circle cx="560" cy="170" r="70" class="card green"/>
+  <text x="560" y="177" class="label">Course</text>
+  <circle cx="560" cy="450" r="70" class="card yellow"/>
+  <text x="560" y="457" class="label">Topic</text>
+  <circle cx="900" cy="300" r="70" class="card cyan"/>
+  <text x="900" y="307" class="label">추천 후보</text>
+  <line x1="300" y1="190" x2="490" y2="170" class="line"/>
+  <line x1="255" y1="255" x2="505" y2="410" class="line"/>
+  <line x1="560" y1="240" x2="560" y2="380" class="line"/>
+  <line x1="630" y1="450" x2="850" y2="335" class="line"/>
+  <text x="390" y="155" class="tiny">ENROLLED</text>
+  <text x="360" y="350" class="tiny">INTERESTED_IN</text>
+  <text x="635" y="315" class="tiny">RELATED_TO</text>
+  <text x="760" y="420" class="tiny">탐색</text>
+  <text x="600" y="610" class="small">단순 목록 조회는 RDBMS JOIN으로 충분할 수 있습니다.</text>
+</svg>

@@ -1,123 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1180" viewBox="0 0 1200 1180" role="img" aria-labelledby="title desc">
-  <title id="title">RAG 답변 근거성 검토</title>
-  <desc id="desc">환불 질문, 검색된 환불 기준 청크와 생성 답변을 함께 놓고 답변을 주장 단위로 분해해 각 주장이 근거 문서에 의해 뒷받침되는지 확인한 뒤 검색 적합성, 답변 근거성, 출처와 최신성 및 권한을 검토하고 문제 유형별로 수정하는 흐름</desc>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760">
+  <title id="title">검색 적합성과 답변 근거성 분리 검토</title>
+  <desc id="desc">검색이 맞아도 답변이 문서 밖 주장을 만들 수 있습니다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
-    <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:27px;font-weight:700;text-anchor:middle}.subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .section{stroke-width:1.5;rx:16}.case{fill:#f8fafc;stroke:#a8b3c4}.claims{fill:#f4f8ff;stroke:#93b4e6}.review{fill:#f2fbf5;stroke:#8bc9a0}
-      .sectionTitle{font-size:18px;font-weight:700}.sectionSub{font-size:12.5px;fill:#475569}
-      .box{fill:#fff;stroke-width:1.6;rx:11}.question{stroke:#3b82c4}.evidence{stroke:#3c9a5f}.answer{stroke:#d69e2e}
-      .boxTitle{font-size:15px;font-weight:700;text-anchor:middle}.boxMain{font-size:12.5px;font-weight:600;text-anchor:middle}.boxSub{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}.feedback{stroke:#d9534f;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
-      .claim{fill:#fff;stroke-width:1.5;rx:10}.supported{fill:#f2fbf5;stroke:#62b47a}.unsupported{fill:#fff5f5;stroke:#d9534f}
-      .claimNo{font-size:12px;font-weight:700;text-anchor:middle}.claimText{font-size:12.5px;font-weight:700;text-anchor:middle}.claimEvidence{font-size:11.5px;text-anchor:middle;fill:#475569}.status{font-size:12.5px;font-weight:700;text-anchor:middle}
-      .gate{fill:#fff;stroke-width:1.6;rx:11}.retrieval{stroke:#3b82c4}.grounding{stroke:#3c9a5f}.governance{stroke:#7c5cc4}
-      .gateTitle{font-size:14px;font-weight:700;text-anchor:middle}.gateText{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .decision{fill:#fff8e8;stroke:#b7791f;stroke-width:1.8}.decisionTitle{font-size:15px;font-weight:700;text-anchor:middle}.branch{font-size:12.5px;font-weight:700}
-      .fix{fill:#fff5f5;stroke:#d9534f;stroke-width:1.5;rx:10}.fixTitle{font-size:13px;font-weight:700;text-anchor:middle}.fixText{font-size:11.3px;text-anchor:middle;fill:#475569}
-      .final{fill:#eef7ff;stroke:#2f6fad;stroke-width:1.6;rx:11}.record{fill:#f2fbf5;stroke:#3c9a5f;stroke-width:1.6;rx:11}
-      .note{fill:#fff8e8;stroke:#d69e2e;stroke-width:1.3;rx:9}.noteTitle{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#92400e}.noteText{font-size:11.2px;text-anchor:middle;fill:#475569}
-      .core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.coreLabel{font-size:14px;font-weight:700;fill:#166534}.coreText{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
-    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#111827}.t{font-size:30px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:16}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.c{fill:#ecfeff;stroke:#06b6d4}.r{fill:#fff1f2;stroke:#f43f5e}.h{font-size:19px;font-weight:700;text-anchor:middle}.m{font-size:14px;text-anchor:middle;fill:#334155}.code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.soft{stroke:#94a3b8;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
   </defs>
-
-  <rect width="1200" height="1180" fill="#fff"/>
-  <text x="600" y="40" class="title">RAG 답변 근거성 검토</text>
-  <text x="600" y="68" class="subtitle">질문·검색 문서·답변 주장을 함께 놓고 각 문장이 실제 근거에 의해 뒷받침되는지 확인한다</text>
-
-  <rect x="34" y="92" width="1132" height="252" class="section case"/>
-  <text x="58" y="125" class="sectionTitle">1. 검토할 사례를 같은 화면에 준비</text>
-  <text x="365" y="125" class="sectionSub">답변만 읽지 말고 질문, 검색된 원문과 출처, 생성 답변을 동시에 비교한다</text>
-
-  <rect x="55" y="154" width="330" height="150" class="box question"/>
-  <text x="220" y="184" class="boxTitle">사용자 질문</text>
-  <text x="220" y="220" class="boxMain">“프리미엄 이용권은 언제</text><text x="220" y="242" class="boxMain">환불할 수 있나요?”</text>
-  <text x="220" y="275" class="boxSub">검토 기준이 되는 질문 의도</text>
-
-  <rect x="435" y="154" width="330" height="150" class="box evidence"/>
-  <text x="600" y="184" class="boxTitle">검색 근거 · chunk 2</text>
-  <text x="600" y="216" class="boxMain">결제 후 7일 이내에는</text><text x="600" y="238" class="boxMain">전액 환불이 가능합니다.</text>
-  <text x="600" y="263" class="boxMain">이용 내역에 따라 제한될 수 있습니다.</text>
-  <text x="600" y="288" class="boxSub">title=환불 기준 · 원문·출처·버전 확인</text>
-
-  <rect x="815" y="154" width="330" height="150" class="box answer"/>
-  <text x="980" y="184" class="boxTitle">검토 대상 생성 답변</text>
-  <text x="980" y="214" class="boxMain">7일 이내 전액 환불 가능하며</text><text x="980" y="236" class="boxMain">이용 내역에 따라 제한됩니다.</text>
-  <text x="980" y="260" class="boxMain" fill="#b42318">본인 확인 서류와 결제 영수증이 필요합니다.</text>
-  <text x="980" y="288" class="boxSub">문서에 있는 주장과 없는 주장이 섞여 있음</text>
-
-  <path d="M220 304V372H230V398" class="flow"/><path d="M600 304V372H600V398" class="flow"/><path d="M980 304V372H970V398" class="flow"/>
-
-  <rect x="34" y="368" width="1132" height="310" class="section claims"/>
-  <text x="58" y="401" class="sectionTitle">2. 답변을 주장 단위로 분해해 근거와 대조</text>
-  <text x="440" y="401" class="sectionSub">수치·조건·예외·필요 서류처럼 검증 가능한 문장별로 근거를 확인한다</text>
-
-  <rect x="58" y="430" width="330" height="180" class="claim supported"/>
-  <text x="223" y="459" class="claimNo">주장 1</text>
-  <text x="223" y="491" class="claimText">결제 후 7일 이내 전액 환불 가능</text>
-  <text x="223" y="524" class="claimEvidence">근거 문장과 직접 일치</text>
-  <text x="223" y="557" class="status" fill="#166534">근거 있음 · grounded</text>
-  <text x="223" y="584" class="claimEvidence">답변에 유지</text>
-
-  <rect x="435" y="430" width="330" height="180" class="claim supported"/>
-  <text x="600" y="459" class="claimNo">주장 2</text>
-  <text x="600" y="491" class="claimText">이용 내역에 따라 환불 제한 가능</text>
-  <text x="600" y="524" class="claimEvidence">근거 문장의 예외 조건과 일치</text>
-  <text x="600" y="557" class="status" fill="#166534">근거 있음 · grounded</text>
-  <text x="600" y="584" class="claimEvidence">답변에 유지</text>
-
-  <rect x="812" y="430" width="330" height="180" class="claim unsupported"/>
-  <text x="977" y="459" class="claimNo">주장 3</text>
-  <text x="977" y="491" class="claimText">본인 확인 서류와 결제 영수증 필요</text>
-  <text x="977" y="524" class="claimEvidence">검색된 문서에 해당 내용 없음</text>
-  <text x="977" y="557" class="status" fill="#b42318">근거 없음 · unsupported claim</text>
-  <text x="977" y="584" class="claimEvidence">제거하거나 추가 근거 검색</text>
-
-  <text x="600" y="650" class="boxSub">관련 문서를 검색했다는 사실만으로 답변 전체의 근거성이 보장되지는 않는다</text>
-
-  <rect x="34" y="702" width="1132" height="276" class="section review"/>
-  <text x="58" y="735" class="sectionTitle">3. 세 가지 검토 관문과 문제 유형별 수정</text>
-
-  <rect x="55" y="766" width="260" height="112" class="gate retrieval"/>
-  <text x="185" y="795" class="gateTitle">A. 검색 적합성</text>
-  <text x="185" y="824" class="gateText">질문 의도와 관련된 청크인가?</text><text x="185" y="846" class="gateText">중요한 근거가 빠지지 않았는가?</text>
-
-  <rect x="345" y="766" width="260" height="112" class="gate grounding"/>
-  <text x="475" y="795" class="gateTitle">B. 답변 근거성</text>
-  <text x="475" y="824" class="gateText">모든 핵심 주장을 문서가 뒷받침하는가?</text><text x="475" y="846" class="gateText">문서 밖 수치·조건이 추가되지 않았는가?</text>
-
-  <rect x="635" y="766" width="260" height="112" class="gate governance"/>
-  <text x="765" y="795" class="gateTitle">C. 출처·운영 안전</text>
-  <text x="765" y="824" class="gateText">출처와 chunk_id를 추적할 수 있는가?</text><text x="765" y="846" class="gateText">최신성·개인정보·접근 권한이 적절한가?</text>
-
-  <polygon points="1030,754 1142,822 1030,890 918,822" class="decision"/>
-  <text x="1030" y="816" class="decisionTitle">모든 기준 통과?</text>
-  <path d="M315 822H345" class="flow"/><path d="M605 822H635" class="flow"/><path d="M895 822H918" class="flow"/>
-
-  <rect x="55" y="900" width="250" height="58" class="fix"/>
-  <text x="180" y="923" class="fixTitle">검색 품질 문제</text><text x="180" y="945" class="fixText">질문·필터·Top-k·임계값·청킹 조정</text>
-  <rect x="325" y="900" width="250" height="58" class="fix"/>
-  <text x="450" y="923" class="fixTitle">답변 근거 문제</text><text x="450" y="945" class="fixText">근거 없는 주장 제거·추가 검색·재생성</text>
-  <rect x="595" y="900" width="250" height="58" class="fix"/>
-  <text x="720" y="923" class="fixTitle">문서 관리 문제</text><text x="720" y="945" class="fixText">문서 갱신·권한 문서 제외·재임베딩</text>
-  <path d="M1030 890V929H845" class="feedback"/><text x="930" y="914" class="branch" fill="#b42318">아니요</text>
-  <path d="M55 929H20V520H58" class="feedback"/>
-
-  <rect x="870" y="900" width="272" height="58" class="final"/>
-  <text x="1006" y="923" class="fixTitle">근거·출처 포함 최종 답변</text><text x="1006" y="945" class="fixText">근거 부족 시 부족하다고 명시</text>
-  <path d="M1142 822H1160V929H1142" class="flow"/><text x="1150" y="880" class="branch" fill="#166534">예</text>
-
-  <rect x="55" y="1002" width="1090" height="82" class="record"/>
-  <text x="600" y="1029" class="boxTitle">검토 기록 저장</text>
-  <text x="600" y="1054" class="boxSub">질문 · 검색 청크 · 생성 답변 · 주장별 판정 · 발견 문제 · 수정 근거 · 최종 출처</text>
-  <text x="600" y="1075" class="boxSub">is_retrieval_relevant · is_answer_grounded · has_unsupported_claim · reviewer_note</text>
-
-  <rect x="55" y="1102" width="330" height="52" class="note"/>
-  <text x="220" y="1123" class="noteTitle">검색과 생성은 별도 평가</text><text x="220" y="1143" class="noteText">좋은 검색 결과도 근거 없는 답변을 막아주지는 않음</text>
-  <rect x="435" y="1102" width="330" height="52" class="note"/>
-  <text x="600" y="1123" class="noteTitle">주장 단위 검토</text><text x="600" y="1143" class="noteText">답변 전체가 아니라 수치·조건·예외별로 확인</text>
-  <rect x="815" y="1102" width="330" height="52" class="core"/>
-  <text x="840" y="1134" class="coreLabel">핵심</text><text x="995" y="1135" class="coreText" style="font-size:13px">모든 핵심 주장에 확인 가능한 근거가 있어야 한다</text>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="50" class="t">검색 적합성과 답변 근거성 분리 검토</text>
+  <text x="600" y="78" class="s">검색이 맞아도 답변이 문서 밖 주장을 만들 수 있습니다.</text>
+  <rect x="75" y="150" width="260" height="130" class="card b"/>
+  <text x="205" y="184" class="h">검색 적합성</text>
+  <text x="205" y="215" class="m">질문과 검색 문서가 맞는가?</text>
+  <rect x="470" y="150" width="260" height="130" class="card g"/>
+  <text x="600" y="184" class="h">답변 근거성</text>
+  <text x="600" y="215" class="m">답변 주장이 문서에 있는가?</text>
+  <rect x="865" y="150" width="260" height="130" class="card r"/>
+  <text x="995" y="184" class="h">unsupported claim</text>
+  <text x="995" y="215" class="m">문서 밖 주장이 있는가?</text>
+  <line x1="335" y1="215" x2="470" y2="215" class="line"/>
+  <line x1="730" y1="215" x2="865" y2="215" class="line"/>
+  <rect x="110" y="420" width="250" height="120" class="card c"/>
+  <text x="235" y="454" class="h">정상 답변</text>
+  <text x="235" y="485" class="m">TRUE · TRUE · FALSE</text>
+  <rect x="475" y="420" width="250" height="120" class="card y"/>
+  <text x="600" y="454" class="h">근거 없는 주장</text>
+  <text x="600" y="485" class="m">TRUE · FALSE · TRUE</text>
+  <rect x="840" y="420" width="250" height="120" class="card p"/>
+  <text x="965" y="454" class="h">부적합 검색</text>
+  <text x="965" y="485" class="m">FALSE · TRUE · FALSE</text>
+  <rect x="310" y="630" width="580" height="70" class="card r"/>
+  <text x="600" y="664" class="h">근거가 부족하면 답변을 보류하거나 검색 조건을 조정합니다.</text>
 </svg>

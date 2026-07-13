@@ -1,1 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">Document DB와 JSON 문서 구조</text><rect x="440" y="80" width="320" height="65" class="b m"/><text x="600" y="113" class="l">JSON과 유사한 문서</text><rect x="110" y="230" width="170" height="55" class="b"/><text x="195" y="258" class="s">content_id</text><rect x="310" y="230" width="170" height="55" class="b"/><text x="395" y="258" class="s">title</text><rect x="510" y="230" width="170" height="55" class="b y"/><text x="595" y="258" class="s">tags 배열</text><rect x="710" y="230" width="170" height="55" class="b g"/><text x="795" y="258" class="s">creator 객체</text><rect x="910" y="230" width="170" height="55" class="b p"/><text x="995" y="258" class="s">options 객체</text><rect x="680" y="410" width="150" height="50" class="b g"/><text x="755" y="435" class="s">name</text><rect x="850" y="410" width="150" height="50" class="b g"/><text x="925" y="435" class="s">specialty</text><rect x="830" y="560" width="150" height="50" class="b p"/><text x="905" y="585" class="s">online</text><rect x="1000" y="560" width="150" height="50" class="b p"/><text x="1075" y="585" class="s">certificate</text><rect x="260" y="560" width="300" height="65" class="b y"/><text x="410" y="588" class="l">유연한 필드 구조</text><text x="410" y="612" class="s">하지만 설계는 필요</text><line x1="520" y1="145" x2="195" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="560" y1="145" x2="395" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="145" x2="595" y2="230" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="640" y1="145" x2="795" y2="230" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="145" x2="995" y2="230" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="795" y1="285" x2="755" y2="410" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="795" y1="285" x2="925" y2="410" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="995" y1="285" x2="905" y2="560" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="995" y1="285" x2="1075" y2="560" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="595" y1="285" x2="410" y2="560" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="680" viewBox="0 0 1200 680">
+  <title id="title">Document JSON 구조</title>
+  <desc id="desc">강의 문서를 함께 생성하고 조회하고 수정하는 구조를 보여 줍니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#0f172a}
+      .title{font-size:32px;font-weight:800;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:18}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .yellow{fill:#fffbeb;stroke:#f59e0b}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .label{font-size:20px;font-weight:700;text-anchor:middle}
+      .small{font-size:15px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}
+      .line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <text x="600" y="52" class="title">Document JSON 구조</text>
+  <text x="600" y="80" class="subtitle">강의 문서를 함께 생성하고 조회하고 수정하는 구조를 보여 줍니다.</text>
+  <rect x="70" y="150" width="300" height="330" class="card blue"/>
+  <text x="220" y="184" class="label">course document</text>
+  <text x="220" y="218" class="small">course_code: DB-101</text>
+  <text x="220" y="242" class="small">title: 데이터베이스 입문</text>
+  <rect x="470" y="120" width="300" height="390" class="card green"/>
+  <text x="620" y="154" class="label">metadata</text>
+  <text x="620" y="188" class="small">level: basic</text>
+  <text x="620" y="212" class="small">tags: SQL, PostgreSQL, DB</text>
+  <text x="620" y="236" class="small">instructor: 김강사</text>
+  <text x="620" y="260" class="small">options: online, certificate</text>
+  <rect x="850" y="210" width="250" height="180" class="card yellow"/>
+  <text x="975" y="244" class="label">설계 주의</text>
+  <text x="975" y="278" class="small">문서 크기</text>
+  <text x="975" y="302" class="small">반복 값</text>
+  <text x="975" y="326" class="small">깊은 중첩</text>
+  <text x="975" y="350" class="small">필드명 일관성</text>
+  <line x1="370" y1="300" x2="470" y2="300" class="line"/>
+  <line x1="770" y1="310" x2="850" y2="300" class="line"/>
+</svg>

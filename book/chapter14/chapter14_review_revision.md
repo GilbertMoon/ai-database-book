@@ -1,85 +1,66 @@
-# Chapter 14 출간용 문체 정리 기록
+# Chapter 14 리뷰 반영 기록
 
-## 대상 원고
+## 대상
 
-```text
-book/chapter14/chapter14.md
-```
+Chapter 14. Vector DB와 RAG 기초
 
-## 목적
+## 반영 요약
 
-Chapter 14를 일반 실용서 문체에 맞게 정리한 내용을 기록합니다.
+이번 수정에서는 Chapter 14를 검색 방식 비교, 임베딩 조건, pgvector의 정확한 거리 연산자, RAG의 근거 검토 흐름 중심으로 재정리했습니다. Chapter 13과 Chapter 15 파일은 수정하지 않았습니다.
 
----
+## 주요 변경 사항
 
-## 1. 리뷰 결과 요약
+| 영역 | 반영 내용 |
+|---|---|
+| 본문 순서 | 그림 14-1부터 14-8까지 본문 흐름에 맞게 재배치 |
+| 검색 용어 | 구조화 조건 검색, 키워드 검색, 벡터 의미 검색, 혼합 검색으로 보정 |
+| SQL 설명 | 벡터 검색도 PostgreSQL에서는 SQL로 실행할 수 있음을 명시 |
+| 임베딩 | 같은 모델, 버전, 차원, 전처리, 거리 함수 조건 추가 |
+| Vector DB | 임베딩 생성 주체가 아니라 벡터 저장과 검색 기능으로 설명 |
+| 거리 함수 | `<->` L2 거리, `<=>` 코사인 거리, `1 - cosine distance` 설명 추가 |
+| Top-k | 상대 순위와 관련성 판정을 분리 |
+| 정확/근사 검색 | 기본 exact search와 HNSW/IVFFlat approximate index 구분 |
+| SQL | Section A/B 데이터셋을 같은 7개 문서로 통일 |
+| 수동 벡터 | `manual-demo-3d`가 실제 임베딩 결과가 아님을 명시 |
+| RAG | 모델 재학습이 아니라 검색 문서를 컨텍스트로 제공하는 방식으로 설명 |
+| 평가 | 검색 적합성과 답변 근거성, unsupported claim을 분리 |
+| 문서 갱신 | 문서 변경, 삭제, 재임베딩, 접근 권한 필터 설명 추가 |
+| 이미지 | SVG 8개를 800px 이하 단순 구조로 갱신 |
+| 활동지 | 점수/배점보다 자기 점검과 결과 기록 중심으로 변경 |
 
-Chapter 14는 Vector DB와 RAG의 기본 개념을 처음 접하는 독자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
+## 공식 pgvector 확인 결과
 
-본문, 실습 SQL, 활동 자료, 도식, RAG 답변 검토 흐름이 다음과 같이 연결되어 있습니다.
+pgvector 공식 README를 확인해 다음 개념을 본문과 README에 반영했습니다.
 
-| 구성 요소 | 상태 | 비고 |
-| --- | --- | --- |
-| 본문 원고 | 완료 | 임베딩, 벡터 검색, Vector DB, pgvector, 청킹, RAG 설명 포함 |
-| 실습 SQL | 완료 | `code/chapter14/vector_rag_practice.sql` 작성 완료 |
-| 코드 README | 완료 | `code/chapter14/README.md` 작성 완료 |
-| 활동 자료 | 완료 | `book/chapter14/chapter14_activity.md` 작성 완료 |
-| 도식 설계 | 완료 | `images/chapter14/README.md` 작성 완료 |
-| Mermaid 원본 | 완료 | 8종 작성 완료 |
-| SVG 도식 | 완료 | 8종 생성 완료 |
-| 본문 그림 삽입 | 완료 | 그림 14-1부터 그림 14-8까지 삽입 완료 |
-| RAG 답변 검토 흐름 | 완료 | 검색 적합성, 근거 충실성, 환각 가능성, 출처, 최신성, 개인정보 검토 포함 |
+- `<->`: L2 또는 Euclidean distance
+- `<=>`: cosine distance
+- `1 - (embedding <=> query)`: cosine similarity 계산 방식
+- 기본 검색: exact nearest neighbor search
+- HNSW, IVFFlat: approximate nearest neighbor search index
+- approximate index는 속도를 얻는 대신 일부 recall을 희생할 수 있음
 
----
+## SQL 기대 결과
 
-## 2. 반영 완료 항목
+| 항목 | 기대 행 수 |
+|---|---:|
+| `simple_document_chunks` | 7 |
+| `rag_search_logs` | 3 |
+| `rag_answer_reviews` | 3 |
 
-| 보완 항목 | 반영 상태 | 반영 위치 |
-| --- | --- | --- |
-| 리뷰 체크리스트 작성 | 완료 | `notes/chapter14_review_checklist.md` |
-| 리뷰 후 보완 반영 기록 | 완료 | `book/chapter14/chapter14_review_revision.md` |
-| 본문 그림 링크와 캡션 삽입 | 완료 | Chapter 14 본문 전반 |
-| 도식 설계 문서 상태 갱신 | 완료 | `images/chapter14/README.md` |
-| README 진행 상태 갱신 | 완료 | `README.md` |
-| TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
-| Chapter 상태 문구 변경 | 완료 | `book/chapter14/chapter14.md` 상단 |
-| 실용서형 표현 정리 | 완료 | Chapter 14 본문, 실습 자료 |
-| 프로젝트 점검 표현 전환 | 완료 | Chapter 14 실습 자료 17~18장 |
-| 서비스 공지 예시 정리 | 완료 | Chapter 14 본문, 실습 자료 |
+환불 질문 Top-3 예상 순위는 `구독 취소`, `환불 기준`, `이용권 변경`입니다.
 
----
+## 미확인 항목
 
-## 3. 보완 판단
+| 항목 | 상태 | 이유 |
+|---|---|---|
+| PostgreSQL Section B 실제 실행 | 미확인 | 현재 환경에서 `psql` 명령 사용 불가 |
+| pgvector Section A 실제 실행 | 미확인 | 현재 환경에서 `psql` 및 pgvector 실행 불가 |
+| GitHub/브라우저 렌더링 | 미확인 | 자동 렌더링 검증 도구 미사용 |
+| Word/PDF/eBook 변환 | 미확인 | 변환 작업 미수행 |
 
-현재 단계에서 추가적인 본문 내용 보강은 필요하지 않습니다.
+## 추가 확인 권장
 
-다만 출판 변환 단계에서는 다음을 다시 확인해야 합니다.
-
-```text
-- SVG 도식이 PDF 변환 시 정상 표시되는가?
-- Word 또는 eBook 변환 시 그림 크기가 적절한가?
-- SQL 코드 블록이 출판물에서 적절히 줄바꿈되는가?
-- 긴 검토표와 완성도 점검표가 PDF/Word 변환 시 가독성을 유지하는가?
-- PostgreSQL 환경에서 pgvector 미설치 대체 실습 Section B가 정상 동작하는가?
-- pgvector 설치 환경에서는 Section A가 정상 동작하는가?
-```
-
----
-
-## 4. 최종 반영 상태
-
-| 항목 | 상태 |
-| --- | --- |
-| 리뷰 체크리스트 작성 | 완료 |
-| 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 완료 |
-| Chapter 14 1차 완료 판정 | 완료 |
-
----
-
-## 5. 결론
-
-```text
-Chapter 14는 일반 독자가 혼자 읽고 따라갈 수 있는 실용서형 문체로 1차 정리했다.
-다음 작업은 Chapter 15를 두 번째 실전 프로젝트 장으로 정리하는 것이다.
-```
+- PostgreSQL 환경에서 `code/chapter14/vector_rag_practice.sql` Section B를 실행한다.
+- pgvector가 준비된 환경에서 Section A의 주석을 해제해 Top-3 순서를 비교한다.
+- 브라우저 또는 GitHub 미리보기에서 SVG 텍스트 위치를 확인한다.
+- Word/PDF/eBook 변환 후 SVG 축소 상태의 가독성을 확인한다.

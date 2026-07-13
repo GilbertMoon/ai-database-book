@@ -1,1 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.p{fill:#faf5ff;stroke:#805ad5}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">NoSQL 유형 분류</text><rect x="440" y="80" width="320" height="65" class="b m"/><text x="600" y="113" class="l">NoSQL</text><rect x="90" y="230" width="230" height="70" class="b g"/><text x="205" y="258" class="l">Key-Value</text><text x="205" y="282" class="s">키와 값</text><rect x="360" y="230" width="230" height="70" class="b y"/><text x="475" y="258" class="l">Document</text><text x="475" y="282" class="s">JSON 문서</text><rect x="630" y="230" width="230" height="70" class="b p"/><text x="745" y="258" class="l">Column-Family</text><text x="745" y="282" class="s">대규모 컬럼 묶음</text><rect x="900" y="230" width="230" height="70" class="b m"/><text x="1015" y="258" class="l">Graph</text><text x="1015" y="282" class="s">노드와 관계</text><rect x="70" y="430" width="160" height="55" class="b"/><text x="150" y="458" class="s">캐시</text><rect x="240" y="430" width="160" height="55" class="b"/><text x="320" y="458" class="s">세션</text><rect x="340" y="560" width="160" height="55" class="b"/><text x="420" y="588" class="s">프로필</text><rect x="510" y="560" width="160" height="55" class="b"/><text x="590" y="588" class="s">콘텐츠 옵션</text><rect x="630" y="430" width="160" height="55" class="b"/><text x="710" y="458" class="s">이벤트</text><rect x="800" y="430" width="160" height="55" class="b"/><text x="880" y="458" class="s">로그</text><rect x="900" y="560" width="160" height="55" class="b"/><text x="980" y="588" class="s">추천</text><rect x="990" y="430" width="160" height="55" class="b"/><text x="1070" y="458" class="s">관계 탐색</text><line x1="530" y1="145" x2="205" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="575" y1="145" x2="475" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="625" y1="145" x2="745" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="670" y1="145" x2="1015" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="205" y1="300" x2="150" y2="430" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="205" y1="300" x2="320" y2="430" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="475" y1="300" x2="420" y2="560" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="475" y1="300" x2="590" y2="560" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="745" y1="300" x2="710" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="745" y1="300" x2="880" y2="430" stroke="#805ad5" stroke-width="2" marker-end="url(#a)"/><line x1="1015" y1="300" x2="1070" y2="430" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="1015" y1="300" x2="980" y2="560" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="680" viewBox="0 0 1200 680">
+  <title id="title">NoSQL 유형 정리</title>
+  <desc id="desc">Chapter 12에서는 네 가지 유형만 비교합니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#0f172a}
+      .title{font-size:32px;font-weight:800;text-anchor:middle}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:18}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .yellow{fill:#fffbeb;stroke:#f59e0b}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .label{font-size:20px;font-weight:700;text-anchor:middle}
+      .small{font-size:15px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}
+      .line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <text x="600" y="52" class="title">NoSQL 유형 정리</text>
+  <text x="600" y="80" class="subtitle">Chapter 12에서는 네 가지 유형만 비교합니다.</text>
+  <rect x="475" y="120" width="250" height="95" class="card purple"/>
+  <text x="600" y="154" class="label">NoSQL 계열</text>
+  <text x="600" y="188" class="small">관계형 테이블 밖의</text>
+  <text x="600" y="212" class="small">다양한 저장 모델</text>
+  <rect x="80" y="300" width="230" height="120" class="card blue"/>
+  <text x="195" y="334" class="label">Key-Value DB</text>
+  <text x="195" y="368" class="small">정확한 키 조회</text>
+  <text x="195" y="392" class="small">세션 · 캐시</text>
+  <rect x="350" y="300" width="230" height="120" class="card green"/>
+  <text x="465" y="334" class="label">Document DB</text>
+  <text x="465" y="368" class="small">문서 단위 저장</text>
+  <text x="465" y="392" class="small">강의 메타데이터</text>
+  <rect x="620" y="300" width="230" height="120" class="card yellow"/>
+  <text x="735" y="334" class="label">Column-Family DB</text>
+  <text x="735" y="368" class="small">partition key</text>
+  <text x="735" y="392" class="small">event_time 정렬</text>
+  <rect x="890" y="300" width="230" height="120" class="card cyan"/>
+  <text x="1005" y="334" class="label">Graph DB</text>
+  <text x="1005" y="368" class="small">노드와 관계</text>
+  <text x="1005" y="392" class="small">추천 탐색</text>
+  <line x1="520" y1="215" x2="195" y2="300" class="line"/>
+  <line x1="570" y1="215" x2="465" y2="300" class="line"/>
+  <line x1="630" y1="215" x2="735" y2="300" class="line"/>
+  <line x1="680" y1="215" x2="1005" y2="300" class="line"/>
+</svg>

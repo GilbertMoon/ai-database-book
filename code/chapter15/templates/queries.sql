@@ -1,150 +1,93 @@
--- Chapter 15. 실전 프로젝트 2 - queries.sql
--- 목적: 요구사항을 증명하는 조회, JOIN, 집계와 검증 SQL을 작성한다.
--- 실행 순서: schema.sql → seed.sql → queries.sql
+-- Chapter 15 template verification queries
 
--- ============================================================
--- 1. 기본 조회
--- ============================================================
+-- REQ-01: 학생과 질문 연결 확인
+SELECT q.id, s.email, q.title, q.status
+FROM questions q
+JOIN students s ON s.id = q.student_id
+ORDER BY q.id;
 
-SELECT id, name, email, role, created_at
-FROM example_users
-ORDER BY id;
+-- REQ-05: 질문별 답변 수
+SELECT q.title, COUNT(a.id) AS answer_count
+FROM questions q
+LEFT JOIN answers a ON a.question_id = q.id
+GROUP BY q.id, q.title
+ORDER BY q.id;
 
-SELECT id, title, status, created_at, updated_at
-FROM example_items
-ORDER BY id;
+-- REQ-06: 답변과 튜터 연결 확인
+SELECT q.title, t.name AS tutor_name, a.answer_body
+FROM answers a
+JOIN questions q ON q.id = a.question_id
+JOIN tutors t ON t.id = a.tutor_id
+ORDER BY q.id, a.id;
 
--- ============================================================
--- 2. 조건 조회
--- ============================================================
+-- REQ-07: 질문과 학습 자료 N:M 조회
+SELECT q.title AS question_title, lm.title AS material_title, qm.display_order
+FROM question_materials qm
+JOIN questions q ON q.id = qm.question_id
+JOIN learning_materials lm ON lm.id = qm.material_id
+ORDER BY q.id, qm.display_order;
 
-SELECT id, title, status
-FROM example_items
-WHERE status = 'active'
-ORDER BY id;
+-- REQ-08: 질문이 없는 학생 조회, 예상 1명
+SELECT s.name, COUNT(q.id) AS question_count
+FROM students s
+LEFT JOIN questions q ON q.student_id = s.id
+GROUP BY s.id, s.name
+HAVING COUNT(q.id) = 0;
 
--- ============================================================
--- 3. INNER JOIN: 관계가 있는 데이터만 조회
--- ============================================================
+-- REQ-09: 연결되지 않은 학습 자료 조회, 예상 1건
+SELECT lm.title, COUNT(qm.question_id) AS linked_question_count
+FROM learning_materials lm
+LEFT JOIN question_materials qm ON qm.material_id = lm.id
+GROUP BY lm.id, lm.title
+HAVING COUNT(qm.question_id) = 0;
 
-SELECT
-    ui.id AS relation_id,
-    u.id AS user_id,
-    u.name AS user_name,
-    i.id AS item_id,
-    i.title AS item_title,
-    ui.relation_role,
-    ui.created_at
-FROM example_user_items AS ui
-JOIN example_users AS u ON ui.user_id = u.id
-JOIN example_items AS i ON ui.item_id = i.id
-ORDER BY ui.id;
+-- 정합성 이상 확인: 모두 0행이어야 합니다.
+SELECT q.id, q.title
+FROM questions q
+LEFT JOIN students s ON s.id = q.student_id
+WHERE s.id IS NULL;
 
--- ============================================================
--- 4. LEFT JOIN과 집계: 관계가 없는 사용자도 포함
--- ============================================================
+SELECT a.id
+FROM answers a
+LEFT JOIN questions q ON q.id = a.question_id
+LEFT JOIN tutors t ON t.id = a.tutor_id
+WHERE q.id IS NULL OR t.id IS NULL;
 
-SELECT
-    u.id,
-    u.name,
-    COUNT(ui.id) AS item_count
-FROM example_users AS u
-LEFT JOIN example_user_items AS ui ON ui.user_id = u.id
-GROUP BY u.id, u.name
-ORDER BY item_count DESC, u.id;
+SELECT qm.question_id, qm.material_id
+FROM question_materials qm
+LEFT JOIN questions q ON q.id = qm.question_id
+LEFT JOIN learning_materials lm ON lm.id = qm.material_id
+WHERE q.id IS NULL OR lm.id IS NULL;
 
--- COUNT(*)를 사용하면 관계가 없는 사용자의 가상 행도 1로 셀 수 있다.
--- LEFT JOIN 집계에서는 자식 테이블의 실제 PK인 COUNT(ui.id)를 사용하는 것이 안전하다.
+-- FK 개수 확인, 예상 5개
+SELECT COUNT(*) AS foreign_key_count
+FROM information_schema.table_constraints
+WHERE table_schema = current_schema()
+  AND constraint_type = 'FOREIGN KEY'
+  AND table_name IN ('questions', 'answers', 'question_materials');
 
--- ============================================================
--- 5. 상태별 집계
--- ============================================================
+-- 인덱스 후보: 실제 조회 패턴을 기준으로 검토만 합니다.
+-- CREATE INDEX idx_questions_student_status_created ON questions (student_id, status, created_at DESC);
+-- CREATE INDEX idx_answers_question_id ON answers (question_id);
+-- CREATE INDEX idx_question_materials_material_id ON question_materials (material_id);
 
-SELECT
-    status,
-    COUNT(*) AS item_count
-FROM example_items
-GROUP BY status
-ORDER BY status;
+-- 트랜잭션 예시: 실제 반영하지 않고 ROLLBACK합니다.
+BEGIN;
+INSERT INTO answers (question_id, tutor_id, answer_body)
+SELECT q.id, t.id, '트랜잭션 테스트 답변입니다.'
+FROM questions q
+CROSS JOIN tutors t
+WHERE q.status = 'open'
+ORDER BY q.id, t.id
+LIMIT 1;
+SELECT COUNT(*) AS answers_inside_transaction FROM answers;
+ROLLBACK;
 
--- ============================================================
--- 6. 검증 쿼리: 어떤 사용자와도 연결되지 않은 항목
--- ============================================================
-
-SELECT
-    i.id,
-    i.title,
-    i.status
-FROM example_items AS i
-LEFT JOIN example_user_items AS ui ON ui.item_id = i.id
-WHERE ui.id IS NULL
-ORDER BY i.id;
-
--- ============================================================
--- 7. 검증 쿼리: 어떤 항목과도 연결되지 않은 사용자
--- ============================================================
-
-SELECT
-    u.id,
-    u.name,
-    u.email
-FROM example_users AS u
-LEFT JOIN example_user_items AS ui ON ui.user_id = u.id
-WHERE ui.id IS NULL
-ORDER BY u.id;
-
--- ============================================================
--- 8. 검증 쿼리: 외래키 관계 확인
--- ============================================================
--- FK가 정상적으로 설정되어 있다면 아래 결과는 0건이어야 한다.
--- 제약조건을 비활성화하거나 외부 데이터 적재를 사용한 경우 점검에 활용할 수 있다.
-
-SELECT
-    ui.id,
-    ui.user_id,
-    ui.item_id
-FROM example_user_items AS ui
-LEFT JOIN example_users AS u ON ui.user_id = u.id
-LEFT JOIN example_items AS i ON ui.item_id = i.id
-WHERE u.id IS NULL OR i.id IS NULL;
-
--- ============================================================
--- 9. 안전한 UPDATE 흐름 예시
--- ============================================================
--- 실제 변경 전 같은 조건으로 대상을 먼저 조회한다.
-
-SELECT id, title, status
-FROM example_items
-WHERE id = 2;
-
--- 필요할 때만 실행한다.
--- UPDATE example_items
--- SET status = 'inactive',
---     updated_at = CURRENT_TIMESTAMP
--- WHERE id = 2;
-
--- 변경 후 다시 같은 조건으로 확인한다.
--- SELECT id, title, status, updated_at
--- FROM example_items
--- WHERE id = 2;
-
--- ============================================================
--- 10. 실제 프로젝트 핵심 SQL 작성 영역
--- ============================================================
--- 각 SQL 위에 어떤 요구사항을 확인하는지 주석을 남긴다.
-
--- 요구사항:
--- SELECT ...
-
--- ============================================================
--- 11. SQL 점검
--- ============================================================
--- 1. 주요 테이블의 기본 조회가 있는가?
--- 2. 실제 검색 기능을 재현하는 조건 조회가 있는가?
--- 3. 필요한 정보를 연결하는 JOIN이 있는가?
--- 4. LEFT JOIN에서 COUNT(*)와 COUNT(child.id)의 차이를 검토했는가?
--- 5. GROUP BY 또는 집계 SQL이 있는가?
--- 6. 최근·상위 데이터를 위한 ORDER BY와 LIMIT가 필요한가?
--- 7. 누락, 불일치 또는 업무 규칙 위반을 찾는 검증 SQL이 있는가?
--- 8. UPDATE와 DELETE 전에 대상 확인 SELECT가 있는가?
--- 9. 실행 결과가 어떤 요구사항을 증명하는지 설명할 수 있는가?
+-- 최종 요약
+SELECT 'students' AS table_name, COUNT(*) AS row_count FROM students
+UNION ALL SELECT 'tutors', COUNT(*) FROM tutors
+UNION ALL SELECT 'questions', COUNT(*) FROM questions
+UNION ALL SELECT 'answers', COUNT(*) FROM answers
+UNION ALL SELECT 'learning_materials', COUNT(*) FROM learning_materials
+UNION ALL SELECT 'question_materials', COUNT(*) FROM question_materials
+ORDER BY table_name;

@@ -1,103 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
-  <title id="title">문서 청킹 구조</title>
-  <desc id="desc">긴 서비스 운영 안내 문서를 통째로 하나의 벡터로 만들 때의 문제를 보여 주고, 제목·문단·항목·주제 경계에 따라 의미 단위 청크로 나눈 뒤 부모 문서 관계와 순서, 원문, 메타데이터, 임베딩을 저장하고 관련 청크를 검색하는 과정을 설명한다.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760">
+  <title id="title">원문을 의미 단위 청크로 나누기</title>
+  <desc id="desc">청크에는 본문뿐 아니라 출처, 버전, 권한 메타데이터가 필요합니다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
-    <style>
-      text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#172033}
-      .title{font-size:27px;font-weight:700;text-anchor:middle}.subtitle{font-size:15px;text-anchor:middle;fill:#475569}
-      .section{fill:#f8fafc;stroke:#a8b3c4;stroke-width:1.5;rx:16}.sectionTitle{font-size:18px;font-weight:700}.sectionSub{font-size:12px;fill:#64748b}
-      .stage{fill:#fff;stroke-width:1.6;rx:11}.doc{stroke:#3b82c4}.warn{stroke:#d9534f}.rule{stroke:#d69e2e}.store{stroke:#3c9a5f}
-      .stageTitle{font-size:15px;font-weight:700;text-anchor:middle}.stageMain{font-size:13px;font-weight:600;text-anchor:middle}.stageSub{font-size:12px;text-anchor:middle;fill:#475569}
-      .flow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
-      .chunk{fill:#fff;stroke:#94a3b8;stroke-width:1.3;rx:10}.chunkHit{fill:#f2fbf5;stroke:#62b47a;stroke-width:1.6;rx:10}
-      .chunkId{font-size:12px;font-weight:700;text-anchor:middle;fill:#64748b}.chunkTitle{font-size:14px;font-weight:700;text-anchor:middle}.meta{font-size:11.5px;text-anchor:middle;fill:#64748b}
-      .parent{fill:#eef5ff;stroke:#78a6df;stroke-width:1.4;rx:9}.parentText{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#334155}
-      .trade{fill:#fff;stroke-width:1.4;rx:10}.large{stroke:#d9534f}.small{stroke:#d69e2e}.good{stroke:#3c9a5f}.overlap{stroke:#7c5cc4}
-      .tradeTitle{font-size:13.5px;font-weight:700;text-anchor:middle}.tradeText{font-size:11.5px;text-anchor:middle;fill:#475569}
-      .search{fill:#f5f1ff;stroke:#7c5cc4;stroke-width:1.6;rx:11}.result{fill:#f2fbf5;stroke:#62b47a;stroke-width:1.6;rx:11}
-      .boxTitle{font-size:15px;font-weight:700;text-anchor:middle}.boxText{font-size:12px;text-anchor:middle;fill:#475569}
-      .label{font-size:12px;font-weight:700;text-anchor:middle}.core{fill:#ecfdf3;stroke:#62b47a;stroke-width:1.6;rx:11}.coreLabel{font-size:14px;font-weight:700;fill:#166534}.coreText{font-size:16px;font-weight:700;text-anchor:middle;fill:#166534}
-    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>text{font-family:'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;fill:#111827}.t{font-size:30px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:16}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.c{fill:#ecfeff;stroke:#06b6d4}.r{fill:#fff1f2;stroke:#f43f5e}.h{font-size:19px;font-weight:700;text-anchor:middle}.m{font-size:14px;text-anchor:middle;fill:#334155}.code{font-family:Consolas,'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif;font-size:14px;text-anchor:middle;fill:#1d4ed8;font-weight:700}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.soft{stroke:#94a3b8;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
   </defs>
-
-  <rect width="1200" height="1120" fill="#fff"/>
-  <text x="600" y="40" class="title">문서 청킹 구조</text>
-  <text x="600" y="68" class="subtitle">긴 문서를 검색 가능한 의미 단위로 나누고, 각 조각의 문맥과 출처를 함께 관리한다</text>
-
-  <rect x="34" y="92" width="1132" height="236" class="section"/>
-  <text x="58" y="126" class="sectionTitle">1. 긴 문서를 의미 단위 검색 조각으로 변환</text>
-  <text x="450" y="126" class="sectionSub">문서를 통째로 임베딩하면 여러 주제가 한 벡터에 섞여 정확한 부분을 찾기 어렵다</text>
-
-  <rect x="55" y="154" width="240" height="132" class="stage doc"/>
-  <text x="175" y="185" class="stageTitle">긴 원문 문서</text>
-  <text x="175" y="216" class="stageMain">서비스 운영 안내</text>
-  <text x="175" y="242" class="stageSub">이용권 · 환불 · 보안 · 문의</text>
-  <text x="175" y="264" class="stageSub">여러 주제가 한 문서에 포함</text>
-
-  <rect x="330" y="154" width="240" height="132" class="stage warn"/>
-  <text x="450" y="185" class="stageTitle">통째로 하나의 벡터</text>
-  <text x="450" y="216" class="stageMain">여러 의미가 평균처럼 섞임</text>
-  <text x="450" y="242" class="stageSub">“환불 기준” 질문에도</text>
-  <text x="450" y="264" class="stageSub">무관한 내용이 함께 검색될 수 있음</text>
-
-  <rect x="605" y="154" width="240" height="132" class="stage rule"/>
-  <text x="725" y="185" class="stageTitle">청킹 기준 선택</text>
-  <text x="725" y="216" class="stageMain">제목 · 문단 · 항목 · 주제</text>
-  <text x="725" y="242" class="stageSub">문장 중간보다 의미 경계 우선</text>
-  <text x="725" y="264" class="stageSub">독립적으로 이해 가능한 범위</text>
-
-  <rect x="880" y="154" width="265" height="132" class="stage store"/>
-  <text x="1012" y="185" class="stageTitle">청크별 임베딩·저장</text>
-  <text x="1012" y="216" class="stageMain">원문 · 메타데이터 · embedding</text>
-  <text x="1012" y="242" class="stageSub">document_id · chunk_id · order</text>
-  <text x="1012" y="264" class="stageSub">Vector DB 또는 pgvector</text>
-
-  <path d="M295 220H330" class="flow"/><path d="M570 220H605" class="flow"/><path d="M845 220H880" class="flow"/>
-
-  <rect x="34" y="350" width="1132" height="340" class="section"/>
-  <text x="58" y="384" class="sectionTitle">2. 같은 부모 문서에서 생성된 의미 단위 청크</text>
-  <text x="520" y="384" class="sectionSub">각 청크는 개별 검색 단위이지만 원본 문서와 순서 관계는 유지한다</text>
-
-  <rect x="70" y="410" width="1060" height="42" class="parent"/>
-  <text x="600" y="436" class="parentText">부모 문서 document_id = 10 · title = 서비스 운영 안내 · source = service_guide.pdf</text>
-
-  <rect x="70" y="474" width="320" height="82" class="chunk"/>
-  <text x="230" y="498" class="chunkId">chunk 1 · order 1</text><text x="230" y="527" class="chunkTitle">이용권 안내</text><text x="230" y="548" class="meta">독립 검색 단위</text>
-  <rect x="440" y="474" width="320" height="82" class="chunkHit"/>
-  <text x="600" y="498" class="chunkId">chunk 2 · order 2</text><text x="600" y="527" class="chunkTitle">환불 기준</text><text x="600" y="548" class="meta">질문의 핵심 근거</text>
-  <rect x="810" y="474" width="320" height="82" class="chunk"/>
-  <text x="970" y="498" class="chunkId">chunk 3 · order 3</text><text x="970" y="527" class="chunkTitle">계정 보안 안내</text><text x="970" y="548" class="meta">다른 주제</text>
-
-  <rect x="70" y="582" width="320" height="82" class="chunk"/>
-  <text x="230" y="606" class="chunkId">chunk 4 · order 4</text><text x="230" y="635" class="chunkTitle">고객지원 문의 방법</text><text x="230" y="656" class="meta">연속 순서 유지</text>
-  <rect x="440" y="582" width="320" height="82" class="chunkHit"/>
-  <text x="600" y="606" class="chunkId">chunk 5 · order 5</text><text x="600" y="635" class="chunkTitle">환불 및 구독 취소 안내</text><text x="600" y="656" class="meta">질문의 보조 근거</text>
-  <rect x="810" y="582" width="320" height="82" class="chunk"/>
-  <text x="970" y="606" class="chunkId">chunk 6 · order 6</text><text x="970" y="635" class="chunkTitle">문의 방법</text><text x="970" y="656" class="meta">같은 부모 문서 소속</text>
-
-  <rect x="34" y="712" width="1132" height="168" class="section"/>
-  <text x="58" y="746" class="sectionTitle">3. 청크 크기와 겹침의 균형</text>
-  <text x="360" y="746" class="sectionSub">정답 크기는 하나가 아니며 문서 구조와 실제 검색 결과를 보고 조정한다</text>
-
-  <rect x="58" y="770" width="250" height="84" class="trade large"/>
-  <text x="183" y="796" class="tradeTitle">너무 큰 청크</text><text x="183" y="821" class="tradeText">문맥은 많지만 여러 주제와</text><text x="183" y="840" class="tradeText">무관한 내용이 함께 포함</text>
-  <rect x="336" y="770" width="250" height="84" class="trade small"/>
-  <text x="461" y="796" class="tradeTitle">너무 작은 청크</text><text x="461" y="821" class="tradeText">정확한 위치는 찾기 쉽지만</text><text x="461" y="840" class="tradeText">답변에 필요한 문맥 부족</text>
-  <rect x="614" y="770" width="250" height="84" class="trade good"/>
-  <text x="739" y="796" class="tradeTitle">의미 단위 청크</text><text x="739" y="821" class="tradeText">검색 정확성과 답변 문맥의</text><text x="739" y="840" class="tradeText">균형을 우선</text>
-  <rect x="892" y="770" width="250" height="84" class="trade overlap"/>
-  <text x="1017" y="796" class="tradeTitle">선택적 겹침</text><text x="1017" y="821" class="tradeText">경계 문맥은 보존하지만</text><text x="1017" y="840" class="tradeText">과하면 중복 저장·검색 증가</text>
-
-  <rect x="34" y="902" width="1132" height="130" class="section"/>
-  <rect x="58" y="930" width="280" height="76" class="search"/>
-  <text x="198" y="958" class="boxTitle">사용자 질문</text><text x="198" y="984" class="boxText">“환불 기준은 무엇인가요?”</text>
-  <rect x="460" y="930" width="280" height="76" class="search"/>
-  <text x="600" y="958" class="boxTitle">관련 청크 검색</text><text x="600" y="984" class="boxText">핵심 chunk 2 · 보조 chunk 5</text>
-  <rect x="862" y="930" width="280" height="76" class="result"/>
-  <text x="1002" y="958" class="boxTitle">RAG 근거로 전달</text><text x="1002" y="984" class="boxText">관련 부분만 LLM 컨텍스트에 포함</text>
-  <path d="M338 968H460" class="flow"/><path d="M740 968H862" class="flow"/>
-
-  <rect x="165" y="1054" width="870" height="48" class="core"/>
-  <text x="192" y="1083" class="coreLabel">핵심 원칙</text><text x="650" y="1084" class="coreText">좋은 청킹은 검색 정확성과 답변에 필요한 문맥을 함께 확보한다</text>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="50" class="t">원문을 의미 단위 청크로 나누기</text>
+  <text x="600" y="78" class="s">청크에는 본문뿐 아니라 출처, 버전, 권한 메타데이터가 필요합니다.</text>
+  <rect x="60" y="160" width="230" height="130" class="card b"/>
+  <text x="175" y="194" class="h">원문 문서</text>
+  <text x="175" y="225" class="m">service_notice.md</text>
+  <text x="175" y="247" class="m">공지 전체</text>
+  <rect x="380" y="145" width="220" height="110" class="card g"/>
+  <text x="490" y="179" class="h">chunk 1</text>
+  <text x="490" y="210" class="m">이용권 변경</text>
+  <rect x="380" y="295" width="220" height="110" class="card g"/>
+  <text x="490" y="329" class="h">chunk 2</text>
+  <text x="490" y="360" class="m">환불 기준</text>
+  <rect x="380" y="445" width="220" height="110" class="card g"/>
+  <text x="490" y="479" class="h">chunk 3</text>
+  <text x="490" y="510" class="m">구독 취소</text>
+  <rect x="780" y="230" width="300" height="170" class="card p"/>
+  <text x="930" y="264" class="h">메타데이터</text>
+  <text x="930" y="295" class="m">source · chunk_no</text>
+  <text x="930" y="317" class="m">source_version</text>
+  <text x="930" y="339" class="m">updated_at · 권한</text>
+  <line x1="290" y1="225" x2="380" y2="200" class="line"/>
+  <line x1="290" y1="225" x2="380" y2="350" class="line"/>
+  <line x1="290" y1="225" x2="380" y2="500" class="line"/>
+  <line x1="600" y1="350" x2="780" y2="315" class="line"/>
+  <rect x="285" y="620" width="630" height="80" class="card y"/>
+  <text x="600" y="654" class="h">문서가 바뀌면 청크와 임베딩도 함께 갱신해야 합니다.</text>
+  <text x="600" y="685" class="m">벡터 인덱스는 원문에서 재생성 가능한 파생 데이터입니다.</text>
 </svg>

@@ -1,17 +1,8 @@
-flowchart TB
-    A[Document DB] --> B[JSON-like document]
-
-    B --> C[content_id]
-    B --> D[title]
-    B --> E[tags array]
-    B --> F[creator object]
-    B --> G[options object]
-
-    F --> F1[name]
-    F --> F2[specialty]
-
-    G --> G1[online]
-    G --> G2[certificate]
-
-    B --> H[Flexible fields]
-    H --> I[Still needs design]
+flowchart LR
+    A[course document] --> B[course_code]
+    A --> C[title]
+    A --> D[metadata]
+    D --> E[level]
+    D --> F[tags]
+    D --> G[instructor]
+    D --> H[options]

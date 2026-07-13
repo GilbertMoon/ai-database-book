@@ -1,15 +1,5 @@
-flowchart TB
-    A[User events] --> B[Page view]
-    A --> C[Content play]
-    A --> D[Review write]
-    A --> E[Content exit]
-
-    B --> F[Event stream]
-    C --> F
-    D --> F
-    E --> F
-
-    F --> G[Column-Family DB]
-    G --> H[Partition by time or user]
-    H --> I[Large-scale write]
-    I --> J[Analytics query]
+flowchart LR
+    A[target query] --> B[one student + one date]
+    B --> C[partition key: student_id + event_date]
+    C --> D[sort key: event_time]
+    D --> E[learning events in time order]

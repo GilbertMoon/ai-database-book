@@ -1,21 +1,9 @@
 flowchart TB
-    A[NoSQL] --> B[Key-Value DB]
+    A[NoSQL 계열] --> B[Key-Value DB]
     A --> C[Document DB]
     A --> D[Column-Family DB]
     A --> E[Graph DB]
-
-    B --> B1[Key and value]
-    B --> B2[Cache]
-    B --> B3[Session]
-
-    C --> C1[JSON-like document]
-    C --> C2[Profile]
-    C --> C3[Content options]
-
-    D --> D1[Wide rows]
-    D --> D2[Events]
-    D --> D3[Logs]
-
-    E --> E1[Nodes and edges]
-    E --> E2[Recommendation]
-    E --> E3[Relationship search]
+    B --> B1[student:1001:session]
+    C --> C1[course_documents]
+    D --> D1[student_id + event_date]
+    E --> E1[Student-Course-Topic]

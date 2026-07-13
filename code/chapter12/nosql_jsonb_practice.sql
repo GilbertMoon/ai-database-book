@@ -1,298 +1,226 @@
 -- Chapter 12. NoSQL 이해와 선택 기준
--- 목적: PostgreSQL JSONB를 사용해 문서형 데이터와 Key-Value 개념을 맛보고,
---       데이터 유형별 저장 방식 선택 기준을 연습한다.
+-- 목적: PostgreSQL JSONB로 문서형 데이터 개념을 맛보고,
+--       Key-Value 캐시 개념과 저장 방식 선택 기준을 확인합니다.
+-- 주의: 이 파일은 별도 NoSQL 서버를 설치하지 않습니다.
+--       PostgreSQL JSONB는 실제 Document DB 자체가 아니라 문서형 데이터 실습을 위한 기능입니다.
+--       key_value_cache_examples 테이블은 Key-Value DB 개념을 단순 시뮬레이션할 뿐입니다.
 
--- 중요 주의:
--- 1. 이 파일은 실습용 예제입니다.
--- 2. 별도 NoSQL 서버를 설치하지 않고 PostgreSQL 안에서 JSONB를 사용합니다.
--- 3. JSONB는 Document DB를 완전히 대체한다는 의미가 아니라 문서형 데이터 개념을 이해하기 위한 맛보기입니다.
--- 4. 실제 서비스에서는 데이터 구조, 조회 패턴, 정합성, 운영 난이도를 함께 검토해야 합니다.
+SELECT current_database() AS current_database;
 
--- ============================================================
--- 1. 문서형 데이터 맛보기: content_documents
--- ============================================================
+DROP TABLE IF EXISTS storage_choice_cases;
+DROP TABLE IF EXISTS key_value_cache_examples;
+DROP TABLE IF EXISTS course_documents;
 
-CREATE TABLE IF NOT EXISTS content_documents (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
+CREATE TABLE course_documents (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    course_code TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
     metadata JSONB NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT course_documents_metadata_object_chk
+        CHECK (jsonb_typeof(metadata) = 'object')
 );
 
-INSERT INTO content_documents (title, metadata)
-VALUES
+INSERT INTO course_documents (course_code, title, metadata) VALUES
 (
+    'DB-101',
     '데이터베이스 입문',
     '{
-        "level": "basic",
-        "tags": ["SQL", "PostgreSQL", "DB"],
-        "online": true,
-        "certificate": true,
-        "creator": {
-            "name": "김작가",
-            "specialty": "Database"
-        }
+      "level": "basic",
+      "tags": ["SQL", "PostgreSQL", "DB"],
+      "instructor": {"name": "김강사", "specialty": "Database"},
+      "options": {"online": true, "certificate": true}
     }'::jsonb
 ),
 (
+    'AI-201',
     'AI 데이터 분석',
     '{
-        "level": "intermediate",
-        "tags": ["Python", "Pandas", "AI"],
-        "online": true,
-        "certificate": true,
-        "creator": {
-            "name": "이작가",
-            "specialty": "Data Analysis"
-        }
+      "level": "intermediate",
+      "tags": ["AI", "Data Analysis", "Python"],
+      "instructor": {"name": "이강사", "specialty": "AI"},
+      "options": {"online": true, "certificate": false}
     }'::jsonb
 ),
 (
+    'GRAPH-301',
     '그래프 데이터 이해',
     '{
-        "level": "advanced",
-        "tags": ["Graph", "Recommendation", "Network"],
-        "online": false,
-        "certificate": false,
-        "creator": {
-            "name": "박작가",
-            "specialty": "Graph Data"
-        }
+      "level": "advanced",
+      "tags": ["Graph", "Recommendation", "Network"],
+      "instructor": {"name": "박강사", "specialty": "Graph Data"},
+      "options": {"online": false, "certificate": true}
     }'::jsonb
 );
 
--- 전체 문서 조회
-SELECT id, title, metadata
-FROM content_documents
-ORDER BY id;
-
--- JSONB의 특정 필드 조회
+-- JSONB 필드 조회: -> 는 JSONB 값을, ->> 는 text 값을 반환합니다.
 SELECT
-    id,
+    course_code,
     title,
     metadata ->> 'level' AS level,
-    metadata ->> 'online' AS online
-FROM content_documents
-ORDER BY id;
+    metadata -> 'options' ->> 'online' AS online
+FROM course_documents
+ORDER BY CASE course_code
+    WHEN 'DB-101' THEN 1
+    WHEN 'AI-201' THEN 2
+    WHEN 'GRAPH-301' THEN 3
+    ELSE 99
+END;
 
--- 중첩 객체 필드 조회
-SELECT
-    title,
-    metadata -> 'creator' ->> 'name' AS creator_name,
-    metadata -> 'creator' ->> 'specialty' AS creator_specialty
-FROM content_documents;
+-- ? 연산자: 최상위 키 존재 여부를 확인합니다.
+SELECT course_code, title
+FROM course_documents
+WHERE metadata ? 'instructor'
+ORDER BY course_code;
 
--- 특정 조건의 JSONB 필드 조회
-SELECT id, title, metadata ->> 'level' AS level
-FROM content_documents
-WHERE metadata ->> 'level' = 'basic';
+-- @> 연산자: JSONB 포함 조건을 확인합니다.
+SELECT course_code, title
+FROM course_documents
+WHERE metadata @> '{"tags": ["PostgreSQL"]}'::jsonb;
 
--- 배열에 특정 태그가 포함된 문서 조회
-SELECT id, title, metadata -> 'tags' AS tags
-FROM content_documents
-WHERE metadata -> 'tags' ? 'SQL';
+-- course_code를 기준으로 안전하게 JSONB 필드를 수정합니다.
+UPDATE course_documents
+SET metadata = jsonb_set(metadata, '{options,certificate}', 'false'::jsonb)
+WHERE course_code = 'DB-101';
 
--- JSONB 포함 연산자를 사용한 조회
-SELECT id, title, metadata
-FROM content_documents
-WHERE metadata @> '{"online": true}'::jsonb;
+SELECT course_code, metadata -> 'options' AS options
+FROM course_documents
+WHERE course_code = 'DB-101';
 
--- ============================================================
--- 2. JSONB 필드 업데이트 맛보기
--- ============================================================
-
--- certificate 값을 true로 변경하는 예시
-UPDATE content_documents
-SET metadata = jsonb_set(metadata, '{certificate}', 'true'::jsonb)
-WHERE title = '그래프 데이터 이해';
-
-SELECT
-    title,
-    metadata ->> 'certificate' AS certificate
-FROM content_documents
-WHERE title = '그래프 데이터 이해';
-
--- 새 필드 추가 예시
-UPDATE content_documents
-SET metadata = jsonb_set(metadata, '{duration_hours}', '24'::jsonb)
-WHERE title = '데이터베이스 입문';
-
-SELECT
-    title,
-    metadata ->> 'duration_hours' AS duration_hours
-FROM content_documents
-WHERE title = '데이터베이스 입문';
-
--- ============================================================
--- 3. JSONB 인덱스 맛보기
--- ============================================================
-
--- JSONB 전체 문서에 대한 GIN 인덱스 예시
-CREATE INDEX IF NOT EXISTS idx_content_documents_metadata_gin
-ON content_documents
+-- JSONB 전체 문서 검색에는 GIN 인덱스를 고려할 수 있습니다.
+CREATE INDEX idx_course_documents_metadata_gin
+ON course_documents
 USING GIN (metadata);
 
--- level 필드에 대한 표현식 인덱스 예시
-CREATE INDEX IF NOT EXISTS idx_content_documents_level
-ON content_documents ((metadata ->> 'level'));
+-- 특정 JSONB 필드를 자주 조건으로 사용하면 표현식 인덱스를 고려할 수 있습니다.
+CREATE INDEX idx_course_documents_level_text
+ON course_documents ((metadata ->> 'level'));
 
--- 실행 계획 확인
+ANALYZE course_documents;
+
+-- 표본이 작으면 인덱스가 있어도 Seq Scan이 나올 수 있습니다.
 EXPLAIN
-SELECT id, title
-FROM content_documents
+SELECT course_code, title
+FROM course_documents
 WHERE metadata ->> 'level' = 'basic';
 
-EXPLAIN
-SELECT id, title
-FROM content_documents
-WHERE metadata @> '{"online": true}'::jsonb;
-
--- 주의:
--- 샘플 데이터가 적으면 인덱스가 있어도 Seq Scan이 나올 수 있습니다.
--- 이는 오류가 아니라 데이터가 적을 때 전체를 읽는 것이 더 싸다고 판단한 결과일 수 있습니다.
-
--- ============================================================
--- 4. Key-Value DB 개념 시뮬레이션
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS key_value_cache_examples (
-    cache_key VARCHAR(200) PRIMARY KEY,
+CREATE TABLE key_value_cache_examples (
+    cache_key TEXT PRIMARY KEY,
     cache_value JSONB NOT NULL,
-    expired_at TIMESTAMP
+    expired_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT key_value_cache_examples_value_object_chk
+        CHECK (jsonb_typeof(cache_value) = 'object')
 );
 
-INSERT INTO key_value_cache_examples (cache_key, cache_value, expired_at)
-VALUES
+INSERT INTO key_value_cache_examples (cache_key, cache_value, expired_at) VALUES
 (
-    'content:popular:top3',
-    '{"content_ids": [1, 2, 3], "description": "인기 콘텐츠 Top 3"}'::jsonb,
-    CURRENT_TIMESTAMP + INTERVAL '1 hour'
+    'student:1001:session',
+    '{"student_id": 1001, "login_device": "browser", "status": "active"}'::jsonb,
+    now() + interval '30 minutes'
 ),
 (
-    'user:1001:session',
-    '{"user_id": 1001, "login": true, "role": "member"}'::jsonb,
-    CURRENT_TIMESTAMP + INTERVAL '30 minutes'
+    'course:popular:top3',
+    '{"course_codes": ["DB-101", "AI-201", "GRAPH-301"], "source": "daily_batch"}'::jsonb,
+    now() + interval '1 hour'
 ),
 (
     'feature:recommendation:v1',
-    '{"enabled": true, "ratio": 0.5}'::jsonb,
-    NULL
-)
-ON CONFLICT (cache_key) DO UPDATE
-SET cache_value = EXCLUDED.cache_value,
-    expired_at = EXCLUDED.expired_at;
-
--- 키로 빠르게 조회하는 예시
-SELECT cache_key, cache_value, expired_at
-FROM key_value_cache_examples
-WHERE cache_key = 'content:popular:top3';
-
--- 만료되지 않은 캐시만 확인
-SELECT cache_key, cache_value, expired_at
-FROM key_value_cache_examples
-WHERE expired_at IS NULL OR expired_at > CURRENT_TIMESTAMP;
-
--- Key-Value 방식의 한계:
--- 키를 모르면 복잡한 조건 검색이나 JOIN에는 적합하지 않을 수 있습니다.
-
--- ============================================================
--- 5. 데이터 유형별 저장 방식 선택 연습용 테이블
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS storage_choice_cases (
-    id SERIAL PRIMARY KEY,
-    data_name VARCHAR(100) NOT NULL,
-    data_description TEXT NOT NULL,
-    consistency_required VARCHAR(20) NOT NULL,
-    query_pattern VARCHAR(200) NOT NULL,
-    suggested_storage VARCHAR(100),
-    review_reason TEXT
+    '{"enabled": true, "target": "student_course_topic"}'::jsonb,
+    now() + interval '1 day'
+),
+(
+    'student:9999:session',
+    '{"student_id": 9999, "login_device": "mobile", "status": "expired"}'::jsonb,
+    now() - interval '10 minutes'
 );
 
-INSERT INTO storage_choice_cases (
-    data_name,
-    data_description,
-    consistency_required,
-    query_pattern,
-    suggested_storage,
-    review_reason
-)
-VALUES
-(
-    '주문/결제 내역',
-    '회원이 콘텐츠를 결제하고 이용신청하는 핵심 거래 데이터',
-    'high',
-    '회원별 주문 조회, 결제 상태 변경, 정산 조회',
-    'Relational DB',
-    '정합성과 트랜잭션이 중요하므로 관계형 DB가 적합하다.'
-),
-(
-    '로그인 세션',
-    '로그인 유지와 만료 시간을 관리하는 임시 데이터',
-    'medium',
-    '세션 키로 빠른 조회',
-    'Key-Value DB',
-    '키 기반 조회와 만료 처리에 적합하다.'
-),
-(
-    '콘텐츠 상세 옵션',
-    '콘텐츠별로 서로 다른 설정값과 태그를 포함하는 데이터',
-    'medium',
-    '콘텐츠별 문서 조회, 일부 필드 조건 검색',
-    'Document DB or PostgreSQL JSONB',
-    '필드 구조가 유연하므로 문서형 저장이 유리할 수 있다.'
-),
-(
-    '사용자 행동 로그',
-    '페이지 조회, 콘텐츠 재생, 리뷰 작성 등 대량 이벤트 데이터',
-    'low',
-    '시간대별 대량 저장과 분석',
-    'Column-Family DB or Log System',
-    '대량 쓰기와 분석이 중요하다.'
-),
-(
-    '추천 관계',
-    '회원, 콘텐츠, 태그, 이용 이력 사이의 관계 데이터',
-    'medium',
-    '관계 탐색과 추천 경로 조회',
-    'Graph DB',
-    '관계 탐색이 중요하므로 그래프 구조가 적합할 수 있다.'
-);
+-- expired_at은 만료 기준 시각을 저장할 뿐이며, 행을 자동 삭제하지 않습니다.
+SELECT cache_key, expired_at, expired_at > now() AS is_valid
+FROM key_value_cache_examples
+ORDER BY cache_key;
 
 SELECT
-    data_name,
-    consistency_required,
-    query_pattern,
-    suggested_storage,
-    review_reason
+    COUNT(*) AS total_cache_rows,
+    COUNT(*) FILTER (WHERE expired_at > now()) AS valid_cache_rows,
+    COUNT(*) FILTER (WHERE expired_at <= now()) AS expired_cache_rows
+FROM key_value_cache_examples;
+
+-- 실제 Key-Value DB의 캐시 미스 흐름은 보통 다음처럼 설계합니다.
+-- 1. cache_key로 캐시를 조회합니다.
+-- 2. 없거나 만료되면 원본 RDBMS에서 데이터를 읽습니다.
+-- 3. 캐시를 갱신합니다.
+-- 4. 사용자에게 결과를 반환합니다.
+-- 이 테이블은 메모리 저장, 분산, 자동 TTL 삭제, 복제, 고성능 조회를 구현하지 않습니다.
+-- DELETE FROM key_value_cache_examples WHERE expired_at <= now();
+
+CREATE TABLE storage_choice_cases (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    case_name TEXT NOT NULL,
+    example_data TEXT NOT NULL,
+    recommended_storage TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    system_role TEXT NOT NULL,
+    consistency_level TEXT NOT NULL,
+    CONSTRAINT storage_choice_cases_system_role_chk
+        CHECK (system_role IN ('source_of_truth', 'derived_cache', 'event_log', 'relationship_index', 'flexible_metadata')),
+    CONSTRAINT storage_choice_cases_consistency_level_chk
+        CHECK (consistency_level IN ('strong', 'eventual', 'context_dependent'))
+);
+
+INSERT INTO storage_choice_cases
+(case_name, example_data, recommended_storage, reason, system_role, consistency_level) VALUES
+(
+    '수강 신청과 결제',
+    'students, courses, enrollments, payments',
+    'RDBMS',
+    '정합성, 트랜잭션, 제약 조건이 중요합니다.',
+    'source_of_truth',
+    'strong'
+),
+(
+    '학생 로그인 세션',
+    'student:1001:session',
+    'Key-Value DB',
+    '정확한 키로 빠르게 읽고 만료 시간을 관리하는 패턴에 적합합니다.',
+    'derived_cache',
+    'eventual'
+),
+(
+    '강의 유연 메타데이터',
+    'course_documents.metadata',
+    'Document DB or PostgreSQL JSONB',
+    '강의별 옵션과 태그 구조가 조금씩 다를 수 있습니다.',
+    'flexible_metadata',
+    'context_dependent'
+),
+(
+    '학습 행동 이벤트',
+    'student_id + event_date / event_time',
+    'Column-Family DB',
+    '특정 학생의 특정 날짜 이벤트를 시간순으로 읽는 조회 패턴에 맞출 수 있습니다.',
+    'event_log',
+    'eventual'
+),
+(
+    '학생-강의-주제 추천 관계',
+    'Student, Course, Topic nodes and edges',
+    'Graph DB',
+    '관계를 여러 단계 따라가며 추천 후보를 찾는 문제에 적합합니다.',
+    'relationship_index',
+    'context_dependent'
+);
+
+SELECT case_name, recommended_storage, system_role, consistency_level
 FROM storage_choice_cases
 ORDER BY id;
 
--- ============================================================
--- 6. AI 추천 결과 검토 질문
--- ============================================================
-
--- AI가 다음처럼 추천했다고 가정합니다.
--- "모든 데이터를 Document DB에 저장하면 유연하고 빠르므로 가장 좋습니다."
-
--- 아래 기준으로 검토하세요.
--- 1. 주문/결제 데이터에 강한 정합성이 필요한가?
--- 2. 트랜잭션이 필요한 데이터가 포함되어 있는가?
--- 3. JOIN이나 복잡한 SQL 분석이 필요한가?
--- 4. 기존 관계형 DB로 충분히 해결 가능한가?
--- 5. 새 NoSQL을 운영할 팀 역량이 있는가?
--- 6. 백업, 복구, 모니터링 방법이 준비되어 있는가?
--- 7. NoSQL 도입으로 얻는 이점이 운영 복잡도보다 큰가?
-
--- ============================================================
--- 7. 정리용 조회
--- ============================================================
-
-SELECT 'Document DB taste with JSONB' AS practice_topic, COUNT(*) AS row_count
-FROM content_documents
+SELECT 'course_documents' AS table_name, COUNT(*) AS expected_count
+FROM course_documents
 UNION ALL
-SELECT 'Key-Value concept simulation' AS practice_topic, COUNT(*) AS row_count
+SELECT 'key_value_cache_examples', COUNT(*)
 FROM key_value_cache_examples
 UNION ALL
-SELECT 'Storage choice cases' AS practice_topic, COUNT(*) AS row_count
-FROM storage_choice_cases;
+SELECT 'storage_choice_cases', COUNT(*)
+FROM storage_choice_cases
+ORDER BY table_name;

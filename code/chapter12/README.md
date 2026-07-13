@@ -1,84 +1,64 @@
-# Chapter 12 실습 코드
+# Chapter 12 SQL 실습
 
 ## NoSQL 이해와 선택 기준
 
-이 폴더는 Chapter 12의 NoSQL 개념 실습 파일을 관리합니다.
+이 폴더는 Chapter 12의 PostgreSQL 실습 파일을 관리합니다.
 
-별도 NoSQL 서버를 설치하지 않고 PostgreSQL의 `JSONB` 기능을 사용해 문서형 데이터 개념을 맛보고, Key-Value DB 개념을 단순 시뮬레이션합니다.
+별도 NoSQL 서버를 설치하지 않습니다. 이 장에서는 PostgreSQL의 `JSONB`를 사용해 문서형 데이터 개념을 맛보고, 일반 테이블로 Key-Value 캐시 개념을 단순 시뮬레이션합니다.
 
----
-
-## 파일 목록
+## 파일
 
 | 파일 | 설명 |
-| --- | --- |
-| `nosql_jsonb_practice.sql` | PostgreSQL JSONB 문서형 데이터 실습, Key-Value 개념 시뮬레이션, 데이터 유형별 저장 방식 선택 연습 |
+|---|---|
+| `nosql_jsonb_practice.sql` | `course_documents`, `key_value_cache_examples`, `storage_choice_cases`를 생성하고 JSONB 조회와 저장 방식 선택 기준을 확인합니다. |
 
----
+## 실행 전 확인
 
-## 실행 전 주의 사항
+- PostgreSQL 접속이 가능한지 확인합니다.
+- Chapter 12는 MongoDB, Redis, Cassandra, Neo4j 같은 별도 NoSQL 서버를 설치하지 않습니다.
+- PostgreSQL JSONB는 실제 Document DB 자체가 아닙니다.
+- `key_value_cache_examples`는 실제 Key-Value DB의 메모리 저장, 분산, 자동 TTL 삭제, 복제, 성능 특성을 구현하지 않습니다.
+- `expired_at`은 만료 기준 시각을 저장할 뿐이며 행을 자동 삭제하지 않습니다.
 
-```text
-- 이 파일은 실습용 예제입니다.
-- 별도 NoSQL 서버를 설치하지 않습니다.
-- PostgreSQL JSONB는 Document DB를 완전히 대체한다는 의미가 아닙니다.
-- JSONB는 문서형 데이터 개념을 이해하기 위한 맛보기로 사용합니다.
-- 실제 서비스에서는 데이터 구조, 조회 패턴, 정합성, 운영 난이도를 함께 검토해야 합니다.
+## 실행 방법
+
+```bash
+psql -U postgres -d ai_database_book -f code/chapter12/nosql_jsonb_practice.sql
 ```
 
----
+## 실행 흐름
 
-## 권장 실행 환경
+1. 현재 접속 데이터베이스 확인
+2. 기존 실습 테이블 삭제
+3. `course_documents` 생성 및 3행 입력
+4. JSONB 연산자 `->`, `->>`, `?`, `@>` 조회
+5. `course_code` 기준 JSONB 수정
+6. JSONB GIN 인덱스와 표현식 인덱스 생성
+7. `key_value_cache_examples` 생성 및 4행 입력
+8. 유효 캐시 3건, 만료 캐시 1건 확인
+9. `storage_choice_cases` 생성 및 5행 입력
+10. 최종 행 수 3 / 4 / 5 확인
 
-```text
-- PostgreSQL
-- DBeaver Community Edition
-- ai_database_book 실습 데이터베이스
-```
+## 기대 결과
 
----
+JSONB 기본 조회 결과는 다음 형태입니다.
 
-## 주요 실습 항목
+| course_code | title | level | online |
+|---|---|---|---|
+| DB-101 | 데이터베이스 입문 | basic | true |
+| AI-201 | AI 데이터 분석 | intermediate | true |
+| GRAPH-301 | 그래프 데이터 이해 | advanced | false |
 
-```text
-- JSONB 컬럼을 가진 content_documents 테이블 생성
-- JSON 문서 형태의 콘텐츠 데이터 입력
-- JSONB 특정 필드 조회
-- 중첩 객체 필드 조회
-- JSON 배열 태그 검색
-- JSONB 포함 연산자 사용
-- jsonb_set을 이용한 JSONB 필드 수정
-- JSONB GIN 인덱스 맛보기
-- Key-Value DB 개념 시뮬레이션
-- 데이터 유형별 저장 방식 선택 사례 조회
-- AI 추천 NoSQL 선택 결과 검토 질문
-```
+최종 행 수는 다음과 같아야 합니다.
 
----
+| table_name | expected_count |
+|---|---:|
+| course_documents | 3 |
+| key_value_cache_examples | 4 |
+| storage_choice_cases | 5 |
 
-## 실습 운영 팁
+## 인덱스 해석 주의
 
-입문 독자는 다음 순서로 진행하는 것을 권장합니다.
-
-```text
-1. 관계형 테이블과 JSON 문서 구조 차이 설명
-2. content_documents 테이블 생성
-3. metadata JSONB 필드 조회
-4. tags 배열 검색 실습
-5. JSONB 필드 업데이트 실습
-6. Key-Value 캐시 예시 확인
-7. storage_choice_cases 표를 이용한 DB 선택 토론
-8. AI 추천 결과 검토 활동
-```
-
----
-
-## 핵심 포인트
-
-```text
-NoSQL은 관계형 DB를 무조건 대체하는 기술이 아닙니다.
-데이터 구조와 조회 패턴에 따라 적합한 저장 방식을 선택해야 합니다.
-정합성이 중요한 데이터는 관계형 DB가 더 적합할 수 있습니다.
-문서형 데이터가 필요할 때 PostgreSQL JSONB도 선택지 중 하나가 될 수 있습니다.
-AI가 추천한 DB 선택 결과도 사람이 검토해야 합니다.
-```
+- `idx_course_documents_metadata_gin`은 JSONB 전체 문서 포함 검색에 사용할 수 있는 GIN 인덱스입니다.
+- `idx_course_documents_level_text`는 `metadata ->> 'level'` 조건을 자주 사용할 때 고려하는 표현식 인덱스입니다.
+- 표본 데이터가 작으면 인덱스를 만들어도 `EXPLAIN`에서 `Seq Scan`이 나올 수 있습니다. 이것은 오류가 아닙니다.
