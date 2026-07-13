@@ -97,7 +97,8 @@ WITH first_relevant AS (
     GROUP BY q.id
 )
 SELECT
-    ROUND(AVG(1.0 / first_relevant_rank), 4) AS mrr_expected_1;
+    ROUND(AVG(1.0 / first_relevant_rank), 4) AS mrr_expected_1
+FROM first_relevant;
 
 -- 3. 관련성 등급과 실제 순위 비교
 SELECT
