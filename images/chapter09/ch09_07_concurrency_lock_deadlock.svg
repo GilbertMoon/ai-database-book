@@ -1,59 +1,113 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
   <title id="title">동시 좌석 신청과 Lock</title>
-  <desc id="desc">잔여 좌석 1개에 두 트랜잭션이 접근할 때 정상 Lock 대기와 Deadlock의 순환 대기를 구분한다.</desc>
+  <desc id="desc">잔여 좌석 1개에 두 트랜잭션이 접근할 때 정상 Lock 대기와 Deadlock의 순환 대기를 섹션으로 나누어 구분한다.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
     </marker>
+    <marker id="arrow-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
     <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
     </marker>
-    <style>.ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
-.mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
-.title { font-size: 28px; font-weight: 700; }
-.subtitle { font-size: 15px; fill: #4b5563; }
-.box-title { font-size: 18px; font-weight: 700; }
-.body { font-size: 14px; }
-.small { font-size: 12.5px; fill: #4b5563; }
-.card { stroke: #64748b; stroke-width: 1.8; rx: 14; ry: 14; }
-.start { fill: #eaf3ff; }
-.work { fill: #eef5ff; }
-.review { fill: #fff6d8; }
-.ok { fill: #eaf8ee; }
-.fail { fill: #ffeaea; }
-.rule { fill: #f2ecff; }
-.lock { fill: #fff0d9; }
-.line { stroke: #475569; stroke-width: 2.2; fill: none; }
-.dash { stroke: #b45309; stroke-width: 2.2; stroke-dasharray: 7 6; fill: none; }
-.retry { stroke: #b91c1c; stroke-width: 2.2; stroke-dasharray: 7 6; fill: none; }</style>
+    <style>
+      .ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
+      .mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #4b5563; }
+      .section-title { font-size: 19px; font-weight: 700; }
+      .box-title { font-size: 17px; font-weight: 700; }
+      .body { font-size: 14px; }
+      .small { font-size: 12.5px; fill: #4b5563; }
+      .tiny { font-size: 11.5px; fill: #64748b; }
+      .card { stroke: #64748b; stroke-width: 1.8; }
+      .section-normal { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.6; }
+      .section-deadlock { fill: #fff7f7; stroke: #fecaca; stroke-width: 1.8; }
+      .resource { fill: #eaf3ff; stroke: #3b82f6; stroke-width: 1.8; }
+      .lock { fill: #fff0d9; }
+      .review { fill: #fff6d8; }
+      .ok { fill: #eaf8ee; }
+      .work { fill: #eef5ff; }
+      .danger { fill: #ffeaea; stroke: #f87171; stroke-width: 1.8; }
+      .legend-box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.3; }
+      .line { stroke: #475569; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .wait { stroke: #b45309; stroke-width: 2.2; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow-wait); }
+      .dead { stroke: #b91c1c; stroke-width: 2.4; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow-red); }
+      .num { font-size: 12px; font-weight: 700; fill: #ffffff; }
+      .badge-text { font-size: 12px; font-weight: 700; fill: #92400e; }
+    </style>
   </defs>
-  <rect x="0" y="0" width="1200" height="760" fill="#ffffff"/>
-  <text x="600" y="42" text-anchor="middle" class="ko title"><tspan x="600" dy="0">동시 좌석 신청과 Lock</tspan></text>
-  <text x="600" y="70" text-anchor="middle" class="ko subtitle"><tspan x="600" dy="0">한 행을 기다리는 Lock 대기와 서로 기다리는 Deadlock은 다릅니다.</tspan></text>
-  <rect x="460" y="105" width="280" height="60" rx="14" ry="14" class="card start"/>
-  <text x="600" y="142" text-anchor="middle" class="mono box-title"><tspan x="600" dy="0">remaining_seats = 1</tspan></text>
-  <rect x="80" y="215" width="440" height="90" rx="14" ry="14" class="card lock"/>
-  <text x="300" y="250" text-anchor="middle" class="ko box-title"><tspan x="300" dy="0">트랜잭션 A</tspan></text>
-  <text x="300" y="282" text-anchor="middle" class="ko body"><tspan x="300" dy="0">강의 행 Lock → 좌석 차감 → COMMIT</tspan></text>
-  <rect x="680" y="215" width="440" height="90" rx="14" ry="14" class="card lock"/>
-  <text x="900" y="250" text-anchor="middle" class="ko box-title"><tspan x="900" dy="0">트랜잭션 B</tspan></text>
-  <text x="900" y="282" text-anchor="middle" class="ko body"><tspan x="900" dy="0">같은 행 변경 시도 → 대기</tspan></text>
-  <line x1="520" y1="165" x2="300" y2="215" class="line" marker-end="url(#arrow)"/>
-  <line x1="680" y1="165" x2="900" y2="215" class="line" marker-end="url(#arrow)"/>
-  <rect x="680" y="355" width="440" height="90" rx="14" ry="14" class="card review"/>
-  <text x="900" y="390" text-anchor="middle" class="ko box-title"><tspan x="900" dy="0">A COMMIT 후 최신 값 확인</tspan></text>
-  <text x="900" y="422" text-anchor="middle" class="ko body"><tspan x="900" dy="0">좌석 0 → 신청 중단 → ROLLBACK</tspan></text>
-  <line x1="900" y1="305" x2="900" y2="355" class="line" marker-end="url(#arrow)"/>
-  <rect x="60" y="515" width="1080" height="185" rx="14" ry="14" class="card fail"/>
-  <text x="600" y="552" text-anchor="middle" class="ko box-title"><tspan x="600" dy="0">Deadlock: 서로의 잠금을 기다리는 순환 대기</tspan></text>
-  <rect x="100" y="585" width="430" height="75" rx="14" ry="14" class="card work"/>
-  <text x="315" y="615" text-anchor="middle" class="ko box-title"><tspan x="315" dy="0">트랜잭션 A</tspan></text>
-  <text x="315" y="642" text-anchor="middle" class="ko body"><tspan x="315" dy="0">강의 1 잠금 → 강의 2 대기</tspan></text>
-  <rect x="670" y="585" width="430" height="75" rx="14" ry="14" class="card work"/>
-  <text x="885" y="615" text-anchor="middle" class="ko box-title"><tspan x="885" dy="0">트랜잭션 B</tspan></text>
-  <text x="885" y="642" text-anchor="middle" class="ko body"><tspan x="885" dy="0">강의 2 잠금 → 강의 1 대기</tspan></text>
-  <path d="M 530 622 H 620 V 680 H 885 V 660" class="dash" marker-end="url(#arrow)"/>
-  <path d="M 670 622 H 580 V 680 H 315 V 660" class="dash" marker-end="url(#arrow)"/>
-  <text x="600" y="725" text-anchor="middle" class="ko small"><tspan x="600" dy="0">PostgreSQL은 Deadlock을 감지하면 한 트랜잭션을 오류로 종료할 수 있습니다.</tspan></text>
+
+  <rect x="0" y="0" width="1200" height="820" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" class="ko title">동시 좌석 신청과 Lock</text>
+  <text x="600" y="70" text-anchor="middle" class="ko subtitle">한 행을 기다리는 정상 Lock 대기와 서로 기다리는 Deadlock은 다릅니다.</text>
+
+  <rect x="70" y="92" width="1060" height="338" rx="18" ry="18" class="section-normal"/>
+  <text x="100" y="126" class="ko section-title">1. 정상 Lock 대기: 같은 행은 순서대로 처리</text>
+  <text x="100" y="150" class="ko small">B는 A가 잡은 같은 강의 행 Lock을 기다립니다. A가 COMMIT하면 B는 최신 값을 다시 확인합니다.</text>
+
+  <rect x="455" y="172" width="290" height="66" rx="14" ry="14" class="resource"/>
+  <text x="600" y="198" text-anchor="middle" class="mono box-title">courses.id = 101</text>
+  <text x="600" y="222" text-anchor="middle" class="mono body">remaining_seats = 1</text>
+
+  <rect x="120" y="260" width="390" height="86" rx="14" ry="14" class="card lock"/>
+  <text x="315" y="291" text-anchor="middle" class="ko box-title">트랜잭션 A</text>
+  <text x="315" y="318" text-anchor="middle" class="ko body">강의 행 Lock 획득 → 좌석 차감</text>
+  <text x="315" y="337" text-anchor="middle" class="ko small">1 → 0, COMMIT</text>
+
+  <rect x="690" y="260" width="390" height="86" rx="14" ry="14" class="card lock"/>
+  <text x="885" y="291" text-anchor="middle" class="ko box-title">트랜잭션 B</text>
+  <text x="885" y="318" text-anchor="middle" class="ko body">같은 행 변경 시도</text>
+  <text x="885" y="337" text-anchor="middle" class="ko small">A의 Lock 해제까지 대기</text>
+
+  <rect x="690" y="365" width="390" height="48" rx="14" ry="14" class="card review"/>
+  <text x="885" y="394" text-anchor="middle" class="ko body">A COMMIT 후 최신 값 0 확인 → ROLLBACK</text>
+
+  <line x1="520" y1="238" x2="360" y2="260" class="line"/>
+  <line x1="680" y1="238" x2="840" y2="260" class="line"/>
+  <path d="M 885 346 V 365" class="wait"/>
+
+  <circle cx="500" cy="245" r="12" fill="#475569"/><text x="500" y="250" text-anchor="middle" class="ko num">1</text>
+  <circle cx="700" cy="245" r="12" fill="#b45309"/><text x="700" y="250" text-anchor="middle" class="ko num">2</text>
+  <circle cx="885" cy="356" r="12" fill="#b45309"/><text x="885" y="361" text-anchor="middle" class="ko num">3</text>
+
+  <rect x="780" y="112" width="320" height="50" rx="12" ry="12" class="legend-box"/>
+  <line x1="800" y1="130" x2="850" y2="130" class="line"/>
+  <text x="860" y="134" class="ko tiny">진행</text>
+  <line x1="800" y1="149" x2="850" y2="149" class="wait"/>
+  <text x="860" y="153" class="ko tiny">Lock 대기</text>
+  <line x1="940" y1="149" x2="990" y2="149" class="dead"/>
+  <text x="1000" y="153" class="ko tiny">순환 대기</text>
+
+  <rect x="70" y="465" width="1060" height="285" rx="18" ry="18" class="section-deadlock"/>
+  <text x="100" y="500" class="ko section-title">2. Deadlock: 서로의 잠금을 기다리는 순환 대기</text>
+  <text x="100" y="524" class="ko small">A와 B가 서로 다른 행을 먼저 잠근 뒤, 상대가 가진 행을 추가로 요청하면 순환 대기가 생깁니다.</text>
+
+  <rect x="470" y="545" width="120" height="58" rx="14" ry="14" class="resource"/>
+  <text x="530" y="570" text-anchor="middle" class="ko box-title">강의 1</text>
+  <text x="530" y="591" text-anchor="middle" class="ko small">A가 보유</text>
+
+  <rect x="610" y="545" width="120" height="58" rx="14" ry="14" class="resource"/>
+  <text x="670" y="570" text-anchor="middle" class="ko box-title">강의 2</text>
+  <text x="670" y="591" text-anchor="middle" class="ko small">B가 보유</text>
+
+  <rect x="120" y="620" width="390" height="80" rx="14" ry="14" class="card work"/>
+  <text x="315" y="650" text-anchor="middle" class="ko box-title">트랜잭션 A</text>
+  <text x="315" y="677" text-anchor="middle" class="ko body">강의 1 잠금 보유 → 강의 2 요청</text>
+
+  <rect x="690" y="620" width="390" height="80" rx="14" ry="14" class="card work"/>
+  <text x="885" y="650" text-anchor="middle" class="ko box-title">트랜잭션 B</text>
+  <text x="885" y="677" text-anchor="middle" class="ko body">강의 2 잠금 보유 → 강의 1 요청</text>
+
+  <path d="M 400 620 C 420 585, 455 570, 470 570" class="line"/>
+  <path d="M 800 620 C 780 585, 745 570, 730 570" class="line"/>
+  <path d="M 510 660 C 585 620, 610 620, 690 660" class="dead"/>
+  <path d="M 690 682 C 610 735, 585 735, 510 682" class="dead"/>
+
+  <rect x="430" y="710" width="340" height="30" rx="12" ry="12" class="danger"/>
+  <text x="600" y="730" text-anchor="middle" class="ko small">DBMS가 Deadlock을 감지하면 보통 한 트랜잭션을 중단하고 롤백합니다.</text>
+
+  <text x="600" y="790" text-anchor="middle" class="ko small">핵심: 단순 대기는 순서가 풀리지만, Deadlock은 서로의 Lock 해제를 기다려 자동 감지·해제가 필요합니다.</text>
 </svg>
