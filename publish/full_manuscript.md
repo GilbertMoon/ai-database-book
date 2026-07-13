@@ -9,7 +9,7 @@
 1. Chapter 01. AI 시대에 데이터베이스를 왜 배워야 하는가
 2. Chapter 02. 데이터와 DBMS의 기본 개념
 3. Chapter 03. PostgreSQL과 DBeaver로 실습 환경 만들기
-4. Chapter 04. 관계형 데이터베이스와 SQL 기초
+4. Chapter 04. 관계형 데이터베이스와 SQL 시작하기
 5. Chapter 05. 데이터 모델링과 ERD
 6. Chapter 06. 정규화와 좋은 테이블 설계
 7. Chapter 07. 실전 프로젝트 1: 온라인 강의 수강신청 데이터베이스 설계
@@ -2082,301 +2082,307 @@ AI가 만든 기본 SQL 검토하기
 
 ---
 
-# Chapter 04. 관계형 데이터베이스와 SQL 기초
+# Chapter 04. 관계형 데이터베이스와 SQL 시작하기
 
 ---
 
 ## 이 장에서 살펴볼 내용
 
-이 장에서는 PostgreSQL에서 가장 기본이 되는 SQL을 직접 실행하며 확인합니다.
+Chapter 03에서는 PostgreSQL과 DBeaver를 연결하고, 현재 데이터베이스와 스키마에서 SQL을 실행할 수 있는 환경을 준비했습니다. 이제 처음으로 테이블을 만들고 데이터를 직접 다룹니다.
 
-Chapter 02에서는 테이블, 행, 열, 기본키, 외래키, 제약조건을 살펴보았고, Chapter 03에서는 PostgreSQL과 DBeaver 실습 환경을 구축했습니다. 이제부터는 실제 SQL을 작성해 데이터를 생성하고, 조회하고, 수정하고, 삭제하는 기본 흐름을 익혀 봅니다.
+이 장의 학습 흐름은 다음과 같습니다.
 
-이 장에서 다룰 내용은 다음과 같습니다.
+```text
+현재 데이터베이스와 스키마 확인
+→ students 테이블 생성
+→ 샘플 데이터 입력
+→ 필요한 데이터 조회
+→ 조건과 정렬 적용
+→ 데이터 수정과 삭제
+→ 실행 전후 결과 검증
+```
 
-- 관계형 데이터베이스의 기본 구조
-- SQL의 기본 역할
-- `SELECT`로 데이터 조회하기
-- `WHERE`로 조건 지정하기
-- `ORDER BY`로 정렬하기
-- `INSERT`로 데이터 추가하기
-- `UPDATE`로 데이터 수정하기
-- `DELETE`로 데이터 삭제하기
-- CRUD 흐름 이해하기
-- AI가 만든 SQL을 검토하는 방법
+이 장에서는 다음 내용을 살펴봅니다.
 
-이 장의 목표는 SQL 문법을 많이 외우는 것이 아닙니다. SQL이 테이블의 데이터를 어떻게 읽고 바꾸는지 직접 확인하고, AI가 만든 SQL을 사람이 검토할 수 있는 기준을 갖추는 것입니다.
+- `CREATE TABLE`로 첫 번째 테이블 만들기
+- 문자열·정수·날짜시간 데이터 타입 읽기
+- `INSERT`로 단일 행과 여러 행 추가하기
+- `SELECT`로 전체 열과 필요한 열 조회하기
+- `WHERE`, 비교 연산자, `AND`, `OR`, `IN`으로 조건 지정하기
+- `LIKE`로 문자열 검색하기
+- `NULL`, `IS NULL`, `IS NOT NULL` 이해하기
+- `ORDER BY`와 `LIMIT`로 결과 순서와 개수 정하기
+- `UPDATE`와 `DELETE`를 안전하게 실행하기
+- CRUD와 서비스 기능 연결하기
+- AI가 만든 SQL의 예상 결과와 실제 결과 검증하기
+
+이 장의 목표는 SQL 문법을 많이 외우는 것이 아닙니다. 다음 순환을 반복하는 습관을 만드는 것입니다.
+
+```text
+SQL 읽기
+→ 실행 결과 예상
+→ 실행
+→ 반환 행 또는 영향받은 행 수 확인
+→ 원본 데이터와 비교
+```
+
+> **핵심 원칙**
+>
+> SQL은 문법만 맞게 실행하는 것이 아니라, 실행 전 예상 결과와 실행 후 실제 변화를 비교해야 합니다.
 
 ---
 
-## 1. 왜 SQL 기초를 배워야 하는가
+## 1. 첫 번째 테이블과 기본 SQL
 
-SQL은 데이터베이스와 대화하는 언어입니다.
+Chapter 02에서 테이블, 행, 열, 기본키와 제약조건의 의미를 살펴보았습니다. 이 장에서는 그 개념이 실제 PostgreSQL 코드에서 어떻게 표현되는지 확인합니다.
 
-데이터베이스 안에는 테이블이 있고, 테이블 안에는 행과 열이 있습니다. SQL은 이 테이블에 명령을 내립니다.
+이번 장에서 사용할 테이블은 `students`입니다.
 
-예를 들어 다음 SQL은 students 테이블의 모든 데이터를 조회합니다.
+```text
+테이블: students
+한 행: 학생 한 명
+열: id, name, email, major, grade, created_at
+기본키: id
+```
+
+테이블을 만든 뒤에는 다음 네 가지 작업을 수행합니다.
+
+| CRUD | SQL | 역할 | 서비스 기능 예시 |
+| --- | --- | --- | --- |
+| Create | `INSERT` | 새 행 추가 | 학생 등록 |
+| Read | `SELECT` | 데이터 조회 | 학생 목록 확인 |
+| Update | `UPDATE` | 기존 행 수정 | 학생 정보 변경 |
+| Delete | `DELETE` | 기존 행 삭제 | 학생 정보 삭제 |
+
+![SQL DML 명령어와 CRUD 대응](../images/chapter04/ch04_01_sql_crud_overview.svg)
+
+그림 4-1 SQL 명령어와 CRUD 대응
+
+SQL은 역할에 따라 DDL, DML, DCL, TCL처럼 분류하기도 합니다. 이 장에서는 분류 용어를 암기하기보다 다음 작업을 정확히 수행하는 데 집중합니다.
+
+```text
+구조 만들기: CREATE TABLE
+데이터 추가: INSERT
+데이터 조회: SELECT
+데이터 수정: UPDATE
+데이터 삭제: DELETE
+```
+
+---
+
+## 2. 실습 위치부터 확인하기
+
+이 장의 SQL은 Chapter 03에서 만든 `ai_database_book` 데이터베이스를 기준으로 실행합니다.
+
+DBeaver에서 SQL 편집기를 연 뒤 가장 먼저 다음 SQL을 실행합니다.
 
 ```sql
-SELECT *
-FROM students;
+SELECT current_database();
+SELECT current_schema();
 ```
 
-이 문장은 짧지만 다음 의미를 담고 있습니다.
+일반적인 기대 결과는 다음과 같습니다.
 
 ```text
-students 테이블에서 모든 컬럼과 모든 행을 조회하라.
+current_database = ai_database_book
+current_schema   = public
 ```
 
-AI 시대에는 ChatGPT나 Codex가 SQL을 대신 작성해 줄 수 있습니다. 하지만 다음을 이해하지 못하면 위험합니다.
+현재 위치를 확인하지 않으면 다른 데이터베이스나 스키마에 테이블을 만들 수 있습니다.
+
+실습 준비 상태는 다음과 같이 확인합니다.
 
 ```text
-- 어떤 테이블을 조회하는가?
-- 어떤 행만 가져오는가?
-- 어떤 컬럼이 수정되는가?
-- 삭제되는 데이터는 무엇인가?
-- 조건이 빠져 전체 데이터가 바뀌지는 않는가?
+PostgreSQL 서버가 실행 중이다.
+DBeaver에서 ai_database_book에 연결했다.
+현재 스키마가 public인지 확인했다.
+code/chapter04/basic_crud.sql을 열 수 있다.
 ```
 
-특히 `UPDATE`와 `DELETE`는 조심해야 합니다. 조건 없이 실행하면 많은 데이터가 한 번에 바뀌거나 삭제될 수 있습니다.
-
-따라서 SQL 기초의 핵심은 다음입니다.
+이 장의 SQL 파일은 여러 구간으로 나누어져 있습니다. 처음부터 끝까지 한꺼번에 실행하기보다 학습 중인 구간만 선택해 실행합니다.
 
 ```text
-SQL을 실행하기 전에, 어떤 데이터가 영향을 받는지 설명할 수 있어야 한다.
+현재 위치 확인
+→ 테이블 생성
+→ 데이터 입력
+→ 조회
+→ 조건과 정렬
+→ 수정
+→ 삭제
 ```
 
 ---
 
-## 2. 관계형 데이터베이스 다시 보기
+## 3. SQL을 실행하고 검증하는 기본 순서
 
-관계형 데이터베이스는 데이터를 테이블 형태로 저장합니다.
+SQL을 실행하기 전에는 다음 네 가지를 먼저 확인합니다.
 
-테이블은 행과 열로 구성됩니다.
-
-| id | name | email | major |
-| ---: | --- | --- | --- |
-| 1 | 김민지 | minji@example.com | 컴퓨터공학 |
-| 2 | 이준호 | junho@example.com | 데이터사이언스 |
-| 3 | 박서연 | seoyeon@example.com | 경영학 |
-
-이 예제에서 개념을 다시 정리하면 다음과 같습니다.
-
-| 개념 | 예시 |
+| 확인 항목 | 질문 |
 | --- | --- |
-| 테이블 | students |
-| 행 | 김민지 학생 정보 한 줄 |
-| 열 | id, name, email, major |
-| 기본키 | id |
-| 데이터 타입 | VARCHAR, INT, TIMESTAMP 등 |
-| 제약조건 | PRIMARY KEY, NOT NULL, UNIQUE 등 |
+| 위치 | 현재 데이터베이스와 스키마가 맞는가? |
+| 대상 | 어떤 테이블과 열을 사용하는가? |
+| 범위 | 몇 개의 행을 조회하거나 변경할 것인가? |
+| 결과 | 실행 후 어떤 결과가 나와야 하는가? |
 
-SQL은 이 테이블을 대상으로 동작합니다.
+예를 들어 다음 SQL을 실행한다고 가정합니다.
+
+```sql
+SELECT name, grade
+FROM students
+WHERE grade >= 3
+ORDER BY grade DESC;
+```
+
+실행 전에 다음을 예상할 수 있어야 합니다.
+
+```text
+반환되는 열: name, grade
+조건: grade가 3 이상
+정렬: grade가 큰 값부터
+예상되는 학생: 이준호, 최현우
+예상 행 수: 2행
+```
+
+실행 후에는 예상과 실제 결과가 일치하는지 확인합니다. 예상이 틀렸다면 SQL, 샘플 데이터 또는 자신의 해석 중 무엇이 잘못되었는지 찾아야 합니다.
 
 ---
 
-## 3. 이 장의 실습 준비
+## 4. CREATE TABLE로 첫 테이블 만들기
 
-이 장의 실습은 Chapter 03에서 만든 PostgreSQL 환경을 기준으로 진행합니다.
-
-필요한 준비는 다음과 같습니다.
-
-```text
-1. PostgreSQL이 실행 중이다.
-2. DBeaver에서 ai_database_book 데이터베이스에 연결했다.
-3. SQL Editor를 열 수 있다.
-4. code/chapter04/basic_crud.sql 파일을 사용할 수 있다.
-```
-
-이번 장에서는 students 테이블을 중심으로 SQL을 연습합니다.
-
-먼저 기존 테이블이 있다면 삭제하고 다시 만들 수 있습니다. 반복 실습을 위해 다음 SQL을 사용합니다.
+다음 SQL로 `students` 테이블을 만듭니다.
 
 ```sql
-DROP TABLE IF EXISTS students;
-
 CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
+    id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     major VARCHAR(100),
-    grade INT,
+    grade INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-`DROP TABLE IF EXISTS students;`는 students 테이블이 이미 있으면 삭제하고, 없으면 그냥 넘어갑니다. 실습을 처음부터 다시 시작할 때 유용합니다.
+각 부분의 의미는 다음과 같습니다.
 
-다만 실제 서비스에서는 함부로 테이블을 삭제하면 안 됩니다. 이 SQL은 실습용으로만 사용합니다.
+| 구성 | 의미 |
+| --- | --- |
+| `CREATE TABLE` | 새 테이블 생성 |
+| `students` | 테이블 이름 |
+| `id` | 학생 한 명을 구분하는 식별자 |
+| `INTEGER` | 정수 데이터 타입 |
+| `GENERATED BY DEFAULT AS IDENTITY` | 값을 생략하면 번호 자동 생성 |
+| `PRIMARY KEY` | 각 행을 고유하게 구분 |
+| `VARCHAR(50)` | 최대 50자의 문자열 |
+| `NOT NULL` | 값 생략 금지 |
+| `UNIQUE` | 중복 값 금지 |
+| `TIMESTAMP` | 날짜와 시간 저장 |
+| `DEFAULT CURRENT_TIMESTAMP` | 값을 생략하면 현재 시각 사용 |
 
-### basic_crud.sql 실행 순서
+`SERIAL`도 PostgreSQL에서 자동 번호를 만드는 데 널리 사용되어 왔습니다. 이 책의 새 기본 예제에서는 SQL 표준에 가까운 `IDENTITY` 방식을 사용합니다.
 
-`basic_crud.sql`은 다음 흐름으로 실행합니다. 실제 SQL 전체 코드는 파일과 본문 예제에서 확인하고, 여기서는 실행 순서와 확인할 결과만 정리합니다.
-
-| 순서 | 작업 | 대표 SQL | 확인할 결과 |
-| ---: | --- | --- | --- |
-| 1 | 실습 테이블 초기화 | `DROP TABLE IF EXISTS`, `CREATE TABLE` | `students` 구조 생성 |
-| 2 | 샘플 데이터 추가 | `INSERT` | 예상한 행 수와 자동 생성값 |
-| 3 | 전체·일부 컬럼 조회 | `SELECT` | 컬럼명, 컬럼 순서, 행 수 |
-| 4 | 조건 조회 | `WHERE` | 조건에 맞는 행만 반환 |
-| 5 | 결과 정렬 | `ORDER BY` | ASC 또는 DESC 순서 |
-| 6 | 수정 대상 확인 | `SELECT ... WHERE` | 수정 대상과 현재 값 |
-| 7 | 데이터 수정 | `UPDATE ... WHERE` | 의도한 행만 변경 |
-| 8 | 수정 결과 확인 | `SELECT ... WHERE` | 변경값과 영향 범위 |
-| 9 | 삭제 대상 확인 | `SELECT ... WHERE` | 삭제할 행 확인 |
-| 10 | 데이터 삭제 | `DELETE ... WHERE` | 의도한 행만 삭제 |
-| 11 | 삭제 결과 확인 | `SELECT` | 남은 행과 삭제 결과 |
-
----
-
-## 4. SQL의 기본 분류
-
-SQL은 역할에 따라 여러 종류로 나눌 수 있습니다.
-
-| 분류 | 의미 | 대표 명령어 |
-| --- | --- | --- |
-| DDL | 테이블과 구조를 정의 | `CREATE`, `ALTER`, `DROP` |
-| DML | 데이터를 추가, 조회, 수정, 삭제 | `INSERT`, `SELECT`, `UPDATE`, `DELETE` |
-| DCL | 권한을 제어 | `GRANT`, `REVOKE` |
-| TCL | 트랜잭션을 제어 | `COMMIT`, `ROLLBACK` |
-
-이 장에서는 주로 DML을 다룹니다. 즉 데이터를 직접 다루는 명령어입니다.
+테이블을 만든 뒤 DBeaver에서 다음 위치를 새로고침합니다.
 
 ```text
-INSERT → 데이터 추가
-SELECT → 데이터 조회
-UPDATE → 데이터 수정
-DELETE → 데이터 삭제
+Schemas
+→ public
+→ Tables
+→ students
 ```
 
-이 네 가지를 합쳐 CRUD라고 부릅니다.
+### 같은 CREATE TABLE을 다시 실행하면
 
-![SQL DML 명령어와 CRUD 대응](../images/chapter04/ch04_01_sql_crud_overview.svg)
+이미 `students` 테이블이 존재하면 다음과 비슷한 오류가 발생합니다.
 
-그림 4-1 SQL DML 명령어와 CRUD 대응
+```text
+relation "students" already exists
+```
+
+이 오류가 발생했다고 바로 테이블을 삭제해서는 안 됩니다. 기존 테이블에 데이터가 있을 수 있기 때문입니다.
+
+실습을 처음부터 다시 시작해야 할 때만 별도 파일을 사용합니다.
+
+```text
+code/chapter04/reset_students.sql
+```
+
+이 파일은 `students` 테이블과 데이터를 삭제하므로 실행 전에 현재 데이터베이스를 반드시 확인합니다.
+
+> `CREATE TABLE IF NOT EXISTS`는 같은 이름의 테이블이 있을 때 오류를 피할 수 있지만, 기존 테이블의 열과 제약조건이 원하는 구조인지까지 확인하지는 않습니다.
 
 ---
 
-## 5. SELECT: 데이터 조회하기
+## 5. 열, 데이터 타입과 제약조건 읽기
 
-`SELECT`는 테이블에서 데이터를 조회하는 명령어입니다.
+`students` 테이블의 한 행은 학생 한 명을 나타냅니다.
 
-가장 기본 형태는 다음과 같습니다.
+| 열 | 데이터 타입 | 필수 여부 | 역할 |
+| --- | --- | --- | --- |
+| `id` | `INTEGER` | 필수·자동 생성 | 학생 식별자 |
+| `name` | `VARCHAR(50)` | 필수 | 학생 이름 |
+| `email` | `VARCHAR(100)` | 필수·중복 금지 | 학생 이메일 |
+| `major` | `VARCHAR(100)` | 선택 | 전공 |
+| `grade` | `INTEGER` | 선택 | 학년 |
+| `created_at` | `TIMESTAMP` | 기본값 사용 | 등록 시각 |
 
-```sql
-SELECT 컬럼명
-FROM 테이블명;
-```
+`major`와 `grade`에는 `NOT NULL`이 없으므로 값을 생략할 수 있습니다. 값이 없으면 `NULL`이 저장됩니다.
 
-모든 컬럼을 조회하려면 `*`를 사용할 수 있습니다.
-
-```sql
-SELECT *
-FROM students;
-```
-
-`*`는 모든 컬럼을 의미합니다. 초급 실습에서는 편리하지만, 실무에서는 필요한 컬럼만 명시하는 것이 좋습니다.
-
-예를 들어 이름과 전공만 조회하려면 다음처럼 작성합니다.
-
-```sql
-SELECT name, major
-FROM students;
-```
-
-이 SQL은 students 테이블에서 `name`과 `major` 컬럼만 가져옵니다.
-
-![SELECT로 필요한 컬럼 선택하기](../images/chapter04/ch04_02_select_projection_flow.svg)
-
-그림 4-2 SELECT로 필요한 컬럼 선택하기
-
-### SELECT 결과 읽기
-
-다음 데이터가 있다고 가정해 보겠습니다.
-
-| id | name | email | major | grade |
-| ---: | --- | --- | --- | ---: |
-| 1 | 김민지 | minji@example.com | 컴퓨터공학 | 2 |
-| 2 | 이준호 | junho@example.com | 데이터사이언스 | 3 |
-| 3 | 박서연 | seoyeon@example.com | 경영학 | 1 |
-
-다음 SQL을 실행하면:
-
-```sql
-SELECT name, major
-FROM students;
-```
-
-결과는 다음처럼 나옵니다.
-
-| name | major |
-| --- | --- |
-| 김민지 | 컴퓨터공학 |
-| 이준호 | 데이터사이언스 |
-| 박서연 | 경영학 |
-
-즉 `SELECT`는 테이블에서 원하는 열을 선택하는 명령입니다.
+이 장에서는 제약조건의 의미만 읽습니다. 중복 이메일, 잘못된 값과 참조 무결성을 DBMS가 어떻게 차단하는지는 Chapter 06에서 자세히 다룹니다.
 
 ---
 
-## 6. INSERT: 데이터 추가하기
+## 6. INSERT로 단일 행 입력하기
 
-`INSERT`는 테이블에 새 행을 추가하는 명령어입니다.
+`INSERT`는 테이블에 새 행을 추가합니다.
 
 기본 형태는 다음과 같습니다.
 
 ```sql
-INSERT INTO 테이블명 (컬럼1, 컬럼2, 컬럼3)
+INSERT INTO 테이블명 (열1, 열2, 열3)
 VALUES (값1, 값2, 값3);
 ```
 
-students 테이블에 학생 한 명을 추가해 보겠습니다.
+학생 한 명을 추가합니다.
 
 ```sql
 INSERT INTO students (name, email, major, grade)
 VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2);
 ```
 
-여러 행을 한 번에 추가할 수도 있습니다.
+문자열은 작은따옴표로 감쌉니다. 숫자는 따옴표 없이 입력합니다.
+
+PostgreSQL에서는 `RETURNING`을 사용해 새로 저장된 값을 바로 확인할 수도 있습니다.
 
 ```sql
 INSERT INTO students (name, email, major, grade)
-VALUES
-    ('이준호', 'junho@example.com', '데이터사이언스', 3),
-    ('박서연', 'seoyeon@example.com', '경영학', 1),
-    ('최현우', 'hyunwoo@example.com', '컴퓨터공학', 4);
+VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2)
+RETURNING id, name, created_at;
 ```
 
-입력 후에는 반드시 조회해서 확인합니다.
+`id`와 `created_at`을 직접 입력하지 않았지만 자동 생성된 값을 확인할 수 있습니다.
 
-```sql
-SELECT *
-FROM students;
-```
+> `RETURNING`은 PostgreSQL에서 유용하게 사용할 수 있는 선택 기능입니다. 입력 후 별도의 `SELECT` 없이 생성된 값을 확인할 수 있습니다.
 
 ![INSERT로 새 행 추가하기](../images/chapter04/ch04_03_insert_row_flow.svg)
 
-그림 4-3 INSERT로 새 행 추가하기
+그림 4-2 INSERT로 새 행 추가하기
 
-### INSERT에서 자주 하는 실수
+### INSERT에서 자주 발생하는 오류
 
-첫 번째 실수는 컬럼 수와 값의 수가 맞지 않는 경우입니다.
+열의 개수와 값의 개수가 다르면 오류가 발생합니다.
 
 ```sql
 INSERT INTO students (name, email, major)
 VALUES ('홍길동', 'hong@example.com');
 ```
 
-컬럼은 3개인데 값은 2개입니다. 이 경우 오류가 발생합니다.
-
-두 번째 실수는 문자열에 작은따옴표를 사용하지 않는 경우입니다.
+문자열에 작은따옴표를 사용하지 않아도 오류가 발생합니다.
 
 ```sql
 INSERT INTO students (name, email)
 VALUES (홍길동, hong@example.com);
 ```
 
-문자열 값은 작은따옴표로 감싸야 합니다.
+올바른 형태는 다음과 같습니다.
 
 ```sql
 INSERT INTO students (name, email)
@@ -2385,19 +2391,91 @@ VALUES ('홍길동', 'hong@example.com');
 
 ---
 
-## 7. WHERE: 조건 지정하기
+## 7. 여러 행 입력과 자동값 확인
 
-`WHERE`는 특정 조건을 만족하는 행만 선택할 때 사용합니다.
-
-기본 형태는 다음과 같습니다.
+여러 행을 한 번에 추가할 수 있습니다.
 
 ```sql
-SELECT 컬럼명
-FROM 테이블명
-WHERE 조건;
+INSERT INTO students (name, email, major, grade)
+VALUES
+    ('이준호', 'junho@example.com', '데이터사이언스', 3),
+    ('박서연', 'seoyeon@example.com', '경영학', 1),
+    ('최현우', 'hyunwoo@example.com', '컴퓨터공학', 4),
+    ('정하늘', 'haneul@example.com', 'AI데이터공학', 2);
 ```
 
-예를 들어 전공이 컴퓨터공학인 학생만 조회하려면 다음처럼 작성합니다.
+전공과 학년을 아직 모르는 학생도 입력해 보겠습니다.
+
+```sql
+INSERT INTO students (name, email)
+VALUES ('윤서진', 'seojin@example.com');
+```
+
+이 행에서는 다음 값이 자동으로 결정됩니다.
+
+```text
+id: 자동 생성
+created_at: 현재 시각
+major: NULL
+grade: NULL
+```
+
+입력된 전체 행 수를 확인합니다.
+
+```sql
+SELECT COUNT(*) AS student_count
+FROM students;
+```
+
+정상적으로 처음부터 실행했다면 결과는 `6`입니다. `COUNT`와 집계 함수는 Chapter 08에서 자세히 다룹니다. 여기서는 입력 행 수를 확인하는 용도로만 사용합니다.
+
+---
+
+## 8. SELECT로 전체 데이터 조회하기
+
+`SELECT`는 테이블의 데이터를 조회합니다.
+
+```sql
+SELECT *
+FROM students;
+```
+
+`*`는 모든 열을 의미합니다. 초급 실습에서는 편리하지만, 실제 분석이나 애플리케이션에서는 필요한 열만 명시하는 것이 좋습니다.
+
+```sql
+SELECT name, email, major
+FROM students;
+```
+
+![SELECT로 필요한 컬럼 선택하기](../images/chapter04/ch04_02_select_projection_flow.svg)
+
+그림 4-3 SELECT로 필요한 열 선택하기
+
+조회 결과의 열 이름을 바꾸어 표시하려면 별칭을 사용할 수 있습니다.
+
+```sql
+SELECT
+    name AS student_name,
+    major AS student_major
+FROM students;
+```
+
+`AS`는 원본 열 이름을 변경하지 않습니다. 조회 결과에 표시되는 이름만 바꿉니다.
+
+### SELECT 결과에서 확인할 것
+
+```text
+어떤 열이 반환되었는가?
+열의 순서는 어떻게 되는가?
+몇 개의 행이 반환되었는가?
+예상한 값과 실제 값이 일치하는가?
+```
+
+---
+
+## 9. WHERE와 비교 연산자
+
+`WHERE`는 조건에 맞는 행만 선택합니다.
 
 ```sql
 SELECT *
@@ -2409,7 +2487,7 @@ WHERE major = '컴퓨터공학';
 
 그림 4-4 WHERE 조건으로 대상 행 필터링하기
 
-학년이 3학년 이상인 학생을 조회할 수도 있습니다.
+학년이 3 이상인 학생을 조회합니다.
 
 ```sql
 SELECT *
@@ -2417,7 +2495,7 @@ FROM students
 WHERE grade >= 3;
 ```
 
-조건에는 비교 연산자를 사용할 수 있습니다.
+대표 비교 연산자는 다음과 같습니다.
 
 | 연산자 | 의미 | 예시 |
 | --- | --- | --- |
@@ -2428,9 +2506,21 @@ WHERE grade >= 3;
 | `<` | 작다 | `grade < 3` |
 | `<=` | 작거나 같다 | `grade <= 2` |
 
-### AND와 OR
+조건에 사용하는 값의 데이터 타입도 확인해야 합니다.
 
-조건을 여러 개 연결할 수 있습니다.
+```sql
+-- grade는 정수이므로 숫자로 비교
+WHERE grade = 3
+
+-- major는 문자열이므로 작은따옴표 사용
+WHERE major = '컴퓨터공학'
+```
+
+---
+
+## 10. AND, OR, IN과 괄호
+
+`AND`는 모든 조건이 참인 행을 선택합니다.
 
 ```sql
 SELECT *
@@ -2439,7 +2529,7 @@ WHERE major = '컴퓨터공학'
   AND grade >= 3;
 ```
 
-이 SQL은 전공이 컴퓨터공학이고 학년이 3학년 이상인 학생만 조회합니다.
+`OR`는 조건 중 하나 이상이 참인 행을 선택합니다.
 
 ```sql
 SELECT *
@@ -2448,23 +2538,102 @@ WHERE major = '컴퓨터공학'
    OR major = '데이터사이언스';
 ```
 
-이 SQL은 전공이 컴퓨터공학이거나 데이터사이언스인 학생을 조회합니다.
+같은 열을 여러 값과 비교할 때는 `IN`이 더 읽기 쉬울 수 있습니다.
+
+```sql
+SELECT *
+FROM students
+WHERE major IN ('컴퓨터공학', '데이터사이언스');
+```
+
+`AND`와 `OR`를 함께 사용하면 괄호로 의도를 명확하게 표현합니다.
+
+```sql
+SELECT *
+FROM students
+WHERE major = '컴퓨터공학'
+  AND (grade = 2 OR grade = 3);
+```
+
+괄호가 없으면 DBMS의 연산 우선순위에 따라 예상과 다른 범위의 행이 선택될 수 있습니다.
 
 ---
 
-## 8. ORDER BY: 정렬하기
+## 11. LIKE로 문자열 검색하기
 
-`ORDER BY`는 조회 결과를 정렬할 때 사용합니다.
-
-기본 형태는 다음과 같습니다.
+문자열의 일부가 일치하는 행을 찾을 때 `LIKE`를 사용할 수 있습니다.
 
 ```sql
-SELECT 컬럼명
-FROM 테이블명
-ORDER BY 정렬기준;
+SELECT *
+FROM students
+WHERE name LIKE '김%';
 ```
 
-학년 오름차순으로 정렬하려면 다음처럼 작성합니다.
+`%`는 길이에 상관없이 여러 문자를 의미합니다.
+
+| 조건 | 의미 |
+| --- | --- |
+| `'김%'` | 김으로 시작 |
+| `'%민%'` | 중간에 민 포함 |
+| `'%우'` | 우로 끝남 |
+
+PostgreSQL에서 대소문자를 구분하지 않는 문자열 검색이 필요하면 `ILIKE`를 사용할 수 있습니다.
+
+```sql
+SELECT *
+FROM students
+WHERE email ILIKE '%EXAMPLE.COM';
+```
+
+이 장에서는 기본적인 문자열 검색만 다룹니다. 대규모 텍스트 검색과 인덱스는 뒤 장의 범위입니다.
+
+---
+
+## 12. NULL, IS NULL과 IS NOT NULL
+
+`NULL`은 숫자 0이나 빈 문자열이 아닙니다.
+
+```text
+NULL = 값이 없거나 아직 알려지지 않음
+```
+
+윤서진 학생은 `major`와 `grade`를 입력하지 않았으므로 두 열의 값이 `NULL`입니다.
+
+NULL을 다음처럼 비교하면 원하는 결과가 나오지 않습니다.
+
+```sql
+SELECT *
+FROM students
+WHERE major = NULL;
+```
+
+NULL 여부는 `IS NULL`로 확인합니다.
+
+```sql
+SELECT *
+FROM students
+WHERE major IS NULL;
+```
+
+값이 있는 행만 조회하려면 `IS NOT NULL`을 사용합니다.
+
+```sql
+SELECT *
+FROM students
+WHERE major IS NOT NULL;
+```
+
+> NULL은 일반 값처럼 `=` 또는 `<>`로 비교하지 않습니다.
+
+NULL이 집계와 데이터 품질에 미치는 영향은 Chapter 08과 Chapter 14에서 다시 다룹니다.
+
+---
+
+## 13. ORDER BY와 LIMIT
+
+`ORDER BY`는 조회 결과의 순서를 정합니다.
+
+학년 오름차순으로 정렬합니다.
 
 ```sql
 SELECT *
@@ -2472,9 +2641,7 @@ FROM students
 ORDER BY grade ASC;
 ```
 
-`ASC`는 오름차순입니다. 작은 값에서 큰 값으로 정렬됩니다.
-
-내림차순은 `DESC`를 사용합니다.
+학년 내림차순으로 정렬합니다.
 
 ```sql
 SELECT *
@@ -2486,89 +2653,115 @@ ORDER BY grade DESC;
 
 그림 4-5 ORDER BY로 조회 결과 정렬하기
 
-이름순으로 정렬할 수도 있습니다.
+`LIMIT`는 조회할 행의 개수를 제한합니다.
 
 ```sql
 SELECT *
 FROM students
-ORDER BY name ASC;
+ORDER BY created_at DESC
+LIMIT 3;
 ```
 
-### WHERE와 ORDER BY 함께 사용하기
+```text
+ORDER BY: 어떤 순서로 표시할지 결정
+LIMIT: 그중 몇 행을 가져올지 결정
+```
 
-조건으로 먼저 행을 고르고, 그 결과를 정렬할 수 있습니다.
+`LIMIT`만 사용하면 어떤 행이 선택될지 명확하지 않을 수 있습니다. 상위·최신·최소·최대처럼 의미가 있는 결과를 만들 때는 가능한 한 `ORDER BY`와 함께 사용합니다.
+
+NULL의 정렬 위치를 명확히 지정할 수도 있습니다.
 
 ```sql
 SELECT *
 FROM students
-WHERE major = '컴퓨터공학'
-ORDER BY grade DESC;
+ORDER BY grade DESC NULLS LAST;
 ```
-
-이 SQL은 전공이 컴퓨터공학인 학생만 조회한 뒤, 학년이 높은 순서로 정렬합니다.
 
 ---
 
-## 9. UPDATE: 데이터 수정하기
+## 14. UPDATE를 안전하게 실행하기
 
-`UPDATE`는 기존 데이터를 수정하는 명령어입니다.
+`UPDATE`는 기존 행의 값을 수정합니다.
 
 기본 형태는 다음과 같습니다.
 
 ```sql
 UPDATE 테이블명
-SET 컬럼명 = 새값
+SET 열 = 새값
 WHERE 조건;
 ```
 
-예를 들어 김민지 학생의 학년을 3으로 수정하려면 다음처럼 작성합니다.
+이준호 학생의 학년을 4로 수정한다고 가정합니다.
 
-```sql
-UPDATE students
-SET grade = 3
-WHERE email = 'minji@example.com';
-```
-
-수정 후에는 반드시 조회해서 확인합니다.
+### 1단계: 수정 대상 확인
 
 ```sql
 SELECT *
 FROM students
-WHERE email = 'minji@example.com';
+WHERE email = 'junho@example.com';
+```
+
+조회 결과가 한 행인지, 현재 값이 무엇인지 확인합니다.
+
+### 2단계: UPDATE 실행
+
+```sql
+UPDATE students
+SET grade = 4
+WHERE email = 'junho@example.com';
+```
+
+DBeaver의 실행 결과에서 영향받은 행 수가 예상과 일치하는지 확인합니다.
+
+```text
+예상: 1행 수정
+실제: Updated Rows 1
+```
+
+### 3단계: 수정 결과 확인
+
+```sql
+SELECT *
+FROM students
+WHERE email = 'junho@example.com';
 ```
 
 ![안전한 UPDATE 실행 절차](../images/chapter04/ch04_06_update_safe_flow.svg)
 
 그림 4-6 안전한 UPDATE 실행 절차
 
-### UPDATE에서 가장 중요한 점
+PostgreSQL에서는 수정된 행을 바로 반환할 수도 있습니다.
 
-`UPDATE`에서는 `WHERE`가 매우 중요합니다.
+```sql
+UPDATE students
+SET grade = 4
+WHERE email = 'junho@example.com'
+RETURNING id, name, grade;
+```
 
-다음 SQL은 위험합니다.
+### WHERE 없는 UPDATE의 위험
+
+다음 SQL은 모든 학생의 학년을 1로 바꿉니다.
 
 ```sql
 UPDATE students
 SET grade = 1;
 ```
 
-이 SQL은 students 테이블의 모든 학생 학년을 1로 바꿉니다. 실습에서는 되돌릴 수 있지만, 실제 서비스에서는 큰 사고가 될 수 있습니다.
+문법 오류는 아니지만 영향 범위가 전체 테이블입니다. 따라서 `UPDATE` 전에는 같은 `WHERE` 조건으로 `SELECT`를 실행해야 합니다.
 
-따라서 `UPDATE`를 실행하기 전에는 먼저 같은 조건으로 `SELECT`를 실행해 확인하는 습관이 필요합니다.
-
-```sql
-SELECT *
-FROM students
-WHERE email = 'minji@example.com';
+```text
+SELECT로 대상 확인
+→ UPDATE 실행
+→ 영향받은 행 수 확인
+→ SELECT로 결과 확인
 ```
-
-조회 결과가 맞다면 그 다음 `UPDATE`를 실행합니다.
 
 ---
 
-## 10. DELETE: 데이터 삭제하기
+## 15. DELETE를 안전하게 실행하기
 
-`DELETE`는 테이블에서 행을 삭제하는 명령어입니다.
+`DELETE`는 테이블에서 행을 삭제합니다.
 
 기본 형태는 다음과 같습니다.
 
@@ -2577,132 +2770,108 @@ DELETE FROM 테이블명
 WHERE 조건;
 ```
 
-예를 들어 특정 이메일을 가진 학생을 삭제하려면 다음처럼 작성합니다.
+박서연 학생을 삭제한다고 가정합니다.
 
-```sql
-DELETE FROM students
-WHERE email = 'hyunwoo@example.com';
-```
-
-삭제 후에는 다시 조회합니다.
+### 1단계: 삭제 대상 확인
 
 ```sql
 SELECT *
-FROM students;
+FROM students
+WHERE email = 'seoyeon@example.com';
 ```
+
+### 2단계: DELETE 실행
+
+```sql
+DELETE FROM students
+WHERE email = 'seoyeon@example.com';
+```
+
+DBeaver에서 삭제된 행 수를 확인합니다.
+
+```text
+예상: 1행 삭제
+실제: Deleted Rows 1
+```
+
+### 3단계: 삭제 결과 확인
+
+```sql
+SELECT *
+FROM students
+WHERE email = 'seoyeon@example.com';
+```
+
+결과가 0행이면 삭제 대상이 사라진 것입니다.
 
 ![안전한 DELETE 실행 절차](../images/chapter04/ch04_07_delete_safe_flow.svg)
 
 그림 4-7 안전한 DELETE 실행 절차
 
-### DELETE에서 가장 중요한 점
+삭제된 행을 즉시 확인하려면 `RETURNING`을 사용할 수 있습니다.
 
-`DELETE`도 `WHERE`가 매우 중요합니다.
+```sql
+DELETE FROM students
+WHERE email = 'seoyeon@example.com'
+RETURNING id, name, email;
+```
 
-다음 SQL은 매우 위험합니다.
+### WHERE 없는 DELETE의 위험
+
+다음 SQL은 `students` 테이블의 모든 행을 삭제합니다.
 
 ```sql
 DELETE FROM students;
 ```
 
-이 SQL은 students 테이블의 모든 행을 삭제합니다.
+테이블 구조는 남지만 데이터는 모두 사라집니다. 문법이 맞는 SQL과 실행해도 되는 SQL은 다릅니다.
 
-따라서 삭제 전에는 반드시 다음처럼 삭제 대상부터 확인합니다.
-
-```sql
-SELECT *
-FROM students
-WHERE email = 'hyunwoo@example.com';
+```text
+SELECT로 대상 확인
+→ DELETE 실행
+→ 영향받은 행 수 확인
+→ SELECT로 삭제 결과 확인
 ```
-
-확인한 결과가 맞을 때만 `DELETE`를 실행합니다.
 
 ---
 
-## 11. CRUD 흐름으로 이해하기
+## 16. CRUD와 서비스 기능 연결하기
 
-지금까지 배운 SQL은 CRUD 흐름으로 정리할 수 있습니다.
+대부분의 데이터 중심 서비스 기능은 기본 CRUD로 설명할 수 있습니다.
 
-| CRUD | SQL | 역할 | 예시 |
-| --- | --- | --- | --- |
-| Create | `INSERT` | 새 데이터 추가 | 학생 등록 |
-| Read | `SELECT` | 데이터 조회 | 학생 목록 확인 |
-| Update | `UPDATE` | 기존 데이터 수정 | 이메일 변경 |
-| Delete | `DELETE` | 데이터 삭제 | 학생 삭제 |
-
-웹 서비스의 대부분 기능은 CRUD로 설명할 수 있습니다.
-
-예를 들어 학생 관리 시스템은 다음과 같습니다.
-
-| 화면 기능 | SQL |
+| 화면 또는 API 기능 | SQL 작업 |
 | --- | --- |
-| 학생 등록 버튼 | `INSERT` |
-| 학생 목록 화면 | `SELECT` |
-| 학생 정보 수정 | `UPDATE` |
-| 학생 삭제 | `DELETE` |
+| 학생 등록 | `INSERT` |
+| 학생 목록 조회 | `SELECT` |
+| 전공별 학생 검색 | `SELECT ... WHERE` |
+| 학생 정보 수정 | `UPDATE ... WHERE` |
+| 학생 삭제 | `DELETE ... WHERE` |
 
-즉 SQL 기초를 배우는 것은 웹 서비스와 데이터 분석의 공통 기반을 배우는 것입니다.
+데이터 분석에서도 기본 흐름은 같습니다.
+
+```text
+필요한 열 선택
+→ 분석 대상 행 필터링
+→ 순서와 개수 조정
+→ 결과 확인
+```
+
+Chapter 08에서는 여러 테이블을 연결하고 집계하며, Chapter 14에서는 SQL 결과를 Python 분석으로 확장합니다.
 
 ---
 
-## 12. SELECT를 먼저 실행하는 습관
+## 17. AI가 만든 SQL 검토하기
 
-초급자에게 가장 중요한 습관 중 하나는 수정이나 삭제 전에 먼저 조회하는 것입니다.
+ChatGPT나 Codex는 SQL 초안을 빠르게 만들 수 있습니다. 하지만 실행 여부를 결정하는 책임은 사용자에게 있습니다.
 
-다음 순서를 기억하세요.
-
-```text
-1. SELECT로 대상 확인
-2. UPDATE 또는 DELETE 실행
-3. 다시 SELECT로 결과 확인
-```
-
-예를 들어 학년을 수정하려면 다음 순서가 좋습니다.
-
-```sql
-SELECT *
-FROM students
-WHERE email = 'junho@example.com';
-
-UPDATE students
-SET grade = 4
-WHERE email = 'junho@example.com';
-
-SELECT *
-FROM students
-WHERE email = 'junho@example.com';
-```
-
-삭제도 마찬가지입니다.
-
-```sql
-SELECT *
-FROM students
-WHERE email = 'seoyeon@example.com';
-
-DELETE FROM students
-WHERE email = 'seoyeon@example.com';
-
-SELECT *
-FROM students
-WHERE email = 'seoyeon@example.com';
-```
-
-이 습관은 이후 트랜잭션과 백업을 배울 때도 중요합니다.
-
----
-
-## 13. AI가 만든 SQL 검토하기
-
-ChatGPT나 Codex에게 SQL을 요청하면 빠르게 답을 얻을 수 있습니다.
-
-예를 들어 다음처럼 요청할 수 있습니다.
+예를 들어 다음 요청을 생각해 보겠습니다.
 
 ```text
-students 테이블에서 전공이 컴퓨터공학인 학생만 조회하는 PostgreSQL SQL을 작성해 주세요.
+students 테이블에서 전공이 컴퓨터공학인 학생만 조회하는
+PostgreSQL SQL을 작성해 주세요.
 ```
 
-AI는 다음과 비슷한 SQL을 만들 수 있습니다.
+AI는 다음처럼 작성할 수 있습니다.
 
 ```sql
 SELECT *
@@ -2710,22 +2879,22 @@ FROM students
 WHERE major = '컴퓨터공학';
 ```
 
-이 SQL은 비교적 안전합니다. 조회만 하기 때문입니다.
+조회 SQL도 실제 테이블과 열이 존재하는지, 예상 행 수가 맞는지 확인해야 합니다.
 
-하지만 다음 요청은 조심해야 합니다.
+삭제 요청은 더 주의해야 합니다.
 
 ```text
 students 테이블에서 1학년 학생을 삭제하는 SQL을 작성해 주세요.
 ```
 
-AI는 다음과 같이 답할 수 있습니다.
+AI가 다음 SQL을 제안할 수 있습니다.
 
 ```sql
 DELETE FROM students
 WHERE grade = 1;
 ```
 
-이 SQL은 문법상 맞을 수 있지만, 실제로 실행해도 되는지는 별개의 문제입니다. 삭제 대상이 정확한지 먼저 확인해야 합니다.
+문법은 맞을 수 있지만 바로 실행하면 안 됩니다. 먼저 같은 조건으로 대상을 조회합니다.
 
 ```sql
 SELECT *
@@ -2737,253 +2906,264 @@ WHERE grade = 1;
 
 그림 4-8 AI 생성 SQL 검토 흐름
 
-AI가 만든 SQL을 검토할 때는 다음을 확인합니다.
+AI가 만든 SQL은 다음 항목으로 검토합니다.
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
-| 대상 테이블 | 올바른 테이블을 사용했는가? |
-| 대상 컬럼 | 올바른 컬럼을 사용했는가? |
-| 조건 | `WHERE` 조건이 있는가? 조건이 정확한가? |
-| 영향 범위 | 몇 개의 행이 영향을 받을 수 있는가? |
-| 실행 전 조회 | 수정/삭제 전 `SELECT`로 확인했는가? |
-| PostgreSQL 문법 | PostgreSQL에서 실행 가능한 문법인가? |
+| 실제 구조 | 테이블과 열이 실제로 존재하는가? |
+| 데이터 타입 | 숫자와 문자열을 올바르게 처리했는가? |
+| 문자열 | 작은따옴표를 올바르게 사용했는가? |
+| NULL | `= NULL` 대신 `IS NULL`을 사용했는가? |
+| 조건 | `WHERE`가 요구사항과 정확히 일치하는가? |
+| 논리 연산 | `AND`, `OR`와 괄호가 의도와 맞는가? |
+| 정렬·개수 | `ORDER BY`와 `LIMIT`가 필요한가? |
+| 영향 범위 | 몇 행이 수정되거나 삭제되는가? |
+| 실행 전 확인 | 같은 조건의 `SELECT`를 먼저 실행했는가? |
+| 실제 결과 | 예상 결과와 실행 결과가 일치하는가? |
+
+AI에게 SQL을 요청할 때도 예상 결과를 함께 요구하면 검토하기 쉽습니다.
+
+```text
+SQL을 작성한 뒤 다음을 함께 설명해 주세요.
+- 사용하는 테이블과 열
+- WHERE 조건의 의미
+- 예상 반환 행 또는 영향받는 행
+- 실행 전에 확인할 SELECT
+```
 
 ---
 
-## 14. 작은 실습: 안전한 수정과 삭제
+## 18. 종합 실습
 
-다음 순서대로 실습해 보세요.
+다음 순서로 Chapter 04 실습을 진행합니다.
 
-### 14.1 데이터 확인
-
-```sql
-SELECT *
-FROM students;
-```
-
-### 14.2 수정 대상 확인
+### 18.1 위치 확인
 
 ```sql
-SELECT *
-FROM students
-WHERE email = 'junho@example.com';
+SELECT current_database();
+SELECT current_schema();
 ```
 
-### 14.3 데이터 수정
+### 18.2 테이블 생성
 
 ```sql
-UPDATE students
-SET major = 'AI데이터공학'
-WHERE email = 'junho@example.com';
+CREATE TABLE students (
+    id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    major VARCHAR(100),
+    grade INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-### 14.4 수정 결과 확인
+### 18.3 데이터 입력
 
-```sql
-SELECT *
-FROM students
-WHERE email = 'junho@example.com';
+학생 여섯 명을 입력하고 전체 행 수를 확인합니다.
+
+### 18.4 조회 조건 작성
+
+다음 질문을 SQL로 바꿉니다.
+
+```text
+전공이 컴퓨터공학인 학생은 누구인가?
+학년이 3 이상인 학생은 누구인가?
+전공 정보가 없는 학생은 누구인가?
+가장 최근에 등록된 학생 3명은 누구인가?
 ```
 
-### 14.5 삭제 대상 확인
+### 18.5 수정과 삭제
 
-```sql
-SELECT *
-FROM students
-WHERE email = 'seoyeon@example.com';
+```text
+수정 전 SELECT
+→ UPDATE
+→ 영향받은 행 수 확인
+→ 수정 후 SELECT
+
+삭제 전 SELECT
+→ DELETE
+→ 영향받은 행 수 확인
+→ 삭제 후 SELECT
 ```
 
-### 14.6 데이터 삭제
+### 18.6 AI SQL 검토
 
-```sql
-DELETE FROM students
-WHERE email = 'seoyeon@example.com';
+AI가 만든 SQL 하나에 대해 다음을 기록합니다.
+
+```markdown
+## AI가 만든 SQL
+
+## 예상 결과
+
+## 검토한 문제
+
+## 수정한 SQL
+
+## 실제 실행 결과
 ```
-
-### 14.7 삭제 결과 확인
-
-```sql
-SELECT *
-FROM students;
-```
-
-이 실습의 핵심은 `UPDATE`와 `DELETE` 자체가 아니라, 실행 전후에 `SELECT`로 확인하는 습관입니다.
 
 ---
 
-## 15. 자주 하는 실수
+## 19. 자주 하는 실수
 
-### 실수 1. 문자열에 작은따옴표를 쓰지 않는다
+### 실수 1. 현재 데이터베이스와 스키마를 확인하지 않는다
 
-문자열 값은 작은따옴표로 감싸야 합니다.
+테이블이 보이지 않거나 예상하지 않은 위치에 생성될 수 있습니다.
+
+```sql
+SELECT current_database();
+SELECT current_schema();
+```
+
+### 실수 2. 기본 SQL 파일을 처음부터 끝까지 무조건 실행한다
+
+이미 테이블과 데이터가 있다면 생성 오류나 중복 데이터 오류가 발생할 수 있습니다. 필요한 구간만 선택해 실행합니다.
+
+### 실수 3. 문자열에 작은따옴표를 사용하지 않는다
 
 ```sql
 WHERE major = '컴퓨터공학'
 ```
 
-### 실수 2. WHERE 없이 UPDATE를 실행한다
+### 실수 4. NULL을 일반 값처럼 비교한다
+
+```sql
+-- 잘못된 예
+WHERE major = NULL
+
+-- 올바른 예
+WHERE major IS NULL
+```
+
+### 실수 5. AND와 OR를 괄호 없이 복잡하게 연결한다
+
+조건의 의도를 괄호로 명확히 표현합니다.
+
+### 실수 6. WHERE 없이 UPDATE를 실행한다
 
 ```sql
 UPDATE students
 SET grade = 1;
 ```
 
-이 SQL은 모든 학생의 학년을 1로 바꿉니다.
+전체 행이 변경됩니다.
 
-### 실수 3. WHERE 없이 DELETE를 실행한다
+### 실수 7. WHERE 없이 DELETE를 실행한다
 
 ```sql
 DELETE FROM students;
 ```
 
-이 SQL은 모든 학생 데이터를 삭제합니다.
+전체 행이 삭제됩니다.
 
-### 실수 4. SELECT 결과를 확인하지 않고 수정한다
+### 실수 8. 영향받은 행 수를 확인하지 않는다
 
-수정 전에는 반드시 같은 조건으로 조회해야 합니다.
+예상한 행이 1개인데 여러 행이 변경되었다면 조건이 잘못되었을 수 있습니다.
 
-### 실수 5. AI가 만든 SQL을 그대로 실행한다
+### 실수 9. AI가 만든 SQL을 그대로 실행한다
 
-AI가 만든 SQL은 초안입니다. 특히 `UPDATE`, `DELETE`는 실행 전 영향 범위를 반드시 확인해야 합니다.
-
----
-
-## 16. 직접 해보기
-
-다음 요구사항을 SQL로 작성해 보세요.
-
-```text
-1. students 테이블을 새로 만든다.
-2. 학생 데이터 5건을 입력한다.
-3. 전체 학생을 조회한다.
-4. 전공이 컴퓨터공학인 학생만 조회한다.
-5. 학년이 높은 순서로 학생을 정렬한다.
-6. 특정 학생의 전공을 수정한다.
-7. 수정 전후를 SELECT로 확인한다.
-8. 특정 학생을 삭제한다.
-9. 삭제 전후를 SELECT로 확인한다.
-10. AI가 만든 SQL 하나를 검토하고, 수정한 내용을 설명한다.
-```
-
-실습 결과는 다음 형식으로 정리해 볼 수 있습니다.
-
-```markdown
-# Chapter 04 직접 해보기
-
-## 1. 작성한 SQL
-
-## 2. 실행 결과 요약
-
-## 3. UPDATE 실행 전 확인한 SELECT
-
-## 4. DELETE 실행 전 확인한 SELECT
-
-## 5. AI가 만든 SQL 검토 결과
-
-## 6. 느낀 점
-```
+AI 결과는 초안입니다. 실제 구조, 조건, 영향 범위와 실행 결과를 확인해야 합니다.
 
 ---
 
-## 17. 스스로 확인하기
+## 20. 스스로 확인하기
 
-### 17.1 개념 확인
+### 20.1 개념 확인
 
-1. [기초] `SELECT`의 역할을 설명해 보세요.
-2. [기초] `INSERT`의 역할을 설명해 보세요.
-3. [기초] `WHERE`가 필요한 이유를 설명해 보세요.
-4. [기초] `ORDER BY ASC`와 `ORDER BY DESC`의 차이를 설명해 보세요.
-5. [기초] CRUD와 SQL 명령어를 연결해 보세요.
+1. `CREATE TABLE`은 어떤 작업을 수행하는가?
+2. `INSERT`, `SELECT`, `UPDATE`, `DELETE`를 CRUD와 연결해 설명해 보세요.
+3. `NULL`은 0이나 빈 문자열과 어떻게 다른가?
+4. `WHERE major = NULL`이 올바르지 않은 이유는 무엇인가?
+5. `ORDER BY`와 `LIMIT`의 역할은 어떻게 다른가?
+6. `UPDATE`와 `DELETE` 전에 `SELECT`를 실행해야 하는 이유는 무엇인가?
 
-### 17.2 SQL 작성 문제
+### 20.2 SQL 작성
 
-1. [SQL] students 테이블의 모든 데이터를 조회하는 SQL을 작성해 보세요.
-2. [SQL] students 테이블에서 name과 email만 조회하는 SQL을 작성해 보세요.
-3. [SQL] 전공이 데이터사이언스인 학생만 조회하는 SQL을 작성해 보세요.
-4. [SQL] 학년이 2 이상인 학생을 조회하는 SQL을 작성해 보세요.
-5. [SQL] 학생을 학년 내림차순으로 정렬하는 SQL을 작성해 보세요.
+1. 학생의 이름과 이메일만 조회하는 SQL을 작성해 보세요.
+2. 전공이 데이터사이언스인 학생을 조회해 보세요.
+3. 학년이 2 이상이고 전공이 컴퓨터공학인 학생을 조회해 보세요.
+4. 전공이 컴퓨터공학 또는 데이터사이언스인 학생을 `IN`으로 조회해 보세요.
+5. 이름이 `김`으로 시작하는 학생을 조회해 보세요.
+6. 전공이 NULL인 학생을 조회해 보세요.
+7. 최신 등록 학생 3명을 조회해 보세요.
 
-### 17.3 위험 SQL 검토 문제
+### 20.3 위험 SQL 검토
 
-다음 SQL의 문제점을 설명하세요.
+다음 SQL의 영향 범위를 설명합니다.
 
 ```sql
 UPDATE students
 SET major = '컴퓨터공학';
 ```
 
-다음 SQL의 문제점을 설명하세요.
-
-```sql
-DELETE FROM students;
-```
-
-### 17.4 AI 검토 문제
-
-AI가 다음 SQL을 생성했습니다.
+다음 SQL을 실행하기 전에 먼저 작성해야 할 조회 SQL을 적습니다.
 
 ```sql
 DELETE FROM students
 WHERE major = '경영학';
 ```
 
-실행 전에 어떤 SQL을 먼저 실행해야 할까요? 그 이유도 함께 설명하세요.
+### 20.4 예상 결과 작성
+
+다음 SQL을 실행하기 전에 반환 열, 예상 행과 정렬 순서를 적어 봅니다.
+
+```sql
+SELECT name, grade
+FROM students
+WHERE grade >= 2
+ORDER BY grade DESC NULLS LAST
+LIMIT 3;
+```
 
 ---
 
-## 18. 정리
+## 21. 핵심 정리
 
-이번 장에서는 관계형 데이터베이스에서 가장 기본이 되는 SQL을 살펴보았습니다.
+| 작업 | SQL | 실행 전 확인 | 실행 후 확인 |
+| --- | --- | --- | --- |
+| 테이블 생성 | `CREATE TABLE` | 현재 DB·스키마, 같은 이름 존재 여부 | 테이블 구조 |
+| 데이터 입력 | `INSERT` | 열과 값의 개수·타입 | 추가된 행과 자동값 |
+| 데이터 조회 | `SELECT` | 필요한 열과 조건 | 반환 행 수와 값 |
+| 데이터 수정 | `UPDATE` | 같은 조건의 `SELECT` | 영향받은 행 수와 변경값 |
+| 데이터 삭제 | `DELETE` | 같은 조건의 `SELECT` | 영향받은 행 수와 남은 데이터 |
 
 핵심 내용을 정리하면 다음과 같습니다.
 
 ```text
-1. SQL은 데이터베이스와 대화하는 언어이다.
-2. SELECT는 데이터를 조회한다.
-3. INSERT는 새 데이터를 추가한다.
-4. WHERE는 조건을 지정한다.
-5. ORDER BY는 조회 결과를 정렬한다.
-6. UPDATE는 기존 데이터를 수정한다.
-7. DELETE는 데이터를 삭제한다.
-8. INSERT, SELECT, UPDATE, DELETE는 CRUD 흐름과 연결된다.
-9. UPDATE와 DELETE를 실행하기 전에는 반드시 SELECT로 대상을 확인해야 한다.
-10. AI가 만든 SQL은 실행 전 사람이 검토해야 한다.
+1. SQL을 실행하기 전에 현재 데이터베이스와 스키마를 확인한다.
+2. CREATE TABLE은 테이블 구조를 만든다.
+3. INSERT, SELECT, UPDATE, DELETE는 CRUD와 연결된다.
+4. WHERE는 대상 행을 결정한다.
+5. NULL은 IS NULL 또는 IS NOT NULL로 확인한다.
+6. ORDER BY는 순서를, LIMIT는 행 개수를 정한다.
+7. UPDATE와 DELETE 전에는 같은 조건으로 SELECT를 실행한다.
+8. 실행 후 반환 행과 영향받은 행 수를 확인한다.
+9. AI가 만든 SQL은 예상 결과와 실제 결과를 비교해 검증한다.
 ```
-
-### SQL 안전 실행 원칙
-
-| 상황 | 먼저 확인할 것 | 이유 |
-| --- | --- | --- |
-| SELECT 실행 | 필요한 컬럼과 조건 | 불필요한 데이터 조회를 줄이기 위해 |
-| INSERT 실행 | 컬럼 수와 값 수 | 입력 오류를 막기 위해 |
-| UPDATE 실행 | 같은 WHERE 조건으로 SELECT | 잘못된 행 수정을 막기 위해 |
-| DELETE 실행 | 같은 WHERE 조건으로 SELECT | 잘못된 행 삭제를 막기 위해 |
-| AI 생성 SQL 실행 | 대상 테이블, 조건, 영향 범위 | AI 초안을 그대로 실행하는 위험을 줄이기 위해 |
 
 이 장에서 가장 중요한 문장은 다음입니다.
 
 ```text
-SQL은 실행하는 것보다, 실행 전에 어떤 데이터가 영향을 받는지 이해하는 것이 더 중요하다.
+SQL은 실행하는 것보다,
+실행 전에 어떤 데이터가 영향을 받고
+실행 후 실제 결과가 예상과 일치하는지 확인하는 것이 더 중요하다.
 ```
 
 ---
 
-## 19. 다음 장에서는
+## 22. 다음 장에서는
 
-다음 장에서는 데이터 모델링과 ERD를 살펴봅니다.
-
-Chapter 05에서 다룰 내용은 다음과 같습니다.
+다음 장에서는 현실의 업무 요구사항을 테이블과 관계로 표현하는 데이터 모델링과 ERD를 살펴봅니다.
 
 ```text
-- 요구사항에서 테이블 후보 찾기
-- 엔터티와 속성 이해
-- 테이블 간 관계 찾기
-- ERD 기본 기호 이해
-- ChatGPT로 ERD 초안 만들기
-- AI가 만든 ERD 검토하기
+업무 문장 읽기
+→ 엔터티와 속성 찾기
+→ 식별자 결정
+→ 테이블 관계 찾기
+→ ERD 작성
 ```
 
-Chapter 04에서 배운 SQL은 이후 모든 장에서 반복해서 사용됩니다.
+Chapter 04에서 하나의 `students` 테이블을 직접 만들었다면, Chapter 05에서는 학생, 강의, 수강신청처럼 여러 종류의 데이터를 어떻게 나누고 연결할지 설계합니다.
 
 ---
 
