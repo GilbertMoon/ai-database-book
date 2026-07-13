@@ -33,7 +33,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 02 | 데이터와 DBMS의 기본 개념 | 2차 재구성 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver로 실습 환경 만들기 | 2차 재구성 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 시작하기 | 2차 재구성 완료 |
-| Chapter 05 | 데이터 모델링과 ERD | eBook 1차 수정 완료 |
+| Chapter 05 | 요구사항에서 데이터 모델과 ERD 만들기 | 2차 재구성 완료 |
 | Chapter 06 | 정규화와 좋은 테이블 설계 | eBook 1차 수정 완료 |
 | Chapter 07 | 실전 프로젝트 1: 온라인 강의 수강신청 데이터베이스 설계 | eBook 1차 수정 완료 |
 | Chapter 08 | JOIN과 집계 쿼리 | eBook 1차 수정 완료 |
