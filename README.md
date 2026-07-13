@@ -38,7 +38,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 07 | 실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기 | 2차 재구성 완료 |
 | Chapter 08 | JOIN과 집계로 서비스 질문에 답하기 | 2차 재구성 완료 |
 | Chapter 09 | 트랜잭션으로 데이터 정합성 지키기 | 2차 재구성 완료 |
-| Chapter 10 | 인덱스와 성능 기초 | eBook 1차 수정 완료 |
+| Chapter 10 | 실행 계획으로 인덱스 효과 검증하기 | 2차 재구성 완료 |
 | Chapter 11 | 데이터베이스를 안전하게 지키고 복구하는 방법 | eBook 1차 수정 완료 |
 | Chapter 12 | NoSQL 이해와 선택 기준 | eBook 1차 수정 완료 |
 | Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | eBook 1차 수정 완료 |
