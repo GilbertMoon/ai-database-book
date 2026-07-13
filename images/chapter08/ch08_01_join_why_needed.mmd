@@ -3,15 +3,15 @@ flowchart LR
     S[students.id<br/>학생 이름]
     C[courses.id<br/>강의 제목<br/>FK instructor_id]
     I[instructors.id<br/>강사 이름]
-    R[수강신청 현황 한 행<br/>학생 이름 · 강의 제목<br/>강사 이름 · 상태 · 결제금액<br/>기준 행 = 수강신청 한 건]
-    N[정규화는 사실을 나누어 저장하고<br/>JOIN은 조회 시점에 관계를 따라 결과를 만든다]
+    R[수강신청 현황 한 행<br/>학생 이름<br/>강의 제목 · 강사 이름<br/>상태 · 결제금액]
+    N[정규화는 사실을 나누어 저장하고<br/>JOIN은 관계를 따라 필요한 결과를 만든다]
 
-    E -. "student_id → students.id" .-> S
-    E -. "course_id → courses.id" .-> C
-    C -. "instructor_id → instructors.id" .-> I
+    E -. "FK: student_id → id" .-> S
+    E -. "FK: course_id → id" .-> C
+    C -. "FK: instructor_id → id" .-> I
 
-    S --> R
-    C --> R
-    I --> R
-    E --> R
+    S -->|학생 이름| R
+    C -->|강의 제목| R
+    I -->|강사 이름| R
+    E -->|status · paid_amount| R
     R --> N
