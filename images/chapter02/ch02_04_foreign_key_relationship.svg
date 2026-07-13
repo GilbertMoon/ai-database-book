@@ -10,7 +10,7 @@
       <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/>
     </filter>
     <style>
-      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      text{font-family:"Malgun Gothic","NanumSquare","Noto Sans CJK KR","Apple SD Gothic Neo","Noto Sans KR","UnDotum",Arial,sans-serif;fill:#172033}
       .title{font-size:34px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .card-outline{fill:#ffffff;stroke:#64748b;stroke-width:2}
       .bridge-outline{fill:#ffffff;stroke:#6d43b5;stroke-width:2.2}
