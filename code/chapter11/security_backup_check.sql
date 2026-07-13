@@ -2,6 +2,7 @@
 --
 -- 이 파일은 기존 링크 호환용 안내·상태 확인 진입점입니다.
 -- 기존 프로젝트 테이블을 삭제하거나 다시 만들지 않습니다.
+-- security_lab이 아직 생성되지 않은 상태에서도 안전하게 실행할 수 있습니다.
 -- 실제 실습은 다음 파일을 순서대로 사용합니다.
 --
 -- 1. 01_security_lab_schema.sql
@@ -21,11 +22,19 @@ SELECT
     current_schema() AS current_schema_name,
     current_setting('server_version') AS postgresql_version;
 
--- 앞 장 데이터 보호 확인
-SELECT COUNT(*) AS project_enrollment_count
-FROM course_project.enrollments;
+-- 앞 장과 Chapter 11 객체 존재 여부 확인
+-- 존재하지 않는 객체는 NULL로 표시되며 오류를 발생시키지 않습니다.
+SELECT
+    to_regclass('course_project.enrollments')
+        AS project_enrollments_table,
+    to_regclass('security_lab.students')
+        AS security_students_table,
+    to_regclass('security_lab.courses')
+        AS security_courses_table,
+    to_regclass('security_lab.enrollments')
+        AS security_enrollments_table;
 
--- security_lab 객체 확인
+-- security_lab 테이블 목록
 SELECT
     table_schema,
     table_name
@@ -33,23 +42,23 @@ FROM information_schema.tables
 WHERE table_schema = 'security_lab'
 ORDER BY table_name;
 
--- security_lab이 준비된 경우 기준 행 수 확인
-SELECT COUNT(*) AS student_count
-FROM security_lab.students;
-
-SELECT COUNT(*) AS course_count
-FROM security_lab.courses;
-
-SELECT COUNT(*) AS enrollment_count
-FROM security_lab.enrollments;
-
-SELECT COUNT(*) AS joined_row_count
-FROM security_lab.enrollments AS e
-JOIN security_lab.students AS s
-    ON s.id = e.student_id
-JOIN security_lab.courses AS c
-    ON c.id = e.course_id;
-
+-- 기준 행 수 조회는 01·02 파일을 실행한 뒤 사용합니다.
+-- SELECT COUNT(*) AS student_count
+-- FROM security_lab.students;
+--
+-- SELECT COUNT(*) AS course_count
+-- FROM security_lab.courses;
+--
+-- SELECT COUNT(*) AS enrollment_count
+-- FROM security_lab.enrollments;
+--
+-- SELECT COUNT(*) AS joined_row_count
+-- FROM security_lab.enrollments AS e
+-- JOIN security_lab.students AS s
+--     ON s.id = e.student_id
+-- JOIN security_lab.courses AS c
+--     ON c.id = e.course_id;
+--
 -- 기대 결과: 3 / 3 / 3 / 3
 
 -- 실습 Role 확인
