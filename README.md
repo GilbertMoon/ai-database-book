@@ -40,7 +40,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 09 | 트랜잭션으로 데이터 정합성 지키기 | 2차 재구성 완료 |
 | Chapter 10 | 실행 계획으로 인덱스 효과 검증하기 | 2차 재구성 완료 |
 | Chapter 11 | 데이터베이스를 안전하게 지키고 복구하는 방법 | 2차 재구성 완료 |
-| Chapter 12 | NoSQL 이해와 선택 기준 | eBook 1차 수정 완료 |
+| Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 2차 재구성 완료 |
 | Chapter 13 | ChatGPT와 Codex로 DB 설계 검증하기 | eBook 1차 수정 완료 |
 | Chapter 14 | Vector DB와 RAG 기초 | eBook 1차 수정 완료 |
 | Chapter 15 | 실전 프로젝트 2: AI 기반 데이터베이스 서비스 완성하기 | eBook 1차 수정 완료 |
