@@ -1,55 +1,215 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 760">
+<?xml version="1.0" encoding="utf-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100%"
+  viewBox="0 0 1200 740"
+  role="img"
+  aria-labelledby="title desc"
+  preserveAspectRatio="xMidYMid meet"
+>
   <title id="title">AI 생성 JOIN·집계 SQL 검토 흐름</title>
-  <desc id="desc">업무 질문 정의에서 시작해 AI가 만든 SQL을 JOIN 경로, 기준 행, 집계 대상, 검산 기준으로 검토하고 문제 시 수정 후 다시 실행하는 피드백 루프를 보여 주는 도식이다.</desc>
+  <desc id="desc">업무 질문과 예상 결과를 먼저 정하고, AI가 만든 SQL을 JOIN 경로, 기준 행, JOIN 종류, GROUP BY, 집계 대상, NULL과 중복 계산 기준으로 검토한 뒤 PostgreSQL에서 실행하고 결과가 맞지 않으면 수정해 다시 실행하는 흐름</desc>
+
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+    <marker
+      id="arrow"
+      viewBox="0 0 10 10"
+      refX="9"
+      refY="5"
+      markerWidth="8"
+      markerHeight="8"
+      orient="auto"
+    >
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569" />
     </marker>
     <style>
-      .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
-      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
-      .head { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
-      .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      text {
+        font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
+        fill: #0f172a;
+      }
+      .title {
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .subtitle {
+        font-size: 15px;
+        fill: #475569;
+      }
+      .box {
+        stroke: #334155;
+        stroke-width: 2;
+        rx: 16;
+        ry: 16;
+      }
+      .question {
+        fill: #dbeafe;
+      }
+      .ai {
+        fill: #ede9fe;
+      }
+      .review {
+        fill: #fef3c7;
+      }
+      .run {
+        fill: #dcfce7;
+      }
+      .retry {
+        fill: #fee2e2;
+      }
+      .done {
+        fill: #dbeafe;
+      }
+      .head {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .text {
+        font-size: 14px;
+      }
+      .small {
+        font-size: 12.5px;
+        fill: #475569;
+      }
+      .line {
+        stroke: #475569;
+        stroke-width: 2.4;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+      .feedback {
+        stroke: #dc2626;
+        stroke-width: 2.4;
+        stroke-dasharray: 7 6;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+      .branch-label {
+        font-size: 12.5px;
+        font-weight: 700;
+        fill: #475569;
+      }
+      .feedback-label {
+        font-size: 12.5px;
+        font-weight: 700;
+        fill: #b91c1c;
+      }
     </style>
   </defs>
-  <rect width="1200" height="760" fill="#ffffff"/>
-  <text x="600" y="42" text-anchor="middle" class="title">AI 생성 JOIN·집계 SQL 검토 흐름</text>
-  <rect x="390" y="85" width="420" height="68" class="box" fill="#dbeafe"/>
-  <text x="600" y="115" text-anchor="middle" class="head">1. 업무 질문과 예상 결과 정의</text>
-  <text x="600" y="140" text-anchor="middle" class="text">예상 행 수와 합계를 먼저 정한다</text>
-  <rect x="390" y="185" width="420" height="68" class="box" fill="#ede9fe"/>
-  <text x="600" y="215" text-anchor="middle" class="head">2. AI 생성 SQL</text>
-  <text x="600" y="240" text-anchor="middle" class="text">AI SQL은 초안이다</text>
-  <rect x="130" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
-  <text x="255" y="330" text-anchor="middle" class="head">3. JOIN 경로와 ON 조건 확인</text>
-  <text x="255" y="358" text-anchor="middle" class="text">실제 FK 경로인지 확인</text>
-  <rect x="475" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
-  <text x="600" y="330" text-anchor="middle" class="head">4. 기준 행과 JOIN 종류 확인</text>
-  <text x="600" y="358" text-anchor="middle" class="text">INNER / LEFT 선택 검토</text>
-  <rect x="820" y="300" width="250" height="78" class="box" fill="#fef3c7"/>
-  <text x="945" y="330" text-anchor="middle" class="head">5. GROUP BY와 집계 대상 확인</text>
-  <text x="945" y="358" text-anchor="middle" class="text">COUNT · SUM · DISTINCT · COALESCE</text>
-  <rect x="390" y="430" width="420" height="78" class="box" fill="#dcfce7"/>
-  <text x="600" y="460" text-anchor="middle" class="head">6. PostgreSQL에서 실행</text>
-  <text x="600" y="488" text-anchor="middle" class="text">원본 건수와 수동 계산으로 검산</text>
-  <polygon points="600,555 760,635 600,715 440,635" fill="#fef3c7" stroke="#334155" stroke-width="2"/>
-  <text x="600" y="625" text-anchor="middle" class="head">원본 건수와 합계에 맞는가?</text>
-  <rect x="110" y="600" width="240" height="70" class="box" fill="#fee2e2"/>
-  <text x="230" y="630" text-anchor="middle" class="head">아니요</text>
-  <text x="230" y="655" text-anchor="middle" class="text">SQL 또는 요구사항을 수정하고 다시 실행</text>
-  <rect x="860" y="600" width="240" height="70" class="box" fill="#dbeafe"/>
-  <text x="980" y="630" text-anchor="middle" class="head">예</text>
-  <text x="980" y="655" text-anchor="middle" class="text">검토된 SQL과 근거 기록</text>
-  <line x1="600" y1="153" x2="600" y2="185" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="600" y1="253" x2="255" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="600" y1="253" x2="600" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="600" y1="253" x2="945" y2="300" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="255" y1="378" x2="520" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="600" y1="378" x2="600" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="945" y1="378" x2="680" y2="430" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="600" y1="508" x2="600" y2="555" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="440" y1="635" x2="350" y2="635" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <line x1="760" y1="635" x2="860" y2="635" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <path d="M230 600 C230 520, 320 500, 390 220" fill="none" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="260" y="545" class="text">수정 후 재실행</text>
+
+  <rect x="0" y="0" width="1200" height="740" fill="#ffffff" />
+
+  <!-- Title -->
+  <text x="600" y="42" text-anchor="middle" class="title">
+    AI 생성 JOIN·집계 SQL 검토 흐름
+  </text>
+  <text x="600" y="70" text-anchor="middle" class="subtitle">
+    예상 결과를 먼저 정하고, SQL 구조와 실제 실행 결과를 차례로 검증합니다.
+  </text>
+
+  <!-- 1. Question and expected result -->
+  <rect x="390" y="90" width="420" height="68" class="box question" />
+  <text x="600" y="120" text-anchor="middle" class="head">
+    1. 업무 질문과 예상 결과 정의
+  </text>
+  <text x="600" y="145" text-anchor="middle" class="text">
+    예상 행 수·합계·포함 대상을 먼저 정한다
+  </text>
+
+  <!-- 2. AI draft -->
+  <rect x="390" y="190" width="420" height="68" class="box ai" />
+  <text x="600" y="220" text-anchor="middle" class="head">
+    2. AI 생성 SQL
+  </text>
+  <text x="600" y="245" text-anchor="middle" class="text">
+    AI SQL은 검토가 필요한 초안이다
+  </text>
+
+  <!-- Review sequence -->
+  <rect x="70" y="310" width="250" height="82" class="box review" />
+  <text x="195" y="340" text-anchor="middle" class="head">
+    3. JOIN 경로와 ON 조건
+  </text>
+  <text x="195" y="369" text-anchor="middle" class="text">
+    실제 PK·FK 경로인지 확인
+  </text>
+
+  <rect x="475" y="310" width="250" height="82" class="box review" />
+  <text x="600" y="340" text-anchor="middle" class="head">
+    4. 기준 행과 JOIN 종류
+  </text>
+  <text x="600" y="369" text-anchor="middle" class="text">
+    INNER·LEFT 선택과 기준 행 확인
+  </text>
+
+  <rect x="880" y="310" width="250" height="82" class="box review" />
+  <text x="1005" y="340" text-anchor="middle" class="head">
+    5. GROUP BY와 집계 대상
+  </text>
+  <text x="1005" y="369" text-anchor="middle" class="text">
+    그룹 기준과 집계 열 확인
+  </text>
+
+  <rect x="880" y="440" width="250" height="82" class="box review" />
+  <text x="1005" y="470" text-anchor="middle" class="head">
+    6. 집계 계산 검토
+  </text>
+  <text x="1005" y="499" text-anchor="middle" class="text">
+    COUNT·SUM·NULL·중복 확인
+  </text>
+
+  <!-- 7. Execute -->
+  <rect x="475" y="440" width="250" height="82" class="box run" />
+  <text x="600" y="470" text-anchor="middle" class="head">
+    7. PostgreSQL에서 실행
+  </text>
+  <text x="600" y="499" text-anchor="middle" class="text">
+    원본 건수와 수동 계산으로 검산
+  </text>
+
+  <!-- Decision -->
+  <polygon
+    points="600,565 745,620 600,675 455,620"
+    fill="#fef3c7"
+    stroke="#334155"
+    stroke-width="2"
+  />
+  <text x="600" y="613" text-anchor="middle" class="head">
+    원본 건수와 합계에
+  </text>
+  <text x="600" y="638" text-anchor="middle" class="head">
+    맞는가?
+  </text>
+
+  <!-- Outcomes -->
+  <rect x="70" y="585" width="260" height="72" class="box retry" />
+  <text x="200" y="614" text-anchor="middle" class="head">아니요</text>
+  <text x="200" y="642" text-anchor="middle" class="text">
+    SQL 또는 요구사항 수정
+  </text>
+
+  <rect x="870" y="585" width="260" height="72" class="box done" />
+  <text x="1000" y="614" text-anchor="middle" class="head">예</text>
+  <text x="1000" y="642" text-anchor="middle" class="text">
+    검토된 SQL과 근거 기록
+  </text>
+
+  <!-- Main flow -->
+  <path d="M600 158 V190" class="line" />
+  <path d="M600 258 V282 H195 V310" class="line" />
+  <path d="M320 351 H475" class="line" />
+  <path d="M725 351 H880" class="line" />
+  <path d="M1005 392 V440" class="line" />
+  <path d="M880 481 H725" class="line" />
+  <path d="M600 522 V565" class="line" />
+
+  <!-- Decision branches -->
+  <path d="M455 620 H330" class="line" />
+  <text x="392" y="603" text-anchor="middle" class="branch-label">아니요</text>
+
+  <path d="M745 620 H870" class="line" />
+  <text x="808" y="603" text-anchor="middle" class="branch-label">예</text>
+
+  <!-- Feedback loop: outside all cards -->
+  <path d="M200 585 V545 H28 V224 H390" class="feedback" />
+  <text x="45" y="525" class="feedback-label">수정 후 재실행</text>
 </svg>
