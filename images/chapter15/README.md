@@ -2,7 +2,7 @@
 
 ## Chapter 15. 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기
 
-기존 Mermaid·SVG 8종은 최종 프로젝트의 범위·구조·검증·AI 검토·완료 판단을 설명합니다. 2차 재구성에서는 `tutor_project`, 단계별 SQL, 운영·복구와 선택 RAG 확장 기준을 이미지 설명에 반영합니다.
+기존 Mermaid·SVG 8종은 최종 프로젝트의 범위·구조·검증·AI 검토·완료 판단을 설명합니다. 2차 재구성에서는 `tutor_project`, 단계별 SQL, 운영·복구, 선택 RAG와 최종 완료 게이트 기준을 이미지 설명에 반영합니다.
 
 ## 공통 원칙
 
@@ -13,6 +13,7 @@
 - 자동 DROP이나 운영 DB 직접 실행을 정상 흐름으로 표현하지 않는다.
 - AI 변경 뒤 diff·재실행·사람 승인 단계를 포함한다.
 - RAG는 원본 학습 자료와 벡터 파생 데이터를 구분한다.
+- 완료 게이트와 실제 운영·복구 완료를 동일하게 표현하지 않는다.
 - title, desc, role, aria-labelledby, width="100%", viewBox를 유지한다.
 ```
 
@@ -22,10 +23,10 @@
 | --- | --- | --- | --- |
 | 그림 15-1 | `ch15_01_service_project_flow.svg` | 통합 데이터베이스 서비스 완성 흐름 | 요구사항→실행→운영→완료 |
 | 그림 15-2 | `ch15_02_scope_selection_guide.svg` | 필수 범위와 선택 확장 | 기본 DB·API·NoSQL·RAG·배포 판단 |
-| 그림 15-3 | `ch15_03_project_structure.svg` | 재현 가능한 파일 구조 | 01~09 SQL·보고서·RUNBOOK |
+| 그림 15-3 | `ch15_03_project_structure.svg` | 재현 가능한 파일 구조 | 01~10 SQL·보고서·RUNBOOK |
 | 그림 15-4 | `ch15_04_db_design_validation.svg` | 요구사항부터 실행 증거까지 | ERD·DDL·메타데이터·조회·반례 |
 | 그림 15-5 | `ch15_05_ai_review_loop.svg` | AI 제안 검토 루프 | 최소 변경·diff·재실행·승인 |
-| 그림 15-6 | `ch15_06_completion_dimensions.svg` | 프로젝트 완성도의 핵심 축 | 범위·설계·검증·운영·AI·한계 |
+| 그림 15-6 | `ch15_06_completion_dimensions.svg` | 프로젝트 완성도의 일곱 축 | 범위·설계·재현·검증·운영·AI·한계 |
 | 그림 15-7 | `ch15_07_project_story_flow.svg` | 설계 결정과 검증 근거 | final_report의 이야기 구조 |
 | 그림 15-8 | `ch15_08_completion_checklist.svg` | 최종 완료 게이트 | 필수 통과·선택 확장·보류 |
 
@@ -42,6 +43,7 @@ IDENTITY PK 5
 CASCADE 0
 자동 반례 14
 unexpected 0
+required_completion_gate_passed true
 ```
 
 선택 RAG:
@@ -54,6 +56,8 @@ internal: 1
 비활성 자료 제외
 ```
 
+`required_completion_gate_passed`는 필수 DB 구조와 기준 데이터 검증 결과입니다. Role 시험, 실제 백업·복원, API·RAG·배포 완료는 별도 증거가 필요합니다.
+
 ## 도식에서 피할 표현
 
 ```text
@@ -64,13 +68,16 @@ internal: 1
 - 작은 샘플에서 인덱스 미사용은 오류다.
 - 백업 파일이 있으면 복구 검증이 끝난다.
 - 벡터 인덱스를 업무 원본으로 사용한다.
+- 완료 게이트 true이면 운영 검증도 모두 완료되었다.
 ```
 
 ## 검수 기준
 
 ```text
 - 본문 그림 번호 15-1~15-8 순서 일치
+- 그림 15-6의 일곱 축과 본문 표현 일치
 - 실제 템플릿 파일명과 도식 표현 일치
+- 10_completion_gate.sql 추가가 파일 구조에 반영됨
 - 필수·선택·보류 상태를 색상뿐 아니라 텍스트로 표현
 - tutor_project 외 스키마 변경 표현 없음
 - 요구사항·실행 결과·운영 계획·AI diff 연결
