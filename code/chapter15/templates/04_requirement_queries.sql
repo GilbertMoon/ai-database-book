@@ -181,19 +181,25 @@ SELECT
     (SELECT COUNT(*) FROM tutor_project.question_materials) = 7 AS links_ok,
     (
         SELECT COUNT(*)
-        FROM tutor_project.students AS s
-        LEFT JOIN tutor_project.questions AS q
-            ON q.student_id = s.id
-        GROUP BY s.id
-        HAVING COUNT(q.id) = 0
+        FROM (
+            SELECT s.id
+            FROM tutor_project.students AS s
+            LEFT JOIN tutor_project.questions AS q
+                ON q.student_id = s.id
+            GROUP BY s.id
+            HAVING COUNT(q.id) = 0
+        ) AS no_question_students
     ) = 1 AS no_question_student_ok,
     (
         SELECT COUNT(*)
-        FROM tutor_project.learning_materials AS m
-        LEFT JOIN tutor_project.question_materials AS qm
-            ON qm.material_id = m.id
-        GROUP BY m.id
-        HAVING COUNT(qm.question_id) = 0
+        FROM (
+            SELECT m.id
+            FROM tutor_project.learning_materials AS m
+            LEFT JOIN tutor_project.question_materials AS qm
+                ON qm.material_id = m.id
+            GROUP BY m.id
+            HAVING COUNT(qm.question_id) = 0
+        ) AS unlinked_materials
     ) = 1 AS unlinked_material_ok;
 
 -- 모든 결과가 true여야 합니다.
