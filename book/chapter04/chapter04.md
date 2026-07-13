@@ -155,7 +155,7 @@ ORDER BY grade DESC;
 반환되는 열: name, grade
 조건: grade가 3 이상
 정렬: grade가 큰 값부터
-예상되는 학생: 이준호, 최현우
+예상되는 학생: 최현우, 이준호
 예상 행 수: 2행
 ```
 
@@ -257,16 +257,7 @@ INSERT INTO 테이블명 (열1, 열2, 열3)
 VALUES (값1, 값2, 값3);
 ```
 
-학생 한 명을 추가합니다.
-
-```sql
-INSERT INTO students (name, email, major, grade)
-VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2);
-```
-
-문자열은 작은따옴표로 감쌉니다. 숫자는 따옴표 없이 입력합니다.
-
-PostgreSQL에서는 `RETURNING`을 사용해 새로 저장된 값을 바로 확인할 수도 있습니다.
+학생 한 명을 추가하고, 자동으로 만들어진 값까지 확인합니다.
 
 ```sql
 INSERT INTO students (name, email, major, grade)
@@ -274,7 +265,7 @@ VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2)
 RETURNING id, name, created_at;
 ```
 
-`id`와 `created_at`을 직접 입력하지 않았지만 자동 생성된 값을 확인할 수 있습니다.
+문자열은 작은따옴표로 감싸고 숫자는 따옴표 없이 입력합니다. `id`와 `created_at`은 직접 입력하지 않았지만 자동으로 생성됩니다.
 
 > `RETURNING`은 PostgreSQL에서 유용하게 사용할 수 있는 선택 기능입니다. 입력 후 별도의 `SELECT` 없이 생성된 값을 확인할 수 있습니다.
 
@@ -619,12 +610,13 @@ WHERE email = 'junho@example.com';
 
 조회 결과가 한 행인지, 현재 값이 무엇인지 확인합니다.
 
-### 2단계: UPDATE 실행
+### 2단계: UPDATE 실행과 변경값 확인
 
 ```sql
 UPDATE students
 SET grade = 4
-WHERE email = 'junho@example.com';
+WHERE email = 'junho@example.com'
+RETURNING id, name, grade;
 ```
 
 DBeaver의 실행 결과에서 영향받은 행 수가 예상과 일치하는지 확인합니다.
@@ -634,7 +626,7 @@ DBeaver의 실행 결과에서 영향받은 행 수가 예상과 일치하는지
 실제: Updated Rows 1
 ```
 
-### 3단계: 수정 결과 확인
+### 3단계: 수정 결과 재확인
 
 ```sql
 SELECT *
@@ -645,15 +637,6 @@ WHERE email = 'junho@example.com';
 ![안전한 UPDATE 실행 절차](../../images/chapter04/ch04_06_update_safe_flow.svg)
 
 그림 4-6 안전한 UPDATE 실행 절차
-
-PostgreSQL에서는 수정된 행을 바로 반환할 수도 있습니다.
-
-```sql
-UPDATE students
-SET grade = 4
-WHERE email = 'junho@example.com'
-RETURNING id, name, grade;
-```
 
 ### WHERE 없는 UPDATE의 위험
 
@@ -696,11 +679,12 @@ FROM students
 WHERE email = 'seoyeon@example.com';
 ```
 
-### 2단계: DELETE 실행
+### 2단계: DELETE 실행과 삭제값 확인
 
 ```sql
 DELETE FROM students
-WHERE email = 'seoyeon@example.com';
+WHERE email = 'seoyeon@example.com'
+RETURNING id, name, email;
 ```
 
 DBeaver에서 삭제된 행 수를 확인합니다.
@@ -710,7 +694,7 @@ DBeaver에서 삭제된 행 수를 확인합니다.
 실제: Deleted Rows 1
 ```
 
-### 3단계: 삭제 결과 확인
+### 3단계: 삭제 결과 재확인
 
 ```sql
 SELECT *
@@ -723,14 +707,6 @@ WHERE email = 'seoyeon@example.com';
 ![안전한 DELETE 실행 절차](../../images/chapter04/ch04_07_delete_safe_flow.svg)
 
 그림 4-7 안전한 DELETE 실행 절차
-
-삭제된 행을 즉시 확인하려면 `RETURNING`을 사용할 수 있습니다.
-
-```sql
-DELETE FROM students
-WHERE email = 'seoyeon@example.com'
-RETURNING id, name, email;
-```
 
 ### WHERE 없는 DELETE의 위험
 
@@ -892,12 +868,12 @@ CREATE TABLE students (
 
 ```text
 수정 전 SELECT
-→ UPDATE
+→ UPDATE RETURNING
 → 영향받은 행 수 확인
 → 수정 후 SELECT
 
 삭제 전 SELECT
-→ DELETE
+→ DELETE RETURNING
 → 영향받은 행 수 확인
 → 삭제 후 SELECT
 ```
