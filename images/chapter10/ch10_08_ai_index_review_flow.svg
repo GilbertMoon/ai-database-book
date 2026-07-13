@@ -1,44 +1,110 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
-<title id="title">AI 추천 인덱스 검토 흐름</title>
-<desc id="desc">AI 추천은 기존 인덱스와 실행 계획으로 적용 여부를 판단한다</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
-text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#ffffff;stroke:#7fb3f5;stroke-width:2;rx:14} .scan{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .idx{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .cand{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:14} .warn{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
-</style></defs>
-<rect width="1200" height="620" fill="#ffffff"/>
-<text x="600" y="48" class="title">AI 추천 인덱스 검토 흐름</text>
-<text x="600" y="76" class="sub">AI 추천은 기존 인덱스와 실행 계획으로 적용 여부를 판단한다</text>
-<rect x="60" y="210" width="180" height="120" class="ai"/>
-<text x="150.0" y="242" class="head">AI 추천</text>
-<text x="150.0" y="268" class="body">인덱스 초안</text>
-<rect x="300" y="210" width="190" height="120" class="cand"/>
-<text x="395.0" y="242" class="head">기존 인덱스</text>
-<text x="395.0" y="268" class="code">PK · UNIQUE</text>
-<text x="395.0" y="290" class="body">수동 인덱스</text>
-<polygon points="600,205.0 705.0,270 600,335.0 495.0,270" class="cand"/>
-<text x="600" y="264" class="head">중복인가?</text>
-<rect x="820" y="120" width="160" height="105" class="warn"/>
-<text x="900.0" y="152" class="head">예</text>
-<text x="900.0" y="178" class="body">제거</text>
-<rect x="820" y="315" width="160" height="105" class="idx"/>
-<text x="900.0" y="347" class="head">아니요</text>
-<text x="900.0" y="373" class="body">계획 비교</text>
-<polygon points="1060,310.5 1150.0,368 1060,425.5 970.0,368" class="cand"/>
-<text x="1060" y="362" class="head">근거 충분?</text>
-<path d="M240 270 L300 270" class="arrow"/>
-<path d="M490 270 L495 270" class="arrow"/>
-<path d="M705 270 L820 172" class="arrow"/>
-<text x="760" y="190" class="tag">예</text>
-<path d="M705 270 L820 365" class="arrow"/>
-<text x="760" y="345" class="tag">아니요</text>
-<path d="M980 365 L970 365" class="arrow"/>
-<rect x="995" y="80" width="150" height="90" class="idx"/>
-<text x="1070.0" y="112" class="head">적용</text>
-<text x="1070.0" y="138" class="body">근거 있음</text>
-<rect x="995" y="475" width="150" height="90" class="box"/>
-<text x="1070.0" y="507" class="head">보류</text>
-<text x="1070.0" y="533" class="body">근거 부족</text>
-<path d="M1060 310 L1065 170" class="arrow"/>
-<path d="M1060 425 L1065 475" class="arrow"/>
-<path d="M995 520 L390 330" class="dash"/>
-<text x="680" y="515" class="tag">보류 시 쿼리 패턴 재확인</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1280 660" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">AI 추천 인덱스 검토 흐름</title>
+  <desc id="desc">AI가 추천한 인덱스를 기존 인덱스 중복 여부와 실행 계획 개선 근거로 검토한 뒤 적용, 제거, 보류로 결정하는 흐름이다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#db2777"/>
+    </marker>
+    <style>
+      text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #0f172a; }
+      .title { font-size: 28px; font-weight: 700; text-anchor: middle; }
+      .sub { font-size: 14px; fill: #475569; text-anchor: middle; }
+      .head { font-size: 18px; font-weight: 700; text-anchor: middle; }
+      .body { font-size: 13.5px; fill: #334155; text-anchor: middle; }
+      .small { font-size: 12.5px; fill: #475569; text-anchor: middle; }
+      .tag { font-size: 12px; font-weight: 700; fill: #2563eb; text-anchor: middle; }
+      .yes { font-size: 12px; font-weight: 700; fill: #15803d; text-anchor: middle; }
+      .no { font-size: 12px; font-weight: 700; fill: #b45309; text-anchor: middle; }
+      .code { font-family: Consolas, D2Coding, "Courier New", monospace; font-size: 13px; font-weight: 700; text-anchor: middle; fill: #1d4ed8; }
+      .step { font-size: 12px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .box { stroke-width: 2; rx: 14; ry: 14; }
+      .ai { fill: #f5f3ff; stroke: #8b5cf6; }
+      .cand { fill: #eff6ff; stroke: #2563eb; }
+      .idx { fill: #ecfdf5; stroke: #22c55e; }
+      .warn { fill: #fdf2f8; stroke: #db2777; }
+      .hold { fill: #ffffff; stroke: #7fb3f5; }
+      .note { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; }
+      .decision { fill: #ffffff; stroke: #2563eb; stroke-width: 2; }
+      .arrow { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #db2777; stroke-width: 2; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrow-dash); }
+    </style>
+  </defs>
+
+  <rect width="1280" height="660" fill="#ffffff"/>
+  <text x="640" y="48" class="title">AI 추천 인덱스 검토 흐름</text>
+  <text x="640" y="76" class="sub">AI 추천 인덱스는 바로 적용하지 않고, 중복 여부와 실행 계획 개선 근거를 확인한 뒤 결정한다.</text>
+
+  <rect x="70" y="110" width="1140" height="60" rx="14" ry="14" class="note"/>
+  <text x="640" y="137" class="head">핵심 원칙</text>
+  <text x="640" y="158" class="small">추천 인덱스 = 후보일 뿐이며, 기존 인덱스와 EXPLAIN / 실행 계획 변화로 검증한다</text>
+
+  <rect x="60" y="250" width="170" height="120" class="box ai"/>
+  <circle cx="88" cy="278" r="15" fill="#8b5cf6"/>
+  <text x="88" y="283" class="step">1</text>
+  <text x="145" y="292" class="head">AI 추천</text>
+  <text x="145" y="320" class="body">인덱스 초안</text>
+  <text x="145" y="344" class="code">CREATE INDEX ...</text>
+
+  <rect x="280" y="250" width="190" height="120" class="box cand"/>
+  <circle cx="308" cy="278" r="15" fill="#2563eb"/>
+  <text x="308" y="283" class="step">2</text>
+  <text x="375" y="292" class="head">기존 인덱스 확인</text>
+  <text x="375" y="320" class="code">PK · UNIQUE</text>
+  <text x="375" y="344" class="body">수동 인덱스와 비교</text>
+
+  <polygon points="595,235 700,310 595,385 490,310" class="decision"/>
+  <circle cx="540" cy="258" r="15" fill="#2563eb"/>
+  <text x="540" y="263" class="step">3</text>
+  <text x="595" y="302" class="head">중복인가?</text>
+  <text x="595" y="326" class="body">이미 충분한가?</text>
+
+  <rect x="795" y="180" width="170" height="95" class="box warn"/>
+  <text x="880" y="216" class="head">제거</text>
+  <text x="880" y="242" class="body">중복 추천</text>
+  <text x="880" y="262" class="small">적용하지 않음</text>
+
+  <rect x="790" y="355" width="180" height="110" class="box idx"/>
+  <circle cx="820" cy="383" r="15" fill="#22c55e"/>
+  <text x="820" y="388" class="step">4</text>
+  <text x="880" y="397" class="head">실행 계획 비교</text>
+  <text x="880" y="425" class="body">EXPLAIN 전/후</text>
+  <text x="880" y="447" class="body">비용 · 스캔 방식 확인</text>
+
+  <polygon points="1090,325 1180,390 1090,455 1000,390" class="decision"/>
+  <circle cx="1040" cy="350" r="15" fill="#2563eb"/>
+  <text x="1040" y="355" class="step">5</text>
+  <text x="1090" y="384" class="head">근거 충분?</text>
+  <text x="1090" y="408" class="body">개선이 보이는가?</text>
+
+  <rect x="1005" y="190" width="170" height="95" class="box idx"/>
+  <text x="1090" y="226" class="head">적용</text>
+  <text x="1090" y="252" class="body">근거 있음</text>
+  <text x="1090" y="272" class="small">배포 전 영향 확인</text>
+
+  <rect x="1005" y="520" width="170" height="95" class="box hold"/>
+  <text x="1090" y="556" class="head">보류</text>
+  <text x="1090" y="582" class="body">근거 부족</text>
+  <text x="1090" y="602" class="small">쿼리 패턴 재확인</text>
+
+  <path d="M230 310 H280" class="arrow"/>
+  <path d="M470 310 H490" class="arrow"/>
+  <path d="M700 310 C740 270 755 228 795 228" class="arrow"/>
+  <text x="748" y="244" class="yes">예</text>
+  <path d="M700 310 C740 340 755 410 790 410" class="arrow"/>
+  <text x="748" y="375" class="no">아니요</text>
+  <path d="M970 410 H1002" class="arrow"/>
+  <path d="M1090 325 V285" class="arrow"/>
+  <text x="1122" y="314" class="yes">예</text>
+  <path d="M1090 455 V520" class="arrow"/>
+  <text x="1128" y="492" class="no">아니요</text>
+
+  <path d="M1005 567 C850 610 570 610 375 370" class="dash"/>
+  <text x="700" y="625" class="small">보류 시: 쿼리 빈도, 조건절, 정렬, 조인 패턴을 다시 확인한 뒤 후보를 재검토한다</text>
+
+  <rect x="70" y="485" width="530" height="90" rx="12" ry="12" class="note"/>
+  <text x="335" y="518" class="head">검토 체크포인트</text>
+  <text x="335" y="545" class="body">중복 인덱스 제거 · 쓰기 비용 고려 · 실제 실행 계획 비교 · 운영 반영 전 테스트</text>
 </svg>
