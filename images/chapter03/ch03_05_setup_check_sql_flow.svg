@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
   <title id="title">setup_check.sql 실행과 재실행 흐름</title>
-  <desc id="desc">setup_check.sql 파일을 열고 현재 데이터베이스와 기존 테이블 상태를 확인한 뒤 처음 실행 또는 재실행 범위를 선택해 결과를 기록하는 흐름</desc>
+  <desc id="desc">조회문 전용 setup_check.sql 파일을 ai_database_book 연결에서 실행하고 데이터베이스, 스키마, 사용자, 서버 시각과 계산 결과를 확인한 뒤 필요할 때 다시 실행하는 흐름</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0 0L10 5L0 10Z" fill="#475569"/>
@@ -10,49 +10,64 @@
       .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .box{fill:#fff;stroke:#64748b;stroke-width:2}
       .check{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
+      .run{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
       .decision{fill:#fffceb;stroke:#d6a600;stroke-width:2}
-      .first{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
-      .rerun{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2}
-      .warn{fill:#fff5df;stroke:#d89424;stroke-width:2}
+      .fix{fill:#fff1f1;stroke:#d64545;stroke-width:2}
+      .record{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2}
       .name{font-size:18px;font-weight:700;text-anchor:middle}
       .sub{font-size:14px;text-anchor:middle;fill:#475569}
       .mono{font-size:14px;font-weight:700;text-anchor:middle;font-family:Consolas,D2Coding,"Courier New",monospace;fill:#0f2d5c}
       .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#d64545;stroke-width:2.3;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}
       .label{font-size:16px;font-weight:700;text-anchor:middle}
       .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
-  <rect width="1200" height="800" fill="#fff"/>
+  <rect width="1200" height="820" fill="#fff"/>
   <text x="600" y="48" class="title">setup_check.sql 실행과 재실행 흐름</text>
 
-  <rect x="420" y="80" width="360" height="58" rx="14" class="box"/><text x="600" y="116" class="name">setup_check.sql 열기</text>
-  <rect x="390" y="170" width="420" height="70" rx="14" class="check"/>
-  <text x="600" y="198" class="name">실행 연결 확인</text>
-  <text x="600" y="223" class="mono">현재 DB = ai_database_book</text>
-  <rect x="390" y="272" width="420" height="70" rx="14" class="decision"/>
-  <text x="600" y="300" class="name">기존 students 테이블이 있는가?</text>
-  <text x="600" y="325" class="sub">재실행 전 현재 상태 확인</text>
+  <rect x="420" y="82" width="360" height="58" rx="14" class="box"/>
+  <text x="600" y="118" class="name">setup_check.sql 열기</text>
 
-  <rect x="130" y="395" width="300" height="86" rx="14" class="first"/>
-  <text x="280" y="428" class="name">처음 실행</text>
-  <text x="280" y="453" class="sub">전체 기본 구간을 순서대로 실행</text>
-  <rect x="770" y="395" width="300" height="86" rx="14" class="rerun"/>
-  <text x="920" y="428" class="name">재실행 범위 선택</text>
-  <text x="920" y="453" class="sub">필요한 구간만 실행 또는 초기화</text>
+  <rect x="390" y="172" width="420" height="72" rx="14" class="check"/>
+  <text x="600" y="201" class="name">실행 연결 확인</text>
+  <text x="600" y="226" class="mono">현재 DB = ai_database_book</text>
 
-  <rect x="420" y="520" width="360" height="58" rx="14" class="check"/><text x="600" y="556" class="name">환경 확인 구간 실행</text>
-  <rect x="420" y="610" width="360" height="70" rx="14" class="first"/>
-  <text x="600" y="638" class="name">테이블 생성·샘플 입력·조회</text>
-  <text x="600" y="663" class="sub">예상 결과와 비교</text>
-  <rect x="820" y="610" width="260" height="70" rx="14" class="warn"/>
-  <text x="950" y="638" class="name">선택 검증</text>
-  <text x="950" y="663" class="sub">예상한 UNIQUE 오류 확인</text>
-  <rect x="420" y="710" width="360" height="58" rx="14" class="box"/><text x="600" y="746" class="name">실행 결과 기록</text>
+  <rect x="390" y="276" width="420" height="72" rx="14" class="run"/>
+  <text x="600" y="305" class="name">조회문 전체 실행</text>
+  <text x="600" y="330" class="sub">테이블·데이터 변경 없이 환경 확인</text>
 
-  <path d="M600 138V170" class="line"/><path d="M600 240V272" class="line"/>
-  <path d="M500 342L330 395" class="line"/><text x="405" y="375" class="label" fill="#166534">아니요</text>
-  <path d="M700 342L870 395" class="line"/><text x="795" y="375" class="label" fill="#6d3fb6">예</text>
-  <path d="M280 481V549H420" class="line"/><path d="M920 481V549H780" class="line"/>
-  <path d="M600 578V610" class="line"/><path d="M780 645H820" class="line"/><path d="M600 680V710" class="line"/>
-  <text x="600" y="793" class="note">전체 파일을 무조건 재실행하지 말고, 삭제·초기화 전 대상 데이터베이스를 확인한다.</text>
+  <rect x="330" y="380" width="540" height="92" rx="14" class="check"/>
+  <text x="600" y="410" class="name">결과 확인</text>
+  <text x="600" y="438" class="sub">DB · 스키마 · 사용자 · 서버 시각 · 계산 결과</text>
+  <text x="600" y="460" class="mono">ai_database_book · public · result = 2</text>
+
+  <rect x="390" y="506" width="420" height="70" rx="14" class="decision"/>
+  <text x="600" y="536" class="name">기대 결과와 일치하는가?</text>
+  <text x="600" y="560" class="sub">현재 연결과 실행 결과 비교</text>
+
+  <rect x="90" y="630" width="300" height="74" rx="14" class="fix"/>
+  <text x="240" y="659" class="name">연결과 현재 위치 수정</text>
+  <text x="240" y="684" class="sub">DB·스키마·사용자 재확인</text>
+
+  <rect x="455" y="630" width="290" height="74" rx="14" class="record"/>
+  <text x="600" y="659" class="name">실행 결과 기록</text>
+  <text x="600" y="684" class="sub">환경 확인 기록 남기기</text>
+
+  <rect x="810" y="630" width="300" height="74" rx="14" class="run"/>
+  <text x="960" y="659" class="name">필요할 때 다시 실행</text>
+  <text x="960" y="684" class="sub">같은 파일로 환경 재검증</text>
+
+  <path d="M600 140V172" class="line"/>
+  <path d="M600 244V276" class="line"/>
+  <path d="M600 348V380" class="line"/>
+  <path d="M600 472V506" class="line"/>
+  <path d="M500 576L315 630" class="loop"/>
+  <text x="408" y="606" class="label" fill="#b42323">아니요</text>
+  <path d="M700 576L600 630" class="line"/>
+  <text x="660" y="606" class="label" fill="#166534">예</text>
+  <path d="M745 667H810" class="line"/>
+  <path d="M240 630V208H390" class="loop"/>
+
+  <text x="600" y="782" class="note">조회문만 포함하므로 여러 번 실행해도 테이블과 데이터는 변경되지 않는다.</text>
 </svg>
