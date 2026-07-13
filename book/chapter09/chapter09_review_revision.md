@@ -205,9 +205,11 @@ course_project.enrollments 5 유지
 
 ## 8. 도식 처리
 
-기존 Mermaid·SVG 8종은 트랜잭션 필요성, 기본 흐름, ACID, COMMIT·ROLLBACK, Lock과 AI 검토의 일반 메시지가 새 본문과 호환되어 유지한다.
+그림 9-6 ROLLBACK 도식은 대상 행과 미확정·복구 상태가 명확하도록 보완했다.
+그림 9-7 Lock 도식은 실제 `course_inventory` 303 실습과 course 301·302 Deadlock 구분이 명확하도록 보완했다.
+나머지 Mermaid·SVG 6종은 트랜잭션 필요성, 기본 흐름, ACID, COMMIT과 AI 검토의 일반 메시지가 새 본문과 호환되어 유지한다.
 
-도식 문서에서는 `transaction_lab`과 `course_project`의 역할을 구분하고, 구체적 ID·행 수는 본문과 SQL에서 관리한다.
+도식 문서에서는 `transaction_lab`과 `course_project`의 역할을 구분한다. 그림 9-6은 ROLLBACK 범위 오해를 줄이기 위해 `course 302`, `enrollment 9002`, `payment 9902`를 직접 표시하고, 그림 9-7은 Lock 대기 대상 `course_id 303`과 Deadlock 예시 `course 301`, `course 302`를 직접 표시한다.
 
 ---
 

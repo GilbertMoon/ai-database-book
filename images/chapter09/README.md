@@ -13,8 +13,8 @@ Chapter 09 도식은 트랜잭션의 성공·실패 경계, 정합성 검증과 
 | 그림 9-3 | `ch09_03_consistency_problem_examples.svg` | 데이터 정합성이 깨지는 예 | 여러 테이블 업무 규칙 불일치 |
 | 그림 9-4 | `ch09_04_acid_overview.svg` | ACID의 네 가지 기본 특성 | ACID 입문 개념과 역할 구분 |
 | 그림 9-5 | `ch09_05_enrollment_payment_transaction.svg` | 수강신청·결제·좌석 변경 트랜잭션 | 성공 트랜잭션 실행 흐름 |
-| 그림 9-6 | `ch09_06_rollback_before_after.svg` | ROLLBACK 전후 상태 비교 | 임시 변경과 원상 복구 |
-| 그림 9-7 | `ch09_07_concurrency_lock_deadlock.svg` | 동시 좌석 신청과 Lock | Lock 대기와 Deadlock 구분 |
+| 그림 9-6 | `ch09_06_rollback_before_after.svg` | ROLLBACK 전후 상태 비교 | 9002·9902 임시 변경과 원상 복구 |
+| 그림 9-7 | `ch09_07_concurrency_lock_deadlock.svg` | 동시 좌석 신청과 Lock | course 303 Lock 대기와 301·302 Deadlock 구분 |
 | 그림 9-8 | `ch09_08_ai_transaction_review_flow.svg` | AI 생성 트랜잭션 SQL 검토 흐름 | 정상·실패·복구 경로 검토 |
 
 ## 2차 재구성 스키마 기준
@@ -61,7 +61,7 @@ COMMIT 전 좌석·신청·결제 확인
 
 ## Mermaid 원본과 SVG 결과물
 
-모든 SVG에는 동일 이름의 `.mmd` 원본이 있습니다. 기존 8종은 특정 테이블 ID보다 일반적인 트랜잭션 흐름을 설명하므로 새 본문에서 계속 사용합니다.
+모든 SVG에는 동일 이름의 `.mmd` 원본이 있습니다. 그림 9-6은 ROLLBACK 범위를 명확히 하기 위해 대상 ID를 직접 표시하고, 그림 9-7은 실제 Lock 실습 대상과 Deadlock 예시 행을 직접 표시합니다. 나머지 도식은 일반적인 트랜잭션 흐름을 설명합니다.
 
 ## 공통 SVG 기준
 

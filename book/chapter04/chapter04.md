@@ -354,7 +354,7 @@ SELECT name, email, major
 FROM students;
 ```
 
-![SELECT로 필요한 컬럼 선택하기](../../images/chapter04/ch04_02_select_projection_flow.svg)
+![SELECT로 필요한 열 선택하기](../../images/chapter04/ch04_02_select_projection_flow.svg)
 
 그림 4-3 SELECT로 필요한 열 선택하기
 

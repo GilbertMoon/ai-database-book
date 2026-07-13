@@ -17,7 +17,7 @@
 
 | 그림 번호 | 파일명 | 도식 제목 | 새 본문 역할 |
 | --- | --- | --- | --- |
-| 그림 7-1 | `ch07_01_project_flow.svg` | 온라인 강의 DB 프로젝트 핵심 흐름 | 범위에서 검증까지 전체 흐름 |
+| 그림 7-1 | `ch07_01_project_flow.svg` | 온라인 강의 DB 프로젝트 핵심 흐름 | 범위·설계·단계별 SQL·검증·기준선 확정 흐름 |
 | 그림 7-2 | `ch07_02_requirement_to_entities.svg` | 요구사항을 데이터 구조로 바꾸기 | 엔터티·속성·사건 도출 |
 | 그림 7-3 | `ch07_04_many_to_many_enrollments.svg` | enrollments로 학생-강의 N:M 관계 해소 | 관계 문장과 연결 테이블 |
 | 그림 7-4 | `ch07_03_online_course_erd.svg` | 온라인 강의 수강신청 핵심 ERD | 네 테이블과 PK·FK 확인 |

@@ -1,14 +1,34 @@
 flowchart TB
-    A[remaining_seats = 1]
-    A --> B[트랜잭션 A · 강의 행 Lock]
-    A --> C[트랜잭션 B · 같은 행 변경 시도]
-    B --> D[좌석 확인·차감 후 COMMIT]
-    C --> E[Lock 해제까지 대기]
-    D --> E
-    E --> F[최신 좌석 0 확인]
-    F --> G[ROLLBACK]
-    H[Deadlock 예시]
-    H --> I[A: 강의 1 잠금 → 강의 2 대기]
-    H --> J[B: 강의 2 잠금 → 강의 1 대기]
-    I --> K[순환 대기 · PostgreSQL이 한 트랜잭션 중단 가능]
-    J --> K
+    subgraph NORMAL["정상 Lock 대기"]
+        N1[course_inventory<br/>course_id 303<br/>remaining_seats 1]
+        A1[세션 A BEGIN<br/>SELECT FOR UPDATE<br/>Lock 획득]
+        B1[세션 B BEGIN<br/>SELECT FOR UPDATE<br/>Lock 요청·대기]
+        A2[세션 A COMMIT 또는 ROLLBACK<br/>Lock 해제]
+        B2[세션 B 잠금 획득<br/>최신 값 확인<br/>트랜잭션 종료]
+        X1[선택 확장<br/>A가 1→0 COMMIT이면<br/>B는 좌석 0 확인 후 후속 신청 미실행]
+
+        A1 --> N1
+        B1 -. 대기 .-> N1
+        A1 --> A2 --> B2
+        B2 --> X1
+    end
+
+    subgraph DEADLOCK["Deadlock"]
+        A3[트랜잭션 A<br/>course 301 Lock 보유]
+        B3[트랜잭션 B<br/>course 302 Lock 보유]
+        R301[course 301 행]
+        R302[course 302 행]
+        A4[A가 course 302 요청·대기]
+        B4[B가 course 301 요청·대기]
+        D1[순환 대기<br/>A waits for B<br/>B waits for A]
+        D2[PostgreSQL이 한 트랜잭션을 오류 종료]
+        D3[ROLLBACK 후 재시도 정책 검토]
+
+        A3 --> R301
+        B3 --> R302
+        A3 -. 대기 .-> R302
+        B3 -. 대기 .-> R301
+        A4 --> D1
+        B4 --> D1
+        D1 --> D2 --> D3
+    end

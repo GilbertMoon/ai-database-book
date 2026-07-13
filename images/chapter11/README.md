@@ -27,7 +27,7 @@
 | 그림 11-5 | `ch11_05_dev_prod_account_separation.svg` | 개발·운영 환경과 계정 분리 | 계정·데이터·백업 분리 |
 | 그림 11-6 | `ch11_06_sql_injection_safe_query.svg` | 문자열 결합과 파라미터 바인딩 | 값 바인딩·식별자 허용 목록 |
 | 그림 11-7 | `ch11_07_backup_restore_flow.svg` | 백업 생성에서 복구 검증까지 | 파일 검증·별도 DB 복원·재시험 |
-| 그림 11-8 | `ch11_08_ai_security_review_flow.svg` | AI 보안·백업 명령 검토 흐름 | 범위·권한·비밀·복원 검토 |
+| 그림 11-8 | `ch11_08_ai_security_review_flow.svg` | AI 보안·백업 명령 검토 흐름 | 권한 명령과 백업·복원 명령의 분리 검토 |
 
 모든 SVG에는 동일 이름의 `.mmd` 원본이 있습니다.
 

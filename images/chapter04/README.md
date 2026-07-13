@@ -35,7 +35,7 @@ Chapter 04 도식은 SQL 전체 코드를 이미지로 반복하지 않고, **CR
 | --- | --- | --- | --- | --- |
 | 그림 4-1 | `ch04_01_sql_crud_overview.svg` | SQL 명령어와 CRUD 대응 | INSERT, SELECT, UPDATE, DELETE와 CRUD 연결 | 유지 |
 | 그림 4-2 | `ch04_03_insert_row_flow.svg` | INSERT로 새 행 추가하기 | 열·값 대응, 생략 열 자동값 결정, 검사 뒤 성공·실패 분기와 RETURNING 확인 | 유지 |
-| 그림 4-3 | `ch04_02_select_projection_flow.svg` | SELECT로 필요한 열 선택하기 | SELECT 목록이 결과 열과 순서를 정하는 과정 | 유지 |
+| 그림 4-3 | `ch04_02_select_projection_flow.svg` | SELECT로 필요한 열 선택하기 | SELECT 목록이 결과 열과 순서를 정하고, WHERE가 없으면 행이 유지되는 과정 | 유지 |
 | 그림 4-4 | `ch04_04_where_filter_flow.svg` | WHERE 조건으로 대상 행 필터링하기 | 조건이 참인 행만 결과에 포함되는 흐름 | 유지 |
 | 그림 4-5 | `ch04_05_order_by_sort_flow.svg` | ORDER BY로 조회 결과 정렬하기 | ASC와 DESC의 표시 순서 차이 | 유지 |
 | 그림 4-6 | `ch04_06_update_safe_flow.svg` | 안전한 UPDATE 실행 절차 | SELECT → UPDATE → 영향 행 수 → SELECT 확인 | 유지 |

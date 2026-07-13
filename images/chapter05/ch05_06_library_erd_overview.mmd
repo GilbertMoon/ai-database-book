@@ -1,6 +1,11 @@
 flowchart LR
-    M[members<br/>PK id<br/>name<br/>email UNIQUE<br/>joined_at]
-    L[loans<br/>PK id<br/>FK member_id<br/>FK book_id<br/>borrowed_at<br/>due_at<br/>returned_at NULL 가능]
-    B[books<br/>PK id<br/>title<br/>author<br/>published_year<br/>isbn UNIQUE]
-    M -- "1 : 0..N" --> L
-    B -- "1 : 0..N" --> L
+    %% 선의 방향은 데이터 이동이 아니라 관계 배치를 위한 것임
+    M["members<br/>회원 테이블<br/>PK id<br/>name<br/>email UNIQUE<br/>joined_at"]
+    L["loans<br/>대여 사건·업무 테이블<br/>PK id<br/>FK·필수 member_id → members.id<br/>FK·필수 book_id → books.id<br/>borrowed_at<br/>due_at<br/>returned_at NULL 허용"]
+    B["books<br/>도서 테이블<br/>PK id<br/>title<br/>author<br/>published_year<br/>isbn UNIQUE"]
+
+    M -- "1 : 0..N" --- L
+    B -- "1 : 0..N" --- L
+
+    N["각 loans 행은 members와 books를 각각 정확히 하나 참조"]
+    L --- N
