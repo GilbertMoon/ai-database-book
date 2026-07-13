@@ -1,8 +1,33 @@
 # Chapter 08 실습 코드
 
-## JOIN과 집계 쿼리
+## JOIN과 집계로 서비스 질문에 답하기
 
-이 폴더는 Chapter 08의 JOIN과 집계 쿼리 실습 SQL 파일을 관리합니다.
+이 폴더는 Chapter 07에서 완성한 `course_project` 데이터를 변경하지 않고 JOIN과 집계 결과를 조회·검산하는 SQL 파일을 관리합니다.
+
+---
+
+## 실행 전 조건
+
+Chapter 07의 다음 파일을 순서대로 실행한 최종 상태가 필요합니다.
+
+```text
+code/chapter07/01_course_project_schema.sql
+code/chapter07/02_course_project_seed.sql
+code/chapter07/03_course_project_changes.sql
+code/chapter07/04_course_project_validation.sql
+```
+
+기대 상태:
+
+```text
+students 3
+instructors 2
+courses 3
+enrollments 5
+1001 완료
+1004 취소
+1005 신청
+```
 
 ---
 
@@ -10,140 +35,112 @@
 
 | 파일 | 설명 |
 | --- | --- |
-| `join_aggregation_practice.sql` | Chapter 07과 같은 테이블 구조를 사용하되, Chapter 08 전용 샘플 데이터로 JOIN과 집계를 검증하는 실습 SQL |
-
----
-
-## 실행 전 확인
-
-1. 개인 실습용 `ai_database_book` 데이터베이스에 연결합니다.
-2. `SELECT current_database();`로 현재 연결 대상을 확인합니다.
-3. `join_aggregation_practice.sql`이 `enrollments`, `courses`, `instructors`, `students`를 삭제하고 다시 생성한다는 점을 확인합니다.
-4. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
-
----
-
-## Chapter 08 데이터셋 설명
-
-Chapter 08은 Chapter 07과 같은 스키마를 사용하지만, LEFT JOIN과 집계 차이를 분명히 확인하기 위해 전용 샘플 데이터를 다시 입력합니다.
-
-| 테이블 | 예상 건수 |
-| --- | ---: |
-| students | 4 |
-| instructors | 3 |
-| courses | 4 |
-| enrollments | 5 |
-
-특히 다음 두 행이 실습 핵심입니다.
-
-```text
-- 최현우: 수강신청이 없는 학생
-- 집계 쿼리 실습: 수강신청이 없는 강의
-```
-
----
-
-## 주요 예상 결과
-
-| 항목 | 예상값 |
-| --- | --- |
-| students | 4 |
-| instructors | 3 |
-| courses | 4 |
-| enrollments | 5 |
-| INNER JOIN 결과 | 5행 |
-| 학생 기준 LEFT JOIN 결과 | 6행 |
-| 전체 결제금액 | 620000 |
-| 평균 결제금액 | 124000 |
-
-상세 기준은 다음과 같습니다.
-
-```text
-- 수강신청이 없는 학생: 최현우
-- 수강신청이 없는 강의: 집계 쿼리 실습
-- 상태별 건수: 신청 2, 수강중 2, 완료 1
-- HAVING 결과: 데이터베이스 입문, 파이썬 데이터 분석
-```
-
----
-
-## 이 장에서 특히 구분할 개념
-
-```text
-COUNT(*)
-- 결과 행 전체 수
-
-COUNT(e.id)
-- 실제 수강신청 행 수
-
-COUNT(DISTINCT e.student_id)
-- 중복을 제거한 고유 학생 수
-```
-
-현재 샘플에서는 `COUNT(e.id)`와 `COUNT(DISTINCT e.student_id)`가 같은 값으로 보일 수 있지만, 재신청 데이터가 생기면 달라질 수 있습니다.
-
-또한 `SUM(paid_amount)`는 저장된 결제금액의 단순 합계입니다. 환불·취소·매출 인식 기준까지 반영한 실제 매출과 같은 의미로 단정하지 않습니다.
-
----
-
-## 실행 후 확인할 핵심 결과
-
-1. INNER JOIN 결과가 5행인지 확인합니다.
-2. 학생 기준 LEFT JOIN 결과가 6행인지 확인합니다.
-3. 최현우가 `WHERE e.id IS NULL` 결과에 1행으로 나오는지 확인합니다.
-4. `집계 쿼리 실습` 강의의 수강신청 건수와 결제금액 합계가 0인지 확인합니다.
-5. AI가 만든 SQL을 사용할 때는 원본 건수와 합계로 다시 검산합니다.
-# Chapter 08 실습 코드
-
-## JOIN과 집계 쿼리
-
-이 폴더는 Chapter 08의 JOIN과 집계 쿼리 실습 SQL 파일을 관리합니다.
-
----
-
-## 파일 목록
-
-| 파일 | 설명 |
-| --- | --- |
-| `join_aggregation_practice.sql` | 온라인 강의 수강신청 시스템을 활용한 INNER JOIN, LEFT JOIN, GROUP BY, COUNT, SUM, AVG, HAVING 실습 |
+| `00_check_course_project.sql` | 스키마·행 수·상태와 기본 합계 확인 |
+| `01_join_queries.sql` | INNER·다중·LEFT JOIN, ON/WHERE, NOT EXISTS |
+| `02_aggregation_queries.sql` | COUNT·SUM·AVG·GROUP BY·FILTER·HAVING |
+| `03_join_aggregation_validation.sql` | 상세·집계 결과의 건수와 금액 검산 |
+| `join_aggregation_practice.sql` | 기존 링크 호환용 읽기 전용 핵심 쿼리 |
 
 ---
 
 ## 실행 순서
 
-1. DBeaver에서 `ai_database_book` 데이터베이스에 연결합니다.
-2. SQL Editor를 엽니다.
-3. `join_aggregation_practice.sql`을 실행합니다.
-4. `students`, `instructors`, `courses`, `enrollments` 테이블이 생성되었는지 확인합니다.
-5. INNER JOIN과 LEFT JOIN 결과 차이를 확인합니다.
-6. GROUP BY와 집계 함수 결과를 확인합니다.
-7. HAVING으로 집계 결과를 필터링하는 예제를 확인합니다.
+```text
+00_check_course_project.sql
+→ 01_join_queries.sql
+→ 02_aggregation_queries.sql
+→ 03_join_aggregation_validation.sql
+```
 
----
-
-## 확인할 핵심 결과
+모든 파일은 조회 전용입니다.
 
 ```text
-- 학생별 수강 강의 목록
-- 수강신청 현황 전체 조회
-- 수강신청이 없는 학생 조회
-- 전체 수강신청 수
-- 전체 결제금액 합계와 평균
-- 수강상태별 수강신청 수
-- 강의별 수강생 수
-- 강의별 매출
-- 강사별 개설 강의 수
-- 수강생이 2명 이상인 강의
+CREATE 없음
+INSERT 없음
+UPDATE 없음
+DELETE 없음
+DROP 없음
 ```
 
 ---
 
-## 주의 사항
+## 핵심 기준값
+
+| 항목 | 기대값 |
+| --- | ---: |
+| 전체 신청 수 | 5 |
+| 전체 저장 결제금액 합계 | 590000 |
+| 전체 평균 결제금액 | 118000 |
+| 취소 제외 신청 수 | 4 |
+| 취소 제외 결제금액 합계 | 440000 |
+
+상태별 건수:
 
 ```text
-- 이 파일은 반복 실습을 위해 DROP TABLE IF EXISTS 구문을 포함합니다.
-- 실제 서비스 데이터베이스에서는 DROP TABLE을 함부로 실행하면 안 됩니다.
-- JOIN 조건이 빠지면 결과 행이 비정상적으로 많아질 수 있습니다.
-- LEFT JOIN에서 수강신청이 없는 강의를 세려면 COUNT(*)보다 COUNT(e.id)를 사용하는 것이 안전합니다.
-- AI가 만든 JOIN/집계 SQL은 반드시 실행 결과를 확인해야 합니다.
+신청 2
+수강중 1
+완료 1
+취소 1
 ```
+
+---
+
+## 중요한 구분
+
+```text
+COUNT(*)
+- JOIN 결과 행 전체 수
+
+COUNT(e.id)
+- NULL이 아닌 실제 신청 행 수
+
+COUNT(DISTINCT e.student_id)
+- 고유 학생 수
+```
+
+LEFT JOIN에서 자식 사건 수를 계산할 때 `COUNT(*)`를 사용하면 자식이 없는 부모도 1건처럼 보일 수 있습니다.
+
+---
+
+## ON과 WHERE
+
+모든 부모 행을 유지하면서 오른쪽 대상만 제한하려면 조건을 `ON`에 둘 필요가 있습니다.
+
+```sql
+LEFT JOIN course_project.enrollments AS e
+    ON c.id = e.course_id
+   AND e.status <> '취소'
+```
+
+같은 조건을 `WHERE`에 두면 오른쪽 행이 없는 부모가 결과에서 제거될 수 있습니다.
+
+---
+
+## 금액 표현
+
+```text
+SUM(paid_amount)
+→ 저장된 결제금액의 합
+
+status <> '취소' 조건 합계
+→ 이 장에서 사용하는 취소 제외 기준
+
+실제 매출
+→ 결제 성공·환불·매출 인식 정책이 추가로 필요
+```
+
+저장 금액 합계를 실제 회계 매출로 단정하지 않습니다.
+
+---
+
+## 검산 원칙
+
+```text
+상태별 건수 합 = 전체 5
+상태별 금액 합 = 전체 590000
+강의별 취소 제외 건수 합 = 4
+강의별 취소 제외 금액 합 = 440000
+INNER JOIN 결과 행 수 = enrollments 5
+```
+
+결과가 다르면 JOIN 경로, ON/WHERE 조건, COUNT 대상, DISTINCT와 상태 기준을 확인합니다.
