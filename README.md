@@ -29,7 +29,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 
 | Chapter | 제목 | 상태 |
 | --- | --- | --- |
-| Chapter 01 | AI 시대에 데이터베이스를 왜 배우는가 | eBook 1차 수정 완료 |
+| Chapter 01 | AI 시대에 데이터베이스를 왜 배워야 하는가 | 2차 재구성 완료 |
 | Chapter 02 | DBMS 기본 개념 | eBook 1차 수정 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver로 데이터베이스 환경 만들기 | eBook 1차 수정 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 기초 | eBook 1차 수정 완료 |
