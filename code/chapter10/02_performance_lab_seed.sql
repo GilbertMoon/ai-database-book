@@ -67,6 +67,7 @@ FROM generate_series(1, 2000) AS gs;
 
 -- 7. 성능 신청 100000건: id 10001~110000
 -- 각 성능 학생은 약 10건, 각 성능 강의는 약 50건을 가집니다.
+-- 동일 강의 안에서도 상태가 여러 값으로 분포하도록 반복 묶음 번호로 상태를 정합니다.
 INSERT INTO performance_lab.enrollments (
     id, student_id, course_id, enrolled_at, status, paid_amount
 )
@@ -75,7 +76,7 @@ SELECT
     1001 + ((gs - 1) % 10000),
     1001 + ((gs - 1) % 2000),
     DATE '2025-01-01' + (gs % 365),
-    CASE gs % 4
+    CASE (((gs - 1) / 2000) % 4)
         WHEN 0 THEN '신청'
         WHEN 1 THEN '수강중'
         WHEN 2 THEN '완료'
@@ -102,4 +103,11 @@ SELECT COUNT(*) AS enrollment_count FROM performance_lab.enrollments;
 SELECT status, COUNT(*) AS row_count
 FROM performance_lab.enrollments
 GROUP BY status
+ORDER BY status;
+
+-- 11. 복합 인덱스 대상 강의의 상태 분포 확인
+SELECT course_id, status, COUNT(*) AS row_count
+FROM performance_lab.enrollments
+WHERE course_id = 1500
+GROUP BY course_id, status
 ORDER BY status;
