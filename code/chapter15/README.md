@@ -37,6 +37,7 @@ code/chapter15/templates/
 ├── 07_performance_checks.sql
 ├── 08_operations_checks.sql
 ├── 09_optional_rag_extension.sql
+├── 10_completion_gate.sql
 ├── OPERATIONS_RUNBOOK.md
 ├── ai_review_report.md
 ├── final_report.md
@@ -61,9 +62,10 @@ code/chapter15/templates/
 → 06_negative_tests.sql
 → 07_performance_checks.sql
 → 08_operations_checks.sql
+→ 10_completion_gate.sql
 ```
 
-학습 자료 의미 검색 요구사항이 있을 때만 `09_optional_rag_extension.sql`을 실행합니다.
+학습 자료 의미 검색 요구사항이 있을 때만 `09_optional_rag_extension.sql`을 실행합니다. `10_completion_gate.sql`은 선택 확장 여부와 관계없이 필수 프로젝트의 최종 상태를 읽기 전용으로 판정합니다.
 
 처음부터 다시 시작할 때만 `reset_tutor_project.sql`을 검토·선택 실행합니다.
 
@@ -85,8 +87,27 @@ code/chapter15/templates/
 | CASCADE FK | 0 |
 | 질문 없는 학생 | 1 |
 | 연결되지 않은 자료 | 1 |
+| 답변 없는 open 질문 | 1 |
+| 답변 2개 질문 | 1 |
 | 자동 반례 | 14 |
 | unexpected 반례 | 0 |
+| `required_completion_gate_passed` | true |
+
+---
+
+## 완료 게이트가 확인하는 항목
+
+```text
+행 수 4·3·5·5·6·7
+테이블 6·FK 5·IDENTITY PK 5
+업무 인덱스 3·CASCADE 0
+경계 사례 각각 1건
+고아 참조·상태 이상·중복 표시 순서 0건
+민감정보 형태 컬럼 0건
+example.test 외 이메일 0건
+```
+
+완료 게이트가 `true`여도 실제 백업·복원 시험, Role 권한 시험, API·RAG·배포가 자동으로 완료된 것은 아닙니다. 미실행 항목은 운영 문서와 최종 보고서에 남깁니다.
 
 ---
 
@@ -102,6 +123,7 @@ code/chapter15/templates/
 - 실제 개인정보·비밀번호·토큰·전체 접속 URL을 기록하지 않습니다.
 - 작은 데이터의 Seq Scan을 오류로 판단하지 않습니다.
 - 선택 RAG 확장에서 원문과 벡터 파생 데이터를 분리합니다.
+- 검증하지 않은 운영 항목을 완료로 표시하지 않습니다.
 ```
 
 ---
@@ -116,6 +138,7 @@ FK 5·인덱스 3·CASCADE 0
 정합성 이상 0행
 ROLLBACK 후 기준 데이터 복구
 반례 unexpected 0
+required_completion_gate_passed true
 운영·백업·복구 계획 기록
 AI diff와 미실행 항목 기록
 ```
