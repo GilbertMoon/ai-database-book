@@ -1,19 +1,9 @@
-flowchart LR
-    A[Practice database] --> B[information_schema]
-    B --> C[tables]
-    B --> D[columns]
-    B --> E[table_constraints]
-    B --> F[key_column_usage]
-    B --> G[constraint_column_usage]
-
-    C --> H[Table list]
-    D --> I[Column types and nullability]
-    E --> J[PK UNIQUE CHECK FK]
-    F --> K[Source FK columns]
-    G --> L[Target FK columns]
-
-    H --> M[Design review evidence]
-    I --> M
-    J --> M
-    K --> M
-    L --> M
+flowchart TB
+    A[예상 설계<br/>테이블 6·FK 4·CHECK·UNIQUE] --> B[실습 DB 생성]
+    B --> C[information_schema + pg_indexes]
+    C --> D[테이블·컬럼·제약·CHECK·FK·인덱스]
+    D --> E{예상과 실제가 일치하는가?}
+    E -- 일치 --> F[메타데이터 증거 기록]
+    E -- 불일치 --> G[DDL 수정]
+    G --> H[DB 초기화·재생성]
+    H --> C
