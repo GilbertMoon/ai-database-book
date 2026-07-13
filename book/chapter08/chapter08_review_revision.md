@@ -1,127 +1,173 @@
-# Chapter 08 출간용 문체 정리 기록
+# Chapter 08 2차 재구성 반영 기록
 
-## 대상 원고
+## 대상 파일
 
 ```text
 book/chapter08/chapter08.md
+book/chapter08/chapter08_activity.md
+book/chapter08/chapter08_outline.md
+code/chapter08/00_check_course_project.sql
+code/chapter08/01_join_queries.sql
+code/chapter08/02_aggregation_queries.sql
+code/chapter08/03_join_aggregation_validation.sql
+code/chapter08/join_aggregation_practice.sql
+code/chapter08/README.md
+images/chapter08/README.md
+notes/chapter08_review_checklist.md
+README.md
 ```
 
 ## 목적
 
-Chapter 08의 리뷰 반영과 정합성 보정 작업을 기존 기록에 이어 추가합니다.
-
----
-
-## 기존 요약 유지
-
-Chapter 08은 JOIN과 집계 쿼리를 처음 접하는 독자에게 설명하기 위한 원고, 실습 SQL, 활동 자료, 도식이 함께 연결된 장입니다.
-
----
-
-## 추가 작업 기록
-
-| 작업 항목 | 반영 상태 | 비고 |
-| --- | --- | --- |
-| Chapter 07 연결 설명 보정 | 완료 | 같은 스키마, 다른 Chapter 08 데이터셋 설명 추가 |
-| 잘못된 파일 경로 수정 | 완료 | `midterm_project_template.sql` 제거 |
-| Chapter 08 데이터 기준표 추가 | 완료 | 표와 주요 예상 결과 표 추가 |
-| 결과 행 수와 집계값 정합성 보정 | 완료 | 5행, 6행, 620000, 124000 기준 통일 |
-| COUNT와 고유 학생 수 개념 분리 | 완료 | `COUNT(DISTINCT e.student_id)` 설명 추가 |
-| 결제금액과 매출 표현 보정 | 완료 | 결제금액 합계 중심으로 용어 수정 |
-| SVG 8개 단순화 | 완료 | 한 그림당 한 질문 원칙 적용 |
-| Mermaid 원본 동기화 | 완료 | SVG 역할과 동일한 제목·흐름으로 재작성 |
-| 접근성 속성 보완 | 완료 | SVG title, desc, role, aria-labelledby 반영 |
-| README와 활동 자료 갱신 | 완료 | 실행 경고, 예상값, 개념 구분 반영 |
-| 렌더링 검증 결과 정리 | 부분 완료 | XML 검증 예정, 브라우저/GitHub/PDF는 수동 확인 필요 |
-
----
-
-## 추가 메모
+Chapter 08을 별도 데이터셋을 다시 만드는 장에서 **Chapter 07의 실제 프로젝트 데이터를 그대로 조회하고 검산하는 장**으로 재구성한다.
 
 ```text
-- Chapter 07과 Chapter 09는 정합성 비교만 수행했고 파일은 수정하지 않았다.
-- Chapter 08 실행 기준은 join_aggregation_practice.sql로 통일했다.
-- AI SQL은 초안이며 원본 행 수와 합계로 다시 검산해야 한다는 메시지를 강화했다.
-```
-# Chapter 08 출간용 문체 정리 기록
-
-## 대상 원고
-
-```text
-book/chapter08/chapter08.md
-```
-
-## 목적
-
-Chapter 08을 일반 실용서 문체에 맞게 정리한 내용을 기록합니다.
-
----
-
-## 1. 리뷰 결과 요약
-
-Chapter 08은 JOIN과 집계 쿼리를 처음 접하는 독자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
-
-본문, 실습 SQL, 활동 자료, 도식, AI SQL 검토 흐름이 다음과 같이 연결되어 있습니다.
-
-| 구성 요소 | 상태 | 비고 |
-| --- | --- | --- |
-| 본문 원고 | 완료 | JOIN, LEFT JOIN, GROUP BY, HAVING 설명 포함 |
-| 실습 SQL | 완료 | `code/chapter08/join_aggregation_practice.sql` 작성 완료 |
-| 코드 README | 완료 | `code/chapter08/README.md` 작성 완료 |
-| 활동 자료 | 완료 | `book/chapter08/chapter08_activity.md` 작성 완료 |
-| 도식 설계 | 완료 | `images/chapter08/README.md` 작성 완료 |
-| Mermaid 원본 | 완료 | 8종 작성 완료 |
-| SVG 도식 | 완료 | 8종 생성 완료 |
-| 본문 그림 삽입 | 완료 | 그림 8-1부터 그림 8-8까지 삽입 완료 |
-| AI SQL 검토 흐름 | 완료 | JOIN 조건, GROUP BY, COUNT, NULL 처리, 실행 검증 기준 포함 |
-
----
-
-## 2. 반영 완료 항목
-
-| 보완 항목 | 반영 상태 | 반영 위치 |
-| --- | --- | --- |
-| JOIN/집계 SQL 실행 전 확인표 추가 | 완료 | Chapter 08 본문 17장 |
-| LEFT JOIN COUNT 대상 주의 문장 강화 | 완료 | 본문 9장 |
-| 본문 그림 링크와 캡션 삽입 | 완료 | Chapter 08 본문 전반 |
-| 도식 설계 문서 상태 갱신 | 완료 | `images/chapter08/README.md` |
-| README 진행 상태 갱신 | 완료 | `README.md` |
-| TODO 진행 상태 갱신 | 완료 | `notes/todo.md` |
-| 리뷰 체크리스트 작성 | 완료 | `notes/chapter08_review_checklist.md` |
-| Chapter 상태 문구 변경 | 완료 | `book/chapter08/chapter08.md` 상단 |
-| 강의안형 표현 완화 | 완료 | Chapter 08 본문, 실습 자료 |
-| 제출/평가 표현 전환 | 완료 | Chapter 08 실습 자료 18~19장 |
-
----
-
-## 3. 보완 판단
-
-추가적인 본문 내용 보강은 현재 단계에서는 필요하지 않습니다.
-
-다만 출판 변환 단계에서는 다음을 다시 확인해야 합니다.
-
-```text
-- SVG 도식이 PDF 변환 시 정상 표시되는가?
-- Word 또는 eBook 변환 시 그림 크기가 적절한가?
-- SQL 코드 블록 줄바꿈이 지나치게 길지 않은가?
+업무 질문
+→ 기준 행
+→ JOIN 경로·종류
+→ ON·WHERE 조건
+→ 집계 대상
+→ NULL·중복 처리
+→ 상세·그룹 결과 검산
+→ AI SQL 검토
 ```
 
 ---
 
-## 4. 최종 반영 상태
+## 1. 제목 변경
 
-| 항목 | 상태 |
+```text
+기존: JOIN과 집계 쿼리
+변경: JOIN과 집계로 서비스 질문에 답하기
+```
+
+---
+
+## 2. Chapter 07 데이터 연속성
+
+기존 Chapter 08은 `public`의 네 테이블을 삭제하고 4/3/4/5행 전용 데이터를 다시 생성했다.
+
+변경 후에는 다음 Chapter 07 최종 상태만 사용한다.
+
+```text
+course_project.students 3
+course_project.instructors 2
+course_project.courses 3
+course_project.enrollments 5
+```
+
+```text
+전체 신청 5
+전체 저장 금액 590000
+평균 118000
+취소 제외 신청 4
+취소 제외 금액 440000
+```
+
+---
+
+## 3. 강화한 내용
+
+| 항목 | 반영 내용 |
 | --- | --- |
-| 리뷰 체크리스트 작성 | 완료 |
-| 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 완료 |
-| Chapter 08 1차 완료 판정 | 완료 |
+| 질문 정의 | 결과 한 행·상태·0건 포함·집계 대상을 먼저 결정 |
+| 기준 행 | 신청 한 건과 학생·강의 한 개 결과 구분 |
+| ON·WHERE | LEFT JOIN 오른쪽 조건 위치 차이 추가 |
+| anti-join | LEFT JOIN IS NULL과 NOT EXISTS 비교 |
+| COUNT | `COUNT(*)`, `COUNT(e.id)`, `COUNT(DISTINCT ...)` 구분 |
+| 조건부 집계 | PostgreSQL `FILTER` 추가 |
+| 과대 집계 | 여러 1:N JOIN에서 DISTINCT 필요성 설명 |
+| 금액 정의 | 전체·취소 제외·실제 매출 구분 |
+| 검산 | 상세·상태별·강의별 건수와 금액 대조 |
+| AI 검토 | 누락·과대 계산·조건 위치·금액 정의 검토 |
 
 ---
 
-## 5. 결론
+## 4. SQL 구조 변경
+
+### 기존
 
 ```text
-Chapter 08은 일반 독자가 혼자 읽고 따라갈 수 있는 실용서형 문체로 1차 정리했다.
-다음 작업은 다른 장에도 같은 기준을 적용하는 것이다.
+join_aggregation_practice.sql
+- 자동 DROP
+- SERIAL 테이블 생성
+- Chapter 08 별도 데이터 입력
+- 조회와 집계 혼합
+```
+
+### 변경
+
+```text
+00_check_course_project.sql
+- Chapter 07 최종 상태 확인
+
+01_join_queries.sql
+- INNER·다중·LEFT JOIN
+- ON/WHERE 차이
+- LEFT JOIN IS NULL·NOT EXISTS
+
+02_aggregation_queries.sql
+- 기본 집계·GROUP BY·FILTER·HAVING
+- 강의·강사·학생별 집계
+
+03_join_aggregation_validation.sql
+- 상세·그룹 건수와 금액 검산
+
+join_aggregation_practice.sql
+- 읽기 전용 호환 진입점
+```
+
+모든 Chapter 08 SQL에서 CREATE·INSERT·UPDATE·DELETE·DROP을 제거했다.
+
+---
+
+## 5. 핵심 예상 결과
+
+```text
+상태별 건수: 신청 2 / 수강중 1 / 완료 1 / 취소 1
+강의 301 취소 제외: 2건 / 200000
+강의 302 취소 제외: 2건 / 240000
+강의 303 취소 제외: 0건 / 0
+취소 제외 신청 없는 학생: 박서연
+취소 제외 신청 2건 이상 강의: 301, 302
+```
+
+---
+
+## 6. 도식 처리
+
+기존 8개 SVG 자산은 유지한다.
+
+새 본문에서는 Chapter 07 최종 데이터와 충돌하지 않는 네 도식만 사용한다.
+
+```text
+JOIN 필요성
+다중 JOIN 경로
+WHERE·GROUP BY·HAVING 논리 흐름
+AI SQL 검토 흐름
+```
+
+4/3/4 전용 데이터의 이름·행 수를 직접 표시하는 기존 도식은 새 본문에서 제외하고 자산으로만 유지한다.
+
+---
+
+## 7. 남은 확인 항목
+
+```text
+- 실제 PostgreSQL에서 Chapter 07 최종 상태 확인
+- Chapter 08 네 파일 순서 실행
+- 5·590000 및 4·440000 검산
+- FILTER 지원과 결과 타입 확인
+- GitHub·PDF·Word·eBook 렌더링 확인
+- Chapter 09가 course_project 연속성을 유지하는지 확인
+```
+
+---
+
+## 8. 최종 상태
+
+```text
+Chapter 08 본문, 워크북, 구성안과 조회 전용 SQL 구조를 2차 재구성했다.
+Chapter 07 데이터를 삭제·재생성하지 않고 실제 프로젝트 질문에 답하도록 변경했다.
+원격 main에 변경을 직접 반영했다.
 ```
