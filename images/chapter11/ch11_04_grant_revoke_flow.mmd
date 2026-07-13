@@ -1,14 +1,9 @@
 flowchart LR
-    A[Role] --> B{Permission change}
-
-    B --> C[GRANT]
-    C --> C1[Add permission]
-    C1 --> C2[Can access table]
-
-    B --> D[REVOKE]
-    D --> D1[Remove permission]
-    D1 --> D2[Access blocked]
-
-    C2 --> E[Check permission]
-    D2 --> E
-    E --> F[has_table_privilege]
+    A[변경 대상 확인] --> B[GRANT 또는 REVOKE]
+    B --> C[직접 권한 확인]
+    C --> D[역할 멤버십 확인]
+    D --> E[PUBLIC 경로 확인]
+    E --> F[유효 권한 확인]
+    F --> G{정책과 일치?}
+    G -- 아니요 --> A
+    G -- 예 --> H[완료]

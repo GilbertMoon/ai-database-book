@@ -1,17 +1,12 @@
-flowchart LR
-    A[User] --> B[Role]
-    B --> C[Permission]
-    C --> D[Table]
-
-    B --> B1[readonly_user]
-    B --> B2[app_user]
-    B --> B3[admin_user]
-
-    C --> C1[SELECT]
-    C --> C2[INSERT]
-    C --> C3[UPDATE]
-    C --> C4[DELETE]
-
-    D --> D1[students]
-    D --> D2[courses]
-    D --> D3[enrollments]
+flowchart TB
+    A[로그인 역할
+readonly_user] --> B[권한 역할
+role_report_reader]
+    C[로그인 역할
+app_enrollment_user] --> D[권한 역할
+role_enrollment_app]
+    B --> E[DB CONNECT]
+    B --> F[스키마 USAGE]
+    B --> G[테이블 SELECT]
+    D --> H[테이블 INSERT · UPDATE]
+    D --> I[시퀀스 USAGE]

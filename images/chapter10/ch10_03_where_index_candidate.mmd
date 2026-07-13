@@ -1,13 +1,7 @@
-flowchart TB
-    A[Frequent SELECT query] --> B[Check WHERE condition]
-    B --> C[email column]
-    B --> D[title column]
-    B --> E[student_id column]
-
-    C --> F[Index candidate]
-    D --> F
-    E --> F
-
-    F --> G[Create index]
-    G --> H[Compare with EXPLAIN]
-    H --> I[Keep or revise]
+flowchart LR
+    A[WHERE 컬럼] --> B{자동 인덱스 존재?}
+    B -- 예 --> C[중복 생성 안 함]
+    B -- 아니요 --> D{자주 실행되고 선택도 높은가?}
+    D -- 예 --> E[후보]
+    D -- 아니요 --> F[보류]
+    E --> G[실행 계획 비교]

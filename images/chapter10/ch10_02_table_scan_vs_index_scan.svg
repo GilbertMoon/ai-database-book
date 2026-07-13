@@ -1,1 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">전체 테이블 스캔과 인덱스 검색 비교</text><rect x="470" y="90" width="260" height="60" class="b m"/><text x="600" y="120" class="l">SELECT 쿼리</text><rect x="120" y="230" width="320" height="65" class="b y"/><text x="280" y="263" class="l">Seq Scan</text><rect x="760" y="230" width="320" height="65" class="b g"/><text x="920" y="263" class="l">Index Scan</text><rect x="120" y="370" width="320" height="65" class="b"/><text x="280" y="403" class="l">테이블 행을 많이 확인</text><rect x="760" y="370" width="320" height="65" class="b"/><text x="920" y="403" class="l">인덱스를 먼저 확인</text><rect x="120" y="510" width="320" height="65" class="b"/><text x="280" y="543" class="l">값을 하나씩 비교</text><rect x="760" y="510" width="320" height="65" class="b"/><text x="920" y="543" class="l">행 위치를 빠르게 찾음</text><rect x="440" y="635" width="320" height="55" class="b m"/><text x="600" y="663" class="l">조건에 맞는 행 반환</text><line x1="540" y1="150" x2="280" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="660" y1="150" x2="920" y2="230" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="280" y1="295" x2="280" y2="370" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="280" y1="435" x2="280" y2="510" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="920" y1="295" x2="920" y2="370" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="920" y1="435" x2="920" y2="510" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="280" y1="575" x2="520" y2="635" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="920" y1="575" x2="680" y2="635" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">Seq Scan과 Index Scan의 검색 경로</title>
+<desc id="desc">전체 읽기와 인덱스 탐색은 비용 비교로 선택된다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#ffffff;stroke:#7fb3f5;stroke-width:2;rx:14} .scan{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .idx{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .cand{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:14} .warn{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
+</style></defs>
+<rect width="1200" height="560" fill="#ffffff"/>
+<text x="600" y="48" class="title">Seq Scan과 Index Scan의 검색 경로</text>
+<text x="600" y="76" class="sub">전체 읽기와 인덱스 탐색은 비용 비교로 선택된다</text>
+<rect x="90" y="145" width="230" height="150" class="cand"/>
+<text x="205.0" y="177" class="head">조회 SQL</text>
+<text x="205.0" y="203" class="body">WHERE email = ...</text>
+<rect x="470" y="120" width="240" height="170" class="scan"/>
+<text x="590.0" y="152" class="head">Seq Scan</text>
+<text x="590.0" y="178" class="body">테이블 전체 확인</text>
+<text x="590.0" y="200" class="body">많은 행 반환에 적합</text>
+<rect x="470" y="335" width="240" height="170" class="idx"/>
+<text x="590.0" y="367" class="head">Index Scan</text>
+<text x="590.0" y="393" class="body">인덱스 먼저 탐색</text>
+<text x="590.0" y="415" class="body">적은 행 선택에 유리</text>
+<rect x="875" y="145" width="230" height="150" class="box"/>
+<text x="990.0" y="177" class="head">판단 기준</text>
+<text x="990.0" y="203" class="body">테이블 크기</text>
+<text x="990.0" y="225" class="body">선택도 · 비용</text>
+<path d="M320 220 L470 205" class="arrow"/>
+<path d="M320 220 L470 420" class="arrow"/>
+<path d="M710 205 L875 220" class="arrow"/>
+<path d="M710 420 L990 295" class="arrow"/>
+<text x="600" y="80" class="tag">Seq Scan도 정상적인 선택일 수 있다</text>
+</svg>

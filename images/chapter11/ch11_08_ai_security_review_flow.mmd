@@ -1,9 +1,9 @@
-flowchart TD
-    A[AI command suggestion] --> B[Check permission scope]
-    B --> C[Check least privilege]
-    C --> D[Check password exposure]
-    D --> E[Check target database]
-    E --> F[Check risky commands]
-    F --> G[Check backup location]
-    G --> H[Check restore test]
-    H --> I[Apply or revise]
+flowchart LR
+    A[AI 명령 초안] --> B[환경 확인]
+    B --> C[권한 범위 확인]
+    C --> D[비밀 정보 확인]
+    D --> E[테스트 DB 실행]
+    E --> F{검증 통과?}
+    F -- 아니요 --> G[수정 후 재검증]
+    G --> B
+    F -- 예 --> H[사람 승인 후 반영]

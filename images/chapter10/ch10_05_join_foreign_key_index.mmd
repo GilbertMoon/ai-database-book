@@ -1,15 +1,13 @@
 flowchart LR
-    A[enrollments] --> A1[student_id]
-    A --> A2[course_id]
-
-    B[students] --> B1[id]
-    C[courses] --> C1[id]
-
-    A1 -. JOIN .-> B1
-    A2 -. JOIN .-> C1
-
-    A1 --> D[Index candidate]
-    A2 --> D
-
-    D --> E[Support WHERE and JOIN]
-    E --> F[Check with EXPLAIN]
+    A[students.id
+PK 자동 인덱스] --> B[enrollments.student_id
+FK 자식 컬럼]
+    C[courses.id
+PK 자동 인덱스] --> D[enrollments.course_id
+FK 자식 컬럼]
+    B --> E{조회가 잦은가?}
+    D --> F{조회가 잦은가?}
+    E -- 예 --> G[수동 인덱스 후보]
+    F -- 예 --> G
+    E -- 아니요 --> H[보류]
+    F -- 아니요 --> H

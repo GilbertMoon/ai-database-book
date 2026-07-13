@@ -1,13 +1,9 @@
 flowchart LR
-    A[User input] --> B{SQL construction}
-
-    B --> C[String concatenation]
-    C --> C1[Input changes SQL meaning]
-    C1 --> C2[Risk]
-
-    B --> D[Parameter binding]
-    D --> D1[SQL structure separated]
-    D1 --> D2[Safer query]
-
-    C2 --> E[Review required]
-    D2 --> E
+    A[사용자 입력] --> B{SQL 구조에 결합?}
+    B -- 예 --> C[위험
+문자열 결합]
+    B -- 아니요 --> D[안전 방향
+파라미터 바인딩]
+    D --> E[값은 바인딩]
+    D --> F[식별자는 허용 목록]
+    C --> G[권한 최소화로 피해 축소]

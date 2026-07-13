@@ -2,64 +2,72 @@
 
 ---
 
-## 이 장에서 살펴볼 내용
+## 이 장에서 배울 내용
 
-이 장에서는 데이터 검색 속도를 높이는 **인덱스(index)**의 기본 개념을 살펴봅니다.
+Chapter 08에서는 JOIN과 집계 쿼리로 여러 테이블을 조회했고, Chapter 09에서는 트랜잭션으로 데이터 변경을 안전하게 처리하는 방법을 살펴보았습니다. 이번 장에서는 데이터가 많아졌을 때 조회 경로가 왜 중요해지는지, PostgreSQL 인덱스와 실행 계획을 어떻게 읽어야 하는지 배웁니다.
 
-Chapter 08에서는 JOIN과 집계 쿼리를 사용해 여러 테이블의 데이터를 조회했습니다. Chapter 09에서는 트랜잭션을 사용해 데이터 변경 작업을 안전하게 처리하는 방법을 살펴보았습니다.
+Chapter 10은 이전 장과 같은 온라인 강의 도메인을 사용하지만, Chapter 09의 결제·좌석 트랜잭션 상태를 이어 쓰는 실습은 아닙니다. 인덱스와 실행 계획을 비교하기 위한 별도의 성능 실습 데이터셋을 다시 구성합니다.
 
-이제 데이터가 많아졌을 때 발생하는 문제를 살펴보겠습니다. 데이터가 수십 건일 때는 대부분의 SQL이 빠르게 실행됩니다. 하지만 데이터가 수만 건, 수십만 건, 수백만 건으로 늘어나면 같은 SQL도 느려질 수 있습니다.
+> Chapter 10은 이전 장과 같은 온라인 강의 도메인을 사용하지만 인덱스와 실행 계획을 비교하기 위한 별도의 성능 실습 데이터셋을 다시 구성합니다. Chapter 09의 결제·좌석 트랜잭션 상태를 그대로 이어 사용하는 실습은 아닙니다.
 
-이 장에서는 다음 내용을 다룹니다.
+이 장에서 다루는 핵심은 다음과 같습니다.
 
-- 인덱스가 필요한 이유
-- 인덱스를 책의 색인에 비유해 이해하기
-- WHERE 조건과 인덱스
-- ORDER BY와 인덱스
-- JOIN 조건과 인덱스
-- CREATE INDEX 기본 문법
-- EXPLAIN 실행 계획 맛보기
-- 인덱스의 장점과 단점
-- 인덱스를 만들면 안 되는 경우
-- AI가 추천한 인덱스를 검토하는 방법
+- 데이터가 많아지면 조회 경로가 왜 중요해지는가
+- PostgreSQL B-tree 인덱스의 기본 역할
+- PRIMARY KEY와 UNIQUE가 자동으로 만드는 인덱스
+- FOREIGN KEY 자식 컬럼에는 인덱스가 자동 생성되지 않는다는 점
+- Seq Scan, Index Scan, Bitmap Heap Scan의 차이
+- WHERE, ORDER BY, JOIN 조건에서 인덱스 후보를 찾는 방법
+- 복합 인덱스에서 선두 컬럼 순서가 중요한 이유
+- EXPLAIN과 EXPLAIN ANALYZE의 차이
+- 인덱스의 읽기 이점과 쓰기 비용
+- AI가 추천한 인덱스를 실행 계획으로 검증하는 방법
 
 ---
 
-## 1. 왜 인덱스를 배워야 하는가
+## 1. 인덱스가 필요한 이유
 
-데이터베이스를 처음 배울 때는 테이블에 들어 있는 데이터가 많지 않습니다.
-
-예를 들어 `students` 테이블에 학생이 5명만 있다면 다음 SQL은 매우 빠르게 실행됩니다.
+작은 테이블에서는 전체 행을 읽어도 큰 문제가 보이지 않을 수 있습니다. 하지만 같은 SQL도 데이터가 수만 건, 수십만 건으로 늘어나면 느려질 수 있습니다.
 
 ```sql
 SELECT id, name, email
 FROM students
-WHERE email = 'minji@example.com';
+WHERE email = 'performance5000@example.com';
 ```
 
-하지만 학생이 100만 명이라면 이야기가 달라집니다. 데이터베이스가 모든 행을 처음부터 끝까지 확인해야 한다면 검색 시간이 길어질 수 있습니다.
+인덱스가 없다면 PostgreSQL은 조건에 맞는 행을 찾기 위해 테이블을 처음부터 끝까지 읽을 수 있습니다. 이런 접근을 `Seq Scan`이라고 부릅니다. 반대로 조건 컬럼에 적절한 인덱스가 있으면 인덱스를 먼저 탐색한 뒤 필요한 행으로 이동할 수 있습니다.
 
-![인덱스가 필요한 이유](../../images/chapter10/ch10_01_index_need_overview.svg)
+![데이터 증가와 인덱스 검토](../../images/chapter10/ch10_01_index_need_overview.svg)
 
-그림 10-1 인덱스가 필요한 이유
+그림 10-1 데이터 증가와 인덱스 검토
 
-인덱스는 이런 상황에서 원하는 데이터를 더 빠르게 찾기 위한 구조입니다.
-
-```text
-인덱스 = 자주 찾는 값을 빠르게 찾기 위해 미리 만들어 둔 검색용 구조
-```
-
-책의 뒷부분에 있는 색인을 생각하면 이해하기 쉽습니다. 특정 단어가 어느 페이지에 있는지 찾을 때 책을 처음부터 끝까지 읽지 않고 색인을 먼저 확인합니다.
-
-데이터베이스 인덱스도 비슷합니다. 특정 컬럼으로 자주 검색한다면 그 컬럼에 인덱스를 만들어 검색 속도를 높일 수 있습니다.
+인덱스는 검색용 보조 구조입니다. 많이 만들수록 항상 좋아지는 장치가 아니라, 자주 쓰는 조회 패턴을 빠르게 만들기 위해 선택적으로 추가하는 구조입니다.
 
 ---
 
-## 2. 실습에 사용할 테이블 구조
+## 2. 실습 데이터셋과 안전 경고
 
-이 장에서도 온라인 강의 수강신청 시스템을 계속 사용합니다.
+이 장의 실습 파일은 다음 위치에 있습니다.
 
-기본 테이블은 다음과 같습니다.
+```text
+code/chapter10/index_performance_practice.sql
+```
+
+> **실습 DB 확인**
+>
+> `index_performance_practice.sql`은 기존 실습 테이블을 삭제하고 성능 비교용 데이터를 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 먼저 `SELECT current_database();`로 연결 대상을 확인합니다. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+
+Chapter 09에서 `payments`가 `enrollments`를 참조했을 수 있으므로 Chapter 10 SQL은 `payments`를 먼저 삭제합니다.
+
+```sql
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS enrollments;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS instructors;
+DROP TABLE IF EXISTS students;
+```
+
+Chapter 10의 기본 테이블은 다음 네 개입니다.
 
 ```text
 students(id, name, email, joined_at)
@@ -68,519 +76,325 @@ courses(id, instructor_id, title, description, level, price, opened_at)
 enrollments(id, student_id, course_id, enrolled_at, status, paid_amount)
 ```
 
-성능 실습에서는 다음과 같은 조회를 중심으로 생각합니다.
+기본 예제 데이터만으로는 성능 차이를 관찰하기 어렵기 때문에 성능 테스트 데이터를 추가로 만듭니다.
 
-```text
-- 이메일로 학생 찾기
-- 강의 제목으로 강의 찾기
-- 수강상태별 신청 내역 찾기
-- 특정 학생의 수강신청 내역 찾기
-- 특정 강의의 수강생 목록 찾기
-- 강의 제목순으로 정렬하기
+| 테이블 | 예제 데이터 | 자동 생성 데이터 | 최종 예상 행 수 |
+| --- | ---: | ---: | ---: |
+| students | 5 | 10,000 | 10,005 |
+| instructors | 3 | 0 | 3 |
+| courses | 5 | 2,000 | 2,005 |
+| enrollments | 7 | 100,000 | 100,007 |
+
+데이터 생성 뒤에는 통계를 갱신합니다.
+
+```sql
+ANALYZE students;
+ANALYZE instructors;
+ANALYZE courses;
+ANALYZE enrollments;
 ```
 
-이런 조회가 자주 실행된다면 인덱스를 검토할 수 있습니다.
+`ANALYZE table_name`은 옵티마이저가 사용할 통계를 갱신하는 명령입니다. `EXPLAIN ANALYZE`와 이름이 비슷하지만 의미가 다릅니다.
 
 ---
 
-## 3. 인덱스란 무엇인가
+## 3. 자동 생성 인덱스와 수동 인덱스
 
-인덱스는 테이블의 특정 컬럼 값을 기준으로 데이터를 빠르게 찾을 수 있도록 도와주는 구조입니다.
+PostgreSQL은 PRIMARY KEY와 UNIQUE 제약조건을 유지하기 위해 고유 인덱스를 자동으로 만듭니다. 반면 FOREIGN KEY의 자식 컬럼에는 인덱스를 자동으로 만들지 않습니다.
 
-예를 들어 `students.email` 컬럼으로 학생을 자주 검색한다고 가정합니다.
+| 구조 | PostgreSQL 인덱스 생성 | Chapter 10 처리 |
+| --- | --- | --- |
+| PRIMARY KEY | 고유 인덱스 자동 생성 | 별도 생성하지 않음 |
+| UNIQUE | 고유 인덱스 자동 생성 | 기존 인덱스를 확인함 |
+| FOREIGN KEY 자식 컬럼 | 자동 생성하지 않음 | 쿼리 패턴에 따라 수동 생성 검토 |
+| 일반 컬럼 | 자동 생성하지 않음 | 필요할 때 수동 생성 |
+
+`students.email`은 이미 UNIQUE 제약조건이 있으므로 고유 인덱스가 자동으로 존재합니다. 따라서 같은 컬럼에 별도 수동 인덱스를 추가하지 않습니다.
+
+현재 인덱스 목록은 다음 SQL로 확인합니다.
 
 ```sql
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
+SELECT
+    tablename,
+    indexname,
+    indexdef
+FROM pg_indexes
+WHERE schemaname = 'public'
+  AND tablename IN ('students', 'instructors', 'courses', 'enrollments')
+ORDER BY tablename, indexname;
 ```
 
-이때 `email` 컬럼에 인덱스가 없다면 데이터베이스는 많은 행을 확인해야 할 수 있습니다. 반대로 `email` 컬럼에 인덱스가 있으면 해당 값을 더 빠르게 찾을 수 있습니다.
-
-인덱스 생성 SQL은 다음과 같습니다.
-
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
-
-이 SQL의 의미는 다음과 같습니다.
-
-| 구성 | 의미 |
-| --- | --- |
-| CREATE INDEX | 인덱스를 생성한다 |
-| idx_students_email | 인덱스 이름 |
-| ON students(email) | students 테이블의 email 컬럼에 인덱스를 만든다 |
-
-인덱스 이름은 보통 다음 규칙으로 작성하면 좋습니다.
-
-```text
-idx_테이블명_컬럼명
-```
-
-예시는 다음과 같습니다.
-
-```text
-idx_students_email
-idx_courses_title
-idx_enrollments_student_id
-idx_enrollments_course_id
-```
+자동 인덱스 이름은 제약조건 이름이나 PostgreSQL 환경에 따라 달라질 수 있습니다. 중요한 것은 이름을 외우는 것이 아니라 어떤 제약조건이 어떤 인덱스를 만들었는지 이해하는 것입니다.
 
 ---
 
-## 4. 인덱스가 없는 조회와 있는 조회
+## 4. Seq Scan과 Index Scan
 
-인덱스가 없는 상태에서는 데이터베이스가 테이블의 많은 행을 확인해야 할 수 있습니다.
+`Seq Scan`은 테이블을 순차적으로 읽는 접근 방식입니다. 데이터가 적거나 대부분의 행을 읽어야 할 때는 Seq Scan이 합리적일 수 있습니다.
 
-![전체 테이블 스캔과 인덱스 검색 비교](../../images/chapter10/ch10_02_table_scan_vs_index_scan.svg)
+`Index Scan`은 인덱스를 사용해 조건에 맞는 위치를 찾는 방식입니다. 조건이 비교적 적은 행을 골라내고, 인덱스 탐색 비용보다 절약되는 읽기 비용이 클 때 유리합니다.
 
-그림 10-2 전체 테이블 스캔과 인덱스 검색 비교
+![Seq Scan과 Index Scan의 검색 경로](../../images/chapter10/ch10_02_table_scan_vs_index_scan.svg)
 
-```text
-students 테이블 전체 확인 -> email 값 비교 -> 일치하는 행 반환
-```
+그림 10-2 Seq Scan과 Index Scan의 검색 경로
 
-인덱스가 있으면 다음처럼 검색 경로가 달라질 수 있습니다.
-
-```text
-email 인덱스 확인 -> 해당 행 위치 찾기 -> 필요한 행 반환
-```
-
-인덱스가 항상 모든 상황에서 빠른 것은 아닙니다. 하지만 특정 조건으로 자주 검색하는 컬럼에는 큰 도움이 될 수 있습니다.
-
-초급 단계에서는 다음처럼 이해하면 충분합니다.
-
-```text
-데이터가 많고, 특정 컬럼으로 자주 찾는다면 인덱스를 검토한다.
-```
+인덱스가 있어도 PostgreSQL이 Seq Scan을 선택할 수 있습니다. 이것은 오류가 아닙니다. 테이블 크기, 조건 선택도, 통계, 캐시 상태, 반환 행 수에 따라 전체 테이블을 읽는 편이 더 낫다고 판단할 수 있습니다.
 
 ---
 
-## 5. WHERE 조건과 인덱스
+## 5. WHERE 조건에서 인덱스 후보 찾기
 
-인덱스는 주로 `WHERE` 조건에서 자주 사용되는 컬럼에 만듭니다.
+인덱스 후보를 찾을 때는 단순히 WHERE에 등장하는 모든 컬럼을 고르지 않습니다. 다음 질문을 함께 봅니다.
 
-![WHERE 조건과 인덱스 후보](../../images/chapter10/ch10_03_where_index_candidate.svg)
+- 자주 실행되는 쿼리인가?
+- 테이블 데이터가 충분히 많은가?
+- 조건이 전체 행 중 적은 행을 선택하는가?
+- 이미 같은 역할을 하는 인덱스가 있는가?
+- 쓰기 비용 증가보다 조회 이점이 큰가?
 
-그림 10-3 WHERE 조건과 인덱스 후보
+![WHERE 조건에서 인덱스 후보 판단하기](../../images/chapter10/ch10_03_where_index_candidate.svg)
 
-예를 들어 학생 이메일로 자주 검색한다면 `students.email` 컬럼이 인덱스 후보입니다.
+그림 10-3 WHERE 조건에서 인덱스 후보 판단하기
 
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
+| 쿼리 컬럼 | 현재 구조 | 판단 |
+| --- | --- | --- |
+| `students.email` | UNIQUE 인덱스 자동 존재 | 수동 인덱스 생성 불필요 |
+| `courses.title` | 일반 컬럼 | 정확 일치 검색이 많으면 후보 |
+| `enrollments.student_id` | FK지만 자동 인덱스 없음 | 학생별 조회가 많으면 후보 |
+| `enrollments.course_id` | FK지만 자동 인덱스 없음 | 강의별 조회가 많으면 후보 |
+| `enrollments.status` | 값 종류가 적음 | 단독 인덱스는 분포 확인 후 판단 |
+| `(course_id, status)` | 복합 조건 | 쿼리 패턴과 컬럼 순서 검토 |
 
-조회 SQL은 다음과 같습니다.
-
-```sql
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
-```
-
-강의 제목으로 자주 검색한다면 `courses.title`도 인덱스 후보가 될 수 있습니다.
-
-```sql
-CREATE INDEX idx_courses_title
-ON courses(title);
-```
-
-```sql
-SELECT id, title, level, price
-FROM courses
-WHERE title = '데이터베이스 입문';
-```
-
-하지만 모든 WHERE 조건 컬럼에 무조건 인덱스를 만드는 것은 좋지 않습니다. 자주 검색하지 않는 컬럼이나 데이터 종류가 너무 적은 컬럼은 효과가 작을 수 있습니다.
-
-예를 들어 `status` 값이 `신청`, `수강중`, `완료`, `취소` 정도로만 구성되어 있다면 단독 인덱스의 효과가 제한적일 수 있습니다. 실제로 필요한지는 데이터 양과 쿼리 패턴을 보고 판단해야 합니다.
+선택도는 조건이 전체 행 중 얼마나 적은 행을 선택하는지 판단하는 개념입니다. 이메일처럼 대부분 값이 서로 다른 컬럼은 선택도가 높고, 수강 상태처럼 값 종류가 적은 컬럼은 선택도가 낮을 수 있습니다. 다만 낮은 선택도 컬럼도 다른 조건과 함께 쓰이거나 특정 값의 분포가 치우쳐 있으면 검토 대상이 될 수 있습니다.
 
 ---
 
 ## 6. ORDER BY와 인덱스
 
-인덱스는 정렬에도 도움이 될 수 있습니다.
+인덱스는 검색뿐 아니라 정렬에도 영향을 줄 수 있습니다.
 
-![ORDER BY와 인덱스](../../images/chapter10/ch10_04_order_by_index_flow.svg)
+![ORDER BY에서 인덱스가 사용되는 흐름](../../images/chapter10/ch10_04_order_by_index_flow.svg)
 
-그림 10-4 ORDER BY와 인덱스
+그림 10-4 ORDER BY에서 인덱스가 사용되는 흐름
 
-예를 들어 강의 목록을 제목순으로 자주 보여 준다면 다음 SQL이 자주 실행될 수 있습니다.
+다음 두 쿼리를 비교합니다.
 
 ```sql
+EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, title, level, price
 FROM courses
 ORDER BY title;
 ```
 
-이 경우 `title` 컬럼에 인덱스가 있으면 정렬 작업에 도움이 될 수 있습니다.
-
 ```sql
-CREATE INDEX idx_courses_title
-ON courses(title);
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id, title, level, price
+FROM courses
+ORDER BY title
+LIMIT 20;
 ```
 
-다만 정렬에 항상 인덱스가 사용되는 것은 아닙니다. 데이터 양, 조건, 정렬 방향, DBMS의 판단에 따라 실행 방식이 달라질 수 있습니다.
-
-그래서 인덱스를 만든 뒤에는 실행 계획을 확인하는 습관이 필요합니다.
+`ORDER BY title`에 맞는 인덱스가 있어도 항상 Index Scan이 선택되는 것은 아닙니다. 전체 행을 모두 반환해야 하는지, 일부 행만 빠르게 가져오면 되는지, 별도 `Sort` 비용이 얼마나 큰지에 따라 계획이 달라질 수 있습니다. `LIMIT`은 특히 계획 선택에 영향을 줄 수 있습니다.
 
 ---
 
-## 7. JOIN 조건과 인덱스
+## 7. JOIN과 FOREIGN KEY 인덱스
 
-JOIN에서는 외래키 컬럼이 자주 사용됩니다.
+JOIN에서는 외래키 컬럼이 자주 등장합니다. 그러나 PostgreSQL은 FOREIGN KEY 자식 컬럼에 인덱스를 자동 생성하지 않습니다.
 
-![JOIN 조건과 외래키 인덱스](../../images/chapter10/ch10_05_join_foreign_key_index.svg)
+![JOIN 관계와 외래키 인덱스 후보](../../images/chapter10/ch10_05_join_foreign_key_index.svg)
 
-그림 10-5 JOIN 조건과 외래키 인덱스
+그림 10-5 JOIN 관계와 외래키 인덱스 후보
 
-Chapter 08에서 다음 JOIN을 사용했습니다.
-
-```sql
-SELECT
-    s.name AS student_name,
-    c.title AS course_title,
-    e.status
-FROM enrollments AS e
-JOIN students AS s ON e.student_id = s.id
-JOIN courses AS c ON e.course_id = c.id;
-```
-
-여기서 JOIN 조건에 사용되는 컬럼은 다음과 같습니다.
-
-```text
-enrollments.student_id
-enrollments.course_id
-students.id
-courses.id
-```
-
-`students.id`와 `courses.id`는 기본키이므로 보통 자동으로 인덱스가 만들어집니다. 하지만 `enrollments.student_id`, `enrollments.course_id`는 별도로 인덱스를 검토할 수 있습니다.
+`students.id`와 `courses.id`는 기본키이므로 자동 인덱스가 있습니다. 하지만 `enrollments.student_id`, `enrollments.course_id`는 자식 FK 컬럼이므로 쿼리 패턴을 보고 수동 인덱스를 검토해야 합니다.
 
 ```sql
 CREATE INDEX idx_enrollments_student_id
 ON enrollments(student_id);
 ```
 
-```sql
-CREATE INDEX idx_enrollments_course_id
-ON enrollments(course_id);
-```
-
-특정 학생의 수강신청 내역을 자주 조회한다면 `student_id` 인덱스가 도움이 될 수 있습니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE student_id = 1;
-```
-
-특정 강의의 수강생 목록을 자주 조회한다면 `course_id` 인덱스를 검토할 수 있습니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE course_id = 1;
-```
+`course_id` 단일 인덱스는 복합 인덱스 실습과 겹칠 수 있습니다. 이 장에서는 단일 `course_id` 인덱스를 비교한 뒤 제거하고, 최종 수동 인덱스는 `(course_id, status)` 복합 인덱스로 둡니다.
 
 ---
 
-## 8. 복합 인덱스 맛보기
+## 8. 복합 인덱스와 선두 컬럼
 
-하나의 컬럼이 아니라 여러 컬럼을 함께 사용하는 인덱스도 있습니다. 이를 복합 인덱스라고 합니다.
-
-![복합 인덱스와 컬럼 순서](../../images/chapter10/ch10_06_composite_index_order.svg)
-
-그림 10-6 복합 인덱스와 컬럼 순서
-
-예를 들어 특정 강의에서 특정 상태의 수강신청을 자주 조회한다고 가정합니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE course_id = 1 AND status = '수강중';
-```
-
-이런 쿼리가 자주 실행된다면 다음과 같은 복합 인덱스를 검토할 수 있습니다.
+복합 인덱스는 여러 컬럼을 묶어 만든 인덱스입니다.
 
 ```sql
 CREATE INDEX idx_enrollments_course_status
 ON enrollments(course_id, status);
 ```
 
-복합 인덱스는 컬럼 순서가 중요합니다. `(course_id, status)`와 `(status, course_id)`는 같은 의미가 아닙니다.
+![복합 인덱스의 선두 컬럼과 쿼리 조건](../../images/chapter10/ch10_06_composite_index_order.svg)
 
-초급 단계에서는 다음 정도만 기억하면 됩니다.
+그림 10-6 복합 인덱스의 선두 컬럼과 쿼리 조건
 
-```text
-복합 인덱스는 자주 함께 사용되는 조건 컬럼을 묶어 만들 수 있다.
-다만 컬럼 순서와 실제 쿼리 패턴을 함께 검토해야 한다.
-```
-
----
-
-## 9. EXPLAIN 실행 계획 맛보기
-
-인덱스를 만들었다고 해서 무조건 사용되는 것은 아닙니다. 데이터베이스는 SQL을 실행할 때 여러 방법 중 하나를 선택합니다.
-
-이 선택 과정을 확인할 수 있는 도구가 `EXPLAIN`입니다.
-
-![EXPLAIN 생성 전후 비교](../../images/chapter10/ch10_07_explain_before_after.svg)
-
-그림 10-7 EXPLAIN 생성 전후 비교
+`(course_id, status)`는 다음 조건에 잘 맞을 수 있습니다.
 
 ```sql
-EXPLAIN
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
+WHERE course_id = 5
+  AND status = '수강중'
 ```
 
-`EXPLAIN`은 SQL을 실제로 어떻게 실행할지 계획을 보여 줍니다.
+또한 선두 컬럼인 `course_id`만 사용하는 조건에도 활용될 가능성이 있습니다.
 
-처음에는 모든 내용을 이해하지 못해도 괜찮습니다. 다음 단어 정도만 눈여겨보면 됩니다.
+```sql
+WHERE course_id = 5
+```
 
-| 표현 | 대략적 의미 |
+반면 `status`만 사용하는 조건에는 일반적으로 효율적이지 않을 수 있습니다.
+
+```sql
+WHERE status = '수강중'
+```
+
+`(course_id, status)`와 `(status, course_id)`는 같은 인덱스가 아닙니다. 복합 인덱스는 실제 쿼리 조건 조합과 선두 컬럼 사용 여부를 함께 검토해야 합니다.
+
+---
+
+## 9. EXPLAIN과 EXPLAIN ANALYZE
+
+`EXPLAIN`은 SQL을 실제로 실행하지 않고 예상 실행 계획을 보여 줍니다. `EXPLAIN ANALYZE`는 SQL을 실제로 실행하고 실제 통계를 함께 보여 줍니다.
+
+| 명령 | 의미 | 주의 |
+| --- | --- | --- |
+| `EXPLAIN` | 실행하지 않고 예상 실행 계획 표시 | 비용과 예상 행 수 중심 |
+| `EXPLAIN ANALYZE` | SQL을 실제 실행하고 실제 통계 표시 | 변경 SQL에 사용하면 실제 변경됨 |
+| `EXPLAIN (ANALYZE, BUFFERS)` | 실제 실행 결과와 버퍼 사용량 표시 | 이 장에서는 SELECT 실습에만 사용 |
+
+이 장에서는 SELECT 쿼리에만 다음 형태를 사용합니다.
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT ...;
+```
+
+`EXPLAIN ANALYZE`의 `ANALYZE`와 `ANALYZE students;`의 `ANALYZE`는 다릅니다. 앞의 것은 쿼리를 실제 실행해 계획을 측정하는 옵션이고, 뒤의 것은 옵티마이저 통계를 갱신하는 명령입니다.
+
+![인덱스 전후 실행 계획 비교](../../images/chapter10/ch10_07_explain_before_after.svg)
+
+그림 10-7 인덱스 전후 실행 계획 비교
+
+실행 계획에서 확인할 항목은 다음과 같습니다.
+
+| 확인 항목 | 의미 |
 | --- | --- |
-| Seq Scan | 테이블을 순차적으로 확인하는 방식 |
-| Index Scan | 인덱스를 사용해 찾는 방식 |
-| Bitmap Index Scan | 인덱스를 활용해 여러 행을 찾는 방식 |
+| 계획 노드 | Seq Scan, Index Scan, Bitmap Heap Scan 등 |
+| cost | 옵티마이저가 계산한 상대적 예상 비용 |
+| rows | 예상 결과 행 수 |
+| actual rows | 실제 반환 행 수 |
+| actual time | 실제 실행 시간 |
+| Buffers | 읽거나 사용한 데이터 블록 |
+| Filter | 읽은 뒤 적용한 조건 |
+| Index Cond | 인덱스 탐색에 사용한 조건 |
+| Sort | 별도 정렬 작업 여부 |
 
-초급 단계에서는 다음 흐름으로 보면 됩니다.
-
-```text
-1. 인덱스 생성 전 EXPLAIN을 실행한다.
-2. 인덱스를 생성한다.
-3. 같은 SELECT에 대해 EXPLAIN을 다시 실행한다.
-4. 실행 계획이 어떻게 달라졌는지 비교한다.
-```
-
-다만 샘플 데이터가 너무 적으면 인덱스가 있어도 데이터베이스가 `Seq Scan`을 선택할 수 있습니다. 이는 오류가 아니라 데이터가 적을 때는 전체를 읽는 편이 더 싸다고 판단한 결과일 수 있습니다.
+`cost`는 시간이 아닙니다. 실행 시간은 PC 상태, 캐시, PostgreSQL 버전, 데이터 분포에 따라 달라집니다. 한 번의 실행 시간만으로 결론을 내리지 말고, 같은 환경에서 인덱스 생성 전후 계획과 실제 행 수, 버퍼 사용량을 함께 비교합니다.
 
 ---
 
-## 10. 인덱스의 장점
+## 10. 인덱스의 이점과 비용
 
-인덱스의 가장 큰 장점은 검색 성능을 높일 수 있다는 점입니다.
+인덱스의 장점은 조회 성능을 높일 수 있다는 점입니다.
 
-대표적인 장점은 다음과 같습니다.
+- WHERE 조건 검색이 빨라질 수 있습니다.
+- JOIN 조건 처리에 도움이 될 수 있습니다.
+- ORDER BY 정렬 비용을 줄일 수 있습니다.
+- 자주 사용하는 조회 쿼리의 응답 시간을 줄일 수 있습니다.
 
-```text
-- WHERE 조건 검색이 빨라질 수 있다.
-- JOIN 조건 처리에 도움이 될 수 있다.
-- ORDER BY 정렬에 도움이 될 수 있다.
-- 자주 사용하는 조회 쿼리의 응답 시간을 줄일 수 있다.
-```
+하지만 인덱스에는 비용도 있습니다.
 
-특히 데이터가 많아지고 조회 요청이 많아질수록 인덱스의 중요성이 커집니다.
-
-하지만 인덱스는 무조건 많이 만들수록 좋은 것은 아닙니다.
-
----
-
-## 11. 인덱스의 단점
-
-인덱스에는 비용이 있습니다.
-
-첫째, 저장 공간을 사용합니다. 인덱스는 별도의 구조이므로 테이블 데이터 외에 추가 공간이 필요합니다.
-
-둘째, 데이터 변경 작업이 느려질 수 있습니다. `INSERT`, `UPDATE`, `DELETE`가 실행될 때 테이블뿐 아니라 인덱스도 함께 관리해야 하기 때문입니다.
-
-셋째, 너무 많은 인덱스는 관리와 판단을 어렵게 만듭니다.
-
-인덱스의 단점을 정리하면 다음과 같습니다.
-
-| 단점 | 설명 |
+| 비용 | 설명 |
 | --- | --- |
-| 저장 공간 증가 | 인덱스 구조를 따로 저장해야 함 |
-| 쓰기 성능 저하 | 데이터 변경 시 인덱스도 함께 갱신됨 |
-| 관리 복잡도 증가 | 인덱스가 많으면 어떤 것이 필요한지 판단하기 어려움 |
-| 불필요한 인덱스 가능성 | 실제 쿼리에서 사용되지 않는 인덱스가 생길 수 있음 |
+| 저장 공간 증가 | 인덱스 구조를 별도로 저장해야 함 |
+| 쓰기 성능 저하 | INSERT, UPDATE, DELETE 때 인덱스도 함께 갱신해야 함 |
+| 관리 복잡도 증가 | 어떤 인덱스가 필요한지 판단해야 함 |
+| 중복 인덱스 가능성 | 이미 비슷한 인덱스가 있는데 또 만들 수 있음 |
 
-따라서 인덱스는 실제 쿼리 패턴과 실행 계획을 보고 신중하게 만들어야 합니다.
-
----
-
-## 12. 인덱스를 만들면 좋은 경우와 조심해야 할 경우
-
-인덱스를 만들면 좋은 경우는 다음과 같습니다.
-
-```text
-- 데이터가 많은 테이블에서 자주 검색하는 컬럼
-- WHERE 조건에 자주 등장하는 컬럼
-- JOIN 조건에 자주 사용되는 외래키 컬럼
-- ORDER BY에 자주 사용되는 컬럼
-- 중복이 적고 선택도가 높은 컬럼
-```
-
-반대로 조심해야 할 경우는 다음과 같습니다.
-
-```text
-- 데이터가 매우 적은 테이블
-- 거의 검색하지 않는 컬럼
-- 값의 종류가 너무 적은 컬럼
-- INSERT/UPDATE/DELETE가 매우 자주 발생하는 테이블
-- 이미 비슷한 인덱스가 있는 경우
-```
-
-여기서 선택도는 값이 얼마나 잘 구분되는지를 의미합니다. 예를 들어 이메일은 사람마다 대부분 다르므로 선택도가 높습니다. 반면 수강상태는 몇 가지 값만 반복되므로 선택도가 낮을 수 있습니다.
+따라서 인덱스는 많이 만드는 것이 아니라 필요한 곳에 신중하게 만드는 것입니다.
 
 ---
 
-## 13. AI가 추천한 인덱스 검토하기
+## 11. AI 추천 인덱스 검토
 
-AI에게 다음처럼 요청할 수 있습니다.
-
-```text
-PostgreSQL에서 온라인 강의 수강신청 시스템의 성능을 높이기 위한 인덱스를 추천해 주세요.
-students, courses, enrollments 테이블을 사용합니다.
-자주 실행되는 쿼리는 학생 이메일 검색, 특정 학생의 수강신청 조회, 특정 강의의 수강생 조회입니다.
-```
-
-AI는 다음과 같은 인덱스를 추천할 수 있습니다.
+AI에게 인덱스를 추천해 달라고 하면 그럴듯한 SQL을 빠르게 받을 수 있습니다. 하지만 AI는 실제 데이터 분포와 현재 인덱스 목록, 실행 계획을 모를 수 있습니다.
 
 ![AI 추천 인덱스 검토 흐름](../../images/chapter10/ch10_08_ai_index_review_flow.svg)
 
 그림 10-8 AI 추천 인덱스 검토 흐름
 
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
-
-```sql
-CREATE INDEX idx_enrollments_student_id
-ON enrollments(student_id);
-```
-
-```sql
-CREATE INDEX idx_enrollments_course_id
-ON enrollments(course_id);
-```
-
-이 추천이 항상 정답은 아닙니다. 다음 기준으로 검토해야 합니다.
+AI 추천은 다음 기준으로 검토합니다.
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
 | 쿼리 패턴 | 실제로 자주 실행되는 SQL인가? |
-| WHERE 조건 | 해당 컬럼이 WHERE 조건에 자주 등장하는가? |
-| JOIN 조건 | 외래키 JOIN에 자주 사용되는가? |
-| 정렬 조건 | ORDER BY에 자주 사용되는가? |
-| 데이터 양 | 테이블 데이터가 충분히 많은가? |
-| 선택도 | 값이 잘 구분되는 컬럼인가? |
-| 쓰기 비용 | INSERT/UPDATE/DELETE가 너무 느려지지 않는가? |
-| 실행 계획 | EXPLAIN으로 확인했는가? |
+| 기존 인덱스 | PRIMARY KEY, UNIQUE, 기존 수동 인덱스와 겹치지 않는가? |
+| WHERE 조건 | 해당 컬럼이 조건에서 반복적으로 쓰이는가? |
+| JOIN 조건 | FK 컬럼이 조회 성능에 영향을 주는가? |
+| ORDER BY | 정렬과 LIMIT에 도움이 되는가? |
+| 선택도 | 조건이 충분히 적은 행을 골라내는가? |
+| 쓰기 비용 | INSERT, UPDATE, DELETE 비용 증가를 감수할 가치가 있는가? |
+| 실행 계획 | EXPLAIN ANALYZE로 전후 차이를 확인했는가? |
 
-AI가 추천한 인덱스는 출발점일 뿐입니다. 실제 적용 여부는 사람이 쿼리 패턴과 실행 계획을 확인하고 결정해야 합니다.
-
----
-
-## 14. 인덱스 실습 전 확인표
-
-인덱스를 만들기 전 다음 질문을 확인합니다.
-
-| 질문 | 확인 |
-| --- | --- |
-| 이 쿼리는 자주 실행되는가? |  |
-| 이 테이블은 데이터가 충분히 많은가? |  |
-| WHERE 조건에 반복적으로 사용되는 컬럼인가? |  |
-| JOIN 조건에 사용되는 외래키인가? |  |
-| ORDER BY에 자주 사용되는 컬럼인가? |  |
-| 이미 비슷한 인덱스가 있는가? |  |
-| 인덱스 생성 전후 EXPLAIN을 비교했는가? |  |
-| 쓰기 성능 저하 가능성을 검토했는가? |  |
-
-이 표를 사용하면 AI가 추천한 인덱스도 무비판적으로 적용하지 않고 검토할 수 있습니다.
+AI가 `students.email` 인덱스를 추천했다면 먼저 UNIQUE 자동 인덱스가 이미 있는지 확인해야 합니다. 이미 같은 역할을 하는 인덱스가 있다면 새로 만들지 않습니다.
 
 ---
 
-## 15. 자주 하는 실수
+## 12. 최종 인덱스 기준
 
-### 실수 1. 모든 컬럼에 인덱스를 만들려고 한다
-
-인덱스가 많으면 검색은 일부 빨라질 수 있지만 저장 공간과 쓰기 비용이 증가합니다. 모든 컬럼에 인덱스를 만드는 것은 좋은 전략이 아닙니다.
-
-### 실수 2. 데이터가 적은데 성능 차이를 과장한다
-
-샘플 데이터가 적으면 인덱스 효과가 거의 보이지 않을 수 있습니다. 데이터베이스가 인덱스보다 순차 검색을 선택할 수도 있습니다.
-
-### 실수 3. EXPLAIN을 확인하지 않는다
-
-인덱스를 만들었더라도 실제 쿼리에서 사용되는지 확인해야 합니다.
-
-### 실수 4. 값 종류가 적은 컬럼에 무조건 인덱스를 만든다
-
-상태값처럼 값의 종류가 적은 컬럼은 단독 인덱스 효과가 제한적일 수 있습니다.
-
-### 실수 5. AI 추천을 그대로 적용한다
-
-AI가 추천한 인덱스는 실제 데이터 양, 쿼리 빈도, 실행 계획을 모르는 상태에서 만든 초안일 수 있습니다.
-
----
-
-## 16. 스스로 확인하기
-
-### 16.1 개념 확인
-
-1. 인덱스가 필요한 이유를 설명해 보세요.
-2. 인덱스를 책의 색인에 비유해 설명해 보세요.
-3. 인덱스의 장점과 단점을 각각 2가지 이상 정리해 보세요.
-4. `Seq Scan`과 `Index Scan`의 차이를 간단히 설명해 보세요.
-5. AI가 추천한 인덱스를 검토할 때 확인해야 할 항목을 3가지 이상 정리해 보세요.
-
-### 16.2 SQL 작성 문제
-
-다음 요구사항에 맞는 SQL을 작성해 보세요.
+이 장의 실습에서 최종 수동 인덱스 기준은 다음과 같습니다.
 
 ```text
-1. students 테이블의 email 컬럼에 인덱스를 생성한다.
-2. courses 테이블의 title 컬럼에 인덱스를 생성한다.
-3. enrollments 테이블의 student_id 컬럼에 인덱스를 생성한다.
-4. enrollments 테이블의 course_id 컬럼에 인덱스를 생성한다.
-5. course_id와 status를 함께 사용하는 복합 인덱스를 생성한다.
+idx_courses_title
+idx_enrollments_student_id
+idx_enrollments_course_status
 ```
 
-### 16.3 검토 문제
+`idx_enrollments_course_id`는 단일 인덱스와 복합 인덱스의 역할이 겹치는지 비교한 뒤 제거하는 실습 대상으로 둡니다.
 
-다음 상황에서 인덱스를 만들지 말아야 할 수도 있는 이유를 설명해 보세요.
-
-```text
-- 테이블에 데이터가 20건뿐이다.
-- status 컬럼 값이 신청, 수강중, 완료 세 가지뿐이다.
-- INSERT가 매우 자주 발생하는 로그 테이블이다.
-- AI가 모든 컬럼에 인덱스를 만들라고 추천했다.
-```
+자동 인덱스까지 확인하려면 `indexname LIKE 'idx_%'` 조건만 쓰지 말고 `pg_indexes`에서 네 테이블 전체를 조회합니다. 그래야 PK와 UNIQUE 자동 인덱스도 함께 볼 수 있습니다.
 
 ---
 
-## 17. 정리
+## 13. 자주 하는 실수
 
-이번 장에서는 인덱스와 성능 기초를 살펴보았습니다.
+### 실수 1. UNIQUE 컬럼에 같은 인덱스를 또 만든다
 
-핵심 내용을 정리하면 다음과 같습니다.
+`students.email`은 UNIQUE 제약조건 때문에 자동 인덱스가 있습니다. 같은 컬럼에 `idx_students_email`을 또 만들면 중복 인덱스가 될 수 있습니다.
 
-```text
-1. 인덱스는 데이터를 빠르게 찾기 위한 검색용 구조이다.
-2. WHERE 조건에 자주 사용되는 컬럼은 인덱스 후보가 될 수 있다.
-3. JOIN 조건에 사용되는 외래키 컬럼도 인덱스 후보가 될 수 있다.
-4. ORDER BY에 자주 사용되는 컬럼도 인덱스가 도움이 될 수 있다.
-5. 인덱스는 검색 성능을 높일 수 있지만 저장 공간과 쓰기 비용이 증가한다.
-6. 인덱스 생성 전후에는 EXPLAIN으로 실행 계획을 확인하는 것이 좋다.
-7. AI가 추천한 인덱스도 실제 쿼리 패턴과 실행 계획을 기준으로 검토해야 한다.
-```
+### 실수 2. 인덱스가 있으면 항상 Index Scan이 나와야 한다고 생각한다
 
-이 장에서 가장 중요한 문장은 다음입니다.
+PostgreSQL은 비용을 비교해 Seq Scan을 선택할 수 있습니다. 특히 데이터가 적거나 많은 행을 반환할 때 Seq Scan은 정상적인 선택일 수 있습니다.
 
-```text
-인덱스는 많이 만드는 것이 아니라 필요한 곳에 신중하게 만드는 것이다.
-```
+### 실수 3. EXPLAIN의 cost를 실행 시간으로 읽는다
+
+cost는 상대적 예상 비용입니다. 실제 시간은 `EXPLAIN ANALYZE`의 `actual time`과 `Execution Time`을 봅니다.
+
+### 실수 4. FOREIGN KEY가 자동 인덱스를 만든다고 생각한다
+
+PostgreSQL은 FK 제약조건 자체를 만들지만 자식 FK 컬럼 인덱스는 자동 생성하지 않습니다.
+
+### 실수 5. 복합 인덱스의 컬럼 순서를 무시한다
+
+`(course_id, status)`와 `(status, course_id)`는 같은 인덱스가 아닙니다.
 
 ---
 
-## 18. 다음 장에서는
+## 14. 핵심 정리
 
-다음 장에서는 데이터베이스 보안과 백업을 살펴봅니다.
+- 인덱스는 검색을 빠르게 하기 위한 보조 구조입니다.
+- PRIMARY KEY와 UNIQUE는 자동으로 고유 인덱스를 만듭니다.
+- FOREIGN KEY 자식 컬럼은 자동으로 인덱스가 생기지 않습니다.
+- WHERE, JOIN, ORDER BY 조건은 인덱스 후보를 찾는 단서입니다.
+- 인덱스가 있어도 PostgreSQL은 Seq Scan을 선택할 수 있습니다.
+- EXPLAIN은 예상 계획, EXPLAIN ANALYZE는 실제 실행 결과입니다.
+- 복합 인덱스는 선두 컬럼과 실제 조건 조합이 중요합니다.
+- 인덱스는 읽기 성능과 쓰기 비용 사이의 선택입니다.
+- AI 추천 인덱스는 기존 인덱스와 실행 계획으로 검증해야 합니다.
 
-Chapter 11에서는 데이터베이스 접근 권한, 비밀번호 관리, 백업과 복구의 기본 개념을 다룹니다. 데이터베이스는 빠르게 조회되는 것도 중요하지만, 안전하게 보호되고 복구 가능해야 합니다.
+---
+
+## 15. 다음 장에서는
+
+Chapter 11에서는 데이터베이스 보안과 백업의 기본을 다룹니다. 빠른 조회도 중요하지만, 데이터베이스는 안전하게 보호되고 복구 가능해야 합니다.

@@ -1,14 +1,6 @@
-flowchart TB
-    A[SELECT query] --> B[EXPLAIN before index]
-    B --> C[Read plan]
-    C --> D[Create index]
-    D --> E[EXPLAIN after index]
-    E --> F[Compare plan]
-
-    F --> G[Seq Scan]
-    F --> H[Index Scan]
-    F --> I[Bitmap Index Scan]
-
-    G --> J[Interpret result]
-    H --> J
-    I --> J
+flowchart LR
+    A[같은 SELECT] --> B[인덱스 전 계획]
+    B --> C[인덱스 생성]
+    C --> D[통계 갱신]
+    D --> E[인덱스 후 계획]
+    E --> F[노드 · rows · Buffers 비교]

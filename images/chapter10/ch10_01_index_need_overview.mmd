@@ -1,11 +1,7 @@
-flowchart TB
-    A[Small table] --> B[Few rows checked]
-    B --> C[Fast lookup]
-
-    D[Large table] --> E[Many rows checked]
-    E --> F[Slow lookup]
-
-    F --> G[Index]
-    G --> H[Find target row faster]
-
-    H --> I[Better read performance]
+flowchart LR
+    A[데이터 증가] --> B[조회 조건 반복]
+    B --> C{전체 읽기가 부담인가?}
+    C -- 예 --> D[인덱스 후보 검토]
+    C -- 아니요 --> E[Seq Scan도 정상 선택]
+    D --> F[EXPLAIN ANALYZE 비교]
+    F --> G[적용 · 보류 · 제거 판단]

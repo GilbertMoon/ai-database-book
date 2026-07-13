@@ -1,12 +1,7 @@
-flowchart LR
-    A[Query] --> B{Access path}
-
-    B --> C[Seq Scan]
-    C --> C1[Read many table rows]
-    C1 --> C2[Compare each value]
-    C2 --> C3[Return matching row]
-
-    B --> D[Index Scan]
-    D --> D1[Read index first]
-    D1 --> D2[Find row location]
-    D2 --> D3[Return matching row]
+flowchart TB
+    A[조회 SQL] --> B[Seq Scan
+테이블 전체 확인]
+    A --> C[Index Scan
+인덱스 탐색 후 행 접근]
+    B --> D[많은 행 반환 또는 작은 테이블에 적합]
+    C --> E[적은 행 선택 조건에 유리]

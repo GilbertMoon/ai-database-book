@@ -1,13 +1,9 @@
-flowchart TB
-    A[Database] --> B[Create backup]
-    B --> C[Backup file]
-    C --> D[Restore to test DB]
-    D --> E[Check table counts]
-    E --> F[Check key queries]
-    F --> G{Restore works?}
-
-    G --> H[Keep backup plan]
-    G --> I[Fix backup process]
-
-    H --> J[Ready for failure]
-    I --> B
+flowchart LR
+    A[백업 생성] --> B[파일 보호]
+    B --> C[별도 복구 DB 생성]
+    C --> D[오류 중단 옵션으로 복구]
+    D --> E[행 수 · JOIN 검증]
+    E --> F{기준 충족?}
+    F -- 아니요 --> G[절차 수정]
+    G --> A
+    F -- 예 --> H[복구 가능성 기록]

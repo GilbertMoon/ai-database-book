@@ -2,67 +2,49 @@
 
 ## 인덱스와 성능 기초
 
-이 폴더는 Chapter 10의 인덱스와 성능 기초 실습 SQL 파일을 관리합니다.
-
----
+이 폴더는 Chapter 10에서 사용하는 PostgreSQL 인덱스 성능 실습 SQL을 관리합니다.
 
 ## 파일 목록
 
 | 파일 | 설명 |
 | --- | --- |
-| `index_performance_practice.sql` | 인덱스 생성 전후 EXPLAIN 비교, WHERE/ORDER BY/JOIN 조건 인덱스, 복합 인덱스 실습 |
+| `index_performance_practice.sql` | 성능 비교용 데이터 생성, 자동/수동 인덱스 확인, EXPLAIN ANALYZE 비교, 복합 인덱스 실습 |
 
----
+## 실행 전 주의
 
-## 실행 순서
+`index_performance_practice.sql`은 `payments`, `enrollments`, `courses`, `instructors`, `students`를 삭제하고 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하세요.
 
-1. DBeaver에서 `ai_database_book` 데이터베이스에 연결합니다.
-2. SQL Editor를 엽니다.
-3. `index_performance_practice.sql`을 실행합니다.
-4. `students`, `instructors`, `courses`, `enrollments` 테이블이 생성되었는지 확인합니다.
-5. 인덱스 생성 전 `EXPLAIN` 결과를 확인합니다.
-6. 인덱스를 생성한 뒤 같은 SQL의 `EXPLAIN` 결과를 다시 확인합니다.
-7. `Seq Scan`, `Index Scan`, `Bitmap Index Scan` 등의 표현을 비교합니다.
-8. 마지막에 `pg_indexes` 조회 결과로 생성된 인덱스 목록을 확인합니다.
+실행 전에 현재 연결 대상을 확인합니다.
 
----
-
-## 주요 실습 항목
-
-```text
-- students.email 인덱스
-- courses.title 인덱스
-- enrollments.student_id 인덱스
-- enrollments.course_id 인덱스
-- enrollments(course_id, status) 복합 인덱스
-- EXPLAIN 실행 계획 비교
-- AI 추천 인덱스 검토 질문
+```sql
+SELECT current_database();
 ```
 
----
+대량 데이터 생성에는 시간이 걸릴 수 있습니다. 일반 개인 PC에서 너무 오래 걸리면 SQL 파일의 `enrollments` 자동 생성 건수를 100,000에서 50,000으로 줄여 실습할 수 있습니다.
 
-## 주의 사항
+## 예상 데이터 건수
 
-```text
-- 이 파일은 반복 실습을 위해 DROP TABLE IF EXISTS 구문을 포함합니다.
-- 실제 운영 데이터베이스에서는 DROP TABLE과 CREATE INDEX를 신중하게 실행해야 합니다.
-- 샘플 데이터가 적으면 인덱스가 있어도 PostgreSQL이 Seq Scan을 선택할 수 있습니다.
-- 인덱스는 검색 성능을 높일 수 있지만 저장 공간과 쓰기 비용이 증가합니다.
-- AI가 추천한 인덱스도 실제 쿼리 패턴과 EXPLAIN 결과를 기준으로 검토해야 합니다.
-```
+| 테이블 | 최종 예상 행 수 |
+| --- | ---: |
+| students | 10,005 |
+| instructors | 3 |
+| courses | 2,005 |
+| enrollments | 100,007 |
 
----
+## 핵심 보정 사항
 
-## 학습 포인트
+- Chapter 09에서 `payments`가 남아 있을 수 있으므로 먼저 삭제합니다.
+- `students.email`은 UNIQUE 제약조건으로 자동 인덱스가 있으므로 수동 `idx_students_email`을 만들지 않습니다.
+- PostgreSQL은 PRIMARY KEY와 UNIQUE에는 자동 인덱스를 만들지만, FOREIGN KEY 자식 컬럼에는 자동 인덱스를 만들지 않습니다.
+- `EXPLAIN`은 예상 계획이고 `EXPLAIN ANALYZE`는 SQL을 실제 실행합니다.
+- 이 실습의 `EXPLAIN (ANALYZE, BUFFERS)`는 SELECT 쿼리에만 사용합니다.
+- `ANALYZE table_name`은 통계 갱신 명령이며 `EXPLAIN ANALYZE`와 다릅니다.
+- 실행 계획은 PostgreSQL 버전, 데이터 분포, 통계, 메모리 설정, 캐시 상태에 따라 달라질 수 있습니다.
 
-초급 단계에서는 실행 계획의 모든 세부 항목을 외울 필요는 없습니다.
+## 최종 수동 인덱스 기준
 
-다만 다음 흐름을 익히는 것이 중요합니다.
+- `idx_courses_title`
+- `idx_enrollments_student_id`
+- `idx_enrollments_course_status`
 
-```text
-1. 자주 실행되는 SQL을 확인한다.
-2. WHERE, JOIN, ORDER BY에 사용되는 컬럼을 찾는다.
-3. 인덱스를 만들기 전 EXPLAIN을 확인한다.
-4. 인덱스를 만든 뒤 같은 SQL의 EXPLAIN을 다시 확인한다.
-5. 인덱스가 실제로 도움이 되는지 판단한다.
-```
+`idx_enrollments_course_id`는 단일 인덱스와 복합 인덱스의 역할 중복을 비교하기 위한 실습용 인덱스이며, 최종 상태에서는 제거합니다.

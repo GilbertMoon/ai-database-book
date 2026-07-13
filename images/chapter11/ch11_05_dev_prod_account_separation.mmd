@@ -1,15 +1,7 @@
-flowchart TB
-    A[Database environments] --> B[Development DB]
-    A --> C[Production DB]
-
-    B --> B1[Dev account]
-    B --> B2[Test data]
-    B --> B3[Practice SQL]
-
-    C --> C1[Production account]
-    C --> C2[Real user data]
-    C --> C3[Limited access]
-
-    B1 --> D[Separate accounts]
-    C1 --> D
-    D --> E[Safer operation]
+flowchart LR
+    A[개발 환경] --> B[개발 계정]
+    A --> C[가짜 또는 익명 데이터]
+    D[운영 환경] --> E[운영 계정]
+    D --> F[실제 데이터]
+    F --> G[강한 접근 통제]
+    C --> H[실수 영향 제한]

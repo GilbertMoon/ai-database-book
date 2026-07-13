@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">인덱스가 필요한 이유</text><rect x="100" y="120" width="260" height="90" class="b g"/><text x="230" y="155" class="l">데이터가 적은 테이블</text><text x="230" y="182" class="s">확인할 행이 적음</text><rect x="840" y="120" width="260" height="90" class="b r"/><text x="970" y="155" class="l">데이터가 많은 테이블</text><text x="970" y="182" class="s">확인할 행이 많음</text><rect x="100" y="310" width="260" height="80" class="b g"/><text x="230" y="350" class="l">조회가 빠름</text><rect x="840" y="310" width="260" height="80" class="b r"/><text x="970" y="350" class="l">조회가 느려질 수 있음</text><rect x="440" y="460" width="320" height="80" class="b m"/><text x="600" y="492" class="l">인덱스 검토</text><text x="600" y="520" class="s">자주 찾는 컬럼을 빠르게 검색</text><rect x="440" y="600" width="320" height="60" class="b y"/><text x="600" y="630" class="l">검색 응답 시간 개선 가능</text><line x1="230" y1="210" x2="230" y2="310" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="970" y1="210" x2="970" y2="310" stroke="#e53e3e" stroke-width="2" marker-end="url(#a)"/><line x1="970" y1="390" x2="720" y2="460" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="540" x2="600" y2="600" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc">
+<title id="title">데이터 증가와 인덱스 검토</title>
+<desc id="desc">데이터가 늘면 자주 쓰는 조회 경로를 실행 계획으로 확인한다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#ffffff;stroke:#7fb3f5;stroke-width:2;rx:14} .scan{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .idx{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .cand{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:14} .warn{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
+</style></defs>
+<rect width="1200" height="480" fill="#ffffff"/>
+<text x="600" y="48" class="title">데이터 증가와 인덱스 검토</text>
+<text x="600" y="76" class="sub">데이터가 늘면 자주 쓰는 조회 경로를 실행 계획으로 확인한다</text>
+<rect x="60" y="150" width="180" height="130" class="box"/>
+<text x="150.0" y="182" class="head">데이터 증가</text>
+<text x="150.0" y="208" class="body">10만 건 이상</text>
+<text x="150.0" y="230" class="body">읽기 비용 증가</text>
+<rect x="265" y="150" width="180" height="130" class="cand"/>
+<text x="355.0" y="182" class="head">조회 조건 반복</text>
+<text x="355.0" y="208" class="body">WHERE</text>
+<text x="355.0" y="230" class="body">JOIN · ORDER BY</text>
+<rect x="470" y="150" width="180" height="130" class="cand"/>
+<text x="560.0" y="182" class="head">후보 판단</text>
+<text x="560.0" y="208" class="body">자주 실행?</text>
+<text x="560.0" y="230" class="body">선택도 있음?</text>
+<rect x="735" y="150" width="180" height="130" class="idx"/>
+<text x="825.0" y="182" class="head">계획 비교</text>
+<text x="825.0" y="208" class="code">EXPLAIN</text>
+<text x="825.0" y="230" class="body">ANALYZE</text>
+<rect x="940" y="150" width="180" height="130" class="idx"/>
+<text x="1030.0" y="182" class="head">결정</text>
+<text x="1030.0" y="208" class="body">적용</text>
+<text x="1030.0" y="230" class="body">보류 · 제거</text>
+<path d="M240 215 L265 215" class="arrow"/>
+<path d="M445 215 L470 215" class="arrow"/>
+<path d="M650 215 L735 215" class="arrow"/>
+<path d="M915 215 L940 215" class="arrow"/>
+<rect x="300" y="360" width="600" height="58" class="note"/>
+<text x="600" y="394" class="head">인덱스는 데이터와 쿼리가 많아질 때 검토하는 선택 사항이다</text>
+</svg>

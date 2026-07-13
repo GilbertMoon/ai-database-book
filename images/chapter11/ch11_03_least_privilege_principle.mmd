@@ -1,18 +1,8 @@
-flowchart TB
-    A[Task] --> B{Needed permission?}
-
-    B --> C[Read report]
-    C --> C1[SELECT only]
-
-    B --> D[Register enrollment]
-    D --> D1[SELECT + INSERT]
-
-    B --> E[Manage database]
-    E --> E1[Admin permission]
-
-    C1 --> F[Least privilege]
-    D1 --> F
-    E1 --> G[Limit to admins]
-
-    F --> H[Reduce risk]
-    G --> H
+flowchart LR
+    A[업무 작업 정의] --> B[필요 객체 확인]
+    B --> C[필요 권한만 선택]
+    C --> D[역할에 부여]
+    D --> E[유효 권한 검증]
+    E --> F{과도한 권한?}
+    F -- 예 --> C
+    F -- 아니요 --> G[기록]

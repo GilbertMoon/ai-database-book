@@ -1,1 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">ORDER BY와 인덱스</text><rect x="420" y="90" width="360" height="65" class="b m"/><text x="600" y="123" class="l">ORDER BY 쿼리</text><rect x="420" y="220" width="360" height="65" class="b y"/><text x="600" y="253" class="l">정렬 대상 컬럼 확인</text><rect x="420" y="350" width="360" height="65" class="b"/><text x="600" y="383" class="l">예: courses.title</text><rect x="160" y="500" width="320" height="65" class="b g"/><text x="320" y="532" class="l">인덱스가 정렬에 도움 가능</text><rect x="720" y="500" width="320" height="65" class="b y"/><text x="880" y="532" class="l">별도 Sort가 필요할 수도 있음</text><rect x="420" y="610" width="360" height="50" class="b m"/><text x="600" y="635" class="l">EXPLAIN으로 실제 계획 확인</text><line x1="600" y1="155" x2="600" y2="220" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="285" x2="600" y2="350" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="520" y1="415" x2="320" y2="500" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="415" x2="880" y2="500" stroke="#d69e2e" stroke-width="2" marker-end="url(#a)"/><line x1="320" y1="565" x2="520" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="880" y1="565" x2="680" y2="610" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+<title id="title">ORDER BY에서 인덱스가 사용되는 흐름</title>
+<desc id="desc">정렬 인덱스 사용 여부는 반환 행 수와 LIMIT의 영향을 받는다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#ffffff;stroke:#7fb3f5;stroke-width:2;rx:14} .scan{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .idx{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .cand{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:14} .warn{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
+</style></defs>
+<rect width="1200" height="540" fill="#ffffff"/>
+<text x="600" y="48" class="title">ORDER BY에서 인덱스가 사용되는 흐름</text>
+<text x="600" y="76" class="sub">정렬 인덱스 사용 여부는 반환 행 수와 LIMIT의 영향을 받는다</text>
+<rect x="85" y="170" width="220" height="130" class="cand"/>
+<text x="195.0" y="202" class="head">ORDER BY title</text>
+<text x="195.0" y="228" class="body">정렬 요청</text>
+<polygon points="480,165.0 600.0,235 480,305.0 360.0,235" class="cand"/>
+<text x="480" y="229" class="head">반환 행 수?</text>
+<text x="480" y="253" class="small">전체 또는 일부</text>
+<rect x="725" y="120" width="230" height="130" class="scan"/>
+<text x="840.0" y="152" class="head">전체 반환</text>
+<text x="840.0" y="178" class="body">Sort 가능</text>
+<text x="840.0" y="200" class="code">Seq Scan 가능</text>
+<rect x="725" y="330" width="230" height="130" class="idx"/>
+<text x="840.0" y="362" class="head">LIMIT 20</text>
+<text x="840.0" y="388" class="code">Index Scan 가능성</text>
+<text x="840.0" y="410" class="body">일부만 반환</text>
+<path d="M305 235 L360 235" class="arrow"/>
+<path d="M600 235 L725 185" class="arrow"/>
+<path d="M600 235 L725 395" class="arrow"/>
+<text x="660" y="185" class="tag">전체</text><text x="660" y="395" class="tag">LIMIT</text>
+<rect x="990" y="225" width="150" height="105" class="box"/>
+<text x="1065.0" y="257" class="head">비교</text>
+<text x="1065.0" y="283" class="body">Sort</text>
+<text x="1065.0" y="305" class="body">Buffers</text>
+<path d="M955 185 L990 255" class="arrow"/>
+<path d="M955 395 L990 290" class="arrow"/>
+</svg>

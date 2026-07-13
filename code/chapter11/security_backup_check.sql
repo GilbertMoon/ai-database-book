@@ -1,75 +1,71 @@
--- Chapter 11. 데이터베이스를 안전하게 지키고 복구하는 방법
--- 목적: 별도의 테스트 환경에서 계정·권한·데이터 보호·복구 검증 흐름을 확인한다.
+-- Chapter 11. 데이터베이스 보안과 백업 기초
+-- 목적: security_ 실습 테이블로 권한, SQL Injection 방어 원칙, 백업/복구 검증 항목을 점검한다.
 
--- 중요:
--- 1. 운영 데이터베이스에서 이 파일을 그대로 실행하지 않는다.
--- 2. 아래 역할 생성과 권한 변경 명령은 기본적으로 주석 처리되어 있다.
--- 3. 예시 비밀번호를 실제 환경에서 사용하지 않는다.
--- 4. pg_dump, psql, pg_restore는 SQL Editor가 아니라 터미널에서 실행한다.
--- 5. 비밀번호, 접속 URL, 실제 개인정보가 포함된 백업을 저장소에 커밋하지 않는다.
+-- 주의:
+-- 이 파일은 security_ 실습 테이블을 삭제하고 다시 생성합니다.
+-- 개인 실습용 ai_database_book 데이터베이스에서만 실행하세요.
+-- CREATE ROLE, GRANT, REVOKE, 백업/복구 명령은 대부분 주석 상태로 제공됩니다.
+-- pg_dump, pg_restore, createdb, psql은 SQL Editor가 아니라 터미널에서 실행합니다.
 
--- ============================================================
--- 1. 현재 연결 상태 확인
--- ============================================================
+-- 1. 현재 연결 정보 확인
+SELECT
+    current_user AS current_user_name,
+    current_database() AS current_database_name,
+    current_schema() AS current_schema_name;
 
-SELECT current_user AS current_user_name;
-SELECT current_database() AS current_database_name;
-SELECT current_schema() AS current_schema_name;
+SELECT
+    current_setting('server_version') AS postgresql_version,
+    inet_server_addr() AS server_address,
+    inet_server_port() AS server_port;
 
--- 의도한 테스트용 DB가 아니라면 여기서 실행을 중단한다.
+-- 로컬 환경에서는 server_address가 NULL로 표시될 수 있습니다.
+-- 운영 주소나 실제 접속 정보를 문서 예시에 복사하지 않습니다.
 
--- ============================================================
--- 2. 반복 가능한 가상 데이터 준비
--- ============================================================
+-- 2. Chapter 11 전용 실습 테이블 초기화
+DROP TABLE IF EXISTS public.security_enrollments;
+DROP TABLE IF EXISTS public.security_courses;
+DROP TABLE IF EXISTS public.security_students;
 
-DROP TABLE IF EXISTS security_enrollments;
-DROP TABLE IF EXISTS security_courses;
-DROP TABLE IF EXISTS security_students;
-
-CREATE TABLE security_students (
+CREATE TABLE public.security_students (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     joined_at DATE NOT NULL
 );
 
-CREATE TABLE security_courses (
+CREATE TABLE public.security_courses (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200) UNIQUE NOT NULL,
-    level VARCHAR(20) NOT NULL
-        CHECK (level IN ('basic', 'intermediate', 'advanced')),
-    price INT NOT NULL
-        CHECK (price >= 0)
+    title VARCHAR(200) NOT NULL,
+    level VARCHAR(20) NOT NULL,
+    price INT NOT NULL CHECK (price >= 0)
 );
 
-CREATE TABLE security_enrollments (
+CREATE TABLE public.security_enrollments (
     id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL
-        REFERENCES security_students(id),
-    course_id INT NOT NULL
-        REFERENCES security_courses(id),
+    student_id INT NOT NULL REFERENCES public.security_students(id),
+    course_id INT NOT NULL REFERENCES public.security_courses(id),
     status VARCHAR(20) NOT NULL
         CHECK (status IN ('신청', '수강중', '완료', '취소')),
-    paid_amount INT NOT NULL
-        CHECK (paid_amount >= 0),
-    enrolled_at DATE NOT NULL DEFAULT CURRENT_DATE,
-    UNIQUE (student_id, course_id)
+    paid_amount INT NOT NULL CHECK (paid_amount >= 0),
+    enrolled_at DATE NOT NULL DEFAULT CURRENT_DATE
 );
 
--- 실제 개인정보 대신 가상 데이터를 사용한다.
-INSERT INTO security_students (name, email, joined_at)
+-- Chapter 07에서 같은 학생의 같은 강의 재신청 정책은 확정하지 않았다.
+-- 따라서 Chapter 11 보안 실습 테이블에도 UNIQUE(student_id, course_id)를 추가하지 않는다.
+
+INSERT INTO public.security_students (name, email, joined_at)
 VALUES
     ('김민지', 'minji.security@example.com', '2026-03-01'),
     ('이준호', 'junho.security@example.com', '2026-03-03'),
     ('박서연', 'seoyeon.security@example.com', '2026-03-05');
 
-INSERT INTO security_courses (title, level, price)
+INSERT INTO public.security_courses (title, level, price)
 VALUES
     ('데이터베이스 보안 기초', 'basic', 100000),
     ('백업과 복구 이해', 'basic', 120000),
     ('권한 관리 입문', 'basic', 90000);
 
-INSERT INTO security_enrollments (
+INSERT INTO public.security_enrollments (
     student_id,
     course_id,
     status,
@@ -77,255 +73,209 @@ INSERT INTO security_enrollments (
     enrolled_at
 )
 VALUES
-    (
-        (SELECT id FROM security_students WHERE email = 'minji.security@example.com'),
-        (SELECT id FROM security_courses WHERE title = '데이터베이스 보안 기초'),
-        '수강중',
-        100000,
-        '2026-04-01'
-    ),
-    (
-        (SELECT id FROM security_students WHERE email = 'junho.security@example.com'),
-        (SELECT id FROM security_courses WHERE title = '백업과 복구 이해'),
-        '신청',
-        120000,
-        '2026-04-02'
-    ),
-    (
-        (SELECT id FROM security_students WHERE email = 'seoyeon.security@example.com'),
-        (SELECT id FROM security_courses WHERE title = '권한 관리 입문'),
-        '완료',
-        90000,
-        '2026-04-03'
-    );
+    (1, 1, '수강중', 100000, '2026-04-01'),
+    (2, 2, '신청', 120000, '2026-04-02'),
+    (3, 3, '완료', 90000, '2026-04-03');
 
-SELECT * FROM security_students ORDER BY id;
-SELECT * FROM security_courses ORDER BY id;
-SELECT * FROM security_enrollments ORDER BY id;
+-- 3. 기본 데이터 검증
+SELECT COUNT(*) AS expected_3_students
+FROM public.security_students;
 
--- ============================================================
--- 3. 역할 존재 여부와 현재 역할 정보 확인
--- ============================================================
+SELECT COUNT(*) AS expected_3_courses
+FROM public.security_courses;
 
-SELECT
-    rolname,
-    rolsuper,
-    rolcreatedb,
-    rolcreaterole,
-    rolcanlogin
-FROM pg_roles
-WHERE rolname IN ('readonly_user', 'app_enrollment_user')
-ORDER BY rolname;
+SELECT COUNT(*) AS expected_3_enrollments
+FROM public.security_enrollments;
 
--- ============================================================
--- 4. 읽기 전용 역할 설계 예시
--- ============================================================
+SELECT COUNT(*) AS expected_3_join_rows
+FROM public.security_enrollments AS e
+JOIN public.security_students AS s
+    ON e.student_id = s.id
+JOIN public.security_courses AS c
+    ON e.course_id = c.id;
 
--- 아래 명령은 관리자 권한이 있는 테스트 환경에서만 검토한다.
--- 이미 같은 역할이 존재하면 CREATE ROLE은 오류가 발생할 수 있다.
+-- 4. 역할 모델 예시
+-- 실제 역할 생성과 권한 변경은 관리자 권한이 있는 테스트 환경에서만 수행합니다.
+-- 실제 비밀번호를 SQL 파일이나 저장소에 기록하지 않습니다.
 
--- CREATE ROLE readonly_user
---     LOGIN
---     PASSWORD 'replace_with_a_secure_password';
+-- CREATE ROLE role_report_reader NOLOGIN;
+-- CREATE ROLE role_enrollment_app NOLOGIN;
+-- CREATE ROLE readonly_user LOGIN;
+-- CREATE ROLE app_enrollment_user LOGIN;
+-- GRANT role_report_reader TO readonly_user;
+-- GRANT role_enrollment_app TO app_enrollment_user;
 
--- GRANT CONNECT ON DATABASE ai_database_book TO readonly_user;
--- GRANT USAGE ON SCHEMA public TO readonly_user;
--- GRANT SELECT ON
---     security_students,
---     security_courses,
---     security_enrollments
--- TO readonly_user;
+-- 5. 읽기 전용 권한 역할 예시
+-- GRANT CONNECT
+-- ON DATABASE ai_database_book
+-- TO role_report_reader;
+--
+-- GRANT USAGE
+-- ON SCHEMA public
+-- TO role_report_reader;
+--
+-- GRANT SELECT
+-- ON TABLE
+--     public.security_students,
+--     public.security_courses,
+--     public.security_enrollments
+-- TO role_report_reader;
 
--- 역할을 실제로 만든 뒤 다음 권한 확인 쿼리의 주석을 해제한다.
+-- 6. 수강신청 애플리케이션 권한 역할 예시
+-- GRANT CONNECT
+-- ON DATABASE ai_database_book
+-- TO role_enrollment_app;
+--
+-- GRANT USAGE
+-- ON SCHEMA public
+-- TO role_enrollment_app;
+--
+-- GRANT SELECT
+-- ON TABLE
+--     public.security_students,
+--     public.security_courses
+-- TO role_enrollment_app;
+--
+-- GRANT SELECT, INSERT, UPDATE
+-- ON TABLE public.security_enrollments
+-- TO role_enrollment_app;
+--
+-- GRANT USAGE, SELECT
+-- ON SEQUENCE public.security_enrollments_id_seq
+-- TO role_enrollment_app;
+
+-- 7. 유효 권한 확인 예시
+-- REVOKE는 특정 경로로 부여된 권한을 회수한다.
+-- 다른 역할 멤버십이나 PUBLIC 권한으로 같은 권한이 남아 있을 수 있으므로 유효 권한을 다시 확인한다.
 
 -- SELECT
+--     has_database_privilege(
+--         'readonly_user',
+--         'ai_database_book',
+--         'CONNECT'
+--     ) AS can_connect,
+--     has_schema_privilege(
+--         'readonly_user',
+--         'public',
+--         'USAGE'
+--     ) AS can_use_schema,
 --     has_table_privilege(
 --         'readonly_user',
---         'security_students',
+--         'public.security_courses',
 --         'SELECT'
---     ) AS can_select_students,
---     has_table_privilege(
---         'readonly_user',
---         'security_students',
---         'INSERT'
---     ) AS can_insert_students,
---     has_table_privilege(
---         'readonly_user',
---         'security_students',
---         'UPDATE'
---     ) AS can_update_students,
---     has_table_privilege(
---         'readonly_user',
---         'security_students',
---         'DELETE'
---     ) AS can_delete_students;
+--     ) AS can_select_courses;
+--
+-- SELECT pg_has_role(
+--     'readonly_user',
+--     'role_report_reader',
+--     'MEMBER'
+-- ) AS is_report_reader;
 
--- ============================================================
--- 5. 애플리케이션 역할 설계 예시
--- ============================================================
+-- 8. 명시적 테이블 권한 목록 확인 예시
+-- SELECT
+--     grantee,
+--     table_schema,
+--     table_name,
+--     privilege_type
+-- FROM information_schema.role_table_grants
+-- WHERE table_schema = 'public'
+--   AND table_name IN (
+--       'security_students',
+--       'security_courses',
+--       'security_enrollments'
+--   )
+-- ORDER BY grantee, table_name, privilege_type;
 
--- CREATE ROLE app_enrollment_user
---     LOGIN
---     PASSWORD 'replace_with_a_different_secure_password';
+-- 9. 현재 객체와 미래 객체 권한 메모
+-- 현재 존재하는 테이블 GRANT와 ALTER DEFAULT PRIVILEGES는 적용 범위가 다르다.
+-- 기본 실습에서는 자동 실행하지 않는다.
 
--- GRANT CONNECT ON DATABASE ai_database_book TO app_enrollment_user;
--- GRANT USAGE ON SCHEMA public TO app_enrollment_user;
+-- ALTER DEFAULT PRIVILEGES
+-- FOR ROLE <object_owner_role>
+-- IN SCHEMA public
+-- GRANT SELECT ON TABLES
+-- TO role_report_reader;
+--
+-- ALTER DEFAULT PRIVILEGES
+-- FOR ROLE <object_owner_role>
+-- IN SCHEMA public
+-- GRANT USAGE, SELECT ON SEQUENCES
+-- TO role_enrollment_app;
 
--- 학생과 강의는 조회만 허용한다.
--- GRANT SELECT ON
---     security_students,
---     security_courses
--- TO app_enrollment_user;
+-- 10. SQL Injection 안전 처리 메모
+-- 위험한 방향: 사용자 입력을 SQL 문자열에 직접 결합한다.
+-- 안전한 방향: SQL 구조와 값을 분리하고 파라미터 바인딩을 사용한다.
+-- 동적 테이블명과 컬럼명은 파라미터 바인딩 대상이 아니므로 허용 목록으로 제한한다.
 
--- 수강신청에는 필요한 작업만 허용한다.
--- GRANT SELECT, INSERT, UPDATE
--- ON security_enrollments
--- TO app_enrollment_user;
+-- 허용 목록 개념 예시:
+-- allowed_sort_columns = ('name', 'joined_at')
+-- 사용자가 보낸 정렬 컬럼이 목록에 없으면 SQL을 만들지 않는다.
 
--- SERIAL 기본값으로 새 id를 만들려면 관련 시퀀스 권한도 필요할 수 있다.
--- GRANT USAGE, SELECT
--- ON SEQUENCE security_enrollments_id_seq
--- TO app_enrollment_user;
+-- 11. 민감 정보와 로그 점검 메모
+-- .env, .env.local, *.backup, *.dump, *.sql 백업 파일은 공개 저장소에 커밋하지 않는다.
+-- .env.example에는 실제 값 없이 변수 이름만 둔다.
+-- 노출된 비밀번호는 파일 삭제보다 자격 증명 회전을 우선한다.
 
--- DELETE와 관리자 권한은 기본적으로 부여하지 않는다.
+-- 12. 논리 백업 명령 예시: 터미널에서 실행
+-- pg_dump는 데이터베이스 단위 논리 백업 도구이며 결과 파일을 자동 암호화하지 않는다.
+-- 역할 같은 클러스터 전역 객체는 pg_dump에 포함되지 않으므로 별도 관리가 필요할 수 있다.
 
--- ============================================================
--- 6. 권한 회수 예시
--- ============================================================
-
--- REVOKE SELECT ON security_courses FROM readonly_user;
--- REVOKE UPDATE ON security_enrollments FROM app_enrollment_user;
-
--- 권한 회수 후 has_table_privilege로 실제 상태를 다시 확인한다.
-
--- ============================================================
--- 7. 현재 테이블 권한 목록 확인
--- ============================================================
-
-SELECT
-    grantee,
-    table_schema,
-    table_name,
-    privilege_type
-FROM information_schema.role_table_grants
-WHERE table_schema = 'public'
-  AND table_name LIKE 'security_%'
-ORDER BY grantee, table_name, privilege_type;
-
--- 참고:
--- 현재 테이블에 부여한 권한과 앞으로 생성될 테이블의 기본 권한은
--- 별도로 설계해야 할 수 있다.
-
--- ============================================================
--- 8. SQL Injection 점검 메모
--- ============================================================
-
--- 위험한 개념 패턴:
--- SQL 문자열 + 사용자 입력값 + SQL 문자열
-
--- 안전한 방향:
--- 애플리케이션의 DB 드라이버 또는 프레임워크가 제공하는
--- 파라미터 바인딩 기능을 사용한다.
-
--- placeholder 예시는 라이브러리에 따라 다르다.
--- WHERE email = ?
--- WHERE email = $1
--- WHERE email = :email
-
--- 아래 쿼리는 값이 고정된 SQL 확인 예시일 뿐,
--- 애플리케이션 입력 처리 코드의 파라미터 바인딩 예시는 아니다.
-SELECT id, name, email
-FROM security_students
-WHERE email = 'minji.security@example.com';
-
--- ============================================================
--- 9. 개인정보와 로그 점검
--- ============================================================
-
--- 실제 전화번호, 주민등록번호, 결제카드 정보, 실제 개인 이메일을
--- 테스트 데이터로 사용하지 않는다.
-
--- SELECT * 대신 필요한 열만 조회하는 방식을 검토한다.
-SELECT id, name, joined_at
-FROM security_students
-ORDER BY id;
-
--- 로그와 오류 메시지에 비밀번호, 전체 연결 URL, Access Token을 남기지 않는다.
-
--- ============================================================
--- 10. 백업 명령 예시: 터미널에서 실행
--- ============================================================
-
--- SQL 텍스트 형식 백업:
 -- pg_dump -U postgres -d ai_database_book -f ai_database_book_backup.sql
-
--- 사용자 정의 형식 백업:
 -- pg_dump -U postgres -d ai_database_book -Fc -f ai_database_book.backup
+-- pg_dumpall --globals-only -U postgres -f globals.sql
 
--- 백업 전 확인:
--- 1. 대상 DB 이름
--- 2. 접속 사용자
--- 3. 출력 파일 경로
--- 4. 기존 파일 덮어쓰기 가능성
--- 5. 백업 파일 접근 권한
--- 6. 실제 개인정보 포함 여부
+-- 13. 별도 DB 복구 검증 예시: 터미널에서 실행
+-- 원본 운영 DB가 아니라 별도 복구 확인 DB에서 검증한다.
+-- 오류 발생 시 즉시 중단하는 옵션을 사용한다.
 
--- ============================================================
--- 11. 복구 명령 예시: 별도 DB에서 터미널로 실행
--- ============================================================
-
--- SQL 텍스트 형식 복구:
 -- createdb -U postgres ai_database_book_restore
--- psql -U postgres -d ai_database_book_restore -f ai_database_book_backup.sql
-
--- 사용자 정의 형식 복구:
+-- psql -U postgres -d ai_database_book_restore -v ON_ERROR_STOP=1 -f ai_database_book_backup.sql
+--
 -- createdb -U postgres ai_database_book_restore
--- pg_restore -U postgres -d ai_database_book_restore ai_database_book.backup
+-- pg_restore -U postgres -d ai_database_book_restore --exit-on-error ai_database_book.backup
 
--- 운영 DB에 복구 테스트를 직접 수행하지 않는다.
+-- 14. 복구 후 검증 SQL 예시
+SELECT COUNT(*) AS restored_students_expected_3
+FROM public.security_students;
 
--- ============================================================
--- 12. 복구 후 검증 SQL
--- ============================================================
+SELECT COUNT(*) AS restored_courses_expected_3
+FROM public.security_courses;
 
-SELECT COUNT(*) AS restored_student_count
-FROM security_students;
+SELECT COUNT(*) AS restored_enrollments_expected_3
+FROM public.security_enrollments;
 
-SELECT COUNT(*) AS restored_course_count
-FROM security_courses;
-
-SELECT COUNT(*) AS restored_enrollment_count
-FROM security_enrollments;
-
-SELECT
-    s.name AS student_name,
-    c.title AS course_title,
-    e.status,
-    e.paid_amount,
-    e.enrolled_at
-FROM security_enrollments AS e
-JOIN security_students AS s
+SELECT COUNT(*) AS restored_join_rows_expected_3
+FROM public.security_enrollments AS e
+JOIN public.security_students AS s
     ON e.student_id = s.id
-JOIN security_courses AS c
-    ON e.course_id = c.id
-ORDER BY e.id;
+JOIN public.security_courses AS c
+    ON e.course_id = c.id;
 
--- 추가 검증 항목:
--- 1. PK, FK, UNIQUE, CHECK 제약조건 유지 여부
--- 2. 필요한 역할과 권한 복구 여부
--- 3. 필요한 확장 기능과 함수 존재 여부
--- 4. 애플리케이션 핵심 기능 연결 여부
--- 5. 복구에 걸린 시간과 수동 작업 기록
+-- 제약조건 확인
+SELECT
+    conname,
+    contype
+FROM pg_constraint
+WHERE conrelid IN (
+    'public.security_students'::regclass,
+    'public.security_courses'::regclass,
+    'public.security_enrollments'::regclass
+)
+ORDER BY conrelid::regclass::text, conname;
 
--- ============================================================
--- 13. AI 생성 명령 검토 체크리스트
--- ============================================================
+-- 시퀀스 존재 확인
+SELECT
+    sequence_schema,
+    sequence_name
+FROM information_schema.sequences
+WHERE sequence_schema = 'public'
+  AND sequence_name LIKE 'security_%_id_seq'
+ORDER BY sequence_name;
 
--- 1. 대상이 개발 DB인지 운영 DB인지 확인했는가?
--- 2. SUPERUSER 또는 ALL PRIVILEGES를 과도하게 부여하지 않는가?
--- 3. 예시 비밀번호나 실제 접속 정보가 포함되어 있지 않은가?
--- 4. DROP, DELETE, REVOKE, 덮어쓰기 범위를 확인했는가?
--- 5. 백업 형식과 복구 도구가 서로 맞는가?
--- 6. 백업 파일 저장 위치와 접근 권한이 안전한가?
--- 7. 별도 복구 확인용 DB를 사용하는가?
--- 8. 실행 전 되돌리는 방법과 영향 범위를 확인했는가?
+-- 15. AI 명령 검토 체크리스트
+-- 1. 대상 환경이 테스트 DB인가?
+-- 2. 실제 비밀번호나 접속 URL이 포함되어 있지 않은가?
+-- 3. GRANT 범위가 최소 권한인가?
+-- 4. REVOKE 후 유효 권한을 확인하는가?
+-- 5. 백업 파일 보호와 복구 검증 절차가 있는가?
+-- 6. 복구 명령에 오류 중단 옵션이 있는가?

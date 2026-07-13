@@ -1,15 +1,7 @@
 flowchart TB
-    A[Composite index] --> B[(course_id, status)]
-    A --> C[(status, course_id)]
-
-    D[Query condition] --> E[course_id = 5]
-    D --> F[status = active]
-
-    E --> B
-    F --> B
-
-    B --> G[Good match for course first search]
-    C --> H[Different access order]
-
-    G --> I[Column order matters]
-    H --> I
+    A[(course_id, status)] --> B[course_id 조건]
+    A --> C[course_id + status 조건]
+    A --> D[status 단독 조건]
+    B --> E[활용 가능성 있음]
+    C --> F[가장 잘 맞는 조건]
+    D --> G[선두 컬럼 없음: 보류]

@@ -1,10 +1,10 @@
-flowchart TD
-    A[AI index suggestion] --> B[Check query pattern]
-    B --> C[Check WHERE condition]
-    C --> D[Check JOIN condition]
-    D --> E[Check ORDER BY]
-    E --> F[Check data size]
-    F --> G[Check selectivity]
-    G --> H[Check write cost]
-    H --> I[Run EXPLAIN]
-    I --> J[Apply or hold]
+flowchart LR
+    A[AI 추천 인덱스] --> B[기존 인덱스 확인]
+    B --> C{중복인가?}
+    C -- 예 --> D[제거]
+    C -- 아니요 --> E[쿼리 패턴 확인]
+    E --> F[EXPLAIN ANALYZE 비교]
+    F --> G{근거 충분?}
+    G -- 예 --> H[적용]
+    G -- 아니요 --> I[보류]
+    I --> E

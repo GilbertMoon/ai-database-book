@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.r{fill:#fff5f5;stroke:#e53e3e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">최소 권한 원칙</text><rect x="440" y="80" width="320" height="65" class="b m"/><text x="600" y="113" class="l">사용자의 작업 확인</text><rect x="100" y="250" width="260" height="70" class="b y"/><text x="230" y="278" class="l">리포트 조회</text><text x="230" y="302" class="s">SELECT만 필요</text><rect x="470" y="250" width="260" height="70" class="b y"/><text x="600" y="278" class="l">수강신청 등록</text><text x="600" y="302" class="s">SELECT + INSERT</text><rect x="840" y="250" width="260" height="70" class="b r"/><text x="970" y="278" class="l">DB 관리</text><text x="970" y="302" class="s">관리자 권한 제한</text><rect x="280" y="470" width="300" height="75" class="b g"/><text x="430" y="500" class="l">필요한 권한만 부여</text><text x="430" y="524" class="s">불필요한 쓰기 권한 제외</text><rect x="660" y="470" width="300" height="75" class="b m"/><text x="810" y="500" class="l">위험 감소</text><text x="810" y="524" class="s">실수와 피해 범위 축소</text><line x1="520" y1="145" x2="230" y2="250" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="145" x2="600" y2="250" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="145" x2="970" y2="250" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="230" y1="320" x2="390" y2="470" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="320" x2="470" y2="470" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="970" y1="320" x2="850" y2="470" stroke="#2b6cb0" stroke-width="2" marker-end="url(#a)"/><line x1="580" y1="508" x2="660" y2="508" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+<title id="title">최소 권한 설계 절차</title>
+<desc id="desc">업무 작업에서 필요한 객체와 권한만 골라 부여하고 검증한다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#fff;stroke:#7fb3f5;stroke-width:2;rx:14} .safe{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .warn{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .risk{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
+</style></defs>
+<rect width="1200" height="540" fill="#ffffff"/>
+<text x="600" y="48" class="title">최소 권한 설계 절차</text>
+<text x="600" y="76" class="sub">업무 작업에서 필요한 객체와 권한만 골라 부여하고 검증한다</text>
+<rect x="70" y="160" width="170" height="130" class="box"/>
+<text x="155.0" y="192" class="head">작업 정의</text>
+<text x="155.0" y="218" class="body">보고 조회</text>
+<text x="155.0" y="240" class="body">수강신청 입력</text>
+<rect x="290" y="160" width="170" height="130" class="box"/>
+<text x="375.0" y="192" class="head">객체 확인</text>
+<text x="375.0" y="218" class="body">DB · 스키마</text>
+<text x="375.0" y="240" class="body">테이블 · 시퀀스</text>
+<rect x="510" y="160" width="170" height="130" class="safe"/>
+<text x="595.0" y="192" class="head">권한 선택</text>
+<text x="595.0" y="218" class="body">필요 권한만</text>
+<rect x="730" y="160" width="170" height="130" class="safe"/>
+<text x="815.0" y="192" class="head">역할 부여</text>
+<text x="815.0" y="218" class="code">GRANT</text>
+<rect x="950" y="160" width="170" height="130" class="safe"/>
+<text x="1035.0" y="192" class="head">검증 기록</text>
+<text x="1035.0" y="218" class="body">유효 권한</text>
+<path d="M240 225 L290 225" class="arrow"/>
+<path d="M460 225 L510 225" class="arrow"/>
+<path d="M680 225 L730 225" class="arrow"/>
+<path d="M900 225 L950 225" class="arrow"/>
+<polygon points="600,330.0 725.0,390 600,450.0 475.0,390" class="warn"/>
+<text x="600" y="384" class="head">과도한 권한?</text>
+<text x="600" y="408" class="small">예: 다시 줄임</text>
+<path d="M1035 290 L725 390" class="arrow"/>
+<path d="M475 390 L365 290" class="dash"/>
+</svg>

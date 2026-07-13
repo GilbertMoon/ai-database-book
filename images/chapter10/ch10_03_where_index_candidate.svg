@@ -1,1 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a5568"/></marker><style>text{font-family:Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif;fill:#1a202c}.t{font-size:24px;font-weight:700}.b{fill:#f7fafc;stroke:#4a5568;stroke-width:2;rx:12}.m{fill:#ebf8ff;stroke:#2b6cb0}.g{fill:#f0fff4;stroke:#38a169}.y{fill:#fffaf0;stroke:#d69e2e}.l{font-size:15px;text-anchor:middle;dominant-baseline:middle}.s{font-size:13px;text-anchor:middle;dominant-baseline:middle}</style></defs><rect width="100%" height="100%" fill="white"/><text x="600" y="42" text-anchor="middle" class="t">WHERE 조건과 인덱스 후보</text><rect x="420" y="80" width="360" height="65" class="b m"/><text x="600" y="113" class="l">자주 실행되는 SELECT</text><rect x="420" y="220" width="360" height="65" class="b y"/><text x="600" y="253" class="l">WHERE 조건 확인</text><rect x="100" y="380" width="260" height="65" class="b"/><text x="230" y="413" class="l">students.email</text><rect x="470" y="380" width="260" height="65" class="b"/><text x="600" y="413" class="l">courses.title</text><rect x="840" y="380" width="260" height="65" class="b"/><text x="970" y="413" class="l">enrollments.student_id</text><rect x="420" y="540" width="360" height="65" class="b g"/><text x="600" y="573" class="l">인덱스 후보 검토</text><rect x="420" y="645" width="360" height="50" class="b m"/><text x="600" y="670" class="l">EXPLAIN으로 비교</text><line x1="600" y1="145" x2="600" y2="220" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="520" y1="285" x2="230" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="285" x2="600" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="680" y1="285" x2="970" y2="380" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/><line x1="230" y1="445" x2="510" y2="540" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="445" x2="600" y2="540" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="970" y1="445" x2="690" y2="540" stroke="#38a169" stroke-width="2" marker-end="url(#a)"/><line x1="600" y1="605" x2="600" y2="645" stroke="#4a5568" stroke-width="2" marker-end="url(#a)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">WHERE 조건에서 인덱스 후보 판단하기</title>
+<desc id="desc">기존 인덱스, 빈도, 선택도, 쓰기 비용을 함께 확인한다</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><style>
+text{font-family:"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;fill:#0f172a} .title{font-size:28px;font-weight:700;text-anchor:middle} .sub{font-size:14px;fill:#475569;text-anchor:middle} .box{fill:#ffffff;stroke:#7fb3f5;stroke-width:2;rx:14} .scan{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:14} .idx{fill:#ecfdf5;stroke:#22c55e;stroke-width:2;rx:14} .cand{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:14} .warn{fill:#fdf2f8;stroke:#db2777;stroke-width:2;rx:14} .ai{fill:#f5f3ff;stroke:#8b5cf6;stroke-width:2;rx:14} .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:12} .head{font-size:18px;font-weight:700;text-anchor:middle} .body{font-size:13.5px;text-anchor:middle;fill:#334155} .small{font-size:12.5px;text-anchor:middle;fill:#334155} .code{font-family:Consolas, D2Coding, "Courier New", monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8} .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow)} .dash{stroke:#db2777;stroke-width:2;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)} .tag{font-size:12px;font-weight:700;fill:#2563eb;text-anchor:middle}
+</style></defs>
+<rect width="1200" height="560" fill="#ffffff"/>
+<text x="600" y="48" class="title">WHERE 조건에서 인덱스 후보 판단하기</text>
+<text x="600" y="76" class="sub">기존 인덱스, 빈도, 선택도, 쓰기 비용을 함께 확인한다</text>
+<rect x="70" y="170" width="190" height="125" class="cand"/>
+<text x="165.0" y="202" class="head">WHERE 컬럼</text>
+<text x="165.0" y="228" class="body">검색 조건</text>
+<polygon points="420,167.0 530.0,232 420,297.0 310.0,232" class="cand"/>
+<text x="420" y="226" class="head">자동 인덱스?</text>
+<text x="420" y="250" class="small">PK · UNIQUE</text>
+<rect x="660" y="135" width="190" height="125" class="warn"/>
+<text x="755.0" y="167" class="head">중복 생성 안 함</text>
+<text x="755.0" y="193" class="body">students.email</text>
+<polygon points="660,275.0 775.0,340 660,405.0 545.0,340" class="cand"/>
+<text x="660" y="334" class="head">후보 조건?</text>
+<text x="660" y="358" class="small">빈도 · 선택도</text>
+<rect x="925" y="255" width="190" height="125" class="idx"/>
+<text x="1020.0" y="287" class="head">실행 계획 비교</text>
+<text x="1020.0" y="313" class="body">적용 · 보류</text>
+<path d="M260 232 L310 232" class="arrow"/>
+<path d="M530 232 L660 198" class="arrow"/>
+<text x="595" y="202" class="tag">예</text>
+<path d="M420 297 L565 340" class="arrow"/>
+<text x="480" y="330" class="tag">아니요</text>
+<path d="M775 340 L925 318" class="arrow"/>
+<text x="850" y="300" class="tag">예</text>
+<rect x="350" y="455" width="500" height="50" class="note"/>
+<text x="600" y="486" class="head">모든 WHERE 컬럼이 인덱스 대상은 아니다</text>
+</svg>

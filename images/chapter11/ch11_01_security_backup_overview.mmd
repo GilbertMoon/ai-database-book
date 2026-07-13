@@ -1,19 +1,7 @@
-flowchart TB
-    A[Database] --> B[Security]
-    A --> C[Backup]
-
-    B --> B1[Control access]
-    B --> B2[Control permissions]
-    B --> B3[Protect sensitive data]
-
-    C --> C1[Create backup file]
-    C --> C2[Test restore]
-    C --> C3[Recover after failure]
-
-    B1 --> D[Protect data]
-    B2 --> D
-    B3 --> D
-
-    C1 --> E[Recover data]
-    C2 --> E
-    C3 --> E
+flowchart LR
+    A[보호 대상 파악] --> B[인증]
+    B --> C[권한 부여]
+    C --> D[감사와 로그]
+    D --> E[백업]
+    E --> F[복구 검증]
+    F --> G[운영 기준 보완]
