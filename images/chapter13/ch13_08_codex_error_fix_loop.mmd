@@ -1,15 +1,10 @@
 flowchart TB
-    A[SQL file draft] --> B[Run in practice DB]
-    B --> C{Error?}
-    C -->|No| D[Verify results]
-    D --> E[Reviewed SQL]
-
-    C -->|Yes| F[Copy error message]
-    F --> G[Ask Codex to fix]
-    G --> H[Codex modifies SQL]
-    H --> I[Human review]
-    I --> B
-
-    G --> G1[Keep requirements]
-    G --> G2[Explain reason in comments]
-    G --> G3[Do not change unrelated logic]
+    A[오류 재현과 기대 결과] --> B[비밀정보를 제거한 오류 전달]
+    B --> C[수정 파일과 금지 범위 지정]
+    C --> D[Codex 최소 변경]
+    D --> E[사람이 파일별 diff 검토]
+    E --> F[같은 조건으로 재실행]
+    F --> G{행 수·메타데이터·업무 결과 일치?}
+    G -- 예 --> H[이유·증거·남은 가정 기록<br/>사람 승인]
+    G -- 아니요 --> I[원인과 프롬프트 수정]
+    I --> D
