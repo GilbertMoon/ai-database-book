@@ -41,8 +41,16 @@
   <text x="600" y="72" text-anchor="middle" class="ko sub">업무상 독립적인 여러 값을 쉼표 목록이나 반복 컬럼에 넣지 않습니다.</text>
   <rect x="70" y="125" width="430" height="230" class="box problem"/>
   <text x="285" y="160" text-anchor="middle" class="ko h">1NF 적용 전</text>
-  <text x="105" y="210" class="mono b">member_id</text><text x="250" y="210" class="mono b">member_name</text><text x="390" y="210" class="mono b">borrowed_books</text>
-  <text x="135" y="265" class="mono b">1</text><text x="275" y="265" class="ko b">김민지</text><text x="390" y="265" text-anchor="middle" class="ko b hot">데이터베이스 입문, SQL 기초</text>
+
+  <!-- 적용 전 표: 각 열의 중심을 분리해 긴 도서명이 회원명과 겹치지 않도록 배치 -->
+  <text x="135" y="210" text-anchor="middle" class="mono b">member_id</text>
+  <text x="270" y="210" text-anchor="middle" class="mono b">member_name</text>
+  <text x="405" y="210" text-anchor="middle" class="mono b">borrowed_books</text>
+
+  <text x="135" y="265" text-anchor="middle" class="mono b">1</text>
+  <text x="270" y="265" text-anchor="middle" class="ko b">김민지</text>
+  <text x="405" y="265" text-anchor="middle" class="ko s hot">데이터베이스 입문, SQL 기초</text>
+
   <text x="285" y="325" text-anchor="middle" class="ko b">한 셀에 독립적인 책 두 권 저장</text>
   <line x1="500" y1="240" x2="690" y2="240" class="line" marker-end="url(#arrow)"/>
   <text x="595" y="220" text-anchor="middle" class="ko b">한 대여당 한 행</text>
