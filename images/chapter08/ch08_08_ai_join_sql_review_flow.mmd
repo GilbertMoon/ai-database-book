@@ -5,12 +5,12 @@ flowchart TB
     T[4. 기준 행과 JOIN 종류 확인]
     G[5. GROUP BY와 집계 대상 확인]
     C[6. COUNT · SUM · NULL · 중복 계산 확인]
-    R[7. PostgreSQL에서 실행]
-    D{원본 건수와 수동 계산에 맞는가?}
-    F[SQL 또는 요구사항을 수정하고\n다시 실행]
+    R[7. PostgreSQL에서 실행하고 수동 검산]
+    D{원본 건수와 합계에 맞는가?}
+    F[SQL 또는 요구사항 수정]
     O[검토된 SQL과 근거 기록]
 
     Q --> A --> J --> T --> G --> C --> R --> D
-    D -->|아니요| F
+    D -- 아니요 --> F
     F --> A
-    D -->|예| O
+    D -- 예 --> O
