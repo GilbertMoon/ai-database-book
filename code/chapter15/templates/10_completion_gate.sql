@@ -7,7 +7,6 @@ SELECT
     current_database() AS current_database_name,
     current_schema() AS current_schema_name;
 
--- 1. 기준 행 수
 WITH row_counts AS (
     SELECT
         (SELECT COUNT(*) FROM tutor_project.students) AS students_count,
@@ -16,24 +15,8 @@ WITH row_counts AS (
         (SELECT COUNT(*) FROM tutor_project.answers) AS answers_count,
         (SELECT COUNT(*) FROM tutor_project.learning_materials) AS materials_count,
         (SELECT COUNT(*) FROM tutor_project.question_materials) AS links_count
-)
-SELECT
-    students_count,
-    tutors_count,
-    questions_count,
-    answers_count,
-    materials_count,
-    links_count,
-    students_count = 4 AS students_ok,
-    tutors_count = 3 AS tutors_ok,
-    questions_count = 5 AS questions_ok,
-    answers_count = 5 AS answers_ok,
-    materials_count = 6 AS materials_ok,
-    links_count = 7 AS links_ok
-FROM row_counts;
-
--- 2. 실제 구조 수치
-WITH metadata_counts AS (
+),
+metadata_counts AS (
     SELECT
         (
             SELECT COUNT(*)
@@ -71,45 +54,42 @@ WITH metadata_counts AS (
                   'idx_tutor_project_qm_material'
               )
         ) AS business_index_count
-)
-SELECT
-    table_count,
-    foreign_key_count,
-    identity_pk_count,
-    cascade_fk_count,
-    business_index_count,
-    table_count = 6 AS tables_ok,
-    foreign_key_count = 5 AS foreign_keys_ok,
-    identity_pk_count = 5 AS identity_pks_ok,
-    cascade_fk_count = 0 AS no_cascade_ok,
-    business_index_count = 3 AS business_indexes_ok
-FROM metadata_counts;
-
--- 3. 경계 시나리오
-WITH boundary_counts AS (
+),
+boundary_counts AS (
     SELECT
         (
             SELECT COUNT(*)
-            FROM tutor_project.students AS s
-            LEFT JOIN tutor_project.questions AS q
-                ON q.student_id = s.id
-            WHERE q.id IS NULL
+            FROM (
+                SELECT s.id
+                FROM tutor_project.students AS s
+                LEFT JOIN tutor_project.questions AS q
+                    ON q.student_id = s.id
+                GROUP BY s.id
+                HAVING COUNT(q.id) = 0
+            ) AS no_question_students
         ) AS students_without_questions,
         (
             SELECT COUNT(*)
-            FROM tutor_project.learning_materials AS m
-            LEFT JOIN tutor_project.question_materials AS qm
-                ON qm.material_id = m.id
-            WHERE qm.material_id IS NULL
+            FROM (
+                SELECT m.id
+                FROM tutor_project.learning_materials AS m
+                LEFT JOIN tutor_project.question_materials AS qm
+                    ON qm.material_id = m.id
+                GROUP BY m.id
+                HAVING COUNT(qm.question_id) = 0
+            ) AS unlinked_materials
         ) AS unlinked_materials,
         (
             SELECT COUNT(*)
-            FROM tutor_project.questions AS q
-            LEFT JOIN tutor_project.answers AS a
-                ON a.question_id = q.id
-            WHERE q.status = 'open'
-            GROUP BY q.id
-            HAVING COUNT(a.id) = 0
+            FROM (
+                SELECT q.id
+                FROM tutor_project.questions AS q
+                LEFT JOIN tutor_project.answers AS a
+                    ON a.question_id = q.id
+                WHERE q.status = 'open'
+                GROUP BY q.id
+                HAVING COUNT(a.id) = 0
+            ) AS unanswered_open_questions
         ) AS unanswered_open_questions,
         (
             SELECT COUNT(*)
@@ -121,20 +101,9 @@ WITH boundary_counts AS (
                 GROUP BY q.id
                 HAVING COUNT(*) = 2
             ) AS two_answer_questions
-)
-SELECT
-    students_without_questions,
-    unlinked_materials,
-    unanswered_open_questions,
-    two_answer_questions,
-    students_without_questions = 1 AS student_boundary_ok,
-    unlinked_materials = 1 AS material_boundary_ok,
-    unanswered_open_questions = 1 AS unanswered_boundary_ok,
-    two_answer_questions = 1 AS multi_answer_boundary_ok
-FROM boundary_counts;
-
--- 4. 업무 정합성 이상 수치
-WITH anomaly_counts AS (
+        ) AS two_answer_questions
+),
+anomaly_counts AS (
     SELECT
         (
             SELECT COUNT(*)
@@ -163,12 +132,15 @@ WITH anomaly_counts AS (
         ) AS orphan_material_links,
         (
             SELECT COUNT(*)
-            FROM tutor_project.questions AS q
-            LEFT JOIN tutor_project.answers AS a
-                ON a.question_id = q.id
-            WHERE q.status = 'answered'
-            GROUP BY q.id
-            HAVING COUNT(a.id) = 0
+            FROM (
+                SELECT q.id
+                FROM tutor_project.questions AS q
+                LEFT JOIN tutor_project.answers AS a
+                    ON a.question_id = q.id
+                WHERE q.status = 'answered'
+                GROUP BY q.id
+                HAVING COUNT(a.id) = 0
+            ) AS answered_without_answer
         ) AS answered_without_answer,
         (
             SELECT COUNT(*)
@@ -178,22 +150,9 @@ WITH anomaly_counts AS (
                 GROUP BY question_id, display_order
                 HAVING COUNT(*) > 1
             ) AS duplicate_orders
-)
-SELECT
-    orphan_questions,
-    orphan_answers,
-    orphan_material_links,
-    answered_without_answer,
-    duplicate_orders,
-    orphan_questions = 0
-        AND orphan_answers = 0
-        AND orphan_material_links = 0
-        AND answered_without_answer = 0
-        AND duplicate_orders = 0 AS business_consistency_ok
-FROM anomaly_counts;
-
--- 5. 비밀·개인정보 형태 확인
-WITH security_checks AS (
+        ) AS duplicate_orders
+),
+security_counts AS (
     SELECT
         (
             SELECT COUNT(*)
@@ -213,65 +172,56 @@ WITH security_checks AS (
         ) AS non_test_email_count
 )
 SELECT
-    sensitive_column_count,
-    non_test_email_count,
-    sensitive_column_count = 0 AS sensitive_columns_ok,
-    non_test_email_count = 0 AS test_data_privacy_ok
-FROM security_checks;
-
--- 6. 필수 완료 상태 단일 판정
-WITH final_checks AS (
-    SELECT
-        (SELECT COUNT(*) FROM tutor_project.students) = 4 AS students_ok,
-        (SELECT COUNT(*) FROM tutor_project.tutors) = 3 AS tutors_ok,
-        (SELECT COUNT(*) FROM tutor_project.questions) = 5 AS questions_ok,
-        (SELECT COUNT(*) FROM tutor_project.answers) = 5 AS answers_ok,
-        (SELECT COUNT(*) FROM tutor_project.learning_materials) = 6 AS materials_ok,
-        (SELECT COUNT(*) FROM tutor_project.question_materials) = 7 AS links_ok,
-        (
-            SELECT COUNT(*) = 5
-            FROM information_schema.table_constraints
-            WHERE constraint_schema = 'tutor_project'
-              AND constraint_type = 'FOREIGN KEY'
-        ) AS foreign_keys_ok,
-        (
-            SELECT COUNT(*) = 0
-            FROM pg_constraint
-            WHERE connamespace = 'tutor_project'::regnamespace
-              AND contype = 'f'
-              AND pg_get_constraintdef(oid) ILIKE '%ON DELETE CASCADE%'
-        ) AS no_cascade_ok,
-        (
-            SELECT COUNT(*) = 3
-            FROM pg_indexes
-            WHERE schemaname = 'tutor_project'
-              AND indexname IN (
-                  'idx_tutor_project_questions_student_status_created',
-                  'idx_tutor_project_answers_question_created',
-                  'idx_tutor_project_qm_material'
-              )
-        ) AS indexes_ok,
-        NOT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_schema = 'tutor_project'
-              AND lower(column_name)
-                  SIMILAR TO '%(password|secret|token|card|resident|ssn)%'
-        ) AS no_sensitive_columns_ok
-)
-SELECT
-    *,
-    students_ok
-    AND tutors_ok
-    AND questions_ok
-    AND answers_ok
-    AND materials_ok
-    AND links_ok
-    AND foreign_keys_ok
-    AND no_cascade_ok
-    AND indexes_ok
-    AND no_sensitive_columns_ok AS required_completion_gate_passed
-FROM final_checks;
+    r.students_count,
+    r.tutors_count,
+    r.questions_count,
+    r.answers_count,
+    r.materials_count,
+    r.links_count,
+    m.table_count,
+    m.foreign_key_count,
+    m.identity_pk_count,
+    m.cascade_fk_count,
+    m.business_index_count,
+    b.students_without_questions,
+    b.unlinked_materials,
+    b.unanswered_open_questions,
+    b.two_answer_questions,
+    a.orphan_questions,
+    a.orphan_answers,
+    a.orphan_material_links,
+    a.answered_without_answer,
+    a.duplicate_orders,
+    s.sensitive_column_count,
+    s.non_test_email_count,
+    r.students_count = 4
+        AND r.tutors_count = 3
+        AND r.questions_count = 5
+        AND r.answers_count = 5
+        AND r.materials_count = 6
+        AND r.links_count = 7
+        AND m.table_count = 6
+        AND m.foreign_key_count = 5
+        AND m.identity_pk_count = 5
+        AND m.cascade_fk_count = 0
+        AND m.business_index_count = 3
+        AND b.students_without_questions = 1
+        AND b.unlinked_materials = 1
+        AND b.unanswered_open_questions = 1
+        AND b.two_answer_questions = 1
+        AND a.orphan_questions = 0
+        AND a.orphan_answers = 0
+        AND a.orphan_material_links = 0
+        AND a.answered_without_answer = 0
+        AND a.duplicate_orders = 0
+        AND s.sensitive_column_count = 0
+        AND s.non_test_email_count = 0
+        AS required_completion_gate_passed
+FROM row_counts AS r
+CROSS JOIN metadata_counts AS m
+CROSS JOIN boundary_counts AS b
+CROSS JOIN anomaly_counts AS a
+CROSS JOIN security_counts AS s;
 
 -- required_completion_gate_passed가 true여야 합니다.
 -- 이 결과는 실제 백업·복원 시험, Role 권한 시험, API·RAG·배포 완료를 의미하지 않습니다.
