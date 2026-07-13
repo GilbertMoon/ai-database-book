@@ -14,6 +14,7 @@
 → 실행 결과
 → 운영 계획
 → AI 변경 검토
+→ 완료 게이트
 ```
 
 ---
@@ -28,6 +29,7 @@
 정상·경계·오류·트랜잭션 검증
 인덱스·운영·백업·복구 검토
 선택적 RAG 원문 뷰
+최종 완료 상태 판정
 ```
 
 제외 범위:
@@ -77,9 +79,10 @@ tutor_project.question_materials
 07_performance_checks.sql
 08_operations_checks.sql
 09_optional_rag_extension.sql
+10_completion_gate.sql
 ```
 
-필수 실행은 01~08입니다. 09는 실제 RAG 요구사항이 있을 때만 실행합니다.
+필수 실행은 `01~08`과 `10`입니다. `09`는 실제 RAG 요구사항이 있을 때만 실행합니다.
 
 기존 `schema.sql`, `seed.sql`, `queries.sql`은 안전한 호환 안내 파일입니다.
 
@@ -96,6 +99,7 @@ psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 05_transaction_checks.sql
 psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 06_negative_tests.sql
 psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 07_performance_checks.sql
 psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 08_operations_checks.sql
+psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 10_completion_gate.sql
 ```
 
 운영 DB가 아닌 별도 개발·테스트 환경에서 실행합니다.
@@ -117,8 +121,13 @@ psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 08_operations_checks.sql
 | CASCADE FK | 0 |
 | 질문 없는 학생 | 1 |
 | 연결되지 않은 자료 | 1 |
+| 답변 없는 open 질문 | 1 |
+| 답변 2개 질문 | 1 |
 | 자동 반례 | 14 |
 | unexpected | 0 |
+| `required_completion_gate_passed` | true |
+
+완료 게이트는 행 수, 실제 메타데이터, 경계 사례, 업무 정합성, 테스트 데이터 안전성을 한 번에 확인합니다.
 
 ---
 
@@ -134,7 +143,27 @@ psql -U <user> -d <database> -v ON_ERROR_STOP=1 -f 08_operations_checks.sql
 
 ---
 
-## 8. 안전 주의
+## 8. 완료 판정 범위
+
+`required_completion_gate_passed = true`는 필수 데이터베이스 구조와 샘플 검증이 기대값과 일치한다는 뜻입니다.
+
+다음 항목은 별도 실행 증거가 필요합니다.
+
+```text
+Role별 허용·차단 시험
+실제 백업 파일 생성
+별도 DB 복원
+RPO·RTO 측정
+웹·API 테스트
+RAG 검색·답변 평가
+배포·관측성·장애 대응
+```
+
+미실행 항목은 통과로 기록하지 않습니다.
+
+---
+
+## 9. 안전 주의
 
 ```text
 - 생성 파일은 자동 DROP을 실행하지 않습니다.
