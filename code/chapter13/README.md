@@ -1,97 +1,199 @@
 # Chapter 13 실습 코드
 
-## ChatGPT와 Codex로 DB 설계 검증하기
+## AI와 실행 증거로 데이터베이스 설계 검증하기
 
-이 폴더는 AI가 만든 데이터베이스 설계 초안과 사람이 요구사항을 기준으로 보완한 PostgreSQL 설계를 비교하는 실습 파일을 관리합니다.
+이 폴더는 AI가 만든 데이터베이스 설계와 SQL을 `ai_review_lab`에서 격리하고, 요구사항·메타데이터·정상·반례·업무 정합성·diff를 근거로 검토하는 파일을 관리합니다.
 
-## 파일
+---
+
+## 보호 범위
+
+```text
+course_project: 변경하지 않음
+transaction_lab: 변경하지 않음
+performance_lab: 변경하지 않음
+security_lab: 변경하지 않음
+nosql_lab: 변경하지 않음
+ai_review_lab: Chapter 13 실습 대상
+```
+
+---
+
+## 파일 목록
 
 | 파일 | 설명 |
 | --- | --- |
-| `ai_db_design_review_practice.sql` | 나쁜 설계, 좋은 설계, 샘플 데이터, 오류 테스트, 메타데이터와 업무 정합성 검증 |
+| `01_ai_review_lab_schema.sql` | 전용 스키마와 역할이 섞인 나쁜 설계 테이블 생성 |
+| `02_bad_design_seed.sql` | 반복·약한 타입·FK 부재·평문 민감정보 형태의 가상 데이터 입력 |
+| `03_good_design_schema.sql` | IDENTITY·명시적 PK·FK·UNIQUE·CHECK 기반 좋은 설계 |
+| `04_good_design_seed.sql` | 명시적 ID 정상 데이터 입력 |
+| `05_metadata_validation.sql` | 실제 테이블·컬럼·제약조건·FK·인덱스 검증 |
+| `06_business_validation.sql` | 행 수·정상 JOIN·업무 이상 0행 검증 |
+| `07_negative_tests.sql` | 예외 블록 기반 17개 안전한 반례 테스트 |
+| `AI_REVIEW_REPORT_TEMPLATE.md` | 요구사항·diff·증거·승인 상태 기록 |
+| `PROMPT_TEMPLATES.md` | ERD·DDL·Codex 수정·마이그레이션 검토 프롬프트 |
+| `reset_ai_review_lab.sql` | ai_review_lab만 초기화 |
+| `ai_db_design_review_practice.sql` | 기존 링크 호환용 안내·상태 확인 |
 
-## 실행 전 주의
+---
+
+## 실행 순서
 
 ```text
-- 파일은 ai_bad_ 및 ai_good_ 테이블을 삭제하고 다시 생성합니다.
-- 개인 실습용 ai_database_book에서만 실행합니다.
-- current_database, current_user, current_schema를 먼저 확인합니다.
-- 실제 개인정보, 카드번호, 비밀번호, API 키와 접속 URL을 사용하지 않습니다.
-- AI가 만든 SQL을 자동 실행하지 않고 먼저 읽고 검토합니다.
+01_ai_review_lab_schema.sql
+→ 02_bad_design_seed.sql
+→ 03_good_design_schema.sql
+→ 04_good_design_seed.sql
+→ 05_metadata_validation.sql
+→ 06_business_validation.sql
+→ 07_negative_tests.sql
+→ AI_REVIEW_REPORT_TEMPLATE.md 기록
 ```
 
-## Chapter 13 좋은 설계의 기준
+처음부터 다시 시작할 때만 `reset_ai_review_lab.sql`을 사용합니다.
+
+---
+
+## 확인된 요구사항
 
 ```text
-- 좋은 설계 테이블: students, instructors, courses, enrollments, payments
-- 학생·강사 이메일: UNIQUE
-- 강의 식별자: course_code UNIQUE
-- 학생과 강의 N:M: enrollments로 해소
-- 재신청 정책 미확정: UNIQUE(student_id, course_id) 미적용
-- 신청 시점 금액: enrollments.agreed_amount
-- 결제금액: payments.amount
-- 결제 참조: payments.enrollment_id → enrollments.id
-- 실제 카드번호: 저장하지 않음
+R1 학생 email UNIQUE
+R2 강사 email UNIQUE
+R3 강의는 강사 한 명을 FK로 참조
+R4 학생과 강의 N:M을 enrollments로 해소
+R5 수강 상태 CHECK
+R6 가격·금액 0 이상
+R7 결제는 수강신청을 FK로 참조
+R8 실제 카드번호를 저장하지 않음
 ```
 
-이 장은 한 수강신청에 현재 결제 상태 한 건만 저장한다고 가정하므로 `payments.enrollment_id`에 `UNIQUE`를 사용합니다. 결제 시도, 실패, 재결제와 환불 이력을 모두 저장하려면 이 제약을 제거하고 결제 이벤트 모델로 확장해야 합니다.
+미확정 정책:
 
-`courses.price`는 현재 기본 가격이고 `enrollments.agreed_amount`는 신청 시점에 확정한 금액입니다. 두 값의 차이는 자동 오류가 아닙니다. 이 단순 샘플에서는 `agreed_amount`와 `payments.amount`가 일치하는지 검증합니다.
+```text
+취소 후 재신청
+결제 시도 이력
+삭제 정책
+개인정보 보관 기간
+상태 전이 규칙
+```
 
-## 권장 실행 흐름
+미확정 정책은 UNIQUE·CASCADE·NOT NULL로 임의 고정하지 않습니다.
 
-1. 현재 DB·사용자·스키마를 확인합니다.
-2. SQL 파일의 DROP 대상을 확인합니다.
-3. 나쁜 설계와 명확한 가상 데이터를 확인합니다.
-4. 좋은 설계의 요구사항과 단순화 가정을 확인합니다.
-5. 기본 SQL을 처음부터 실행합니다.
-6. 예상 행 수와 정상 JOIN 4행을 확인합니다.
-7. `information_schema`와 `pg_indexes` 결과를 확인합니다.
-8. 오류 SQL은 하나씩 선택적으로 실행합니다.
-9. 업무 정합성 이상 조회가 0행인지 확인합니다.
-10. Codex 수정이 있다면 diff를 검토하고 다시 실행합니다.
+---
 
-## 예상 결과
+## 기준 데이터
 
-| 항목 | 예상값 |
+| 항목 | 기대값 |
 | --- | ---: |
-| `ai_bad_enrollments` | 3 |
-| `ai_good_students` | 3 |
-| `ai_good_instructors` | 2 |
-| `ai_good_courses` | 3 |
-| `ai_good_enrollments` | 4 |
-| `ai_good_payments` | 4 |
-| 정상 JOIN | 4행 |
-| FK 관계 | 4개 |
+| `ai_review_lab.bad_enrollments` | 3 |
+| `ai_review_lab.students` | 3 |
+| `ai_review_lab.instructors` | 2 |
+| `ai_review_lab.courses` | 3 |
+| `ai_review_lab.enrollments` | 4 |
+| `ai_review_lab.payments` | 4 |
+| 정상 JOIN | 4 |
+| 외래키 | 4 |
 
-## 오류 테스트
-
-오류 SQL은 기본적으로 주석 상태입니다. 한꺼번에 실행하지 말고 하나씩 확인합니다.
-
-- 중복 학생·강사 이메일
-- 존재하지 않는 학생·강의 FK
-- 잘못된 수강·결제 상태
-- 음수 가격·신청 금액·결제금액
-- 결제완료인데 `paid_at`이 NULL
-- 중복 `payment_reference`
-
-명시적 트랜잭션에서 오류가 발생해 세션이 aborted 상태가 되면 `ROLLBACK`한 뒤 정상 SELECT를 다시 실행합니다.
-
-## 메타데이터 도구
-
-- `information_schema`: 테이블, 컬럼, 제약조건과 CHECK 정의 확인
-- `pg_indexes`: PostgreSQL 인덱스 정의 확인
-
-테이블 생성 성공만으로 설계가 올바르다고 판단하지 않습니다. 예상 설계와 실제 메타데이터, 행 수, 정상 JOIN, 오류 테스트와 업무 정합성 결과를 함께 확인합니다.
-
-## Codex 변경 후 확인
+명시적 ID:
 
 ```text
-- 요청한 파일만 바뀌었는가?
-- 요구사항 없는 UNIQUE·CASCADE가 추가되지 않았는가?
-- 실제 비밀정보가 포함되지 않았는가?
-- 예상 행 수, JOIN 4행과 FK 4개가 유지되는가?
-- 관련 없는 포맷 변경이나 다른 Chapter 수정이 없는가?
+students 101~103
+instructors 201~202
+courses 301~303
+enrollments 1001~1004
+payments 9001~9004
 ```
 
-ChatGPT와 Codex의 기능과 지원 환경은 바뀔 수 있으므로 제품 기능은 작업 시점의 공식 OpenAI 문서를 기준으로 확인합니다.
+자동 증가값이 1부터 연속이라는 가정에 의존하지 않습니다.
+
+---
+
+## 좋은 설계 핵심
+
+```text
+students.email UNIQUE
+instructors.email UNIQUE
+courses.course_code UNIQUE
+courses.instructor_id FK
+students·courses N:M은 enrollments로 해소
+enrollments.agreed_amount는 신청 시점 금액
+payments.amount는 결제 기록 금액
+payments.enrollment_id UNIQUE는 현재 결제 상태 1건이라는 단순화 가정
+실제 카드번호 컬럼 없음
+```
+
+재신청 정책이 미확정이므로 `UNIQUE(student_id, course_id)`는 적용하지 않습니다.
+
+---
+
+## 메타데이터 검증
+
+`05_metadata_validation.sql`은 다음을 확인합니다.
+
+```text
+테이블 6개
+좋은 설계 테이블 5개
+FK 4개
+IDENTITY PK 5개
+민감정보 형태 컬럼 0개
+재신청 복합 UNIQUE 0개
+PK·FK·UNIQUE·CHECK 실제 정의
+자동·수동 인덱스
+DELETE·UPDATE 규칙
+```
+
+DDL 파일만 읽지 않고 실제 PostgreSQL 카탈로그를 확인합니다.
+
+---
+
+## 업무 정합성 검증
+
+`06_business_validation.sql`의 이상 조회 기대 결과는 모두 0행입니다.
+
+```text
+학생·강사 이메일 중복
+합의 금액·결제금액 불일치
+결제 상태·paid_at 조합 위반
+고아 학생·강의·결제 참조
+샘플 수강·결제 상태 조합 위반
+```
+
+현재 강의 가격과 신청 시점 금액 차이는 정보용으로 1행이 예상됩니다. 할인·가격 변경이므로 자동 오류가 아닙니다.
+
+---
+
+## 안전한 반례 테스트
+
+`07_negative_tests.sql`은 임시 결과 테이블과 PostgreSQL 예외 블록을 사용합니다.
+
+```text
+테스트 1~16: expected_failure
+테스트 17: expected_success
+unexpected 결과: 0
+```
+
+예상 오류가 발생하면 해당 하위 트랜잭션의 변경이 자동 취소됩니다. 따라서 테스트 후 기준 행 수는 그대로 유지됩니다.
+
+반례 유형:
+
+```text
+unique_violation
+foreign_key_violation
+check_violation
+재신청 정책을 복합 UNIQUE로 강제하지 않았는지 확인
+```
+
+---
+
+## AI 변경 검토 기준
+
+```text
+- 확인 요구사항과 미확정 정책을 분리합니다.
+- 수정 대상과 금지 범위를 명시합니다.
+- 실제 개인정보·비밀번호·토큰·접속 URL을 전달하지 않습니다.
+- DROP·ALTER·UPDATE·DELETE·Role 변경은 별도 위험으로 검토합니다.
+- 정상·반례·메타데이터·업무 정합성 검증을 모두 실행합니다.
+- Codex 변경은 파일별 diff를 사람이 검토합니다.
+- 검증하지 않은 항목은 통과로 표시하지 않습니다.
+- 승인·조건부 승인·보류·거절 중 하나로 기록합니다.
+```
