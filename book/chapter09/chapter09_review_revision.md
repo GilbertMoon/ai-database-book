@@ -1,78 +1,76 @@
-# Chapter 09 출간용 문체 정리 기록
+# Chapter 09 출간용 문체 및 도식 보정 기록
 
-## 대상 원고
+## 대상 파일
 
 ```text
 book/chapter09/chapter09.md
+book/chapter09/chapter09_outline.md
+book/chapter09/chapter09_activity.md
+code/chapter09/*
+images/chapter09/*
+notes/chapter09_review_checklist.md
 ```
 
-## 목적
+## 1. 기존 기록
 
-Chapter 09를 일반 실용서 문체에 맞게 정리한 내용을 기록합니다.
+Chapter 09의 1차 원고, 실습 SQL, 활동 자료, Mermaid와 SVG가 작성되어 있었으며 일반 독자용 문체 정리를 진행했습니다.
 
----
+## 2. 이번 보정 내용
 
-## 1. 리뷰 결과 요약
-
-Chapter 09는 트랜잭션과 데이터 정합성을 처음 접하는 독자에게 설명하기 위한 1차 원고로 사용 가능한 수준입니다.
-
-본문, 실습 SQL, 활동 자료, 도식, AI SQL 검토 흐름이 다음과 같이 연결되어 있습니다.
-
-| 구성 요소 | 상태 | 비고 |
+| 보완 항목 | 상태 | 반영 내용 |
 | --- | --- | --- |
-| 본문 원고 | 완료 | 트랜잭션, COMMIT, ROLLBACK, 정합성 설명 포함 |
-| 실습 SQL | 완료 | Chapter 09 실습 SQL 작성 완료 |
-| 활동 자료 | 완료 | Chapter 09 활동/실습 자료 작성 완료 |
-| 도식 설계 | 완료 | Chapter 09 도식 후보 정리 완료 |
-| Mermaid 원본 | 완료 | 8종 작성 완료 |
-| SVG 도식 | 완료 | 8종 생성 완료 |
-| 본문 그림 삽입 | 완료 | Chapter 09 본문 그림 링크와 캡션 삽입 완료 |
-| AI SQL 검토 흐름 | 완료 | 트랜잭션 SQL 검토 기준 포함 |
+| 본문 절 구조 재정렬 | 완료 | 16개 절을 권장 흐름으로 정렬 |
+| 그림 번호와 파일 연결 | 완료 | 그림 9-1~9-8을 서로 다른 파일로 한 번씩 배치 |
+| ACID 절 | 완료 | 개념 표, 주의 문장, 그림 9-4 추가 |
+| 동시성·Lock·Deadlock 절 | 완료 | 정상 대기와 순환 대기 구분, 그림 9-7 추가 |
+| 확장 스키마 설명 | 완료 | courses 확장과 payments 추가 명시 |
+| payments 관계 | 완료 | student_id·course_id 제거, enrollment_id UNIQUE FK 적용 |
+| 상태와 제약조건 | 완료 | 기존 상태값과 금액·좌석 CHECK 통일 |
+| DB 안전 경고 | 완료 | current_database와 DROP 대상 명시 |
+| 좌석 UPDATE 0행 | 완료 | 자동 실패가 아니며 후속 INSERT 금지 명시 |
+| 성공 SQL | 완료 | Lock, UPDATE RETURNING, 신청·결제 연결, COMMIT 전 SELECT 순서 적용 |
+| ROLLBACK 예제 | 완료 | 세 테이블 임시 변경과 원상 복구 확인 |
+| 정합성 검증 | 완료 | 좌석 범위, 결제 누락·금액, 좌석 사용량 SQL 추가 |
+| SVG 8개 | 완료 | 한 메시지 중심, 접근성·유지보수 구조 적용 |
+| Mermaid 8개 | 완료 | SVG 핵심 흐름과 동기화 |
+| README·리뷰 문서 | 완료 | 실제 상태와 수동 확인 항목 갱신 |
 
----
-
-## 2. 반영 완료 항목
-
-| 보완 항목 | 반영 상태 | 반영 위치 |
-| --- | --- | --- |
-| 리뷰 체크리스트 작성 | 완료 | `notes/chapter09_review_checklist.md` |
-| 리뷰 후 보완 반영 기록 | 완료 | `book/chapter09/chapter09_review_revision.md` |
-| Chapter 상태 문구 변경 | 완료 | `book/chapter09/chapter09.md` 상단 |
-| README 진행 상태 갱신 | 완료 예정 | `README.md` |
-| TODO 진행 상태 갱신 | 완료 예정 | `notes/todo.md` |
-| 강의안형 표현 완화 | 완료 | Chapter 09 본문, 실습 자료 |
-| 제출/평가 표현 전환 | 완료 | Chapter 09 실습 자료 14~15장 |
-
----
-
-## 3. 보완 판단
-
-현재 단계에서 추가적인 본문 내용 보강은 필요하지 않습니다.
-
-다만 출판 변환 단계에서는 다음을 다시 확인해야 합니다.
+## 3. 제거한 중복과 오해 가능성
 
 ```text
-- SVG 도식이 PDF 변환 시 정상 표시되는가?
-- 트랜잭션 SQL 코드 블록이 지나치게 길지 않은가?
-- COMMIT/ROLLBACK 실습이 출간본 환경에서 안전하게 안내되는가?
+- 같은 SVG의 그림 번호 중복 사용
+- 본문 표와 전체 SQL을 SVG 안에 반복한 내용
+- COMMIT 전 검증 없이 즉시 확정하는 흐름
+- UPDATE 0행이 자동 실패·자동 ROLLBACK된다는 인상
+- payments.student_id와 payments.course_id 중복 관계
+- 결제대기·결제완료 상태값
+- Lock 대기를 곧바로 Deadlock으로 연결하는 표현
+- Consistency와 Isolation이 모든 규칙·가시성을 자동 보장한다는 표현
 ```
 
----
+## 4. 검증 결과
 
-## 4. 최종 반영 상태
-
-| 항목 | 상태 |
+| 검증 항목 | 결과 |
 | --- | --- |
-| 리뷰 체크리스트 작성 | 완료 |
-| 리뷰 후 보완 반영 기록 | 완료 |
-| 원고 상태 변경 | 완료 |
-| Chapter 09 1차 완료 판정 | 완료 |
+| 본문·활동·SQL 구조와 예상값 | 통과 |
+| payments FK와 상태값 | 통과 |
+| 그림 번호·경로 중복 | 통과 |
+| Mermaid 핵심 논리 | 통과 |
+| SVG XML 파싱 | 통과 |
+| SVG 접근성 구조 | 통과 |
+| 임시 PNG 렌더링 | 통과 |
+| Mermaid CLI 문법 실행 | 미실행 — CLI 없음 |
+| PostgreSQL 실제 SQL 실행 | 미실행 — 정적 검토 |
+| GitHub 실제 미리보기 | 수동 확인 필요 |
+| Word/PDF/eBook 변환 | 미실행 — 수동 확인 필요 |
 
----
+## 5. Chapter 08·10 비교
 
-## 5. 결론
+Chapter 08의 기본 `students`, `instructors`, `courses`, `enrollments` 구조와 상태값을 기준으로 Chapter 09의 확장 컬럼과 `payments`를 설명했습니다. Chapter 10의 인덱스 장 연결 문장을 유지했습니다. 두 Chapter 파일은 수정하지 않았습니다.
+
+## 6. 결론
 
 ```text
-Chapter 09는 일반 독자가 혼자 읽고 따라갈 수 있는 실용서형 문체로 1차 정리했다.
-다음 작업은 다른 장에도 같은 기준을 적용하는 것이다.
+Chapter 09는 트랜잭션 경계, 정합성 규칙, 좌석 확보 실패 처리와 동시성 기초를 하나의 일관된 수강신청 예제로 설명하도록 보정했다.
+실제 PostgreSQL 실행과 출판 파이프라인 렌더링은 후속 수동 확인 항목으로 남긴다.
 ```

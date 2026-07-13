@@ -1,15 +1,11 @@
 flowchart LR
-    A[BEGIN]
-    A --> B[수강신청 INSERT]
-    B --> C[결제 기록 INSERT]
-    C --> D[잔여 좌석 UPDATE]
-    D --> E{모든 작업 성공?}
-
-    E -- 예 --> F[COMMIT]
-    E -- 아니오 --> G[ROLLBACK]
-
-    F --> H[수강신청 확정]
-    F --> I[결제 기록 확정]
-    F --> J[좌석 차감 확정]
-
-    G --> K[모든 변경 취소]
+    A[BEGIN] --> B[강의 행 Lock과 좌석 확인]
+    B --> C[좌석 UPDATE RETURNING]
+    C --> D{1행을 반환했는가?}
+    D -- 아니요 --> I[ROLLBACK · 후속 INSERT 중단]
+    D -- 예 --> E[수강신청 INSERT]
+    E --> F[결제 INSERT<br/>enrollment_id 연결]
+    F --> G[COMMIT 전 결과 SELECT]
+    G --> H{모든 결과 정상인가?}
+    H -- 예 --> J[COMMIT]
+    H -- 아니요 --> I
