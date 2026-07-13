@@ -1,7 +1,12 @@
-flowchart TB
-    A[조회 SQL] --> B[Seq Scan
-테이블 전체 확인]
-    A --> C[Index Scan
-인덱스 탐색 후 행 접근]
-    B --> D[많은 행 반환 또는 작은 테이블에 적합]
-    C --> E[적은 행 선택 조건에 유리]
+flowchart LR
+    A[조회 SQL<br/>WHERE email = ...]
+    P[플래너 비용 비교<br/>테이블 크기<br/>선택도 · 통계 · 예상 비용]
+    B[Seq Scan<br/>테이블 전체 확인<br/>작은 테이블 또는 많은 행 반환에 적합]
+    C[Index Scan<br/>인덱스 탐색 후 행 접근<br/>적은 행 선택 조건에 유리]
+    N[Seq Scan도 비용이 더 낮다면 정상적인 선택이다]
+
+    A --> P
+    P --> B
+    P --> C
+    B --> N
+    C --> N
