@@ -1,4 +1,18 @@
-flowchart LR
-    A[1:1<br/>users 1 - 0..1 profiles<br/>FK + UNIQUE]
-    B[1:N<br/>instructors 1 - 0..N courses<br/>N 쪽에 FK]
-    C[N:M<br/>students - enrollments - courses<br/>연결 테이블 사용]
+%% Chapter 02 관계 유형 미리보기
+%% 각 관계의 기본 개념만 표현하며 상세 FK 설계는 Chapter 05에서 다룬다.
+%% N:M의 연결 테이블 구현은 Chapter 05에서 다룬다.
+flowchart TB
+    subgraph R11["1:1"]
+        direction LR
+        U["users<br/>사용자"] ---|"1 : 1"| P["profiles<br/>상세 프로필"]
+    end
+
+    subgraph R1N["1:N"]
+        direction LR
+        S1["students<br/>학생"] ---|"1 : N"| Q["questions<br/>질문"]
+    end
+
+    subgraph RNM["N:M"]
+        direction LR
+        S2["students<br/>학생"] ---|"N : M"| C["courses<br/>강의"]
+    end
