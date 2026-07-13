@@ -1,58 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1200 620">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" viewBox="0 0 1320 640">
   <title id="title">수강신청 현황을 만드는 다중 JOIN 경로</title>
-  <desc id="desc">enrollments에서 students, courses, instructors로 이동하는 정확한 외래키 경로와 결과 컬럼 구성을 보여 주는 도식이다.</desc>
+  <desc id="desc">enrollments를 기준 테이블로 두고 students, courses, instructors로 이동하는 JOIN 순서와 결과 컬럼의 출처를 보여 주는 도식이다.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+    <marker id="arrow-fk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-map" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
     </marker>
     <style>
       .title { font: 700 28px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
-      .box { stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
-      .head { font: 600 17px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .box { stroke: #334155; stroke-width: 2; }
+      .head { font: 700 18px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
       .text { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #0f172a; }
+      .small { font: 12px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #334155; }
       .fk { font: 700 13px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #7c3aed; }
       .pk { font: 700 13px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #2563eb; }
+      .result { font: 14px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #14532d; }
+      .badge { font: 700 12px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #9a3412; }
+      .num { font: 700 13px 'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif; fill: #ffffff; }
+      .join-line { stroke: #7c3aed; stroke-width: 3; fill: none; marker-end: url(#arrow-fk); }
+      .map-line { stroke: #64748b; stroke-width: 2; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrow-map); opacity: 0.65; }
     </style>
   </defs>
-  <rect width="1200" height="620" fill="#ffffff"/>
-  <text x="600" y="42" text-anchor="middle" class="title">수강신청 현황을 만드는 다중 JOIN 경로</text>
-  <rect x="90" y="160" width="230" height="130" class="box" fill="#dbeafe"/>
-  <text x="205" y="195" text-anchor="middle" class="head">students</text>
-  <text x="205" y="225" text-anchor="middle" class="pk">PK id</text>
-  <text x="205" y="255" text-anchor="middle" class="text">name</text>
-  <rect x="390" y="135" width="280" height="185" class="box" fill="#dbeafe"/>
-  <text x="530" y="170" text-anchor="middle" class="head">enrollments</text>
-  <text x="530" y="200" text-anchor="middle" class="pk">PK id</text>
-  <text x="530" y="228" text-anchor="middle" class="fk">FK student_id</text>
-  <text x="530" y="256" text-anchor="middle" class="fk">FK course_id</text>
-  <text x="530" y="284" text-anchor="middle" class="text">status · paid_amount</text>
-  <rect x="740" y="160" width="230" height="130" class="box" fill="#ede9fe"/>
-  <text x="855" y="195" text-anchor="middle" class="head">courses</text>
-  <text x="855" y="225" text-anchor="middle" class="pk">PK id</text>
-  <text x="855" y="252" text-anchor="middle" class="fk">FK instructor_id</text>
-  <text x="855" y="279" text-anchor="middle" class="text">title</text>
-  <rect x="740" y="355" width="230" height="110" class="box" fill="#ede9fe"/>
-  <text x="855" y="390" text-anchor="middle" class="head">instructors</text>
-  <text x="855" y="420" text-anchor="middle" class="pk">PK id</text>
-  <text x="855" y="448" text-anchor="middle" class="text">name</text>
-  <rect x="930" y="95" width="220" height="420" class="box" fill="#dcfce7"/>
-  <text x="1040" y="130" text-anchor="middle" class="head">결과 컬럼</text>
-  <text x="1040" y="170" text-anchor="middle" class="text">enrollment_id</text>
-  <text x="1040" y="200" text-anchor="middle" class="text">student_name</text>
-  <text x="1040" y="230" text-anchor="middle" class="text">course_title</text>
-  <text x="1040" y="260" text-anchor="middle" class="text">instructor_name</text>
-  <text x="1040" y="290" text-anchor="middle" class="text">status</text>
-  <text x="1040" y="320" text-anchor="middle" class="text">paid_amount</text>
-  <text x="1040" y="350" text-anchor="middle" class="text">enrolled_at</text>
-  <line x1="390" y1="225" x2="320" y2="225" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="355" y="210" text-anchor="middle" class="fk">student_id -> students.id</text>
-  <line x1="670" y1="240" x2="740" y2="240" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="705" y="225" text-anchor="middle" class="fk">course_id -> courses.id</text>
-  <line x1="855" y1="290" x2="855" y2="355" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="900" y="325" class="fk">instructor_id -> instructors.id</text>
-  <line x1="320" y1="260" x2="930" y2="170" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="670" y1="290" x2="930" y2="230" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="970" y1="410" x2="930" y2="260" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="100" y="525" width="1000" height="60" class="box" fill="#f8fafc"/>
-  <text x="600" y="560" text-anchor="middle" class="text">수강신청 현황의 기준 행은 enrollments이며, 강사는 enrollments에서 직접 연결하지 않고 courses를 거쳐 instructors로 이동한다</text>
+
+  <rect width="1320" height="640" fill="#ffffff"/>
+  <text x="660" y="42" text-anchor="middle" class="title">수강신청 현황을 만드는 다중 JOIN 경로</text>
+
+  <rect x="85" y="62" width="520" height="42" rx="12" ry="12" fill="#f8fafc" stroke="#cbd5e1"/>
+  <line x1="110" y1="83" x2="165" y2="83" class="join-line"/>
+  <text x="178" y="88" class="small">JOIN 경로(FK → PK)</text>
+  <line x1="350" y1="83" x2="405" y2="83" class="map-line"/>
+  <text x="418" y="88" class="small">결과 컬럼 출처</text>
+
+  <rect x="80" y="165" width="220" height="130" rx="16" ry="16" class="box" fill="#dbeafe"/>
+  <text x="190" y="198" text-anchor="middle" class="head">students s</text>
+  <text x="190" y="228" text-anchor="middle" class="pk">PK id</text>
+  <text x="190" y="258" text-anchor="middle" class="text">name → student_name</text>
+
+  <rect x="448" y="112" width="130" height="26" rx="13" ry="13" fill="#ffedd5" stroke="#fb923c"/>
+  <text x="513" y="130" text-anchor="middle" class="badge">FROM 기준 테이블</text>
+  <rect x="370" y="145" width="285" height="200" rx="16" ry="16" class="box" fill="#dbeafe"/>
+  <text x="512.5" y="178" text-anchor="middle" class="head">enrollments e</text>
+  <text x="512.5" y="208" text-anchor="middle" class="pk">PK id → enrollment_id</text>
+  <text x="512.5" y="236" text-anchor="middle" class="fk">FK student_id</text>
+  <text x="512.5" y="264" text-anchor="middle" class="fk">FK course_id</text>
+  <text x="512.5" y="292" text-anchor="middle" class="text">status · paid_amount</text>
+  <text x="512.5" y="320" text-anchor="middle" class="text">enrolled_at</text>
+
+  <rect x="735" y="150" width="240" height="145" rx="16" ry="16" class="box" fill="#ede9fe"/>
+  <text x="855" y="183" text-anchor="middle" class="head">courses c</text>
+  <text x="855" y="213" text-anchor="middle" class="pk">PK id</text>
+  <text x="855" y="241" text-anchor="middle" class="fk">FK instructor_id</text>
+  <text x="855" y="269" text-anchor="middle" class="text">title → course_title</text>
+
+  <rect x="735" y="375" width="240" height="120" rx="16" ry="16" class="box" fill="#ede9fe"/>
+  <text x="855" y="408" text-anchor="middle" class="head">instructors i</text>
+  <text x="855" y="438" text-anchor="middle" class="pk">PK id</text>
+  <text x="855" y="466" text-anchor="middle" class="text">name → instructor_name</text>
+
+  <rect x="1045" y="95" width="235" height="425" rx="16" ry="16" class="box" fill="#dcfce7"/>
+  <text x="1162.5" y="130" text-anchor="middle" class="head">결과 컬럼</text>
+  <text x="1162.5" y="154" text-anchor="middle" class="small">e=enrollments · s=students</text>
+  <text x="1162.5" y="174" text-anchor="middle" class="small">c=courses · i=instructors</text>
+  <text x="1068" y="214" class="result">e.id AS enrollment_id</text>
+  <text x="1068" y="246" class="result">s.name AS student_name</text>
+  <text x="1068" y="278" class="result">c.title AS course_title</text>
+  <text x="1068" y="310" class="result">i.name AS instructor_name</text>
+  <text x="1068" y="342" class="result">e.status</text>
+  <text x="1068" y="374" class="result">e.paid_amount</text>
+  <text x="1068" y="406" class="result">e.enrolled_at</text>
+
+  <path d="M370 236 L300 236" class="join-line"/>
+  <circle cx="335" cy="236" r="13" fill="#7c3aed"/>
+  <text x="335" y="241" text-anchor="middle" class="num">1</text>
+  <text x="335" y="218" text-anchor="middle" class="fk">e.student_id → s.id</text>
+
+  <path d="M655 264 L735 264" class="join-line"/>
+  <circle cx="695" cy="264" r="13" fill="#7c3aed"/>
+  <text x="695" y="269" text-anchor="middle" class="num">2</text>
+  <text x="695" y="246" text-anchor="middle" class="fk">e.course_id → c.id</text>
+
+  <path d="M855 295 L855 375" class="join-line"/>
+  <circle cx="855" cy="335" r="13" fill="#7c3aed"/>
+  <text x="855" y="340" text-anchor="middle" class="num">3</text>
+  <text x="885" y="340" class="fk">c.instructor_id → i.id</text>
+
+  <path d="M300 258 C520 485, 855 540, 1045 246" class="map-line"/>
+  <path d="M655 308 C790 332, 935 355, 1045 342" class="map-line"/>
+  <path d="M975 269 C1005 269, 1020 278, 1045 278" class="map-line"/>
+  <path d="M975 446 C1018 430, 1020 318, 1045 310" class="map-line"/>
+
+  <rect x="110" y="540" width="1100" height="72" rx="16" ry="16" class="box" fill="#f8fafc"/>
+  <text x="660" y="570" text-anchor="middle" class="text">수강신청 현황의 기준 행은 enrollments(e)입니다.</text>
+  <text x="660" y="592" text-anchor="middle" class="text">강사는 enrollments에서 직접 연결하지 않고 courses(c)를 거쳐 instructors(i)로 이동합니다.</text>
 </svg>
