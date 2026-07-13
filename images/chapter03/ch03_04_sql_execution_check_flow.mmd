@@ -1,12 +1,13 @@
 flowchart TD
     A[ai_database_book 연결 선택]
     B[SQL Editor 열기]
-    C["SELECT version();<br/>서버 응답 확인"]
-    D["SELECT current_database();<br/>현재 DB 확인"]
-    E["SELECT 1 + 1 AS result;<br/>실행 결과 확인"]
-    F{세 결과가 예상과 일치하는가?}
-    G[연결·DB·SQL 실행 상태 재확인]
-    H[기본 환경 준비 완료]
-    A --> B --> C --> D --> E --> F
-    F -- 아니요 --> G --> A
-    F -- 예 --> H
+    C[version<br/>PostgreSQL 서버 확인]
+    D[current_database · current_schema<br/>DB와 스키마 확인]
+    E[current_user · CURRENT_TIMESTAMP<br/>사용자와 서버 시각 확인]
+    F[1 + 1<br/>SQL 실행 결과 확인]
+    G{결과가 예상과 일치하는가?}
+    H[연결·DB·스키마·사용자 재확인]
+    I[실습 환경 준비 완료]
+    A --> B --> C --> D --> E --> F --> G
+    G -- 아니요 --> H --> A
+    G -- 예 --> I
