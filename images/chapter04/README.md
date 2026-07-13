@@ -34,7 +34,7 @@ Chapter 04 도식은 SQL 전체 코드를 이미지로 반복하지 않고, **CR
 | 본문 번호 | 파일 | 제목 | 역할 | 상태 |
 | --- | --- | --- | --- | --- |
 | 그림 4-1 | `ch04_01_sql_crud_overview.svg` | SQL 명령어와 CRUD 대응 | INSERT, SELECT, UPDATE, DELETE와 CRUD 연결 | 유지 |
-| 그림 4-2 | `ch04_03_insert_row_flow.svg` | INSERT로 새 행 추가하기 | 열과 값 대응 후 새 행 추가 | 유지 |
+| 그림 4-2 | `ch04_03_insert_row_flow.svg` | INSERT로 새 행 추가하기 | 열·값 대응, 생략 열 자동값 결정, 검사 뒤 성공·실패 분기와 RETURNING 확인 | 유지 |
 | 그림 4-3 | `ch04_02_select_projection_flow.svg` | SELECT로 필요한 열 선택하기 | SELECT 목록이 결과 열과 순서를 정하는 과정 | 유지 |
 | 그림 4-4 | `ch04_04_where_filter_flow.svg` | WHERE 조건으로 대상 행 필터링하기 | 조건이 참인 행만 결과에 포함되는 흐름 | 유지 |
 | 그림 4-5 | `ch04_05_order_by_sort_flow.svg` | ORDER BY로 조회 결과 정렬하기 | ASC와 DESC의 표시 순서 차이 | 유지 |
@@ -67,7 +67,7 @@ Chapter 04 도식은 SQL 전체 코드를 이미지로 반복하지 않고, **CR
 - Chapter 제목을 관계형 데이터베이스와 SQL 시작하기로 변경했다.
 - INSERT가 SELECT보다 먼저 등장하므로 본문 그림 4-2와 4-3의 연결 순서를 조정했다.
 - UPDATE와 DELETE 도식은 영향받은 행 수 확인 의미를 본문 설명과 함께 사용한다.
-- NULL, IN, LIKE, LIMIT, RETURNING은 SQL 코드와 표로 설명하고 별도 도식을 추가하지 않았다.
+- NULL, IN, LIKE, LIMIT은 SQL 코드와 표로 설명하고, RETURNING은 그림 4-2의 INSERT 흐름에서 함께 보여 준다.
 - 기본 실습 파일의 자동 DROP을 제거했으며 도식에는 초기화 작업을 포함하지 않는다.
 ```
 

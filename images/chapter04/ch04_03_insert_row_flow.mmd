@@ -1,11 +1,25 @@
 flowchart TD
-    A[INSERT 문<br/>컬럼 목록과 값 목록]
-    B[같은 위치의 컬럼과 값 대응]
-    C[DBMS 검사<br/>컬럼 수 · 타입 · NOT NULL · UNIQUE · DEFAULT]
-    D{검사를 통과하는가?}
-    E[students 테이블에 새 행 추가]
-    F[저장 거부]
-    G[SELECT로 결과 확인]
-    A --> B --> C --> D
-    D -- 예 --> E --> G
-    D -- 아니요 --> F
+    A["INSERT INTO students<br/>열 목록: name, email, major, grade<br/>값 목록: '김민지', 'minji@example.com', '컴퓨터공학', 2<br/>선택 출력: RETURNING id, name, created_at"]
+    B["열 목록과 값 목록 대응<br/>열과 값의 개수가 같고 같은 위치끼리 대응해야 함<br/>열 목록의 순서는 바꿀 수 있지만 각 값은 같은 위치의 열에 저장됨"]
+    C["생략된 열의 값 결정<br/>id → IDENTITY로 자동 생성<br/>created_at → DEFAULT CURRENT_TIMESTAMP 적용"]
+    D["기본 형식과 값 검사<br/>열·값 개수 · 데이터 타입 · NOT NULL · UNIQUE"]
+    E{"검사를 통과했는가?"}
+    F["students 테이블에 새 행 추가<br/>기존 행은 유지되고 행 수가 1 증가"]
+    G["RETURNING 결과 또는 SELECT로 확인<br/>id: 자동 생성값<br/>name: 김민지<br/>created_at: 현재 시각"]
+    H["INSERT 거부<br/>students 테이블에는 새 행이 추가되지 않음"]
+
+    A --> B --> C --> D --> E
+    E -- 예 --> F --> G
+    E -- 아니요 --> H
+
+    classDef insert fill:#eef9f1,stroke:#2f9a58,stroke-width:2px,color:#172033;
+    classDef check fill:#fff7d9,stroke:#d8aa34,stroke-width:2px,color:#172033;
+    classDef ok fill:#eef9f1,stroke:#2f9a58,stroke-width:2px,color:#172033;
+    classDef bad fill:#fff1f1,stroke:#d64545,stroke-width:2px,color:#172033;
+    classDef decision fill:#fff7d9,stroke:#d8aa34,stroke-width:2px,color:#172033;
+
+    class A insert;
+    class B,C,D check;
+    class E decision;
+    class F,G ok;
+    class H bad;
