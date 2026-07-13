@@ -1,83 +1,167 @@
-# Chapter 03 Outline
+# Chapter 03 구성안
 
 ## 제목
-PostgreSQL과 DBeaver로 데이터베이스 환경 만들기
+
+PostgreSQL과 DBeaver로 실습 환경 만들기
 
 ## 권장 분량
-20~25페이지
+
+15~18페이지
 
 ## 이 장의 역할
-관계형 데이터베이스를 직접 다룰 수 있도록 PostgreSQL과 DBeaver의 역할을 설명하고, 설치·연결·실행·확인까지 하나의 흐름으로 안내한다.
 
-단순히 프로그램 설치 화면을 따라가는 데 그치지 않고, 독자가 다음 질문에 답할 수 있도록 구성한다.
+관계형 데이터베이스를 직접 다룰 수 있도록 PostgreSQL과 DBeaver를 설치·연결하고, 현재 데이터베이스와 스키마를 확인하며, 이후 장의 SQL을 안전하게 실행할 수 있는 환경을 완성한다.
+
+이 장에서는 테이블 생성, 데이터 입력과 제약조건 실습을 미리 진행하지 않는다. Chapter 03은 환경 준비와 실행 검증에 집중하고, CRUD는 Chapter 04, 제약조건 오류 실습은 Chapter 06으로 연결한다.
+
+이 장의 핵심 질문은 다음과 같다.
 
 ```text
 PostgreSQL과 DBeaver는 각각 어떤 역할을 하는가?
-로컬 데이터베이스와 클라우드 데이터베이스 중 무엇을 선택해야 하는가?
-현재 어떤 데이터베이스에 연결되어 있는지 어떻게 확인하는가?
-오류가 발생했을 때 무엇부터 점검해야 하는가?
+로컬 환경과 관리형 PostgreSQL 중 무엇을 선택할 것인가?
+DBeaver 연결에 필요한 값은 무엇을 의미하는가?
+현재 어떤 데이터베이스와 스키마에 연결되어 있는가?
+SQL 한 문장, 선택 영역과 전체 스크립트 실행은 어떻게 다른가?
+오류가 발생했을 때 무엇부터 확인해야 하는가?
 비밀번호와 접속 정보는 어떻게 안전하게 관리해야 하는가?
 ```
 
-## 독자가 얻게 될 내용
-- PostgreSQL과 Postgres가 같은 대상을 가리키는 표현임을 이해한다.
-- PostgreSQL과 DBeaver의 역할을 구분한다.
-- 로컬 환경과 관리형 클라우드 환경의 차이를 판단한다.
-- DBeaver에서 PostgreSQL 연결 정보를 설정한다.
-- 작업용 데이터베이스를 만들고 현재 연결 상태를 확인한다.
-- 간단한 테이블과 데이터를 생성해 환경이 정상인지 검증한다.
-- 오류 메시지를 기록하고 AI에 재현 가능한 형태로 질문한다.
-- 비밀번호, 접속 URL, API 키를 저장소에 공개하지 않는 원칙을 익힌다.
+## 독자가 얻게 될 것
+
+- PostgreSQL이 DBMS이고 DBeaver가 클라이언트임을 설명할 수 있다.
+- 로컬 PostgreSQL을 기본 경로로 사용하고 관리형 PostgreSQL을 대안으로 판단할 수 있다.
+- Host, Port, Database, Username과 Password의 의미를 설명할 수 있다.
+- `postgres` 사용자와 `postgres` 데이터베이스를 구분할 수 있다.
+- `ai_database_book` 데이터베이스를 만들고 새 연결로 전환할 수 있다.
+- `current_database()`, `current_schema()`와 `SHOW search_path`로 현재 위치를 확인할 수 있다.
+- DBeaver에서 `Schemas → public → Tables` 구조를 찾을 수 있다.
+- SQL 편집기의 현재 문장, 선택 영역과 전체 스크립트 실행을 구분할 수 있다.
+- 환경 확인 SQL을 `setup_check.sql`로 저장하고 반복 실행할 수 있다.
+- 연결 오류를 서버·인증·데이터베이스·스키마·SQL 범주로 구분할 수 있다.
+- 비밀번호, 접속 URL과 실제 `.env` 값을 공개 파일에서 분리할 수 있다.
+- AI에게 오류 상황을 재현 가능한 형식으로 질문할 수 있다.
 
 ## 핵심 개념
+
 - PostgreSQL / Postgres
 - DBeaver
-- 데이터베이스 서버와 클라이언트 도구
-- Host, Port, Database, Username, Password
-- 로컬 데이터베이스
-- 관리형 클라우드 데이터베이스
+- 서버와 클라이언트
+- 로컬 PostgreSQL
+- 관리형 PostgreSQL
+- Host
+- Port
+- Database
+- Username
+- Password
+- `postgres` 사용자와 데이터베이스
+- `ai_database_book`
+- 스키마
+- `public`
+- `search_path`
 - SQL 편집기
-- 연결 테스트
+- 현재 문장 실행
+- 선택 영역 실행
+- 전체 스크립트 실행
 - 환경 검증 SQL
+- `setup_check.sql`
 - 비밀정보 관리
+- 재현 가능한 오류 질문
 
 ## 본문 구성
-1. 데이터베이스 환경을 직접 만들어야 하는 이유
-2. PostgreSQL, DBeaver, GitHub, AI 도구의 역할
-3. 로컬 환경과 클라우드 환경 선택
-4. 설치 전 확인 사항
-5. PostgreSQL 설치와 실행 상태 확인
-6. DBeaver 설치와 PostgreSQL 연결
-7. 작업용 데이터베이스 생성
-8. 기본 SQL로 연결 상태 검증
-9. 첫 번째 테이블과 샘플 데이터 생성
-10. 제약조건 오류를 통한 정상 동작 확인
-11. SQL 파일과 작업 이력 관리
-12. 접속 정보와 비밀정보 보호
-13. 자주 발생하는 오류의 점검 순서
-14. ChatGPT와 Codex를 문제 해결에 활용하는 방법
-15. 직접 점검해 보기와 장 마무리
+
+1. 이 장에서 완성할 실습 환경
+2. PostgreSQL과 DBeaver의 역할 복습
+3. 로컬과 클라우드 중 실습 환경 선택
+4. 설치 전에 확인할 사항
+5. PostgreSQL 설치와 서버 실행 확인
+6. DBeaver 설치와 드라이버 준비
+7. DBeaver에서 PostgreSQL 연결 만들기
+8. 작업용 데이터베이스 만들기
+9. 새 데이터베이스로 다시 연결하기
+10. 현재 데이터베이스와 스키마 확인하기
+11. DBeaver에서 데이터베이스 구조 탐색하기
+12. SQL 편집기에서 문장 실행하기
+13. 환경 검증 SQL 실행하기
+14. 환경 확인 SQL 파일 저장하기
+15. 접속 정보와 비밀정보 보호하기
+16. 연결 오류를 유형별로 해결하기
+17. AI에게 오류를 정확하게 질문하기
+18. 실습 환경 완료 점검
+19. 자주 하는 실수
+20. 핵심 정리
+21. 다음 장 연결
+
+## 기본 실습 흐름
+
+```text
+PostgreSQL 서버 준비
+→ DBeaver Test Connection
+→ postgres 데이터베이스 접속
+→ ai_database_book 생성
+→ ai_database_book으로 다시 연결
+→ current_database() 확인
+→ current_schema() 확인
+→ public 스키마 탐색
+→ 환경 확인 SQL 실행
+→ setup_check.sql 저장
+```
+
+## 환경 검증 SQL
+
+```sql
+SELECT version();
+SELECT current_database();
+SELECT current_schema();
+SELECT current_user;
+SELECT CURRENT_TIMESTAMP AS checked_at;
+SELECT 1 + 1 AS result;
+```
+
+환경 검증 SQL은 데이터를 변경하지 않는 조회문만 사용한다. 여러 번 실행해도 테이블이나 데이터가 추가되지 않도록 구성한다.
 
 ## 독자 참여 요소
-- 자신의 운영체제와 데이터베이스 환경 기록
-- `SELECT version()`과 `SELECT current_database()` 실행
-- `students` 테이블 생성 및 샘플 데이터 조회
-- 중복 이메일 입력으로 `UNIQUE` 제약조건 확인
-- 로컬 환경과 클라우드 환경 비교
-- 실제 오류 메시지를 재현 가능한 AI 질문으로 변환
+
+- 자신의 운영체제와 PostgreSQL 사용 방식 기록
+- PostgreSQL과 DBeaver의 역할 구분
+- Host, Port, Database, Username의 의미 작성
+- `ai_database_book` 생성과 새 연결 전환
+- 현재 데이터베이스와 스키마 결과 기록
+- DBeaver에서 `public` 스키마 위치 확인
+- SQL 실행 범위별 결과 비교
+- `setup_check.sql` 저장과 재실행
+- 연결 오류 유형 분류
+- 비밀정보 공개 가능 여부 판단
+- 오류 메시지를 재현 가능한 AI 질문으로 변환
 
 ## AI 활용 포인트
-- ChatGPT에는 운영체제, 연결값, 오류 메시지, 시도한 해결 방법을 함께 제공한다.
-- Codex에는 파일 경로, PostgreSQL 기준, 필요한 SQL, 주석 범위를 명확히 지정한다.
-- AI가 제안한 명령이나 SQL은 현재 환경과 실행 결과를 기준으로 검증한다.
-- 비밀번호와 접속 문자열은 AI 대화나 공개 저장소에 그대로 넣지 않는다.
+
+- 오류 질문에는 운영체제, PostgreSQL 방식·버전, DBeaver 버전, 연결값, 실행 작업, 오류 원문과 이미 확인한 내용을 포함한다.
+- 비밀번호와 전체 접속 URL은 AI 대화에 포함하지 않는다.
+- Codex에는 `setup_check.sql`이 조회문만 포함해야 한다는 범위를 명확히 지정한다.
+- AI가 제안한 삭제·초기화 명령은 목적과 대상을 이해하기 전에는 실행하지 않는다.
+- AI 답변의 정확성은 실제 DBeaver 재실행 결과로 검증한다.
+
+## 후속 장으로 이동하는 내용
+
+| 내용 | 이동 장 |
+| --- | --- |
+| `CREATE TABLE students` | Chapter 04 |
+| `INSERT`와 `SELECT` 데이터 실습 | Chapter 04 |
+| `CREATE TABLE IF NOT EXISTS`와 재실행 전략 | Chapter 04 |
+| 중복 이메일 `UNIQUE` 오류 | Chapter 06 |
+| 제약조건 상세 검증 | Chapter 06 |
+| AI 생성 SQL의 구조·결과 검증 | Chapter 13 |
 
 ## 편집 원칙
-- 특정 운영 일정이나 점수표 중심 표현을 사용하지 않는다.
-- 설치 화면의 버튼 이름에만 의존하지 않고 각 단계의 목적을 설명한다.
-- 운영체제와 프로그램 버전에 따라 화면이 달라질 수 있음을 자연스럽게 안내한다.
-- 특정 클라우드 서비스는 고정된 정답이 아니라 선택 가능한 예시로 소개한다.
-- 설치 성공보다 연결·실행·검증·기록을 더 중요한 기준으로 제시한다.
+
+- 설치 화면의 버튼 이름보다 각 단계의 목적을 설명한다.
+- Windows를 기본 흐름으로 설명하되 macOS와 Linux는 다양한 설치 방식이 있음을 안내한다.
+- 특정 프로그램 버전과 서비스 이름은 예시임을 명확히 한다.
+- 특정 클라우드 서비스는 필수 경로가 아닌 대안으로만 소개한다.
+- 설치 완료보다 연결, 현재 위치 확인, SQL 실행과 재현 가능성을 완료 기준으로 사용한다.
+- Chapter 02의 서버·클라이언트 개념을 짧게 복습하고 중복 설명을 줄인다.
+- Chapter 04와 Chapter 06의 SQL 학습을 미리 과도하게 다루지 않는다.
 
 ## 다음 장 연결
-다음 장에서는 이 환경에서 테이블을 만들고 데이터를 생성·조회·수정·삭제하는 SQL의 기본 흐름을 살펴본다.
+
+다음 장에서는 `ai_database_book` 데이터베이스의 `public` 스키마에서 첫 번째 테이블을 만들고, `INSERT`, `SELECT`, `WHERE`, `ORDER BY`, `UPDATE`, `DELETE`의 기본 흐름을 실습한다.
