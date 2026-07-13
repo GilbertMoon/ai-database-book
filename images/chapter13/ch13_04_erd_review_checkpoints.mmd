@@ -1,18 +1,10 @@
-flowchart LR
-    A[AI ERD draft] --> B[Entity check]
-    A --> C[Relationship check]
-    A --> D[N:M check]
-    A --> E[FK check]
-    A --> F[Role separation]
-
-    B --> B1[Missing tables?]
-    C --> C1[Correct cardinality?]
-    D --> D1[Junction table needed?]
-    E --> E1[Reference integrity?]
-    F --> F1[Mixed responsibilities?]
-
-    B1 --> G[Revised ERD]
-    C1 --> G
-    D1 --> G
-    E1 --> G
-    F1 --> G
+flowchart TB
+    A[요구사항 기준선] --> B[엔터티 누락·임의 추가 확인]
+    B --> C[관계와 카디널리티 확인]
+    C --> D[N:M 중간 테이블 확인]
+    D --> E[FK 방향·필수 여부 확인]
+    E --> F{미확정 정책이 제약으로 고정됐는가?}
+    F -- 예 --> G[가정 제거 또는 결정 요청]
+    G --> H[ERD 수정]
+    H --> B
+    F -- 아니요 --> I[수정 ERD와 추적표 기록]

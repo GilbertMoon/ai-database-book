@@ -1,21 +1,8 @@
-flowchart TB
-    A[Bad AI design] --> B[ai_bad_enrollments]
-    B --> B1[student_name]
-    B --> B2[course_title]
-    B --> B3[course_price as TEXT]
-    B --> B4[payment_status]
-    B --> B5[card_number plain text]
-
-    A --> C[Problems]
-    C --> C1[Mixed roles]
-    C --> C2[Duplicated data]
-    C --> C3[Weak types]
-    C --> C4[No FK]
-    C --> C5[Security risk]
-
-    C --> D[Reviewed good design]
-    D --> E[students]
-    D --> F[courses]
-    D --> G[enrollments]
-    D --> H[payments]
-    D --> I[instructors]
+flowchart LR
+    A[역할이 섞인 설계<br/>ai_bad_enrollments] --> B[반복·약한 타입·FK 없음<br/>민감정보 위험]
+    B --> C[역할별 분리]
+    C --> D[students·instructors·courses]
+    C --> E[enrollments·payments]
+    D --> F[PK·FK·CHECK·업무 식별자]
+    E --> F
+    F --> G[데이터 소유자와 변경 이유 분리]

@@ -1,16 +1,19 @@
 flowchart LR
-    A[DB design work] --> B[ChatGPT]
-    A --> C[Codex]
-    A --> D[Human]
-
-    B --> B1[Organize requirements]
-    B --> B2[Explain design]
-    B --> B3[Create review checklist]
-
-    C --> C1[Write SQL files]
-    C --> C2[Fix execution errors]
-    C --> C3[Refactor scripts]
-
-    D --> D1[Decide requirements]
-    D --> D2[Review risks]
-    D --> D3[Approve final schema]
+    subgraph A[ChatGPT 중심 작업]
+        A1[요구사항 대화]
+        A2[설계 대안·검토 기준]
+        A3[설명·보고서 초안]
+    end
+    subgraph B[Codex 중심 작업]
+        B1[저장소 파일 확인]
+        B2[SQL 수정·오류 재현]
+        B3[테스트·diff 확인]
+    end
+    subgraph C[사람의 책임]
+        C1[업무 규칙·권한 결정]
+        C2[비밀정보·위험 검토]
+        C3[변경 검토·최종 승인]
+    end
+    A --> D[기능은 일부 겹침<br/>단계에 따라 주 역할 구분]
+    B --> D
+    D --> C

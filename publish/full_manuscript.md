@@ -16,7 +16,7 @@
 8. Chapter 08. JOIN과 집계 쿼리
 9. Chapter 09. 트랜잭션과 데이터 정합성
 10. Chapter 10. 인덱스와 성능 기초
-11. Chapter 11. 데이터베이스를 안전하게 지키고 복구하는 방법
+11. Chapter 11. 데이터베이스 보안과 백업 기초
 12. Chapter 12. NoSQL 이해와 선택 기준
 13. Chapter 13. ChatGPT와 Codex로 DB 설계 검증하기
 14. Chapter 14. Vector DB와 RAG 기초
@@ -6681,62 +6681,70 @@ AI가 만든 SQL은 검증되지 않은 초안입니다.
 
 ## 이 장에서 살펴볼 내용
 
-이 장에서는 데이터 검색 속도를 높이는 **인덱스(index)**의 기본 개념을 살펴봅니다.
+Chapter 08에서는 JOIN과 집계 쿼리로 여러 테이블을 조회했고, Chapter 09에서는 트랜잭션으로 데이터 변경을 안전하게 처리하는 방법을 살펴보았습니다. 이번 장에서는 데이터가 많아졌을 때 조회 경로가 왜 중요해지는지, PostgreSQL 인덱스와 실행 계획을 어떻게 읽어야 하는지 배웁니다.
 
-Chapter 08에서는 JOIN과 집계 쿼리를 사용해 여러 테이블의 데이터를 조회했습니다. Chapter 09에서는 트랜잭션을 사용해 데이터 변경 작업을 안전하게 처리하는 방법을 살펴보았습니다.
+Chapter 10은 이전 장과 같은 온라인 강의 도메인을 사용하지만, Chapter 09의 결제·좌석 트랜잭션 상태를 이어 쓰는 실습은 아닙니다. 인덱스와 실행 계획을 비교하기 위한 별도의 성능 실습 데이터셋을 다시 구성합니다.
 
-이제 데이터가 많아졌을 때 발생하는 문제를 살펴보겠습니다. 데이터가 수십 건일 때는 대부분의 SQL이 빠르게 실행됩니다. 하지만 데이터가 수만 건, 수십만 건, 수백만 건으로 늘어나면 같은 SQL도 느려질 수 있습니다.
+> Chapter 10은 이전 장과 같은 온라인 강의 도메인을 사용하지만 인덱스와 실행 계획을 비교하기 위한 별도의 성능 실습 데이터셋을 다시 구성합니다. Chapter 09의 결제·좌석 트랜잭션 상태를 그대로 이어 사용하는 실습은 아닙니다.
 
-이 장에서는 다음 내용을 다룹니다.
+이 장에서 다루는 핵심은 다음과 같습니다.
 
-- 인덱스가 필요한 이유
-- 인덱스를 책의 색인에 비유해 이해하기
-- WHERE 조건과 인덱스
-- ORDER BY와 인덱스
-- JOIN 조건과 인덱스
-- CREATE INDEX 기본 문법
-- EXPLAIN 실행 계획 맛보기
-- 인덱스의 장점과 단점
-- 인덱스를 만들면 안 되는 경우
-- AI가 추천한 인덱스를 검토하는 방법
+- 데이터가 많아지면 조회 경로가 왜 중요해지는가
+- PostgreSQL B-tree 인덱스의 기본 역할
+- PRIMARY KEY와 UNIQUE가 자동으로 만드는 인덱스
+- FOREIGN KEY 자식 컬럼에는 인덱스가 자동 생성되지 않는다는 점
+- Seq Scan, Index Scan, Bitmap Heap Scan의 차이
+- WHERE, ORDER BY, JOIN 조건에서 인덱스 후보를 찾는 방법
+- 복합 인덱스에서 선두 컬럼 순서가 중요한 이유
+- EXPLAIN과 EXPLAIN ANALYZE의 차이
+- 인덱스의 읽기 이점과 쓰기 비용
+- AI가 추천한 인덱스를 실행 계획으로 검증하는 방법
 
 ---
 
-## 1. 왜 인덱스를 배워야 하는가
+## 1. 인덱스가 필요한 이유
 
-데이터베이스를 처음 배울 때는 테이블에 들어 있는 데이터가 많지 않습니다.
-
-예를 들어 `students` 테이블에 학생이 5명만 있다면 다음 SQL은 매우 빠르게 실행됩니다.
+작은 테이블에서는 전체 행을 읽어도 큰 문제가 보이지 않을 수 있습니다. 하지만 같은 SQL도 데이터가 수만 건, 수십만 건으로 늘어나면 느려질 수 있습니다.
 
 ```sql
 SELECT id, name, email
 FROM students
-WHERE email = 'minji@example.com';
+WHERE email = 'performance5000@example.com';
 ```
 
-하지만 학생이 100만 명이라면 이야기가 달라집니다. 데이터베이스가 모든 행을 처음부터 끝까지 확인해야 한다면 검색 시간이 길어질 수 있습니다.
+인덱스가 없다면 PostgreSQL은 조건에 맞는 행을 찾기 위해 테이블을 처음부터 끝까지 읽을 수 있습니다. 이런 접근을 `Seq Scan`이라고 부릅니다. 반대로 조건 컬럼에 적절한 인덱스가 있으면 인덱스를 먼저 탐색한 뒤 필요한 행으로 이동할 수 있습니다.
 
-![인덱스가 필요한 이유](../images/chapter10/ch10_01_index_need_overview.svg)
+![데이터 증가와 인덱스 검토](../images/chapter10/ch10_01_index_need_overview.svg)
 
-그림 10-1 인덱스가 필요한 이유
+그림 10-1 데이터 증가와 인덱스 검토
 
-인덱스는 이런 상황에서 원하는 데이터를 더 빠르게 찾기 위한 구조입니다.
-
-```text
-인덱스 = 자주 찾는 값을 빠르게 찾기 위해 미리 만들어 둔 검색용 구조
-```
-
-책의 뒷부분에 있는 색인을 생각하면 이해하기 쉽습니다. 특정 단어가 어느 페이지에 있는지 찾을 때 책을 처음부터 끝까지 읽지 않고 색인을 먼저 확인합니다.
-
-데이터베이스 인덱스도 비슷합니다. 특정 컬럼으로 자주 검색한다면 그 컬럼에 인덱스를 만들어 검색 속도를 높일 수 있습니다.
+인덱스는 검색용 보조 구조입니다. 많이 만들수록 항상 좋아지는 장치가 아니라, 자주 쓰는 조회 패턴을 빠르게 만들기 위해 선택적으로 추가하는 구조입니다.
 
 ---
 
-## 2. 실습에 사용할 테이블 구조
+## 2. 실습 데이터셋과 안전 경고
 
-이 장에서도 온라인 강의 수강신청 시스템을 계속 사용합니다.
+이 장의 실습 파일은 다음 위치에 있습니다.
 
-기본 테이블은 다음과 같습니다.
+```text
+code/chapter10/index_performance_practice.sql
+```
+
+> **실습 DB 확인**
+>
+> `index_performance_practice.sql`은 기존 실습 테이블을 삭제하고 성능 비교용 데이터를 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 먼저 `SELECT current_database();`로 연결 대상을 확인합니다. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
+
+Chapter 09에서 `payments`가 `enrollments`를 참조했을 수 있으므로 Chapter 10 SQL은 `payments`를 먼저 삭제합니다.
+
+```sql
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS enrollments;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS instructors;
+DROP TABLE IF EXISTS students;
+```
+
+Chapter 10의 기본 테이블은 다음 네 개입니다.
 
 ```text
 students(id, name, email, joined_at)
@@ -6745,1296 +6753,724 @@ courses(id, instructor_id, title, description, level, price, opened_at)
 enrollments(id, student_id, course_id, enrolled_at, status, paid_amount)
 ```
 
-성능 실습에서는 다음과 같은 조회를 중심으로 생각합니다.
+기본 예제 데이터만으로는 성능 차이를 관찰하기 어렵기 때문에 성능 테스트 데이터를 추가로 만듭니다.
 
-```text
-- 이메일로 학생 찾기
-- 강의 제목으로 강의 찾기
-- 수강상태별 신청 내역 찾기
-- 특정 학생의 수강신청 내역 찾기
-- 특정 강의의 수강생 목록 찾기
-- 강의 제목순으로 정렬하기
+| 테이블 | 예제 데이터 | 자동 생성 데이터 | 최종 예상 행 수 |
+| --- | ---: | ---: | ---: |
+| students | 5 | 10,000 | 10,005 |
+| instructors | 3 | 0 | 3 |
+| courses | 5 | 2,000 | 2,005 |
+| enrollments | 7 | 100,000 | 100,007 |
+
+데이터 생성 뒤에는 통계를 갱신합니다.
+
+```sql
+ANALYZE students;
+ANALYZE instructors;
+ANALYZE courses;
+ANALYZE enrollments;
 ```
 
-이런 조회가 자주 실행된다면 인덱스를 검토할 수 있습니다.
+`ANALYZE table_name`은 옵티마이저가 사용할 통계를 갱신하는 명령입니다. `EXPLAIN ANALYZE`와 이름이 비슷하지만 의미가 다릅니다.
 
 ---
 
-## 3. 인덱스란 무엇인가
+## 3. 자동 생성 인덱스와 수동 인덱스
 
-인덱스는 테이블의 특정 컬럼 값을 기준으로 데이터를 빠르게 찾을 수 있도록 도와주는 구조입니다.
+PostgreSQL은 PRIMARY KEY와 UNIQUE 제약조건을 유지하기 위해 고유 인덱스를 자동으로 만듭니다. 반면 FOREIGN KEY의 자식 컬럼에는 인덱스를 자동으로 만들지 않습니다.
 
-예를 들어 `students.email` 컬럼으로 학생을 자주 검색한다고 가정합니다.
+| 구조 | PostgreSQL 인덱스 생성 | Chapter 10 처리 |
+| --- | --- | --- |
+| PRIMARY KEY | 고유 인덱스 자동 생성 | 별도 생성하지 않음 |
+| UNIQUE | 고유 인덱스 자동 생성 | 기존 인덱스를 확인함 |
+| FOREIGN KEY 자식 컬럼 | 자동 생성하지 않음 | 쿼리 패턴에 따라 수동 생성 검토 |
+| 일반 컬럼 | 자동 생성하지 않음 | 필요할 때 수동 생성 |
+
+`students.email`은 이미 UNIQUE 제약조건이 있으므로 고유 인덱스가 자동으로 존재합니다. 따라서 같은 컬럼에 별도 수동 인덱스를 추가하지 않습니다.
+
+현재 인덱스 목록은 다음 SQL로 확인합니다.
 
 ```sql
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
+SELECT
+    tablename,
+    indexname,
+    indexdef
+FROM pg_indexes
+WHERE schemaname = 'public'
+  AND tablename IN ('students', 'instructors', 'courses', 'enrollments')
+ORDER BY tablename, indexname;
 ```
 
-이때 `email` 컬럼에 인덱스가 없다면 데이터베이스는 많은 행을 확인해야 할 수 있습니다. 반대로 `email` 컬럼에 인덱스가 있으면 해당 값을 더 빠르게 찾을 수 있습니다.
-
-인덱스 생성 SQL은 다음과 같습니다.
-
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
-
-이 SQL의 의미는 다음과 같습니다.
-
-| 구성 | 의미 |
-| --- | --- |
-| CREATE INDEX | 인덱스를 생성한다 |
-| idx_students_email | 인덱스 이름 |
-| ON students(email) | students 테이블의 email 컬럼에 인덱스를 만든다 |
-
-인덱스 이름은 보통 다음 규칙으로 작성하면 좋습니다.
-
-```text
-idx_테이블명_컬럼명
-```
-
-예시는 다음과 같습니다.
-
-```text
-idx_students_email
-idx_courses_title
-idx_enrollments_student_id
-idx_enrollments_course_id
-```
+자동 인덱스 이름은 제약조건 이름이나 PostgreSQL 환경에 따라 달라질 수 있습니다. 중요한 것은 이름을 외우는 것이 아니라 어떤 제약조건이 어떤 인덱스를 만들었는지 이해하는 것입니다.
 
 ---
 
-## 4. 인덱스가 없는 조회와 있는 조회
+## 4. Seq Scan과 Index Scan
 
-인덱스가 없는 상태에서는 데이터베이스가 테이블의 많은 행을 확인해야 할 수 있습니다.
+`Seq Scan`은 테이블을 순차적으로 읽는 접근 방식입니다. 데이터가 적거나 대부분의 행을 읽어야 할 때는 Seq Scan이 합리적일 수 있습니다.
 
-![전체 테이블 스캔과 인덱스 검색 비교](../images/chapter10/ch10_02_table_scan_vs_index_scan.svg)
+`Index Scan`은 인덱스를 사용해 조건에 맞는 위치를 찾는 방식입니다. 조건이 비교적 적은 행을 골라내고, 인덱스 탐색 비용보다 절약되는 읽기 비용이 클 때 유리합니다.
 
-그림 10-2 전체 테이블 스캔과 인덱스 검색 비교
+![Seq Scan과 Index Scan의 검색 경로](../images/chapter10/ch10_02_table_scan_vs_index_scan.svg)
 
-```text
-students 테이블 전체 확인 -> email 값 비교 -> 일치하는 행 반환
-```
+그림 10-2 Seq Scan과 Index Scan의 검색 경로
 
-인덱스가 있으면 다음처럼 검색 경로가 달라질 수 있습니다.
-
-```text
-email 인덱스 확인 -> 해당 행 위치 찾기 -> 필요한 행 반환
-```
-
-인덱스가 항상 모든 상황에서 빠른 것은 아닙니다. 하지만 특정 조건으로 자주 검색하는 컬럼에는 큰 도움이 될 수 있습니다.
-
-초급 단계에서는 다음처럼 이해하면 충분합니다.
-
-```text
-데이터가 많고, 특정 컬럼으로 자주 찾는다면 인덱스를 검토한다.
-```
+인덱스가 있어도 PostgreSQL이 Seq Scan을 선택할 수 있습니다. 이것은 오류가 아닙니다. 테이블 크기, 조건 선택도, 통계, 캐시 상태, 반환 행 수에 따라 전체 테이블을 읽는 편이 더 낫다고 판단할 수 있습니다.
 
 ---
 
-## 5. WHERE 조건과 인덱스
+## 5. WHERE 조건에서 인덱스 후보 찾기
 
-인덱스는 주로 `WHERE` 조건에서 자주 사용되는 컬럼에 만듭니다.
+인덱스 후보를 찾을 때는 단순히 WHERE에 등장하는 모든 컬럼을 고르지 않습니다. 다음 질문을 함께 봅니다.
 
-![WHERE 조건과 인덱스 후보](../images/chapter10/ch10_03_where_index_candidate.svg)
+- 자주 실행되는 쿼리인가?
+- 테이블 데이터가 충분히 많은가?
+- 조건이 전체 행 중 적은 행을 선택하는가?
+- 이미 같은 역할을 하는 인덱스가 있는가?
+- 쓰기 비용 증가보다 조회 이점이 큰가?
 
-그림 10-3 WHERE 조건과 인덱스 후보
+![WHERE 조건에서 인덱스 후보 판단하기](../images/chapter10/ch10_03_where_index_candidate.svg)
 
-예를 들어 학생 이메일로 자주 검색한다면 `students.email` 컬럼이 인덱스 후보입니다.
+그림 10-3 WHERE 조건에서 인덱스 후보 판단하기
 
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
+| 쿼리 컬럼 | 현재 구조 | 판단 |
+| --- | --- | --- |
+| `students.email` | UNIQUE 인덱스 자동 존재 | 수동 인덱스 생성 불필요 |
+| `courses.title` | 일반 컬럼 | 정확 일치 검색이 많으면 후보 |
+| `enrollments.student_id` | FK지만 자동 인덱스 없음 | 학생별 조회가 많으면 후보 |
+| `enrollments.course_id` | FK지만 자동 인덱스 없음 | 강의별 조회가 많으면 후보 |
+| `enrollments.status` | 값 종류가 적음 | 단독 인덱스는 분포 확인 후 판단 |
+| `(course_id, status)` | 복합 조건 | 쿼리 패턴과 컬럼 순서 검토 |
 
-조회 SQL은 다음과 같습니다.
-
-```sql
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
-```
-
-강의 제목으로 자주 검색한다면 `courses.title`도 인덱스 후보가 될 수 있습니다.
-
-```sql
-CREATE INDEX idx_courses_title
-ON courses(title);
-```
-
-```sql
-SELECT id, title, level, price
-FROM courses
-WHERE title = '데이터베이스 입문';
-```
-
-하지만 모든 WHERE 조건 컬럼에 무조건 인덱스를 만드는 것은 좋지 않습니다. 자주 검색하지 않는 컬럼이나 데이터 종류가 너무 적은 컬럼은 효과가 작을 수 있습니다.
-
-예를 들어 `status` 값이 `신청`, `수강중`, `완료`, `취소` 정도로만 구성되어 있다면 단독 인덱스의 효과가 제한적일 수 있습니다. 실제로 필요한지는 데이터 양과 쿼리 패턴을 보고 판단해야 합니다.
+선택도는 조건이 전체 행 중 얼마나 적은 행을 선택하는지 판단하는 개념입니다. 이메일처럼 대부분 값이 서로 다른 컬럼은 선택도가 높고, 수강 상태처럼 값 종류가 적은 컬럼은 선택도가 낮을 수 있습니다. 다만 낮은 선택도 컬럼도 다른 조건과 함께 쓰이거나 특정 값의 분포가 치우쳐 있으면 검토 대상이 될 수 있습니다.
 
 ---
 
 ## 6. ORDER BY와 인덱스
 
-인덱스는 정렬에도 도움이 될 수 있습니다.
+인덱스는 검색뿐 아니라 정렬에도 영향을 줄 수 있습니다.
 
-![ORDER BY와 인덱스](../images/chapter10/ch10_04_order_by_index_flow.svg)
+![ORDER BY에서 인덱스가 사용되는 흐름](../images/chapter10/ch10_04_order_by_index_flow.svg)
 
-그림 10-4 ORDER BY와 인덱스
+그림 10-4 ORDER BY에서 인덱스가 사용되는 흐름
 
-예를 들어 강의 목록을 제목순으로 자주 보여 준다면 다음 SQL이 자주 실행될 수 있습니다.
+다음 두 쿼리를 비교합니다.
 
 ```sql
+EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, title, level, price
 FROM courses
 ORDER BY title;
 ```
 
-이 경우 `title` 컬럼에 인덱스가 있으면 정렬 작업에 도움이 될 수 있습니다.
-
 ```sql
-CREATE INDEX idx_courses_title
-ON courses(title);
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id, title, level, price
+FROM courses
+ORDER BY title
+LIMIT 20;
 ```
 
-다만 정렬에 항상 인덱스가 사용되는 것은 아닙니다. 데이터 양, 조건, 정렬 방향, DBMS의 판단에 따라 실행 방식이 달라질 수 있습니다.
-
-그래서 인덱스를 만든 뒤에는 실행 계획을 확인하는 습관이 필요합니다.
+`ORDER BY title`에 맞는 인덱스가 있어도 항상 Index Scan이 선택되는 것은 아닙니다. 전체 행을 모두 반환해야 하는지, 일부 행만 빠르게 가져오면 되는지, 별도 `Sort` 비용이 얼마나 큰지에 따라 계획이 달라질 수 있습니다. `LIMIT`은 특히 계획 선택에 영향을 줄 수 있습니다.
 
 ---
 
-## 7. JOIN 조건과 인덱스
+## 7. JOIN과 FOREIGN KEY 인덱스
 
-JOIN에서는 외래키 컬럼이 자주 사용됩니다.
+JOIN에서는 외래키 컬럼이 자주 등장합니다. 그러나 PostgreSQL은 FOREIGN KEY 자식 컬럼에 인덱스를 자동 생성하지 않습니다.
 
-![JOIN 조건과 외래키 인덱스](../images/chapter10/ch10_05_join_foreign_key_index.svg)
+![JOIN 관계와 외래키 인덱스 후보](../images/chapter10/ch10_05_join_foreign_key_index.svg)
 
-그림 10-5 JOIN 조건과 외래키 인덱스
+그림 10-5 JOIN 관계와 외래키 인덱스 후보
 
-Chapter 08에서 다음 JOIN을 사용했습니다.
-
-```sql
-SELECT
-    s.name AS student_name,
-    c.title AS course_title,
-    e.status
-FROM enrollments AS e
-JOIN students AS s ON e.student_id = s.id
-JOIN courses AS c ON e.course_id = c.id;
-```
-
-여기서 JOIN 조건에 사용되는 컬럼은 다음과 같습니다.
-
-```text
-enrollments.student_id
-enrollments.course_id
-students.id
-courses.id
-```
-
-`students.id`와 `courses.id`는 기본키이므로 보통 자동으로 인덱스가 만들어집니다. 하지만 `enrollments.student_id`, `enrollments.course_id`는 별도로 인덱스를 검토할 수 있습니다.
+`students.id`와 `courses.id`는 기본키이므로 자동 인덱스가 있습니다. 하지만 `enrollments.student_id`, `enrollments.course_id`는 자식 FK 컬럼이므로 쿼리 패턴을 보고 수동 인덱스를 검토해야 합니다.
 
 ```sql
 CREATE INDEX idx_enrollments_student_id
 ON enrollments(student_id);
 ```
 
-```sql
-CREATE INDEX idx_enrollments_course_id
-ON enrollments(course_id);
-```
-
-특정 학생의 수강신청 내역을 자주 조회한다면 `student_id` 인덱스가 도움이 될 수 있습니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE student_id = 1;
-```
-
-특정 강의의 수강생 목록을 자주 조회한다면 `course_id` 인덱스를 검토할 수 있습니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE course_id = 1;
-```
+`course_id` 단일 인덱스는 복합 인덱스 실습과 겹칠 수 있습니다. 이 장에서는 단일 `course_id` 인덱스를 비교한 뒤 제거하고, 최종 수동 인덱스는 `(course_id, status)` 복합 인덱스로 둡니다.
 
 ---
 
-## 8. 복합 인덱스 맛보기
+## 8. 복합 인덱스와 선두 컬럼
 
-하나의 컬럼이 아니라 여러 컬럼을 함께 사용하는 인덱스도 있습니다. 이를 복합 인덱스라고 합니다.
-
-![복합 인덱스와 컬럼 순서](../images/chapter10/ch10_06_composite_index_order.svg)
-
-그림 10-6 복합 인덱스와 컬럼 순서
-
-예를 들어 특정 강의에서 특정 상태의 수강신청을 자주 조회한다고 가정합니다.
-
-```sql
-SELECT id, student_id, course_id, status, paid_amount
-FROM enrollments
-WHERE course_id = 1 AND status = '수강중';
-```
-
-이런 쿼리가 자주 실행된다면 다음과 같은 복합 인덱스를 검토할 수 있습니다.
+복합 인덱스는 여러 컬럼을 묶어 만든 인덱스입니다.
 
 ```sql
 CREATE INDEX idx_enrollments_course_status
 ON enrollments(course_id, status);
 ```
 
-복합 인덱스는 컬럼 순서가 중요합니다. `(course_id, status)`와 `(status, course_id)`는 같은 의미가 아닙니다.
+![복합 인덱스의 선두 컬럼과 쿼리 조건](../images/chapter10/ch10_06_composite_index_order.svg)
 
-초급 단계에서는 다음 정도만 기억하면 됩니다.
+그림 10-6 복합 인덱스의 선두 컬럼과 쿼리 조건
 
-```text
-복합 인덱스는 자주 함께 사용되는 조건 컬럼을 묶어 만들 수 있다.
-다만 컬럼 순서와 실제 쿼리 패턴을 함께 검토해야 한다.
-```
-
----
-
-## 9. EXPLAIN 실행 계획 맛보기
-
-인덱스를 만들었다고 해서 무조건 사용되는 것은 아닙니다. 데이터베이스는 SQL을 실행할 때 여러 방법 중 하나를 선택합니다.
-
-이 선택 과정을 확인할 수 있는 도구가 `EXPLAIN`입니다.
-
-![EXPLAIN 생성 전후 비교](../images/chapter10/ch10_07_explain_before_after.svg)
-
-그림 10-7 EXPLAIN 생성 전후 비교
+`(course_id, status)`는 다음 조건에 잘 맞을 수 있습니다.
 
 ```sql
-EXPLAIN
-SELECT id, name, email
-FROM students
-WHERE email = 'minji@example.com';
+WHERE course_id = 5
+  AND status = '수강중'
 ```
 
-`EXPLAIN`은 SQL을 실제로 어떻게 실행할지 계획을 보여 줍니다.
+또한 선두 컬럼인 `course_id`만 사용하는 조건에도 활용될 가능성이 있습니다.
 
-처음에는 모든 내용을 이해하지 못해도 괜찮습니다. 다음 단어 정도만 눈여겨보면 됩니다.
+```sql
+WHERE course_id = 5
+```
 
-| 표현 | 대략적 의미 |
+반면 `status`만 사용하는 조건에는 일반적으로 효율적이지 않을 수 있습니다.
+
+```sql
+WHERE status = '수강중'
+```
+
+`(course_id, status)`와 `(status, course_id)`는 같은 인덱스가 아닙니다. 복합 인덱스는 실제 쿼리 조건 조합과 선두 컬럼 사용 여부를 함께 검토해야 합니다.
+
+---
+
+## 9. EXPLAIN과 EXPLAIN ANALYZE
+
+`EXPLAIN`은 SQL을 실제로 실행하지 않고 예상 실행 계획을 보여 줍니다. `EXPLAIN ANALYZE`는 SQL을 실제로 실행하고 실제 통계를 함께 보여 줍니다.
+
+| 명령 | 의미 | 주의 |
+| --- | --- | --- |
+| `EXPLAIN` | 실행하지 않고 예상 실행 계획 표시 | 비용과 예상 행 수 중심 |
+| `EXPLAIN ANALYZE` | SQL을 실제 실행하고 실제 통계 표시 | 변경 SQL에 사용하면 실제 변경됨 |
+| `EXPLAIN (ANALYZE, BUFFERS)` | 실제 실행 결과와 버퍼 사용량 표시 | 이 장에서는 SELECT 실습에만 사용 |
+
+이 장에서는 SELECT 쿼리에만 다음 형태를 사용합니다.
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT ...;
+```
+
+`EXPLAIN ANALYZE`의 `ANALYZE`와 `ANALYZE students;`의 `ANALYZE`는 다릅니다. 앞의 것은 쿼리를 실제 실행해 계획을 측정하는 옵션이고, 뒤의 것은 옵티마이저 통계를 갱신하는 명령입니다.
+
+![인덱스 전후 실행 계획 비교](../images/chapter10/ch10_07_explain_before_after.svg)
+
+그림 10-7 인덱스 전후 실행 계획 비교
+
+실행 계획에서 확인할 항목은 다음과 같습니다.
+
+| 확인 항목 | 의미 |
 | --- | --- |
-| Seq Scan | 테이블을 순차적으로 확인하는 방식 |
-| Index Scan | 인덱스를 사용해 찾는 방식 |
-| Bitmap Index Scan | 인덱스를 활용해 여러 행을 찾는 방식 |
+| 계획 노드 | Seq Scan, Index Scan, Bitmap Heap Scan 등 |
+| cost | 옵티마이저가 계산한 상대적 예상 비용 |
+| rows | 예상 결과 행 수 |
+| actual rows | 실제 반환 행 수 |
+| actual time | 실제 실행 시간 |
+| Buffers | 읽거나 사용한 데이터 블록 |
+| Filter | 읽은 뒤 적용한 조건 |
+| Index Cond | 인덱스 탐색에 사용한 조건 |
+| Sort | 별도 정렬 작업 여부 |
 
-초급 단계에서는 다음 흐름으로 보면 됩니다.
-
-```text
-1. 인덱스 생성 전 EXPLAIN을 실행한다.
-2. 인덱스를 생성한다.
-3. 같은 SELECT에 대해 EXPLAIN을 다시 실행한다.
-4. 실행 계획이 어떻게 달라졌는지 비교한다.
-```
-
-다만 샘플 데이터가 너무 적으면 인덱스가 있어도 데이터베이스가 `Seq Scan`을 선택할 수 있습니다. 이는 오류가 아니라 데이터가 적을 때는 전체를 읽는 편이 더 싸다고 판단한 결과일 수 있습니다.
+`cost`는 시간이 아닙니다. 실행 시간은 PC 상태, 캐시, PostgreSQL 버전, 데이터 분포에 따라 달라집니다. 한 번의 실행 시간만으로 결론을 내리지 말고, 같은 환경에서 인덱스 생성 전후 계획과 실제 행 수, 버퍼 사용량을 함께 비교합니다.
 
 ---
 
-## 10. 인덱스의 장점
+## 10. 인덱스의 이점과 비용
 
-인덱스의 가장 큰 장점은 검색 성능을 높일 수 있다는 점입니다.
+인덱스의 장점은 조회 성능을 높일 수 있다는 점입니다.
 
-대표적인 장점은 다음과 같습니다.
+- WHERE 조건 검색이 빨라질 수 있습니다.
+- JOIN 조건 처리에 도움이 될 수 있습니다.
+- ORDER BY 정렬 비용을 줄일 수 있습니다.
+- 자주 사용하는 조회 쿼리의 응답 시간을 줄일 수 있습니다.
 
-```text
-- WHERE 조건 검색이 빨라질 수 있다.
-- JOIN 조건 처리에 도움이 될 수 있다.
-- ORDER BY 정렬에 도움이 될 수 있다.
-- 자주 사용하는 조회 쿼리의 응답 시간을 줄일 수 있다.
-```
+하지만 인덱스에는 비용도 있습니다.
 
-특히 데이터가 많아지고 조회 요청이 많아질수록 인덱스의 중요성이 커집니다.
-
-하지만 인덱스는 무조건 많이 만들수록 좋은 것은 아닙니다.
-
----
-
-## 11. 인덱스의 단점
-
-인덱스에는 비용이 있습니다.
-
-첫째, 저장 공간을 사용합니다. 인덱스는 별도의 구조이므로 테이블 데이터 외에 추가 공간이 필요합니다.
-
-둘째, 데이터 변경 작업이 느려질 수 있습니다. `INSERT`, `UPDATE`, `DELETE`가 실행될 때 테이블뿐 아니라 인덱스도 함께 관리해야 하기 때문입니다.
-
-셋째, 너무 많은 인덱스는 관리와 판단을 어렵게 만듭니다.
-
-인덱스의 단점을 정리하면 다음과 같습니다.
-
-| 단점 | 설명 |
+| 비용 | 설명 |
 | --- | --- |
-| 저장 공간 증가 | 인덱스 구조를 따로 저장해야 함 |
-| 쓰기 성능 저하 | 데이터 변경 시 인덱스도 함께 갱신됨 |
-| 관리 복잡도 증가 | 인덱스가 많으면 어떤 것이 필요한지 판단하기 어려움 |
-| 불필요한 인덱스 가능성 | 실제 쿼리에서 사용되지 않는 인덱스가 생길 수 있음 |
+| 저장 공간 증가 | 인덱스 구조를 별도로 저장해야 함 |
+| 쓰기 성능 저하 | INSERT, UPDATE, DELETE 때 인덱스도 함께 갱신해야 함 |
+| 관리 복잡도 증가 | 어떤 인덱스가 필요한지 판단해야 함 |
+| 중복 인덱스 가능성 | 이미 비슷한 인덱스가 있는데 또 만들 수 있음 |
 
-따라서 인덱스는 실제 쿼리 패턴과 실행 계획을 보고 신중하게 만들어야 합니다.
-
----
-
-## 12. 인덱스를 만들면 좋은 경우와 조심해야 할 경우
-
-인덱스를 만들면 좋은 경우는 다음과 같습니다.
-
-```text
-- 데이터가 많은 테이블에서 자주 검색하는 컬럼
-- WHERE 조건에 자주 등장하는 컬럼
-- JOIN 조건에 자주 사용되는 외래키 컬럼
-- ORDER BY에 자주 사용되는 컬럼
-- 중복이 적고 선택도가 높은 컬럼
-```
-
-반대로 조심해야 할 경우는 다음과 같습니다.
-
-```text
-- 데이터가 매우 적은 테이블
-- 거의 검색하지 않는 컬럼
-- 값의 종류가 너무 적은 컬럼
-- INSERT/UPDATE/DELETE가 매우 자주 발생하는 테이블
-- 이미 비슷한 인덱스가 있는 경우
-```
-
-여기서 선택도는 값이 얼마나 잘 구분되는지를 의미합니다. 예를 들어 이메일은 사람마다 대부분 다르므로 선택도가 높습니다. 반면 수강상태는 몇 가지 값만 반복되므로 선택도가 낮을 수 있습니다.
+따라서 인덱스는 많이 만드는 것이 아니라 필요한 곳에 신중하게 만드는 것입니다.
 
 ---
 
-## 13. AI가 추천한 인덱스 검토하기
+## 11. AI 추천 인덱스 검토
 
-AI에게 다음처럼 요청할 수 있습니다.
-
-```text
-PostgreSQL에서 온라인 강의 수강신청 시스템의 성능을 높이기 위한 인덱스를 추천해 주세요.
-students, courses, enrollments 테이블을 사용합니다.
-자주 실행되는 쿼리는 학생 이메일 검색, 특정 학생의 수강신청 조회, 특정 강의의 수강생 조회입니다.
-```
-
-AI는 다음과 같은 인덱스를 추천할 수 있습니다.
+AI에게 인덱스를 추천해 달라고 하면 그럴듯한 SQL을 빠르게 받을 수 있습니다. 하지만 AI는 실제 데이터 분포와 현재 인덱스 목록, 실행 계획을 모를 수 있습니다.
 
 ![AI 추천 인덱스 검토 흐름](../images/chapter10/ch10_08_ai_index_review_flow.svg)
 
 그림 10-8 AI 추천 인덱스 검토 흐름
 
-```sql
-CREATE INDEX idx_students_email
-ON students(email);
-```
-
-```sql
-CREATE INDEX idx_enrollments_student_id
-ON enrollments(student_id);
-```
-
-```sql
-CREATE INDEX idx_enrollments_course_id
-ON enrollments(course_id);
-```
-
-이 추천이 항상 정답은 아닙니다. 다음 기준으로 검토해야 합니다.
+AI 추천은 다음 기준으로 검토합니다.
 
 | 검토 항목 | 확인 질문 |
 | --- | --- |
 | 쿼리 패턴 | 실제로 자주 실행되는 SQL인가? |
-| WHERE 조건 | 해당 컬럼이 WHERE 조건에 자주 등장하는가? |
-| JOIN 조건 | 외래키 JOIN에 자주 사용되는가? |
-| 정렬 조건 | ORDER BY에 자주 사용되는가? |
-| 데이터 양 | 테이블 데이터가 충분히 많은가? |
-| 선택도 | 값이 잘 구분되는 컬럼인가? |
-| 쓰기 비용 | INSERT/UPDATE/DELETE가 너무 느려지지 않는가? |
-| 실행 계획 | EXPLAIN으로 확인했는가? |
+| 기존 인덱스 | PRIMARY KEY, UNIQUE, 기존 수동 인덱스와 겹치지 않는가? |
+| WHERE 조건 | 해당 컬럼이 조건에서 반복적으로 쓰이는가? |
+| JOIN 조건 | FK 컬럼이 조회 성능에 영향을 주는가? |
+| ORDER BY | 정렬과 LIMIT에 도움이 되는가? |
+| 선택도 | 조건이 충분히 적은 행을 골라내는가? |
+| 쓰기 비용 | INSERT, UPDATE, DELETE 비용 증가를 감수할 가치가 있는가? |
+| 실행 계획 | EXPLAIN ANALYZE로 전후 차이를 확인했는가? |
 
-AI가 추천한 인덱스는 출발점일 뿐입니다. 실제 적용 여부는 사람이 쿼리 패턴과 실행 계획을 확인하고 결정해야 합니다.
-
----
-
-## 14. 인덱스 실습 전 확인표
-
-인덱스를 만들기 전 다음 질문을 확인합니다.
-
-| 질문 | 확인 |
-| --- | --- |
-| 이 쿼리는 자주 실행되는가? |  |
-| 이 테이블은 데이터가 충분히 많은가? |  |
-| WHERE 조건에 반복적으로 사용되는 컬럼인가? |  |
-| JOIN 조건에 사용되는 외래키인가? |  |
-| ORDER BY에 자주 사용되는 컬럼인가? |  |
-| 이미 비슷한 인덱스가 있는가? |  |
-| 인덱스 생성 전후 EXPLAIN을 비교했는가? |  |
-| 쓰기 성능 저하 가능성을 검토했는가? |  |
-
-이 표를 사용하면 AI가 추천한 인덱스도 무비판적으로 적용하지 않고 검토할 수 있습니다.
+AI가 `students.email` 인덱스를 추천했다면 먼저 UNIQUE 자동 인덱스가 이미 있는지 확인해야 합니다. 이미 같은 역할을 하는 인덱스가 있다면 새로 만들지 않습니다.
 
 ---
 
-## 15. 자주 하는 실수
+## 12. 최종 인덱스 기준
 
-### 실수 1. 모든 컬럼에 인덱스를 만들려고 한다
-
-인덱스가 많으면 검색은 일부 빨라질 수 있지만 저장 공간과 쓰기 비용이 증가합니다. 모든 컬럼에 인덱스를 만드는 것은 좋은 전략이 아닙니다.
-
-### 실수 2. 데이터가 적은데 성능 차이를 과장한다
-
-샘플 데이터가 적으면 인덱스 효과가 거의 보이지 않을 수 있습니다. 데이터베이스가 인덱스보다 순차 검색을 선택할 수도 있습니다.
-
-### 실수 3. EXPLAIN을 확인하지 않는다
-
-인덱스를 만들었더라도 실제 쿼리에서 사용되는지 확인해야 합니다.
-
-### 실수 4. 값 종류가 적은 컬럼에 무조건 인덱스를 만든다
-
-상태값처럼 값의 종류가 적은 컬럼은 단독 인덱스 효과가 제한적일 수 있습니다.
-
-### 실수 5. AI 추천을 그대로 적용한다
-
-AI가 추천한 인덱스는 실제 데이터 양, 쿼리 빈도, 실행 계획을 모르는 상태에서 만든 초안일 수 있습니다.
-
----
-
-## 16. 스스로 확인하기
-
-### 16.1 개념 확인
-
-1. 인덱스가 필요한 이유를 설명해 보세요.
-2. 인덱스를 책의 색인에 비유해 설명해 보세요.
-3. 인덱스의 장점과 단점을 각각 2가지 이상 정리해 보세요.
-4. `Seq Scan`과 `Index Scan`의 차이를 간단히 설명해 보세요.
-5. AI가 추천한 인덱스를 검토할 때 확인해야 할 항목을 3가지 이상 정리해 보세요.
-
-### 16.2 SQL 작성 문제
-
-다음 요구사항에 맞는 SQL을 작성해 보세요.
+이 장의 실습에서 최종 수동 인덱스 기준은 다음과 같습니다.
 
 ```text
-1. students 테이블의 email 컬럼에 인덱스를 생성한다.
-2. courses 테이블의 title 컬럼에 인덱스를 생성한다.
-3. enrollments 테이블의 student_id 컬럼에 인덱스를 생성한다.
-4. enrollments 테이블의 course_id 컬럼에 인덱스를 생성한다.
-5. course_id와 status를 함께 사용하는 복합 인덱스를 생성한다.
+idx_courses_title
+idx_enrollments_student_id
+idx_enrollments_course_status
 ```
 
-### 16.3 검토 문제
+`idx_enrollments_course_id`는 단일 인덱스와 복합 인덱스의 역할이 겹치는지 비교한 뒤 제거하는 실습 대상으로 둡니다.
 
-다음 상황에서 인덱스를 만들지 말아야 할 수도 있는 이유를 설명해 보세요.
-
-```text
-- 테이블에 데이터가 20건뿐이다.
-- status 컬럼 값이 신청, 수강중, 완료 세 가지뿐이다.
-- INSERT가 매우 자주 발생하는 로그 테이블이다.
-- AI가 모든 컬럼에 인덱스를 만들라고 추천했다.
-```
+자동 인덱스까지 확인하려면 `indexname LIKE 'idx_%'` 조건만 쓰지 말고 `pg_indexes`에서 네 테이블 전체를 조회합니다. 그래야 PK와 UNIQUE 자동 인덱스도 함께 볼 수 있습니다.
 
 ---
 
-## 17. 정리
+## 13. 자주 하는 실수
 
-이번 장에서는 인덱스와 성능 기초를 살펴보았습니다.
+### 실수 1. UNIQUE 컬럼에 같은 인덱스를 또 만든다
 
-핵심 내용을 정리하면 다음과 같습니다.
+`students.email`은 UNIQUE 제약조건 때문에 자동 인덱스가 있습니다. 같은 컬럼에 `idx_students_email`을 또 만들면 중복 인덱스가 될 수 있습니다.
 
-```text
-1. 인덱스는 데이터를 빠르게 찾기 위한 검색용 구조이다.
-2. WHERE 조건에 자주 사용되는 컬럼은 인덱스 후보가 될 수 있다.
-3. JOIN 조건에 사용되는 외래키 컬럼도 인덱스 후보가 될 수 있다.
-4. ORDER BY에 자주 사용되는 컬럼도 인덱스가 도움이 될 수 있다.
-5. 인덱스는 검색 성능을 높일 수 있지만 저장 공간과 쓰기 비용이 증가한다.
-6. 인덱스 생성 전후에는 EXPLAIN으로 실행 계획을 확인하는 것이 좋다.
-7. AI가 추천한 인덱스도 실제 쿼리 패턴과 실행 계획을 기준으로 검토해야 한다.
-```
+### 실수 2. 인덱스가 있으면 항상 Index Scan이 나와야 한다고 생각한다
 
-이 장에서 가장 중요한 문장은 다음입니다.
+PostgreSQL은 비용을 비교해 Seq Scan을 선택할 수 있습니다. 특히 데이터가 적거나 많은 행을 반환할 때 Seq Scan은 정상적인 선택일 수 있습니다.
 
-```text
-인덱스는 많이 만드는 것이 아니라 필요한 곳에 신중하게 만드는 것이다.
-```
+### 실수 3. EXPLAIN의 cost를 실행 시간으로 읽는다
 
----
+cost는 상대적 예상 비용입니다. 실제 시간은 `EXPLAIN ANALYZE`의 `actual time`과 `Execution Time`을 봅니다.
 
-## 18. 다음 장에서는
+### 실수 4. FOREIGN KEY가 자동 인덱스를 만든다고 생각한다
 
-다음 장에서는 데이터베이스 보안과 백업을 살펴봅니다.
+PostgreSQL은 FK 제약조건 자체를 만들지만 자식 FK 컬럼 인덱스는 자동 생성하지 않습니다.
 
-Chapter 11에서는 데이터베이스 접근 권한, 비밀번호 관리, 백업과 복구의 기본 개념을 다룹니다. 데이터베이스는 빠르게 조회되는 것도 중요하지만, 안전하게 보호되고 복구 가능해야 합니다.
+### 실수 5. 복합 인덱스의 컬럼 순서를 무시한다
+
+`(course_id, status)`와 `(status, course_id)`는 같은 인덱스가 아닙니다.
 
 ---
 
-# Chapter 11. 데이터베이스를 안전하게 지키고 복구하는 방법
+## 14. 핵심 정리
+
+- 인덱스는 검색을 빠르게 하기 위한 보조 구조입니다.
+- PRIMARY KEY와 UNIQUE는 자동으로 고유 인덱스를 만듭니다.
+- FOREIGN KEY 자식 컬럼은 자동으로 인덱스가 생기지 않습니다.
+- WHERE, JOIN, ORDER BY 조건은 인덱스 후보를 찾는 단서입니다.
+- 인덱스가 있어도 PostgreSQL은 Seq Scan을 선택할 수 있습니다.
+- EXPLAIN은 예상 계획, EXPLAIN ANALYZE는 실제 실행 결과입니다.
+- 복합 인덱스는 선두 컬럼과 실제 조건 조합이 중요합니다.
+- 인덱스는 읽기 성능과 쓰기 비용 사이의 선택입니다.
+- AI 추천 인덱스는 기존 인덱스와 실행 계획으로 검증해야 합니다.
+
+---
+
+## 15. 다음 장에서는
+
+Chapter 11에서는 데이터베이스 보안과 백업의 기본을 다룹니다. 빠른 조회도 중요하지만, 데이터베이스는 안전하게 보호되고 복구 가능해야 합니다.
+
+---
+
+# Chapter 11. 데이터베이스 보안과 백업 기초
 
 ---
 
 ## 이 장에서 살펴볼 내용
 
-데이터베이스는 빠르게 조회되는 것만으로 충분하지 않습니다. 필요한 사람만 접근할 수 있어야 하고, 허용된 작업만 수행할 수 있어야 하며, 실수나 장애가 발생했을 때 데이터를 되돌릴 수 있어야 합니다.
+Chapter 10에서는 인덱스와 실행 계획으로 조회 성능을 점검했습니다. 빠른 조회만큼 중요한 것은 데이터베이스를 안전하게 보호하고, 장애나 실수 발생 시 복구할 수 있도록 준비하는 일입니다.
 
-온라인 강의 서비스를 예로 들면 데이터베이스에는 이름, 이메일, 수강 이력, 결제 금액처럼 외부에 노출되거나 잘못 변경되었을 때 문제가 되는 정보가 저장됩니다. 관리자 계정이 유출되거나, 애플리케이션이 과도한 권한으로 접속하거나, 백업이 복구되지 않는다면 잘 설계된 테이블과 빠른 인덱스도 서비스를 지켜 주지 못합니다.
+이번 장에서는 PostgreSQL을 기준으로 계정, 역할, 권한, SQL Injection 방어, 백업과 복구 검증의 기본 흐름을 배웁니다. 실제 운영 환경에서 실행할 명령을 그대로 따라 하는 장이 아니라, 어떤 권한을 왜 부여하고 어떤 복구 절차를 어떻게 검증해야 하는지 판단하는 장입니다.
 
-이 장에서는 다음 내용을 살펴봅니다.
+이 장에서 다루는 내용은 다음과 같습니다.
 
-- 데이터베이스 보안을 바라보는 기본 관점
-- 관리자, 서비스, 읽기 전용 계정의 역할 분리
+- 보호해야 할 데이터와 위협 파악
+- 인증과 권한 부여의 차이
+- PostgreSQL Role, LOGIN 역할, NOLOGIN 권한 역할
 - 최소 권한 원칙
-- PostgreSQL의 `GRANT`, `REVOKE`와 권한 확인
-- 개발 환경과 운영 환경의 분리
-- 비밀번호, 접속 URL, 환경 변수 관리
+- GRANT, REVOKE와 유효 권한 확인
+- 개발·운영 환경과 계정 분리
+- 비밀번호와 접속 정보 보호
 - SQL Injection과 파라미터 바인딩
-- 개인정보와 로그를 다루는 기본 원칙
-- 논리 백업과 복구
-- RPO와 RTO의 기초
-- 별도 환경에서 복구 결과를 검증하는 방법
-- AI가 만든 보안 설정과 백업 명령을 검토하는 기준
-
-이 장의 핵심은 다음 두 문장으로 정리할 수 있습니다.
-
-```text
-보안은 누가 무엇을 할 수 있는지 통제하는 일이다.
-백업은 문제가 생겼을 때 되돌아갈 수 있게 만드는 일이다.
-```
+- 개인정보, 로그, 백업 파일 보호
+- 논리 백업과 복구 검증
+- RPO와 RTO
+- AI가 만든 보안·백업 명령 검토
 
 ---
 
-## 1. 데이터베이스가 안전하다는 것은 무엇인가
+## 1. 보안 통제와 복구 준비
 
-데이터베이스 보안이라고 하면 복잡한 암호화 기술이나 공격 방어 장비부터 떠올리기 쉽습니다. 하지만 작은 서비스에서도 먼저 확인해야 할 질문은 비교적 단순합니다.
+보안은 하나의 기능이 아니라 여러 통제 장치의 조합입니다. 접속 계정만 만들었다고 안전해지는 것도 아니고, 백업 파일만 있다고 복구 가능한 것도 아닙니다.
 
-```text
-누가 데이터베이스에 접속할 수 있는가?
-접속한 계정은 어떤 테이블을 읽을 수 있는가?
-데이터를 추가하거나 수정하거나 삭제할 수 있는가?
-비밀번호와 접속 정보는 어디에 저장되어 있는가?
-사용자 입력이 SQL 명령으로 해석될 가능성은 없는가?
-중요한 데이터가 삭제되었을 때 복구할 수 있는가?
-백업 파일 자체는 안전하게 보호되고 있는가?
-```
+![보안 통제와 복구 준비](../images/chapter11/ch11_01_security_backup_overview.svg)
 
-![보안과 백업이 필요한 이유](../images/chapter11/ch11_01_security_backup_overview.svg)
+그림 11-1 보안 통제와 복구 준비
 
-그림 11-1 보안과 백업이 필요한 이유
-
-보안은 하나의 기능이 아니라 여러 통제 장치가 겹쳐서 만들어지는 결과입니다.
-
-| 관점 | 핵심 질문 | 대표적인 대응 |
+| 영역 | 핵심 질문 | 예시 |
 | --- | --- | --- |
-| 접근 통제 | 누가 접속할 수 있는가? | 계정, 비밀번호, 네트워크 제한 |
-| 권한 통제 | 접속 후 무엇을 할 수 있는가? | 역할 분리, 최소 권한, GRANT/REVOKE |
-| 안전한 입력 처리 | 입력값이 SQL 구조를 바꾸는가? | 파라미터 바인딩 |
-| 비밀정보 관리 | 접속 정보가 노출되는가? | 환경 변수, Secret 관리, 저장소 제외 |
-| 데이터 보호 | 개인정보가 과도하게 수집·노출되는가? | 최소 수집, 최소 접근, 로그 점검 |
-| 복구 가능성 | 손실된 데이터를 되돌릴 수 있는가? | 정기 백업, 별도 복구 테스트 |
+| 인증 | 누구인가? | 계정, 비밀번호, 인증서 |
+| 권한 부여 | 무엇을 할 수 있는가? | SELECT, INSERT, UPDATE |
+| 감사·기록 | 누가 무엇을 했는가? | 접속 로그, 관리자 작업 기록 |
+| 복구 | 문제가 생기면 되돌릴 수 있는가? | 백업과 복구 테스트 |
 
-하나의 장치만으로 모든 위험을 막을 수는 없습니다. 예를 들어 파라미터 바인딩을 사용하더라도 애플리케이션 계정이 모든 테이블을 삭제할 수 있다면 사고의 영향이 커질 수 있습니다. 반대로 권한이 잘 분리되어 있어도 비밀번호가 공개 저장소에 올라가면 접근 통제가 무너질 수 있습니다.
+인증에 성공했다고 모든 데이터에 접근할 수 있는 것은 아닙니다. 인증 이후에도 역할과 객체 권한을 확인해야 합니다.
 
 ---
 
-## 2. 보호해야 할 데이터부터 파악한다
+## 2. Chapter 11 실습 테이블과 SQL 파일
 
-보안 설계는 기술보다 데이터에서 시작합니다. 어떤 데이터를 저장하는지 모르면 어느 수준으로 보호해야 하는지도 결정하기 어렵습니다.
-
-온라인 강의 서비스에는 다음과 같은 데이터가 있을 수 있습니다.
+실습 파일은 다음 하나입니다.
 
 ```text
-학생 이름과 이메일
-강사 정보
-수강신청 상태
-수강 이력
-결제 금액
-관리자 작업 기록
-서비스 접속 로그
+code/chapter11/security_backup_check.sql
 ```
 
-모든 데이터가 같은 성격을 갖는 것은 아닙니다. 공개 강의 제목은 많은 사람이 볼 수 있지만, 학생 이메일과 수강 이력은 접근 범위를 제한해야 합니다. 백업 파일에도 동일한 데이터가 들어가므로 원본 데이터베이스만 보호해서는 충분하지 않습니다.
+Chapter 11은 이전 장의 테이블과 충돌하지 않도록 `security_` 접두사가 붙은 별도 실습 테이블을 사용합니다.
 
-데이터를 분류할 때는 다음을 생각해 볼 수 있습니다.
+```text
+public.security_students
+public.security_courses
+public.security_enrollments
+```
 
-- 외부에 공개되어도 되는가?
-- 특정 사용자만 볼 수 있어야 하는가?
-- 변경 이력을 남겨야 하는가?
-- 삭제되면 서비스 운영에 어떤 영향을 주는가?
-- 백업 파일에 포함될 때 별도의 보호가 필요한가?
+본문에서 일반 개념을 설명할 때는 학생, 강의, 수강신청 같은 용어를 쓰지만, 실행 가능한 SQL 예시는 `security_` 테이블명을 사용합니다.
 
-데이터의 중요도와 사용 목적을 먼저 파악하면 계정 권한과 백업 정책을 더 구체적으로 설계할 수 있습니다.
+> **실습 환경 확인**
+>
+> `security_backup_check.sql`은 `security_` 실습 테이블을 삭제하고 다시 생성합니다. 개인 실습용 `ai_database_book` 데이터베이스에서만 실행하고, 먼저 현재 사용자와 데이터베이스를 확인합니다. 보존해야 할 데이터가 있는 데이터베이스에서는 실행하지 않습니다.
 
 ---
 
-## 3. 계정을 역할에 따라 분리한다
+## 3. PostgreSQL 역할과 계정 구조
 
-모든 사용자가 하나의 관리자 계정을 공유하는 방식은 편리해 보이지만 위험합니다. 누가 어떤 작업을 했는지 구분하기 어렵고, 계정 하나가 노출되었을 때 피해 범위도 커집니다.
+PostgreSQL에서는 사용자와 그룹을 모두 Role로 관리합니다. `LOGIN` 속성이 있는 Role은 일반적으로 계정처럼 접속에 사용하고, `NOLOGIN` Role은 권한 묶음이나 그룹 역할로 사용할 수 있습니다.
 
-![계정과 권한 구조](../images/chapter11/ch11_02_account_permission_model.svg)
+![PostgreSQL 역할과 객체 권한 구조](../images/chapter11/ch11_02_account_permission_model.svg)
 
-그림 11-2 계정과 권한 구조
+그림 11-2 PostgreSQL 역할과 객체 권한 구조
 
-일반적인 계정 유형은 다음처럼 나눌 수 있습니다.
-
-| 계정 유형 | 목적 | 권한 방향 |
+| 구분 | 예시 | 설명 |
 | --- | --- | --- |
-| 관리자 계정 | 데이터베이스 생성, 역할과 권한 관리 | 높은 권한이지만 사용 범위를 제한 |
-| 애플리케이션 계정 | 서비스 코드가 데이터베이스에 접속 | 실제 기능에 필요한 테이블과 작업만 허용 |
-| 읽기 전용 계정 | 보고서, 조회, 분석 | `SELECT` 중심 |
-| 배치·자동화 계정 | 정해진 작업을 주기적으로 수행 | 해당 작업에 필요한 권한만 허용 |
-| 개발·테스트 계정 | 개발 환경에서 기능 검증 | 운영 환경과 분리 |
+| 로그인 역할 | `readonly_user` | 실제 접속 계정으로 사용 가능 |
+| 로그인 역할 | `app_enrollment_user` | 애플리케이션 접속 계정 예시 |
+| 권한 역할 | `role_report_reader` | 읽기 권한 묶음 |
+| 권한 역할 | `role_enrollment_app` | 수강신청 서비스 권한 묶음 |
 
-여기서 중요한 것은 계정 이름이 아니라 **역할과 책임의 분리**입니다. 애플리케이션이 데이터 조회와 수강신청 등록만 수행한다면 데이터베이스 생성이나 사용자 관리 권한은 필요하지 않습니다.
+권한 역할을 만든 뒤 로그인 역할에 멤버십을 부여할 수 있습니다.
+
+```sql
+-- CREATE ROLE role_report_reader NOLOGIN;
+-- CREATE ROLE readonly_user LOGIN;
+-- GRANT role_report_reader TO readonly_user;
+```
+
+실제 비밀번호 설정은 조직의 비밀 정보 관리 절차를 통해 별도로 수행합니다. 예제 SQL 파일이나 저장소에 실제 비밀번호를 기록하지 않습니다.
 
 ---
 
-## 4. 최소 권한 원칙
+## 4. 권한 범위 계층
 
-최소 권한 원칙은 사용자나 프로그램이 자신의 역할을 수행하는 데 필요한 권한만 갖도록 하는 원칙입니다.
+PostgreSQL 권한은 여러 범위로 나뉩니다.
 
-![최소 권한 원칙](../images/chapter11/ch11_03_least_privilege_principle.svg)
+| 범위 | 예시 권한 | 의미 |
+| --- | --- | --- |
+| 데이터베이스 | CONNECT | 해당 DB에 접속 |
+| 스키마 | USAGE | 스키마 안 객체 이름 사용 |
+| 테이블 | SELECT, INSERT, UPDATE, DELETE | 테이블 데이터 작업 |
+| 시퀀스 | USAGE, SELECT | SERIAL 번호 생성·확인 |
+| 역할 멤버십 | GRANT role TO user | 권한 역할 상속 |
 
-그림 11-3 최소 권한 원칙
-
-```text
-필요할 것 같은 권한을 미리 모두 부여하는 것이 아니라,
-현재 역할에 필요한 권한만 부여한다.
-```
-
-예를 들어 보고서 생성 계정은 학생과 강의 데이터를 읽어야 할 수 있지만, 새 학생을 추가하거나 수강신청을 삭제할 필요는 없습니다. 이런 계정에는 `SELECT`만 부여하는 것이 적절합니다.
-
-수강신청 서비스 계정은 다음과 같이 더 세분화할 수 있습니다.
-
-| 대상 | 필요한 작업 예시 |
-| --- | --- |
-| students | 학생 정보 조회 |
-| courses | 강의 목록 조회 |
-| enrollments | 조회, 신규 신청 등록, 상태 변경 |
-
-이 경우 `students`와 `courses`에 대한 삭제 권한이나 전체 데이터베이스의 관리자 권한은 필요하지 않습니다.
-
-최소 권한은 공격뿐 아니라 실수의 피해도 줄입니다. 잘못된 코드가 실행되더라도 계정에 삭제 권한이 없다면 데이터 삭제까지 이어지는 것을 막을 수 있습니다.
+`CONNECT`만 있어도 테이블을 읽을 수 있는 것은 아닙니다. `USAGE`만 있어도 `SELECT`가 가능한 것은 아닙니다. `SERIAL` 컬럼에 INSERT하려면 테이블 INSERT 권한뿐 아니라 관련 시퀀스 권한도 필요할 수 있습니다.
 
 ---
 
-## 5. PostgreSQL의 역할과 권한
+## 5. 최소 권한 원칙
 
-PostgreSQL에서는 사용자와 역할을 모두 역할(Role) 개념으로 관리합니다. 로그인 가능한 역할을 만들 수 있고, 데이터베이스·스키마·테이블 단위로 권한을 부여할 수 있습니다.
+최소 권한은 필요한 작업에 필요한 권한만 부여하는 원칙입니다.
 
-다음은 읽기 전용 역할을 만드는 개념 예시입니다.
+![최소 권한 설계 절차](../images/chapter11/ch11_03_least_privilege_principle.svg)
 
-```sql
-CREATE ROLE readonly_user LOGIN PASSWORD 'replace_with_a_secure_password';
-```
+그림 11-3 최소 권한 설계 절차
 
-예시 비밀번호는 실제 환경에서 사용하면 안 됩니다. 또한 역할 생성은 관리자 권한이 있는 계정에서 수행해야 합니다.
-
-데이터베이스 접속 권한과 스키마 사용 권한을 부여하는 예시는 다음과 같습니다.
+읽기 전용 보고 계정에는 SELECT만 부여합니다.
 
 ```sql
-GRANT CONNECT ON DATABASE ai_database_book TO readonly_user;
-GRANT USAGE ON SCHEMA public TO readonly_user;
+-- GRANT CONNECT ON DATABASE ai_database_book TO role_report_reader;
+-- GRANT USAGE ON SCHEMA public TO role_report_reader;
+-- GRANT SELECT ON TABLE
+--     public.security_students,
+--     public.security_courses,
+--     public.security_enrollments
+-- TO role_report_reader;
 ```
 
-테이블 조회 권한은 다음과 같이 부여할 수 있습니다.
+수강신청 애플리케이션 역할은 필요한 테이블과 작업만 허용합니다.
 
 ```sql
-GRANT SELECT ON students, courses, enrollments TO readonly_user;
+-- GRANT SELECT ON TABLE
+--     public.security_students,
+--     public.security_courses
+-- TO role_enrollment_app;
+--
+-- GRANT SELECT, INSERT, UPDATE
+-- ON TABLE public.security_enrollments
+-- TO role_enrollment_app;
+--
+-- GRANT USAGE, SELECT
+-- ON SEQUENCE public.security_enrollments_id_seq
+-- TO role_enrollment_app;
 ```
 
-이 세 단계는 서로 다른 범위를 다룹니다.
-
-| 권한 | 의미 |
-| --- | --- |
-| `CONNECT` | 해당 데이터베이스에 연결할 수 있음 |
-| `USAGE ON SCHEMA` | 스키마 안의 객체 이름을 사용할 수 있음 |
-| `SELECT ON TABLE` | 지정한 테이블을 조회할 수 있음 |
-
-권한을 한 번 부여했다고 끝나는 것은 아닙니다. 역할이 바뀌거나 업무가 종료되면 더 이상 필요하지 않은 권한을 회수해야 합니다.
+기본 예시에서는 DELETE, CREATE DATABASE, CREATE ROLE, SUPERUSER, 불필요한 전체 테이블 쓰기 권한을 부여하지 않습니다.
 
 ---
 
-## 6. GRANT, REVOKE와 권한 확인
+## 6. GRANT, REVOKE와 유효 권한 확인
 
-`GRANT`는 권한을 부여하고, `REVOKE`는 권한을 회수합니다.
+`GRANT`는 특정 경로로 권한을 부여하고, `REVOKE`는 특정 경로로 부여된 권한을 회수합니다. 하지만 REVOKE 한 번으로 사용자의 모든 유효 권한이 사라진다고 단정하면 안 됩니다.
 
-![GRANT와 REVOKE 흐름](../images/chapter11/ch11_04_grant_revoke_flow.svg)
+![GRANT·REVOKE와 유효 권한 확인](../images/chapter11/ch11_04_grant_revoke_flow.svg)
 
-그림 11-4 GRANT와 REVOKE 흐름
+그림 11-4 GRANT·REVOKE와 유효 권한 확인
 
-```sql
-GRANT SELECT ON courses TO readonly_user;
-REVOKE SELECT ON courses FROM readonly_user;
-```
-
-권한 변경 후에는 실제 상태를 확인해야 합니다. 역할이 존재하는 테스트 환경에서는 다음과 같은 함수를 사용할 수 있습니다.
-
-```sql
-SELECT has_table_privilege(
-    'readonly_user',
-    'courses',
-    'SELECT'
-);
-```
-
-결과가 `true`이면 해당 역할이 지정한 권한을 갖고 있다는 뜻입니다. 존재하지 않는 역할 이름을 사용하면 오류가 발생할 수 있으므로 역할 생성 여부를 먼저 확인해야 합니다.
-
-현재 스키마의 권한 목록은 `information_schema.role_table_grants`와 같은 시스템 뷰를 통해 살펴볼 수 있습니다.
+같은 권한이 다른 역할 멤버십이나 PUBLIC을 통해 남아 있다면 사용자는 여전히 접근할 수 있습니다. 따라서 권한 변경 뒤에는 유효 권한을 다시 확인해야 합니다.
 
 ```sql
 SELECT
-    grantee,
-    table_schema,
-    table_name,
-    privilege_type
-FROM information_schema.role_table_grants
-WHERE table_schema = 'public'
-ORDER BY grantee, table_name, privilege_type;
+    has_database_privilege('readonly_user', 'ai_database_book', 'CONNECT') AS can_connect,
+    has_schema_privilege('readonly_user', 'public', 'USAGE') AS can_use_schema,
+    has_table_privilege('readonly_user', 'public.security_courses', 'SELECT') AS can_select_courses;
 ```
 
-권한 설계에서는 다음 세 단계를 한 묶음으로 생각하는 것이 좋습니다.
+역할 멤버십은 다음처럼 확인할 수 있습니다.
 
-```text
-필요한 권한을 정한다.
-→ 권한을 부여하거나 회수한다.
-→ 실제 권한 상태를 확인한다.
+```sql
+SELECT pg_has_role('readonly_user', 'role_report_reader', 'MEMBER');
 ```
+
+`information_schema.role_table_grants`는 명시적으로 부여된 테이블 권한을 살펴볼 때 유용하고, `has_table_privilege`는 실제 유효 권한을 확인할 때 유용합니다.
 
 ---
 
-## 7. 기존 테이블과 앞으로 생성될 테이블
+## 7. 현재 객체와 미래 객체 권한
 
-현재 존재하는 테이블에 `SELECT` 권한을 부여했다고 해서 이후 새로 만들어지는 테이블에도 자동으로 같은 권한이 적용되는 것은 아닐 수 있습니다. 새 테이블까지 같은 정책을 적용하려면 기본 권한(Default Privileges)을 별도로 설계해야 합니다.
+현재 존재하는 테이블에 `GRANT SELECT`를 실행해도 이후 새로 만들어지는 테이블에 자동으로 같은 권한이 적용되지는 않습니다. 미래 객체까지 고려하려면 Default Privileges를 별도로 검토해야 합니다.
 
-예를 들어 특정 역할이 앞으로 만들어질 테이블도 읽을 수 있어야 한다면, 테이블을 생성하는 역할과 대상 스키마를 기준으로 기본 권한을 검토해야 합니다.
-
-이 부분은 단순히 다음 명령을 복사하는 문제가 아닙니다.
-
-```text
-누가 새 테이블을 만드는가?
-어느 스키마에 만들어지는가?
-새 테이블을 어느 역할이 자동으로 읽을 수 있어야 하는가?
+```sql
+-- ALTER DEFAULT PRIVILEGES
+-- FOR ROLE <object_owner_role>
+-- IN SCHEMA public
+-- GRANT SELECT ON TABLES
+-- TO role_report_reader;
 ```
 
-기존 객체 권한과 미래 객체의 기본 권한은 서로 다른 문제라는 점을 기억해 두면 좋습니다.
+Default Privileges는 앞으로 특정 소유자가 만들 객체에 적용됩니다. 이미 존재하는 객체 권한을 바꾸지 않는다는 점을 분명히 구분해야 합니다.
 
 ---
 
-## 8. 개발 환경과 운영 환경을 분리한다
+## 8. 개발·운영 환경과 계정 분리
 
-개발 환경은 코드를 만들고 실패를 허용하는 공간입니다. 운영 환경은 실제 사용자의 데이터와 서비스가 동작하는 공간입니다. 두 환경의 계정과 접속 정보를 섞으면 테스트 명령이 실제 데이터에 영향을 줄 수 있습니다.
+개발 환경과 운영 환경은 계정, 권한, 데이터, 백업 파일을 분리해야 합니다.
 
-![개발용 계정과 운영용 계정 분리](../images/chapter11/ch11_05_dev_prod_account_separation.svg)
+![개발·운영 환경과 계정 분리](../images/chapter11/ch11_05_dev_prod_account_separation.svg)
 
-그림 11-5 개발 환경과 운영 환경 분리
+그림 11-5 개발·운영 환경과 계정 분리
 
-피해야 할 방식은 다음과 같습니다.
+개발 DB에서 사용하는 계정과 운영 DB 계정이 같으면 실수로 운영 데이터에 영향을 줄 수 있습니다. 또한 백업 파일, 로그, `.env` 파일도 환경별로 분리해야 합니다.
 
-```text
-개발용 관리자 계정을 운영 서비스에서도 사용한다.
-여러 사람이 하나의 운영 관리자 비밀번호를 공유한다.
-테스트용 DELETE나 DROP 명령을 운영 DB에서 실행한다.
-운영 DB 덤프를 개인 PC나 공개 저장소에 복사한다.
-```
-
-더 안전한 방향은 다음과 같습니다.
+실제 접속 정보는 저장소에 커밋하지 않습니다. `.env.example`은 필요한 변수 이름만 보여 주고 실제 값은 비워 둡니다.
 
 ```text
-개발 DB와 운영 DB를 분리한다.
-환경별 계정과 비밀번호를 다르게 관리한다.
-운영 DB 접근 권한을 필요한 사람과 시스템으로 제한한다.
-테스트와 복구 검증은 별도의 DB에서 수행한다.
+DATABASE_URL=
+DB_USER=
+DB_PASSWORD=
 ```
 
-환경 이름을 화면과 연결 문자열에 명확히 표시하고, 운영 환경에서 위험한 작업을 수행할 때 별도의 승인이나 확인 절차를 두는 것도 도움이 됩니다.
+비밀번호가 노출되면 파일을 삭제하는 것보다 먼저 자격 증명을 회전해야 합니다. 이미 커밋된 비밀 정보는 기록에 남아 있을 수 있기 때문입니다.
 
 ---
 
-## 9. 비밀번호와 접속 정보를 코드에서 분리한다
-
-데이터베이스 연결에는 보통 다음 정보가 필요합니다.
-
-```text
-DB_HOST
-DB_PORT
-DB_NAME
-DB_USER
-DB_PASSWORD
-```
-
-이 값을 소스코드에 직접 작성하면 저장소, 로그, 화면 공유, 코드 리뷰를 통해 노출될 수 있습니다. 일반적으로 로컬 개발에서는 환경 변수나 `.env` 파일을 사용하고, 배포 환경에서는 플랫폼의 Secret 관리 기능을 사용합니다.
-
-`.env` 파일을 사용하는 경우 저장소에 포함되지 않도록 `.gitignore`를 확인합니다.
-
-```text
-.env
-.env.*
-```
-
-공개 가능한 예제는 실제 값을 제거한 `.env.example`로 분리할 수 있습니다.
-
-```text
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=example_db
-DB_USER=example_user
-DB_PASSWORD=replace_me
-```
-
-다음 정보는 공개 저장소에 올리지 않아야 합니다.
-
-- 실제 DB 비밀번호
-- 클라우드 DB 전체 접속 URL
-- API 키와 Access Token
-- 운영 환경의 `.env` 파일
-- 실제 개인정보가 포함된 SQL 덤프
-- 암호화되지 않은 백업 파일
-
-비밀정보가 이미 저장소에 커밋되었다면 파일을 삭제하는 것만으로 충분하지 않을 수 있습니다. 해당 비밀번호나 키를 즉시 폐기하고 새 값으로 교체하는 것이 먼저입니다.
-
----
-
-## 10. SQL Injection은 어떻게 발생하는가
+## 9. SQL Injection과 안전한 입력 처리
 
 SQL Injection은 사용자 입력값이 SQL 문장의 구조에 영향을 주면서 의도하지 않은 조회나 변경이 발생할 수 있는 취약점입니다.
 
-![SQL Injection 위험과 안전한 쿼리](../images/chapter11/ch11_06_sql_injection_safe_query.svg)
+![문자열 결합과 파라미터 바인딩](../images/chapter11/ch11_06_sql_injection_safe_query.svg)
 
-그림 11-6 SQL Injection 위험과 안전한 쿼리
+그림 11-6 문자열 결합과 파라미터 바인딩
 
-위험한 방식은 다음과 같은 개념으로 표현할 수 있습니다.
-
-```text
-SQL 문자열 + 사용자 입력값 + SQL 문자열
-```
-
-예를 들어 애플리케이션이 이메일 입력값을 문자열로 직접 이어 붙여 SQL을 만든다면, 입력값이 단순한 데이터가 아니라 SQL 구조의 일부로 해석될 가능성이 생깁니다.
-
-안전한 방향은 SQL 문장과 입력값을 분리하는 것입니다.
+위험한 방향은 사용자 입력을 SQL 문자열에 직접 결합하는 방식입니다.
 
 ```text
-SQL 문장 구조
-+
-별도로 전달되는 파라미터 값
+위험: "SELECT * FROM users WHERE email = '" + user_input + "'"
 ```
 
-사용하는 드라이버나 프레임워크에 따라 placeholder 표현은 다를 수 있습니다.
+더 안전한 방향은 SQL 구조와 입력값을 분리하는 파라미터 바인딩입니다.
 
 ```text
-?
-$1
-:email
+권장: SELECT * FROM users WHERE email = $1
+값: user_input
 ```
 
-중요한 것은 기호 자체가 아니라 해당 라이브러리가 제공하는 **파라미터 바인딩 API**를 사용하는 것입니다.
+입력값 검증만으로 SQL Injection 방어가 끝나는 것은 아닙니다. 파라미터 바인딩, 최소 권한 DB 계정, 동적 테이블명·컬럼명의 허용 목록 검증을 함께 사용해야 합니다.
 
-```text
-사용자 입력값을 직접 문자열로 결합하지 않는다.
-입력값 검증만으로 SQL Injection 방어가 끝난다고 생각하지 않는다.
-DB 계정에도 최소 권한을 적용한다.
-AI가 만든 로그인·검색 코드의 쿼리 구성 방식을 확인한다.
-```
-
-입력값 검증과 파라미터 바인딩은 서로 대체 관계가 아닙니다. 입력값은 업무 규칙에 맞는지 검증해야 하고, SQL 전달은 안전한 바인딩 방식을 사용해야 합니다.
+동적으로 테이블명이나 컬럼명을 선택해야 하는 경우에는 사용자 입력을 그대로 식별자로 쓰지 말고 허용 목록에서만 선택하도록 제한합니다.
 
 ---
 
-## 11. 개인정보와 로그를 다루는 기본 원칙
+## 10. 개인정보, 로그, 백업 파일 보호
 
-서비스 데이터에는 개인정보나 민감한 운영 정보가 포함될 수 있습니다. 구체적인 법적 요구사항은 서비스가 운영되는 지역과 조직 정책에 따라 달라질 수 있지만, 기술 설계에서 먼저 적용할 수 있는 기본 원칙은 있습니다.
+백업 파일은 원본 데이터와 같은 수준으로 보호해야 합니다. 백업에는 개인정보, 이메일, 결제 금액, 내부 업무 데이터가 그대로 포함될 수 있습니다.
 
-| 원칙 | 설명 |
-| --- | --- |
-| 최소 수집 | 서비스에 필요한 정보만 저장한다 |
-| 최소 접근 | 업무상 필요한 사용자와 시스템만 접근한다 |
-| 목적 제한 | 수집 목적과 무관한 용도로 사용하지 않는다 |
-| 보관 기간 관리 | 필요가 끝난 데이터를 무기한 보관하지 않는다 |
-| 테스트 데이터 분리 | 실제 개인정보 대신 가상 데이터를 사용한다 |
-| 로그 최소화 | 비밀번호, 전체 접속 URL, 과도한 개인정보를 로그에 남기지 않는다 |
-| 백업 보호 | 백업 파일에도 동일한 보호 원칙을 적용한다 |
-
-개발 중에는 디버깅을 위해 많은 값을 로그에 출력하기 쉽습니다. 하지만 오류 로그에 DB 비밀번호나 전체 연결 문자열이 포함되면 보안 사고로 이어질 수 있습니다. 로그는 문제 해결에 필요한 정보만 남기고 민감한 값은 가리거나 제외해야 합니다.
+- 백업 파일을 공개 저장소에 커밋하지 않습니다.
+- 백업 파일은 자동으로 암호화된다고 가정하지 않습니다.
+- 전송, 저장, 접근 권한을 별도로 관리합니다.
+- 로그에는 비밀번호, 토큰, 전체 접속 URL이 남지 않도록 합니다.
+- 노출이 확인되면 삭제보다 자격 증명 회전을 우선합니다.
 
 ---
 
-## 12. 백업이 필요한 상황
+## 11. 백업과 복제는 다르다
 
-백업은 데이터 손실에 대비해 데이터와 구조를 별도의 형태로 보관하는 작업입니다.
+백업은 특정 시점의 데이터를 복구하기 위해 보관하는 사본입니다. 복제는 서비스 가용성이나 읽기 확장을 위해 다른 서버에 데이터를 지속적으로 반영하는 구조입니다.
 
-![백업과 복구 테스트 흐름](../images/chapter11/ch11_07_backup_restore_flow.svg)
+| 구분 | 목적 | 주의 |
+| --- | --- | --- |
+| 백업 | 실수·장애 후 특정 시점 복구 | 복구 테스트가 필요 |
+| 복제 | 가용성·읽기 분산 | 백업을 대체하지 않음 |
 
-그림 11-7 백업과 복구 테스트 흐름
-
-데이터 손실은 하드웨어 장애에서만 발생하지 않습니다.
-
-```text
-WHERE 조건이 빠진 UPDATE가 실행되었다.
-잘못된 DELETE가 많은 행을 삭제했다.
-배포 과정에서 테이블 구조가 예상과 다르게 변경되었다.
-저장장치나 서버에 문제가 생겼다.
-계정이 침해되어 데이터가 변경되었다.
-운영자가 필요한 데이터를 실수로 제거했다.
-```
-
-백업은 이런 상황에서 이전 상태로 돌아가기 위한 안전망입니다. 그러나 백업 파일이 존재한다는 사실만으로 복구 가능성이 증명되지는 않습니다.
-
-```text
-백업 파일 생성
-→ 안전한 위치에 보관
-→ 별도 환경에서 복구
-→ 구조와 데이터 검증
-→ 복구 절차와 시간을 기록
-```
+복제가 있어도 잘못 삭제된 데이터가 복제본에도 반영될 수 있습니다. 그래서 복구 가능한 백업은 별도로 필요합니다.
 
 ---
 
-## 13. 백업 종류와 선택 기준
+## 12. pg_dump와 역할 백업
 
-백업 방식은 데이터 크기, 허용 가능한 손실 범위, 복구 시간, 운영 환경에 따라 달라집니다.
-
-| 구분 | 설명 |
-| --- | --- |
-| 논리 백업 | SQL이나 덤프 형식으로 데이터베이스 객체와 데이터를 저장 |
-| 물리 백업 | 데이터 파일과 서버 상태를 기반으로 백업 |
-| 전체 백업 | 전체 데이터베이스 또는 시스템을 대상으로 백업 |
-| 부분 백업 | 특정 스키마나 테이블만 백업 |
-| 정기 백업 | 정해진 시간과 주기로 자동 실행 |
-
-이 장에서는 작은 프로젝트에서 이해하기 쉬운 PostgreSQL 논리 백업을 중심으로 살펴봅니다.
-
-`pg_dump`는 하나의 데이터베이스를 논리적으로 백업하는 데 사용합니다. 역할과 같은 클러스터 전역 객체는 별도로 관리해야 할 수 있으므로, 실제 운영 계획에서는 데이터베이스 덤프뿐 아니라 계정·권한·확장 기능·설정 정보도 함께 고려해야 합니다.
-
----
-
-## 14. pg_dump로 논리 백업 만들기
-
-SQL 텍스트 형식의 백업 예시는 다음과 같습니다.
+`pg_dump`는 하나의 데이터베이스를 논리적으로 백업하는 도구입니다. 역할과 같은 클러스터 전역 객체는 별도로 관리해야 할 수 있습니다.
 
 ```bash
 pg_dump -U postgres -d ai_database_book -f ai_database_book_backup.sql
 ```
 
-| 구성 | 의미 |
-| --- | --- |
-| `pg_dump` | PostgreSQL 논리 백업 도구 |
-| `-U postgres` | 접속할 사용자 |
-| `-d ai_database_book` | 백업할 데이터베이스 |
-| `-f ...sql` | 결과를 저장할 파일 |
-
-사용자 정의 형식(Custom Format)을 사용할 수도 있습니다.
+사용자 정의 형식 백업은 `pg_restore`로 복구할 수 있습니다.
 
 ```bash
 pg_dump -U postgres -d ai_database_book -Fc -f ai_database_book.backup
 ```
 
-두 형식은 복구 방식이 다릅니다.
+역할 같은 전역 객체는 운영 정책에 따라 별도 관리가 필요합니다.
 
-| 백업 형식 | 파일 예 | 일반적인 복구 도구 |
+```bash
+pg_dumpall --globals-only -U postgres -f globals.sql
+```
+
+이 명령들은 DBeaver SQL Editor가 아니라 터미널에서 실행합니다. 예제 파일명은 구조 설명용이며, 실제 백업 파일은 공개 저장소에 커밋하지 않습니다.
+
+---
+
+## 13. 별도 DB에서 복구 검증
+
+백업 파일이 존재한다고 복구가 가능한 것은 아닙니다. 복구는 원본 운영 DB가 아니라 별도 검증 DB에서 확인해야 합니다.
+
+![백업 생성에서 복구 검증까지](../images/chapter11/ch11_07_backup_restore_flow.svg)
+
+그림 11-7 백업 생성에서 복구 검증까지
+
+SQL 텍스트 백업을 복구할 때는 오류 발생 시 즉시 중단하도록 옵션을 사용합니다.
+
+```bash
+createdb -U postgres ai_database_book_restore
+psql -U postgres -d ai_database_book_restore -v ON_ERROR_STOP=1 -f ai_database_book_backup.sql
+```
+
+사용자 정의 형식 백업은 다음처럼 복구할 수 있습니다.
+
+```bash
+createdb -U postgres ai_database_book_restore
+pg_restore -U postgres -d ai_database_book_restore --exit-on-error ai_database_book.backup
+```
+
+복구 뒤에는 구조, 데이터, 제약조건, 권한, 시퀀스를 확인합니다.
+
+```sql
+SELECT COUNT(*) FROM public.security_students;
+SELECT COUNT(*) FROM public.security_courses;
+SELECT COUNT(*) FROM public.security_enrollments;
+```
+
+예상 기준은 다음과 같습니다.
+
+| 검증 대상 | 예상 결과 |
+| --- | ---: |
+| `security_students` | 3 |
+| `security_courses` | 3 |
+| `security_enrollments` | 3 |
+| JOIN 결과 | 3 |
+
+---
+
+## 14. RPO와 RTO
+
+RPO는 얼마나 많은 데이터 손실을 감수할 수 있는지에 대한 기준입니다. RTO는 장애 후 얼마나 빨리 복구해야 하는지에 대한 기준입니다.
+
+| 기준 | 질문 | 예시 |
 | --- | --- | --- |
-| SQL 텍스트 | `backup.sql` | `psql` |
-| 사용자 정의 형식 | `backup.backup` | `pg_restore` |
+| RPO | 어느 시점까지의 데이터가 필요할까? | 최대 1시간 손실 허용 |
+| RTO | 몇 분 또는 몇 시간 안에 복구해야 할까? | 2시간 안에 서비스 재개 |
 
-명령을 실행하기 전에 다음을 확인해야 합니다.
-
-```text
-대상 데이터베이스 이름이 맞는가?
-접속 사용자가 필요한 권한을 갖고 있는가?
-백업 파일이 저장될 경로가 안전한가?
-기존 백업 파일을 덮어쓰지 않는가?
-백업 파일에 개인정보가 포함되는가?
-백업 완료와 오류 여부를 어떻게 기록할 것인가?
-```
+RPO와 RTO는 기술 결정이기도 하지만 비용과 서비스 특성의 결정이기도 합니다.
 
 ---
 
-## 15. 백업 파일을 안전하게 보관한다
+## 15. AI 보안·백업 명령 검토
 
-백업은 원본 데이터의 복사본입니다. 원본 데이터베이스에 적용한 접근 통제를 백업 파일에는 적용하지 않는 실수를 피해야 합니다.
-
-확인할 항목은 다음과 같습니다.
-
-- 데이터베이스 서버와 다른 위치에도 사본이 있는가?
-- 백업 파일을 볼 수 있는 사용자가 제한되어 있는가?
-- 전송과 저장 과정에서 암호화가 필요한가?
-- 파일명이 백업 날짜와 대상을 구분할 수 있는가?
-- 오래된 백업을 언제 삭제할 것인가?
-- 랜섬웨어나 계정 침해 시 백업까지 함께 삭제되지 않는가?
-
-프로젝트 저장소는 일반적으로 운영 데이터베이스 백업을 보관하는 장소가 아닙니다. 특히 공개 GitHub 저장소에 SQL 덤프를 올리는 것은 피해야 합니다.
-
----
-
-## 16. RPO와 RTO로 목표를 구체화한다
-
-“자주 백업한다”는 표현만으로는 운영 목표가 충분히 구체적이지 않습니다. 데이터 손실과 복구 시간을 어느 정도까지 허용할 수 있는지 정해야 합니다.
-
-- **RPO(Recovery Point Objective)**: 장애가 발생했을 때 어느 시점까지의 데이터 손실을 허용할 수 있는지를 나타내는 목표입니다.
-- **RTO(Recovery Time Objective)**: 장애가 발생한 뒤 서비스를 어느 시간 안에 복구할 것인지를 나타내는 목표입니다.
-
-예를 들어 하루에 한 번 백업한다면 장애 시점에 따라 최근 여러 시간의 데이터가 손실될 수 있습니다. 서비스가 이를 허용할 수 없다면 더 짧은 주기나 다른 복구 전략이 필요합니다.
-
-RPO와 RTO는 모든 서비스에 같은 값을 적용하는 규칙이 아닙니다. 데이터 중요도, 서비스 중단 영향, 운영 비용을 고려해 결정합니다.
-
-| 질문 | 예시 판단 |
-| --- | --- |
-| 어느 정도의 데이터 손실을 허용할 수 있는가? | 최근 1시간, 최근 1일 등 |
-| 서비스를 얼마나 빨리 복구해야 하는가? | 30분, 4시간, 다음 영업일 등 |
-| 목표를 달성할 백업 주기는 무엇인가? | 시간별, 일별, 주별 |
-| 복구 담당자와 절차가 정해져 있는가? | 담당자, 연락 방법, 문서 위치 |
-
----
-
-## 17. 별도 데이터베이스에서 복구한다
-
-백업 파일은 원본 운영 데이터베이스가 아닌 별도의 복구 확인용 데이터베이스에서 먼저 검증해야 합니다.
-
-SQL 텍스트 백업을 복구하는 예시는 다음과 같습니다.
-
-```bash
-psql -U postgres -d ai_database_book_restore -f ai_database_book_backup.sql
-```
-
-사용자 정의 형식 백업은 다음과 같이 복구할 수 있습니다.
-
-```bash
-pg_restore -U postgres -d ai_database_book_restore ai_database_book.backup
-```
-
-복구 대상 데이터베이스는 미리 만들고, 원본과 혼동하지 않도록 이름을 분명하게 구분합니다.
-
-```text
-1. 별도의 복구 확인용 데이터베이스를 만든다.
-2. 백업 형식에 맞는 도구를 선택한다.
-3. 복구 명령의 대상 DB와 파일 경로를 확인한다.
-4. 복구 명령을 실행하고 오류를 기록한다.
-5. 테이블 구조, 데이터 수, 제약조건과 핵심 조회를 검증한다.
-6. 걸린 시간과 필요한 수동 작업을 기록한다.
-```
-
-복구 과정에서 객체가 이미 존재하거나 소유자·권한·확장 기능이 맞지 않아 오류가 날 수 있습니다. 이런 오류는 실제 장애 시에도 문제가 될 수 있으므로 테스트 결과를 백업 절차에 반영해야 합니다.
-
----
-
-## 18. 복구 후 데이터를 검증한다
-
-DBeaver에 테이블 목록이 보인다고 해서 복구가 끝난 것은 아닙니다. 구조와 데이터가 서비스 요구사항에 맞게 돌아왔는지 확인해야 합니다.
-
-```sql
-SELECT COUNT(*) FROM students;
-SELECT COUNT(*) FROM courses;
-SELECT COUNT(*) FROM enrollments;
-```
-
-핵심 JOIN도 실행해 봅니다.
-
-```sql
-SELECT
-    s.name AS student_name,
-    c.title AS course_title,
-    e.status
-FROM enrollments AS e
-JOIN students AS s ON e.student_id = s.id
-JOIN courses AS c ON e.course_id = c.id
-ORDER BY e.id;
-```
-
-복구 후 확인할 항목은 다음과 같습니다.
-
-| 검증 항목 | 확인 내용 |
-| --- | --- |
-| 객체 | 필요한 테이블, 뷰, 시퀀스가 존재하는가? |
-| 데이터 | 주요 테이블의 행 수와 핵심 값이 맞는가? |
-| 제약조건 | PK, FK, UNIQUE, CHECK가 유지되는가? |
-| 권한 | 필요한 계정이 접속하고 작업할 수 있는가? |
-| 확장 기능 | 필요한 PostgreSQL 확장이 준비되어 있는가? |
-| 핵심 쿼리 | 서비스의 주요 조회가 정상 동작하는가? |
-| 애플리케이션 | 실제 서비스가 복구 DB에 연결되어 동작하는가? |
-
-백업의 품질은 파일 크기가 아니라 복구 결과로 판단해야 합니다.
-
----
-
-## 19. 백업 운영 계획 만들기
-
-작은 프로젝트에서도 간단한 백업 계획을 문서로 남기면 좋습니다.
-
-| 항목 | 결정할 내용 |
-| --- | --- |
-| 보호 대상 | 어떤 DB와 스키마를 백업하는가? |
-| 백업 방식 | SQL 텍스트, 사용자 정의 형식, 다른 방식 중 무엇인가? |
-| 백업 주기 | 시간별, 일별, 주별 중 무엇인가? |
-| 저장 위치 | 서버 내부, 별도 저장소, 원격 저장소 중 어디인가? |
-| 접근 권한 | 누가 백업 파일을 볼 수 있는가? |
-| 보관 기간 | 언제까지 보관하고 언제 삭제하는가? |
-| 복구 테스트 | 얼마나 자주 별도 DB에서 복구할 것인가? |
-| RPO/RTO | 허용 손실 범위와 목표 복구 시간은 무엇인가? |
-| 책임자 | 누가 백업 실패와 복구를 확인하는가? |
-| 문서 위치 | 명령과 검증 절차를 어디에 기록하는가? |
-
-자동 백업을 설정했다면 성공 여부를 확인하는 알림과 로그도 필요합니다. 자동화되어 있다는 사실과 정상적으로 동작한다는 사실은 다릅니다.
-
----
-
-## 20. AI가 만든 보안 설정과 명령 검토하기
-
-AI는 역할 생성, 권한 부여, 백업 명령, 복구 절차를 빠르게 제안할 수 있습니다. 그러나 AI는 현재 데이터베이스가 개발 환경인지 운영 환경인지, 어떤 계정이 이미 존재하는지, 명령이 기존 데이터를 덮어쓰는지 정확히 알지 못할 수 있습니다.
+AI는 GRANT, REVOKE, pg_dump, pg_restore 명령 초안을 빠르게 만들 수 있습니다. 하지만 AI가 만든 명령을 운영 환경에 바로 적용하면 위험합니다.
 
 ![AI 보안·백업 명령 검토 흐름](../images/chapter11/ch11_08_ai_security_review_flow.svg)
 
-그림 11-8 AI가 만든 보안·백업 명령 검토 흐름
+그림 11-8 AI 보안·백업 명령 검토 흐름
 
-다음과 같은 제안은 특히 주의해야 합니다.
+검토 기준은 다음과 같습니다.
 
-```text
-서비스 계정에 SUPERUSER 권한을 부여한다.
-모든 테이블에 ALL PRIVILEGES를 부여한다.
-예시 비밀번호를 실제 계정에 사용한다.
-운영 DB에서 바로 DROP, REVOKE, 복구 명령을 실행한다.
-백업 파일을 프로젝트 저장소에 커밋한다.
-```
+| 검토 항목 | 확인 질문 |
+| --- | --- |
+| 대상 환경 | 개발, 테스트, 운영 중 어디인가? |
+| 대상 객체 | DB, 스키마, 테이블, 시퀀스가 정확한가? |
+| 권한 범위 | 필요한 권한보다 넓지 않은가? |
+| 유효 권한 | 역할 멤버십과 PUBLIC 권한까지 확인했는가? |
+| 비밀 정보 | 실제 비밀번호나 접속 URL이 포함되지 않았는가? |
+| 백업 파일 | 공개 저장소에 남지 않도록 관리되는가? |
+| 복구 검증 | 별도 DB에서 검증했는가? |
+| 실패 처리 | 오류 발생 시 중단하는 옵션이 있는가? |
 
-AI 결과를 검토할 때는 다음 순서를 사용할 수 있습니다.
-
-```text
-대상 환경을 확인한다.
-→ 명령이 변경하는 객체와 범위를 확인한다.
-→ 실행 계정의 권한을 확인한다.
-→ 최소 권한 원칙에 맞는지 확인한다.
-→ 비밀번호와 접속 정보 노출 여부를 확인한다.
-→ 삭제·덮어쓰기·권한 확대 가능성을 확인한다.
-→ 되돌리는 방법과 백업 여부를 확인한다.
-→ 별도 테스트 환경에서 검증한다.
-→ 결과와 수정 내용을 기록한다.
-```
-
-AI는 초안을 만드는 도구이며, 보안과 복구 작업의 책임을 대신 지지 않습니다.
+AI 제안은 초안입니다. 최종 적용 전에는 테스트 환경에서 실행하고 결과를 확인해야 합니다.
 
 ---
 
-## 21. 자주 하는 실수
+## 16. 핵심 정리
 
-### 실수 1. 애플리케이션이 관리자 계정으로 접속한다
-
-서비스 기능에 필요하지 않은 권한까지 갖게 되어 코드 오류나 계정 침해의 영향이 커집니다.
-
-### 실수 2. 읽기 전용 계정에도 쓰기 권한을 준다
-
-편의를 위해 권한을 넓히면 조회 작업이 데이터 변경 사고로 이어질 수 있습니다.
-
-### 실수 3. 비밀번호를 코드와 저장소에 기록한다
-
-코드에서 삭제하더라도 커밋 기록이나 로그에 남았을 수 있으므로 노출된 값은 교체해야 합니다.
-
-### 실수 4. 입력값 검증만 하고 문자열 결합 SQL을 사용한다
-
-업무 규칙 검증과 SQL 파라미터 바인딩은 모두 필요합니다.
-
-### 실수 5. 데이터베이스와 같은 서버에 백업 하나만 둔다
-
-서버나 계정 전체에 문제가 생기면 원본과 백업을 동시에 잃을 수 있습니다.
-
-### 실수 6. 백업 성공 로그만 확인한다
-
-복구 환경에서 구조, 데이터, 권한과 핵심 쿼리를 확인해야 합니다.
-
-### 실수 7. AI가 만든 권한·복구 명령을 바로 실행한다
-
-대상 DB, 실행 계정, 파일 형식과 변경 범위를 먼저 확인해야 합니다.
+- 인증은 누구인지 확인하는 것이고, 권한 부여는 무엇을 할 수 있는지 정하는 것입니다.
+- PostgreSQL의 사용자는 LOGIN 가능한 Role입니다.
+- 권한 역할은 NOLOGIN Role로 묶어 관리할 수 있습니다.
+- 최소 권한 원칙은 필요한 범위만 부여하는 것입니다.
+- REVOKE 뒤에도 다른 경로의 유효 권한이 남을 수 있습니다.
+- SERIAL INSERT에는 테이블 INSERT와 시퀀스 권한이 함께 필요할 수 있습니다.
+- 파라미터 바인딩은 SQL 구조와 값을 분리합니다.
+- 백업 파일은 원본 데이터와 같은 수준으로 보호해야 합니다.
+- pg_dump는 DB 단위 논리 백업이며, 역할 같은 전역 객체는 별도 관리가 필요할 수 있습니다.
+- 복구 가능성은 별도 DB에서 직접 검증해야 합니다.
+- AI가 만든 보안·백업 명령은 테스트 환경에서 검증한 뒤 적용합니다.
 
 ---
 
-## 22. 직접 점검해 보기
+## 17. 다음 장에서는
 
-### 22.1 권한 설계
-
-온라인 강의 서비스의 다음 역할에 필요한 권한을 정해 보세요.
-
-```text
-관리자
-수강신청 서비스
-매출 리포트 조회자
-개발자
-백업 자동화 계정
-```
-
-각 역할에 대해 다음을 설명합니다.
-
-```text
-접근해야 하는 데이터베이스와 스키마
-읽어야 하는 테이블
-추가·수정해야 하는 테이블
-삭제 권한이 필요한지 여부
-관리자 권한이 필요하지 않은 이유
-```
-
-### 22.2 위험한 코드 검토
-
-AI가 사용자 입력값을 문자열로 이어 붙여 로그인 SQL을 만들었다고 가정합니다. 다음 관점에서 수정 방향을 설명해 보세요.
-
-```text
-파라미터 바인딩
-입력값 검증
-DB 계정 최소 권한
-오류 메시지와 로그의 민감정보 노출
-```
-
-### 22.3 백업 계획
-
-작은 온라인 강의 서비스의 백업 계획을 다음 항목으로 작성해 보세요.
-
-```text
-백업 대상
-백업 형식
-백업 주기
-저장 위치
-보관 기간
-복구 테스트 주기
-허용 가능한 데이터 손실 범위
-목표 복구 시간
-복구 담당자
-복구 후 검증 SQL
-```
-
-더 자세한 점검표는 `book/chapter11/chapter11_activity.md`에서 확인할 수 있습니다.
-
----
-
-## 23. 정리
-
-이 장에서는 데이터베이스를 안전하게 사용하고 복구 가능하게 만드는 기본 원칙을 살펴보았습니다.
-
-```text
-1. 데이터베이스 보안은 접근과 권한을 통제하는 일이다.
-2. 관리자, 서비스, 읽기 전용 계정은 역할에 따라 분리한다.
-3. 권한은 최소 권한 원칙에 따라 필요한 만큼만 부여한다.
-4. GRANT 후에는 권한을 확인하고, 필요가 끝나면 REVOKE한다.
-5. 개발 환경과 운영 환경의 계정과 접속 정보를 분리한다.
-6. 비밀번호와 전체 접속 URL을 코드와 공개 저장소에 기록하지 않는다.
-7. 사용자 입력값은 SQL 문자열에 직접 결합하지 않고 파라미터로 전달한다.
-8. 개인정보와 민감 정보는 최소한으로 수집하고 접근 범위를 제한한다.
-9. 백업 파일도 원본 데이터와 같은 수준으로 보호해야 한다.
-10. 백업은 별도 환경에서 복구하고 결과를 검증해야 의미가 있다.
-11. RPO와 RTO를 통해 데이터 손실과 복구 시간 목표를 구체화할 수 있다.
-12. AI가 만든 보안 설정과 백업 명령도 실행 전에 사람이 검토해야 한다.
-```
-
-이 장에서 기억할 문장은 다음과 같습니다.
-
-```text
-데이터베이스는 빠르게 동작하는 것만큼,
-필요한 사람에게만 열려 있고 다시 복구할 수 있어야 한다.
-```
-
----
-
-## 24. 다음 장에서는
-
-다음 장에서는 관계형 데이터베이스와 다른 저장 모델인 NoSQL을 살펴봅니다. 문서형, 키-값, 그래프 데이터베이스가 각각 어떤 문제에 적합한지 비교하고, 데이터 구조와 사용 목적에 따라 저장 방식을 선택하는 기준을 정리합니다.
-
-저장 방식이 달라져도 이 장에서 살펴본 원칙은 계속 적용됩니다.
-
-```text
-접근을 통제한다.
-필요한 권한만 부여한다.
-비밀정보를 분리한다.
-데이터 손실에 대비한다.
-복구 가능성을 검증한다.
-```
+Chapter 12에서는 지금까지 배운 SQL, 설계, 성능, 보안 관점을 종합해 데이터베이스 프로젝트를 점검하고 정리하는 흐름으로 이어갑니다.
 
 ---
 
@@ -8590,539 +8026,663 @@ Chapter 13에서는 AI가 만든 ERD, 테이블 설계, SQL을 사람이 어떻�
 
 ## 이 장에서 살펴볼 내용
 
-이 장에서는 ChatGPT와 Codex를 활용해 데이터베이스 설계와 SQL을 생성하고, 그 결과를 사람이 검토하고 수정하는 방법을 살펴봅니다.
+이 장에서는 ChatGPT와 Codex를 활용해 데이터베이스 설계 초안을 만들고, **요구사항과 실행 증거를 기준으로 사람이 검토하는 방법**을 살펴봅니다.
 
-앞 장까지는 관계형 데이터베이스의 기본 개념, SQL, 모델링, 정규화, JOIN, 트랜잭션, 인덱스, 보안, 백업, NoSQL 선택 기준을 살펴보았습니다. 이제는 AI 도구를 활용해 데이터베이스 설계 초안을 빠르게 만들 수 있습니다.
+AI는 요구사항 정리, ERD·DDL 초안, SQL 파일 수정과 오류 분석을 빠르게 도울 수 있습니다. 그러나 실행 가능한 SQL이 곧 올바른 설계를 뜻하지는 않습니다. 요구사항에 없는 `UNIQUE`나 삭제 정책이 추가될 수 있고, 현재 강의 가격과 과거 결제금액처럼 의미가 다른 값을 잘못 비교할 수도 있습니다.
 
-하지만 AI가 만든 설계와 SQL을 그대로 사용하는 것은 위험합니다. AI는 요구사항을 잘못 해석할 수 있고, 기본키나 외래키를 누락할 수 있으며, 정규화가 부족하거나 보안상 위험한 필드를 포함할 수도 있습니다.
+이 장의 핵심 원칙은 다음과 같습니다.
+
+```text
+AI 결과는 정답이 아니라 검토 대상 초안이다.
+요구사항, 실제 생성된 DB 구조와 실행 결과가 일치할 때만 검토된 설계로 판단한다.
+```
 
 이 장에서는 다음 내용을 다룹니다.
 
-- ChatGPT와 Codex를 DB 설계에 활용하는 방법
-- AI에게 요구사항을 명확하게 전달하는 프롬프트 작성법
-- AI가 생성한 ERD 초안 검토 방법
-- AI가 생성한 테이블 설계 검토 방법
-- AI가 생성한 PostgreSQL DDL 검토 방법
-- 기본키, 외래키, 제약조건, 정규화 점검
-- SQL Anti-pattern 찾기
-- AI 생성 SQL 실행 전 안전 검토
-- Codex를 활용한 수정 루프
-- AI 결과를 정답이 아니라 초안으로 다루는 태도
+- ChatGPT·Codex·사람의 협업 방식
+- 확인된 요구사항과 미확정 업무 규칙 구분
+- 요구사항 추적표 작성
+- 좋은 DB 설계·파일 수정 프롬프트 구성
+- ERD, 관계, 데이터 타입과 제약조건 검토
+- 정규화와 의도된 중복 검토
+- SQL Anti-pattern과 안전 실행 원칙
+- `information_schema`와 `pg_indexes` 기반 실제 구조 확인
+- 업무 정합성 검증 SQL
+- Codex 변경 후 diff·재실행·재검증
+- 검토 근거와 남은 가정 기록
 
 ---
 
 ## 1. 왜 AI 기반 DB 설계 검증을 배워야 하는가
 
-ChatGPT와 Codex는 데이터베이스 설계 과정에서 매우 유용합니다. 요구사항 정리, 테이블 후보 도출, ERD 초안 작성, PostgreSQL DDL 생성, 샘플 데이터 생성, CRUD SQL 생성, SQL 오류 수정까지 빠르게 도와줄 수 있습니다.
+AI는 짧은 시간에 테이블 후보, 관계, PostgreSQL DDL과 테스트 SQL을 제안할 수 있습니다. 하지만 AI가 업무 정책을 충분히 알지 못하면 다음과 같은 문제가 생길 수 있습니다.
 
-하지만 AI가 빠르게 만든 결과가 항상 좋은 설계는 아닙니다. 온라인 강의 수강신청 시스템을 설계해 달라고 했을 때 AI는 학생과 강사를 하나의 테이블에 섞거나, 수강신청과 결제를 한 테이블에 넣거나, 외래키와 제약조건을 누락할 수 있습니다.
+```text
+- 학생, 강의, 강사와 결제 정보를 한 테이블에 섞는다.
+- N:M 관계를 중간 테이블 없이 표현한다.
+- 요구사항에 없는 UNIQUE 또는 CASCADE를 추가한다.
+- 실제 카드번호처럼 보이는 민감정보 예제를 넣는다.
+- 강의의 현재 가격과 신청 시점의 결제금액을 무조건 같다고 판단한다.
+- SQL 실행 성공만 보고 설계 검증이 끝났다고 판단한다.
+```
 
 ![AI 기반 DB 설계 검증 전체 흐름](../images/chapter13/ch13_01_ai_db_design_review_flow.svg)
 
 그림 13-1 AI 기반 DB 설계 검증 전체 흐름
 
-AI 시대의 데이터베이스 활용에서 중요한 능력은 단순히 SQL을 직접 작성하는 능력만이 아닙니다.
+AI 설계 검증에서는 결과가 보기 좋은지보다 다음 연결을 확인해야 합니다.
 
 ```text
-AI가 만든 데이터베이스 설계와 SQL을 검토하고, 잘못된 부분을 찾아 수정할 수 있는 능력이 중요하다.
+확인된 요구사항
+→ ERD와 DDL
+→ 실제 생성된 메타데이터
+→ 정상·오류 테스트
+→ 업무 정합성 결과
+→ 변경 근거
 ```
 
 ---
 
-## 2. ChatGPT와 Codex의 역할 구분
+## 2. ChatGPT·Codex·사람의 협업 방식
 
-이 책에서는 ChatGPT와 Codex를 다음처럼 구분해 사용할 수 있습니다.
+> ChatGPT와 Codex의 지원 환경과 기능은 계속 바뀔 수 있습니다. 이 장의 역할 구분은 제품의 절대적인 기능 제한이 아니라, 데이터베이스 설계 검토를 체계적으로 진행하기 위한 권장 작업 흐름입니다.
 
-![ChatGPT와 Codex 역할 구분](../images/chapter13/ch13_02_chatgpt_codex_roles.svg)
+ChatGPT와 Codex의 기능은 일부 겹칠 수 있습니다. ChatGPT도 파일과 코드를 다룰 수 있고, Codex도 설계 검토와 코드 리뷰를 지원할 수 있습니다. 이 장에서는 작업 단계에 따라 주 역할을 다음처럼 구분합니다.
 
-그림 13-2 ChatGPT와 Codex 역할 구분
+![ChatGPT·Codex·사람의 협업 흐름](../images/chapter13/ch13_02_chatgpt_codex_roles.svg)
 
-| 도구 | 주로 활용할 작업 | 예시 |
+그림 13-2 ChatGPT·Codex·사람의 협업 흐름
+
+| 참여자 | 활용하기 좋은 흐름 | 최종 책임 |
 | --- | --- | --- |
-| ChatGPT | 요구사항 정리, 설계 설명, 검토 질문 생성 | ERD 후보, 테이블 설명, 검토 체크리스트 |
-| Codex | 코드 생성, SQL 파일 작성, 오류 수정 루프 | DDL, INSERT, SELECT, 테스트 SQL |
-| 사람 | 요구사항 판단, 위험 검토, 최종 승인 | 정규화, 보안, 운영 위험 검토 |
+| ChatGPT | 대화형 요구사항 정리, 설계 대안 비교, 검토 질문과 설명 초안 | 업무 정책을 대신 결정하지 않음 |
+| Codex | 저장소 파일 확인, SQL 생성·수정, 오류 재현, 테스트와 diff 확인 | 변경 결과를 자동 승인하지 않음 |
+| 사람 | 업무 규칙, 접근 범위, 개인정보·비밀정보, 변경 내용과 최종 승인 | 요구사항과 위험 판단을 책임짐 |
 
-ChatGPT는 무엇을 설계해야 하는지 정리하고 검토하는 데 유용합니다. Codex는 실제 파일과 코드를 만들고 실행 오류를 수정하는 데 유용합니다. 최종 판단은 사람이 해야 합니다.
+책에서 권장하는 흐름과 제품의 기술적 한계를 혼동하지 않아야 합니다. 특정 버튼, 요금제나 화면 위치보다 **요구사항을 고정하고 결과를 검증하는 작업 방식**에 집중합니다.
 
 ---
 
-## 3. AI에게 요구사항을 명확하게 전달하기
+## 3. 요구사항 기준선과 미확정 규칙
 
-AI가 좋은 초안을 만들려면 요구사항이 명확해야 합니다.
+AI에게 설계를 요청하기 전에 사람이 확인한 요구사항을 기준선으로 고정합니다.
 
-나쁜 프롬프트 예시는 다음과 같습니다.
+### 확인된 요구사항
+
+| ID | 요구사항 | 설계 반영 위치 | 검증 방법 |
+| --- | --- | --- | --- |
+| R1 | 학생 이메일은 중복될 수 없음 | `ai_good_students.email UNIQUE` | 중복 INSERT 오류 |
+| R2 | 강사 이메일은 중복될 수 없음 | `ai_good_instructors.email UNIQUE` | 중복 INSERT 오류 |
+| R3 | 강의는 강사 한 명을 참조 | `courses.instructor_id` FK | FK 메타데이터 |
+| R4 | 학생과 강의는 N:M 관계 | `enrollments` 중간 테이블 | ERD·FK 조회 |
+| R5 | 수강신청 상태는 허용값만 사용 | `enrollments.status CHECK` | 잘못된 상태 INSERT |
+| R6 | 가격과 금액은 음수가 될 수 없음 | `price`, `agreed_amount`, `amount CHECK` | 음수 INSERT |
+| R7 | 결제는 수강신청을 참조 | `payments.enrollment_id` FK | FK 메타데이터 |
+| R8 | 실제 카드번호를 저장하지 않음 | `payment_reference`만 저장 | 컬럼 목록 검토 |
+
+AI 결과를 검토할 때는 “좋아 보이는가?”가 아니라 각 요구사항이 어떤 테이블, 컬럼, 제약조건과 검증 SQL로 반영되었는지 확인합니다.
+
+### 사람이 결정해야 하는 미확정 규칙
+
+| 질문 | 현재 상태 | AI가 임의로 결정하면 생길 수 있는 문제 |
+| --- | --- | --- |
+| 취소 후 같은 강의를 다시 신청할 수 있는가? | 미확정 | 불필요한 UNIQUE로 이력 저장 차단 |
+| 한 수강신청에 결제 시도가 여러 번 가능한가? | 단순 예제에서는 1건으로 가정 | 재결제·실패 이력 손실 |
+| 강의 가격 변경 후 기존 신청 금액의 기준은 무엇인가? | 신청 시점 금액 보존 | 현재 가격과 잘못 비교 |
+| 결제 없이 `신청` 상태를 유지할 수 있는가? | 가능 | 모든 신청에 결제를 강제 |
+| 강의 삭제 시 기존 수강 이력을 어떻게 처리하는가? | 미확정 | 무분별한 CASCADE 적용 |
+| 개인정보 보관 기간은 얼마인가? | 조직 정책 필요 | 임의 삭제 또는 과도한 보관 |
+
+확정되지 않은 정책은 제약조건으로 고정하지 않고 **결정 필요 항목**으로 기록합니다.
+
+### 요구사항 추적표
+
+AI 초안을 검토한 뒤 다음 표에 실제 근거를 채웁니다.
+
+| 요구사항 ID | AI 초안 반영 | 문제 | 수정 파일·위치 | 검증 증거 |
+| --- | --- | --- | --- | --- |
+| R1 |  |  |  |  |
+| R2 |  |  |  |  |
+| R3 |  |  |  |  |
+| R4 |  |  |  |  |
+| R5 |  |  |  |  |
+| R6 |  |  |  |  |
+| R7 |  |  |  |  |
+| R8 |  |  |  |  |
+
+검증 증거에는 DDL 줄, `information_schema` 결과, 의도한 오류 INSERT, 정상 JOIN 행 수와 git diff 등이 포함될 수 있습니다.
+
+---
+
+## 4. 좋은 DB 설계 요청 프롬프트
+
+좋은 프롬프트는 긴 문장보다 **검토 가능한 기준과 범위**가 명확해야 합니다.
+
+![실행 가능한 DB 작업 프롬프트의 구성](../images/chapter13/ch13_03_good_prompt_structure.svg)
+
+그림 13-3 실행 가능한 DB 작업 프롬프트의 구성
+
+핵심 요소는 다음과 같습니다.
+
+1. 업무 배경과 목표
+2. 확인된 요구사항
+3. 미확정 규칙
+4. DBMS와 데이터 표현 가정
+5. 기존 테이블 또는 저장소 구조
+6. 수정 대상 파일
+7. 수정 금지 범위
+8. 출력 형식
+9. 검토 기준
+10. 실행·검증 방법
+11. 완료 보고 형식
+
+다음은 대화형 설계 요청 예시입니다.
 
 ```text
-수강신청 DB 만들어 줘.
-```
+온라인 강의 수강신청 데이터베이스 설계 초안을 작성해 주세요.
 
-이 프롬프트는 너무 짧습니다. 어떤 사용자가 있고, 어떤 기능이 필요하고, 어떤 제약조건이 중요한지 알 수 없습니다.
+환경:
+- PostgreSQL
+- 원 단위 정수 금액 사용
+- 실제 개인정보 사용 금지
 
-좋은 프롬프트에는 업무 배경, 핵심 엔터티, 관계, 주요 속성, 제약조건, 출력 형식, 검토 기준이 포함되어야 합니다.
+확인된 요구사항:
+- 학생과 강사는 이름과 이메일을 가진다.
+- 학생과 강사의 이메일은 중복될 수 없다.
+- 강의는 강사 한 명을 참조한다.
+- 학생과 강의는 N:M 관계이며 enrollments로 해소한다.
+- 수강 상태는 신청, 수강중, 완료, 취소 중 하나다.
+- 결제는 수강신청을 참조한다.
+- 실제 카드번호는 저장하지 않는다.
 
-![좋은 DB 설계 프롬프트 구조](../images/chapter13/ch13_03_good_prompt_structure.svg)
+아직 결정되지 않은 항목:
+- 취소 후 동일 강의 재신청 허용 여부
+- 결제 재시도와 이력 저장 방식
+- 삭제 시 기존 이력 처리 방식
 
-그림 13-3 좋은 DB 설계 프롬프트 구조
-
-예시는 다음과 같습니다.
-
-```text
-온라인 강의 수강신청 시스템의 데이터베이스 초안을 설계해 주세요.
-
-요구사항:
-- 학생은 이름, 이메일, 가입일을 가진다.
-- 강사는 이름, 이메일, 전문 분야를 가진다.
-- 강의는 제목, 설명, 난이도, 가격, 강사를 가진다.
-- 학생은 여러 강의를 수강신청할 수 있다.
-- 하나의 강의는 여러 학생이 수강신청할 수 있다.
-- 수강신청은 상태를 가진다. 예: 신청, 취소, 완료
-- 결제는 수강신청과 연결된다.
-
-출력 형식:
-1. 테이블 목록
-2. 각 테이블의 주요 컬럼
-3. 기본키와 외래키
-4. 관계 설명
+출력:
+1. 테이블 목록과 역할
+2. 컬럼과 데이터 타입
+3. PK·FK·UNIQUE·CHECK·NOT NULL
+4. 관계와 카디널리티
 5. PostgreSQL DDL 초안
-6. 설계 시 주의할 점
+6. AI가 가정한 내용
+7. 추가 결정이 필요한 항목
+8. 정상·오류 검증 SQL
+
+검토 기준:
+- 요구사항에 없는 제약조건을 임의로 추가하지 않는다.
+- 현재 강의 가격과 신청 시점 금액을 자동으로 동일시하지 않는다.
+- 보안상 민감한 값을 저장하지 않는다.
+```
+
+Codex에 저장소 수정을 요청할 때는 실제 파일과 금지 범위를 명시합니다.
+
+```text
+현재 저장소의
+code/chapter13/ai_db_design_review_practice.sql을 수정해 주세요.
+
+수정 목표:
+- 요구사항에 없는 중복 수강신청 UNIQUE 제거
+- 신청 시점 합의 금액을 enrollments에 저장
+- 현재 가격과 결제금액 직접 비교 오류 수정
+- 가상 민감정보와 메타데이터 검증 보강
+
+수정 금지:
+- Chapter 12와 Chapter 14 파일
+- Chapter 13 외 다른 SQL 파일
+- 사용자가 이미 수정한 무관한 내용
+
+검증:
+- Chapter 13 테이블 6개
+- 좋은 설계 테이블 5개
+- FK 4개
+- 정상 JOIN 4행
+- 오류 SQL은 기본적으로 주석 유지
+- 파일별 diff로 관련 없는 변경 확인
 ```
 
 ---
 
-## 4. AI가 만든 ERD 초안 검토하기
+## 5. AI가 만든 ERD 초안 검토
 
-AI가 ERD 초안을 만들면 먼저 엔터티와 관계를 확인해야 합니다. 온라인 강의 수강신청 시스템에서는 최소한 다음 엔터티가 필요할 수 있습니다.
+ERD 검토의 출발점은 AI 초안이 아니라 요구사항 기준선입니다.
 
-```text
-students
-instructors
-courses
-enrollments
-payments
-```
+![요구사항을 기준으로 ERD 검토하기](../images/chapter13/ch13_04_erd_review_checkpoints.svg)
 
-![ERD 초안 검토 체크포인트](../images/chapter13/ch13_04_erd_review_checkpoints.svg)
+그림 13-4 요구사항을 기준으로 ERD 검토하기
 
-그림 13-4 ERD 초안 검토 체크포인트
-
-ERD 검토 질문은 다음과 같습니다.
+다음 질문을 순서대로 확인합니다.
 
 ```text
-- 핵심 엔터티가 누락되지 않았는가?
-- 하나의 테이블에 너무 많은 역할이 섞여 있지 않은가?
-- N:M 관계가 중간 테이블로 표현되었는가?
-- 결제와 수강신청이 적절히 분리되었는가?
-- 관계의 방향과 필수 여부가 자연스러운가?
-- 테이블 이름이 일관된 규칙을 따르는가?
+- 핵심 엔터티가 모두 있으며 요구사항에 없는 엔터티가 임의로 추가되지 않았는가?
+- 각 테이블이 하나의 주요 역할을 담당하는가?
+- 학생과 강의의 N:M 관계가 enrollments로 해소되었는가?
+- 강사와 강의의 1:N 관계가 올바른가?
+- 결제와 수강신청 관계가 요구사항에 맞는가?
+- 관계의 필수성과 선택성이 표현되었는가?
+- FK가 자식 컬럼에서 부모 PK를 참조하는가?
+- 미확정 재신청 정책이 UNIQUE로 고정되지 않았는가?
+- 삭제 정책이 요구사항 없이 CASCADE로 지정되지 않았는가?
 ```
 
-| 문제 | 설명 | 수정 방향 |
+이 장의 기본 카디널리티는 다음과 같습니다.
+
+```text
+instructors 1 → 0..N courses
+students 1 → 0..N enrollments
+courses 1 → 0..N enrollments
+enrollments 1 → 0..1 payments
+```
+
+마지막 관계는 한 수강신청에 현재 결제 상태 한 건을 저장한다는 단순화 가정입니다. 결제 시도, 실패, 재결제와 환불 이력을 모두 저장하려면 `enrollments 1 → 0..N payments`로 바꾸고 `enrollment_id UNIQUE`를 제거해야 합니다.
+
+---
+
+## 6. 테이블 역할과 관계 검토
+
+한 테이블에 학생, 강의, 강사, 신청과 결제 정보를 모두 저장하면 정보의 소유자와 변경 이유가 섞입니다.
+
+![역할이 섞인 설계와 분리된 설계](../images/chapter13/ch13_05_bad_vs_good_design.svg)
+
+그림 13-5 역할이 섞인 설계와 분리된 설계
+
+| 테이블 | 주요 역할 |
+| --- | --- |
+| `ai_good_students` | 학생 기본 정보 |
+| `ai_good_instructors` | 강사 기본 정보 |
+| `ai_good_courses` | 강의의 현재 정보와 기본 가격 |
+| `ai_good_enrollments` | 학생과 강의 관계, 신청 상태와 신청 시점 합의 금액 |
+| `ai_good_payments` | 특정 수강신청의 결제 상태와 기록 |
+
+테이블을 나누는 목적은 개수를 늘리는 것이 아닙니다. **각 데이터의 소유자와 변경 이유를 분리하고 관계를 제약조건으로 보호하는 것**이 목적입니다.
+
+---
+
+## 7. 데이터 타입과 제약조건 검토
+
+데이터 타입은 저장 가능한 문자의 길이보다 업무 의미와 검증 필요성을 기준으로 선택합니다.
+
+| 데이터 | 권장 타입 | 검토 이유 |
 | --- | --- | --- |
-| 엔터티 누락 | payments 같은 핵심 테이블이 빠짐 | 요구사항을 다시 반영해 테이블 추가 |
-| 역할 혼합 | enrollments에 결제 상세까지 모두 저장 | payments 테이블로 분리 |
-| N:M 관계 미처리 | students와 courses를 직접 연결 | enrollments 중간 테이블 추가 |
-| 관계 불명확 | FK가 없거나 관계 설명이 모호함 | FK 컬럼과 참조 테이블 명시 |
+| 학생·강사 이름 | `VARCHAR` | 길이 제한이 있는 문자열 |
+| 이메일 | `VARCHAR + UNIQUE` | 중복 방지 |
+| 강의 코드 | `VARCHAR + UNIQUE` | 제목과 분리된 업무 식별자 |
+| 원 단위 가격·금액 | `INT` | 이 장의 정수 금액 가정 |
+| 가입일·개설일 | `DATE` | 날짜 단위 |
+| 결제 시각 | `TIMESTAMPTZ` | 시각과 시간대 고려 |
+| 활성 여부 | `BOOLEAN` | 참·거짓 |
+| 상태 | `VARCHAR + CHECK` | 허용값 제한 |
+| 설명 | `TEXT` | 길이가 긴 선택 정보 |
+
+`VARCHAR`와 `TEXT`의 성능 차이를 과장해서 설명하지 않습니다. 상태값을 `CHECK`로 제한해도 상태 전이 규칙까지 자동으로 검증되는 것은 아닙니다.
+
+![업무 규칙을 제약조건과 테스트로 검증하기](../images/chapter13/ch13_06_constraints_review.svg)
+
+그림 13-6 업무 규칙을 제약조건과 테스트로 검증하기
+
+| 업무 규칙 | DB 제약조건 | 오류 테스트 |
+| --- | --- | --- |
+| 행을 식별 | `PRIMARY KEY` | 중복 PK |
+| 존재하는 대상 참조 | `FOREIGN KEY` | 없는 학생·강의 |
+| 필수값 입력 | `NOT NULL` | NULL 입력 |
+| 이메일 중복 금지 | `UNIQUE` | 중복 이메일 |
+| 금액 0 이상 | `CHECK` | 음수 금액 |
+| 허용 상태만 저장 | `CHECK` | 잘못된 상태 |
+
+`UNIQUE`는 강력한 안전장치지만 요구사항이 없으면 잘못된 정책이 될 수 있습니다. 이 장에서는 취소 후 재신청 정책이 확정되지 않았으므로 `(student_id, course_id) UNIQUE`를 추가하지 않습니다.
 
 ---
 
-## 5. 테이블 설계 검토하기
+## 8. 정규화와 의도된 중복 검토
 
-AI가 만든 테이블 설계는 다음 기준으로 검토합니다.
+중복은 값이 같다는 사실만으로 판단하지 않고 의미와 시점을 확인합니다.
 
 ```text
-1. 테이블 이름이 명확한가?
-2. 각 테이블의 역할이 하나로 유지되는가?
-3. 기본키가 있는가?
-4. 외래키가 필요한 곳에 있는가?
-5. 중복 데이터가 과도하지 않은가?
-6. 컬럼 타입이 적절한가?
-7. NOT NULL, UNIQUE, CHECK 같은 제약조건이 필요한가?
-8. 개인정보나 민감정보가 불필요하게 포함되지 않았는가?
+courses.price
+= 현재 기본 강의 가격
+
+enrollments.agreed_amount
+= 수강신청 시점에 확정한 금액
+
+payments.amount
+= 해당 수강신청에 실제 기록된 결제금액
 ```
 
-예를 들어 `enrollments` 테이블 하나에 학생 이름, 강의 제목, 결제금액, 카드번호를 모두 저장하면 역할이 섞이고 중복이 발생합니다.
+`courses.price`와 `enrollments.agreed_amount`가 다를 수 있습니다. 할인, 프로모션 또는 가격 변경이 있었다면 정상일 수 있습니다. 반면 이 장의 단순 예제에서는 `enrollments.agreed_amount`와 `payments.amount`가 일치해야 합니다.
 
-![나쁜 설계와 좋은 설계 비교](../images/chapter13/ch13_05_bad_vs_good_design.svg)
+```sql
+SELECT
+    e.id AS enrollment_id,
+    e.agreed_amount,
+    p.amount AS payment_amount
+FROM ai_good_enrollments AS e
+JOIN ai_good_payments AS p
+    ON p.enrollment_id = e.id
+WHERE e.agreed_amount <> p.amount;
+```
 
-그림 13-5 나쁜 설계와 좋은 설계 비교
+예상 결과는 0행입니다.
 
-더 나은 방향은 다음과 같습니다.
+현재 가격과 신청 시점 금액의 차이는 정보용으로 확인합니다.
 
-| 테이블 | 역할 |
-| --- | --- |
-| students | 학생 정보 |
-| instructors | 강사 정보 |
-| courses | 강의 정보 |
-| enrollments | 학생과 강의의 수강신청 관계 |
-| payments | 결제 정보 |
+```sql
+SELECT
+    e.id AS enrollment_id,
+    c.price AS current_course_price,
+    e.agreed_amount
+FROM ai_good_enrollments AS e
+JOIN ai_good_courses AS c
+    ON c.id = e.course_id
+WHERE c.price <> e.agreed_amount;
+```
+
+결과가 존재해도 자동 오류로 판정하지 않습니다. 값의 의미와 기록 시점을 먼저 확인합니다.
 
 ---
 
-## 6. AI가 만든 DDL 검토하기
-
-AI가 PostgreSQL DDL을 생성하면 바로 실행하지 말고 먼저 읽어야 합니다.
-
-예를 들어 다음 SQL은 기본적으로 괜찮아 보이지만 이메일 중복을 막으려면 `UNIQUE` 제약조건이 필요할 수 있습니다.
-
-```sql
-CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-![PK/FK/UNIQUE/CHECK 제약조건 검토](../images/chapter13/ch13_06_constraints_review.svg)
-
-그림 13-6 PK/FK/UNIQUE/CHECK 제약조건 검토
-
-DDL 검토 기준은 다음과 같습니다.
-
-| 검토 항목 | 확인 질문 |
-| --- | --- |
-| 기본키 | 모든 테이블에 기본키가 있는가? |
-| 외래키 | 관계가 필요한 테이블에 FK가 있는가? |
-| NOT NULL | 필수 값이 NULL을 허용하지 않는가? |
-| UNIQUE | 이메일, 코드 등 중복 금지 값이 보호되는가? |
-| CHECK | 가격, 수량, 상태값에 제한이 있는가? |
-| 데이터 타입 | 금액, 날짜, 상태값에 적절한 타입을 썼는가? |
-| 삭제 정책 | ON DELETE 동작이 적절한가? |
-| 이름 규칙 | 테이블과 컬럼 이름이 일관적인가? |
-
----
-
-## 7. 기본키와 외래키 점검
-
-기본키와 외래키는 데이터 정합성의 핵심입니다. AI가 만든 SQL에서 기본키가 없으면 각 행을 안정적으로 식별하기 어렵습니다. 외래키가 없으면 존재하지 않는 학생이나 강의를 수강신청하는 데이터가 들어갈 수 있습니다.
-
-예를 들어 수강신청 테이블은 다음처럼 외래키를 가져야 합니다.
-
-```sql
-CREATE TABLE enrollments (
-    id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES students(id),
-    course_id INTEGER NOT NULL REFERENCES courses(id),
-    status VARCHAR(20) NOT NULL,
-    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-검토 질문은 다음과 같습니다.
-
-```text
-- enrollments.student_id가 students.id를 참조하는가?
-- enrollments.course_id가 courses.id를 참조하는가?
-- payments.enrollment_id가 enrollments.id를 참조하는가?
-- 참조 대상이 없는 데이터가 들어가지 않도록 막고 있는가?
-- FK 컬럼에 인덱스가 필요한가?
-```
-
----
-
-## 8. 정규화와 중복 데이터 점검
-
-AI는 때때로 조회하기 편하다는 이유로 같은 데이터를 여러 테이블에 중복 저장합니다.
-
-```text
-enrollments 테이블에 student_name, student_email, course_title, course_price를 모두 저장한다.
-```
-
-이 방식은 처음에는 편해 보이지만 학생 이름이나 강의 제목이 바뀔 때 여러 행을 수정해야 하고, 데이터 불일치가 생기기 쉽습니다.
-
-정규화 관점에서는 다음처럼 분리하는 것이 자연스럽습니다.
-
-```text
-students: 학생의 기본 정보
-courses: 강의의 기본 정보
-enrollments: 학생과 강의의 관계
-payments: 결제 정보
-```
-
-다만 모든 중복이 항상 나쁜 것은 아닙니다. 성능이나 이력 보존을 위해 의도적으로 중복을 둘 수도 있습니다. 중요한 것은 AI가 만든 중복이 의도된 것인지 확인하는 것입니다.
-
----
-
-## 9. 제약조건 점검
-
-제약조건은 데이터가 잘못 들어오는 것을 막는 안전장치입니다.
-
-```sql
-price NUMERIC(10, 2) NOT NULL CHECK (price >= 0)
-```
-
-```sql
-status VARCHAR(20) NOT NULL CHECK (status IN ('applied', 'cancelled', 'completed'))
-```
-
-```sql
-payment_status VARCHAR(20) NOT NULL CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded'))
-```
-
-AI가 만든 SQL을 검토할 때는 가격이나 수량에 음수가 들어갈 수 없는지, 상태값이 아무 문자열이나 허용되지 않는지, 이메일 중복이 허용되어도 되는지, 필수 값이 NULL로 저장될 수 없는지 확인해야 합니다.
-
----
-
-## 10. SQL Anti-pattern 찾기
-
-SQL Anti-pattern은 자주 보이지만 장기적으로 문제를 만드는 설계나 쿼리 패턴입니다.
+## 9. SQL Anti-pattern 찾기
 
 | Anti-pattern | 문제 | 수정 방향 |
 | --- | --- | --- |
-| 모든 컬럼을 TEXT로 저장 | 타입 검증이 어렵고 성능 저하 가능 | 날짜, 숫자, 상태값에 적절한 타입 사용 |
-| 하나의 테이블에 모든 정보 저장 | 중복과 변경 문제 발생 | 역할별 테이블 분리 |
-| FK 없이 id만 저장 | 참조 무결성 보장 어려움 | FOREIGN KEY 추가 |
-| 상태값 제한 없음 | 잘못된 상태 문자열 저장 가능 | CHECK 또는 별도 코드 테이블 사용 |
-| SELECT * 남용 | 불필요한 데이터 조회 | 필요한 컬럼만 조회 |
-| 비밀번호나 토큰 평문 저장 | 보안 위험 | 저장 방식과 접근 권한 별도 검토 |
+| 하나의 테이블에 모든 정보 저장 | 반복·역할 혼합·변경 이상 | 역할별 테이블과 관계 분리 |
+| 모든 컬럼을 `TEXT`로 저장 | 값 검증과 계산 어려움 | 업무 의미에 맞는 타입 |
+| FK 없이 ID만 저장 | 존재하지 않는 참조 가능 | FK와 오류 테스트 |
+| 요구사항 없는 UNIQUE 추가 | 정상적인 이력 입력 차단 | 정책 확정 후 적용 |
+| 현재 가격과 과거 결제금액 직접 비교 | 할인·가격 변경을 오류로 오판 | 신청 시점 금액 보존 |
+| 오류 로그 전체를 AI에 전달 | 비밀정보 노출 가능 | 민감정보 제거 후 전달 |
+| AI가 수정한 전체 diff 미확인 | 관련 없는 변경 포함 가능 | 파일별 diff 검토 |
+| 실행 성공만 확인 | 업무 규칙 오류 발견 불가 | 예상 결과와 검증 SQL |
+| 운영 DB에서 시험 실행 | 데이터 손실 위험 | 별도 실습 DB |
 
-초급 단계에서는 테이블 역할이 섞여 있지 않은지, PK/FK가 제대로 설정되어 있는지, 데이터 타입과 제약조건이 적절한지 집중적으로 확인하면 좋습니다.
-
----
-
-## 11. AI 생성 SQL 실행 전 안전 검토
-
-AI가 SQL을 생성하면 바로 운영 데이터베이스에서 실행하면 안 됩니다. 실행 전 다음을 확인해야 합니다.
-
-| 확인 항목 | 설명 |
-| --- | --- |
-| 실행 대상 DB | 운영 DB가 아니라 실습 DB인지 확인 |
-| 삭제/변경 명령 | DROP, DELETE, UPDATE가 포함되어 있는지 확인 |
-| 트랜잭션 사용 | 중요한 변경 전 BEGIN/ROLLBACK 가능성 확인 |
-| 백업 필요성 | 기존 데이터가 있으면 백업 필요 여부 확인 |
-| 권한 | 현재 계정이 과도한 권한을 갖고 있지 않은지 확인 |
-| 개인정보 | 실제 개인정보가 포함되어 있지 않은지 확인 |
-
-실습에서는 다음 원칙을 지킵니다.
-
-```text
-AI가 만든 SQL은 먼저 읽고, 실습 DB에서 실행하고, 결과를 확인한 뒤 수정한다.
-```
-
-![information_schema 기반 메타데이터 점검](../images/chapter13/ch13_07_information_schema_review.svg)
-
-그림 13-7 information_schema 기반 메타데이터 점검
-
-`information_schema`를 활용하면 실제 생성된 테이블, 컬럼, 제약조건, 외래키 관계를 확인할 수 있습니다.
+`SELECT *`를 모든 상황에서 금지할 필요는 없습니다. 탐색과 임시 점검에는 사용할 수 있지만, 애플리케이션과 출간 예제에서는 필요한 컬럼을 명시하는 편이 안전합니다.
 
 ---
 
-## 12. Codex를 활용한 수정 루프
+## 10. AI 생성 SQL 실행 전 안전 검토
 
-Codex는 파일 단위 작업에 유용합니다. 예를 들어 `schema.sql`을 만들고, 실행 오류가 발생하면 오류 메시지를 바탕으로 수정할 수 있습니다.
-
-![Codex 오류 수정 루프](../images/chapter13/ch13_08_codex_error_fix_loop.svg)
-
-그림 13-8 Codex 오류 수정 루프
-
-기본 수정 루프는 다음과 같습니다.
-
-```text
-1. 요구사항을 정리한다.
-2. AI에게 ERD와 DDL 초안을 요청한다.
-3. 사람이 PK/FK/제약조건/정규화 관점에서 검토한다.
-4. Codex에게 SQL 파일을 작성하게 한다.
-5. 실습 DB에서 실행한다.
-6. 오류 메시지를 확인한다.
-7. 오류 원인을 분석한다.
-8. Codex에게 수정 요청을 한다.
-9. 다시 실행하고 결과를 검증한다.
-```
-
-Codex에게 수정 요청을 할 때는 오류 메시지를 그대로 전달하는 것이 좋습니다.
-
-```text
-다음 PostgreSQL 오류를 보고 schema.sql을 수정해 주세요.
-오류 메시지:
-ERROR: relation "students" does not exist
-
-조건:
-- 테이블 생성 순서를 조정해 주세요.
-- 기존 요구사항은 유지해 주세요.
-- 수정 이유를 주석으로 설명해 주세요.
-```
-
----
-
-## 13. AI 검토 프롬프트 예시
-
-AI에게 단순히 “검토해 줘”라고 하면 결과가 막연할 수 있습니다. 검토 기준을 명확히 줘야 합니다.
-
-```text
-다음 PostgreSQL DDL을 검토해 주세요.
-
-검토 기준:
-1. 모든 테이블에 기본키가 있는가?
-2. 필요한 외래키가 누락되지 않았는가?
-3. N:M 관계가 중간 테이블로 표현되었는가?
-4. 제약조건이 부족한 컬럼은 없는가?
-5. 정규화 관점에서 중복 데이터가 과도하지 않은가?
-6. 개인정보나 보안상 위험한 컬럼이 있는가?
-7. PostgreSQL 문법 오류 가능성이 있는가?
-8. 초급자가 이해할 수 있게 수정안을 제시해 달라.
-```
-
-AI에게 다음처럼 역할을 부여할 수도 있습니다.
-
-```text
-당신은 데이터베이스 설계 리뷰어입니다.
-AI가 생성한 ERD와 SQL을 그대로 믿지 않고, 요구사항과 데이터 정합성 관점에서 문제를 찾는 역할입니다.
-```
-
----
-
-## 14. 작은 예제: AI 설계 결과 검토
-
-AI가 다음과 같은 테이블을 제안했다고 가정합니다.
+> **실습 DB 확인**
+>
+> `code/chapter13/ai_db_design_review_practice.sql`은 Chapter 13 전용 `ai_bad_`, `ai_good_` 테이블을 삭제하고 다시 생성합니다. 실행 전에 현재 데이터베이스, 사용자와 스키마를 확인하고 운영 DB 또는 보존해야 할 데이터가 있는 DB에서는 실행하지 않습니다.
 
 ```sql
-CREATE TABLE enrollments (
-    id SERIAL PRIMARY KEY,
-    student_name TEXT,
-    student_email TEXT,
-    course_title TEXT,
-    course_price TEXT,
-    payment_status TEXT
-);
+SELECT
+    current_database() AS current_database_name,
+    current_user AS current_user_name,
+    current_schema() AS current_schema_name;
 ```
 
-겉으로 보기에는 수강신청 정보를 저장할 수 있어 보입니다. 하지만 문제가 많습니다.
-
-| 문제 | 이유 | 수정 방향 |
-| --- | --- | --- |
-| 학생 정보 중복 | 학생이 여러 강의를 들으면 이름과 이메일 반복 | students 테이블 분리 |
-| 강의 정보 중복 | 같은 강의 제목과 가격이 반복 저장 | courses 테이블 분리 |
-| 가격이 TEXT | 숫자 계산과 검증이 어려움 | NUMERIC 타입 사용 |
-| 상태값 제한 없음 | 아무 문자열이나 저장 가능 | CHECK 제약조건 추가 |
-| FK 없음 | 실제 학생과 강의 존재 여부 보장 불가 | student_id, course_id FK 추가 |
-| 결제와 수강신청 혼합 | 결제 이력 관리가 어려움 | payments 테이블 분리 |
-
-수정 방향은 다음과 같습니다.
+실행 전에는 다음을 확인합니다.
 
 ```text
-students(id, name, email, created_at)
-courses(id, title, price, instructor_id)
-enrollments(id, student_id, course_id, status, enrolled_at)
-payments(id, enrollment_id, amount, payment_status, paid_at)
+- DROP 대상이 Chapter 13 전용 테이블인가?
+- 기본 실행 SQL과 선택적 오류 SQL이 구분되어 있는가?
+- 실제 개인정보, 비밀번호, 토큰, 접속 URL과 카드번호가 없는가?
+- INSERT, UPDATE, DELETE의 영향 범위를 확인했는가?
+- 예상 테이블 수, 행 수, JOIN과 FK 결과가 명시되어 있는가?
 ```
 
-이 예제의 핵심은 AI가 만든 SQL을 틀렸다고만 보는 것이 아니라, 왜 문제가 되는지 설명하고 더 나은 설계로 수정하는 것입니다.
+오류의 기술적 내용은 가능한 한 정확하게 전달하되 비밀번호, 전체 연결 문자열, 실제 서버 주소, 고객 이메일, 사용자 경로와 운영 데이터는 제거하거나 마스킹합니다.
 
 ---
 
-## 15. 자주 하는 실수
+## 11. Chapter 13 실습 SQL 구조
 
-### 실수 1. AI가 만든 ERD를 그대로 사용한다
+실습 파일은 다음 순서로 구성됩니다.
 
-AI가 만든 ERD는 초안입니다. 요구사항과 맞는지 반드시 확인해야 합니다.
+1. 현재 DB·사용자·스키마 확인
+2. 실습 테이블 초기화
+3. 나쁜 설계와 가상 데이터
+4. 나쁜 설계 문제 조회
+5. 확인된 요구사항과 미확정 규칙
+6. 좋은 설계 DDL
+7. 좋은 설계 샘플 데이터
+8. 정상 JOIN
+9. 예상 행 수 확인
+10. 선택적 제약조건 오류 테스트
+11. 메타데이터·FK·인덱스 확인
+12. 업무 정합성 검증
+13. 최종 예상 결과와 AI 검토 프롬프트
 
-### 실수 2. SQL이 실행되면 설계도 맞다고 생각한다
+기본 실행 후 예상값은 다음과 같습니다.
 
-SQL이 실행되어도 정규화, 제약조건, 보안, 성능이 부족할 수 있습니다.
+| 항목 | 예상값 |
+| --- | ---: |
+| `ai_bad_enrollments` | 3행 |
+| `ai_good_students` | 3행 |
+| `ai_good_instructors` | 2행 |
+| `ai_good_courses` | 3행 |
+| `ai_good_enrollments` | 4행 |
+| `ai_good_payments` | 4행 |
+| 정상 JOIN | 4행 |
+| 외래키 관계 | 4개 |
 
-### 실수 3. FK를 생략한다
-
-외래키를 생략하면 데이터 정합성을 애플리케이션 코드에만 의존하게 됩니다.
-
-### 실수 4. 모든 컬럼을 TEXT로 만든다
-
-데이터 타입이 부정확하면 검색, 정렬, 계산, 제약조건 설정이 어려워집니다.
-
-### 실수 5. AI에게 수정 기준을 주지 않는다
-
-AI에게는 무엇을 기준으로 검토해야 하는지 명확히 알려야 합니다.
-
----
-
-## 16. 스스로 확인하기
-
-### 16.1 개념 확인
-
-1. AI가 만든 데이터베이스 설계를 그대로 사용하면 안 되는 이유를 설명해 보세요.
-2. ERD 초안을 검토할 때 확인해야 할 항목을 5가지 이상 정리해 보세요.
-3. 기본키와 외래키가 중요한 이유를 설명해 보세요.
-4. SQL Anti-pattern의 예를 3가지 이상 정리해 보세요.
-5. Codex를 활용한 SQL 수정 루프를 설명해 보세요.
-
-### 16.2 설계 검토 문제
-
-다음 AI 생성 설계를 검토하고 문제점을 작성해 보세요.
-
-```text
-enrollments(id, student_name, student_email, course_title, course_price, payment_status)
-```
-
-다음 기준을 포함해 설명해 보세요.
-
-```text
-- 테이블 역할
-- 중복 데이터
-- 데이터 타입
-- 기본키와 외래키
-- 결제 정보 분리
-- 제약조건
-```
-
-### 16.3 프롬프트 작성 문제
-
-ChatGPT에게 온라인 강의 수강신청 시스템의 ERD와 DDL을 요청하는 프롬프트를 작성해 보세요.
-
-프롬프트에는 다음 항목을 포함해야 합니다.
-
-```text
-- 시스템 배경
-- 핵심 엔터티
-- 관계
-- 주요 컬럼
-- 제약조건
-- 출력 형식
-- 검토 기준
-```
-
-### 16.4 AI 검토 문제
-
-AI가 다음처럼 답했다고 가정합니다.
-
-```text
-수강신청과 결제는 한 테이블에 넣는 것이 간단하므로 가장 좋습니다.
-```
-
-이 답변을 그대로 받아들이면 안 되는 이유를 설명하고, 더 나은 설계 방향을 제안해 보세요.
+오류 SQL은 한꺼번에 주석 해제하지 않습니다. 하나씩 실행해 의도한 제약조건으로 차단되는지 확인합니다. 트랜잭션이 오류 후 aborted 상태라면 `ROLLBACK`한 뒤 정상 조회를 다시 실행합니다.
 
 ---
 
-## 17. 정리
+## 12. 실제 DB 구조와 예상 설계 비교
 
-이번 장에서는 ChatGPT와 Codex를 활용해 데이터베이스 설계와 SQL을 생성하고 검토하는 방법을 살펴보았습니다.
+SQL 파일의 DDL만 읽고 끝내지 않고 실제로 생성된 메타데이터를 확인합니다.
 
-핵심 내용을 정리하면 다음과 같습니다.
+![예상 설계와 실제 메타데이터 비교](../images/chapter13/ch13_07_information_schema_review.svg)
+
+그림 13-7 예상 설계와 실제 메타데이터 비교
+
+주요 확인 대상은 다음과 같습니다.
+
+| 확인 대상 | 용도 |
+| --- | --- |
+| `information_schema.tables` | 테이블 목록 |
+| `information_schema.columns` | 컬럼 타입과 NULL 허용 |
+| `information_schema.table_constraints` | PK·FK·UNIQUE·CHECK 종류 |
+| `information_schema.check_constraints` | 실제 CHECK 조건 |
+| `information_schema.key_column_usage` | 제약조건 컬럼 |
+| `information_schema.constraint_column_usage` | FK 참조 대상 |
+| `pg_indexes` | PostgreSQL 인덱스 정의 |
+
+예상 설계와 실제 구조가 다르면 DDL을 수정하고 DB를 초기화한 뒤 다시 생성·검증합니다. 테이블이 존재한다는 사실만으로 설계가 맞는 것은 아닙니다.
+
+---
+
+## 13. 업무 정합성 검증
+
+제약조건은 한 행이나 참조 무결성을 보호하지만 여러 테이블의 업무 의미까지 모두 자동으로 판단하지는 않습니다.
+
+이 장에서는 다음 검증 결과가 0행인지 확인합니다.
 
 ```text
-1. AI는 데이터베이스 설계 초안을 빠르게 만들 수 있다.
-2. AI가 만든 ERD와 SQL은 정답이 아니라 검토 대상이다.
-3. 좋은 프롬프트는 업무 배경, 엔터티, 관계, 제약조건, 출력 형식을 포함한다.
-4. ERD는 엔터티 누락, 관계 오류, N:M 처리 여부를 확인해야 한다.
-5. DDL은 PK, FK, NOT NULL, UNIQUE, CHECK, 데이터 타입을 확인해야 한다.
-6. 정규화 관점에서 중복 데이터가 의도된 것인지 검토해야 한다.
-7. AI 생성 SQL은 운영 DB가 아니라 실습 DB에서 먼저 검증해야 한다.
-8. Codex를 사용할 때는 오류 메시지와 수정 조건을 명확히 제공해야 한다.
-9. 최종 판단은 AI가 아니라 사람이 해야 한다.
+- 학생·강사 이메일 중복
+- 신청 시점 합의 금액과 결제금액 불일치
+- 결제완료·환불인데 paid_at이 NULL
+- 결제대기·결제실패인데 paid_at이 존재
 ```
 
-이 장에서 가장 중요한 문장은 다음입니다.
+수강 상태와 결제 상태의 조합도 함께 조회합니다. 이 장의 단순 샘플에서는 다음 조합을 사용합니다.
 
 ```text
-AI는 데이터베이스 설계의 정답을 주는 도구가 아니라, 사람이 검토할 초안을 빠르게 만드는 도구이다.
+완료 → 결제완료
+신청 → 결제대기
+취소 → 환불
+```
+
+이는 예제 범위의 가정이며 모든 서비스의 보편적인 정답은 아닙니다.
+
+---
+
+## 14. Codex 파일 수정·검증 루프
+
+Codex에 오류를 전달하고 수정된 파일이 생성되었다고 해서 작업이 끝나는 것은 아닙니다.
+
+![Codex 변경·검증·재수정 루프](../images/chapter13/ch13_08_codex_error_fix_loop.svg)
+
+그림 13-8 Codex 변경·검증·재수정 루프
+
+권장 흐름은 다음과 같습니다.
+
+```text
+1. 오류와 기대 결과를 같은 조건에서 재현한다.
+2. 오류 메시지에서 비밀번호·접속 정보·개인정보를 제거한다.
+3. 실제 수정 파일과 수정 금지 범위를 지정한다.
+4. Codex에 최소 변경을 요청한다.
+5. 사람이 파일별 diff를 검토한다.
+6. 관련 없는 변경을 제거한다.
+7. 같은 조건으로 다시 실행한다.
+8. 행 수·메타데이터·정합성 결과를 검증한다.
+9. 실패하면 원인과 프롬프트를 수정해 반복한다.
+10. 통과하면 변경 이유, 증거와 남은 가정을 기록한다.
+```
+
+### Codex 변경 후 diff 검토
+
+| 확인 항목 | 질문 |
+| --- | --- |
+| 파일 범위 | 요청한 파일만 변경되었는가? |
+| 요구사항 | 기존 확인 요구사항이 유지되었는가? |
+| 임의 규칙 | 새로운 UNIQUE·CASCADE가 추가되지 않았는가? |
+| 보안 | 비밀번호나 실제 데이터가 포함되지 않았는가? |
+| SQL | DROP·DELETE·UPDATE 범위가 안전한가? |
+| 테스트 | 실행 결과와 예상값이 함께 제공되었는가? |
+| 주석 | 수정 이유가 정확한가? |
+| 문서 | 본문·README·워크북과 일치하는가? |
+
+AI가 생성한 코드뿐 아니라 **AI가 만든 변경사항 자체도 사람이 리뷰**해야 합니다.
+
+---
+
+## 15. AI 검토 프롬프트 예시
+
+### ERD·DDL 검토 요청
+
+```text
+다음 PostgreSQL 설계 초안을 검토해 주세요.
+
+확인된 요구사항:
+- 학생과 강사 이메일은 UNIQUE
+- 학생과 강의 N:M 관계는 enrollments로 해소
+- 결제는 enrollment_id를 참조
+- 원 단위 정수 금액
+- 실제 카드번호 저장 금지
+
+미확정 규칙:
+- 취소 후 재신청 허용 여부
+- 결제 재시도와 이력 저장 방식
+- 삭제 정책
+
+검토:
+1. 요구사항별 반영 위치
+2. 임의로 추가된 업무 규칙
+3. PK·FK·CHECK·UNIQUE·NOT NULL
+4. 데이터 타입과 보안 문제
+5. 정상·오류 검증 SQL
+6. 추가 결정이 필요한 항목
+```
+
+### 오류 수정 요청
+
+```text
+다음 PostgreSQL 오류를 분석하고
+code/chapter13/ai_db_design_review_practice.sql을 수정해 주세요.
+
+오류:
+ERROR: relation "ai_good_students" does not exist
+
+조건:
+- 비밀번호와 접속 정보는 포함하지 않습니다.
+- 테이블 생성 순서를 확인합니다.
+- 기존 요구사항과 샘플 데이터는 유지합니다.
+- 오류와 직접 관련 없는 SQL은 수정하지 않습니다.
+- 수정 이유를 주석으로 남깁니다.
+- 변경 후 실행 순서와 검증 SQL을 제시합니다.
 ```
 
 ---
 
-## 18. 다음 장에서는
+## 16. 작은 예제: 역할이 섞인 설계 개선
 
-다음 장에서는 Vector DB와 RAG 기초를 살펴봅니다.
+나쁜 설계는 학생, 강의, 강사, 신청, 결제를 `ai_bad_enrollments` 한 테이블에 저장합니다. 모든 값을 `TEXT`로 저장하고 평문 민감정보의 나쁜 예도 포함합니다.
 
-Chapter 14에서는 텍스트를 벡터로 변환하고, 유사도 검색을 통해 문서를 찾아 LLM 답변에 활용하는 RAG의 기본 흐름을 다룹니다.
+실습에서는 실제 카드번호 형태를 사용하지 않고 다음처럼 명확한 가상값만 사용합니다.
+
+```text
+TEST-CARD-PLAINTEXT-01
+TEST-CARD-PLAINTEXT-02
+```
+
+좋은 설계에는 카드번호 컬럼을 만들지 않고 결제 대행사의 안전한 식별자를 가정한 `payment_reference`만 저장합니다.
+
+또한 다음 근거 없는 제약을 제거합니다.
+
+```text
+UNIQUE (instructor_id, title)
+UNIQUE (student_id, course_id)
+```
+
+강의 식별에는 제목이 아니라 `course_code`를 사용합니다. 재신청 제한은 정책이 확정된 뒤 별도로 설계합니다.
+
+---
+
+## 17. 자주 하는 실수
+
+### 실수 1. AI가 만든 SQL이 실행되면 설계도 맞다고 판단한다
+
+문법 성공과 업무 설계 검증은 다른 문제입니다. 실제 메타데이터, 정상·오류 테스트와 정합성 결과를 확인해야 합니다.
+
+### 실수 2. 미확정 정책을 UNIQUE나 CASCADE로 고정한다
+
+AI가 가정한 정책을 요구사항처럼 사용하면 정상적인 이력이나 삭제 정책을 훼손할 수 있습니다.
+
+### 실수 3. 현재 가격과 신청 시점 금액을 같은 의미로 본다
+
+값이 다르면 먼저 의미와 기록 시점을 확인합니다.
+
+### 실수 4. 오류 메시지를 그대로 AI에 전달한다
+
+기술적 재현 정보는 유지하되 비밀번호, 연결 문자열과 실제 개인정보는 제거합니다.
+
+### 실수 5. Codex가 수정한 전체 diff를 확인하지 않는다
+
+요청 파일 외 변경, 임의 제약조건, 무관한 포맷 변경이 섞일 수 있습니다.
+
+### 실수 6. 존재하지 않는 파일을 수정 대상으로 지정한다
+
+실제 저장소를 확인하고 `code/chapter13/ai_db_design_review_practice.sql`처럼 존재하는 경로를 사용합니다.
+
+---
+
+## 18. 스스로 확인하기
+
+1. AI 결과가 실행 가능하더라도 검토가 필요한 이유는 무엇인가요?
+2. 확인된 요구사항과 미확정 업무 규칙을 왜 분리해야 하나요?
+3. `(student_id, course_id) UNIQUE`를 바로 추가하면 안 되는 이유는 무엇인가요?
+4. `courses.price`, `enrollments.agreed_amount`, `payments.amount`의 차이를 설명해 보세요.
+5. 실제 CHECK 정의를 확인하려면 어떤 메타데이터를 조회해야 하나요?
+6. 트랜잭션과 별개로 업무 정합성 SQL이 필요한 이유는 무엇인가요?
+7. Codex 변경 후 diff에서 확인해야 할 항목을 세 가지 이상 말해 보세요.
+8. 오류 메시지를 AI에 전달하기 전에 제거해야 할 정보를 설명해 보세요.
+
+---
+
+## 19. 정리
+
+```text
+1. AI 결과는 검토 대상 초안이다.
+2. 요구사항과 미확정 정책을 먼저 구분한다.
+3. ERD·DDL·샘플 데이터·검증 결과를 요구사항과 추적한다.
+4. 실행 가능한 SQL과 올바른 설계는 같은 의미가 아니다.
+5. 현재 가격, 신청 시점 금액과 결제금액의 의미를 구분한다.
+6. 실제 생성된 구조는 information_schema와 pg_indexes로 확인한다.
+7. 오류 테스트와 업무 정합성 조회를 함께 사용한다.
+8. Codex 변경은 diff와 재실행 결과를 사람이 검토한다.
+9. 비밀정보와 실제 개인정보를 AI 프롬프트에서 제거한다.
+10. 검증 증거와 남은 가정을 기록한 뒤 최종 승인한다.
+```
+
+---
+
+## 20. 다음 장에서는
+
+다음 장에서는 Vector DB와 RAG의 기본 개념을 살펴봅니다. Chapter 13에서 AI가 만든 데이터베이스 설계와 SQL을 검증했다면, Chapter 14에서는 생성형 AI 서비스가 관련 문서를 검색하고 근거를 바탕으로 답변하도록 지원하는 데이터 구조와 검색 흐름을 다룹니다.
 
 ---
 

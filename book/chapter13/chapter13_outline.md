@@ -1,48 +1,94 @@
 # Chapter 13 Outline
 
 ## 제목
+
 ChatGPT와 Codex로 DB 설계 검증하기
 
 ## 권장 분량
-25~30페이지
+
+28~34페이지
 
 ## 이 장의 목적
-ChatGPT와 Codex를 활용해 ERD, DDL, SQL, 웹 CRUD 코드를 생성하고, 생성 결과를 사람이 검토하는 방법을 다룬다.
+
+ChatGPT와 Codex를 활용해 ERD와 PostgreSQL 설계 초안을 만들고, 요구사항 기준선·실제 메타데이터·정상 및 오류 테스트·diff를 근거로 사람이 검토하고 승인하는 방법을 다룬다.
 
 ## 이 장에서 다룰 내용
-- ChatGPT로 요구사항과 DB 설계 초안을 생성할 수 있다.
-- Codex로 SQL과 웹 CRUD 코드를 생성할 수 있다.
-- AI가 생성한 ERD, DDL, SQL의 오류를 찾을 수 있다.
-- SQL Anti-pattern 관점으로 설계를 검토할 수 있다.
+
+- AI 결과를 검토 대상 초안으로 다룬다.
+- ChatGPT·Codex·사람의 협업 흐름을 이해한다.
+- 확인된 요구사항과 미확정 업무 규칙을 구분한다.
+- 요구사항 추적표로 ERD·DDL·검증 결과를 연결한다.
+- 데이터 타입, PK·FK·CHECK·UNIQUE·NOT NULL을 검토한다.
+- 정규화와 의도된 중복을 구분한다.
+- SQL Anti-pattern과 민감정보 위험을 찾는다.
+- `information_schema`와 `pg_indexes`로 실제 구조를 검증한다.
+- Codex 수정 후 diff와 재실행 결과를 검토한다.
 
 ## 주요 개념
-- AI 기반 DB 설계
-- 프롬프트
-- ERD 검증
-- DDL 검증
-- SQL 검증
+
+- AI 기반 DB 설계 검토
+- 요구사항 기준선
+- 미확정 업무 규칙
+- 요구사항 추적
+- ERD와 카디널리티
+- DDL과 제약조건
+- 데이터 타입
+- 정규화와 의도된 중복
 - SQL Anti-pattern
-- Codex 기반 구현
+- 메타데이터 검증
+- `information_schema`
+- `pg_indexes`
+- 정상·오류 테스트
+- diff 검토
+- Codex 수정 루프
+- 사람의 최종 승인
 
 ## 본문 구성안
-1. AI를 DB 학습에 활용하는 방식
-2. ChatGPT로 요구사항 정리하기
-3. ChatGPT로 ERD 초안 만들기
-4. Codex로 DDL과 CRUD 코드 만들기
-5. AI 결과 검증 체크리스트
-6. SQL Anti-pattern 기본 사례
-7. 사람의 역할: 설계 검토자
+
+1. 왜 AI 기반 DB 설계 검증을 배워야 하는가
+2. ChatGPT·Codex·사람의 협업 방식
+3. 요구사항 기준선과 미확정 규칙
+4. 좋은 DB 설계 요청 프롬프트
+5. AI가 만든 ERD 초안 검토
+6. 테이블 역할과 관계 검토
+7. 데이터 타입과 제약조건 검토
+8. 정규화와 의도된 중복 검토
+9. SQL Anti-pattern 찾기
+10. AI 생성 SQL 실행 전 안전 검토
+11. Chapter 13 실습 SQL 구조
+12. 실제 DB 구조와 예상 설계 비교
+13. 업무 정합성 검증
+14. Codex 파일 수정·검증 루프
+15. AI 검토 프롬프트 예시
+16. 작은 예제: 역할이 섞인 설계 개선
+17. 자주 하는 실수
+18. 스스로 확인하기
+19. 정리
+20. 다음 장에서는
 
 ## 실습 구성
-- AI에게 DB 설계 요청하기
-- 생성된 DDL 검토하기
-- 잘못된 SQL 찾기
-- Codex로 CRUD 초안 생성하기
+
+- 확인된 요구사항과 미확정 규칙 작성
+- AI 설계 초안과 요구사항 추적표 비교
+- 나쁜 설계와 역할별 분리 설계 비교
+- 실제 PostgreSQL DDL과 샘플 데이터 검토
+- 정상 JOIN 4행과 예상 행 수 확인
+- 선택적 오류 SQL로 제약조건 확인
+- `information_schema`와 `pg_indexes` 결과 해석
+- 업무 정합성 이상 조회 확인
+- Codex 변경 후 파일별 diff 검토
 
 ## 실습 결과물
-- AI 프롬프트 모음
-- AI 생성 설계 검토 보고서
+
+- 요구사항 기준선
+- 미확정 업무 규칙표
+- 요구사항 추적표
+- AI 설계 검토 보고서
 - 수정 전후 DDL 비교
+- 메타데이터 검증 결과
+- Codex 변경 diff 검토 결과
+- 최종 검증 근거와 남은 가정
 
 ## 다음 장 연결
-다음 장에서는 Vector DB와 RAG를 다룬다.
+
+다음 장에서는 Vector DB와 RAG 기초를 다룬다.
