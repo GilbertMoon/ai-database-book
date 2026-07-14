@@ -1,19 +1,17 @@
 flowchart TD
-    A["목표·변경 범위<br/>기준 commit · 허용·금지 파일 · 파괴적 작업"]
-    B["AI 변경 초안<br/>요구사항·ERD·SQL·문서"]
-    C["파일별 diff·위험 변경 확인<br/>관련 없는 변경 · DROP·ALTER·CASCADE·Role·GRANT"]
-    D["사람의 실행 전 검토<br/>설계 근거 · 비밀 · 범위"]
-    E["테스트 환경에서 관련 SQL 재실행<br/>영향 SQL · 반례 · 10_completion_gate.sql"]
-    F["기대값·실제 결과·완료 게이트 비교<br/>구조 · 행 수 · 경계 사례 · ROLLBACK · 반례"]
-    G{"요구사항과 검증 기준이 일치하는가?"}
-    H["미실행·미확인 항목 확인<br/>검증하지 않은 항목은 통과 처리하지 않음"]
-    I["사람 최종 판단<br/>승인 · 조건부 승인 · 보류 · 거절"]
-    J["ai_review_report.md 기록<br/>commit · diff · expected/actual · 근거 · 후속 조치"]
-    K["승인 보류·원인 수정<br/>요구사항·ERD·SQL·테스트·README·보고서"]
+    A[목표·변경 범위<br/>허용·금지 파일 · 기대값]
+    B[AI 변경 초안<br/>ERD · SQL · Python · 문서]
+    C[파일별 diff·위험 변경 확인<br/>DROP · CASCADE · 비밀 · 임의 데이터 제거]
+    D[사람의 실행 전 검토]
+    E[테스트 DB에서 SQL 실행]
+    F[Python DataFrame·집계 실행]
+    G[SQL·Python 기준값 비교]
+    H{요구사항과 검증 기준이 일치하는가?}
+    I[ai_review_report.md 기록<br/>실행 증거·미실행 항목]
+    J[사람 최종 승인]
+    K[원인 수정<br/>요구사항·ERD·SQL·Python·문서]
 
-    A --> B --> C --> D
-    D -- "실행 가능" --> E --> F --> G
-    D -- "실행 부적합" --> K
-    G -- "예" --> H --> I --> J
-    G -- "아니요" --> K
-    K -- "새 diff부터 재검토" --> C
+    A --> B --> C --> D --> E --> F --> G --> H
+    H -->|예| I --> J
+    H -->|아니요| K
+    K --> C
