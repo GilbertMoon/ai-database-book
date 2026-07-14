@@ -1,9 +1,0 @@
-flowchart LR
-A[검색 결과] --> B[검색 적합성]
-A --> C[답변 근거성]
-C --> D[unsupported claim]
-B --> E{통과?}
-C --> E
-D --> E
-E -->|통과| F[답변 제공]
-E -->|실패| G[검색 조정 또는 답변 보류]
