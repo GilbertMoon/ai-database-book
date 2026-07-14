@@ -1,8 +1,8 @@
 # Chapter 14 실습 코드
 
-## 벡터 검색과 RAG로 근거 있는 답변 만들기
+## SQL 데이터 분석과 Python 확장
 
-이 폴더는 `rag_lab`에서 원문·청크·벡터·질문·정답표·검색 로그·답변 검토를 분리하고, 권한·최신성 필터와 검색·답변 평가를 수행하는 파일을 관리합니다.
+이 폴더는 `analysis_lab` 전용 스키마에서 SQL 데이터 분석을 수행하고, 분석용 VIEW를 CSV 또는 PostgreSQL 연결로 Python과 pandas에 전달한 뒤 결과를 교차 검증하는 파일을 관리합니다.
 
 ---
 
@@ -15,10 +15,10 @@ performance_lab: 변경하지 않음
 security_lab: 변경하지 않음
 nosql_lab: 변경하지 않음
 ai_review_lab: 변경하지 않음
-rag_lab: Chapter 14 실습 대상
+analysis_lab: Chapter 14 실습 대상
 ```
 
-`CREATE EXTENSION`, Role 변경과 근사 인덱스 생성을 자동 실행하지 않습니다.
+생성 파일에서는 기존 객체를 자동으로 삭제하지 않습니다. 처음부터 다시 시작할 때만 `reset_analysis_lab.sql`을 검토한 후 선택 실행합니다.
 
 ---
 
@@ -26,34 +26,50 @@ rag_lab: Chapter 14 실습 대상
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_rag_lab_schema.sql` | 원문·청크·질문·정답·검색 로그·답변 평가 테이블 생성 |
-| `02_rag_lab_seed.sql` | 문서 7·청크 9·질문 4·정답 6 입력 |
-| `03_manual_vector_search.sql` | 권한·활성 상태 필터 후 수동 3차원 L2 Top-k 생성 |
-| `04_retrieval_evaluation.sql` | Precision@k·Recall@k·RR·MRR와 보류 조건 평가 |
-| `05_rag_answer_reviews.sql` | 근거·인용·권한·최신성·Unsupported claim·보류 검토 |
-| `06_rag_lifecycle_checks.sql` | 원문·벡터 버전·비활성 문서·재임베딩 대상 확인 |
-| `07_pgvector_optional.sql` | pgvector 준비 환경에서 선택적 vector(3) 비교 |
-| `RAG_EVALUATION_REPORT_TEMPLATE.md` | 검색·답변·보안·수명주기·회귀 평가 기록 |
-| `RAG_REVIEW_PROMPTS.md` | RAG 설계·검색·답변·보안·인덱스 검토 프롬프트 |
-| `reset_rag_lab.sql` | rag_lab만 초기화 |
-| `vector_rag_practice.sql` | 기존 링크 호환용 안내·상태 확인 |
+| `01_analysis_lab_schema.sql` | 학생·강사·강의·수강신청 분석 스키마 생성 |
+| `02_analysis_lab_seed.sql` | 2026년 1~6월 기준 샘플 데이터 입력 |
+| `03_data_quality_checks.sql` | 행 수·중복·고아 FK·상태·날짜·금액 점검 |
+| `04_summary_analysis.sql` | 상태·강의·지역별 기본 집계 |
+| `05_period_category_analysis.sql` | 월별·범주별 분석, LAG와 완료 기간 확인 |
+| `06_analysis_dataset.sql` | 수강신청 1건 단위 분석 VIEW 생성 |
+| `07_analysis_validation.sql` | 기대값과 실제 결과 최종 검산 |
+| `reset_analysis_lab.sql` | `analysis_lab`만 선택적으로 초기화 |
+| `python/requirements.txt` | Python 분석 패키지 목록 |
+| `python/.env.example` | `DATABASE_URL` 예시 |
+| `python/01_load_csv.py` | DBeaver CSV를 pandas로 읽고 구조 확인 |
+| `python/02_load_postgresql.py` | PostgreSQL 분석 VIEW를 pandas로 읽기 |
+| `python/03_pandas_analysis.py` | 상태·월·강의 분석과 피벗·그래프 |
+| `python/04_result_validation.py` | SQL 기준값과 pandas 결과 자동 비교 |
 
 ---
 
 ## 실행 순서
 
 ```text
-01_rag_lab_schema.sql
-→ 02_rag_lab_seed.sql
-→ 03_manual_vector_search.sql
-→ 04_retrieval_evaluation.sql
-→ 05_rag_answer_reviews.sql
-→ 06_rag_lifecycle_checks.sql
-→ pgvector가 준비된 경우 07_pgvector_optional.sql
-→ RAG_EVALUATION_REPORT_TEMPLATE.md 기록
+01_analysis_lab_schema.sql
+→ 02_analysis_lab_seed.sql
+→ 03_data_quality_checks.sql
+→ 04_summary_analysis.sql
+→ 05_period_category_analysis.sql
+→ 06_analysis_dataset.sql
+→ 07_analysis_validation.sql
 ```
 
-처음부터 다시 시작할 때만 `reset_rag_lab.sql`을 사용합니다.
+그다음 두 경로 중 하나를 선택합니다.
+
+```text
+기본 경로
+DBeaver 조회 결과를 CSV로 저장
+→ python/01_load_csv.py
+→ python/03_pandas_analysis.py
+→ python/04_result_validation.py
+
+확장 경로
+.env에 개발·테스트 DB의 DATABASE_URL 설정
+→ python/02_load_postgresql.py
+→ python/03_pandas_analysis.py
+→ python/04_result_validation.py
+```
 
 ---
 
@@ -61,141 +77,209 @@ rag_lab: Chapter 14 실습 대상
 
 | 항목 | 기대값 |
 | --- | ---: |
-| `document_sources` | 7 |
-| `document_chunks` | 9 |
-| 활성 청크 | 8 |
-| 비활성 청크 | 1 |
-| `query_cases` | 4 |
-| `relevance_judgments` | 6 |
-| `retrieval_runs` | 9 |
-| `answer_reviews` | 4 |
+| `students` | 8 |
+| `instructors` | 3 |
+| `courses` | 5 |
+| `enrollments` | 24 |
+| `enrollment_analysis_dataset` | 24 |
+| 데이터셋 PK 중복 | 0 |
 
----
+상태별 기준:
 
-## 질문과 기대 행동
+| status | 기대 건수 |
+| --- | ---: |
+| 완료 | 12 |
+| 수강중 | 5 |
+| 신청 | 4 |
+| 취소 | 3 |
 
-| query_id | 질문 | scope | top_k | 기대 |
-| ---: | --- | --- | ---: | --- |
-| 201 | 환불 가능 기간 | public | 3 | 답변 |
-| 202 | 프로젝트 제출 자료 | internal | 2 | 답변 |
-| 203 | JOIN 의미 | public | 1 | 답변 |
-| 204 | 배송 정책 | public | 3 | 보류 |
+월별 기준:
 
-환불 질문과 가까운 다음 문서는 검색 후보에서 제외되어야 합니다.
+| 월 | 신청 건수 | 결제금액 |
+| --- | ---: | ---: |
+| 2026-01 | 3 | 200000 |
+| 2026-02 | 4 | 520000 |
+| 2026-03 | 5 | 540000 |
+| 2026-04 | 4 | 550000 |
+| 2026-05 | 4 | 390000 |
+| 2026-06 | 4 | 570000 |
+
+추가 기준:
 
 ```text
-108 관리자 환불 예외: restricted
-109 과거 환불 정책: inactive
+전체 수강신청 24
+결제금액 합계 2,770,000
+완료 건수 12
+평균 완료 기간 25일
+최소 완료 기간 18일
+최대 완료 기간 36일
+고아 FK 0
+상태·완료일 이상 0
 ```
 
 ---
 
-## 수동 벡터 기준
+## 분석 데이터셋
+
+VIEW:
 
 ```text
-embedding_source: manual-demo-3d-v1
-dimension: 3
-distance: L2
+analysis_lab.enrollment_analysis_dataset
 ```
 
-이 벡터는 실제 임베딩 모델 출력이 아닙니다. 거리·필터·평가 흐름을 설명하기 위한 교육용 숫자입니다.
-
-검색 순서:
+행 단위:
 
 ```text
-active source/chunk
-→ requester_scope 이하
-→ 같은 모델·차원
-→ L2 거리
-→ Top-k
-→ threshold
+수강신청 1건 = enrollment_id 1개
+```
+
+주요 컬럼:
+
+```text
+enrollment_id
+student_id
+student_name
+region
+course_id
+course_title
+category
+level
+enrolled_at
+enrollment_month
+status
+paid_amount
+completed_at
+completion_days
+is_completed
+```
+
+Python 분석 전 다음을 확인합니다.
+
+```text
+행 수 24
+중복 enrollment_id 0
+날짜 컬럼 형식
+paid_amount 숫자형
+completed_at NULL 허용
 ```
 
 ---
 
-## 환불 질문 기대 순위
+## CSV 경로
 
-| 순위 | chunk_id | 제목 |
-| ---: | ---: | --- |
-| 1 | 103 | 구독 취소 |
-| 2 | 102 | 환불 기준 |
-| 3 | 101 | 이용권 변경 |
-
-201~203은 Precision@k·Recall@k·RR이 각각 1.0이고, 정답이 있는 질문의 MRR은 1.0이 예상됩니다.
-
-204는 Top-3 후보가 존재하더라도 threshold 통과 청크가 0건이어야 하며 답변을 보류합니다.
-
----
-
-## 답변 검토 사례
-
-```text
-grounded_refund_answer
-- 최신 public 근거와 인용 통과
-
-unsupported_30_day_claim
-- 검색은 적절하지만 최신 근거에 없는 30일 주장
-
-restricted_document_used
-- 내용은 관련 있지만 public 사용자가 볼 수 없는 문서
-
-correct_no_evidence_abstention
-- 배송 정책 근거가 없어 올바르게 보류
-```
-
-검색 적합성과 답변 근거성을 별도로 평가합니다.
-
----
-
-## pgvector 선택 경로
-
-확장 확인:
+DBeaver에서 다음 조회를 실행합니다.
 
 ```sql
-SELECT
-    name,
-    default_version,
-    installed_version
-FROM pg_available_extensions
-WHERE name = 'vector';
-
-SELECT to_regtype('vector');
+SELECT *
+FROM analysis_lab.enrollment_analysis_dataset
+ORDER BY enrollment_id;
 ```
 
-주요 연산자:
+결과를 UTF-8 CSV로 저장합니다.
+
+권장 경로:
 
 ```text
-<->  L2 distance
-<=>  cosine distance
-1 - cosine distance  cosine similarity
+code/chapter14/data/enrollment_analysis_dataset.csv
 ```
 
-pgvector는 기본적으로 정확 최근접 검색을 수행할 수 있고, HNSW와 IVFFlat 인덱스로 근사 검색을 구성할 수 있습니다. 이 장의 데이터는 9건뿐이므로 근사 인덱스를 만들지 않습니다.
+`data/` 폴더와 CSV는 실행 과정에서 생성될 수 있습니다. 실제 개인정보가 포함된 파일은 저장소에 커밋하지 않습니다.
 
 ---
 
-## 수명주기 기준
+## Python 환경
 
-```text
-- 원문·source_version·content_hash를 기준으로 관리합니다.
-- 청크·벡터는 재생성 가능한 파생 데이터입니다.
-- 비활성 문서는 검색 로그에 포함하지 않습니다.
-- 권한 변경은 다음 검색부터 후보 집합에 반영합니다.
-- 모델·버전·차원·청킹 전략 변경 시 재임베딩 대상을 계산합니다.
-- 변경 전후 같은 평가 질문으로 회귀 검증합니다.
+가상환경 생성:
+
+```bash
+python -m venv .venv
+```
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r code/chapter14/python/requirements.txt
+```
+
+macOS·Linux:
+
+```bash
+source .venv/bin/activate
+pip install -r code/chapter14/python/requirements.txt
+```
+
+설치 확인:
+
+```bash
+python -c "import pandas, sqlalchemy, psycopg, matplotlib; print('OK')"
 ```
 
 ---
 
-## 안전 원칙
+## PostgreSQL 연결
+
+`python/.env.example`을 참고해 `.env`를 만듭니다.
 
 ```text
-- 기존 스키마·Role·확장을 변경하지 않습니다.
-- 생성 파일에서 자동 DROP을 실행하지 않습니다.
-- Top-k 결과를 정답 집합으로 사용하지 않습니다.
-- 권한·최신성 필터를 벡터 순위 전에 적용합니다.
-- 검색 로그에 실제 개인정보와 원문 전체를 복제하지 않습니다.
-- 근거가 없는 질문은 답변을 보류합니다.
-- 검색 문서의 명령형 문장을 시스템 지시로 실행하지 않습니다.
-- 검증하지 않은 항목은 통과로 기록하지 않습니다.
+DATABASE_URL=postgresql+psycopg://db_user:db_password@localhost:5432/db_name
+```
+
+안전 원칙:
+
+```text
+- 운영 DB가 아닌 개발·테스트 DB를 사용합니다.
+- 실제 비밀번호를 코드나 노트북에 적지 않습니다.
+- .env를 GitHub에 커밋하지 않습니다.
+- SELECT 중심의 읽기 전용 계정을 우선 검토합니다.
+- Python 분석 코드에서 UPDATE·DELETE·DROP을 자동 실행하지 않습니다.
+```
+
+---
+
+## Python 실행 예
+
+CSV 경로:
+
+```bash
+python code/chapter14/python/01_load_csv.py
+python code/chapter14/python/03_pandas_analysis.py
+python code/chapter14/python/04_result_validation.py
+```
+
+PostgreSQL 연결 경로:
+
+```bash
+python code/chapter14/python/02_load_postgresql.py
+python code/chapter14/python/03_pandas_analysis.py --source postgresql
+python code/chapter14/python/04_result_validation.py --source postgresql
+```
+
+각 스크립트는 파일 또는 환경변수가 없을 때 명확한 오류 메시지를 출력하도록 구성합니다.
+
+---
+
+## 결과 검증 원칙
+
+```text
+- SQL과 pandas의 전체 행 수를 비교합니다.
+- 상태별·월별 건수의 합이 24인지 확인합니다.
+- 결제금액 합계가 2,770,000인지 확인합니다.
+- 완료 건수와 완료 기간 통계를 비교합니다.
+- 불일치할 때 기대값을 실제값으로 바꾸지 않습니다.
+- 날짜 범위, JOIN, NULL, 중복, 자료형과 실행 시점을 확인합니다.
+```
+
+---
+
+## AI 활용 원칙
+
+```text
+- 분석 질문·기간·행 단위·기대값을 함께 제공합니다.
+- PK·FK와 JOIN 경로를 명시합니다.
+- SQL과 Python 수정 범위를 구분합니다.
+- 파괴적 SQL과 접속 정보 노출을 확인합니다.
+- dropna·drop_duplicates가 오류를 숨기지 않는지 확인합니다.
+- 별도의 SQL 기준값으로 Python 결과를 검산합니다.
+- diff와 실행 결과를 확인한 후 사람이 승인합니다.
 ```
