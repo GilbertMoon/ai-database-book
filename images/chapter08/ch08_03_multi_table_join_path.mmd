@@ -1,14 +1,35 @@
-flowchart LR
-    S[students\nPK id · name]
-    E[enrollments\nPK id\nFK student_id\nFK course_id\nstatus · paid_amount]
-    C[courses\nPK id · title\nFK instructor_id]
-    I[instructors\nPK id · name]
-    R[결과 컬럼\nenrollment_id\nstudent_name\ncourse_title\ninstructor_name\nstatus\npaid_amount\nenrolled_at]
+flowchart TB
+    P["핵심 원칙<br/>결과 한 행의 기준을 먼저 정하고<br/>ERD의 실제 FK → PK 관계만 따라 JOIN"]
 
-    E -->|student_id -> students.id| S
-    E -->|course_id -> courses.id| C
-    C -->|instructor_id -> instructors.id| I
-    E --> R
-    S --> R
-    C --> R
-    I --> R
+    G["결과 한 행의 기준<br/>enrollments 한 건<br/>기준 데이터 5행"]
+
+    subgraph PATH[논리적 다중 JOIN 관계 경로]
+        direction LR
+        S["students s<br/>PK id<br/>name"]
+        E["enrollments e<br/>PK id<br/>FK student_id · course_id<br/>status · paid_amount · enrolled_at"]
+        C["courses c<br/>PK id<br/>FK instructor_id<br/>title"]
+        I["instructors i<br/>PK id<br/>name"]
+
+        E -->|"e.student_id = s.id"| S
+        E -->|"e.course_id = c.id"| C
+        C -->|"c.instructor_id = i.id"| I
+    end
+
+    subgraph COLS[SELECT 결과 컬럼의 출처]
+        direction LR
+        CE["enrollments<br/>enrollment_id · status<br/>paid_amount · enrolled_at"]
+        CS["students<br/>student_name"]
+        CC["courses<br/>course_title"]
+        CI["instructors<br/>instructor_name"]
+    end
+
+    V["행 수와 의미 검산<br/>원본 enrollments 5행 → INNER JOIN 결과 5행<br/>같은 학생의 반복은 여러 신청을 가진 정상적인 1:N 결과"]
+    W["결과가 예상과 다르면<br/>JOIN 조건·필터·관계 차수·키 중복을 먼저 확인<br/>원인을 모른 채 DISTINCT를 추가하지 않음"]
+    N["주의<br/>이 그림은 SQL의 논리적 관계 경로이며<br/>DBMS의 물리적 JOIN 실행 순서는 실행 계획이 결정"]
+
+    P --> G
+    G --> E
+    PATH --> COLS
+    COLS --> V
+    V --> W
+    PATH --- N
