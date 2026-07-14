@@ -1,54 +1,192 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
+<?xml version="1.0" encoding="utf-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100%"
+  viewBox="0 0 1200 720"
+  role="img"
+  aria-labelledby="title desc"
+  preserveAspectRatio="xMidYMid meet"
+>
   <title id="title">프로젝트 완성도의 일곱 축</title>
-  <desc id="desc">Chapter 15 본문과 같은 일곱 축으로 완성도를 판단합니다.</desc>
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-    <style>
-      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}
-      .mono{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:13px;text-anchor:middle}
-      .title{font-size:29px;font-weight:800;text-anchor:middle}
-      .sub{font-size:15px;text-anchor:middle;fill:#475569}
-      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}
-      .blue{fill:#eff6ff;stroke:#3b82f6}
-      .green{fill:#f0fdf4;stroke:#22c55e}
-      .orange{fill:#fff7ed;stroke:#f97316}
-      .purple{fill:#faf5ff;stroke:#8b5cf6}
-      .pink{fill:#fff1f2;stroke:#f43f5e}
-      .cyan{fill:#ecfeff;stroke:#06b6d4}
-      .gray{fill:#f8fafc;stroke:#94a3b8}
-      .h{font-size:18px;font-weight:700;text-anchor:middle}
-      .m{font-size:13.5px;text-anchor:middle;fill:#334155}
-      .tiny{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
-      .loop{stroke:#f43f5e;stroke-width:2.4;fill:none;marker-end:url(#arrow);stroke-dasharray:7 5}
-    </style>
-  </defs>
-  <rect width="1200" height="760" fill="#ffffff"/>
-  <text x="600" y="46" class="title">프로젝트 완성도의 일곱 축</text>
-  <text x="600" y="73" class="sub">Chapter 15 본문과 같은 일곱 축으로 완성도를 판단합니다.</text>
-  <rect x="470" y="100" width="260" height="68" class="card blue"/>
-  <text x="600" y="131" class="h">프로젝트 완성도</text>
-  <rect x="80" y="230" width="245" height="85" class="card blue"/>
-  <text x="202" y="261" class="h">1 문제와 범위</text>
-  <rect x="365" y="230" width="245" height="85" class="card blue"/>
-  <text x="488" y="261" class="h">2 요구사항·설계</text>
-  <rect x="650" y="230" width="245" height="85" class="card orange"/>
-  <text x="772" y="261" class="h">3 재현 SQL</text>
-  <rect x="935" y="230" width="210" height="85" class="card orange"/>
-  <text x="1040" y="261" class="h">4 검증 증거</text>
-  <rect x="180" y="410" width="250" height="85" class="card cyan"/>
-  <text x="305" y="441" class="h">5 운영 계획</text>
-  <rect x="475" y="410" width="250" height="85" class="card purple"/>
-  <text x="600" y="441" class="h">6 AI·문서화</text>
-  <rect x="770" y="410" width="250" height="85" class="card green"/>
-  <text x="895" y="441" class="h">7 한계·다음 버전</text>
-  <path d="M600 168 L202 230" class="line"/>
-  <path d="M600 168 L488 230" class="line"/>
-  <path d="M600 168 L772 230" class="line"/>
-  <path d="M600 168 L1040 230" class="line"/>
-  <path d="M600 168 L305 410" class="line"/>
-  <path d="M600 168 L600 410" class="line"/>
-  <path d="M600 168 L895 410" class="line"/>
-  <rect x="330" y="600" width="540" height="70" class="card gray"/>
-  <text x="600" y="631" class="h">기능 수가 아니라 빈틈없는 설계와 검증 근거를 확인합니다.</text>
+  <desc id="desc">문제와 범위, 요구사항과 설계 일관성, 재현 가능한 데이터와 SQL, 검증 증거, 운영 계획, AI 변경 검토와 문서화, 남은 한계와 다음 버전이라는 일곱 축으로 프로젝트 완성도를 판단하는 도식</desc>
+
+  <style>
+    text {
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
+      fill: #111827;
+    }
+    .title {
+      font-size: 29px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+    .subtitle {
+      font-size: 15px;
+      text-anchor: middle;
+      fill: #475569;
+    }
+    .summary {
+      fill: #eff6ff;
+      stroke: #3b82f6;
+      stroke-width: 2.2;
+      rx: 16;
+      ry: 16;
+    }
+    .card {
+      stroke-width: 2;
+      rx: 14;
+      ry: 14;
+    }
+    .blue {
+      fill: #eff6ff;
+      stroke: #3b82f6;
+    }
+    .green {
+      fill: #f0fdf4;
+      stroke: #22c55e;
+    }
+    .purple {
+      fill: #faf5ff;
+      stroke: #8b5cf6;
+    }
+    .yellow {
+      fill: #fffbeb;
+      stroke: #f59e0b;
+    }
+    .cyan {
+      fill: #ecfeff;
+      stroke: #06b6d4;
+    }
+    .rose {
+      fill: #fff1f2;
+      stroke: #f43f5e;
+    }
+    .slate {
+      fill: #f8fafc;
+      stroke: #64748b;
+    }
+    .summary-head {
+      font-size: 19px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+    .summary-body {
+      font-size: 13.5px;
+      text-anchor: middle;
+      fill: #475569;
+    }
+    .number-badge {
+      fill: #ffffff;
+      stroke: #64748b;
+      stroke-width: 1.4;
+    }
+    .number {
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+      fill: #334155;
+    }
+    .head {
+      font-size: 17px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+    .body {
+      font-size: 13px;
+      text-anchor: middle;
+      fill: #475569;
+    }
+    .guide {
+      stroke: #94a3b8;
+      stroke-width: 2;
+      fill: none;
+    }
+    .note {
+      fill: #fff8eb;
+      stroke: #f59e0b;
+      stroke-width: 1.8;
+      rx: 13;
+      ry: 13;
+    }
+    .note-text {
+      font-size: 14px;
+      font-weight: 700;
+      text-anchor: middle;
+      fill: #334155;
+    }
+  </style>
+
+  <rect width="1200" height="720" fill="#ffffff"/>
+
+  <text x="600" y="48" class="title">프로젝트 완성도의 일곱 축</text>
+  <text x="600" y="76" class="subtitle">기능 수가 아니라 요구사항부터 실행 증거와 남은 한계까지의 빈틈을 확인합니다.</text>
+
+  <!-- Completion summary -->
+  <rect x="340" y="105" width="520" height="82" class="summary"/>
+  <text x="600" y="137" class="summary-head">프로젝트 완성도 판단</text>
+  <text x="600" y="164" class="summary-body">일곱 축이 서로 추적되고 검증 증거로 설명되어야 합니다.</text>
+
+  <!-- Connector guides -->
+  <path d="M600 187 V214 H172.5 V235" class="guide"/>
+  <path d="M600 214 H457.5 V235" class="guide"/>
+  <path d="M600 214 H742.5 V235" class="guide"/>
+  <path d="M600 214 H1027.5 V235" class="guide"/>
+  <path d="M600 214 V405 H245 V430" class="guide"/>
+  <path d="M600 405 V430" class="guide"/>
+  <path d="M600 405 H955 V430" class="guide"/>
+
+  <!-- Row 1 -->
+  <rect x="45" y="235" width="255" height="130" class="card green"/>
+  <circle cx="72" cy="262" r="16" class="number-badge"/>
+  <text x="72" y="267" class="number">1</text>
+  <text x="172.5" y="274" class="head">문제와 범위</text>
+  <text x="172.5" y="310" class="body">사용자와 해결 문제</text>
+  <text x="172.5" y="334" class="body">필수·제외·선택 범위</text>
+
+  <rect x="330" y="235" width="255" height="130" class="card purple"/>
+  <circle cx="357" cy="262" r="16" class="number-badge"/>
+  <text x="357" y="267" class="number">2</text>
+  <text x="457.5" y="270" class="head">요구사항과 설계</text>
+  <text x="457.5" y="293" class="head">일관성</text>
+  <text x="457.5" y="329" class="body">REQ·ERD·DDL 추적</text>
+
+  <rect x="615" y="235" width="255" height="130" class="card blue"/>
+  <circle cx="642" cy="262" r="16" class="number-badge"/>
+  <text x="642" y="267" class="number">3</text>
+  <text x="742.5" y="270" class="head">재현 가능한</text>
+  <text x="742.5" y="293" class="head">데이터와 SQL</text>
+  <text x="742.5" y="329" class="body">같은 순서·같은 결과</text>
+
+  <rect x="900" y="235" width="255" height="130" class="card yellow"/>
+  <circle cx="927" cy="262" r="16" class="number-badge"/>
+  <text x="927" y="267" class="number">4</text>
+  <text x="1027.5" y="270" class="head">정상·경계·오류·</text>
+  <text x="1027.5" y="293" class="head">트랜잭션 증거</text>
+  <text x="1027.5" y="329" class="body">실행 결과로 검증</text>
+
+  <!-- Row 2 -->
+  <rect x="90" y="430" width="310" height="130" class="card cyan"/>
+  <circle cx="119" cy="457" r="16" class="number-badge"/>
+  <text x="119" y="462" class="number">5</text>
+  <text x="245" y="465" class="head">성능·보안·백업·복구 계획</text>
+  <text x="245" y="505" class="body">조회 비용과 최소 권한</text>
+  <text x="245" y="529" class="body">복원 가능한 운영 준비</text>
+
+  <rect x="445" y="430" width="310" height="130" class="card rose"/>
+  <circle cx="474" cy="457" r="16" class="number-badge"/>
+  <text x="474" y="462" class="number">6</text>
+  <text x="600" y="465" class="head">AI 변경 검토와 문서화</text>
+  <text x="600" y="505" class="body">diff·재실행·사람 승인</text>
+  <text x="600" y="529" class="body">검증 근거와 결정 기록</text>
+
+  <rect x="800" y="430" width="310" height="130" class="card slate"/>
+  <circle cx="829" cy="457" r="16" class="number-badge"/>
+  <text x="829" y="462" class="number">7</text>
+  <text x="955" y="465" class="head">남은 한계와 다음 버전</text>
+  <text x="955" y="505" class="body">미실행·미확정 항목 명시</text>
+  <text x="955" y="529" class="body">다음 개선 우선순위 기록</text>
+
+  <!-- Key note -->
+  <rect x="210" y="625" width="780" height="58" class="note"/>
+  <text x="600" y="660" class="note-text">기능이 많아도 한 축의 근거가 비어 있으면 재현 가능한 완성 프로젝트가 아닙니다.</text>
 </svg>

@@ -1,13 +1,19 @@
-flowchart LR
-A[필수 DB 완료] --> B{완료 게이트 통과?}
-B -->|아니요| C[누락 보완]
-C --> A
-B -->|예| D[요구사항으로 확장 판단]
-D --> E[CRUD/API]
-D --> F[NoSQL]
-D --> G[Vector DB/RAG]
-D --> H[배포]
-E --> I[다음 버전]
-F --> I
-G --> I
-H --> I
+flowchart TB
+    A[필수 DB 완성<br/>requirements · ERD · DDL<br/>seed · queries · 검증 · 운영 계획]
+    G{필수 완료 게이트를<br/>통과했는가?}
+    R[필수 항목 보완<br/>관련 SQL 재실행 · 재검증]
+    J[실제 요구사항에 따라<br/>선택 확장 필요성 판단<br/>필요 없으면 기본 DB 완료 유지]
+
+    W[웹 CRUD/API<br/>화면이나 API로 입력·조회 흐름을<br/>검증해야 할 때]
+    N[NoSQL<br/>캐시·이벤트·가변 문서라는<br/>별도 조회 패턴이 있을 때]
+    V[Vector DB/RAG<br/>의미 검색과 근거 기반 답변이<br/>필요할 때]
+    D[배포<br/>다른 사용자가 실제 환경에서<br/>검증해야 할 때]
+
+    A --> G
+    G -->|아니요| R
+    R --> A
+    G -->|예| J
+    J --> W
+    J --> N
+    J --> V
+    J --> D
