@@ -1,10 +1,21 @@
-flowchart LR
-A[문제 정의] --> B[범위 결정]
-B --> C[요구사항]
-C --> D[ERD]
-D --> E[DDL]
-E --> F[seed]
-F --> G[queries]
-G --> H[운영 검토]
-H --> I[AI 검토]
-I --> J[최종 보고]
+flowchart TB
+    A[1. 문제·사용자 정의]
+    B[2. 필수·제외·선택 범위]
+    C[3. 확인 요구사항·미확정 정책]
+    D[4. ERD·DDL]
+    E[5. 01_schema.sql]
+    F[6. 02_seed.sql]
+    G[7. 03~08 검증]
+    H[8. 운영·보안·백업·복구 계획]
+    I[9. AI diff·사람 검토]
+    J[10. 10_completion_gate.sql]
+    K[11. final_report.md]
+    L{12. 선택 확장이 필요한가?}
+
+    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K --> L
+
+    L -->|예| W[웹 CRUD/API]
+    L -->|예| N[NoSQL]
+    L -->|예| R[Vector DB/RAG]
+    L -->|예| P[배포]
+    L -->|아니요| C0[필수 DB 완료 상태 유지]
