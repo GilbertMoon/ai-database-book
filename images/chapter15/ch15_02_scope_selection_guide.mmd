@@ -1,19 +1,19 @@
 flowchart TB
-    A[필수 DB 완성<br/>requirements · ERD · DDL<br/>seed · queries · 검증 · 운영 계획]
+    A[필수 프로젝트 경로<br/>requirements · ERD · DDL<br/>검증 SQL · 분석 VIEW]
+    P[Python·pandas 분석<br/>SQL 기준값과 교차 검증]
     G{필수 완료 게이트를<br/>통과했는가?}
-    R[필수 항목 보완<br/>관련 SQL 재실행 · 재검증]
-    J[실제 요구사항에 따라<br/>선택 확장 필요성 판단<br/>필요 없으면 기본 DB 완료 유지]
+    R[필수 항목 보완<br/>SQL·Python 재실행 · 재검증]
+    J[실제 요구사항에 따라<br/>선택 확장 필요성 판단]
 
-    W[웹 CRUD/API<br/>화면이나 API로 입력·조회 흐름을<br/>검증해야 할 때]
-    N[NoSQL<br/>캐시·이벤트·가변 문서라는<br/>별도 조회 패턴이 있을 때]
-    V[Vector DB/RAG<br/>의미 검색과 근거 기반 답변이<br/>필요할 때]
-    D[배포<br/>다른 사용자가 실제 환경에서<br/>검증해야 할 때]
+    W[웹 CRUD/API<br/>입력·조회 흐름 검증]
+    N[NoSQL<br/>별도 캐시·문서·이벤트 패턴]
+    D[배포<br/>외부 환경 접근·운영 검증]
+    C[필수 프로젝트 완료 상태 유지]
 
-    A --> G
-    G -->|아니요| R
-    R --> A
+    A --> P --> G
+    G -->|아니요| R --> A
     G -->|예| J
-    J --> W
-    J --> N
-    J --> V
-    J --> D
+    J -->|필요| W
+    J -->|필요| N
+    J -->|필요| D
+    J -->|불필요| C
