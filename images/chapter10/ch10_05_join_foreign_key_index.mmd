@@ -1,13 +1,19 @@
 flowchart LR
-    A[students.id
-PK 자동 인덱스] --> B[enrollments.student_id
-FK 자식 컬럼]
-    C[courses.id
-PK 자동 인덱스] --> D[enrollments.course_id
-FK 자식 컬럼]
-    B --> E{조회가 잦은가?}
-    D --> F{조회가 잦은가?}
-    E -- 예 --> G[수동 인덱스 후보]
-    F -- 예 --> G
-    E -- 아니요 --> H[보류]
-    F -- 아니요 --> H
+    subgraph PARENT[부모 PK 자동 인덱스]
+        A[students.id<br/>PK 자동 인덱스]
+        C[courses.id<br/>PK 자동 인덱스]
+    end
+
+    subgraph CHILD[자식 FK 컬럼]
+        B[enrollments.student_id<br/>FK 자식 컬럼<br/>자동 인덱스 없음]
+        D[enrollments.course_id<br/>FK 자식 컬럼<br/>자동 인덱스 없음]
+    end
+
+    A -->|참조| B
+    C -->|참조| D
+    B --> E[인덱스 후보 검토<br/>반복 JOIN·WHERE<br/>선택도·쓰기 비용<br/>실행 계획 비교]
+    D --> E
+    E -->|효과 확인| G[수동 인덱스 후보]
+    E -->|효과 불충분| H[보류]
+
+    N[FK는 참조 무결성<br/>인덱스는 조회 성능<br/>목적이 다르다]
