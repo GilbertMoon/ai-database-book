@@ -21,6 +21,13 @@ loader = _load_module("chapter15_loader", BASE_DIR / "01_load_postgresql.py")
 analysis = _load_module("chapter15_analysis", BASE_DIR / "02_pandas_analysis.py")
 
 EXPECTED_STATUS_COUNTS = {"answered": 3, "closed": 1, "open": 1}
+EXPECTED_MONTHLY_COUNTS = {
+    "2026-01": 1,
+    "2026-02": 1,
+    "2026-03": 1,
+    "2026-04": 1,
+    "2026-05": 1,
+}
 EXPECTED_DATASET_ROWS = 5
 EXPECTED_ANSWER_SUM = 5
 EXPECTED_MATERIAL_SUM = 7
@@ -35,6 +42,10 @@ def validate() -> None:
         row.status: int(row.question_count)
         for row in summaries["status"].itertuples(index=False)
     }
+    actual_monthly_counts = {
+        row.question_month.strftime("%Y-%m"): int(row.question_count)
+        for row in summaries["monthly"].itertuples(index=False)
+    }
 
     checks = {
         "dataset_rows": len(df) == EXPECTED_DATASET_ROWS,
@@ -45,6 +56,7 @@ def validate() -> None:
         "no_answer_questions": int((~df["has_answer"].astype(bool)).sum())
         == EXPECTED_NO_ANSWER,
         "status_counts": actual_status_counts == EXPECTED_STATUS_COUNTS,
+        "monthly_counts": actual_monthly_counts == EXPECTED_MONTHLY_COUNTS,
     }
 
     failed = [name for name, passed in checks.items() if not passed]
