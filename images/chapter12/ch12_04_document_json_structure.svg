@@ -1,77 +1,108 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="720" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet">
-  <title id="title">Document JSON 구조</title>
-  <desc id="desc">하나의 course document 안에 기본 필드와 metadata 중첩 객체, 배열 필드를 함께 저장하는 JSON 문서 구조를 보여 준다.</desc>
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Document JSON 구조와 문서 경계</title>
+  <desc id="desc">강의 문서의 최상위 필드, 배열 필드와 중첩 객체를 구분하고, 함께 읽고 쓰는 문서 경계와 별도 참조를 검토하는 기준을 수평으로 연결한 도식</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
     </marker>
     <style>
-      text { font-family: 'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',Arial,sans-serif; fill: #0f172a; }
-      .title { font-size: 32px; font-weight: 800; text-anchor: middle; }
-      .subtitle { font-size: 15px; text-anchor: middle; fill: #475569; }
-      .card { stroke: #cbd5e1; stroke-width: 2; }
-      .doc { fill: #eff6ff; stroke: #3b82f6; }
-      .nested { fill: #f0fdf4; stroke: #22c55e; }
-      .array { fill: #fff7ed; stroke: #f97316; }
-      .note { fill: #fffbeb; stroke: #f59e0b; }
-      .rule { fill: #f8fafc; stroke: #94a3b8; }
-      .label { font-size: 21px; font-weight: 800; text-anchor: middle; }
-      .section { font-size: 16px; font-weight: 700; fill: #14532d; }
-      .small { font-size: 15px; fill: #334155; }
-      .tiny { font-size: 13px; fill: #475569; }
-      .code { font-family: Consolas, D2Coding, 'Courier New', monospace; font-size: 15px; fill: #1e293b; }
-      .key { fill: #1d4ed8; font-weight: 700; }
-      .str { fill: #15803d; }
-      .arr { fill: #c2410c; font-weight: 700; }
-      .line { stroke: #475569; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
-      .dash { stroke: #64748b; stroke-width: 2; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow); }
+      text{font-family:"Pretendard","Noto Sans KR","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",Arial,sans-serif;fill:#0f172a}
+      .mono{font-family:Consolas,D2Coding,"Courier New",monospace}
+      .title{font-size:30px;font-weight:800;text-anchor:middle}
+      .subtitle{font-size:14px;text-anchor:middle;fill:#475569}
+      .head{font-size:18px;font-weight:800;text-anchor:middle}
+      .section{font-size:15px;font-weight:700;text-anchor:middle}
+      .body{font-size:13.5px;text-anchor:middle;fill:#334155}
+      .small{font-size:12px;text-anchor:middle;fill:#475569}
+      .code{font-size:13.5px;fill:#1e293b}
+      .key{fill:#1d4ed8;font-weight:700}
+      .str{fill:#15803d}
+      .bool{fill:#7c3aed;font-weight:700}
+      .card{stroke-width:2;rx:16;ry:16}
+      .principle{fill:#f8fafc;stroke:#94a3b8}
+      .document{fill:#eff6ff;stroke:#3b82f6}
+      .root{fill:#ffffff;stroke:#7fb3f5}
+      .array{fill:#fff7ed;stroke:#f97316}
+      .nested{fill:#f0fdf4;stroke:#22c55e}
+      .object{fill:#ffffff;stroke:#86efac;stroke-width:1.5;rx:12;ry:12}
+      .guide{fill:#f8fafc;stroke:#94a3b8}
+      .warning{fill:#fffbeb;stroke:#f59e0b}
+      .divider{stroke:#cbd5e1;stroke-width:1.4;stroke-dasharray:6 6}
+      .line{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow);stroke-linejoin:round}
     </style>
   </defs>
 
-  <rect width="1200" height="720" fill="#ffffff"/>
-  <text x="600" y="52" class="title">Document JSON 구조</text>
-  <text x="600" y="82" class="subtitle">하나의 문서 안에 기본 정보, 중첩 객체, 배열 필드를 함께 저장합니다.</text>
+  <rect width="1200" height="860" fill="#ffffff"/>
+  <text x="600" y="46" class="title">Document JSON 구조와 문서 경계</text>
+  <text x="600" y="74" class="subtitle">관련 있어 보이는 모든 값을 넣는 것이 아니라, 함께 읽고 쓰는 단위로 문서 경계를 정합니다.</text>
 
-  <rect x="70" y="120" width="710" height="500" rx="20" ry="20" class="card doc"/>
-  <text x="425" y="158" class="label">course document</text>
-  <text x="425" y="185" text-anchor="middle" class="tiny">문서형 DB에서는 관련 데이터를 하나의 JSON 문서 안에 중첩해 표현할 수 있습니다.</text>
+  <rect x="90" y="100" width="1020" height="66" class="card principle"/>
+  <text x="600" y="126" class="section">핵심 원칙</text>
+  <text x="600" y="150" class="body">문서 안에는 수명이 같고 함께 조회·수정되는 값을 포함하며, 공유 원본이나 계속 커지는 데이터는 별도 참조를 검토합니다.</text>
 
-  <text x="115" y="225" class="code">{</text>
-  <text x="145" y="255" class="code"><tspan class="key">"course_code"</tspan>: <tspan class="str">"DB-101"</tspan>,</text>
-  <text x="145" y="285" class="code"><tspan class="key">"title"</tspan>: <tspan class="str">"데이터베이스 입문"</tspan>,</text>
+  <!-- Course document -->
+  <rect x="40" y="195" width="710" height="505" class="card document"/>
+  <text x="395" y="228" class="head">course document</text>
+  <text x="395" y="253" class="small">강의 상세 화면에서 함께 읽는 JSON 문서 예시</text>
+  <text x="65" y="285" class="mono code">{</text>
 
-  <rect x="130" y="315" width="570" height="215" rx="16" ry="16" class="card nested"/>
-  <text x="160" y="350" class="code"><tspan class="key">"metadata"</tspan>: {</text>
-  <text x="190" y="382" class="code"><tspan class="key">"level"</tspan>: <tspan class="str">"basic"</tspan>,</text>
-  <text x="190" y="414" class="code"><tspan class="key">"instructor"</tspan>: <tspan class="str">"김강사"</tspan>,</text>
-  <text x="190" y="446" class="code"><tspan class="key">"tags"</tspan>: <tspan class="arr">[</tspan><tspan class="str">"SQL"</tspan>, <tspan class="str">"PostgreSQL"</tspan>, <tspan class="str">"DB"</tspan><tspan class="arr">]</tspan>,</text>
-  <text x="190" y="478" class="code"><tspan class="key">"options"</tspan>: <tspan class="arr">[</tspan><tspan class="str">"online"</tspan>, <tspan class="str">"certificate"</tspan><tspan class="arr">]</tspan></text>
-  <text x="160" y="510" class="code">}</text>
+  <!-- Root fields -->
+  <rect x="70" y="275" width="650" height="112" class="card root"/>
+  <text x="395" y="302" class="section">최상위 필드</text>
+  <text x="100" y="329" class="mono code"><tspan class="key">"course_code"</tspan>: <tspan class="str">"DB-101"</tspan>,</text>
+  <text x="100" y="354" class="mono code"><tspan class="key">"title"</tspan>: <tspan class="str">"데이터베이스 입문"</tspan>,</text>
+  <text x="100" y="379" class="mono code"><tspan class="key">"level"</tspan>: <tspan class="str">"basic"</tspan>,</text>
 
-  <text x="115" y="565" class="code">}</text>
+  <!-- Array field -->
+  <rect x="70" y="405" width="650" height="82" class="card array"/>
+  <text x="395" y="432" class="section">배열 필드</text>
+  <text x="100" y="463" class="mono code"><tspan class="key">"tags"</tspan>: [<tspan class="str">"SQL"</tspan>, <tspan class="str">"PostgreSQL"</tspan>, <tspan class="str">"DB"</tspan>],</text>
 
-  <rect x="495" y="235" width="205" height="54" rx="14" ry="14" class="card rule"/>
-  <text x="598" y="258" text-anchor="middle" class="section">기본 필드</text>
-  <text x="598" y="278" text-anchor="middle" class="tiny">문서의 직접 속성</text>
-  <path d="M 495 262 H 365" class="dash"/>
+  <!-- Nested objects -->
+  <rect x="70" y="505" width="650" height="165" class="card nested"/>
+  <text x="395" y="532" class="section">중첩 객체</text>
 
-  <rect x="495" y="535" width="205" height="54" rx="14" ry="14" class="card array"/>
-  <text x="598" y="558" text-anchor="middle" class="section" fill="#9a3412">배열 필드</text>
-  <text x="598" y="578" text-anchor="middle" class="tiny">반복 값을 []로 표현</text>
-  <path d="M 505 535 C 480 500, 455 465, 428 445" class="dash"/>
+  <rect x="90" y="550" width="290" height="96" class="object"/>
+  <text x="110" y="574" class="mono code"><tspan class="key">"instructor"</tspan>: {</text>
+  <text x="135" y="597" class="mono code"><tspan class="key">"name"</tspan>: <tspan class="str">"김강사"</tspan>,</text>
+  <text x="135" y="620" class="mono code"><tspan class="key">"specialty"</tspan>: <tspan class="str">"Database"</tspan></text>
+  <text x="110" y="640" class="mono code">},</text>
 
-  <rect x="850" y="135" width="280" height="365" rx="20" ry="20" class="card note"/>
-  <text x="990" y="176" class="label">설계 주의</text>
-  <text x="895" y="220" class="small">• 자주 함께 조회하면 중첩</text>
-  <text x="895" y="258" class="small">• 너무 커지는 배열은 분리 검토</text>
-  <text x="895" y="296" class="small">• 깊은 중첩은 쿼리와 수정이 어려움</text>
-  <text x="895" y="334" class="small">• 필드명은 일관되게 유지</text>
-  <text x="895" y="372" class="small">• 자주 검색하는 필드는 인덱스 검토</text>
-  <text x="895" y="410" class="small">• 스키마 변경 가능성을 고려</text>
+  <rect x="410" y="550" width="290" height="96" class="object"/>
+  <text x="430" y="574" class="mono code"><tspan class="key">"options"</tspan>: {</text>
+  <text x="455" y="597" class="mono code"><tspan class="key">"online"</tspan>: <tspan class="bool">true</tspan>,</text>
+  <text x="455" y="620" class="mono code"><tspan class="key">"certificate"</tspan>: <tspan class="bool">true</tspan></text>
+  <text x="430" y="640" class="mono code">}</text>
 
-  <rect x="850" y="530" width="280" height="90" rx="16" ry="16" class="card rule"/>
-  <text x="990" y="563" text-anchor="middle" class="section">핵심 관점</text>
-  <text x="990" y="591" text-anchor="middle" class="tiny">문서 구조는 조회 패턴을 기준으로 설계합니다.</text>
+  <text x="65" y="684" class="mono code">}</text>
 
-  <line x1="780" y1="370" x2="850" y2="300" class="line"/>
+  <!-- Structure guidance -->
+  <rect x="805" y="275" width="350" height="112" class="card guide"/>
+  <text x="980" y="304" class="head">최상위 필드</text>
+  <text x="980" y="334" class="body">문서를 직접 식별하거나 자주 조건에 사용하는 값</text>
+  <text x="980" y="360" class="small">검색 빈도가 높으면 필드 인덱스를 검토</text>
+  <path d="M720 331 H805" class="line"/>
+
+  <rect x="805" y="405" width="350" height="82" class="card warning"/>
+  <text x="980" y="433" class="head">배열 필드</text>
+  <text x="980" y="461" class="body">작고 크기가 제한된 반복값에 적합</text>
+  <text x="980" y="482" class="small">계속 증가하는 배열은 별도 저장을 검토</text>
+  <path d="M720 446 H805" class="line"/>
+
+  <rect x="805" y="505" width="350" height="165" class="card guide"/>
+  <text x="980" y="535" class="head">중첩 객체</text>
+  <text x="980" y="565" class="body">항상 함께 읽고 쓰며 문서와 수명이 같을 때 포함</text>
+  <line x1="835" y1="586" x2="1125" y2="586" class="divider"/>
+  <text x="980" y="614" class="body">여러 문서에서 공유하거나 독립적으로 자주 변경되면</text>
+  <text x="980" y="640" class="body">별도 원본과 참조 방식 검토</text>
+  <text x="980" y="660" class="small">강한 관계 무결성이 필요한 데이터도 분리 후보</text>
+  <path d="M720 588 H805" class="line"/>
+
+  <!-- Final principles -->
+  <rect x="100" y="735" width="1000" height="72" class="card principle"/>
+  <text x="600" y="764" class="head">문서 경계 = 함께 읽고 쓰는 단위</text>
+  <text x="600" y="791" class="body">강의 태그·옵션처럼 항상 함께 쓰는 값은 포함하고, 공유 강사 원본·독립 변경 데이터·무한 성장 배열은 참조를 검토합니다.</text>
+
+  <text x="600" y="840" class="small">유연한 스키마도 필드명·타입·필수 여부·버전·마이그레이션 규칙을 애플리케이션·검증 계층·DB 기능에서 관리해야 합니다.</text>
 </svg>
