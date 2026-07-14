@@ -1,9 +1,18 @@
 flowchart TB
-    A[예상 설계<br/>테이블 6·FK 4·CHECK·UNIQUE] --> B[실습 DB 생성]
-    B --> C[information_schema + pg_indexes]
-    C --> D[테이블·컬럼·제약·CHECK·FK·인덱스]
-    D --> E{예상과 실제가 일치하는가?}
-    E -- 일치 --> F[메타데이터 증거 기록]
-    E -- 불일치 --> G[DDL 수정]
-    G --> H[DB 초기화·재생성]
-    H --> C
+    A["1. 예상 설계 기준 정리<br/>테이블·컬럼·타입·NULL 허용<br/>PK·FK·UNIQUE·CHECK·인덱스"] --> B["2. 실습 DB 생성 또는 초기화"]
+    B --> C["3. 실제 메타데이터 조회<br/>information_schema + pg_indexes"]
+    C --> D["4. 항목별 비교<br/>테이블·컬럼·제약조건·인덱스"]
+
+    subgraph R[검토 항목과 증거]
+        direction LR
+        R1["테이블<br/>information_schema.tables"]
+        R2["컬럼·타입·NULL 허용<br/>information_schema.columns"]
+        R3["PK·FK·UNIQUE·CHECK<br/>table_constraints·key_column_usage·check_constraints"]
+        R4["인덱스<br/>pg_indexes"]
+    end
+
+    D --> E{"예상 설계와 실제 구조가<br/>항목별로 일치하는가?"}
+    E -- 일치 --> F["검증 완료<br/>조회 SQL·결과·판단 근거 기록"]
+    E -- 불일치 --> G["DDL 수정·DB 재생성<br/>같은 메타데이터 조회를 다시 실행"]
+
+    N["검토 원칙<br/>테이블 존재만 확인하지 않고 컬럼 타입, NULL 허용, 제약조건 정의와 인덱스까지 검증"]
