@@ -1,238 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  role="img"
-  aria-labelledby="title desc"
-  width="100%"
-  height="900"
-  viewBox="0 0 1200 900"
-  preserveAspectRatio="xMidYMid meet"
->
-  <title id="title">설계 결정과 검증 근거를 설명하는 흐름</title>
-  <desc id="desc">AI 튜터링 데이터베이스 프로젝트의 문제와 사용자, 필수·제외·선택 범위, 설계 결정과 근거, 구현 산출물과 실행 증거를 설명하고, 검증 결과가 요구사항과 다르면 AI 제안과 사람 수정을 거쳐 다시 검증하며, 통과하면 미실행 항목과 위험, 다음 버전 계획과 최종 완료 상태를 final_report.md에 기록하는 흐름</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 840" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">설계 결정과 분석·검증 근거를 설명하는 흐름</title>
+  <desc id="desc">문제와 범위, 설계, PostgreSQL 구현, SQL 분석, Python 분석, 운영과 AI 검토, 한계와 다음 버전을 최종 보고서로 연결하는 흐름</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker><marker id="retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#be123c"/></marker><style>
+  text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{stroke-width:2;rx:13;ry:13}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.p{fill:#faf5ff;stroke:#8b5cf6}.y{fill:#fffbeb;stroke:#f59e0b}.c{fill:#ecfeff;stroke:#06b6d4}.r{fill:#fff1f2;stroke:#f43f5e}.n{fill:#f8fafc;stroke:#64748b}.head{font-size:15px;font-weight:700;text-anchor:middle}.body{font-size:12px;text-anchor:middle;fill:#334155}.line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.back{stroke:#be123c;stroke-width:2.2;fill:none;marker-end:url(#retry)}.tag{font-size:12px;font-weight:700;fill:#475569}
+  </style></defs>
+  <rect width="1200" height="840" fill="#fff"/>
+  <text x="600" y="46" class="t">설계 결정과 분석·검증 근거를 설명하는 흐름</text>
+  <text x="600" y="76" class="s">최종 보고서는 선택, 구현, 검증, 분석과 남은 한계를 하나의 이야기로 연결합니다.</text>
 
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="retry-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#be123c"/>
-    </marker>
-    <style>
-      text {
-        font-family: "Malgun Gothic", "NanumSquare", "Noto Sans CJK KR", "Apple SD Gothic Neo", "Noto Sans KR", "UnDotum", Arial, sans-serif;
-        fill: #111827;
-      }
-      .mono {
-        font-family: Consolas, D2Coding, "Noto Sans Mono CJK KR", Menlo, monospace;
-      }
-      .title {
-        font-size: 34px;
-        font-weight: 800;
-        text-anchor: middle;
-      }
-      .subtitle {
-        font-size: 18px;
-        text-anchor: middle;
-        fill: #475569;
-      }
-      .card {
-        stroke-width: 2.2;
-        rx: 16;
-        ry: 16;
-      }
-      .problem {
-        fill: #eff6ff;
-        stroke: #2563eb;
-      }
-      .scope {
-        fill: #ecfdf5;
-        stroke: #16a34a;
-      }
-      .design {
-        fill: #faf5ff;
-        stroke: #7c3aed;
-      }
-      .build {
-        fill: #ecfeff;
-        stroke: #0891b2;
-      }
-      .evidence {
-        fill: #fffbeb;
-        stroke: #d97706;
-      }
-      .decision {
-        fill: #fff7ed;
-        stroke: #f97316;
-        stroke-width: 2.6;
-      }
-      .fix {
-        fill: #fff1f2;
-        stroke: #e11d48;
-      }
-      .risk {
-        fill: #f8fafc;
-        stroke: #64748b;
-      }
-      .next {
-        fill: #eff6ff;
-        stroke: #3b82f6;
-      }
-      .judgment {
-        fill: #f0fdf4;
-        stroke: #16a34a;
-      }
-      .report {
-        fill: #dcfce7;
-        stroke: #15803d;
-      }
-      .step {
-        font-size: 14px;
-        font-weight: 800;
-        fill: #2563eb;
-        text-anchor: middle;
-      }
-      .head {
-        font-size: 21px;
-        font-weight: 800;
-        text-anchor: middle;
-      }
-      .body {
-        font-size: 17px;
-        text-anchor: middle;
-        fill: #334155;
-      }
-      .decision-text {
-        font-size: 20px;
-        font-weight: 800;
-        text-anchor: middle;
-      }
-      .label {
-        font-size: 18px;
-        font-weight: 800;
-        text-anchor: middle;
-        fill: #334155;
-      }
-      .retry-label {
-        font-size: 17px;
-        font-weight: 800;
-        text-anchor: middle;
-        fill: #be123c;
-      }
-      .line {
-        stroke: #475569;
-        stroke-width: 2.8;
-        fill: none;
-        marker-end: url(#arrow);
-      }
-      .retry-line {
-        stroke: #be123c;
-        stroke-width: 2.8;
-        fill: none;
-        stroke-dasharray: 9 6;
-        marker-end: url(#retry-arrow);
-      }
-      .note {
-        font-size: 19px;
-        font-weight: 800;
-        text-anchor: middle;
-        fill: #0f766e;
-      }
-    </style>
-  </defs>
+  <rect x="30" y="140" width="165" height="105" class="card b"/><text x="112" y="174" class="head">1. 문제·사용자</text><text x="112" y="204" class="body">해결할 핵심 업무</text>
+  <rect x="220" y="140" width="165" height="105" class="card b"/><text x="302" y="174" class="head">2. 범위</text><text x="302" y="201" class="body">필수·제외·선택</text><text x="302" y="222" class="body">미확정 정책</text>
+  <rect x="410" y="140" width="165" height="105" class="card g"/><text x="492" y="174" class="head">3. 설계 결정</text><text x="492" y="201" class="body">ERD·키·무결성</text><text x="492" y="222" class="body">대안과 선택 근거</text>
+  <rect x="600" y="140" width="165" height="105" class="card p"/><text x="682" y="174" class="head">4. DB 구현</text><text x="682" y="201" class="body">DDL·seed·검증 SQL</text><text x="682" y="222" class="body">재현 가능한 실행</text>
+  <rect x="790" y="140" width="165" height="105" class="card y"/><text x="872" y="174" class="head">5. DB 검증</text><text x="872" y="201" class="body">정상·경계·반례</text><text x="872" y="222" class="body">트랜잭션·성능</text>
+  <rect x="980" y="140" width="165" height="105" class="card c"/><text x="1062" y="174" class="head">6. SQL 분석</text><text x="1062" y="201" class="body">분석 VIEW·기준값</text><text x="1062" y="222" class="body">질문 1건 단위</text>
+  <path d="M195 192 H220" class="line"/><path d="M385 192 H410" class="line"/><path d="M575 192 H600" class="line"/><path d="M765 192 H790" class="line"/><path d="M955 192 H980" class="line"/>
+  <path d="M1062 245 V325" class="line"/>
 
-  <rect width="1200" height="900" fill="#ffffff"/>
-  <text x="600" y="48" class="title">설계 결정과 검증 근거를 설명하는 흐름</text>
-  <text x="600" y="78" class="subtitle">최종 보고서는 문제·범위·설계 근거·실행 증거·위험·최종 판단을 하나의 이야기로 연결합니다.</text>
+  <rect x="980" y="325" width="165" height="105" class="card c"/><text x="1062" y="359" class="head">7. Python 분석</text><text x="1062" y="389" class="body">pandas 집계·검증</text>
+  <rect x="790" y="325" width="165" height="105" class="card y"/><text x="872" y="359" class="head">8. 결과 비교</text><text x="872" y="386" class="body">SQL ↔ Python</text><text x="872" y="407" class="body">행 수·건수·합계</text>
+  <polygon points="650,305 760,377 650,449 540,377" class="card y"/><text x="650" y="365" class="head">기준과 일치?</text><text x="650" y="395" class="body">요구사항·예상값</text>
+  <rect x="350" y="325" width="165" height="105" class="card r"/><text x="432" y="359" class="head">9. AI·사람 수정</text><text x="432" y="386" class="body">diff·재실행·승인</text><text x="432" y="407" class="body">설계·SQL·Python</text>
+  <path d="M980 377 H955" class="line"/><path d="M790 377 H760" class="line"/>
+  <path d="M540 377 H515" class="back"/><text x="522" y="360" class="tag">아니요</text>
+  <path d="M432 325 V285 H492 V245" class="back"/>
 
-  <rect x="40" y="120" width="250" height="118" class="card problem"/>
-  <text x="165" y="146" class="step">01</text>
-  <text x="165" y="176" class="head">문제·사용자</text>
-  <text x="165" y="205" class="body">학생 · 튜터 · 운영자</text>
-  <text x="165" y="228" class="body">해결할 핵심 업무</text>
+  <rect x="70" y="555" width="220" height="105" class="card r"/><text x="180" y="589" class="head">10. 운영 판단</text><text x="180" y="616" class="body">권한·보안·백업</text><text x="180" y="637" class="body">복구·RPO·RTO</text>
+  <rect x="350" y="555" width="220" height="105" class="card n"/><text x="460" y="589" class="head">11. 현재 한계</text><text x="460" y="616" class="body">미실행·미확정 항목</text><text x="460" y="637" class="body">해석 제한·남은 위험</text>
+  <rect x="630" y="555" width="220" height="105" class="card b"/><text x="740" y="589" class="head">12. 다음 버전</text><text x="740" y="616" class="body">웹·NoSQL·배포</text><text x="740" y="637" class="body">우선순위·조건</text>
+  <rect x="910" y="555" width="220" height="105" class="card g"/><text x="1020" y="589" class="head">13. 최종 판단</text><text x="1020" y="616" class="body">final_report.md</text><text x="1020" y="637" class="body">완료·조건부·보류</text>
+  <path d="M610 449 V500 H180 V555" class="line"/><text x="575" y="492" class="tag">예</text>
+  <path d="M290 607 H350" class="line"/><path d="M570 607 H630" class="line"/><path d="M850 607 H910" class="line"/>
 
-  <rect x="325" y="120" width="250" height="118" class="card scope"/>
-  <text x="450" y="146" class="step">02</text>
-  <text x="450" y="176" class="head">범위·요구사항</text>
-  <text x="450" y="205" class="body">필수 / 제외 / 선택</text>
-  <text x="450" y="228" class="body">확정 규칙 / 미확정 정책</text>
-
-  <rect x="610" y="120" width="250" height="118" class="card design"/>
-  <text x="735" y="146" class="step">03</text>
-  <text x="735" y="176" class="head">설계 결정·근거</text>
-  <text x="735" y="205" class="body">관계 · 키 · 무결성</text>
-  <text x="735" y="228" class="body">선택 이유와 제외한 대안</text>
-
-  <rect x="895" y="120" width="265" height="118" class="card build"/>
-  <text x="1028" y="146" class="step">04</text>
-  <text x="1028" y="176" class="head">구현 산출물</text>
-  <text x="1028" y="205" class="body">01 DDL · 02 기준 데이터</text>
-  <text x="1028" y="228" class="body">03~08 검증 · 10 완료 게이트</text>
-
-  <path d="M 290 179 L 325 179" class="line"/>
-  <path d="M 575 179 L 610 179" class="line"/>
-  <path d="M 860 179 L 895 179" class="line"/>
-
-  <rect x="60" y="340" width="320" height="150" class="card evidence"/>
-  <text x="220" y="366" class="step">05</text>
-  <text x="220" y="396" class="head">실행·검증 증거</text>
-  <text x="220" y="425" class="body">구조·행 수·관계</text>
-  <text x="220" y="448" class="body">경계·반례·트랜잭션</text>
-  <text x="220" y="471" class="body">성능·보안·복구</text>
-
-  <polygon points="600,325 735,415 600,505 465,415" class="decision"/>
-  <text x="600" y="389" class="decision-text">요구사항과</text>
-  <text x="600" y="416" class="decision-text">실행 결과가</text>
-  <text x="600" y="443" class="decision-text">일치하는가?</text>
-
-  <rect x="830" y="340" width="310" height="150" class="card fix"/>
-  <text x="985" y="366" class="step">06</text>
-  <text x="985" y="396" class="head">AI 제안·사람 수정</text>
-  <text x="985" y="425" class="body">파일별 diff</text>
-  <text x="985" y="448" class="body">설계·SQL·문서 동기화</text>
-  <text x="985" y="471" class="body">사람 검토 후 재실행</text>
-
-  <path d="M 1028 238 L 1028 285 L 220 285 L 220 340" class="line"/>
-  <path d="M 380 415 L 465 415" class="line"/>
-  <path d="M 735 415 L 830 415" class="line"/>
-  <text x="782" y="398" class="label">아니요</text>
-
-  <path d="M 600 505 L 600 600 L 185 600 L 185 640" class="line"/>
-  <text x="628" y="565" class="label">예</text>
-
-  <path d="M 940 340 C 925 270 820 262 735 238" class="retry-line"/>
-  <text x="850" y="280" class="retry-label">설계 수정</text>
-  <path d="M 1045 340 C 1100 292 1105 258 1040 238" class="retry-line"/>
-  <text x="1110" y="286" class="retry-label">구현 수정</text>
-
-  <rect x="60" y="640" width="250" height="120" class="card risk"/>
-  <text x="185" y="666" class="step">07</text>
-  <text x="185" y="696" class="head">미실행 항목·현재 위험</text>
-  <text x="185" y="725" class="body">검증하지 않은 항목</text>
-  <text x="185" y="748" class="body">미확정 정책 · 남은 위험</text>
-
-  <rect x="345" y="640" width="250" height="120" class="card next"/>
-  <text x="470" y="666" class="step">08</text>
-  <text x="470" y="696" class="head">다음 버전 계획</text>
-  <text x="470" y="725" class="body">우선순위 · 담당 · 조건</text>
-  <text x="470" y="748" class="body">API · 권한 · 성능 · 복구 · RAG</text>
-
-  <rect x="630" y="640" width="250" height="120" class="card judgment"/>
-  <text x="755" y="666" class="step">09</text>
-  <text x="755" y="696" class="head">최종 판단</text>
-  <text x="755" y="725" class="body">완료 · 조건부 완료</text>
-  <text x="755" y="748" class="body">보류 · 미완료</text>
-
-  <rect x="915" y="640" width="245" height="120" class="card report"/>
-  <text x="1038" y="666" class="step">10</text>
-  <text x="1038" y="696" class="head mono">final_report.md</text>
-  <text x="1038" y="725" class="body">문제부터 판단까지</text>
-  <text x="1038" y="748" class="body">근거와 상태 기록</text>
-
-  <path d="M 310 700 L 345 700" class="line"/>
-  <path d="M 595 700 L 630 700" class="line"/>
-  <path d="M 880 700 L 915 700" class="line"/>
-
-  <rect x="170" y="810" width="860" height="46" class="card build"/>
-  <text x="600" y="840" class="note">검증 실패는 보고서로 합류하지 않고, 사람 검토와 수정 뒤 다시 실행 증거로 확인합니다.</text>
+  <rect x="180" y="720" width="840" height="55" class="card p"/><text x="600" y="754" class="head">보고서에는 문제부터 최종 판단까지의 근거와 상태를 빠짐없이 기록합니다.</text>
 </svg>
