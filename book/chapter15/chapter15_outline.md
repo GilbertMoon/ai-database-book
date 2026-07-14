@@ -2,7 +2,7 @@
 
 ## 제목
 
-실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기
+데이터베이스 종합 프로젝트
 
 ## 권장 분량
 
@@ -10,7 +10,7 @@
 
 ## 이 장의 역할
 
-Chapter 15는 책 전체의 개념을 `tutor_project` 예제로 통합하고, 다른 사람이 같은 순서로 실행해 같은 결과를 확인할 수 있는 최종 프로젝트를 완성하는 장이다.
+Chapter 15는 책 전체에서 학습한 요구사항 분석, ERD, PostgreSQL 구현, SQL 검증, 운영 계획, AI 검토와 SQL·Python 분석을 `tutor_project` 예제로 통합하는 장입니다.
 
 ```text
 문제·범위
@@ -20,10 +20,15 @@ Chapter 15는 책 전체의 개념을 `tutor_project` 예제로 통합하고, �
 → 메타데이터·업무 조회
 → 트랜잭션·반례
 → 인덱스·운영·복구
+→ 분석용 데이터셋
+→ SQL·Python 분석
 → AI diff 검토
-→ 선택 RAG 확장
 → 완료 게이트
 ```
+
+## 핵심 메시지
+
+> 데이터베이스 프로젝트는 SQL이 실행되는 것으로 끝나지 않는다. 설계와 데이터가 요구사항에 맞고, SQL과 Python 분석 결과가 일치하며, 다른 사람이 같은 절차로 재현할 수 있어야 한다.
 
 ## 핵심 질문
 
@@ -35,8 +40,9 @@ Chapter 15는 책 전체의 개념을 `tutor_project` 예제로 통합하고, �
 실제 메타데이터와 업무 정합성이 기대와 일치하는가?
 인덱스가 실제 조회 패턴을 근거로 하는가?
 비밀·권한·백업·복원 계획이 있는가?
+분석 데이터셋의 한 행 단위가 명확한가?
+SQL과 pandas의 핵심 집계가 일치하는가?
 AI 변경을 diff와 실행 증거로 검토하는가?
-RAG 확장에서 원본과 벡터 파생 데이터를 구분하는가?
 미실행 항목과 다음 버전을 명시하는가?
 ```
 
@@ -49,6 +55,7 @@ tutor_project.questions
 tutor_project.answers
 tutor_project.learning_materials
 tutor_project.question_materials
+tutor_project.question_analysis_dataset VIEW
 ```
 
 보호 대상:
@@ -60,11 +67,11 @@ performance_lab
 security_lab
 nosql_lab
 ai_review_lab
-rag_lab
+analysis_lab
 public
 ```
 
-## 기준 데이터
+## 기준 데이터와 분석 기준
 
 ```text
 students 4
@@ -76,54 +83,29 @@ question_materials 7
 FK 5
 업무 인덱스 3
 CASCADE 0
-```
-
-명시적 ID:
-
-```text
-students 101~104
-tutors 201~203
-questions 301~305
-answers 401~405
-learning_materials 501~506
-```
-
-## 확인 요구사항
-
-```text
-REQ-01 학생 질문 등록
-REQ-02 학생 email UNIQUE
-REQ-03 튜터 email UNIQUE
-REQ-04 질문 상태 CHECK
-REQ-05 질문 1:N 답변
-REQ-06 답변→튜터 FK
-REQ-07 질문·자료 N:M
-REQ-08 질문 없는 학생 조회
-REQ-09 연결되지 않은 자료 조회
-REQ-10 질문별 표시 순서 UNIQUE
-REQ-11 자료 유형·접근 범위 CHECK
-REQ-12 실제 개인정보·비밀 미사용
+분석 VIEW 5행
+answer_count 합계 5
+material_count 합계 7
+question_id 중복 0
 ```
 
 ## 핵심 개념
 
-- 필수 경로·선택 확장
-- 요구사항 추적
-- 미확정 정책
-- 전용 스키마
-- IDENTITY·명시적 ID
-- ERD·DDL 정합성
-- 메타데이터 검증
+- 필수 경로와 선택 확장
+- 요구사항 추적과 미확정 정책
+- 전용 스키마와 명시적 ID
+- ERD·DDL·메타데이터 정합성
 - 정상·경계·오류 데이터
-- 업무 정합성
 - 트랜잭션·ROLLBACK
-- 예외 블록 반례 테스트
+- 자동 반례 테스트
 - 인덱스·EXPLAIN
-- 최소 권한
-- 비밀 관리
+- 최소 권한·비밀 관리
 - 백업·복원·RPO·RTO
-- 원본·파생 RAG 데이터
-- AI diff 검토
+- 분석 질문과 행 단위
+- 분석용 VIEW
+- PostgreSQL·Python 연결
+- pandas `groupby`와 결과 검증
+- AI 생성 SQL·Python 코드 검토
 - 완료·조건부 완료·보류·미완료
 
 ## 본문 구성
@@ -134,21 +116,17 @@ REQ-12 실제 개인정보·비밀 미사용
 4. 요구사항·미확정 정책
 5. ERD·DDL 추적
 6. 전용 스키마
-7. 검증 시나리오 데이터
+7. 검증·분석 시나리오 데이터
 8. 실제 메타데이터
-9. 요구사항 업무 조회
-10. 트랜잭션
-11. 자동 반례
-12. 인덱스·실행 계획
-13. 보안·백업·복구
-14. 선택 RAG 확장
-15. AI diff 검토
-16. 프로젝트 완성도
-17. 최종 보고서
-18. 완료 게이트
-19. 자주 하는 실수
-20. 책 전체 연결
-21. 이후 학습 방향
+9. 요구사항 조회와 분석 질문
+10. 트랜잭션·반례
+11. 인덱스·운영 안전성
+12. 분석용 데이터셋
+13. AI diff와 실행 증거 검토
+14. 프로젝트 완성도의 일곱 축
+15. 최종 보고서와 완료 게이트
+16. 자주 하는 실수
+17. 책 전체 연결
 
 ## 코드·문서 파일
 
@@ -165,9 +143,17 @@ code/chapter15/templates/
 ├── 06_negative_tests.sql
 ├── 07_performance_checks.sql
 ├── 08_operations_checks.sql
-├── 09_optional_rag_extension.sql
+├── 09_analysis_dataset.sql
+├── 10_completion_gate.sql
+├── python/
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── 01_load_postgresql.py
+│   ├── 02_pandas_analysis.py
+│   └── 03_result_validation.py
 ├── OPERATIONS_RUNBOOK.md
 ├── ai_review_report.md
+├── analysis_report.md
 ├── final_report.md
 └── reset_tutor_project.sql
 ```
@@ -175,37 +161,39 @@ code/chapter15/templates/
 | 파일 | 역할 |
 | --- | --- |
 | `01_schema.sql` | 전용 스키마·테이블·제약·업무 인덱스 생성 |
-| `02_seed.sql` | 명시적 ID 기준 데이터 입력 |
+| `02_seed.sql` | 명시적 ID와 고정 시각 기준 데이터 입력 |
 | `03_metadata_validation.sql` | 테이블·FK·PK·CHECK·인덱스·CASCADE 검증 |
 | `04_requirement_queries.sql` | REQ별 JOIN·집계·경계·정합성 조회 |
 | `05_transaction_checks.sql` | 답변 등록·상태 변경·ROLLBACK 검증 |
 | `06_negative_tests.sql` | 자동 반례와 기준 행 유지 확인 |
 | `07_performance_checks.sql` | 인덱스 존재와 대표 EXPLAIN |
-| `08_operations_checks.sql` | 소유자·권한·민감 컬럼·기준 행 상태 확인 |
-| `09_optional_rag_extension.sql` | 활성 자료를 RAG 원문 후보로 제공하는 선택 뷰 |
-| `OPERATIONS_RUNBOOK.md` | 역할·비밀·백업·복원·RPO·RTO 기록 |
-| `reset_tutor_project.sql` | tutor_project만 초기화 |
+| `08_operations_checks.sql` | 권한·비밀·백업·복구 계획 점검 |
+| `09_analysis_dataset.sql` | 질문 1건 단위 분석 VIEW와 SQL 기준값 생성 |
+| `10_completion_gate.sql` | DB 구조·기준 데이터·분석 VIEW 최종 판정 |
+| `python/01_load_postgresql.py` | 환경변수로 분석 VIEW 읽기 |
+| `python/02_pandas_analysis.py` | 상태·월·학생별 분석 |
+| `python/03_result_validation.py` | SQL 기준값과 pandas 결과 비교 |
+| `analysis_report.md` | 분석 질문·결과·해석·한계 기록 |
 
 ## 안전성 원칙
 
-- 생성 파일에서 자동 DROP을 실행하지 않는다.
+- 생성 파일에서 자동 `DROP`을 실행하지 않는다.
 - 모든 객체에 `tutor_project` 스키마를 명시한다.
-- SERIAL 대신 IDENTITY를 사용한다.
 - 샘플은 명시적 ID와 고정 시각을 사용한다.
 - CASCADE와 Role 변경을 자동 적용하지 않는다.
-- 반례는 하위 트랜잭션에서 실행해 기준 데이터를 유지한다.
-- 작은 데이터의 Seq Scan을 오류로 판단하지 않는다.
-- 실제 개인정보·비밀·전체 접속 URL·백업 파일을 커밋하지 않는다.
-- 검증하지 않은 항목을 통과로 기록하지 않는다.
+- 반례는 기준 데이터를 유지하도록 실행한다.
+- 실제 개인정보·비밀·접속 URL·백업·운영 CSV를 커밋하지 않는다.
+- Python에서 중복·NULL을 임의 제거해 오류를 숨기지 않는다.
+- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
 
 ## AI 활용 원칙
 
-- 확인 요구사항·미확정 정책·현재 구조를 제공한다.
-- 수정·금지 파일과 스키마를 명시한다.
-- 행 수·FK·인덱스·정합성·반례 기대값을 제공한다.
-- 코드뿐 아니라 README·requirements·erd·보고서를 동기화하게 한다.
+- 요구사항·분석 질문·행 단위·기대값을 제공한다.
+- PK·FK와 JOIN 경로를 함께 제공한다.
+- SQL과 Python의 수정·금지 범위를 명시한다.
+- 파괴적인 SQL과 접속 정보 노출을 확인한다.
 - 파일별 diff와 실제 실행 결과를 사람이 검토한다.
 
 ## 책의 마무리
 
-재현 가능한 실행 절차, 검증 증거와 남은 한계를 남기는 것을 프로젝트의 최종 완료 기준으로 삼는다.
+재현 가능한 실행 절차, SQL·Python 분석 증거와 남은 한계를 남기는 것을 프로젝트의 최종 완료 기준으로 삼습니다.
