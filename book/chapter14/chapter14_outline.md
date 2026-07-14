@@ -2,50 +2,53 @@
 
 ## 제목
 
-벡터 검색과 RAG로 근거 있는 답변 만들기
+SQL 데이터 분석과 Python 확장
 
 ## 권장 분량
 
-28~32페이지
+28~34페이지
 
 ## 이 장의 역할
 
-Chapter 14는 임베딩과 벡터 검색의 원리를 설명하는 데서 끝나지 않고, 접근 권한·최신성 필터, 정답 집합, 검색 지표와 답변 근거 검토를 사용해 RAG 시스템을 검증하는 장이다.
+Chapter 14는 앞 장까지 학습한 PostgreSQL·SQL·JOIN·집계·검증 능력을 데이터 분석으로 연결하고, SQL에서 만든 분석 데이터셋을 Python과 pandas로 확장하는 장입니다.
 
 ```text
-원문·권한·버전
-→ 청크·임베딩
-→ 메타데이터 필터
-→ 키워드·벡터 검색
-→ 정답 집합 평가
-→ 근거·인용·보류 검토
-→ 문서·모델 수명주기
-→ 회귀 평가
+분석 질문 정의
+→ 데이터 범위와 행 단위 확정
+→ SQL 필터·JOIN·집계
+→ 데이터 품질 점검
+→ 분석용 VIEW 생성
+→ CSV 또는 PostgreSQL 연결
+→ pandas 가공·피벗·시각화
+→ SQL·Python 결과 교차 검증
 ```
+
+## 핵심 메시지
+
+> SQL은 데이터베이스에서 분석 범위와 관계를 정확하게 확정하고, Python은 그 결과를 추가 가공·시각화·분석하는 도구다. 두 결과가 같은 기준값을 만드는지 검증해야 한다.
 
 ## 핵심 질문
 
 ```text
-구조화·키워드·벡터·혼합 검색을 언제 사용하는가?
-문서와 질문이 같은 모델·버전·차원·전처리를 사용하는가?
-권한·최신성 필터가 벡터 순위 전에 적용되는가?
-Top-k 결과와 사람이 검토한 정답 집합이 분리되어 있는가?
-Precision@k·Recall@k·MRR로 검색을 평가하는가?
-답변의 핵심 주장과 인용이 실제 청크에 근거하는가?
-근거가 없을 때 답변을 보류하는가?
-검색 문서 안의 명령을 시스템 지시로 처리하지 않는가?
-문서·모델·청킹 변경 뒤 회귀 평가를 수행하는가?
+분석 질문과 기간·단위·기대 결과가 정의되었는가?
+JOIN 경로와 집계 단위가 요구사항에 맞는가?
+NULL·중복·고아·업무 규칙을 집계 전에 확인했는가?
+분석용 데이터셋에서 한 행의 의미가 명확한가?
+SQL에서 처리할 작업과 Python에서 처리할 작업을 구분했는가?
+CSV 또는 DB 연결 후 DataFrame 행 수와 자료형을 확인했는가?
+SQL과 pandas의 건수·합계·평균이 일치하는가?
+그래프의 축·단위·기간이 해석을 왜곡하지 않는가?
+AI가 만든 SQL·Python 코드와 diff를 사람이 검토했는가?
 ```
 
 ## 실습 스키마
 
 ```text
-rag_lab.document_sources
-rag_lab.document_chunks
-rag_lab.query_cases
-rag_lab.relevance_judgments
-rag_lab.retrieval_runs
-rag_lab.answer_reviews
+analysis_lab.students
+analysis_lab.instructors
+analysis_lab.courses
+analysis_lab.enrollments
+analysis_lab.enrollment_analysis_dataset VIEW
 ```
 
 보호 대상:
@@ -63,146 +66,167 @@ public
 ## 기준 데이터
 
 ```text
-document_sources 7
-document_chunks 9
-query_cases 4
-relevance_judgments 6
-retrieval_runs 9
-answer_reviews 4
+students 8
+instructors 3
+courses 5
+enrollments 24
+분석 데이터셋 24행
 ```
 
-질문:
+상태별 기준:
 
 ```text
-201 환불 가능 기간: public, Top-3
-202 프로젝트 제출 자료: internal, Top-2
-203 JOIN 의미: public, Top-1
-204 배송 정책: public, 보류 기대
+완료 12
+수강중 5
+신청 4
+취소 3
 ```
 
-검색 방해 사례:
+월별 신청 건수:
 
 ```text
-108 restricted이지만 환불 질문에 매우 가까움
-109 inactive 과거 환불 정책
+2026-01 3
+2026-02 4
+2026-03 5
+2026-04 4
+2026-05 4
+2026-06 4
+```
+
+검산 기준:
+
+```text
+전체 수강신청 24
+결제금액 합계 2,770,000
+완료 수강 12
+평균 완료 기간 25일
+PK 중복 0
+고아 FK 0
+상태·완료일 이상 0
 ```
 
 ## 핵심 개념
 
-- 구조화 조건 검색
-- 키워드 검색
-- 벡터 의미 검색
-- 혼합 검색
-- 임베딩 모델·버전·차원
-- L2 거리
-- 코사인 거리·유사도
-- Top-k
-- 거리 임계값
-- 정확 최근접 검색
-- HNSW
-- IVFFlat
-- 원문·청크·벡터
-- 접근 권한 필터
-- 최신성·활성 상태
-- 정답 집합
-- Precision@k
-- Recall@k
-- Reciprocal Rank·MRR
-- 검색 적합성
-- 답변 근거성
-- 인용 정확성
-- Unsupported claim
-- 답변 보류
-- 검색 문서 내 악성 지시
-- 재청킹·재임베딩
-- 회귀 평가
+- 분석 질문
+- 분석 대상과 기간
+- 분석 단위와 행 단위
+- SQL 필터·JOIN·집계
+- `COUNT(*)`와 `COUNT(column)`
+- `COUNT(DISTINCT ...)`
+- `GROUP BY`, `HAVING`
+- `DATE_TRUNC`
+- 윈도 함수 `LAG`
+- NULL과 업무 의미
+- 중복·고아·정합성 점검
+- 분석용 VIEW
+- 원본 데이터와 파생 데이터셋
+- CSV 내보내기
+- PostgreSQL·Python 연결
+- 환경변수와 `.env`
+- pandas DataFrame
+- `groupby`, `agg`, `pivot_table`
+- matplotlib 시각화
+- SQL·Python 교차 검증
+- 분석 결과의 관찰·해석·한계
+- AI 생성 분석 코드 검토
 
 ## 본문 구성
 
-1. 검색과 생성 단계 분리
-2. 네 가지 검색 방식
-3. 임베딩 호환 조건
-4. 거리·Top-k·임계값
-5. 정확·근사 검색
-6. 원문·청크·벡터 역할
-7. 청킹 전략
-8. 권한·최신성 필터
-9. RAG 색인·질문 흐름
-10. PostgreSQL·pgvector
-11. 격리 실습 구조
-12. 기준 데이터·방해 사례
-13. 수동 벡터 검색
-14. 정답 집합·검색 평가
-15. 평가 데이터 오염 방지
-16. 답변 근거 검토
-17. 인용 설계
-18. 근거 부족 답변 보류
-19. 검색 문서 신뢰 경계
-20. 문서·모델 수명주기
-21. 저장소 역할
-22. 회귀 평가
-23. AI RAG 설계 검토
-24. 자주 하는 실수
-25. 스스로 확인하기
-26. 핵심 정리
-27. 다음 장 연결
+1. 분석 질문을 먼저 정의한다
+2. SQL과 Python의 역할을 구분한다
+3. Chapter 14 실습 구조
+4. 분석 실습 데이터 이해하기
+5. 분석 전에 데이터 품질을 확인한다
+6. JOIN·필터·집계로 분석한다
+7. 기간별 분석을 수행한다
+8. 분석용 데이터셋을 만든다
+9. DBeaver에서 CSV로 내보낸다
+10. Python 분석 환경을 준비한다
+11. CSV를 pandas로 읽는다
+12. PostgreSQL과 Python을 연결한다
+13. pandas로 집계한다
+14. 간단한 시각화로 확장한다
+15. SQL 결과와 Python 결과를 교차 검증한다
+16. 분석 결과를 해석한다
+17. AI가 만든 분석 코드를 검토한다
+18. 자주 하는 실수
+19. 스스로 확인하기
+20. 핵심 정리
+21. 다음 장 연결
 
 ## 코드·문서 파일
 
 ```text
 code/chapter14/
-├── 01_rag_lab_schema.sql
-├── 02_rag_lab_seed.sql
-├── 03_manual_vector_search.sql
-├── 04_retrieval_evaluation.sql
-├── 05_rag_answer_reviews.sql
-├── 06_rag_lifecycle_checks.sql
-├── 07_pgvector_optional.sql
-├── RAG_EVALUATION_REPORT_TEMPLATE.md
-├── RAG_REVIEW_PROMPTS.md
-├── reset_rag_lab.sql
-├── vector_rag_practice.sql
+├── 01_analysis_lab_schema.sql
+├── 02_analysis_lab_seed.sql
+├── 03_data_quality_checks.sql
+├── 04_summary_analysis.sql
+├── 05_period_category_analysis.sql
+├── 06_analysis_dataset.sql
+├── 07_analysis_validation.sql
+├── reset_analysis_lab.sql
+├── python/
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── 01_load_csv.py
+│   ├── 02_load_postgresql.py
+│   ├── 03_pandas_analysis.py
+│   └── 04_result_validation.py
 └── README.md
 ```
 
 | 파일 | 역할 |
 | --- | --- |
-| `01_rag_lab_schema.sql` | 전용 스키마와 원문·청크·질문·평가 테이블 생성 |
-| `02_rag_lab_seed.sql` | 문서 7·청크 9·질문 4·정답 6 입력 |
-| `03_manual_vector_search.sql` | 권한·최신성 필터 후 L2 Top-k 로그 생성 |
-| `04_retrieval_evaluation.sql` | Precision·Recall·RR·MRR 계산 |
-| `05_rag_answer_reviews.sql` | 근거·인용·권한·보류 사례 입력·검증 |
-| `06_rag_lifecycle_checks.sql` | 비활성 문서·모델 버전·재임베딩 대상 확인 |
-| `07_pgvector_optional.sql` | 확장 확인과 선택적 vector(3) 비교 |
-| `RAG_EVALUATION_REPORT_TEMPLATE.md` | 검색·답변·보안·회귀 평가 기록 |
-| `RAG_REVIEW_PROMPTS.md` | 설계·검색·답변·수명주기 검토 프롬프트 |
-| `reset_rag_lab.sql` | rag_lab만 초기화 |
-| `vector_rag_practice.sql` | 안전한 호환 진입점 |
+| `01_analysis_lab_schema.sql` | 전용 분석 스키마와 네 테이블 생성 |
+| `02_analysis_lab_seed.sql` | 기간·상태·지역·강의 분석용 기준 데이터 입력 |
+| `03_data_quality_checks.sql` | 행 수·중복·고아 FK·상태·날짜·금액 점검 |
+| `04_summary_analysis.sql` | 상태·강의·지역별 기본 집계 |
+| `05_period_category_analysis.sql` | 월별·범주별 분석과 이전 기간 비교 |
+| `06_analysis_dataset.sql` | 수강신청 1건 단위 분석 VIEW 생성 |
+| `07_analysis_validation.sql` | SQL 기준값과 완료 게이트용 검산 |
+| `01_load_csv.py` | DBeaver에서 내보낸 CSV 읽기·구조 확인 |
+| `02_load_postgresql.py` | 환경변수로 PostgreSQL VIEW 읽기 |
+| `03_pandas_analysis.py` | 상태·월·강의 분석과 피벗·그래프 |
+| `04_result_validation.py` | SQL 기준값과 pandas 결과 자동 비교 |
+| `reset_analysis_lab.sql` | analysis_lab만 선택적으로 초기화 |
+
+## 이미지 구성
+
+```text
+ch14_01_analysis_workflow.svg
+ch14_02_sql_python_role_split.svg
+ch14_03_sql_aggregation_flow.svg
+ch14_04_data_quality_checks.svg
+ch14_05_analysis_dataset_pipeline.svg
+ch14_06_postgresql_python_connection.svg
+ch14_07_pandas_analysis_flow.svg
+ch14_08_analysis_result_validation.svg
+```
 
 ## 안전성 원칙
 
-- 기존 스키마와 Role을 변경하지 않는다.
-- 생성 파일에서 자동 DROP을 실행하지 않는다.
-- `CREATE EXTENSION`을 자동 실행하지 않는다.
-- 수동 3차원 벡터를 실제 모델 출력으로 설명하지 않는다.
-- 권한·최신성 필터를 검색 후보 단계에서 적용한다.
-- 검색 로그에 실제 개인정보와 원문 전체를 복제하지 않는다.
-- Top-k를 정답 집합으로 사용하지 않는다.
-- 정답 없는 질문은 보류 정확성으로 평가한다.
-- 검색 문서의 지시를 시스템 명령으로 실행하지 않는다.
-- 검증하지 않은 항목을 통과로 기록하지 않는다.
+- 앞 장의 스키마와 데이터를 변경하지 않는다.
+- 생성 SQL에서 자동 `DROP`을 실행하지 않는다.
+- 운영 DB가 아닌 개발·테스트 DB를 사용한다.
+- 분석 코드에서 원본 테이블 변경 SQL을 자동 실행하지 않는다.
+- 비밀번호와 접속 URL을 코드·노트북·화면 캡처에 남기지 않는다.
+- `.env`와 실제 분석 데이터 파일을 저장소에 무조건 커밋하지 않는다.
+- Python에서 중복·NULL을 임의 제거해 오류를 숨기지 않는다.
+- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
+- 검증하지 않은 분석 결과를 통과로 기록하지 않는다.
 
 ## AI 활용 원칙
 
-- 원문·파생 벡터의 역할을 구분한다.
-- 모델·버전·차원과 청킹 기준을 제공한다.
-- 권한·최신성 필터 위치를 검토시킨다.
-- 정확 검색 기준과 정답 집합을 제공한다.
-- 검색 평가와 답변 평가를 분리한다.
-- 보류·인용·Unsupported claim을 검토한다.
-- 검색 문서 내 악성 지시와 도구 호출 권한을 검토한다.
-- 변경 전후 회귀 지표와 개별 실패를 비교한다.
+- 분석 질문·기간·행 단위·기대값을 AI에 제공한다.
+- PK·FK와 JOIN 경로를 함께 제공한다.
+- SQL과 Python의 수정 대상과 금지 범위를 명시한다.
+- 파괴적인 SQL과 접속 정보 노출을 확인한다.
+- `dropna`, `drop_duplicates`가 오류를 숨기지 않는지 확인한다.
+- SQL 기준값과 별도 검산 쿼리로 결과를 비교한다.
+- 그래프보다 행 수·건수·합계·평균 검증을 우선한다.
+- AI 결과는 diff와 실행 증거를 확인한 후 사람이 승인한다.
 
 ## 다음 장 연결
 
-Chapter 15에서는 관계형 원본, 검색용 파생 데이터, API, 권한·성능·복구·RAG 평가를 하나의 작은 프로젝트로 통합한다.
+Chapter 15에서는 요구사항, ERD, SQL 구현, 트랜잭션, 성능, 운영, AI 검토와 SQL·Python 데이터 분석을 하나의 재현 가능한 데이터베이스 종합 프로젝트로 통합합니다.
