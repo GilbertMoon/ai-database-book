@@ -6,7 +6,7 @@
 tutor_project
 ```
 
-모든 프로젝트 테이블은 이 스키마에 생성합니다.
+모든 프로젝트 테이블과 분석 VIEW는 이 스키마에 생성합니다.
 
 ---
 
@@ -32,7 +32,7 @@ learning_materials 1 → 0..N question_materials
 | `tutors` | 답변 작성 튜터 | IDENTITY PK, email UNIQUE |
 | `questions` | 질문과 상태 | student FK, question_code UNIQUE, status CHECK |
 | `answers` | 튜터 답변 | question·tutor FK, 빈 본문 CHECK |
-| `learning_materials` | 학습 자료 원본 메타데이터 | material_code UNIQUE, 유형·접근 범위 CHECK |
+| `learning_materials` | 학습 자료 메타데이터 | material_code UNIQUE, 유형·접근 범위 CHECK |
 | `question_materials` | 질문·자료 연결 | 복합 PK, 표시 순서 UNIQUE·CHECK |
 
 ---
@@ -63,33 +63,55 @@ PK와 UNIQUE의 자동 인덱스와 별도로 실제 반복 조회를 근거로 
 
 ---
 
-## 6. 미확정 정책
+## 6. 분석 VIEW
+
+`09_analysis_dataset.sql`은 `tutor_project.question_analysis_dataset` VIEW를 생성합니다.
+
+```text
+한 행 = questions.id 한 건
+```
+
+주요 컬럼:
+
+```text
+question_id
+question_code
+question_created_at
+question_month
+student_id
+student_name
+status
+answer_count
+first_answer_at
+first_response_hours
+material_count
+has_answer
+has_material
+```
+
+`answers`와 `question_materials`를 동시에 직접 JOIN하면 답변 수와 자료 수의 곱만큼 행이 늘어날 수 있습니다. 먼저 질문별로 각각 집계한 뒤 질문 테이블에 연결해야 합니다.
+
+검증 기준:
+
+```text
+VIEW 행 수 5
+question_id 중복 0
+answer_count 합계 5
+material_count 합계 7
+답변 없는 질문 1
+```
+
+---
+
+## 7. 미확정 정책
 
 ```text
 answers에 UNIQUE(question_id, tutor_id)를 추가하지 않는다.
 답변 등록 시 상태 자동 변경 트리거를 만들지 않는다.
 closed 질문 답변 허용 여부를 DB 제약으로 고정하지 않는다.
 삭제 정책을 CASCADE로 고정하지 않는다.
+분석 기준 시각과 갱신 주기를 임의로 확정하지 않는다.
 ```
-
----
-
-## 7. RAG 선택 확장
-
-`learning_materials`가 원문 메타데이터의 Source of Truth입니다.
-
-```text
-material_code
-title
-content_summary
-access_scope
-source_version
-content_hash
-is_active
-updated_at
-```
-
-선택 뷰 `rag_source_documents`는 활성 자료만 노출합니다. 청크·임베딩·벡터 인덱스와 검색 로그는 원문에서 다시 만들 수 있는 파생 데이터입니다.
 
 ---
 
@@ -100,5 +122,7 @@ updated_at
 - 실제 개인정보와 비밀을 저장하지 않는다.
 - 명시적 ID 샘플로 시퀀스 상태 의존을 제거한다.
 - 실제 구조는 03_metadata_validation.sql로 검증한다.
+- 분석 VIEW는 원본을 복제하지 않는 파생 조회다.
+- Python 분석은 VIEW를 읽고 SQL 기준값과 비교한다.
 - 운영 변경은 별도 마이그레이션·백업·복구 계획이 필요하다.
 ```
