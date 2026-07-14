@@ -87,7 +87,7 @@ FROM tutor_project.question_analysis_dataset
 GROUP BY student_id, student_name
 ORDER BY student_id;
 
--- 월별 질문 수: 기준 데이터는 2026-07 5건
+-- 월별 질문 수: 2026년 1~5월 각 1건
 SELECT
     question_month,
     COUNT(*) AS question_count,
