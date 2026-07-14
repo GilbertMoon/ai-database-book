@@ -16,7 +16,7 @@ flowchart TB
         S06 --> S07["07_performance_checks.sql"]
         S07 --> S08["08_operations_checks.sql"]
         S08 --> S09["09_analysis_dataset.sql"]
-        S09 --> S10["10_completion_gate.sql"]
+        S10["10_completion_gate.sql"]
     end
 
     subgraph PYTHON["Python 분석 · 필수"]
@@ -41,6 +41,7 @@ flowchart TB
     ROOT --> ERD
     ROOT --> S01
     S09 --> P1
+    P3 --> S10
     P3 --> ANALYSIS_REPORT
     S08 --> RUNBOOK
     S10 --> AI_REPORT --> FINAL_REPORT
