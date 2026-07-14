@@ -22,5 +22,5 @@ flowchart LR
 
     REDESIGN --> STUDENTS
     REDESIGN --> INSTRUCTORS
-    PAYMENTS --> RESULT["역할별 테이블 분리<br/>PK·FK로 관계 보장<br/>타입·CHECK로 값 검증<br/>민감정보 대신 payment_reference 저장"]
+    PAYMENTS -->|비교 결과| RESULT["역할별 테이블 분리<br/>PK·FK로 관계 보장<br/>타입·CHECK로 값 검증<br/>민감정보 대신 payment_reference 저장"]
     ENROLLMENTS --> RESULT
