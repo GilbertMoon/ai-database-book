@@ -1,37 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="700" viewBox="0 0 1200 700">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
   <title id="title">재현 가능한 프로젝트 파일 구조</title>
-  <desc id="desc">실제 템플릿 파일명만 사용합니다.</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-  <style>text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.code{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:14px;text-anchor:middle}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.c{fill:#ecfeff;stroke:#06b6d4}.h{font-size:18px;font-weight:700;text-anchor:middle}.m{font-size:13px;text-anchor:middle;fill:#334155}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.plain{stroke:#94a3b8;stroke-width:2;fill:none}</style></defs>
-  <rect width="1200" height="700" fill="#fff"/>
-  <text x="600" y="48" class="t">재현 가능한 프로젝트 파일 구조</text>
-  <text x="600" y="75" class="s">실제 템플릿 파일명만 사용합니다.</text>
-  <rect x="465" y="110" width="270" height="70" class="card b"/>
-  <text x="600" y="142" class="h">project/</text>
-  <rect x="90" y="260" width="210" height="70" class="card g"/>
-  <text x="195" y="292" class="h">README.md</text>
-  <rect x="350" y="260" width="210" height="70" class="card g"/>
-  <text x="455" y="292" class="h">requirements.md</text>
-  <rect x="610" y="260" width="210" height="70" class="card g"/>
-  <text x="715" y="292" class="h">erd.md</text>
-  <rect x="870" y="260" width="210" height="70" class="card p"/>
-  <text x="975" y="292" class="h">schema.sql</text>
-  <rect x="90" y="430" width="210" height="70" class="card p"/>
-  <text x="195" y="462" class="h">seed.sql</text>
-  <rect x="350" y="430" width="210" height="70" class="card p"/>
-  <text x="455" y="462" class="h">queries.sql</text>
-  <rect x="610" y="430" width="240" height="70" class="card c"/>
-  <text x="730" y="462" class="h">ai_review_report.md</text>
-  <rect x="900" y="430" width="220" height="70" class="card c"/>
-  <text x="1010" y="462" class="h">final_report.md</text>
-  <line x1="600" y1="180" x2="195" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="455" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="715" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="975" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="195" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="455" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="730" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="1010" y2="430" class="line"/>
-  <rect x="300" y="590" width="600" height="70" class="card r"/>
-  <text x="600" y="622" class="h">임시 파일명 대신 지정 보고서 파일을 사용합니다.</text>
+  <desc id="desc">필수 SQL, 선택 SQL, 문서 파일을 실행 순서대로 분리합니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}
+      .mono{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:13px;text-anchor:middle}
+      .title{font-size:29px;font-weight:800;text-anchor:middle}
+      .sub{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .orange{fill:#fff7ed;stroke:#f97316}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .pink{fill:#fff1f2;stroke:#f43f5e}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .gray{fill:#f8fafc;stroke:#94a3b8}
+      .h{font-size:18px;font-weight:700;text-anchor:middle}
+      .m{font-size:13.5px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#f43f5e;stroke-width:2.4;fill:none;marker-end:url(#arrow);stroke-dasharray:7 5}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="46" class="title">재현 가능한 프로젝트 파일 구조</text>
+  <text x="600" y="73" class="sub">필수 SQL, 선택 SQL, 문서 파일을 실행 순서대로 분리합니다.</text>
+  <rect x="445" y="105" width="310" height="70" class="card blue"/>
+  <text x="600" y="136" class="h">code/chapter15/templates</text>
+  <rect x="55" y="240" width="250" height="118" class="card green"/>
+  <text x="180" y="271" class="h">문서</text>
+  <text x="180" y="298" class="mono">README.md</text>
+  <text x="180" y="318" class="mono">requirements.md</text>
+  <text x="180" y="338" class="mono">erd.md</text>
+  <rect x="340" y="225" width="250" height="148" class="card orange"/>
+  <text x="465" y="256" class="h">필수 SQL 01~08</text>
+  <text x="465" y="283" class="mono">01_schema.sql</text>
+  <text x="465" y="303" class="mono">02_seed.sql</text>
+  <text x="465" y="323" class="mono">03~08 검증 SQL</text>
+  <rect x="625" y="240" width="245" height="118" class="card green"/>
+  <text x="748" y="271" class="h">완료 SQL</text>
+  <text x="748" y="298" class="mono">10_completion_gate.sql</text>
+  <text x="748" y="318" class="mono">09 없이도 실행</text>
+  <rect x="905" y="225" width="250" height="148" class="card purple"/>
+  <text x="1030" y="256" class="h">선택·운영·보고</text>
+  <text x="1030" y="283" class="mono">09_optional_rag</text>
+  <text x="1030" y="303" class="mono">OPERATIONS_RUNBOOK</text>
+  <text x="1030" y="323" class="mono">ai_review_report/final</text>
+  <path d="M600 175 L180 240" class="line"/>
+  <path d="M600 175 L465 225" class="line"/>
+  <path d="M600 175 L748 240" class="line"/>
+  <path d="M600 175 L1030 225" class="line"/>
+  <rect x="260" y="535" width="300" height="90" class="card gray"/>
+  <text x="410" y="566" class="h">필요 시 초기화</text>
+  <text x="410" y="593" class="mono">reset_tutor_project.sql</text>
+  <text x="410" y="613" class="mono">수동 실행 전용</text>
+  <rect x="650" y="535" width="300" height="90" class="card purple"/>
+  <text x="800" y="566" class="h">실행 규칙</text>
+  <text x="800" y="593" class="mono">필수: 01~08 + 10</text>
+  <text x="800" y="613" class="mono">선택: 09만 별도</text>
+  <path d="M465 373 L410 535" class="line"/>
+  <path d="M748 358 L800 535" class="line"/>
 </svg>

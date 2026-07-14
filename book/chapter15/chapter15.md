@@ -101,6 +101,7 @@ code/chapter15/templates/
 ├── 07_performance_checks.sql
 ├── 08_operations_checks.sql
 ├── 09_optional_rag_extension.sql
+├── 10_completion_gate.sql
 ├── OPERATIONS_RUNBOOK.md
 ├── ai_review_report.md
 ├── final_report.md
@@ -108,6 +109,7 @@ code/chapter15/templates/
 ```
 
 파일명에는 실행 순서를 포함하고, 생성 파일에서는 자동 `DROP`을 실행하지 않습니다.
+필수 실행은 01~08과 10이며, 09는 실제 RAG 요구사항이 있을 때만 선택 실행합니다.
 
 ---
 
@@ -442,14 +444,14 @@ AI에 요청할 때 다음을 명시합니다.
 
 ## 16. 프로젝트 완성도의 일곱 축
 
-![프로젝트 완성도의 여섯 축](../../images/chapter15/ch15_06_completion_dimensions.svg)
+![프로젝트 완성도의 일곱 축](../../images/chapter15/ch15_06_completion_dimensions.svg)
 
-그림 15-6 프로젝트 완성도의 핵심 축
+그림 15-6 프로젝트 완성도의 일곱 축
 
 ```text
 1. 문제와 범위
 2. 요구사항과 설계 일관성
-3. 재현 가능한 데이터와 SQL
+3. 재현 가능한 데이터셋 SQL
 4. 정상·경계·오류·트랜잭션 증거
 5. 성능·보안·백업·복구 계획
 6. AI 변경 검토와 문서화

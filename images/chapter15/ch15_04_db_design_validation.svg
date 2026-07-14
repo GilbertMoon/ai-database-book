@@ -1,31 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="700" viewBox="0 0 1200 700">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
   <title id="title">요구사항부터 실행 결과까지 검증하기</title>
-  <desc id="desc">REQ ID, ERD, DDL, seed, queries가 한 줄로 이어져야 합니다.</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-  <style>text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.code{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:14px;text-anchor:middle}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.c{fill:#ecfeff;stroke:#06b6d4}.h{font-size:18px;font-weight:700;text-anchor:middle}.m{font-size:13px;text-anchor:middle;fill:#334155}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.plain{stroke:#94a3b8;stroke-width:2;fill:none}</style></defs>
-  <rect width="1200" height="700" fill="#fff"/>
-  <text x="600" y="48" class="t">요구사항부터 실행 결과까지 검증하기</text>
-  <text x="600" y="75" class="s">REQ ID, ERD, DDL, seed, queries가 한 줄로 이어져야 합니다.</text>
-  <rect x="55" y="155" width="170" height="90" class="card b"/>
-  <text x="140" y="187" class="h">REQ ID</text>
-  <rect x="275" y="155" width="170" height="90" class="card g"/>
-  <text x="360" y="187" class="h">ERD</text>
-  <rect x="495" y="155" width="170" height="90" class="card p"/>
-  <text x="580" y="187" class="h">DDL</text>
-  <rect x="715" y="155" width="170" height="90" class="card y"/>
-  <text x="800" y="187" class="h">seed</text>
-  <rect x="935" y="155" width="170" height="90" class="card c"/>
-  <text x="1020" y="187" class="h">queries</text>
-  <line x1="225" y1="200" x2="275" y2="200" class="line"/>
-  <line x1="445" y1="200" x2="495" y2="200" class="line"/>
-  <line x1="665" y1="200" x2="715" y2="200" class="line"/>
-  <line x1="885" y1="200" x2="935" y2="200" class="line"/>
-  <rect x="240" y="410" width="260" height="100" class="card g"/>
-  <text x="370" y="442" class="h">예상 결과 일치</text>
-  <text x="370" y="470" class="m">4 · 3 · 5 · 5 · 6 · 7</text>
-  <rect x="700" y="410" width="260" height="100" class="card r"/>
-  <text x="830" y="442" class="h">수정 필요</text>
-  <text x="830" y="470" class="m">requirements부터 재검토</text>
-  <line x1="1020" y1="245" x2="420" y2="410" class="line"/>
-  <line x1="420" y1="510" x2="700" y2="510" class="line"/>
+  <desc id="desc">불일치가 있으면 최초 불일치 지점으로 돌아갑니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}
+      .mono{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:13px;text-anchor:middle}
+      .title{font-size:29px;font-weight:800;text-anchor:middle}
+      .sub{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .orange{fill:#fff7ed;stroke:#f97316}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .pink{fill:#fff1f2;stroke:#f43f5e}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .gray{fill:#f8fafc;stroke:#94a3b8}
+      .h{font-size:18px;font-weight:700;text-anchor:middle}
+      .m{font-size:13.5px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#f43f5e;stroke-width:2.4;fill:none;marker-end:url(#arrow);stroke-dasharray:7 5}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="46" class="title">요구사항부터 실행 결과까지 검증하기</text>
+  <text x="600" y="73" class="sub">불일치가 있으면 최초 불일치 지점으로 돌아갑니다.</text>
+  <rect x="55" y="140" width="145" height="84" class="card blue"/>
+  <text x="128" y="171" class="h">REQ ID</text>
+  <rect x="240" y="140" width="145" height="84" class="card blue"/>
+  <text x="312" y="171" class="h">ERD</text>
+  <rect x="425" y="140" width="145" height="84" class="card purple"/>
+  <text x="498" y="171" class="h">DDL</text>
+  <rect x="610" y="140" width="180" height="84" class="card orange"/>
+  <text x="700" y="171" class="h">메타데이터</text>
+  <rect x="830" y="140" width="150" height="84" class="card orange"/>
+  <text x="905" y="171" class="h">seed</text>
+  <rect x="1020" y="140" width="145" height="84" class="card orange"/>
+  <text x="1092" y="171" class="h">queries</text>
+  <path d="M200 182 L240 182" class="line"/>
+  <path d="M385 182 L425 182" class="line"/>
+  <path d="M570 182 L610 182" class="line"/>
+  <path d="M790 182 L830 182" class="line"/>
+  <path d="M980 182 L1020 182" class="line"/>
+  <rect x="120" y="360" width="220" height="110" class="card green"/>
+  <text x="230" y="391" class="h">검증 기준</text>
+  <text x="230" y="418" class="m">행 수 4·3·5·5·6·7</text>
+  <text x="230" y="438" class="m">FK 5 · 인덱스 3</text>
+  <rect x="490" y="360" width="220" height="110" class="card green"/>
+  <text x="600" y="391" class="h">일치</text>
+  <text x="600" y="418" class="m">증거 기록</text>
+  <text x="600" y="438" class="m">완료 후보</text>
+  <rect x="850" y="360" width="220" height="110" class="card pink"/>
+  <text x="960" y="391" class="h">불일치</text>
+  <text x="960" y="418" class="m">requirements·ERD</text>
+  <text x="960" y="438" class="m">SQL·seed 수정</text>
+  <path d="M1160 224 L230 360" class="line"/>
+  <path d="M340 415 L490 415" class="line"/>
+  <path d="M710 415 L850 415" class="line"/>
+  <path d="M960 470 L315 224" class="loop"/>
 </svg>

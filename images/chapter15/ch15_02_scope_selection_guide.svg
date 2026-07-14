@@ -1,32 +1,61 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="700" viewBox="0 0 1200 700">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
   <title id="title">필수 범위와 선택 확장 결정하기</title>
-  <desc id="desc">기본 DB 완성과 웹·NoSQL·RAG 확장을 분리합니다.</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-  <style>text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.code{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:14px;text-anchor:middle}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.c{fill:#ecfeff;stroke:#06b6d4}.h{font-size:18px;font-weight:700;text-anchor:middle}.m{font-size:13px;text-anchor:middle;fill:#334155}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.plain{stroke:#94a3b8;stroke-width:2;fill:none}</style></defs>
-  <rect width="1200" height="700" fill="#fff"/>
-  <text x="600" y="48" class="t">필수 범위와 선택 확장 결정하기</text>
-  <text x="600" y="75" class="s">기본 DB 완성과 웹·NoSQL·RAG 확장을 분리합니다.</text>
-  <rect x="80" y="170" width="250" height="130" class="card b"/>
-  <text x="205" y="202" class="h">필수 DB 완성</text>
-  <text x="205" y="230" class="m">requirements</text>
-  <text x="205" y="250" class="m">ERD · DDL</text>
-  <text x="205" y="270" class="m">seed · queries</text>
-  <rect x="470" y="180" width="260" height="110" class="card y"/>
-  <text x="600" y="212" class="h">확장 필요 판단</text>
-  <text x="600" y="240" class="m">문제와 데이터 기준</text>
-  <rect x="860" y="115" width="230" height="90" class="card g"/>
-  <text x="975" y="147" class="h">웹 CRUD/API</text>
-  <text x="975" y="175" class="m">선택</text>
-  <rect x="860" y="250" width="230" height="90" class="card p"/>
-  <text x="975" y="282" class="h">NoSQL</text>
-  <text x="975" y="310" class="m">선택</text>
-  <rect x="860" y="385" width="230" height="90" class="card c"/>
-  <text x="975" y="417" class="h">Vector DB/RAG</text>
-  <text x="975" y="445" class="m">선택</text>
-  <line x1="330" y1="235" x2="470" y2="235" class="line"/>
-  <line x1="730" y1="235" x2="860" y2="160" class="line"/>
-  <line x1="730" y1="235" x2="860" y2="295" class="line"/>
-  <line x1="730" y1="235" x2="860" y2="430" class="line"/>
-  <rect x="320" y="560" width="560" height="75" class="card r"/>
-  <text x="600" y="592" class="h">AI 기능 개수가 아니라 검증 근거로 완성도를 판단합니다.</text>
+  <desc id="desc">기술 개수가 아니라 요구사항과 검증 증거로 확장을 결정합니다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}
+      .mono{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:13px;text-anchor:middle}
+      .title{font-size:29px;font-weight:800;text-anchor:middle}
+      .sub{font-size:15px;text-anchor:middle;fill:#475569}
+      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .orange{fill:#fff7ed;stroke:#f97316}
+      .purple{fill:#faf5ff;stroke:#8b5cf6}
+      .pink{fill:#fff1f2;stroke:#f43f5e}
+      .cyan{fill:#ecfeff;stroke:#06b6d4}
+      .gray{fill:#f8fafc;stroke:#94a3b8}
+      .h{font-size:18px;font-weight:700;text-anchor:middle}
+      .m{font-size:13.5px;text-anchor:middle;fill:#334155}
+      .tiny{font-size:12.5px;text-anchor:middle;fill:#475569}
+      .line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#f43f5e;stroke-width:2.4;fill:none;marker-end:url(#arrow);stroke-dasharray:7 5}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="46" class="title">필수 범위와 선택 확장 결정하기</text>
+  <text x="600" y="73" class="sub">기술 개수가 아니라 요구사항과 검증 증거로 확장을 결정합니다.</text>
+  <rect x="65" y="250" width="240" height="120" class="card blue"/>
+  <text x="185" y="281" class="h">필수 DB 완료</text>
+  <text x="185" y="308" class="mono">requirements · ERD</text>
+  <text x="185" y="328" class="mono">01~08 + 10 실행</text>
+  <rect x="380" y="250" width="230" height="120" class="card green"/>
+  <text x="495" y="281" class="h">완료 게이트</text>
+  <text x="495" y="308" class="m">예상값 일치</text>
+  <text x="495" y="328" class="m">미실행 항목 기록</text>
+  <rect x="690" y="250" width="210" height="120" class="card orange"/>
+  <text x="795" y="281" class="h">확장 판단</text>
+  <text x="795" y="308" class="m">실제 요구사항</text>
+  <text x="795" y="328" class="m">운영 필요성</text>
+  <path d="M305 310 L380 310" class="line"/>
+  <path d="M610 310 L690 310" class="line"/>
+  <rect x="965" y="110" width="185" height="82" class="card purple"/>
+  <text x="1058" y="141" class="h">CRUD/API</text>
+  <text x="1058" y="168" class="m">화면·API 검증</text>
+  <rect x="965" y="230" width="185" height="82" class="card purple"/>
+  <text x="1058" y="261" class="h">NoSQL</text>
+  <text x="1058" y="288" class="m">캐시·이벤트</text>
+  <rect x="965" y="350" width="185" height="82" class="card purple"/>
+  <text x="1058" y="381" class="h">Vector DB/RAG</text>
+  <text x="1058" y="408" class="m">의미 검색·근거</text>
+  <rect x="965" y="470" width="185" height="82" class="card purple"/>
+  <text x="1058" y="501" class="h">배포</text>
+  <text x="1058" y="528" class="m">외부 검증</text>
+  <path d="M900 310 L965 150" class="line"/>
+  <path d="M900 310 L965 270" class="line"/>
+  <path d="M900 310 L965 390" class="line"/>
+  <path d="M900 310 L965 510" class="line"/>
+  <rect x="300" y="590" width="600" height="75" class="card gray"/>
+  <text x="600" y="621" class="h">필수 게이트 통과 전에는 선택 확장을 같은 실행 경로에 섞지 않습니다.</text>
 </svg>
