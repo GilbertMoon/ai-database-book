@@ -1,8 +1,19 @@
 flowchart LR
-    A[course document] --> B[course_code]
-    A --> C[title]
-    A --> D[metadata]
-    D --> E[level]
-    D --> F[tags]
-    D --> G[instructor]
-    D --> H[options]
+    subgraph DOC[course document]
+        direction TB
+        ROOT["최상위 필드<br/>course_code · title · level"]
+        ARRAY["배열 필드<br/>tags: [SQL, PostgreSQL, DB]"]
+        NESTED["중첩 객체<br/>instructor{name, specialty}<br/>options{online, certificate}"]
+        ROOT --> ARRAY --> NESTED
+    end
+
+    ROOT --> R1["직접 식별·조회하는 값<br/>자주 검색하면 인덱스 검토"]
+    ARRAY --> R2["작고 크기가 제한된 반복값<br/>계속 증가하면 별도 저장 검토"]
+    NESTED --> R3["항상 함께 읽고 쓰며<br/>문서와 수명이 같을 때 포함"]
+
+    R3 --> REF["여러 문서에서 공유·독립 변경·강한 무결성 필요<br/>별도 원본과 참조를 검토"]
+    P["문서 경계 원칙<br/>관련 있어 보이는 모든 값이 아니라 함께 읽고 쓰는 단위로 결정"]
+    S["스키마 책임<br/>필드명·타입·필수 여부·버전·마이그레이션 규칙을 관리"]
+
+    DOC --- P
+    P --> S
