@@ -43,7 +43,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 2차 재구성 완료 |
 | Chapter 13 | AI와 실행 증거로 데이터베이스 설계 검증하기 | 2차 재구성 완료 |
 | Chapter 14 | SQL 데이터 분석과 Python 확장 | 방향 전환 반영 |
-| Chapter 15 | 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기 | 2차 재구성 완료 |
+| Chapter 15 | 데이터베이스 종합 프로젝트 | 방향 전환 반영 |
 
 ---
 
@@ -78,8 +78,9 @@ publish/full_manuscript.md
 | Chapter 01~15 본문 작성 | 완료 |
 | 강의안 표현을 eBook 문체로 1차 수정 | 완료 |
 | 활동 자료를 독자용 실습·워크북 형태로 1차 수정 | 완료 |
-| Chapter 07·15 실전 프로젝트 재구성 | 완료 |
-| Chapter 14 SQL·Python 분석 방향 전환 | 반영 중 |
+| Chapter 07 관계형 DB 설계 프로젝트 재구성 | 완료 |
+| Chapter 14 SQL·Python 분석 방향 전환 | 반영 |
+| Chapter 15 설계·분석·검증 종합 프로젝트 전환 | 반영 |
 | `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
 | 전체 원고 방향·용어 일관성 검수 | 예정 |
 | 실제 PostgreSQL·Python 통합 실행 검증 | 예정 |
@@ -90,10 +91,10 @@ publish/full_manuscript.md
 ## 다음 작업
 
 ```text
-1. Chapter 14의 SQL·Python 실습을 실제 PostgreSQL과 Python 환경에서 검증한다.
-2. Chapter 15를 설계·분석·검증 종합 프로젝트 방향으로 재구성한다.
-3. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
-4. 이미지 접근성·SVG 렌더링과 Word·PDF·eBook 변환 결과를 확인한다.
+1. Chapter 14·15의 SQL과 Python 실습을 실제 환경에서 통합 검증한다.
+2. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
+3. Chapter 15 이미지 8종을 GitHub·브라우저·Word·PDF에서 렌더링 검수한다.
+4. 전체 원고의 분량, 중복 설명과 장 간 연결 문장을 최종 조정한다.
 ```
 
 ---
