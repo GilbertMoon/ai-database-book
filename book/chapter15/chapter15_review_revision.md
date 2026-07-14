@@ -1,44 +1,15 @@
-# Chapter 15 2차 재구성 반영 기록
+# Chapter 15 방향 전환 반영 기록
 
-## 대상 파일
+## 대상 Chapter
 
 ```text
-book/chapter15/chapter15.md
-book/chapter15/chapter15_activity.md
-book/chapter15/chapter15_outline.md
-code/chapter15/README.md
-code/chapter15/templates/README.md
-code/chapter15/templates/requirements.md
-code/chapter15/templates/erd.md
-code/chapter15/templates/01_schema.sql
-code/chapter15/templates/02_seed.sql
-code/chapter15/templates/03_metadata_validation.sql
-code/chapter15/templates/04_requirement_queries.sql
-code/chapter15/templates/05_transaction_checks.sql
-code/chapter15/templates/06_negative_tests.sql
-code/chapter15/templates/07_performance_checks.sql
-code/chapter15/templates/08_operations_checks.sql
-code/chapter15/templates/09_optional_rag_extension.sql
-code/chapter15/templates/10_completion_gate.sql
-code/chapter15/templates/OPERATIONS_RUNBOOK.md
-code/chapter15/templates/ai_review_report.md
-code/chapter15/templates/final_report.md
-code/chapter15/templates/reset_tutor_project.sql
-code/chapter15/templates/schema.sql
-code/chapter15/templates/seed.sql
-code/chapter15/templates/queries.sql
-images/chapter15/ch15_03_project_structure.svg
-images/chapter15/ch15_03_project_structure.mmd
-images/chapter15/ch15_05_ai_review_loop.svg
-images/chapter15/ch15_05_ai_review_loop.mmd
-images/chapter15/README.md
-notes/chapter15_review_checklist.md
-README.md
+기존: 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기
+변경: 데이터베이스 종합 프로젝트
 ```
 
-## 목적
+## 변경 목적
 
-Chapter 15를 기본 스키마 테이블 자동 삭제와 세 개 SQL 파일 중심의 프로젝트에서 **요구사항·설계·실행·운영·AI 검토가 추적되는 재현 가능한 최종 프로젝트**로 재구성한다.
+도서 전체 방향을 PostgreSQL·SQL·데이터 설계·분석 중심으로 조정했습니다. Chapter 15는 요구사항, ERD, DDL, 검증, 운영과 AI 활용뿐 아니라 Chapter 14의 SQL·Python 데이터 분석까지 하나의 프로젝트로 통합합니다.
 
 ```text
 문제·범위
@@ -48,50 +19,51 @@ Chapter 15를 기본 스키마 테이블 자동 삭제와 세 개 SQL 파일 중
 → 메타데이터·업무 조회
 → 트랜잭션·반례
 → 인덱스·운영·복구
-→ AI diff
-→ 선택 RAG
+→ 분석용 데이터셋
+→ SQL·Python 분석
+→ AI diff 검토
 → 완료 게이트
 ```
 
 ---
 
-## 1. 제목 변경
+## 1. 제목과 중심 메시지 변경
 
-```text
-기존: 실전 프로젝트 2: AI 기반 데이터베이스 서비스 완성하기
-변경: 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기
-```
+기존에는 AI 데이터베이스 서비스와 선택 RAG 확장이 강조되었습니다. 변경 후에는 데이터베이스 설계·분석·검증의 통합과 재현성을 중심에 둡니다.
 
-AI 기술 수보다 다른 사람이 다시 실행하고 같은 증거를 확인할 수 있는지를 중심에 둔다.
+> 프로젝트는 SQL이 실행되거나 그래프가 생성되는 것으로 끝나지 않는다. 설계와 데이터가 요구사항에 맞고, SQL과 Python 결과가 일치하며, 다른 사람이 같은 절차로 재현할 수 있어야 한다.
 
 ---
 
-## 2. 실습 스키마 격리
+## 2. 필수·선택 범위 변경
 
-기존:
-
-```text
-기본 검색 경로의 students·tutors·questions 등
-schema.sql에서 자동 DROP
-SERIAL 사용
-```
-
-변경:
+필수:
 
 ```text
-tutor_project.students
-tutor_project.tutors
-tutor_project.questions
-tutor_project.answers
-tutor_project.learning_materials
-tutor_project.question_materials
+요구사항·ERD·DDL
+샘플 데이터·업무 조회
+정상·경계·오류·트랜잭션 검증
+인덱스·권한·백업·복구 계획
+분석용 데이터셋
+SQL 분석
+Python·pandas 분석
+SQL·Python 결과 검증
+AI diff 검토
 ```
 
-앞 장 스키마와 `public`은 변경하지 않는다.
+선택:
+
+```text
+웹 CRUD·API
+NoSQL
+배포
+```
+
+Vector DB·RAG는 Chapter 15 범위에서 제거했습니다.
 
 ---
 
-## 3. 단계별 실행 구조
+## 3. 단계별 실행 구조 변경
 
 ```text
 01_schema.sql
@@ -102,181 +74,145 @@ tutor_project.question_materials
 06_negative_tests.sql
 07_performance_checks.sql
 08_operations_checks.sql
-09_optional_rag_extension.sql
+09_analysis_dataset.sql
 10_completion_gate.sql
 ```
 
-`01~08`과 `10`은 필수이며, `09_optional_rag_extension.sql`은 실제 RAG 요구사항이 있을 때만 실행한다.
-
-기존 `schema.sql`, `seed.sql`, `queries.sql`은 자동 삭제·변경을 하지 않는 호환 안내 파일로 전환했다.
+`09_optional_rag_extension.sql`을 제거하고 `09_analysis_dataset.sql`로 교체합니다. `01~10`은 모두 필수 실행 파일입니다.
 
 ---
 
-## 4. DDL 개선
+## 4. 분석 확장
+
+`09_analysis_dataset.sql`은 질문 1건을 한 행으로 정의한 `tutor_project.question_analysis_dataset` VIEW를 생성합니다.
 
 ```text
-- SERIAL → IDENTITY
-- 명시적 제약조건 이름
-- question_code·material_code UNIQUE
-- 자료 유형·접근 범위 CHECK
-- 질문별 display_order UNIQUE
-- 모든 FK ON DELETE RESTRICT
-- 업무 조회 기반 인덱스 3개
-- RAG 원문용 source_version·content_hash·is_active
+VIEW 행 수 5
+question_id 중복 0
+answer_count 합계 5
+material_count 합계 7
+답변 없는 질문 1건
 ```
 
-미확정인 튜터별 복수 답변, 상태 자동 변경, closed 답변, 삭제·보관 정책은 제약으로 고정하지 않았다.
+Python 실습:
+
+```text
+python/01_load_postgresql.py
+python/02_pandas_analysis.py
+python/03_result_validation.py
+```
+
+분석 결과는 `analysis_report.md`에 기록합니다.
 
 ---
 
-## 5. 기준 데이터·재현성
+## 5. 요구사항 확장
+
+기존 DB 요구사항에 다음을 추가합니다.
 
 ```text
-students 4
-tutors 3
-questions 5
-answers 5
-learning_materials 6
-question_materials 7
+REQ-12 질문 1건 단위 분석 데이터셋 제공
+REQ-13 SQL과 Python의 핵심 집계 일치
 ```
 
-명시적 ID:
-
-```text
-students 101~104
-tutors 201~203
-questions 301~305
-answers 401~405
-learning_materials 501~506
-```
-
-고정 시각과 `example.test` 주소를 사용해 실제 개인정보와 실행 시점 의존을 제거했다.
+분석 기준 시각과 갱신 주기는 미확정 정책으로 남깁니다.
 
 ---
 
-## 6. 검증 강화
-
-### 메타데이터
+## 6. 문서 변경
 
 ```text
-테이블 6
-FK 5
-IDENTITY PK 5
-복합 PK 1
-업무 인덱스 3
-CASCADE 0
-민감정보 형태 컬럼 0
-```
+chapter15.md
+- Chapter 14 SQL·Python 분석과 연결
+- RAG 설명 제거
+- 분석 데이터셋과 pandas 검증 추가
 
-### 정상·경계·정합성
+chapter15_activity.md
+- RAG 선택 항목 제거
+- 분석 질문·VIEW·DataFrame·교차 검증 기록 추가
 
-```text
-학생·질문 5행
-답변·튜터 5행
-질문·자료 7행
-질문 없는 학생 1행
-연결되지 않은 자료 1행
-답변 없는 open 질문 1건
-답변 2개 질문 1건
-고아·상태·표시 순서 이상 0행
-```
+chapter15_outline.md
+- SQL·Python 분석을 필수 흐름으로 반영
 
-### 트랜잭션
+chapter15_project_guide.md
+- 01→10 실행과 Python 분석 절차 반영
 
-```text
-answers 5 → 내부 6 → ROLLBACK 후 5
-질문 303 open → 내부 answered → open
-```
+requirements.md·erd.md
+- 분석 VIEW와 결과 검증 요구사항 반영
 
-### 반례
+analysis_report.md
+- 분석 질문·SQL 결과·Python 결과·해석·한계 기록
 
-```text
-14개 자동 테스트
-unique_violation
-foreign_key_violation
-check_violation
-unexpected 0
-기준 데이터 유지
+final_report.md
+- SQL·Python 교차 검증과 분석 한계 추가
 ```
 
 ---
 
-## 7. 성능·운영·복구
+## 7. 완료 게이트 변경
+
+기존 DB 구조와 기준 데이터 검증에 다음을 추가합니다.
 
 ```text
-- 인덱스 존재와 대표 EXPLAIN 분리
-- 작은 표본의 Seq Scan을 오류로 단정하지 않음
-- 객체 소유자·명시적 권한·PUBLIC 권한 확인
-- example.test 이외 이메일 검출
-- 역할 작업 행렬과 최소 권한 계획
-- custom-format 스키마 백업
-- 별도 DB 복원과 03·04·08 재검증
-- RPO·RTO·다음 복원 시험 기록
+question_analysis_dataset VIEW 존재
+VIEW 행 수 5
+question_id 중복 0
+answer_count 합계 5
+material_count 합계 7
+답변 없는 질문 1건
+SQL·Python 핵심 집계 일치 기록
+```
+
+`required_completion_gate_passed`는 DB 구조와 SQL 분석 데이터셋의 필수 기준을 판정합니다. Python 실행 증거는 `analysis_report.md`와 최종 보고서에서 별도로 확인합니다.
+
+---
+
+## 8. 안전성 강화
+
+```text
+- Python은 개발·테스트 DB의 읽기 전용 연결을 우선한다.
+- 접속 정보는 .env로 관리하고 저장소에는 .env.example만 둔다.
+- 실제 개인정보·백업·운영 CSV를 커밋하지 않는다.
+- drop_duplicates·dropna로 오류를 임의로 숨기지 않는다.
+- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
+- 분석 코드에서 UPDATE·DELETE·DROP을 자동 실행하지 않는다.
 ```
 
 ---
 
-## 8. 선택 RAG 확장
-
-`learning_materials`를 원문 메타데이터의 Source of Truth로 사용하고 선택 뷰에서 활성 자료만 노출한다.
+## 9. 이미지 변경 기준
 
 ```text
-활성 원문 후보 5
-public 4
-internal 1
-inactive MAT-OLD-01 제외
-```
-
-벡터·청크·검색 로그는 원문에서 다시 만들 수 있는 파생 데이터로 설명한다.
-
----
-
-## 9. 문서·AI 검토 강화
-
-```text
-requirements.md: REQ-01~12·미확정 정책·검증 기준
-erd.md: 역할·FK·인덱스·RAG 원본 구조
-ai_review_report.md: commit·diff·실행 증거·승인 상태
-final_report.md: 요구사항·검증·운영·한계·다음 버전
-OPERATIONS_RUNBOOK.md: 권한·비밀·백업·복원·RPO·RTO
+그림 15-1: 필수 흐름에 SQL·Python 분석 추가, RAG 제거
+그림 15-2: Python 분석을 필수로 이동, 선택 확장은 웹·NoSQL·배포
+그림 15-3: 09_analysis_dataset.sql·python·analysis_report 반영
+그림 15-4: 요구사항→설계→SQL 분석→Python 검증 연결
+그림 15-5: AI 생성 Python 코드와 DataFrame 검증 추가
+그림 15-6: 재현 가능한 데이터·SQL·Python으로 문구 조정
+그림 15-7: SQL 분석·Python 분석·한계 기록 추가
+그림 15-8: 분석 VIEW와 SQL·Python 일치 기준 추가
 ```
 
 ---
 
-## 10. 도식 처리
-
-그림 15-3 프로젝트 파일 구조 도식은 실제 `code/chapter15/templates/` 파일, `01~08→10` 필수 실행 순서, 선택 RAG, RUNBOOK·보고서, reset과 호환 안내 파일이 구분되도록 보완했다.
-
-그림 15-5 AI 검토 루프는 목표·변경 범위, 파일별 diff와 위험 변경, 사람의 실행 전 검토, PostgreSQL 실행 증거, 완료 게이트와 미실행 항목, 최종 사람 판단을 표시하고, 실패 시 새 diff 검토부터 반복하도록 보완했다.
-
-그림 15-7은 문제·사용자, 필수·제외·선택 범위, 설계 근거와 대안, 실행 증거, AI 제안·사람 수정 루프, 미실행 항목·위험, 다음 버전, 최종 판단이 `final_report.md` 구조와 일치하도록 보완했다.
-
-나머지 Mermaid·SVG 5종은 통합 흐름, 범위, 검증, 완성도와 완료 게이트라는 일반 메시지가 새 본문과 호환되어 유지한다.
-
-이미지 문서에는 새 제목과 `tutor_project`, 단계별 실행 구조, 운영·RAG 완료 기준을 반영한다.
-
----
-
-## 11. 남은 확인
+## 10. 남은 확인
 
 ```text
-- 실제 PostgreSQL에서 01→08 실행
-- 메타데이터 boolean 모두 true 확인
-- 요구사항·정합성 결과 확인
+- 실제 PostgreSQL에서 01→10 순서 실행
+- 메타데이터와 기준 행 수 확인
 - ROLLBACK 복구 확인
-- 반례 14/14·unexpected 0 확인
-- 대표 EXPLAIN 확인
-- 별도 DB 백업·복원 시험
-- 선택 RAG 뷰 5/4/1 확인
+- 반례 unexpected 0 확인
+- 분석 VIEW 5행·중복 0 확인
+- Python DataFrame 5행 확인
+- SQL·pandas 집계 일치 확인
 - GitHub·Word·PDF·eBook 렌더링 확인
 ```
 
 ---
 
-## 12. 최종 상태
+## 최종 상태
 
 ```text
-Chapter 15 본문, 워크북, 구성안과 최종 프로젝트 템플릿을 2차 재구성했다.
-자동 삭제·SERIAL·수동 오류 테스트를 제거하고, 전용 스키마·단계별 검증·운영·선택 RAG·완료 보고 구조로 강화했다.
-원격 main에 모든 변경을 직접 반영했다.
+Chapter 15 본문, 워크북, 구성안과 프로젝트 가이드를 데이터베이스 종합 프로젝트 방향으로 전환했습니다.
+Vector DB·RAG를 제거하고 SQL 분석·Python 분석·교차 검증을 필수 경로에 포함했습니다.
 ```
