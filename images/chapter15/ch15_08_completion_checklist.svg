@@ -1,206 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="100%"
-  height="780"
-  viewBox="0 0 1200 820"
-  role="img"
-  aria-labelledby="title desc"
-  preserveAspectRatio="xMidYMid meet"
->
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
   <title id="title">최종 완료 판단 게이트</title>
-  <desc id="desc">필수 근거, 실제 실행 결과, 미실행 항목을 확인한 뒤 완료 기준을 통과하면 완료 게이트와 최종 보고서로 이동하고, 통과하지 못하면 누락 항목을 보완해 재검증하는 흐름</desc>
+  <desc id="desc">필수 설계와 데이터베이스 결과, 분석 VIEW, SQL·Python 비교와 미실행 항목을 확인한 뒤 완료 여부를 판단하는 흐름</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker><marker id="retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#dc2626"/></marker><style>
+  text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.mono{font-family:Consolas,D2Coding,"Courier New",monospace}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{stroke-width:2;rx:14;ry:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.c{fill:#ecfeff;stroke:#06b6d4}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.n{fill:#f8fafc;stroke:#64748b}.head{font-size:16px;font-weight:700;text-anchor:middle}.body{font-size:12.5px;text-anchor:middle;fill:#334155}.small{font-size:11.5px;text-anchor:middle;fill:#475569}.code{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#166534}.line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.back{stroke:#dc2626;stroke-width:2.2;fill:none;marker-end:url(#retry)}.tag{font-size:12px;font-weight:700;fill:#475569}
+  </style></defs>
+  <rect width="1200" height="860" fill="#fff"/>
+  <text x="600" y="46" class="t">최종 완료 판단 게이트</text>
+  <text x="600" y="76" class="s">데이터베이스와 분석 결과, 미실행 항목을 함께 확인해야 완료 상태를 판단할 수 있습니다.</text>
 
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
-    </marker>
-    <marker id="retryArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 Z" fill="#dc2626"/>
-    </marker>
-    <style>
-      text {
-        font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
-        fill: #111827;
-      }
-      .mono {
-        font-family: Consolas, D2Coding, "Courier New", monospace;
-      }
-      .title {
-        font-size: 29px;
-        font-weight: 800;
-        text-anchor: middle;
-      }
-      .subtitle {
-        font-size: 15px;
-        text-anchor: middle;
-        fill: #475569;
-      }
-      .card {
-        stroke-width: 2;
-        rx: 14;
-        ry: 14;
-      }
-      .evidence {
-        fill: #eff6ff;
-        stroke: #3b82f6;
-      }
-      .result {
-        fill: #ecfeff;
-        stroke: #06b6d4;
-      }
-      .record {
-        fill: #fff8eb;
-        stroke: #f59e0b;
-      }
-      .decision {
-        fill: #fffbeb;
-        stroke: #d97706;
-        stroke-width: 2.2;
-      }
-      .success {
-        fill: #f0fdf4;
-        stroke: #22c55e;
-      }
-      .report {
-        fill: #f5f3ff;
-        stroke: #8b5cf6;
-      }
-      .optional {
-        fill: #eefdf4;
-        stroke: #16a34a;
-      }
-      .retry {
-        fill: #fff1f2;
-        stroke: #f43f5e;
-      }
-      .warning {
-        fill: #f8fafc;
-        stroke: #94a3b8;
-        stroke-width: 1.7;
-        rx: 14;
-        ry: 14;
-      }
-      .head {
-        font-size: 18px;
-        font-weight: 700;
-        text-anchor: middle;
-      }
-      .body {
-        font-size: 13.5px;
-        text-anchor: middle;
-        fill: #334155;
-      }
-      .small {
-        font-size: 12.5px;
-        text-anchor: middle;
-        fill: #475569;
-      }
-      .code {
-        font-size: 13.5px;
-        font-weight: 700;
-        text-anchor: middle;
-        fill: #166534;
-      }
-      .tag {
-        font-size: 13px;
-        font-weight: 700;
-        text-anchor: middle;
-        fill: #334155;
-      }
-      .line {
-        stroke: #475569;
-        stroke-width: 2.4;
-        fill: none;
-        marker-end: url(#arrow);
-      }
-      .retry-line {
-        stroke: #dc2626;
-        stroke-width: 2.4;
-        fill: none;
-        marker-end: url(#retryArrow);
-      }
-      .plain {
-        stroke: #94a3b8;
-        stroke-width: 2;
-        fill: none;
-      }
-    </style>
-  </defs>
+  <rect x="25" y="130" width="250" height="190" class="card b"/><text x="150" y="165" class="head">1. 필수 근거 확인</text><text x="150" y="202" class="body">requirements · ERD · DDL</text><text x="150" y="232" class="body">01~09 SQL · 운영 계획</text><text x="150" y="262" class="body">AI 검토·분석 보고서</text><text x="150" y="292" class="small">문서와 코드의 내용 일치</text>
+  <rect x="315" y="130" width="250" height="190" class="card y"/><text x="440" y="165" class="head">2. DB 결과 검증</text><text x="440" y="202" class="body">행 수 4 · 3 · 5 · 5 · 6 · 7</text><text x="440" y="232" class="body">FK 5 · 인덱스 3 · CASCADE 0</text><text x="440" y="262" class="body">정합성 이상 0 · unexpected 0</text><text x="440" y="292" class="small">ROLLBACK 후 기준 데이터 복구</text>
+  <rect x="605" y="130" width="250" height="190" class="card c"/><text x="730" y="165" class="head">3. 분석 결과 검증</text><text x="730" y="202" class="body">VIEW 5행 · question 중복 0</text><text x="730" y="232" class="body">answer 합계 5 · material 합계 7</text><text x="730" y="262" class="body">SQL·pandas 핵심 집계 일치</text><text x="730" y="292" class="small">오류를 임의 전처리로 숨기지 않음</text>
+  <rect x="895" y="130" width="250" height="190" class="card p"/><text x="1020" y="165" class="head">4. 미실행·미확정 기록</text><text x="1020" y="202" class="body">Role 시험 · 실제 백업·복원</text><text x="1020" y="232" class="body">웹 · NoSQL · 배포</text><text x="1020" y="262" class="body">미확정 정책 · 남은 위험</text><text x="1020" y="292" class="small">검증하지 않은 항목은 통과 금지</text>
+  <path d="M275 225 H315" class="line"/><path d="M565 225 H605" class="line"/><path d="M855 225 H895" class="line"/>
 
-  <rect width="1200" height="820" fill="#ffffff"/>
+  <polygon points="1020,370 1155,455 1020,540 885,455" class="card y"/><text x="1020" y="442" class="head">필수 완료 기준을</text><text x="1020" y="470" class="head">모두 통과했는가?</text><text x="1020" y="498" class="small">실행 증거 기준</text>
+  <path d="M1020 320 V370" class="line"/>
 
-  <text x="600" y="46" class="title">최종 완료 판단 게이트</text>
-  <text x="600" y="76" class="subtitle">필수 근거와 실제 실행 결과를 확인하고, 미실행 항목까지 기록해야 완료 상태를 판단할 수 있습니다.</text>
+  <rect x="780" y="600" width="340" height="100" class="card g"/><text x="950" y="635" class="head">필수 완료 게이트 통과</text><text x="950" y="665" class="code mono">required_completion_gate_passed = true</text><text x="950" y="687" class="small">DB 구조와 SQL 분석 데이터셋 기준</text>
+  <path d="M1020 540 V570 H950 V600" class="line"/><text x="1043" y="565" class="tag">예</text>
+  <rect x="780" y="740" width="340" height="80" class="card p"/><text x="950" y="772" class="head">analysis_report · final_report</text><text x="950" y="798" class="body">근거·한계·선택 확장 판단</text><path d="M950 700 V740" class="line"/>
 
-  <!-- 1. Required evidence -->
-  <rect x="45" y="130" width="250" height="190" class="card evidence"/>
-  <text x="170" y="166" class="head">1. 필수 근거 확인</text>
-  <text x="170" y="202" class="body mono">requirements · erd · DDL</text>
-  <text x="170" y="232" class="body mono">schema · seed · queries</text>
-  <text x="170" y="262" class="body">트랜잭션·반례·운영 계획</text>
-  <text x="170" y="292" class="small">문서와 SQL의 내용 일치</text>
+  <rect x="55" y="415" width="340" height="110" class="card r"/><text x="225" y="450" class="head">누락 항목 보완</text><text x="225" y="480" class="body">SQL·Python 재실행 · 재검증</text><text x="225" y="505" class="small">최초 불일치 지점부터 다시 확인</text>
+  <path d="M885 455 H430 V470 H395" class="back"/><text x="650" y="445" class="tag">아니요</text>
+  <path d="M55 470 H20 V225 H25" class="back"/>
 
-  <!-- 2. Actual results -->
-  <rect x="340" y="130" width="250" height="190" class="card result"/>
-  <text x="465" y="166" class="head">2. 실제 결과 검증</text>
-  <text x="465" y="202" class="body">행 수 4 · 3 · 5 · 5 · 6 · 7</text>
-  <text x="465" y="232" class="body">FK 5 · 인덱스 3 · CASCADE 0</text>
-  <text x="465" y="262" class="body">정합성 이상 0 · unexpected 0</text>
-  <text x="465" y="292" class="small">예상값과 실제 실행 결과 비교</text>
-
-  <!-- 3. Unexecuted and undecided items -->
-  <rect x="635" y="130" width="250" height="190" class="card record"/>
-  <text x="760" y="166" class="head">3. 미실행·미확정 기록</text>
-  <text x="760" y="202" class="body">Role 시험 · 실제 백업·복원</text>
-  <text x="760" y="232" class="body">API · RAG · 배포 검증</text>
-  <text x="760" y="262" class="body">미확정 정책 · 남은 위험</text>
-  <text x="760" y="292" class="small">검증하지 않은 항목은 통과 처리 금지</text>
-
-  <!-- Decision -->
-  <polygon points="1040,125 1170,225 1040,325 910,225" class="decision"/>
-  <text x="1040" y="202" class="head">필수 완료 기준을</text>
-  <text x="1040" y="230" class="head">모두 통과했는가?</text>
-  <text x="1040" y="260" class="small">실행 증거 기준</text>
-
-  <!-- Main flow -->
-  <path d="M295 225 H340" class="line"/>
-  <path d="M590 225 H635" class="line"/>
-  <path d="M885 225 H910" class="line"/>
-
-  <!-- Pass flow -->
-  <rect x="790" y="385" width="330" height="105" class="card success"/>
-  <text x="955" y="420" class="head">필수 완료 게이트 통과</text>
-  <text x="955" y="451" class="code mono">required_completion_gate_passed = true</text>
-  <text x="955" y="476" class="small">필수 DB 구조와 기준 데이터 검증 통과</text>
-
-  <path d="M1040 325 V355 H955 V385" class="line"/>
-  <text x="1063" y="350" class="tag">예</text>
-
-  <rect x="790" y="525" width="330" height="95" class="card report"/>
-  <text x="955" y="560" class="head mono">final_report.md 정리</text>
-  <text x="955" y="590" class="body">검증 근거 · 미실행 항목 · 남은 한계</text>
-  <path d="M955 490 V525" class="line"/>
-
-  <rect x="790" y="655" width="330" height="95" class="card optional"/>
-  <text x="955" y="690" class="head">선택 확장 필요성 판단</text>
-  <text x="955" y="720" class="body">웹 CRUD/API · NoSQL · RAG · 배포</text>
-  <path d="M955 620 V655" class="line"/>
-
-  <!-- Retry flow -->
-  <rect x="55" y="405" width="330" height="115" class="card retry"/>
-  <text x="220" y="440" class="head">누락 항목 보완</text>
-  <text x="220" y="472" class="body">관련 SQL 재실행 · 재검증</text>
-  <text x="220" y="500" class="small">불일치가 시작된 단계부터 다시 확인</text>
-
-  <path d="M1040 325 V350 H420 V462 H385" class="retry-line"/>
-  <text x="720" y="340" class="tag" fill="#b91c1c">아니요</text>
-  <path d="M55 462 H25 V225 H45" class="retry-line"/>
-
-  <!-- Important distinction -->
-  <rect x="55" y="590" width="650" height="160" class="warning"/>
-  <text x="380" y="625" class="head">완료 게이트 통과 ≠ 운영 검증 전체 완료</text>
-  <text x="380" y="660" class="body">Role별 허용·차단 시험과 실제 백업·복원은 별도 실행 증거가 필요합니다.</text>
-  <text x="380" y="690" class="body">API·RAG·배포도 실제 요구사항과 검증 결과가 있을 때만 완료로 기록합니다.</text>
-  <text x="380" y="720" class="small">미실행 항목은 final_report.md에 명시합니다.</text>
+  <rect x="55" y="620" width="650" height="170" class="card n"/><text x="380" y="655" class="head">완료 게이트 통과 ≠ 운영 검증 전체 완료</text><text x="380" y="692" class="body">Role별 권한 시험과 실제 백업·복원은 별도 실행 증거가 필요합니다.</text><text x="380" y="722" class="body">웹 API·NoSQL·배포도 실제 요구사항과 검증 결과가 있을 때만 완료로 기록합니다.</text><text x="380" y="752" class="body">Python 실행 결과와 SQL 비교는 analysis_report.md에 남깁니다.</text><text x="380" y="777" class="small">미실행 항목은 final_report.md에 명시합니다.</text>
 </svg>
