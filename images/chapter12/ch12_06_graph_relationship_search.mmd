@@ -5,15 +5,19 @@ flowchart TB
         direction LR
         S1["Student 101"] -->|INTERESTED_IN| T["Topic: Database"]
         T -->|RELATED_TO| C1["Course: DB-201"]
-        C1 -->|ENROLLED 역방향 탐색| S2["Student 205"]
+        C1 -->|ENROLLED 관계 역방향 탐색| S2["Student 205"]
         S2 -->|ENROLLED| C2["Course: AI-301"]
     end
 
     Q --> S1
-    C2 --> R["추천 후보<br/>Course AI-301"]
+    C2 --> V["추천 후보 검증<br/>학생 101의 기존 수강 강의 제외<br/>공개 여부·선수조건·중복 확인"]
+    V --> R["추천 후보 확정<br/>Course AI-301"]
 
-    SIMPLE["RDBMS JOIN으로 충분할 수 있는 경우<br/>강의별 수강 학생 목록처럼<br/>관계 깊이가 짧고 조회가 정형화됨"]
-    GRAPH["Graph DB를 검토할 수 있는 경우<br/>여러 단계를 반복 탐색하고<br/>경로 자체가 질문의 핵심"]
+    DIR["관계 방향 읽기<br/>저장 관계: Student → Course<br/>역방향 탐색: Course → Student<br/>탐색 방향과 저장 방향을 구분"]
+    C1 -. 관계 방향 설명 .-> DIR
+
+    SIMPLE["RDBMS JOIN으로 충분할 수 있는 경우<br/>관계 깊이가 짧고 조회 경로가 정형화됨<br/>FK·JOIN·인덱스로 먼저 검토"]
+    GRAPH["Graph DB를 검토할 수 있는 경우<br/>여러 단계 관계를 반복 탐색하고<br/>경로·연결 패턴 자체가 주요 질의"]
 
     PATH --- SIMPLE
     PATH --- GRAPH
