@@ -19,6 +19,7 @@ code/chapter15/templates/06_negative_tests.sql
 code/chapter15/templates/07_performance_checks.sql
 code/chapter15/templates/08_operations_checks.sql
 code/chapter15/templates/09_optional_rag_extension.sql
+code/chapter15/templates/10_completion_gate.sql
 code/chapter15/templates/OPERATIONS_RUNBOOK.md
 code/chapter15/templates/ai_review_report.md
 code/chapter15/templates/final_report.md
@@ -26,6 +27,10 @@ code/chapter15/templates/reset_tutor_project.sql
 code/chapter15/templates/schema.sql
 code/chapter15/templates/seed.sql
 code/chapter15/templates/queries.sql
+images/chapter15/ch15_03_project_structure.svg
+images/chapter15/ch15_03_project_structure.mmd
+images/chapter15/ch15_05_ai_review_loop.svg
+images/chapter15/ch15_05_ai_review_loop.mmd
 images/chapter15/README.md
 notes/chapter15_review_checklist.md
 README.md
@@ -98,7 +103,10 @@ tutor_project.question_materials
 07_performance_checks.sql
 08_operations_checks.sql
 09_optional_rag_extension.sql
+10_completion_gate.sql
 ```
+
+`01~08`과 `10`은 필수이며, `09_optional_rag_extension.sql`은 실제 RAG 요구사항이 있을 때만 실행한다.
 
 기존 `schema.sql`, `seed.sql`, `queries.sql`은 자동 삭제·변경을 하지 않는 호환 안내 파일로 전환했다.
 
@@ -237,9 +245,13 @@ OPERATIONS_RUNBOOK.md: 권한·비밀·백업·복원·RPO·RTO
 
 ## 10. 도식 처리
 
-기존 Mermaid·SVG 8종은 통합 흐름, 범위, 파일 구조, 검증, AI 검토, 완성도, 보고서와 완료 게이트라는 일반 메시지가 새 본문과 호환되어 유지한다.
+그림 15-3 프로젝트 파일 구조 도식은 실제 `code/chapter15/templates/` 파일, `01~08→10` 필수 실행 순서, 선택 RAG, RUNBOOK·보고서, reset과 호환 안내 파일이 구분되도록 보완했다.
 
-이미지 문서에는 새 제목과 `tutor_project`, 01~09 실행 구조, 운영·RAG 완료 기준을 반영한다.
+그림 15-5 AI 검토 루프는 목표·변경 범위, 파일별 diff와 위험 변경, 사람의 실행 전 검토, PostgreSQL 실행 증거, 완료 게이트와 미실행 항목, 최종 사람 판단을 표시하고, 실패 시 새 diff 검토부터 반복하도록 보완했다.
+
+나머지 Mermaid·SVG 6종은 통합 흐름, 범위, 검증, 완성도, 보고서와 완료 게이트라는 일반 메시지가 새 본문과 호환되어 유지한다.
+
+이미지 문서에는 새 제목과 `tutor_project`, 단계별 실행 구조, 운영·RAG 완료 기준을 반영한다.
 
 ---
 

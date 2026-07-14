@@ -1,82 +1,243 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="760" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
+<?xml version="1.0" encoding="utf-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100%"
+  height="780"
+  viewBox="0 0 1200 880"
+  role="img"
+  aria-labelledby="title desc"
+  preserveAspectRatio="xMidYMid meet"
+>
   <title id="title">통합 데이터베이스 서비스 완성 흐름</title>
-  <desc id="desc">필수 경로가 끝난 뒤에만 선택 확장을 판단합니다.</desc>
+  <desc id="desc">문제와 사용자 정의부터 범위, 요구사항, ERD와 DDL, 스키마와 기준 데이터, 검증, 운영 계획, AI 검토, 완료 게이트와 최종 보고를 거쳐 필요한 경우에만 웹 API, NoSQL, RAG, 배포를 선택하는 흐름</desc>
+
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569"/>
+    </marker>
     <style>
-      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}
-      .mono{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:13px;text-anchor:middle}
-      .title{font-size:29px;font-weight:800;text-anchor:middle}
-      .sub{font-size:15px;text-anchor:middle;fill:#475569}
-      .card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}
-      .blue{fill:#eff6ff;stroke:#3b82f6}
-      .green{fill:#f0fdf4;stroke:#22c55e}
-      .orange{fill:#fff7ed;stroke:#f97316}
-      .purple{fill:#faf5ff;stroke:#8b5cf6}
-      .pink{fill:#fff1f2;stroke:#f43f5e}
-      .cyan{fill:#ecfeff;stroke:#06b6d4}
-      .gray{fill:#f8fafc;stroke:#94a3b8}
-      .h{font-size:18px;font-weight:700;text-anchor:middle}
-      .m{font-size:13.5px;text-anchor:middle;fill:#334155}
-      .tiny{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
-      .loop{stroke:#f43f5e;stroke-width:2.4;fill:none;marker-end:url(#arrow);stroke-dasharray:7 5}
+      text {
+        font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
+        fill: #111827;
+      }
+      .mono {
+        font-family: Consolas, D2Coding, "Courier New", monospace;
+      }
+      .title {
+        font-size: 29px;
+        font-weight: 800;
+        text-anchor: middle;
+      }
+      .subtitle {
+        font-size: 15px;
+        text-anchor: middle;
+        fill: #475569;
+      }
+      .card {
+        stroke-width: 2;
+        rx: 14;
+        ry: 14;
+      }
+      .define { fill: #eff6ff; stroke: #3b82f6; }
+      .design { fill: #f0fdf4; stroke: #22c55e; }
+      .build { fill: #faf5ff; stroke: #8b5cf6; }
+      .verify { fill: #fffbeb; stroke: #f59e0b; }
+      .operate { fill: #ecfeff; stroke: #06b6d4; }
+      .review { fill: #f5f3ff; stroke: #7c3aed; }
+      .complete { fill: #ecfdf5; stroke: #16a34a; }
+      .optional { fill: #f8fafc; stroke: #64748b; }
+      .hold { fill: #f1f5f9; stroke: #64748b; }
+      .decision {
+        fill: #fff7ed;
+        stroke: #f97316;
+        stroke-width: 2.2;
+      }
+      .note {
+        fill: #fff1f2;
+        stroke: #f43f5e;
+        stroke-width: 1.8;
+        rx: 12;
+        ry: 12;
+      }
+      .head {
+        font-size: 16.5px;
+        font-weight: 700;
+        text-anchor: middle;
+      }
+      .body {
+        font-size: 12.8px;
+        text-anchor: middle;
+        fill: #334155;
+      }
+      .small {
+        font-size: 11.8px;
+        text-anchor: middle;
+        fill: #475569;
+      }
+      .group {
+        font-size: 12px;
+        font-weight: 700;
+        text-anchor: middle;
+        fill: #2563eb;
+      }
+      .tag {
+        font-size: 12px;
+        font-weight: 700;
+        fill: #475569;
+      }
+      .line {
+        stroke: #475569;
+        stroke-width: 2.4;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+      .bus {
+        stroke: #94a3b8;
+        stroke-width: 2;
+        fill: none;
+      }
     </style>
   </defs>
-  <rect width="1200" height="760" fill="#ffffff"/>
+
+  <rect width="1200" height="880" fill="#ffffff"/>
+
   <text x="600" y="46" class="title">통합 데이터베이스 서비스 완성 흐름</text>
-  <text x="600" y="73" class="sub">필수 경로가 끝난 뒤에만 선택 확장을 판단합니다.</text>
-  <rect x="45" y="120" width="170" height="92" class="card blue"/>
-  <text x="130" y="151" class="h">정의</text>
-  <text x="130" y="178" class="m">문제·사용자</text>
-  <text x="130" y="198" class="m">성공 기준</text>
-  <rect x="250" y="120" width="170" height="92" class="card blue"/>
-  <text x="335" y="151" class="h">범위</text>
-  <text x="335" y="178" class="m">필수·제외</text>
-  <text x="335" y="198" class="m">선택 확장</text>
-  <rect x="455" y="120" width="190" height="92" class="card blue"/>
-  <text x="550" y="151" class="h">요구사항</text>
-  <text x="550" y="178" class="m">확정 규칙</text>
-  <text x="550" y="198" class="m">미확정 분리</text>
-  <rect x="690" y="120" width="170" height="92" class="card purple"/>
-  <text x="775" y="151" class="h">설계</text>
-  <text x="775" y="178" class="m">ERD</text>
-  <text x="775" y="198" class="m">DDL</text>
-  <rect x="900" y="120" width="190" height="92" class="card purple"/>
-  <text x="995" y="151" class="h">구현</text>
-  <text x="995" y="178" class="mono">01_schema</text>
-  <text x="995" y="198" class="mono">02_seed</text>
-  <path d="M215 166 L250 166" class="line"/>
-  <path d="M420 166 L455 166" class="line"/>
-  <path d="M645 166 L690 166" class="line"/>
-  <path d="M860 166 L900 166" class="line"/>
-  <rect x="145" y="330" width="190" height="96" class="card orange"/>
-  <text x="240" y="361" class="h">검증</text>
-  <text x="240" y="388" class="mono">03~08 SQL</text>
-  <text x="240" y="408" class="mono">예상/실제 비교</text>
-  <rect x="400" y="330" width="180" height="96" class="card cyan"/>
-  <text x="490" y="361" class="h">운영</text>
-  <text x="490" y="388" class="m">보안·백업</text>
-  <text x="490" y="408" class="m">복구 계획</text>
-  <rect x="645" y="330" width="180" height="96" class="card purple"/>
-  <text x="735" y="361" class="h">AI 검토</text>
-  <text x="735" y="388" class="m">diff 확인</text>
-  <text x="735" y="408" class="m">사람 승인</text>
-  <rect x="880" y="330" width="210" height="96" class="card green"/>
-  <text x="985" y="361" class="h">완료 게이트</text>
-  <text x="985" y="388" class="mono">10_completion_gate</text>
-  <text x="985" y="408" class="mono">final_report</text>
-  <path d="M995 212 L240 330" class="line"/>
-  <path d="M335 378 L400 378" class="line"/>
-  <path d="M580 378 L645 378" class="line"/>
-  <path d="M825 378 L880 378" class="line"/>
-  <rect x="340" y="555" width="230" height="88" class="card gray"/>
-  <text x="455" y="586" class="h">필수 완료</text>
-  <text x="455" y="613" class="m">DB 검증 근거 확보</text>
-  <rect x="665" y="555" width="260" height="88" class="card purple"/>
-  <text x="795" y="586" class="h">선택 확장</text>
-  <text x="795" y="613" class="m">CRUD/API · NoSQL</text>
-  <text x="795" y="633" class="m">Vector DB/RAG · 배포</text>
-  <path d="M985 426 L455 555" class="line"/>
-  <path d="M985 426 L795 555" class="line"/>
+  <text x="600" y="76" class="subtitle">필수 데이터베이스 검증을 완료한 뒤에만 실제 요구사항에 따라 선택 확장을 판단합니다.</text>
+
+  <!-- Top row: definition, design, implementation -->
+  <text x="125" y="118" class="group">정의</text>
+  <text x="505" y="118" class="group">설계</text>
+  <text x="885" y="118" class="group">구현</text>
+
+  <rect x="30" y="135" width="170" height="125" class="card define"/>
+  <text x="115" y="168" class="head">1. 문제·사용자</text>
+  <text x="115" y="194" class="head">정의</text>
+  <text x="115" y="226" class="body">서비스 목표와 사용자 역할</text>
+  <text x="115" y="247" class="small">무엇을 해결할지 먼저 확정</text>
+
+  <rect x="220" y="135" width="170" height="125" class="card define"/>
+  <text x="305" y="168" class="head">2. 범위 결정</text>
+  <text x="305" y="201" class="body">필수 · 제외 · 선택 범위</text>
+  <text x="305" y="228" class="body">운영 배포는 현재 제외</text>
+  <text x="305" y="249" class="small">기술 수보다 검증 범위 우선</text>
+
+  <rect x="410" y="135" width="170" height="125" class="card design"/>
+  <text x="495" y="168" class="head">3. 요구사항</text>
+  <text x="495" y="194" class="head">· 정책 분리</text>
+  <text x="495" y="226" class="body">확인 요구사항 · 미확정 정책</text>
+  <text x="495" y="247" class="small">근거 없는 제약조건 금지</text>
+
+  <rect x="600" y="135" width="170" height="125" class="card design"/>
+  <text x="685" y="168" class="head">4. ERD · DDL</text>
+  <text x="685" y="201" class="body">관계 · PK · FK · 제약조건</text>
+  <text x="685" y="228" class="body">요구사항과 설계 추적</text>
+  <text x="685" y="249" class="small">문서와 실제 구조 일치</text>
+
+  <rect x="790" y="135" width="170" height="125" class="card build"/>
+  <text x="875" y="168" class="head mono">5. 01_schema.sql</text>
+  <text x="875" y="201" class="body">전용 스키마 · 테이블</text>
+  <text x="875" y="228" class="body">명시적 제약조건</text>
+  <text x="875" y="249" class="small">자동 DROP 없이 생성</text>
+
+  <rect x="980" y="135" width="170" height="125" class="card build"/>
+  <text x="1065" y="168" class="head mono">6. 02_seed.sql</text>
+  <text x="1065" y="201" class="body">검증 목적 기준 데이터</text>
+  <text x="1065" y="228" class="body">경계 사례 포함</text>
+  <text x="1065" y="249" class="small">명시적 ID로 재현성 확보</text>
+
+  <path d="M200 197.5 H220" class="line"/>
+  <path d="M390 197.5 H410" class="line"/>
+  <path d="M580 197.5 H600" class="line"/>
+  <path d="M770 197.5 H790" class="line"/>
+  <path d="M960 197.5 H980" class="line"/>
+
+  <!-- Down to second row -->
+  <path d="M1065 260 V350" class="line"/>
+
+  <!-- Second row: verification to final report, right to left -->
+  <text x="1065" y="332" class="group">검증</text>
+  <text x="875" y="332" class="group">운영</text>
+  <text x="685" y="332" class="group">AI 검토</text>
+  <text x="400" y="332" class="group">완료 판단</text>
+
+  <rect x="980" y="350" width="170" height="125" class="card verify"/>
+  <text x="1065" y="382" class="head">7. 03~08 검증</text>
+  <text x="1065" y="410" class="body">메타데이터 · 업무 조회</text>
+  <text x="1065" y="433" class="body">트랜잭션 · 반례 · 성능</text>
+  <text x="1065" y="456" class="small">예상값과 실제 결과 비교</text>
+
+  <rect x="790" y="350" width="170" height="125" class="card operate"/>
+  <text x="875" y="382" class="head">8. 운영 계획</text>
+  <text x="875" y="410" class="body">최소 권한 · 비밀 관리</text>
+  <text x="875" y="433" class="body">백업 · 복구 · RPO · RTO</text>
+  <text x="875" y="456" class="small">실행과 계획을 구분</text>
+
+  <rect x="600" y="350" width="170" height="125" class="card review"/>
+  <text x="685" y="382" class="head">9. AI 변경 검토</text>
+  <text x="685" y="410" class="body">diff · 실행 증거 확인</text>
+  <text x="685" y="433" class="body">사람 승인 후 반영</text>
+  <text x="685" y="456" class="small">요청 범위 밖 변경 금지</text>
+
+  <rect x="410" y="350" width="170" height="125" class="card complete"/>
+  <text x="495" y="382" class="head">10. 완료 게이트</text>
+  <text x="495" y="410" class="body mono">10_completion_</text>
+  <text x="495" y="431" class="body mono">gate.sql</text>
+  <text x="495" y="456" class="small">필수 구조와 기준 데이터 판정</text>
+
+  <rect x="220" y="350" width="170" height="125" class="card complete"/>
+  <text x="305" y="382" class="head">11. 최종 보고</text>
+  <text x="305" y="412" class="body mono">final_report.md</text>
+  <text x="305" y="437" class="body">결과 · 한계 · 다음 버전</text>
+  <text x="305" y="458" class="small">미실행 항목도 명시</text>
+
+  <polygon points="115,335 200,412.5 115,490 30,412.5" class="decision"/>
+  <text x="115" y="387" class="head">12. 선택 확장이</text>
+  <text x="115" y="414" class="head">필요한가?</text>
+  <text x="115" y="443" class="small">실제 요구사항 기준</text>
+
+  <path d="M980 412.5 H960" class="line"/>
+  <path d="M790 412.5 H770" class="line"/>
+  <path d="M600 412.5 H580" class="line"/>
+  <path d="M410 412.5 H390" class="line"/>
+  <path d="M220 412.5 H200" class="line"/>
+
+  <!-- No expansion -->
+  <rect x="25" y="535" width="180" height="72" class="card hold"/>
+  <text x="115" y="564" class="head">필수 DB 완료</text>
+  <text x="115" y="588" class="body">현재 상태 유지</text>
+  <path d="M80 482 V515 H115 V535" class="line"/>
+  <text x="48" y="508" class="tag">아니요</text>
+
+  <!-- Optional expansion branches -->
+  <path d="M150 480 V650" class="bus"/>
+  <path d="M150 650 H1035" class="bus"/>
+  <text x="235" y="635" class="tag">예 · 요구사항에 따라 선택</text>
+
+  <path d="M165 650 V690" class="line"/>
+  <path d="M455 650 V690" class="line"/>
+  <path d="M745 650 V690" class="line"/>
+  <path d="M1035 650 V690" class="line"/>
+
+  <rect x="35" y="690" width="260" height="110" class="card optional"/>
+  <text x="165" y="722" class="head">웹 CRUD/API</text>
+  <text x="165" y="751" class="body">화면·API 입력과 조회 흐름을</text>
+  <text x="165" y="775" class="body">실제로 검증해야 할 때</text>
+
+  <rect x="325" y="690" width="260" height="110" class="card optional"/>
+  <text x="455" y="722" class="head">NoSQL</text>
+  <text x="455" y="751" class="body">캐시·이벤트·가변 문서라는</text>
+  <text x="455" y="775" class="body">별도 조회 패턴이 있을 때</text>
+
+  <rect x="615" y="690" width="260" height="110" class="card optional"/>
+  <text x="745" y="722" class="head">Vector DB/RAG</text>
+  <text x="745" y="751" class="body">의미 검색과 근거 기반 답변이</text>
+  <text x="745" y="775" class="body">필요할 때</text>
+
+  <rect x="905" y="690" width="260" height="110" class="card optional"/>
+  <text x="1035" y="722" class="head">배포</text>
+  <text x="1035" y="751" class="body">다른 사용자가 실제 환경에서</text>
+  <text x="1035" y="775" class="body">검증해야 할 때</text>
+
+  <rect x="225" y="825" width="750" height="40" class="note"/>
+  <text x="600" y="851" class="body">선택 확장은 필수 완료 게이트와 최종 보고가 끝난 뒤에만 진행합니다.</text>
 </svg>
