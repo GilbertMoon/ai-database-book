@@ -1,37 +1,180 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="100%" height="700" viewBox="0 0 1200 700">
-  <title id="title">재현 가능한 프로젝트 파일 구조</title>
-  <desc id="desc">실제 템플릿 파일명만 사용합니다.</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
-  <style>text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.code{font-family:Consolas,D2Coding,"Courier New",monospace;fill:#1d4ed8;font-size:14px;text-anchor:middle}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2;rx:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.c{fill:#ecfeff;stroke:#06b6d4}.h{font-size:18px;font-weight:700;text-anchor:middle}.m{font-size:13px;text-anchor:middle;fill:#334155}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.plain{stroke:#94a3b8;stroke-width:2;fill:none}</style></defs>
-  <rect width="1200" height="700" fill="#fff"/>
-  <text x="600" y="48" class="t">재현 가능한 프로젝트 파일 구조</text>
-  <text x="600" y="75" class="s">실제 템플릿 파일명만 사용합니다.</text>
-  <rect x="465" y="110" width="270" height="70" class="card b"/>
-  <text x="600" y="142" class="h">project/</text>
-  <rect x="90" y="260" width="210" height="70" class="card g"/>
-  <text x="195" y="292" class="h">README.md</text>
-  <rect x="350" y="260" width="210" height="70" class="card g"/>
-  <text x="455" y="292" class="h">requirements.md</text>
-  <rect x="610" y="260" width="210" height="70" class="card g"/>
-  <text x="715" y="292" class="h">erd.md</text>
-  <rect x="870" y="260" width="210" height="70" class="card p"/>
-  <text x="975" y="292" class="h">schema.sql</text>
-  <rect x="90" y="430" width="210" height="70" class="card p"/>
-  <text x="195" y="462" class="h">seed.sql</text>
-  <rect x="350" y="430" width="210" height="70" class="card p"/>
-  <text x="455" y="462" class="h">queries.sql</text>
-  <rect x="610" y="430" width="240" height="70" class="card c"/>
-  <text x="730" y="462" class="h">ai_review_report.md</text>
-  <rect x="900" y="430" width="220" height="70" class="card c"/>
-  <text x="1010" y="462" class="h">final_report.md</text>
-  <line x1="600" y1="180" x2="195" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="455" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="715" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="975" y2="260" class="line"/>
-  <line x1="600" y1="180" x2="195" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="455" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="730" y2="430" class="line"/>
-  <line x1="600" y1="180" x2="1010" y2="430" class="line"/>
-  <rect x="300" y="590" width="600" height="70" class="card r"/>
-  <text x="600" y="622" class="h">임시 파일명 대신 지정 보고서 파일을 사용합니다.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 1180" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">재현 가능한 프로젝트 파일 구조와 실행 순서</title>
+  <desc id="desc">code/chapter15/templates 디렉터리의 프로젝트 문서, 01부터 08과 10까지의 필수 SQL 실행 순서, 선택 RAG 확장, 운영·AI 검토·최종 보고서, 필요할 때만 실행하는 초기화 파일과 기존 링크 호환 안내 파일을 구분한 도식</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text { font-family: "Malgun Gothic", "NanumSquare", "Noto Sans CJK KR", "Apple SD Gothic Neo", "Noto Sans KR", "UnDotum", Arial, sans-serif; fill: #0f172a; }
+      .mono { font-family: Consolas, D2Coding, "Noto Sans Mono CJK KR", Menlo, monospace; }
+      .title { font-size: 36px; font-weight: 800; text-anchor: middle; fill: #12315c; }
+      .subtitle { font-size: 19px; text-anchor: middle; fill: #475569; }
+      .root-title { font-size: 22px; font-weight: 700; text-anchor: middle; }
+      .panel-title { font-size: 23px; font-weight: 800; text-anchor: middle; }
+      .file { font-size: 18px; font-weight: 700; text-anchor: middle; }
+      .role { font-size: 15.5px; text-anchor: middle; fill: #475569; }
+      .badge-text { font-size: 15px; font-weight: 800; text-anchor: middle; }
+      .note { font-size: 18px; font-weight: 700; text-anchor: middle; fill: #334155; }
+      .small-note { font-size: 16px; text-anchor: middle; fill: #475569; }
+      .root { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2.2; rx: 16; }
+      .panel { stroke-width: 2; rx: 18; }
+      .docs-panel { fill: #f5f9ff; stroke: #93c5fd; }
+      .required-panel { fill: #f4fbf6; stroke: #86d5a4; }
+      .support-panel { fill: #f2fbfc; stroke: #67c6d4; }
+      .card { stroke-width: 1.8; rx: 12; }
+      .doc-card { fill: #ffffff; stroke: #60a5fa; }
+      .required-card { fill: #ffffff; stroke: #22a06b; }
+      .gate-card { fill: #e8f8ee; stroke: #15803d; stroke-width: 2.5; }
+      .optional-card { fill: #faf5ff; stroke: #8b5cf6; }
+      .support-card { fill: #ffffff; stroke: #06b6d4; }
+      .reset-card { fill: #fff1f2; stroke: #f43f5e; }
+      .legacy-panel { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2; rx: 16; }
+      .legacy-card { fill: #ffffff; stroke: #94a3b8; }
+      .footer-note { fill: #fff8eb; stroke: #f59e0b; stroke-width: 2; rx: 14; }
+      .badge-required { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.2; }
+      .badge-optional { fill: #f3e8ff; stroke: #7c3aed; stroke-width: 1.2; }
+      .badge-on-demand { fill: #ffe4e6; stroke: #e11d48; stroke-width: 1.2; }
+      .badge-compat { fill: #e2e8f0; stroke: #64748b; stroke-width: 1.2; }
+      .group-line { stroke: #94a3b8; stroke-width: 2.2; fill: none; }
+      .flow { stroke: #475569; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1180" fill="#ffffff"/>
+
+  <text x="600" y="48" class="title">재현 가능한 프로젝트 파일 구조와 실행 순서</text>
+  <text x="600" y="82" class="subtitle">실제 템플릿 파일과 필수·선택·초기화·호환 경로를 구분합니다.</text>
+
+  <rect x="355" y="110" width="490" height="72" class="root"/>
+  <text x="600" y="141" class="root-title mono">code/chapter15/templates/</text>
+  <text x="600" y="166" class="role">파일 번호가 필수 SQL 실행 순서를 나타냅니다.</text>
+
+  <path d="M600 182 V202 H180 V218" class="group-line"/>
+  <path d="M600 182 V218" class="group-line"/>
+  <path d="M600 202 H1020 V218" class="group-line"/>
+
+  <rect x="45" y="218" width="270" height="500" class="panel docs-panel"/>
+  <text x="180" y="257" class="panel-title">프로젝트 문서</text>
+  <rect x="67" y="278" width="68" height="28" rx="14" class="badge-required"/>
+  <text x="101" y="298" class="badge-text" fill="#166534">필수</text>
+
+  <rect x="68" y="325" width="224" height="78" class="card doc-card"/>
+  <text x="180" y="356" class="file mono">README.md</text>
+  <text x="180" y="383" class="role">개요·실행 방법·기대 결과</text>
+
+  <rect x="68" y="425" width="224" height="78" class="card doc-card"/>
+  <text x="180" y="456" class="file mono">requirements.md</text>
+  <text x="180" y="483" class="role">요구사항·미확정 정책</text>
+
+  <rect x="68" y="525" width="224" height="78" class="card doc-card"/>
+  <text x="180" y="556" class="file mono">erd.md</text>
+  <text x="180" y="583" class="role">관계·FK·제약조건 설명</text>
+
+  <text x="180" y="650" class="small-note">문서와 SQL의 내용이</text>
+  <text x="180" y="675" class="small-note">서로 추적되어야 합니다.</text>
+
+  <rect x="345" y="218" width="510" height="690" class="panel required-panel"/>
+  <text x="600" y="257" class="panel-title">필수 SQL 실행 순서</text>
+  <rect x="372" y="278" width="68" height="28" rx="14" class="badge-required"/>
+  <text x="406" y="298" class="badge-text" fill="#166534">필수</text>
+
+  <rect x="375" y="320" width="450" height="54" class="card required-card"/>
+  <text x="600" y="343" class="file mono">01_schema.sql</text>
+  <text x="600" y="364" class="role">스키마·테이블·제약조건</text>
+
+  <rect x="375" y="386" width="450" height="54" class="card required-card"/>
+  <text x="600" y="409" class="file mono">02_seed.sql</text>
+  <text x="600" y="430" class="role">재현 가능한 기준 샘플 데이터</text>
+
+  <rect x="375" y="452" width="450" height="54" class="card required-card"/>
+  <text x="600" y="475" class="file mono">03_metadata_validation.sql</text>
+  <text x="600" y="496" class="role">테이블·PK·FK·IDENTITY·인덱스 확인</text>
+
+  <rect x="375" y="518" width="450" height="54" class="card required-card"/>
+  <text x="600" y="541" class="file mono">04_requirement_queries.sql</text>
+  <text x="600" y="562" class="role">요구사항·경계 사례·정합성 조회</text>
+
+  <rect x="375" y="584" width="450" height="54" class="card required-card"/>
+  <text x="600" y="607" class="file mono">05_transaction_checks.sql</text>
+  <text x="600" y="628" class="role">변경 시나리오와 ROLLBACK 검증</text>
+
+  <rect x="375" y="650" width="450" height="54" class="card required-card"/>
+  <text x="600" y="673" class="file mono">06_negative_tests.sql</text>
+  <text x="600" y="694" class="role">실패해야 정상인 자동 반례</text>
+
+  <rect x="375" y="716" width="450" height="54" class="card required-card"/>
+  <text x="600" y="739" class="file mono">07_performance_checks.sql</text>
+  <text x="600" y="760" class="role">인덱스 존재와 EXPLAIN 검토</text>
+
+  <rect x="375" y="782" width="450" height="54" class="card required-card"/>
+  <text x="600" y="805" class="file mono">08_operations_checks.sql</text>
+  <text x="600" y="826" class="role">권한·비밀·백업·복구 계획 점검</text>
+
+  <rect x="375" y="848" width="450" height="54" class="card gate-card"/>
+  <text x="600" y="871" class="file mono">10_completion_gate.sql</text>
+  <text x="600" y="892" class="role">필수 DB 구조와 기준 데이터의 읽기 전용 최종 판정</text>
+
+  <path d="M600 374 V382" class="flow"/>
+  <path d="M600 440 V448" class="flow"/>
+  <path d="M600 506 V514" class="flow"/>
+  <path d="M600 572 V580" class="flow"/>
+  <path d="M600 638 V646" class="flow"/>
+  <path d="M600 704 V712" class="flow"/>
+  <path d="M600 770 V778" class="flow"/>
+  <path d="M600 836 V844" class="flow"/>
+
+  <rect x="885" y="218" width="270" height="690" class="panel support-panel"/>
+  <text x="1020" y="257" class="panel-title">선택·운영·보고</text>
+
+  <rect x="907" y="280" width="82" height="28" rx="14" class="badge-optional"/>
+  <text x="948" y="300" class="badge-text" fill="#6b21a8">선택</text>
+  <rect x="907" y="320" width="226" height="92" class="card optional-card"/>
+  <text x="1020" y="348" class="file mono">09_optional_</text>
+  <text x="1020" y="370" class="file mono">rag_extension.sql</text>
+  <text x="1020" y="398" class="role">RAG 요구사항이 있을 때만 실행</text>
+
+  <rect x="907" y="448" width="226" height="92" class="card support-card"/>
+  <text x="1020" y="478" class="file mono">OPERATIONS_</text>
+  <text x="1020" y="500" class="file mono">RUNBOOK.md</text>
+  <text x="1020" y="527" class="role">권한·비밀·백업·복구·RPO·RTO</text>
+
+  <rect x="907" y="574" width="226" height="92" class="card support-card"/>
+  <text x="1020" y="604" class="file mono">ai_review_</text>
+  <text x="1020" y="626" class="file mono">report.md</text>
+  <text x="1020" y="653" class="role">AI diff·실행 증거·사람 승인</text>
+
+  <rect x="907" y="700" width="226" height="92" class="card support-card"/>
+  <text x="1020" y="730" class="file mono">final_report.md</text>
+  <text x="1020" y="757" class="role">최종 결과·한계·다음 버전</text>
+
+  <text x="1020" y="840" class="small-note">09는 필수 실행선과 분리하며</text>
+  <text x="1020" y="865" class="small-note">10은 선택 여부와 관계없이 필수입니다.</text>
+
+  <rect x="45" y="942" width="330" height="140" class="card reset-card"/>
+  <rect x="68" y="962" width="105" height="28" rx="14" class="badge-on-demand"/>
+  <text x="120" y="982" class="badge-text" fill="#9f1239">필요 시 실행</text>
+  <text x="210" y="1022" class="file mono">reset_tutor_project.sql</text>
+  <text x="210" y="1052" class="role">처음부터 다시 시작할 때만 검토·선택 실행</text>
+  <text x="210" y="1075" class="role">정상 필수 경로와 자동 DROP에 포함하지 않음</text>
+
+  <rect x="405" y="942" width="750" height="140" class="legacy-panel"/>
+  <text x="780" y="974" class="panel-title">기존 링크 호환 안내 파일</text>
+  <rect x="430" y="958" width="68" height="28" rx="14" class="badge-compat"/>
+  <text x="464" y="978" class="badge-text" fill="#334155">호환</text>
+
+  <rect x="430" y="1004" width="210" height="52" class="card legacy-card"/>
+  <text x="535" y="1036" class="file mono">schema.sql</text>
+
+  <rect x="675" y="1004" width="210" height="52" class="card legacy-card"/>
+  <text x="780" y="1036" class="file mono">seed.sql</text>
+
+  <rect x="920" y="1004" width="210" height="52" class="card legacy-card"/>
+  <text x="1025" y="1036" class="file mono">queries.sql</text>
+
+  <text x="780" y="1075" class="small-note">번호가 붙은 실제 실행 파일을 안내하며, 필수 실행 파일을 대신하지 않습니다.</text>
+
+  <rect x="110" y="1110" width="980" height="50" class="footer-note"/>
+  <text x="600" y="1142" class="note">필수: 01→02→03→04→05→06→07→08→10 · 09는 선택 · reset·호환 파일은 정상 실행 경로 아님</text>
 </svg>
