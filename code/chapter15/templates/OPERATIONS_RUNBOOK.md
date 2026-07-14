@@ -6,6 +6,7 @@
 | --- | --- |
 | 실행 환경 | 개발 / 테스트 / 운영 |
 | PostgreSQL 버전 |  |
+| Python·pandas 버전 |  |
 | 데이터베이스 |  |
 | 스키마 | tutor_project |
 | 담당자 |  |
@@ -31,20 +32,19 @@ tutor_project_owner
 - 객체 소유
 
 tutor_project_app
-- students·questions·answers에 필요한 작업만 허용
-- learning_materials·question_materials는 요구사항에 따라 제한
+- 필요한 업무 테이블 작업만 허용
 - schema CREATE·TRUNCATE·DROP 불허
 
 tutor_project_report
-- 필요한 테이블 SELECT만 허용
+- 분석 VIEW와 필요한 테이블 SELECT만 허용
 - 쓰기 작업 불허
 ```
 
-Role과 GRANT·REVOKE는 클러스터 전역 영향과 현재 멤버십을 검토한 뒤 관리자 테스트 환경에서 선택 적용합니다.
+Role과 GRANT·REVOKE는 현재 멤버십과 영향을 검토한 뒤 관리자 테스트 환경에서 선택 적용합니다.
 
 ---
 
-## 3. 비밀·개인정보 보호
+## 3. 비밀·개인정보·분석 파일 보호
 
 | 점검 | 결과 |
 | --- | --- |
@@ -53,8 +53,11 @@ Role과 GRANT·REVOKE는 클러스터 전역 영향과 현재 멤버십을 검�
 | 전체 접속 URL 미포함 |  |
 | `.env`가 `.gitignore`에 포함 |  |
 | 백업 파일이 `.gitignore`에 포함 |  |
+| 실제 CSV·분석 산출물의 저장 위치 확인 |  |
 | 로그에 질문 본문·개인정보 최소화 |  |
 | 노출된 자격 증명 회전 절차 |  |
+
+Python 분석 코드는 SELECT 중심으로 실행하고 원본 테이블 변경 SQL을 자동 실행하지 않습니다.
 
 ---
 
@@ -115,6 +118,9 @@ pg_restore \
 03_metadata_validation.sql
 04_requirement_queries.sql
 08_operations_checks.sql
+09_analysis_dataset.sql
+10_completion_gate.sql
+Python 결과 검증
 ```
 
 ---
@@ -134,6 +140,9 @@ pg_restore \
 | 업무 인덱스 | 3 |  |  |
 | CASCADE | 0 |  |  |
 | 정합성 이상 | 0행 |  |  |
+| 분석 VIEW | 5행 |  |  |
+| answer_count 합계 | 5 |  |  |
+| material_count 합계 | 7 |  |  |
 
 ---
 
@@ -145,9 +154,11 @@ pg_restore \
 | 스키마 변경 실패 |  |  |  |
 | 백업 파일 손상 |  |  |  |
 | 권한 오설정 |  |  |  |
-| RAG 파생 데이터 불일치 |  |  |  |
+| 분석 VIEW 정의 오류 |  |  |  |
+| SQL·Python 집계 불일치 |  |  |  |
+| `.env` 또는 실제 CSV 노출 |  |  |  |
 
-RAG 벡터·검색 로그는 원문에서 다시 만들 수 있는 파생 데이터로 관리합니다. 원문과 접근 권한·버전·해시는 복구 기준으로 보존합니다.
+분석 VIEW는 원본 테이블에서 다시 생성할 수 있는 파생 객체입니다. SQL과 Python 결과가 다르면 기준값을 바꾸기 전에 원본 데이터, VIEW 정의, 자료형과 집계 단위를 확인합니다.
 
 ---
 
@@ -160,8 +171,9 @@ RAG 벡터·검색 로그는 원문에서 다시 만들 수 있는 파생 데이
 | 정합성 조회 |  |  |  |
 | 권한 검토 |  |  |  |
 | 느린 쿼리 검토 |  |  |  |
-| 비활성 자료 정리 |  |  |  |
-| RAG 회귀 평가 |  |  |  |
+| 분석 VIEW 행 수·중복 |  |  |  |
+| SQL·Python 집계 비교 |  |  |  |
+| `.env`·CSV 저장 위치 점검 |  |  |  |
 
 다음 복원 시험 날짜:
 
