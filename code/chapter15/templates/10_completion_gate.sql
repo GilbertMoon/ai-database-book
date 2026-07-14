@@ -1,6 +1,6 @@
 -- Chapter 15. 최종 완료 게이트
--- 실행 전 01→08 파일을 순서대로 실행합니다.
--- 선택 RAG 확장 여부와 무관하게 필수 프로젝트 상태를 읽기 전용으로 판정합니다.
+-- 실행 전 01→09 파일을 순서대로 실행합니다.
+-- 필수 DB 구조, 기준 데이터와 SQL 분석 데이터셋을 읽기 전용으로 판정합니다.
 
 SELECT
     current_user AS current_user_name,
@@ -170,6 +170,17 @@ security_counts AS (
             FROM tutor_project.tutors
             WHERE email NOT LIKE '%@example.test'
         ) AS non_test_email_count
+),
+analysis_counts AS (
+    SELECT
+        to_regclass('tutor_project.question_analysis_dataset') IS NOT NULL
+            AS analysis_view_exists,
+        COUNT(*) AS analysis_row_count,
+        COUNT(DISTINCT question_id) AS distinct_question_count,
+        SUM(answer_count) AS answer_count_sum,
+        SUM(material_count) AS material_count_sum,
+        COUNT(*) FILTER (WHERE has_answer = FALSE) AS no_answer_count
+    FROM tutor_project.question_analysis_dataset
 )
 SELECT
     r.students_count,
@@ -194,6 +205,12 @@ SELECT
     a.duplicate_orders,
     s.sensitive_column_count,
     s.non_test_email_count,
+    d.analysis_view_exists,
+    d.analysis_row_count,
+    d.distinct_question_count,
+    d.answer_count_sum,
+    d.material_count_sum,
+    d.no_answer_count,
     r.students_count = 4
         AND r.tutors_count = 3
         AND r.questions_count = 5
@@ -216,13 +233,20 @@ SELECT
         AND a.duplicate_orders = 0
         AND s.sensitive_column_count = 0
         AND s.non_test_email_count = 0
+        AND d.analysis_view_exists
+        AND d.analysis_row_count = 5
+        AND d.distinct_question_count = 5
+        AND d.answer_count_sum = 5
+        AND d.material_count_sum = 7
+        AND d.no_answer_count = 1
         AS required_completion_gate_passed
 FROM row_counts AS r
 CROSS JOIN metadata_counts AS m
 CROSS JOIN boundary_counts AS b
 CROSS JOIN anomaly_counts AS a
-CROSS JOIN security_counts AS s;
+CROSS JOIN security_counts AS s
+CROSS JOIN analysis_counts AS d;
 
 -- required_completion_gate_passed가 true여야 합니다.
--- 이 결과는 실제 백업·복원 시험, Role 권한 시험, API·RAG·배포 완료를 의미하지 않습니다.
--- 미실행 항목은 OPERATIONS_RUNBOOK.md와 final_report.md에 별도로 기록합니다.
+-- Python 실행과 SQL·pandas 비교 결과는 analysis_report.md에 별도로 기록합니다.
+-- 이 결과는 실제 백업·복원, Role 시험, 웹 API, NoSQL 또는 배포 완료를 뜻하지 않습니다.
