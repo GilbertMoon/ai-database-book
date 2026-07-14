@@ -1,5 +1,22 @@
-flowchart LR
-    S[Student] -->|ENROLLED| C[Course]
-    S -->|INTERESTED_IN| T[Topic]
-    C -->|RELATED_TO| T
-    T --> R[recommend related courses]
+flowchart TB
+    Q["추천 질문<br/>학생 101의 관심 주제와 수강 관계를 따라<br/>추천할 다른 강의를 찾는다"]
+
+    subgraph PATH[다단계 관계 탐색]
+        direction LR
+        S1["Student 101"] -->|INTERESTED_IN| T["Topic: Database"]
+        T -->|RELATED_TO| C1["Course: DB-201"]
+        C1 -->|ENROLLED 역방향 탐색| S2["Student 205"]
+        S2 -->|ENROLLED| C2["Course: AI-301"]
+    end
+
+    Q --> S1
+    C2 --> R["추천 후보<br/>Course AI-301"]
+
+    SIMPLE["RDBMS JOIN으로 충분할 수 있는 경우<br/>강의별 수강 학생 목록처럼<br/>관계 깊이가 짧고 조회가 정형화됨"]
+    GRAPH["Graph DB를 검토할 수 있는 경우<br/>여러 단계를 반복 탐색하고<br/>경로 자체가 질문의 핵심"]
+
+    PATH --- SIMPLE
+    PATH --- GRAPH
+
+    N["운영 원칙<br/>파생 관계 인덱스라면 원본 저장소·갱신 지연·재구축 절차를 함께 설계"]
+    R --> N
