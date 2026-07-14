@@ -1,10 +1,8 @@
 # Chapter 15 코드 자료
 
-## 재현 가능한 AI 데이터베이스 서비스 완성하기
+## 데이터베이스 종합 프로젝트
 
-이 폴더는 `tutor_project` 전용 스키마에서 AI 튜터링 질문 관리 서비스를 구축하고, 요구사항·메타데이터·업무 조회·트랜잭션·반례·성능·운영·선택 RAG 확장을 검증하는 템플릿 패키지를 제공합니다.
-
----
+이 폴더는 `tutor_project` 전용 스키마에서 AI 튜터링 질문 관리 서비스를 구축하고, 요구사항·메타데이터·업무 조회·트랜잭션·반례·성능·운영과 SQL·Python 분석을 검증하는 템플릿 패키지를 제공합니다.
 
 ## 보호 범위
 
@@ -15,11 +13,9 @@ performance_lab: 변경하지 않음
 security_lab: 변경하지 않음
 nosql_lab: 변경하지 않음
 ai_review_lab: 변경하지 않음
-rag_lab: 변경하지 않음
+analysis_lab: 변경하지 않음
 tutor_project: Chapter 15 프로젝트 대상
 ```
-
----
 
 ## 폴더 구조
 
@@ -36,10 +32,17 @@ code/chapter15/templates/
 ├── 06_negative_tests.sql
 ├── 07_performance_checks.sql
 ├── 08_operations_checks.sql
-├── 09_optional_rag_extension.sql
+├── 09_analysis_dataset.sql
 ├── 10_completion_gate.sql
+├── python/
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── 01_load_postgresql.py
+│   ├── 02_pandas_analysis.py
+│   └── 03_result_validation.py
 ├── OPERATIONS_RUNBOOK.md
 ├── ai_review_report.md
+├── analysis_report.md
 ├── final_report.md
 ├── reset_tutor_project.sql
 ├── schema.sql
@@ -47,9 +50,7 @@ code/chapter15/templates/
 └── queries.sql
 ```
 
-마지막 세 파일은 기존 링크 호환용 안전한 안내 파일입니다.
-
----
+마지막 세 파일은 기존 링크 호환용 안내 파일입니다.
 
 ## 필수 실행 순서
 
@@ -62,14 +63,12 @@ code/chapter15/templates/
 → 06_negative_tests.sql
 → 07_performance_checks.sql
 → 08_operations_checks.sql
+→ 09_analysis_dataset.sql
+→ Python 분석·검증
 → 10_completion_gate.sql
 ```
 
-학습 자료 의미 검색 요구사항이 있을 때만 `09_optional_rag_extension.sql`을 실행합니다. `10_completion_gate.sql`은 선택 확장 여부와 관계없이 필수 프로젝트의 최종 상태를 읽기 전용으로 판정합니다.
-
 처음부터 다시 시작할 때만 `reset_tutor_project.sql`을 검토·선택 실행합니다.
-
----
 
 ## 기준 결과
 
@@ -88,56 +87,36 @@ code/chapter15/templates/
 | 질문 없는 학생 | 1 |
 | 연결되지 않은 자료 | 1 |
 | 답변 없는 open 질문 | 1 |
-| 답변 2개 질문 | 1 |
-| 자동 반례 | 14 |
-| unexpected 반례 | 0 |
+| 자동 반례 unexpected | 0 |
+| 분석 VIEW 행 수 | 5 |
+| question_id 중복 | 0 |
+| answer_count 합계 | 5 |
+| material_count 합계 | 7 |
 | `required_completion_gate_passed` | true |
-
----
-
-## 완료 게이트가 확인하는 항목
-
-```text
-행 수 4·3·5·5·6·7
-테이블 6·FK 5·IDENTITY PK 5
-업무 인덱스 3·CASCADE 0
-경계 사례 각각 1건
-고아 참조·상태 이상·중복 표시 순서 0건
-민감정보 형태 컬럼 0건
-example.test 외 이메일 0건
-```
-
-완료 게이트가 `true`여도 실제 백업·복원 시험, Role 권한 시험, API·RAG·배포가 자동으로 완료된 것은 아닙니다. 미실행 항목은 운영 문서와 최종 보고서에 남깁니다.
-
----
 
 ## 안전 원칙
 
 ```text
 - 생성 파일에서 자동 DROP을 실행하지 않습니다.
 - 모든 객체에 tutor_project 스키마를 명시합니다.
-- SERIAL 대신 IDENTITY를 사용합니다.
 - 명시적 ID와 고정 시각으로 샘플을 재현합니다.
-- 반례는 하위 트랜잭션에서 실행해 기준 데이터를 유지합니다.
 - Role·GRANT·백업·복원은 자동 실행하지 않습니다.
-- 실제 개인정보·비밀번호·토큰·전체 접속 URL을 기록하지 않습니다.
-- 작은 데이터의 Seq Scan을 오류로 판단하지 않습니다.
-- 선택 RAG 확장에서 원문과 벡터 파생 데이터를 분리합니다.
-- 검증하지 않은 운영 항목을 완료로 표시하지 않습니다.
+- 실제 개인정보·비밀번호·토큰·접속 URL을 기록하지 않습니다.
+- .env·백업·실제 CSV를 커밋하지 않습니다.
+- 분석 코드는 읽기 전용 SELECT를 사용합니다.
+- Python에서 중복·NULL을 임의 제거하지 않습니다.
+- SQL과 pandas 결과를 교차 검증합니다.
 ```
-
----
 
 ## 완료 기준
 
 ```text
-requirements·erd·DDL·SQL·보고서가 서로 일치
-행 수 4·3·5·5·6·7
-FK 5·인덱스 3·CASCADE 0
-경계 사례 각각 1건
-정합성 이상 0행
+requirements·erd·DDL·SQL·Python·보고서 일치
+기준 행 수와 메타데이터 일치
 ROLLBACK 후 기준 데이터 복구
 반례 unexpected 0
+분석 VIEW 5행·중복 0
+SQL·Python 핵심 집계 일치
 required_completion_gate_passed true
 운영·백업·복구 계획 기록
 AI diff와 미실행 항목 기록
