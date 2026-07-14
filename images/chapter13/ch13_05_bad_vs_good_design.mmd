@@ -1,8 +1,26 @@
 flowchart LR
-    A[역할이 섞인 설계<br/>ai_bad_enrollments] --> B[반복·약한 타입·FK 없음<br/>민감정보 위험]
-    B --> C[역할별 분리]
-    C --> D[students·instructors·courses]
-    C --> E[enrollments·payments]
-    D --> F[PK·FK·CHECK·업무 식별자]
-    E --> F
-    F --> G[데이터 소유자와 변경 이유 분리]
+    subgraph BAD[역할이 섞인 설계]
+        BAD_TABLE["ai_review_lab.bad_enrollments<br/>student_email TEXT<br/>course_price TEXT<br/>payment_status TEXT<br/>enrollment_status TEXT<br/>sensitive_value_plaintext TEXT<br/>created_at TEXT"]
+        BAD_RISK["반복 데이터<br/>타입·상태값 검증 부족<br/>FK 없음<br/>민감정보 평문 저장 위험"]
+        BAD_TABLE --> BAD_RISK
+    end
+
+    BAD_RISK --> REDESIGN["역할과 관계 재설계"]
+
+    subgraph GOOD[역할별 분리]
+        STUDENTS["students<br/>id PK<br/>email UNIQUE"]
+        INSTRUCTORS["instructors<br/>id PK<br/>email UNIQUE"]
+        COURSES["courses<br/>instructor_id FK<br/>course_code UNIQUE<br/>price CHECK"]
+        ENROLLMENTS["enrollments<br/>student_id·course_id FK<br/>status CHECK<br/>agreed_amount"]
+        PAYMENTS["payments<br/>enrollment_id FK<br/>payment_status CHECK<br/>payment_reference UNIQUE"]
+
+        INSTRUCTORS -->|1:N| COURSES
+        STUDENTS -->|1:N| ENROLLMENTS
+        COURSES -->|1:N| ENROLLMENTS
+        ENROLLMENTS -->|1:0..1| PAYMENTS
+    end
+
+    REDESIGN --> STUDENTS
+    REDESIGN --> INSTRUCTORS
+    PAYMENTS --> RESULT["역할별 테이블 분리<br/>PK·FK로 관계 보장<br/>타입·CHECK로 값 검증<br/>민감정보 대신 payment_reference 저장"]
+    ENROLLMENTS --> RESULT
