@@ -2,7 +2,7 @@
 
 This script used to regenerate Chapter 15 Mermaid and SVG assets from embedded
 legacy templates. Those templates no longer match the current Chapter 15
-方向, where SQL and Python analysis are mandatory and RAG is removed.
+direction, where SQL and Python analysis are mandatory and RAG is removed.
 
 The migration is now intentionally non-generative:
 
