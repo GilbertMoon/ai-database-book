@@ -10,7 +10,7 @@ SELECT
 -- 현재 데이터베이스와 보존 대상을 확인한 뒤
 -- 아래 DROP 구간만 선택 실행합니다.
 
-DROP VIEW IF EXISTS tutor_project.rag_source_documents;
+DROP VIEW IF EXISTS tutor_project.question_analysis_dataset;
 DROP TABLE IF EXISTS tutor_project.question_materials;
 DROP TABLE IF EXISTS tutor_project.answers;
 DROP TABLE IF EXISTS tutor_project.learning_materials;
@@ -28,4 +28,6 @@ DROP SCHEMA IF EXISTS tutor_project;
 -- 6. 06_negative_tests.sql
 -- 7. 07_performance_checks.sql
 -- 8. 08_operations_checks.sql
--- 9. 필요하면 09_optional_rag_extension.sql
+-- 9. 09_analysis_dataset.sql
+-- 10. Python 분석·검증
+-- 11. 10_completion_gate.sql
