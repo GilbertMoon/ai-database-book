@@ -1,0 +1,10 @@
+flowchart LR
+    Q[분석 질문]
+    T[테이블·관계 확인]
+    J[JOIN]
+    W[WHERE<br/>기간·상태 필터]
+    G[GROUP BY<br/>분석 단위]
+    A[COUNT·SUM·AVG]
+    V[전체 건수·합계 검산]
+
+    Q --> T --> J --> W --> G --> A --> V
