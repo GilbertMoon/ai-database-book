@@ -1,0 +1,14 @@
+flowchart LR
+    S[SQL 기준 결과<br/>행 수·건수·합계·평균]
+    P[Python 결과<br/>DataFrame·groupby·pivot]
+    C{결과가 같은가?}
+    Y[검증 통과<br/>분석 결과 기록]
+    N[불일치 원인 확인<br/>기간·JOIN·NULL·중복·자료형]
+    R[SQL·Python 수정 후 재실행]
+
+    S --> C
+    P --> C
+    C -->|예| Y
+    C -->|아니요| N --> R
+    R --> S
+    R --> P
