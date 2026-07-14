@@ -3,6 +3,17 @@
 .env.*
 !.env.example
 
+# Python environments and cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated analysis data and charts
+code/chapter14/data/
+code/chapter14/output/
+
 # Database backup artifacts
 backups/
 *.backup
