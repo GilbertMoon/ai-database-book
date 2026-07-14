@@ -4,7 +4,7 @@
 
 이 저장소는 **AI 시대의 데이터베이스 입문** eBook을 집필하고 관리하기 위한 작업 저장소입니다.
 
-이 책은 데이터베이스를 처음 접하는 일반 독자가 PostgreSQL과 SQL을 직접 실행하고, 데이터 모델링·정규화·트랜잭션·인덱스·보안·NoSQL·Vector DB·RAG까지 하나의 흐름으로 이해할 수 있도록 구성한 실습형 입문서입니다.
+이 책은 데이터베이스를 처음 접하는 일반 독자가 PostgreSQL과 SQL을 직접 실행하고, 데이터 모델링·정규화·트랜잭션·인덱스·보안·NoSQL·AI 활용·SQL 데이터 분석과 Python 확장까지 단계적으로 이해할 수 있도록 구성한 실습형 입문서입니다.
 
 ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용하되, 데이터 구조와 실행 결과를 사람이 직접 검토하는 과정을 중요하게 다룹니다.
 
@@ -15,13 +15,13 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | 항목 | 내용 |
 | --- | --- |
 | 가제 | AI 시대의 데이터베이스 입문 |
-| 부제 | ChatGPT와 Codex로 배우는 DB 설계, SQL, PostgreSQL, NoSQL, Vector DB |
+| 부제 | ChatGPT와 Codex로 배우는 PostgreSQL, SQL, 데이터 설계와 분석 |
 | 대상 | 데이터베이스를 처음 배우는 일반 독자와 예비 개발자 |
 | 형태 | 설명과 실습을 결합한 eBook |
 | 목표 분량 | 300~350페이지 |
 | 구성 | 15개 Chapter |
-| 기본 환경 | PostgreSQL + DBeaver + GitHub |
-| AI 활용 | ChatGPT와 Codex를 활용한 설계·SQL 생성 및 검증 |
+| 기본 환경 | PostgreSQL + DBeaver + Python + GitHub |
+| AI 활용 | ChatGPT와 Codex를 활용한 설계·SQL 작성 및 검증 |
 
 ---
 
@@ -42,7 +42,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 11 | 데이터베이스를 안전하게 지키고 복구하는 방법 | 2차 재구성 완료 |
 | Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 2차 재구성 완료 |
 | Chapter 13 | AI와 실행 증거로 데이터베이스 설계 검증하기 | 2차 재구성 완료 |
-| Chapter 14 | 벡터 검색과 RAG로 근거 있는 답변 만들기 | 2차 재구성 완료 |
+| Chapter 14 | SQL 데이터 분석과 Python 확장 | 방향 전환 반영 |
 | Chapter 15 | 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기 | 2차 재구성 완료 |
 
 ---
@@ -79,11 +79,10 @@ publish/full_manuscript.md
 | 강의안 표현을 eBook 문체로 1차 수정 | 완료 |
 | 활동 자료를 독자용 실습·워크북 형태로 1차 수정 | 완료 |
 | Chapter 07·15 실전 프로젝트 재구성 | 완료 |
-| Chapter 01~15 2차 재구성 | 완료 |
-| `publish/full_manuscript.md` 최신 원고 통합 | 완료 |
-| 통합 원고 자동 동기화 | 완료 |
-| 전체 원고 2차 일관성 검수 | 예정 |
-| 실제 PostgreSQL 통합 실행 검증 | 예정 |
+| Chapter 14 SQL·Python 분석 방향 전환 | 반영 중 |
+| `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
+| 전체 원고 방향·용어 일관성 검수 | 예정 |
+| 실제 PostgreSQL·Python 통합 실행 검증 | 예정 |
 | Word·PDF·eBook 출판 렌더링 검수 | 예정 |
 
 ---
@@ -91,10 +90,10 @@ publish/full_manuscript.md
 ## 다음 작업
 
 ```text
-1. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
-2. 전용 테스트 DB에서 Chapter별 SQL 실행 순서와 기대 결과를 검증한다.
-3. 이미지 접근성·SVG 렌더링과 Word·PDF·eBook 변환 결과를 확인한다.
-4. 전체 원고의 중복 설명, 분량과 장 간 연결 문장을 최종 조정한다.
+1. Chapter 14의 SQL·Python 실습을 실제 PostgreSQL과 Python 환경에서 검증한다.
+2. Chapter 15를 설계·분석·검증 종합 프로젝트 방향으로 재구성한다.
+3. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
+4. 이미지 접근성·SVG 렌더링과 Word·PDF·eBook 변환 결과를 확인한다.
 ```
 
 ---
@@ -106,6 +105,7 @@ publish/full_manuscript.md
 - 강의, 제출, 배점, 평가와 같은 수업 운영 표현은 본문에서 사용하지 않는다.
 - 단순 문법 설명보다 실제 데이터베이스 설계와 검증 과정을 중시한다.
 - SQL은 가능한 한 PostgreSQL에서 직접 실행하고 결과를 확인한다.
+- Python은 SQL 분석을 확장하는 도구로 사용하고 데이터베이스를 중심에 둔다.
 - AI가 생성한 설계와 SQL은 초안으로 취급하고 사람이 검토한다.
 - 비밀번호, 접속 URL, API 키와 실제 개인정보는 저장소에 기록하지 않는다.
 - Chapter별 원고를 기준으로 통합 원고를 자동 생성한다.
