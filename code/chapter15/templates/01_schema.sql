@@ -1,4 +1,4 @@
--- Chapter 15. AI 튜터링 질문 관리 서비스 스키마
+-- Chapter 15. AI 튜터링 질문 관리 데이터베이스 스키마
 -- 기존 프로젝트·앞 장 스키마·Role을 자동으로 변경하지 않습니다.
 -- 처음부터 다시 시작할 때만 reset_tutor_project.sql을 별도로 사용합니다.
 
@@ -14,7 +14,7 @@ SELECT
     to_regnamespace('security_lab') AS security_lab_schema,
     to_regnamespace('nosql_lab') AS nosql_lab_schema,
     to_regnamespace('ai_review_lab') AS ai_review_lab_schema,
-    to_regnamespace('rag_lab') AS rag_lab_schema;
+    to_regnamespace('analysis_lab') AS analysis_lab_schema;
 
 CREATE SCHEMA tutor_project;
 
@@ -140,7 +140,6 @@ CREATE TABLE tutor_project.question_materials (
         CHECK (display_order > 0)
 );
 
--- 반복 조회 패턴이 명확한 세 인덱스입니다.
 CREATE INDEX idx_tutor_project_questions_student_status_created
 ON tutor_project.questions (student_id, status, created_at DESC);
 
