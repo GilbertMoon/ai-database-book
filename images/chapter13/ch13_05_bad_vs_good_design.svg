@@ -102,6 +102,7 @@
   <text x="912" y="463" text-anchor="middle" class="ko relation-label">1:0..1</text>
 
   <!-- Conclusion -->
+  <text x="580" y="596" text-anchor="end" class="ko small">비교 결과</text>
   <line x1="600" y1="570" x2="600" y2="615" class="line" marker-end="url(#arrow)"/>
   <rect x="175" y="620" width="850" height="70" class="box human"/>
   <text x="600" y="648" text-anchor="middle" class="ko head">
