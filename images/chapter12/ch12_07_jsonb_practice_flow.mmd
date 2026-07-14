@@ -1,7 +1,19 @@
-flowchart LR
-    A[course_documents] --> B[metadata JSONB]
-    B --> C[-> and ->>]
-    B --> D[? key exists]
-    B --> E[@> contains]
-    B --> F[GIN / expression index]
-    F --> G[decide JSONB or NoSQL]
+flowchart TB
+    P["핵심 원칙<br/>PostgreSQL JSONB로 문서형 요구를 먼저 검증하고<br/>전용 저장소는 운영 이점이 분명할 때만 PoC"]
+
+    subgraph FLOW[JSONB 실습 흐름]
+        direction LR
+        A["1. 혼합 스키마<br/>일반 컬럼: course_code·title·version<br/>가변 속성: metadata JSONB"] --> B["2. 조회·수정<br/>→ · →> · ? · @><br/>jsonb_set"]
+        B --> C["3. 구조·변경 검증<br/>타입·필수 키·허용 값·버전<br/>트랜잭션 후 ROLLBACK"]
+        C --> D["4. 인덱스·실행 계획<br/>@> → GIN 후보<br/>경로 텍스트 조건 → 표현식 B-tree 후보<br/>EXPLAIN 확인"]
+    end
+
+    D --> E{"PostgreSQL의 일반 컬럼 + JSONB로<br/>조회·무결성·운영 요구를 충족하는가?"}
+    E -- 예 --> F["혼합 설계 유지<br/>JOIN·트랜잭션·백업·권한 체계를 함께 활용"]
+    E -- 아니요 --> G["전용 Document DB 작은 PoC<br/>대표 조회·쓰기·지연·장애·복구를 비교"]
+
+    X["실행 계획 해석<br/>표본이 작으면 인덱스가 있어도 Seq Scan이 가능<br/>인덱스 존재와 사용을 동일하게 보지 않음"]
+    D --- X
+
+    G --> H["도입 전 검토<br/>원본 저장소·동기화·보안·백업·재구축 책임"]
+    P --> A
