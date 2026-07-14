@@ -2,7 +2,7 @@
 
 ## 목적
 
-이 가이드는 최종 프로젝트를 제출 가능한 형태로 정리하기 위한 안내입니다. 기본 목표는 PostgreSQL 기반 데이터베이스 설계와 검증입니다. 웹 CRUD, API, NoSQL, RAG와 배포는 선택 확장입니다.
+이 가이드는 PostgreSQL 기반 데이터베이스 설계·검증·분석 프로젝트를 다른 사람이 다시 실행할 수 있는 형태로 정리하기 위한 안내입니다. SQL과 Python 분석은 필수이며, 웹 CRUD·API, NoSQL과 배포는 선택 확장입니다.
 
 ## 기준 예제
 
@@ -26,9 +26,10 @@ AI 튜터링 질문 관리 서비스
 | `erd.md` | 필수 | 관계, 테이블 역할, FK와 제약조건 |
 | `OPERATIONS_RUNBOOK.md` | 필수 | 역할·비밀·백업·복원·RPO·RTO 계획 |
 | `ai_review_report.md` | 필수 | AI 제안, diff, 실행 증거와 사람 승인 기록 |
+| `analysis_report.md` | 필수 | 분석 질문, SQL·Python 결과, 해석과 한계 |
 | `final_report.md` | 필수 | 최종 결과, 한계와 다음 버전 계획 |
 
-## 필수 SQL 실행 순서
+## 필수 실행 순서
 
 ```text
 01_schema.sql
@@ -39,6 +40,8 @@ AI 튜터링 질문 관리 서비스
 → 06_negative_tests.sql
 → 07_performance_checks.sql
 → 08_operations_checks.sql
+→ 09_analysis_dataset.sql
+→ Python 분석·검증
 → 10_completion_gate.sql
 ```
 
@@ -52,50 +55,53 @@ AI 튜터링 질문 관리 서비스
 | `06_negative_tests.sql` | 실패해야 정상인 자동 반례 검증 |
 | `07_performance_checks.sql` | 인덱스 존재와 대표 EXPLAIN 검토 |
 | `08_operations_checks.sql` | 권한·비밀·백업·복구 계획 점검 |
-| `10_completion_gate.sql` | 필수 DB 구조와 기준 데이터의 읽기 전용 최종 판정 |
+| `09_analysis_dataset.sql` | 질문 1건 단위 분석 VIEW와 SQL 기준값 생성 |
+| `10_completion_gate.sql` | DB 구조·기준 데이터·분석 VIEW 최종 판정 |
 
-`09_optional_rag_extension.sql`은 학습 자료 의미 검색 요구사항이 있을 때만 실행합니다. `10_completion_gate.sql`은 선택 RAG 실행 여부와 관계없이 필수입니다.
-
-## 초기화와 호환 파일
-
-`reset_tutor_project.sql`은 처음부터 다시 시작할 때만 검토·선택 실행합니다. 필수 실행 순서나 자동 `DROP` 과정에 포함하지 않습니다.
-
-다음 파일은 기존 링크 호환용 안전한 안내 파일이며, 번호가 붙은 실제 실행 파일을 대신하지 않습니다.
+## Python 분석
 
 ```text
-schema.sql
-seed.sql
-queries.sql
+python/01_load_postgresql.py
+→ 분석 VIEW를 DataFrame으로 읽기
+
+python/02_pandas_analysis.py
+→ 상태별·월별·학생별 집계
+
+python/03_result_validation.py
+→ SQL 기준값과 pandas 결과 비교
 ```
+
+접속 정보는 `.env`로 관리하고 저장소에는 `.env.example`만 포함합니다. 분석 코드는 SELECT 중심의 읽기 전용 작업으로 구성합니다.
 
 ## 실행 방법
 
 1. 운영 DB가 아닌 별도 개발·테스트 환경을 준비합니다.
 2. 현재 데이터베이스와 계정을 확인합니다.
-3. `01`부터 `08`까지 번호 순서대로 실행합니다.
+3. `01`부터 `09`까지 번호 순서대로 실행합니다.
 4. 각 파일의 기대 결과와 실제 결과를 비교합니다.
-5. RAG 요구사항이 있을 때만 `09_optional_rag_extension.sql`을 실행합니다.
-6. `10_completion_gate.sql`로 필수 프로젝트 상태를 판정합니다.
-7. 실행 결과를 `OPERATIONS_RUNBOOK.md`, `ai_review_report.md`, `final_report.md`에 기록합니다.
+5. Python으로 분석 VIEW를 읽고 SQL 기준값과 비교합니다.
+6. `10_completion_gate.sql`로 프로젝트 상태를 판정합니다.
+7. 실행 결과를 운영·AI·분석·최종 보고서에 기록합니다.
 
 ## 완료 기준
 
-- 요구사항 ID가 SQL 검증과 연결된다.
-- ERD와 실제 DDL 메타데이터가 일치한다.
+- 요구사항 ID가 ERD·DDL·검증 SQL과 연결된다.
 - 행 수와 경계 사례가 기대 결과와 일치한다.
 - FK 5개, IDENTITY PK 5개, 업무 인덱스 3개와 CASCADE 0개가 확인된다.
 - 트랜잭션 ROLLBACK 후 기준 데이터가 복구된다.
-- 자동 반례가 실패해야 할 곳에서 실패하고 `unexpected` 결과가 0이다.
-- `required_completion_gate_passed = true`이다.
+- 자동 반례의 `unexpected` 결과가 0이다.
+- 분석 VIEW가 5행이고 `question_id` 중복이 없다.
+- `answer_count` 합계 5, `material_count` 합계 7이다.
+- SQL과 pandas의 상태별·월별 핵심 집계가 일치한다.
 - 운영·백업·복구 계획과 AI 변경 검토 결과가 기록되어 있다.
+- `required_completion_gate_passed = true`이다.
 
-완료 게이트가 `true`여도 실제 Role 권한 시험, 백업·복원 시험, API·RAG·배포가 자동으로 완료된 것은 아닙니다. 미실행 항목은 통과로 기록하지 않습니다.
+완료 게이트가 `true`여도 실제 Role 권한 시험, 백업·복원 시험, 웹 API, NoSQL과 배포가 자동으로 완료된 것은 아닙니다.
 
 ## 선택 확장 기준
 
 | 확장 | 진행 조건 |
 |---|---|
-| 웹 CRUD/API | DB 입력과 조회를 화면 또는 API로 검증할 필요가 있을 때 |
+| 웹 CRUD·API | DB 입력과 조회를 화면 또는 API로 검증할 필요가 있을 때 |
 | NoSQL | 관계형 테이블 밖의 캐시, 문서, 이벤트 저장 요구가 있을 때 |
-| Vector DB/RAG | 학습 자료 의미 검색과 근거 기반 답변이 필요할 때 |
-| 배포 | 다른 사람이 접근해 검증해야 할 때 |
+| 배포 | 다른 사람이 실제 환경에서 접근해 검증해야 할 때 |
