@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 960" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
   <title id="title">재현 가능한 프로젝트 파일 구조와 실행 순서</title>
-  <desc id="desc">프로젝트 문서, 01부터 10까지의 필수 SQL, Python 분석 파일, 운영·AI·분석·최종 보고서와 초기화 파일을 구분한 도식</desc>
+  <desc id="desc">프로젝트 문서, 01부터 09까지의 SQL, Python 분석과 검증, 10 완료 게이트, 운영·AI·분석·최종 보고서와 초기화 파일을 구분한 도식</desc>
   <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker><style>
-  text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.mono{font-family:Consolas,D2Coding,"Courier New",monospace}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:2;rx:16;ry:16}.docs{fill:#eff6ff;stroke:#60a5fa}.sql{fill:#f0fdf4;stroke:#22c55e}.python{fill:#ecfeff;stroke:#06b6d4}.report{fill:#faf5ff;stroke:#8b5cf6}.support{fill:#fff1f2;stroke:#f43f5e}.card{fill:#fff;stroke-width:1.7;rx:10;ry:10}.dc{stroke:#60a5fa}.sc{stroke:#22c55e}.pc{stroke:#06b6d4}.rc{stroke:#8b5cf6}.xc{stroke:#f43f5e}.ph{font-size:20px;font-weight:800;text-anchor:middle}.file{font-size:14px;font-weight:700;text-anchor:middle}.role{font-size:11.5px;text-anchor:middle;fill:#475569}.line{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
+  text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.mono{font-family:Consolas,D2Coding,"Courier New",monospace}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.panel{stroke-width:2;rx:16;ry:16}.docs{fill:#eff6ff;stroke:#60a5fa}.sql{fill:#f0fdf4;stroke:#22c55e}.python{fill:#ecfeff;stroke:#06b6d4}.report{fill:#faf5ff;stroke:#8b5cf6}.support{fill:#fff1f2;stroke:#f43f5e}.card{fill:#fff;stroke-width:1.7;rx:10;ry:10}.dc{stroke:#60a5fa}.sc{stroke:#22c55e}.pc{stroke:#06b6d4}.xc{stroke:#f43f5e}.ph{font-size:20px;font-weight:800;text-anchor:middle}.file{font-size:14px;font-weight:700;text-anchor:middle}.role{font-size:11.5px;text-anchor:middle;fill:#475569}.line{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#arrow)}
   </style></defs>
   <rect width="1200" height="960" fill="#fff"/>
   <text x="600" y="46" class="t">재현 가능한 프로젝트 파일 구조와 실행 순서</text>
-  <text x="600" y="76" class="s">문서·SQL·Python·보고서가 같은 실행 흐름을 설명해야 합니다.</text>
+  <text x="600" y="76" class="s">09 분석 데이터셋과 Python 검증을 거친 뒤 10 완료 게이트를 실행합니다.</text>
 
   <rect x="360" y="100" width="480" height="70" class="panel docs"/>
-  <text x="600" y="133" class="ph mono">code/chapter15/templates/</text><text x="600" y="157" class="role">01~10과 Python 분석을 순서대로 실행</text>
+  <text x="600" y="133" class="ph mono">code/chapter15/templates/</text><text x="600" y="157" class="role">문서·SQL·Python·보고서가 같은 실행 순서를 설명</text>
 
   <rect x="35" y="205" width="250" height="330" class="panel docs"/>
   <text x="160" y="240" class="ph">프로젝트 문서</text>
@@ -32,14 +32,16 @@
     <rect x="350" y="718" width="500" height="44" class="card pc"/><text x="600" y="746" class="file mono">09_analysis_dataset.sql</text>
     <rect x="350" y="774" width="500" height="44" class="card sc"/><text x="600" y="802" class="file mono">10_completion_gate.sql</text>
   </g>
-  <path d="M600 314 V326" class="line"/><path d="M600 370 V382" class="line"/><path d="M600 426 V438" class="line"/><path d="M600 482 V494" class="line"/><path d="M600 538 V550" class="line"/><path d="M600 594 V606" class="line"/><path d="M600 650 V662" class="line"/><path d="M600 706 V718" class="line"/><path d="M600 762 V774" class="line"/>
+  <path d="M600 314 V326" class="line"/><path d="M600 370 V382" class="line"/><path d="M600 426 V438" class="line"/><path d="M600 482 V494" class="line"/><path d="M600 538 V550" class="line"/><path d="M600 594 V606" class="line"/><path d="M600 650 V662" class="line"/><path d="M600 706 V718" class="line"/>
 
   <rect x="915" y="205" width="250" height="330" class="panel python"/>
   <text x="1040" y="240" class="ph">Python 분석</text>
   <rect x="940" y="270" width="200" height="62" class="card pc"/><text x="1040" y="297" class="file mono">01_load_postgresql.py</text><text x="1040" y="317" class="role">VIEW 읽기</text>
   <rect x="940" y="350" width="200" height="62" class="card pc"/><text x="1040" y="377" class="file mono">02_pandas_analysis.py</text><text x="1040" y="397" class="role">집계·분석</text>
   <rect x="940" y="430" width="200" height="62" class="card pc"/><text x="1040" y="457" class="file mono">03_result_validation.py</text><text x="1040" y="477" class="role">SQL 기준값 비교</text>
+  <path d="M1040 332 V350" class="line"/><path d="M1040 412 V430" class="line"/>
   <path d="M850 740 H900 V301 H940" class="line"/>
+  <path d="M1040 492 H1180 V835 H870 V796 H850" class="line"/>
 
   <rect x="35" y="855" width="820" height="80" class="panel report"/>
   <text x="445" y="883" class="ph">운영·검토·보고</text>
