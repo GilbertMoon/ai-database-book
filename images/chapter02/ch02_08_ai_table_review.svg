@@ -1,66 +1,154 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
   <title id="title">AI 생성 테이블 구조 검토 흐름</title>
-  <desc id="desc">요구사항 정리, AI 설계 초안, 사람 검토, 테스트 DB 실행, 결과 일치 여부 판단 후 수정 반복 또는 채택으로 이어지는 검토 흐름</desc>
+  <desc id="desc">요구사항 정리, AI 설계 초안, 사람의 구조 검토, 격리된 테스트 DB 실행, 요구사항과 결과 일치 여부 판단 후 수정 반복 또는 설계 채택으로 이어지는 검토 흐름</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0 0L10 5L0 10Z" fill="#475569"/>
     </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#d64545"/>
+    </marker>
     <style>
       text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
-      .box{fill:#f8fafc;stroke:#64748b;stroke-width:2}
-      .ai{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
-      .review{fill:#fff5df;stroke:#d89424;stroke-width:2}
-      .test{fill:#f5f0ff;stroke:#7c4dcb;stroke-width:2}
-      .ok{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
-      .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2}
-      .name{font-size:19px;font-weight:700;text-anchor:middle}
-      .sub{font-size:14px;text-anchor:middle;fill:#475569}
-      .kw{font-size:14px;font-weight:700;text-anchor:middle;fill:#334155}
-      .line{stroke:#475569;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
-      .loop{stroke:#d64545;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
-      .branch{font-size:18px;font-weight:700;text-anchor:middle}
+      .title{font-size:32px;font-weight:800;text-anchor:middle;fill:#0f2d5c}
+      .box{fill:#f8fafc;stroke:#64748b;stroke-width:2.2}
+      .ai{fill:#e8fbf6;stroke:#0f9f7a;stroke-width:2.2}
+      .review{fill:#fff7e6;stroke:#d89424;stroke-width:2.2}
+      .test{fill:#eef5ff;stroke:#3b82f6;stroke-width:2.2}
+      .decision{fill:#fff7e6;stroke:#d97706;stroke-width:2.2}
+      .ok{fill:#eef9f1;stroke:#2f9a58;stroke-width:2.2}
+      .bad{fill:#fff1f1;stroke:#d64545;stroke-width:2.2}
+      .name{font-size:20px;font-weight:800;text-anchor:middle}
+      .sub{font-size:16px;text-anchor:middle;fill:#475569}
+      .kw{font-size:15px;font-weight:700;text-anchor:middle;fill:#334155}
+      .line{stroke:#475569;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}
+      .loop{stroke:#d64545;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow-red)}
+      .secondary{stroke:#94a3b8;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:6 5;marker-end:url(#arrow)}
+      .branch{font-size:16px;font-weight:800;text-anchor:middle}
+      .pass{fill:#166534}.fail{fill:#b42323}
+      .note-box{fill:#eef5ff;stroke:#4d86d7;stroke-width:2}
       .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .small-note{font-size:14px;text-anchor:middle;fill:#64748b}
+      .chip{fill:#fffaf0;stroke:#e7a84b;stroke-width:1.3}
+      .chip-text{font-size:14px;font-weight:700;text-anchor:middle;fill:#8a5708}
     </style>
+    <symbol id="actor-ai-icon" viewBox="0 0 24 24">
+      <rect x="5" y="7" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 4v3M9.5 4h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="9.5" cy="12" r="1.2" fill="currentColor"/>
+      <circle cx="14.5" cy="12" r="1.2" fill="currentColor"/>
+      <path d="M9 15h6M5 11H3.5M20.5 11H19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="actor-human-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
   </defs>
-  <rect width="1200" height="800" fill="#fff"/>
-  <text x="600" y="48" class="title">AI 생성 테이블 구조 검토 흐름</text>
 
-  <rect x="420" y="82" width="360" height="74" rx="14" class="box"/>
-  <text x="600" y="113" class="name">1. 요구사항 정리</text>
-  <text x="600" y="138" class="sub">학생 · 강의 · 수강신청 · 업무 규칙</text>
-  <path d="M600 156V192" class="line"/>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <text x="600" y="52" class="title">AI 생성 테이블 구조 검토 흐름</text>
 
-  <rect x="420" y="198" width="360" height="74" rx="14" class="ai"/>
-  <text x="600" y="229" class="name">2. AI 설계 초안</text>
-  <text x="600" y="254" class="sub">테이블 · 컬럼 · PK · FK</text>
-  <path d="M600 272V308" class="line"/>
+  <g id="actor-legend" aria-label="실행 주체 범례">
+    <rect x="935" y="12" width="245" height="70" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
+    <text x="1057.5" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">실행 주체</text>
+    <g transform="translate(953 39)">
+      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+    </g>
+    <text x="991" y="59" font-size="14" font-weight="700" fill="#0f766e">AI</text>
+    <g transform="translate(1047 39)">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <text x="1085" y="59" font-size="14" font-weight="700" fill="#475569">사람</text>
+  </g>
 
-  <rect x="365" y="314" width="470" height="98" rx="14" class="review"/>
-  <text x="600" y="344" class="name">3. 사람이 구조 검토</text>
-  <text x="600" y="371" class="kw">테이블 역할 · PK/FK · 1:N/N:M · 중복 · 제약조건 · 확장 가능성</text>
-  <text x="600" y="394" class="sub">AI 초안은 완성본이 아니라 검토 대상</text>
-  <path d="M600 412V448" class="line"/>
+  <rect x="55" y="110" width="245" height="100" rx="16" class="box"/>
+  <g transform="translate(67 122)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="177.5" y="145" class="name">1. 요구사항 정리</text>
+  <text x="177.5" y="177" class="sub">학생 · 강의 · 수강신청 · 업무 규칙</text>
 
-  <rect x="420" y="454" width="360" height="74" rx="14" class="test"/>
-  <text x="600" y="485" class="name">4. 격리된 테스트 DB에서 실행</text>
-  <text x="600" y="510" class="sub">운영 DB가 아닌 초기화 가능한 환경</text>
-  <path d="M600 528V564" class="line"/>
+  <path d="M300 160 H355" class="line"/>
 
-  <rect x="390" y="570" width="420" height="74" rx="14" class="review"/>
-  <text x="600" y="601" class="name">5. 요구사항과 결과가 일치하는가?</text>
-  <text x="600" y="626" class="sub">실행 성공과 올바른 설계는 다를 수 있음</text>
+  <rect x="355" y="110" width="225" height="100" rx="16" class="ai"/>
+  <g transform="translate(367 122)" aria-label="AI 실행">
+    <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+    <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+  </g>
+  <text x="467.5" y="145" class="name">2. AI 설계 초안</text>
+  <text x="467.5" y="177" class="sub">테이블 · 컬럼 · PK · FK</text>
 
-  <path d="M500 644L300 680" class="loop"/>
-  <text x="395" y="656" class="branch" fill="#b42323">아니요</text>
-  <rect x="105" y="670" width="300" height="62" rx="14" class="bad"/>
-  <text x="255" y="707" class="name">수정 후 재요청·재실행</text>
-  <path d="M255 670V235H420" class="loop"/>
+  <path d="M580 160 H635" class="line"/>
 
-  <path d="M700 644L900 680" class="line"/>
-  <text x="805" y="656" class="branch" fill="#166534">예</text>
-  <rect x="795" y="670" width="300" height="62" rx="14" class="ok"/>
-  <text x="945" y="707" class="name">설계 채택·근거 기록</text>
+  <rect x="635" y="95" width="510" height="145" rx="16" class="review"/>
+  <g transform="translate(647 107)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="890" y="130" class="name">3. 사람이 구조 검토</text>
+  <rect x="670" y="153" width="100" height="28" rx="9" class="chip"/>
+  <text x="720" y="172" class="chip-text">테이블 역할</text>
+  <rect x="780" y="153" width="85" height="28" rx="9" class="chip"/>
+  <text x="822.5" y="172" class="chip-text">PK / FK</text>
+  <rect x="875" y="153" width="100" height="28" rx="9" class="chip"/>
+  <text x="925" y="172" class="chip-text">1:N / N:M</text>
+  <rect x="985" y="153" width="90" height="28" rx="9" class="chip"/>
+  <text x="1030" y="172" class="chip-text">중복</text>
+  <rect x="730" y="188" width="105" height="28" rx="9" class="chip"/>
+  <text x="782.5" y="207" class="chip-text">제약조건</text>
+  <rect x="850" y="188" width="120" height="28" rx="9" class="chip"/>
+  <text x="910" y="207" class="chip-text">확장 가능성</text>
+  <text x="890" y="231" class="sub">AI 초안은 완성본이 아니라 검토 대상</text>
 
-  <text x="600" y="780" class="note">AI는 설계 초안을 만들고, 사람은 요구사항 적합성과 실행 결과를 검증한다.</text>
+  <path d="M890 240 V295" class="line"/>
+
+  <rect x="725" y="295" width="330" height="105" rx="16" class="test"/>
+  <g transform="translate(737 307)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="890" y="334" class="name">4. 격리된 테스트 DB에서 실행</text>
+  <text x="890" y="368" class="sub">운영 DB가 아닌 초기화 가능한 환경</text>
+
+  <path d="M890 400 V430" class="line"/>
+
+  <polygon points="890,430 1080,505 890,580 700,505" class="decision"/>
+  <g transform="translate(730 468)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="890" y="494" class="name">5. 요구사항과 결과가 일치하는가?</text>
+  <text x="890" y="526" class="sub">구조 · 관계 · 제약조건 · 실행 결과 확인</text>
+
+  <path d="M700 505 H630 V610" class="loop"/>
+  <text x="655" y="493" class="branch fail">미통과</text>
+  <rect x="380" y="610" width="250" height="105" rx="16" class="bad"/>
+  <g transform="translate(392 622)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="505" y="650" class="name">수정 후 재요청·재실행</text>
+  <text x="505" y="684" class="sub">설계 · SQL · 제약조건 · 테스트 보완</text>
+
+  <path d="M380 662 H320 V265 H467.5 V210" class="loop"/>
+  <text x="303" y="432" class="small-note">일반적인 재작업 경로</text>
+
+  <path d="M430 715 H177.5 V210" class="secondary"/>
+  <text x="275" y="744" class="small-note">요구사항 오류가 확인된 경우에만 기준 재정의</text>
+
+  <path d="M985 557 V625" class="line"/>
+  <text x="1025" y="598" class="branch pass">통과</text>
+  <rect x="865" y="625" width="300" height="90" rx="16" class="ok"/>
+  <g transform="translate(877 637)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  </g>
+  <text x="1015" y="660" class="name">설계 채택 · 근거 기록</text>
+  <text x="1015" y="692" class="sub">결과 · 조건 · 변경 이력 저장</text>
+
+  <rect x="125" y="770" width="950" height="36" rx="18" class="note-box"/>
+  <text x="600" y="794" class="note">AI는 설계 초안을 만들고, 사람은 요구사항 적합성과 실행 결과를 검증한다.</text>
 </svg>
