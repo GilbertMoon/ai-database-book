@@ -1,15 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
-  <title id="title">AI 생성 결과 검증 사이클</title>
-  <desc id="desc">요구사항과 검증 기준을 정의하고 AI 초안을 생성한 뒤 사람이 사전 검토하고 격리된 환경에서 테스트한다. 예상 결과와 실제 결과를 비교해 검증 기준을 통과하면 결과와 근거를 기록하고, 미통과하면 수정 후 AI 초안 또는 사람 검토 단계로 돌아가는 반복 사이클</desc>
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="100%"
+   viewBox="0 0 1200 720"
+   role="img"
+   aria-labelledby="title desc"
+   version="1.1"
+   id="svg26"
+   sodipodi:docname="ch01_04_ai_result_verification_cycle.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview26"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.1183333"
+     inkscape:cx="600"
+     inkscape:cy="431.4456"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="2512"
+     inkscape:window-y="1168"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg26" />
+  <title
+     id="title">AI 생성 결과 검증 사이클</title>
+  <desc
+     id="desc">요구사항과 검증 기준을 정의하고 AI 초안을 생성한 뒤 사람이 사전 검토하고 격리된 환경에서 테스트한다. 예상 결과와 실제 결과를 비교해 검증 기준을 통과하면 결과와 근거를 기록하고, 미통과하면 수정 후 AI 초안 또는 사람 검토 단계로 돌아가는 반복 사이클</desc>
+  <defs
+     id="defs2">
+    <marker
+       id="arrow"
+       viewBox="0 0 10 10"
+       refX="9"
+       refY="5"
+       markerWidth="8"
+       markerHeight="8"
+       orient="auto">
+      <path
+         d="M0 0 L10 5 L0 10z"
+         fill="#475569"
+         id="path1" />
     </marker>
-    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10z" fill="#d97706"/>
+    <marker
+       id="arrow-orange"
+       viewBox="0 0 10 10"
+       refX="9"
+       refY="5"
+       markerWidth="8"
+       markerHeight="8"
+       orient="auto">
+      <path
+         d="M0 0 L10 5 L0 10z"
+         fill="#d97706"
+         id="path2" />
     </marker>
-    <style>
-      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+    <style
+       id="style2">
+      text{font-family:&quot;Malgun Gothic&quot;,&quot;Apple SD Gothic Neo&quot;,&quot;Noto Sans KR&quot;,Arial,sans-serif;fill:#172033}
       .title{font-size:32px;font-weight:800;text-anchor:middle;fill:#0f2d5c}
       .req{fill:#f8fafc;stroke:#64748b;stroke-width:2.2}
       .ai{fill:#e8fbf6;stroke:#0f9f7a;stroke-width:2.2}
@@ -33,71 +88,276 @@
       .small-note{font-size:14px;text-anchor:middle;fill:#64748b}
     </style>
   </defs>
-
-  <rect width="1200" height="720" fill="#ffffff"/>
-  <text x="600" y="52" class="title">AI 생성 결과 검증 사이클</text>
-
-  <rect x="55" y="105" width="220" height="100" rx="16" class="req"/>
-  <text x="165" y="140" class="head">요구사항과 검증 기준 정의</text>
-  <text x="165" y="171" class="body">목표 · 범위 · 기대 결과</text>
-
-  <path d="M275 155 H330" class="line"/>
-
-  <rect x="330" y="105" width="190" height="100" rx="16" class="ai"/>
-  <text x="425" y="140" class="head">AI 초안 생성</text>
-  <text x="425" y="171" class="body">설계 · SQL · 코드</text>
-
-  <path d="M520 155 H575" class="line"/>
-
-  <rect x="575" y="105" width="210" height="100" rx="16" class="review"/>
-  <text x="680" y="140" class="head">사람의 사전 검토</text>
-  <text x="680" y="171" class="body">요구사항 · 구조 · SQL 확인</text>
-
-  <path d="M785 155 H840" class="line"/>
-
-  <rect x="840" y="105" width="305" height="100" rx="16" class="test"/>
-  <text x="992.5" y="140" class="head">격리된 테스트 환경에서 실행</text>
-  <text x="992.5" y="171" class="body">샘플 데이터 · 영향 범위 확인</text>
-
-  <path d="M992.5 205 V260" class="line"/>
-
-  <rect x="820" y="260" width="345" height="105" rx="16" class="test"/>
-  <text x="992.5" y="298" class="head">예상 결과와 실제 결과 비교</text>
-  <text x="992.5" y="330" class="body">예상값 · 원본 데이터 · 실행 결과 확인</text>
-
-  <path d="M992.5 365 V410" class="line"/>
-
-  <rect x="760" y="410" width="405" height="125" rx="16" class="decision"/>
-  <text x="962.5" y="447" class="head">검증 기준을 통과했는가?</text>
-  <rect x="786" y="470" width="82" height="30" rx="10" class="chip"/>
-  <text x="827" y="490" class="chip-text">정확성</text>
-  <rect x="878" y="470" width="92" height="30" rx="10" class="chip"/>
-  <text x="924" y="490" class="chip-text">누락·중복</text>
-  <rect x="980" y="470" width="76" height="30" rx="10" class="chip"/>
-  <text x="1018" y="490" class="chip-text">부작용</text>
-  <rect x="1066" y="470" width="76" height="30" rx="10" class="chip"/>
-  <text x="1104" y="490" class="chip-text">재현성</text>
-
-  <path d="M1065 535 V585" class="line"/>
-  <text x="1100" y="565" class="label pass">통과</text>
-
-  <rect x="900" y="585" width="265" height="88" rx="16" class="done"/>
-  <text x="1032.5" y="619" class="head">결과 채택 · 근거 기록</text>
-  <text x="1032.5" y="649" class="body">결과 · 조건 · 변경 이력 저장</text>
-
-  <path d="M860 535 V572 H610" class="line"/>
-  <text x="810" y="560" class="label fail">미통과</text>
-
-  <rect x="360" y="545" width="250" height="100" rx="16" class="fix"/>
-  <text x="485" y="581" class="head">원인 수정 후 다시 검증</text>
-  <text x="485" y="612" class="body">설계 · SQL · 코드 · 테스트 보완</text>
-
-  <path d="M360 595 H300 V250 H425 V205" class="loop"/>
-  <text x="276" y="404" class="small-note">일반적인 재작업 경로</text>
-
-  <path d="M410 545 V500 H125 V205" class="secondary"/>
-  <text x="245" y="486" class="small-note">요구사항 오류가 확인된 경우에만 기준 재정의</text>
-
-  <rect x="120" y="680" width="960" height="30" rx="15" class="note"/>
-  <text x="600" y="701" class="note-text">AI는 초안을 만들고, 사람은 기준을 정하고 검증하며 결과에 책임을 진다.</text>
+  <rect
+     width="1200"
+     height="720"
+     fill="#ffffff"
+     id="rect2" />
+  <text
+     x="600"
+     y="52"
+     class="title"
+     id="text2">AI 생성 결과 검증 사이클</text>
+  <rect
+     x="30.91477"
+     y="105.05785"
+     width="244.02739"
+     height="99.884315"
+     rx="17.747446"
+     class="req"
+     id="rect3" />
+  <text
+     x="151.58719"
+     y="140"
+     class="head"
+     id="text3">요구사항과 검증 기준 정의</text>
+  <text
+     x="153.37556"
+     y="170.10582"
+     class="body"
+     id="text4">목표 · 범위 · 기대 결과</text>
+  <path
+     d="M275 155 H330"
+     class="line"
+     id="path4" />
+  <rect
+     x="330"
+     y="105"
+     width="190"
+     height="100"
+     rx="16"
+     class="ai"
+     id="rect4" />
+  <text
+     x="425"
+     y="140"
+     class="head"
+     id="text5">AI 초안 생성</text>
+  <text
+     x="425"
+     y="171"
+     class="body"
+     id="text6">설계 · SQL · 코드</text>
+  <path
+     d="M520 155 H575"
+     class="line"
+     id="path6" />
+  <rect
+     x="575"
+     y="105"
+     width="210"
+     height="100"
+     rx="16"
+     class="review"
+     id="rect6" />
+  <text
+     x="680"
+     y="140"
+     class="head"
+     id="text7">사람의 사전 검토</text>
+  <text
+     x="680"
+     y="171"
+     class="body"
+     id="text8">요구사항 · 구조 · SQL 확인</text>
+  <path
+     d="M785 155 H840"
+     class="line"
+     id="path8" />
+  <rect
+     x="840"
+     y="105"
+     width="305"
+     height="100"
+     rx="16"
+     class="test"
+     id="rect8" />
+  <text
+     x="992.5"
+     y="140"
+     class="head"
+     id="text9">격리된 테스트 환경에서 실행</text>
+  <text
+     x="992.5"
+     y="171"
+     class="body"
+     id="text10">샘플 데이터 · 영향 범위 확인</text>
+  <path
+     d="M992.5 205 V260"
+     class="line"
+     id="path10" />
+  <rect
+     x="820"
+     y="260"
+     width="345"
+     height="105"
+     rx="16"
+     class="test"
+     id="rect10" />
+  <text
+     x="992.5"
+     y="298"
+     class="head"
+     id="text11">예상 결과와 실제 결과 비교</text>
+  <text
+     x="992.5"
+     y="330"
+     class="body"
+     id="text12">예상값 · 원본 데이터 · 실행 결과 확인</text>
+  <path
+     d="M992.5 365 V410"
+     class="line"
+     id="path12" />
+  <rect
+     x="760"
+     y="410"
+     width="405"
+     height="125"
+     rx="16"
+     class="decision"
+     id="rect12" />
+  <text
+     x="962.5"
+     y="447"
+     class="head"
+     id="text13">검증 기준을 통과했는가?</text>
+  <rect
+     x="786"
+     y="470"
+     width="82"
+     height="30"
+     rx="10"
+     class="chip"
+     id="rect13" />
+  <text
+     x="827"
+     y="490"
+     class="chip-text"
+     id="text14">정확성</text>
+  <rect
+     x="878"
+     y="470"
+     width="92"
+     height="30"
+     rx="10"
+     class="chip"
+     id="rect14" />
+  <text
+     x="924"
+     y="490"
+     class="chip-text"
+     id="text15">누락·중복</text>
+  <rect
+     x="980"
+     y="470"
+     width="76"
+     height="30"
+     rx="10"
+     class="chip"
+     id="rect15" />
+  <text
+     x="1018"
+     y="490"
+     class="chip-text"
+     id="text16">부작용</text>
+  <rect
+     x="1066"
+     y="470"
+     width="76"
+     height="30"
+     rx="10"
+     class="chip"
+     id="rect16" />
+  <text
+     x="1104"
+     y="490"
+     class="chip-text"
+     id="text17">재현성</text>
+  <path
+     d="M1065 535 V585"
+     class="line"
+     id="path17" />
+  <text
+     x="1100"
+     y="565"
+     class="label pass"
+     id="text18">통과</text>
+  <rect
+     x="900"
+     y="585"
+     width="265"
+     height="88"
+     rx="16"
+     class="done"
+     id="rect18" />
+  <text
+     x="1032.5"
+     y="619"
+     class="head"
+     id="text19">결과 채택 · 근거 기록</text>
+  <text
+     x="1032.5"
+     y="649"
+     class="body"
+     id="text20">결과 · 조건 · 변경 이력 저장</text>
+  <path
+     d="M860 535 V572 H610"
+     class="line"
+     id="path20" />
+  <text
+     x="810"
+     y="560"
+     class="label fail"
+     id="text21">미통과</text>
+  <rect
+     x="360"
+     y="545"
+     width="250"
+     height="100"
+     rx="16"
+     class="fix"
+     id="rect21" />
+  <text
+     x="485"
+     y="581"
+     class="head"
+     id="text22">원인 수정 후 다시 검증</text>
+  <text
+     x="485"
+     y="612"
+     class="body"
+     id="text23">설계 · SQL · 코드 · 테스트 보완</text>
+  <path
+     d="m 427.95827,540.45455 -0.0894,-0.89419 C 427.86885,424.63031 424.2921,380.86494 424.2921,250 H 425 v -45"
+     class="loop"
+     id="path23"
+     sodipodi:nodetypes="ccccc" />
+  <text
+     x="563.24591"
+     y="357.50223"
+     class="small-note"
+     id="text24">일반적인 재작업 경로</text>
+  <path
+     d="m 356.34873,595.9687 v 0.60358 L 128.57675,598.36066 125,205"
+     class="secondary"
+     id="path24"
+     sodipodi:nodetypes="cccc" />
+  <text
+     x="206.54994"
+     y="615.65723"
+     class="small-note"
+     id="text25">요구사항 오류가 확인된 경우에만 기준 재정의</text>
+  <rect
+     x="120"
+     y="680"
+     width="960"
+     height="30"
+     rx="15"
+     class="note"
+     id="rect25" />
+  <text
+     x="600"
+     y="701"
+     class="note-text"
+     id="text26">AI는 초안을 만들고, 사람은 기준을 정하고 검증하며 결과에 책임을 진다.</text>
 </svg>
