@@ -1,10 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
   <title id="title">데이터 저장 방식 선택 흐름</title>
-  <desc id="desc">데이터의 규모, 관리 방식, 관계와 동시 수정 필요성을 기준으로 파일, 스프레드시트, 데이터베이스 중 적절한 저장 방식을 빠르게 선택하는 흐름도</desc>
+  <desc id="desc">데이터의 규모, 관리 방식, 관계와 동시 수정 필요성을 기준으로 파일, 스프레드시트, 데이터베이스 중 적절한 저장 방식을 선택하는 흐름도</desc>
+
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0 0 L10 5 L0 10z" fill="#48627f"/>
     </marker>
+
     <style>
       text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#18212f}
       .title{font-size:32px;font-weight:800;text-anchor:middle;fill:#111827}
@@ -15,98 +17,102 @@
       .branch{stroke:#48627f;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}
       .q-head{font-size:20px;font-weight:800;text-anchor:middle;fill:#111827}
       .q-body{font-size:16px;text-anchor:middle;fill:#334155}
-      .yes-green{font-size:16px;font-weight:800;fill:#138a2e}
-      .yes-blue{font-size:16px;font-weight:800;fill:#2563eb}
+      .yes-green{font-size:16px;font-weight:800;fill:#15803d}
+      .yes-blue{font-size:16px;font-weight:800;fill:#1d4ed8}
       .no-text{font-size:16px;font-weight:800;fill:#334e68}
       .no-purple{font-size:16px;font-weight:800;fill:#6d28d9}
       .card-title{font-size:24px;font-weight:800}
       .file-title{fill:#15803d}
       .sheet-title{fill:#1d4ed8}
       .db-title{fill:#6d28d9}
-      .card-body{font-size:16px;fill:#1f2937}
+      .card-body{font-size:15px;fill:#1f2937;text-anchor:middle}
       .chip{fill:#f6f1ff;stroke:#b99af7;stroke-width:1.5}
-      .chip-text{font-size:14px;font-weight:700;fill:#6d28d9;text-anchor:middle}
+      .chip-text{font-size:13px;font-weight:700;fill:#6d28d9;text-anchor:middle}
     </style>
+
     <symbol id="icon-file" viewBox="0 0 24 24">
       <path d="M7 3.75h7l3.75 3.75V19.5A1.5 1.5 0 0 1 16.25 21h-9.5a1.5 1.5 0 0 1-1.5-1.5v-14A1.5 1.5 0 0 1 6.75 4h.25Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/>
       <path d="M14 3.75V8h4.25" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/>
-      <path d="M8.5 11h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M8.5 14h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M8.5 17h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <path d="M8.5 11h7M8.5 14h7M8.5 17h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
     </symbol>
+
     <symbol id="icon-sheet" viewBox="0 0 24 24">
       <rect x="4.25" y="4.25" width="15.5" height="15.5" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/>
-      <path d="M8 8.25v7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M12 8.25v7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M16 8.25v7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M6.75 15.75h10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      <path d="M6.75 12.25h10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <path d="M8 8.25v7.5M12 8.25v7.5M16 8.25v7.5M6.75 12.25h10.5M6.75 15.75h10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
     </symbol>
+
     <symbol id="icon-db" viewBox="0 0 24 24">
       <ellipse cx="12" cy="6.25" rx="6.75" ry="2.75" stroke="currentColor" stroke-width="1.6" fill="none"/>
-      <path d="M5.25 6.25v5.5c0 1.52 3.02 2.75 6.75 2.75s6.75-1.23 6.75-2.75v-5.5" stroke="currentColor" stroke-width="1.6" fill="none"/>
-      <path d="M5.25 11.75v5.5c0 1.52 3.02 2.75 6.75 2.75s6.75-1.23 6.75-2.75v-5.5" stroke="currentColor" stroke-width="1.6" fill="none"/>
+      <path d="M5.25 6.25v5.5c0 1.52 3.02 2.75 6.75 2.75s6.75-1.23 6.75-2.75v-5.5M5.25 11.75v5.5c0 1.52 3.02 2.75 6.75 2.75s6.75-1.23 6.75-2.75v-5.5" stroke="currentColor" stroke-width="1.6" fill="none"/>
       <path d="M8.5 10.1c1.05.33 2.24.52 3.5.52 1.26 0 2.45-.19 3.5-.52" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
     </symbol>
   </defs>
-  <rect width="1200" height="720" fill="#ffffff"/>
+
+  <rect width="1200" height="780" fill="#ffffff"/>
   <text x="600" y="58" class="title">데이터 저장 방식 선택 흐름</text>
 
-  <rect x="330" y="90" width="540" height="110" rx="18" class="question"/>
+  <rect x="340" y="90" width="520" height="110" rx="18" class="question"/>
   <text x="600" y="136" class="q-head">작고 단순한 데이터인가?</text>
   <text x="600" y="170" class="q-body">관계가 거의 없고 변경도 많지 않은가?</text>
 
-  <path d="M600 200 V240 H265 V290" class="branch"/>
-  <path d="M600 200 V240 H895 V290" class="branch"/>
-  <text x="455" y="228" class="yes-green">예</text>
-  <text x="842" y="228" class="no-text">아니오</text>
+  <path d="M600 200 V240 H260 V300" class="branch"/>
+  <path d="M600 200 V240 H930 V300" class="branch"/>
+  <text x="446" y="228" class="yes-green">예</text>
+  <text x="836" y="228" class="no-text">아니오</text>
 
-  <rect x="80" y="290" width="370" height="110" rx="18" class="question"/>
-  <text x="265" y="336" class="q-head">한 사람이 주로 관리하는가?</text>
-  <text x="265" y="370" class="q-body">개인 기록이나 작은 설정값인가?</text>
+  <rect x="70" y="300" width="380" height="110" rx="18" class="question"/>
+  <text x="260" y="346" class="q-head">한 사람이 주로 관리하는가?</text>
+  <text x="260" y="380" class="q-body">개인 기록이나 작은 설정값인가?</text>
 
-  <rect x="650" y="290" width="490" height="135" rx="18" class="question"/>
-  <text x="895" y="336" class="q-head">사람이 직접 관리하는 소규모 표인가?</text>
-  <text x="895" y="370" class="q-body">여러 사용자 · 데이터 관계 · 권한 · 동시 수정이</text>
-  <text x="895" y="396" class="q-body">중요하지 않은가?</text>
+  <rect x="680" y="300" width="500" height="135" rx="18" class="question"/>
+  <text x="930" y="346" class="q-head">사람이 직접 관리하는 소규모 표인가?</text>
+  <text x="930" y="380" class="q-body">여러 사용자 · 데이터 관계 · 권한 · 동시 수정이</text>
+  <text x="930" y="406" class="q-body">중요하지 않은가?</text>
 
-  <path d="M160 400 V500" class="branch"/>
-  <path d="M370 400 V500" class="branch"/>
-  <text x="112" y="455" class="yes-green">예</text>
-  <text x="402" y="455" class="no-text">아니오</text>
+  <path d="M175 410 V540" class="branch"/>
+  <text x="130" y="477" class="yes-green">예</text>
 
-  <path d="M770 425 V500" class="branch"/>
-  <path d="M1090 425 V500" class="branch"/>
-  <text x="722" y="468" class="yes-blue">예</text>
-  <text x="1018" y="468" class="no-purple">아니오</text>
+  <path d="M345 410 V470 H540 V540" class="branch"/>
+  <text x="385" y="458" class="no-text">아니오</text>
 
-  <rect x="20" y="500" width="270" height="160" rx="18" class="file-card"/>
-  <use href="#icon-file" x="42" y="540" width="50" height="50" style="color:#16a34a"/>
-  <text x="155" y="575" class="card-title file-title">파일</text>
-  <text x="155" y="620" class="card-body" text-anchor="middle">TXT · Markdown · JSON · CSV</text>
+  <path d="M830 435 V470 H660 V540" class="branch"/>
+  <text x="800" y="458" class="yes-blue">예</text>
 
-  <rect x="315" y="500" width="270" height="160" rx="18" class="sheet-card"/>
-  <use href="#icon-sheet" x="338" y="540" width="50" height="50" style="color:#2563eb"/>
-  <text x="472" y="575" class="card-title sheet-title">스프레드시트</text>
-  <text x="450" y="618" class="card-body" text-anchor="middle">소규모 표 · 명단 · 간단한 통계</text>
+  <path d="M1080 435 V515" class="branch"/>
+  <text x="1038" y="480" class="no-purple">아니오</text>
 
-  <rect x="610" y="500" width="270" height="160" rx="18" class="sheet-card"/>
-  <use href="#icon-sheet" x="633" y="540" width="50" height="50" style="color:#2563eb"/>
-  <text x="767" y="575" class="card-title sheet-title">스프레드시트</text>
-  <text x="745" y="618" class="card-body" text-anchor="middle">사람이 직접 관리하는 표</text>
+  <rect x="60" y="540" width="280" height="190" rx="18" class="file-card"/>
+  <use href="#icon-file" x="86" y="574" width="48" height="48" style="color:#16a34a"/>
+  <text x="210" y="606" class="card-title file-title">파일</text>
+  <text x="200" y="650" class="card-body">
+    <tspan x="200" dy="0">TXT · Markdown</tspan>
+    <tspan x="200" dy="22">JSON · CSV</tspan>
+  </text>
 
-  <rect x="905" y="500" width="275" height="160" rx="18" class="db-card"/>
-  <use href="#icon-db" x="925" y="532" width="60" height="60" style="color:#7c3aed"/>
-  <text x="1060" y="560" class="card-title db-title">데이터베이스</text>
-  <text x="1060" y="595" class="card-body" text-anchor="middle">서비스와 여러 사용자를 위한 구조적 저장</text>
-  <rect x="925" y="612" width="72" height="28" rx="10" class="chip"/>
-  <text x="961" y="631" class="chip-text">여러 사용자</text>
-  <rect x="1007" y="612" width="82" height="28" rx="10" class="chip"/>
-  <text x="1048" y="631" class="chip-text">데이터 관계</text>
-  <rect x="1099" y="612" width="59" height="28" rx="10" class="chip"/>
-  <text x="1128.5" y="631" class="chip-text">정확성</text>
-  <rect x="948" y="646" width="70" height="28" rx="10" class="chip"/>
-  <text x="983" y="665" class="chip-text">동시 수정</text>
-  <rect x="1028" y="646" width="112" height="28" rx="10" class="chip"/>
-  <text x="1084" y="665" class="chip-text">반복 검색 · 집계</text>
+  <rect x="450" y="540" width="300" height="190" rx="18" class="sheet-card"/>
+  <use href="#icon-sheet" x="476" y="574" width="48" height="48" style="color:#2563eb"/>
+  <text x="625" y="606" class="card-title sheet-title">스프레드시트</text>
+  <text x="600" y="650" class="card-body">
+    <tspan x="600" dy="0">사람이 직접 관리하는 소규모 표</tspan>
+    <tspan x="600" dy="22">명단 · 일정 · 간단한 통계</tspan>
+  </text>
+
+  <rect x="850" y="515" width="300" height="230" rx="18" class="db-card"/>
+  <use href="#icon-db" x="875" y="548" width="56" height="56" style="color:#7c3aed"/>
+  <text x="1018" y="584" class="card-title db-title">데이터베이스</text>
+  <text x="1000" y="625" class="card-body">
+    <tspan x="1000" dy="0">서비스와 여러 사용자를 위한</tspan>
+    <tspan x="1000" dy="22">구조적 저장</tspan>
+  </text>
+
+  <rect x="870" y="665" width="78" height="28" rx="10" class="chip"/>
+  <text x="909" y="684" class="chip-text">여러 사용자</text>
+  <rect x="957" y="665" width="78" height="28" rx="10" class="chip"/>
+  <text x="996" y="684" class="chip-text">데이터 관계</text>
+  <rect x="1044" y="665" width="70" height="28" rx="10" class="chip"/>
+  <text x="1079" y="684" class="chip-text">정확성</text>
+  <rect x="915" y="700" width="74" height="28" rx="10" class="chip"/>
+  <text x="952" y="719" class="chip-text">동시 수정</text>
+  <rect x="998" y="700" width="112" height="28" rx="10" class="chip"/>
+  <text x="1054" y="719" class="chip-text">반복 검색·집계</text>
 </svg>
