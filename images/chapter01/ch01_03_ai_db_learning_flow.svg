@@ -20,6 +20,17 @@
       .note{fill:#eef5ff;stroke:#4d86d7;stroke-width:2}
       .note-text{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
+    <symbol id="actor-ai-icon" viewBox="0 0 24 24">
+      <rect x="5" y="7" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 4v3M9.5 4h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="9.5" cy="12" r="1.2" fill="currentColor"/>
+      <circle cx="14.5" cy="12" r="1.2" fill="currentColor"/>
+      <path d="M9 15h6M5 11H3.5M20.5 11H19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="actor-human-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
   </defs>
   <rect width="1200" height="540" fill="#fff"/>
   <text x="600" y="46" class="title">AI 시대의 데이터베이스 작업 흐름</text>
@@ -60,4 +71,52 @@
 
   <rect x="165" y="390" width="870" height="50" rx="18" class="note"/>
   <text x="600" y="421" class="note-text">AI는 초안 생성을 돕고, 사람은 요구사항 판단과 결과 검증을 책임진다.</text>
+
+  <!-- 실행 주체 범례: 기존 흐름은 변경하지 않음 -->
+  <g id="actor-legend" aria-label="실행 주체 범례">
+    <rect x="945" y="10" width="235" height="70" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
+    <text x="1062.5" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">실행 주체</text>
+    <g transform="translate(962 39)">
+      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+    </g>
+    <text x="1000" y="59" font-size="14" font-weight="700" fill="#0f766e">AI</text>
+    <g transform="translate(1050 39)">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <text x="1088" y="59" font-size="14" font-weight="700" fill="#475569">사람</text>
+  </g>
+
+  <!-- 각 단계 실행 주체 아이콘 -->
+  <g id="actor-badges" aria-label="각 단계의 실행 주체">
+    <g transform="translate(48 88)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <g transform="translate(243 88)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <g transform="translate(438 88)" aria-label="AI 실행">
+      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+    </g>
+    <g transform="translate(673 88)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <g transform="translate(868 88)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <g transform="translate(828 220)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+    <g transform="translate(488 220)" aria-label="사람 실행">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    </g>
+  </g>
 </svg>
