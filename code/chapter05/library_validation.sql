@@ -4,24 +4,26 @@
 
 -- ============================================================
 -- 0. 현재 실행 위치 확인
+-- 기대 결과: ai_database_book / public
 -- ============================================================
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
 -- ============================================================
 -- 1. 테이블별 행 수 확인
 -- 기대 결과: members 3, books 3, loans 4
 -- ============================================================
-SELECT COUNT(*) AS member_count FROM members;
-SELECT COUNT(*) AS book_count FROM books;
-SELECT COUNT(*) AS loan_count FROM loans;
+SELECT COUNT(*) AS member_count FROM public.members;
+SELECT COUNT(*) AS book_count FROM public.books;
+SELECT COUNT(*) AS loan_count FROM public.loans;
 
 -- ============================================================
 -- 2. 각 테이블의 원본 데이터 확인
 -- ============================================================
-SELECT * FROM members ORDER BY id;
-SELECT * FROM books ORDER BY id;
-SELECT * FROM loans ORDER BY id;
+SELECT * FROM public.members ORDER BY id;
+SELECT * FROM public.books ORDER BY id;
+SELECT * FROM public.loans ORDER BY id;
 
 -- ============================================================
 -- 3. ERD 관계가 실제 데이터로 연결되는지 확인
@@ -35,9 +37,11 @@ SELECT
     loans.borrowed_at,
     loans.due_at,
     loans.returned_at
-FROM loans
-JOIN members ON loans.member_id = members.id
-JOIN books ON loans.book_id = books.id
+FROM public.loans AS loans
+JOIN public.members AS members
+    ON loans.member_id = members.id
+JOIN public.books AS books
+    ON loans.book_id = books.id
 ORDER BY loans.id;
 
 -- ============================================================
@@ -50,20 +54,35 @@ SELECT
     book_id,
     borrowed_at,
     due_at
-FROM loans
+FROM public.loans
 WHERE returned_at IS NULL
-ORDER BY due_at;
+ORDER BY due_at, id;
 
 -- ============================================================
 -- 5. 1:N 관계 확인
 -- 회원 101과 도서 201이 여러 대여 기록을 가지는지 확인합니다.
 -- ============================================================
 SELECT *
-FROM loans
+FROM public.loans
 WHERE member_id = 101
 ORDER BY id;
 
 SELECT *
-FROM loans
+FROM public.loans
 WHERE book_id = 201
-ORDER BY id;
+ORDER BY borrowed_at, id;
+
+-- ============================================================
+-- 6. 도서 201의 시간 순서 확인
+-- 첫 대여가 4월 2일 반납된 뒤 4월 3일 다시 대여되었습니다.
+-- 정상 샘플에서는 같은 한 권이 동시에 두 미반납 대여에 속하지 않습니다.
+-- ============================================================
+SELECT
+    id,
+    member_id,
+    borrowed_at,
+    due_at,
+    returned_at
+FROM public.loans
+WHERE book_id = 201
+ORDER BY borrowed_at, id;
