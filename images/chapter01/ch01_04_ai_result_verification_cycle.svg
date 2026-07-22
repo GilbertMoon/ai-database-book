@@ -23,11 +23,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.1183333"
      inkscape:cx="599.55292"
-     inkscape:cy="431.44562"
-     inkscape:window-width="1440"
-     inkscape:window-height="2497"
-     inkscape:window-x="1072"
-     inkscape:window-y="-8"
+     inkscape:cy="432.3398"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="3352"
+     inkscape:window-y="1168"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg26" />
   <title
@@ -361,67 +361,332 @@
      class="note-text"
      id="text26">AI는 초안을 만들고, 사람은 기준을 정하고 검증하며 결과에 책임을 진다.</text>
   <!-- 실행 주체 아이콘과 범례: 기존 노드·텍스트·연결선은 변경하지 않음 -->
-  <defs id="actor-icon-defs">
-    <symbol id="actor-ai-icon" viewBox="0 0 24 24">
-      <rect x="5" y="7" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M12 4v3M9.5 4h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="9.5" cy="12" r="1.2" fill="currentColor"/>
-      <circle cx="14.5" cy="12" r="1.2" fill="currentColor"/>
-      <path d="M9 15h6M5 11H3.5M20.5 11H19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  <defs
+     id="actor-icon-defs">
+    <symbol
+       id="actor-ai-icon"
+       viewBox="0 0 24 24">
+      <rect
+         x="5"
+         y="7"
+         width="14"
+         height="11"
+         rx="3"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="1.8"
+         id="rect1" />
+      <path
+         d="M12 4v3M9.5 4h5"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="1.8"
+         stroke-linecap="round"
+         id="path3" />
+      <circle
+         cx="9.5"
+         cy="12"
+         r="1.2"
+         fill="currentColor"
+         id="circle3" />
+      <circle
+         cx="14.5"
+         cy="12"
+         r="1.2"
+         fill="currentColor"
+         id="circle4" />
+      <path
+         d="M9 15h6M5 11H3.5M20.5 11H19"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="1.8"
+         stroke-linecap="round"
+         id="path5" />
     </symbol>
-    <symbol id="actor-human-icon" viewBox="0 0 24 24">
-      <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <symbol
+       id="actor-human-icon"
+       viewBox="0 0 24 24">
+      <circle
+         cx="12"
+         cy="8"
+         r="3.2"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="1.8"
+         id="circle5" />
+      <path
+         d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="1.8"
+         stroke-linecap="round"
+         id="path7" />
     </symbol>
   </defs>
-
-  <g id="actor-legend" aria-label="실행 주체 범례">
-    <rect x="936" y="12" width="244" height="70" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-    <text x="1058" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">실행 주체</text>
-    <g transform="translate(954 39)">
-      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
-      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+  <g
+     id="actor-legend"
+     aria-label="실행 주체 범례">
+    <rect
+       x="936"
+       y="12"
+       width="244"
+       height="70"
+       rx="14"
+       fill="#ffffff"
+       stroke="#cbd5e1"
+       stroke-width="1.6"
+       id="rect7" />
+    <text
+       x="1058"
+       y="31"
+       text-anchor="middle"
+       font-size="13"
+       font-weight="700"
+       fill="#475569"
+       id="text27">실행 주체</text>
+    <g
+       transform="translate(954 39)"
+       id="g27">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#dff8f1"
+         stroke="#0f9f7a"
+         stroke-width="1.4"
+         id="rect27" />
+      <use
+         href="#actor-ai-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#0f766e"
+         id="use27" />
     </g>
-    <text x="992" y="59" font-size="14" font-weight="700" fill="#0f766e">AI</text>
-    <g transform="translate(1046 39)">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <text
+       x="992"
+       y="59"
+       font-size="14"
+       font-weight="700"
+       fill="#0f766e"
+       id="text28">AI</text>
+    <g
+       transform="translate(1046 39)"
+       id="g28">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect28" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use28" />
     </g>
-    <text x="1084" y="59" font-size="14" font-weight="700" fill="#475569">사람</text>
+    <text
+       x="1084"
+       y="59"
+       font-size="14"
+       font-weight="700"
+       fill="#475569"
+       id="text29">사람</text>
   </g>
-
-  <g id="actor-badges" aria-label="각 단계의 실행 주체">
-    <g transform="translate(42 116)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+  <g
+     id="actor-badges"
+     aria-label="각 단계의 실행 주체">
+    <g
+       transform="translate(42 116)"
+       aria-label="사람 실행"
+       id="g29">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect29"
+         x="0"
+         y="34.873325" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use29"
+         transform="translate(0,34.873324)" />
     </g>
-    <g transform="translate(342 116)" aria-label="AI 실행">
-      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
-      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
+    <g
+       transform="translate(342 116)"
+       aria-label="AI 실행"
+       id="g30">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#dff8f1"
+         stroke="#0f9f7a"
+         stroke-width="1.4"
+         id="rect30"
+         x="-7.1535025"
+         y="28.61401" />
+      <use
+         href="#actor-ai-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#0f766e"
+         id="use30"
+         transform="translate(-6.2593146,26.825634)" />
     </g>
-    <g transform="translate(587 116)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(587 116)"
+       aria-label="사람 실행"
+       id="g31">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect31"
+         x="-8.9418783"
+         y="10.730253" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use31"
+         transform="translate(-8.0476906,12.518629)" />
     </g>
-    <g transform="translate(852 116)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(852 116)"
+       aria-label="사람 실행"
+       id="g32">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect32"
+         x="-5.3651266"
+         y="24.143072" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use32"
+         transform="translate(-4.470939,25.037259)" />
     </g>
-    <g transform="translate(832 272)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(832 272)"
+       aria-label="사람 실행"
+       id="g33">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect33" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use33" />
     </g>
-    <g transform="translate(772 422)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(772 422)"
+       aria-label="사람 실행"
+       id="g34">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect34" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use34" />
     </g>
-    <g transform="translate(372 557)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(372 557)"
+       aria-label="사람 실행"
+       id="g35">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect35"
+         x="62.593147"
+         y="59.016396" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use35"
+         transform="translate(62.593146,59.910583)" />
     </g>
-    <g transform="translate(912 597)" aria-label="사람 실행">
-      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
+    <g
+       transform="translate(912 597)"
+       aria-label="사람 실행"
+       id="g36">
+      <rect
+         width="28"
+         height="28"
+         rx="9"
+         fill="#f1f5f9"
+         stroke="#64748b"
+         stroke-width="1.4"
+         id="rect36"
+         x="-10.730253"
+         y="20.56632" />
+      <use
+         href="#actor-human-icon"
+         x="4"
+         y="4"
+         width="20"
+         height="20"
+         style="color:#475569"
+         id="use36"
+         transform="translate(-9.8360658,19.672132)" />
     </g>
   </g>
 </svg>
