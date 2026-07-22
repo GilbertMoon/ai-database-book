@@ -1,18 +1,21 @@
 -- Chapter 06. 정규화 전후 구조 비교와 검증
 -- 실행 전 normalization_schema.sql과 normalization_seed.sql을 순서대로 실행합니다.
 -- 이 파일은 테이블을 삭제하거나 새로 만들지 않습니다.
+-- UPDATE 예시는 기본적으로 주석 처리되어 있습니다.
 
 -- ============================================================
 -- 0. 현재 실행 위치 확인
+-- 기대 결과: ai_database_book / public
 -- ============================================================
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
 -- ============================================================
 -- 1. 정규화 전 원시 데이터 확인: 기대 결과 3행
 -- ============================================================
 SELECT *
-FROM library_records_raw
+FROM public.library_records_raw
 ORDER BY loan_id;
 
 -- ============================================================
@@ -23,7 +26,7 @@ SELECT
     member_name,
     member_email,
     COUNT(*) AS repeated_rows
-FROM library_records_raw
+FROM public.library_records_raw
 GROUP BY member_name, member_email
 ORDER BY repeated_rows DESC, member_name;
 
@@ -35,7 +38,7 @@ SELECT
     book_title,
     author,
     COUNT(*) AS repeated_rows
-FROM library_records_raw
+FROM public.library_records_raw
 GROUP BY book_title, author
 ORDER BY repeated_rows DESC, book_title;
 
@@ -43,16 +46,16 @@ ORDER BY repeated_rows DESC, book_title;
 -- 4. 정규화 후 행 수 확인
 -- 기대 결과: members_nf 2, books_nf 2, loans_nf 3
 -- ============================================================
-SELECT COUNT(*) AS member_count FROM members_nf;
-SELECT COUNT(*) AS book_count FROM books_nf;
-SELECT COUNT(*) AS loan_count FROM loans_nf;
+SELECT COUNT(*) AS member_count FROM public.members_nf;
+SELECT COUNT(*) AS book_count FROM public.books_nf;
+SELECT COUNT(*) AS loan_count FROM public.loans_nf;
 
 -- ============================================================
--- 5. 정규화 후 원본 테이블 확인
+-- 5. 정규화 후 테이블 확인
 -- ============================================================
-SELECT * FROM members_nf ORDER BY id;
-SELECT * FROM books_nf ORDER BY id;
-SELECT * FROM loans_nf ORDER BY id;
+SELECT * FROM public.members_nf ORDER BY id;
+SELECT * FROM public.books_nf ORDER BY id;
+SELECT * FROM public.loans_nf ORDER BY id;
 
 -- ============================================================
 -- 6. 정규화된 관계가 원래 업무 결과를 만들 수 있는지 확인
@@ -60,30 +63,30 @@ SELECT * FROM loans_nf ORDER BY id;
 -- 기대 결과: 3행
 -- ============================================================
 SELECT
-    loans_nf.id AS loan_id,
-    members_nf.name AS member_name,
-    members_nf.email AS member_email,
-    books_nf.title AS book_title,
-    books_nf.author,
-    loans_nf.borrowed_at,
-    loans_nf.due_at,
-    loans_nf.returned_at
-FROM loans_nf
-JOIN members_nf ON loans_nf.member_id = members_nf.id
-JOIN books_nf ON loans_nf.book_id = books_nf.id
-ORDER BY loans_nf.id;
+    l.id AS loan_id,
+    m.name AS member_name,
+    m.email AS member_email,
+    b.title AS book_title,
+    b.author,
+    l.borrowed_at,
+    l.due_at,
+    l.returned_at
+FROM public.loans_nf AS l
+JOIN public.members_nf AS m ON l.member_id = m.id
+JOIN public.books_nf AS b ON l.book_id = b.id
+ORDER BY l.id;
 
 -- ============================================================
 -- 7. 1:N 관계 확인
 -- 회원 101과 도서 201은 각각 여러 대여 기록을 가집니다.
 -- ============================================================
 SELECT *
-FROM loans_nf
+FROM public.loans_nf
 WHERE member_id = 101
 ORDER BY id;
 
 SELECT *
-FROM loans_nf
+FROM public.loans_nf
 WHERE book_id = 201
 ORDER BY id;
 
@@ -92,34 +95,51 @@ ORDER BY id;
 -- 기대 결과: 미반납 기록 2행
 -- ============================================================
 SELECT *
-FROM loans_nf
+FROM public.loans_nf
 WHERE returned_at IS NULL
-ORDER BY due_at;
+ORDER BY due_at, id;
 
 -- ============================================================
--- 9. 수정 이상 감소 확인
--- 먼저 아래 SELECT로 수정 대상을 확인한 뒤 UPDATE만 선택 실행합니다.
+-- 9. 도서 201의 대여 이력 시간 순서 확인
+-- 첫 대여는 4월 2일 반납되고 두 번째 대여는 4월 3일 시작합니다.
+-- ============================================================
+SELECT id, book_id, borrowed_at, returned_at
+FROM public.loans_nf
+WHERE book_id = 201
+ORDER BY borrowed_at, id;
+
+-- ============================================================
+-- 10. 수정 이상 감소 확인
+-- 체크포인트 A: 샘플 입력 완료, 회원 101 이메일은 minji@example.com
+-- 아래 UPDATE는 필요할 때만 한 문장씩 선택 실행합니다.
+-- 체크포인트 B: 회원 101 이메일을 kimminji@example.com으로 수정 완료
 -- ============================================================
 SELECT *
-FROM members_nf
+FROM public.members_nf
 WHERE id = 101;
 
--- UPDATE members_nf
+-- UPDATE public.members_nf
 -- SET email = 'kimminji@example.com'
--- WHERE id = 101;
+-- WHERE id = 101
+-- RETURNING id, name, email;
 
 -- 수정 후에는 회원 행과 JOIN 결과를 다시 확인합니다.
--- SELECT * FROM members_nf WHERE id = 101;
+-- SELECT *
+-- FROM public.members_nf
+-- WHERE id = 101;
 
 -- SELECT
---     loans_nf.id AS loan_id,
---     members_nf.name AS member_name,
---     members_nf.email AS member_email,
---     books_nf.title AS book_title
--- FROM loans_nf
--- JOIN members_nf ON loans_nf.member_id = members_nf.id
--- JOIN books_nf ON loans_nf.book_id = books_nf.id
--- ORDER BY loans_nf.id;
+--     l.id AS loan_id,
+--     m.name AS member_name,
+--     m.email AS member_email,
+--     b.title AS book_title
+-- FROM public.loans_nf AS l
+-- JOIN public.members_nf AS m ON l.member_id = m.id
+-- JOIN public.books_nf AS b ON l.book_id = b.id
+-- ORDER BY l.id;
+
+-- 중복 이메일 오류 테스트는 변경하지 않은 회원 102의
+-- junho@example.com을 사용하므로 체크포인트 A와 B 모두에서 실패해야 합니다.
 
 -- 삭제 이상 비교용 DELETE는 자동 실행하지 않습니다.
--- 삭제 정책과 참조 무결성은 integrity_tests.sql에서 별도로 확인합니다.
+-- 삭제 정책과 참조 무결성은 integrity_tests.sql에서 확인합니다.
