@@ -1,71 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="100%"
-   viewBox="0 0 1200 820"
-   role="img"
-   aria-labelledby="title desc"
-   version="1.1"
-   id="svg34"
-   sodipodi:docname="ch02_08_ai_table_review.svg"
-   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview34"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.1183333"
-     inkscape:cx="599.55291"
-     inkscape:cy="409.9851"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="3352"
-     inkscape:window-y="1168"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg34" />
-  <title
-     id="title">AI 생성 테이블 구조 검토 흐름</title>
-  <desc
-     id="desc">요구사항 정리, AI 설계 초안, 사람의 구조 검토, 격리된 테스트 DB 실행, 요구사항과 결과 일치 여부 판단 후 수정 반복 또는 설계 채택으로 이어지는 검토 흐름</desc>
-  <defs
-     id="defs5">
-    <marker
-       id="arrow"
-       viewBox="0 0 10 10"
-       refX="9"
-       refY="5"
-       markerWidth="8"
-       markerHeight="8"
-       orient="auto">
-      <path
-         d="M0 0L10 5L0 10Z"
-         fill="#475569"
-         id="path1" />
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">AI 생성 테이블 구조 검토 흐름</title>
+  <desc id="desc">요구사항 정리, AI 설계 초안, 사람의 구조 검토, 격리된 테스트 DB 실행, 요구사항과 결과 일치 여부 판단 후 수정 반복 또는 설계 채택으로 이어지는 검토 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
     </marker>
-    <marker
-       id="arrow-red"
-       viewBox="0 0 10 10"
-       refX="9"
-       refY="5"
-       markerWidth="8"
-       markerHeight="8"
-       orient="auto">
-      <path
-         d="M0 0L10 5L0 10Z"
-         fill="#d64545"
-         id="path2" />
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#d64545"/>
     </marker>
-    <style
-       id="style2">
-      text{font-family:&quot;Malgun Gothic&quot;,&quot;Apple SD Gothic Neo&quot;,&quot;Noto Sans KR&quot;,Arial,sans-serif;fill:#172033}
-      .title{font-size:32px;font-weight:800;text-anchor:middle;fill:#0f2d5c}
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .box{fill:#f8fafc;stroke:#64748b;stroke-width:2.2}
       .ai{fill:#e8fbf6;stroke:#0f9f7a;stroke-width:2.2}
       .review{fill:#fff7e6;stroke:#d89424;stroke-width:2.2}
@@ -87,568 +32,123 @@
       .chip{fill:#fffaf0;stroke:#e7a84b;stroke-width:1.3}
       .chip-text{font-size:14px;font-weight:700;text-anchor:middle;fill:#8a5708}
     </style>
-    <symbol
-       id="actor-ai-icon"
-       viewBox="0 0 24 24">
-      <rect
-         x="5"
-         y="7"
-         width="14"
-         height="11"
-         rx="3"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="1.8"
-         id="rect2" />
-      <path
-         d="M12 4v3M9.5 4h5"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="1.8"
-         stroke-linecap="round"
-         id="path3" />
-      <circle
-         cx="9.5"
-         cy="12"
-         r="1.2"
-         fill="currentColor"
-         id="circle3" />
-      <circle
-         cx="14.5"
-         cy="12"
-         r="1.2"
-         fill="currentColor"
-         id="circle4" />
-      <path
-         d="M9 15h6M5 11H3.5M20.5 11H19"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="1.8"
-         stroke-linecap="round"
-         id="path4" />
+    <symbol id="actor-ai-icon" viewBox="0 0 24 24">
+      <rect x="5" y="7" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 4v3M9.5 4h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="9.5" cy="12" r="1.2" fill="currentColor"/>
+      <circle cx="14.5" cy="12" r="1.2" fill="currentColor"/>
+      <path d="M9 15h6M5 11H3.5M20.5 11H19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
     </symbol>
-    <symbol
-       id="actor-human-icon"
-       viewBox="0 0 24 24">
-      <circle
-         cx="12"
-         cy="8"
-         r="3.2"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="1.8"
-         id="circle5" />
-      <path
-         d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="1.8"
-         stroke-linecap="round"
-         id="path5" />
+    <symbol id="actor-human-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5.5 19c.9-3.7 3-5.5 6.5-5.5s5.6 1.8 6.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
     </symbol>
   </defs>
-  <rect
-     width="1200"
-     height="820"
-     fill="#ffffff"
-     id="rect5" />
-  <text
-     x="600"
-     y="52"
-     class="title"
-     id="text5">AI 생성 테이블 구조 검토 흐름</text>
-  <g
-     id="actor-legend"
-     aria-label="실행 주체 범례">
-    <rect
-       x="935"
-       y="12"
-       width="245"
-       height="70"
-       rx="14"
-       fill="#ffffff"
-       stroke="#cbd5e1"
-       stroke-width="1.6"
-       id="rect6" />
-    <text
-       x="1057.5"
-       y="31"
-       text-anchor="middle"
-       font-size="13"
-       font-weight="700"
-       fill="#475569"
-       id="text6">실행 주체</text>
-    <g
-       transform="translate(953 39)"
-       id="g7">
-      <rect
-         width="28"
-         height="28"
-         rx="9"
-         fill="#dff8f1"
-         stroke="#0f9f7a"
-         stroke-width="1.4"
-         id="rect7" />
-      <use
-         href="#actor-ai-icon"
-         x="4"
-         y="4"
-         width="20"
-         height="20"
-         style="color:#0f766e"
-         id="use7" />
+
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <text x="600" y="52" class="title">AI 생성 테이블 구조 검토 흐름</text>
+
+  <g id="actor-legend" aria-label="실행 주체 범례">
+    <rect x="935" y="12" width="245" height="70" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
+    <text x="1057.5" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">실행 주체</text>
+    <g transform="translate(953 39)">
+      <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+      <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
     </g>
-    <text
-       x="991"
-       y="59"
-       font-size="14"
-       font-weight="700"
-       fill="#0f766e"
-       id="text7">AI</text>
-    <g
-       transform="translate(1047 39)"
-       id="g8">
-      <rect
-         width="28"
-         height="28"
-         rx="9"
-         fill="#f1f5f9"
-         stroke="#64748b"
-         stroke-width="1.4"
-         id="rect8" />
-      <use
-         href="#actor-human-icon"
-         x="4"
-         y="4"
-         width="20"
-         height="20"
-         style="color:#475569"
-         id="use8" />
+    <text x="991" y="59" font-size="14" font-weight="700" fill="#0f766e">AI</text>
+    <g transform="translate(1047 39)">
+      <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+      <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
     </g>
-    <text
-       x="1085"
-       y="59"
-       font-size="14"
-       font-weight="700"
-       fill="#475569"
-       id="text8">사람</text>
+    <text x="1085" y="59" font-size="14" font-weight="700" fill="#475569">사람</text>
   </g>
-  <rect
-     x="55"
-     y="110"
-     width="245"
-     height="100"
-     rx="16"
-     class="box"
-     id="rect9" />
-  <g
-     transform="translate(67 122)"
-     aria-label="사람 실행"
-     id="g10">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect10" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use10" />
+
+  <rect x="55" y="110" width="245" height="100" rx="16" class="box"/>
+  <g transform="translate(67 122)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="177.5"
-     y="145"
-     class="name"
-     id="text10">1. 요구사항 정리</text>
-  <text
-     x="177.5"
-     y="177"
-     class="sub"
-     id="text11">학생 · 강의 · 수강신청 · 업무 규칙</text>
-  <path
-     d="M300 160 H355"
-     class="line"
-     id="path11" />
-  <rect
-     x="355"
-     y="110"
-     width="225"
-     height="100"
-     rx="16"
-     class="ai"
-     id="rect11" />
-  <g
-     transform="translate(367 122)"
-     aria-label="AI 실행"
-     id="g12">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#dff8f1"
-       stroke="#0f9f7a"
-       stroke-width="1.4"
-       id="rect12" />
-    <use
-       href="#actor-ai-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#0f766e"
-       id="use12" />
+  <text x="177.5" y="145" class="name">1. 요구사항 정리</text>
+  <text x="177.5" y="177" class="sub">학생 · 강의 · 수강신청 · 업무 규칙</text>
+
+  <path d="M300 160 H355" class="line"/>
+
+  <rect x="355" y="110" width="225" height="100" rx="16" class="ai"/>
+  <g transform="translate(367 122)" aria-label="AI 실행">
+    <rect width="28" height="28" rx="9" fill="#dff8f1" stroke="#0f9f7a" stroke-width="1.4"/>
+    <use href="#actor-ai-icon" x="4" y="4" width="20" height="20" style="color:#0f766e"/>
   </g>
-  <text
-     x="467.5"
-     y="145"
-     class="name"
-     id="text12">2. AI 설계 초안</text>
-  <text
-     x="467.5"
-     y="177"
-     class="sub"
-     id="text13">테이블 · 컬럼 · PK · FK</text>
-  <path
-     d="M580 160 H635"
-     class="line"
-     id="path13" />
-  <rect
-     x="635"
-     y="95"
-     width="510"
-     height="145"
-     rx="16"
-     class="review"
-     id="rect13" />
-  <g
-     transform="translate(647 107)"
-     aria-label="사람 실행"
-     id="g14">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect14" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use14" />
+  <text x="467.5" y="145" class="name">2. AI 설계 초안</text>
+  <text x="467.5" y="177" class="sub">테이블 · 컬럼 · PK · FK</text>
+
+  <path d="M580 160 H635" class="line"/>
+
+  <rect x="635" y="95" width="510" height="145" rx="16" class="review"/>
+  <g transform="translate(647 107)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="890"
-     y="130"
-     class="name"
-     id="text14">3. 사람이 구조 검토</text>
-  <rect
-     x="670"
-     y="153"
-     width="100"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect15" />
-  <text
-     x="720"
-     y="172"
-     class="chip-text"
-     id="text15">테이블 역할</text>
-  <rect
-     x="780"
-     y="153"
-     width="85"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect16" />
-  <text
-     x="822.5"
-     y="172"
-     class="chip-text"
-     id="text16">PK / FK</text>
-  <rect
-     x="875"
-     y="153"
-     width="100"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect17" />
-  <text
-     x="925"
-     y="172"
-     class="chip-text"
-     id="text17">1:N / N:M</text>
-  <rect
-     x="985"
-     y="153"
-     width="90"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect18" />
-  <text
-     x="1030"
-     y="172"
-     class="chip-text"
-     id="text18">중복</text>
-  <rect
-     x="730"
-     y="188"
-     width="105"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect19" />
-  <text
-     x="782.5"
-     y="207"
-     class="chip-text"
-     id="text19">제약조건</text>
-  <rect
-     x="850"
-     y="188"
-     width="120"
-     height="28"
-     rx="9"
-     class="chip"
-     id="rect20" />
-  <text
-     x="910"
-     y="207"
-     class="chip-text"
-     id="text20">확장 가능성</text>
-  <text
-     x="890"
-     y="231"
-     class="sub"
-     id="text21">AI 초안은 완성본이 아니라 검토 대상</text>
-  <path
-     d="M890 240 V295"
-     class="line"
-     id="path21" />
-  <rect
-     x="725"
-     y="295"
-     width="330"
-     height="105"
-     rx="16"
-     class="test"
-     id="rect21" />
-  <g
-     transform="translate(729,297)"
-     aria-label="사람 실행"
-     id="g22">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect22"
-       x="0"
-       y="0" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use22" />
+  <text x="890" y="130" class="name">3. 사람이 구조 검토</text>
+  <rect x="670" y="153" width="100" height="28" rx="9" class="chip"/>
+  <text x="720" y="172" class="chip-text">테이블 역할</text>
+  <rect x="780" y="153" width="85" height="28" rx="9" class="chip"/>
+  <text x="822.5" y="172" class="chip-text">PK / FK</text>
+  <rect x="875" y="153" width="100" height="28" rx="9" class="chip"/>
+  <text x="925" y="172" class="chip-text">1:N / N:M</text>
+  <rect x="985" y="153" width="90" height="28" rx="9" class="chip"/>
+  <text x="1030" y="172" class="chip-text">중복</text>
+  <rect x="730" y="188" width="105" height="28" rx="9" class="chip"/>
+  <text x="782.5" y="207" class="chip-text">제약조건</text>
+  <rect x="850" y="188" width="120" height="28" rx="9" class="chip"/>
+  <text x="910" y="207" class="chip-text">확장 가능성</text>
+  <text x="890" y="231" class="sub">AI 초안은 완성본이 아니라 검토 대상</text>
+
+  <path d="M890 240 V295" class="line"/>
+
+  <rect x="725" y="295" width="330" height="105" rx="16" class="test"/>
+  <g transform="translate(737 307)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="890"
-     y="334"
-     class="name"
-     id="text22">4. 격리된 테스트 DB에서 실행</text>
-  <text
-     x="890"
-     y="368"
-     class="sub"
-     id="text23">운영 DB가 아닌 초기화 가능한 환경</text>
-  <path
-     d="M890 400 V430"
-     class="line"
-     id="path23" />
-  <polygon
-     points="890,430 1080,505 890,580 700,505"
-     class="decision"
-     id="polygon23" />
-  <g
-     transform="translate(712,488)"
-     aria-label="사람 실행"
-     id="g23">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect23"
-       x="0"
-       y="0" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use23" />
+  <text x="890" y="334" class="name">4. 격리된 테스트 DB에서 실행</text>
+  <text x="890" y="368" class="sub">운영 DB가 아닌 초기화 가능한 환경</text>
+
+  <path d="M890 400 V430" class="line"/>
+
+  <polygon points="890,430 1080,505 890,580 700,505" class="decision"/>
+  <g transform="translate(730 468)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="890"
-     y="494"
-     class="name"
-     id="text24">5. 요구사항과 결과가 일치하는가?</text>
-  <text
-     x="890"
-     y="526"
-     class="sub"
-     id="text25">구조 · 관계 · 제약조건 · 실행 결과 확인</text>
-  <path
-     d="M700 505 H630 V610"
-     class="loop"
-     id="path25" />
-  <text
-     x="655"
-     y="493"
-     class="branch fail"
-     id="text26">미통과</text>
-  <rect
-     x="380"
-     y="610"
-     width="250"
-     height="105"
-     rx="16"
-     class="bad"
-     id="rect26" />
-  <g
-     transform="translate(384,614)"
-     aria-label="사람 실행"
-     id="g27">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect27"
-       x="0"
-       y="0" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use27" />
+  <text x="890" y="494" class="name">5. 요구사항과 결과가 일치하는가?</text>
+  <text x="890" y="526" class="sub">구조 · 관계 · 제약조건 · 실행 결과 확인</text>
+
+  <path d="M700 505 H630 V610" class="loop"/>
+  <text x="655" y="493" class="branch fail">미통과</text>
+  <rect x="380" y="610" width="250" height="105" rx="16" class="bad"/>
+  <g transform="translate(392 622)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="505"
-     y="650"
-     class="name"
-     id="text27">수정 후 재요청·재실행</text>
-  <text
-     x="505"
-     y="684"
-     class="sub"
-     id="text28">설계 · SQL · 제약조건 · 테스트 보완</text>
-  <path
-     d="M380 662 H320 V265 H467.5 V210"
-     class="loop"
-     id="path28" />
-  <text
-     x="303"
-     y="432"
-     class="small-note"
-     id="text29">일반적인 재작업 경로</text>
-  <path
-     d="M430 715 H177.5 V210"
-     class="secondary"
-     id="path29" />
-  <text
-     x="275"
-     y="744"
-     class="small-note"
-     id="text30">요구사항 오류가 확인된 경우에만 기준 재정의</text>
-  <path
-     d="M985 557 V625"
-     class="line"
-     id="path30" />
-  <text
-     x="1025"
-     y="598"
-     class="branch pass"
-     id="text31">통과</text>
-  <rect
-     x="865"
-     y="625"
-     width="300"
-     height="90"
-     rx="16"
-     class="ok"
-     id="rect31" />
-  <g
-     transform="translate(877 637)"
-     aria-label="사람 실행"
-     id="g32">
-    <rect
-       width="28"
-       height="28"
-       rx="9"
-       fill="#f1f5f9"
-       stroke="#64748b"
-       stroke-width="1.4"
-       id="rect32" />
-    <use
-       href="#actor-human-icon"
-       x="4"
-       y="4"
-       width="20"
-       height="20"
-       style="color:#475569"
-       id="use32" />
+  <text x="505" y="650" class="name">수정 후 재요청·재실행</text>
+  <text x="505" y="684" class="sub">설계 · SQL · 제약조건 · 테스트 보완</text>
+
+  <path d="M380 662 H320 V265 H467.5 V210" class="loop"/>
+  <text x="303" y="432" class="small-note">일반적인 재작업 경로</text>
+
+  <path d="M430 715 H177.5 V210" class="secondary"/>
+  <text x="275" y="744" class="small-note">요구사항 오류가 확인된 경우에만 기준 재정의</text>
+
+  <path d="M985 557 V625" class="line"/>
+  <text x="1025" y="598" class="branch pass">통과</text>
+  <rect x="865" y="625" width="300" height="90" rx="16" class="ok"/>
+  <g transform="translate(877 637)" aria-label="사람 실행">
+    <rect width="28" height="28" rx="9" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
+    <use href="#actor-human-icon" x="4" y="4" width="20" height="20" style="color:#475569"/>
   </g>
-  <text
-     x="1015"
-     y="660"
-     class="name"
-     id="text32">설계 채택 · 근거 기록</text>
-  <text
-     x="1015"
-     y="692"
-     class="sub"
-     id="text33">결과 · 조건 · 변경 이력 저장</text>
-  <rect
-     x="125"
-     y="770"
-     width="950"
-     height="36"
-     rx="18"
-     class="note-box"
-     id="rect33" />
-  <text
-     x="600"
-     y="794"
-     class="note"
-     id="text34">AI는 설계 초안을 만들고, 사람은 요구사항 적합성과 실행 결과를 검증한다.</text>
+  <text x="1015" y="660" class="name">설계 채택 · 근거 기록</text>
+  <text x="1015" y="692" class="sub">결과 · 조건 · 변경 이력 저장</text>
+
+  <rect x="125" y="770" width="950" height="36" rx="18" class="note-box"/>
+  <text x="600" y="794" class="note">AI는 설계 초안을 만들고, 사람은 요구사항 적합성과 실행 결과를 검증한다.</text>
 </svg>
