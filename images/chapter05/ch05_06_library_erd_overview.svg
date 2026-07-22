@@ -1,12 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 880" role="img" aria-labelledby="title desc">
   <title id="title">도서 대여 시스템 핵심 ERD</title>
-  <desc id="desc">members, loans, books의 주요 열과 키를 보여 주며, 회원과 도서는 각각 0개 이상의 대여 기록을 가질 수 있고 각 loans 행은 회원 한 명과 도서 한 건을 반드시 참조하는 도서 대여 시스템의 핵심 ERD</desc>
+  <desc id="desc">members, loans, books의 주요 열과 키를 보여 주며, 회원과 도서는 각각 0개 이상의 대여 기록을 가질 수 있고 각 loans 행은 회원 한 명과 도서 한 건을 반드시 참조한다. email과 isbn은 고유성 정책이 아직 확정되지 않은 후보이다.</desc>
   <style>
-    text {
-      font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
-      fill: #1f2937;
-    }
-    .code {font-family: Consolas, D2Coding, "Noto Sans Mono CJK KR", Menlo, monospace;}
+    text {font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#1f2937}
+    .code {font-family:Consolas,D2Coding,"Noto Sans Mono CJK KR",Menlo,monospace}
     .title {font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     .subtitle {font-size:15px;text-anchor:middle;fill:#4b5563}
     .card {stroke:#64748b;stroke-width:2;rx:14}
@@ -20,7 +17,7 @@
     .badge {stroke-width:1.2;rx:7}
     .pk {fill:#dbeafe;stroke:#2563eb}
     .fk {fill:#ffedd5;stroke:#ea580c}
-    .uq {fill:#dcfce7;stroke:#16a34a}
+    .candidate {fill:#fef3c7;stroke:#d97706}
     .nullable {fill:#f1f5f9;stroke:#94a3b8}
     .badge-text {font-size:14px;font-weight:700;text-anchor:middle;fill:#172033}
     .relationship {stroke:#475569;stroke-width:3;fill:none}
@@ -47,9 +44,9 @@
     <text x="100" y="205" class="field code">name</text>
     <line x1="24" y1="230" x2="276" y2="230" class="row-line"/>
     <g transform="translate(24 248)">
-      <rect width="56" height="30" class="badge uq"/>
-      <text x="28" y="21" class="badge-text">UQ</text>
-      <text x="76" y="22" class="field code">email</text>
+      <rect width="92" height="30" class="badge candidate"/>
+      <text x="46" y="21" class="badge-text">고유 후보</text>
+      <text x="112" y="22" class="field code">email</text>
     </g>
     <line x1="24" y1="292" x2="276" y2="292" class="row-line"/>
     <text x="100" y="329" class="field code">joined_at</text>
@@ -115,9 +112,9 @@
     </g>
     <line x1="24" y1="354" x2="276" y2="354" class="row-line"/>
     <g transform="translate(24 372)">
-      <rect width="56" height="30" class="badge uq"/>
-      <text x="28" y="21" class="badge-text">UQ</text>
-      <text x="76" y="22" class="field code">isbn</text>
+      <rect width="92" height="30" class="badge candidate"/>
+      <text x="46" y="21" class="badge-text">고유 후보</text>
+      <text x="112" y="22" class="field code">isbn</text>
     </g>
   </g>
 
@@ -137,6 +134,6 @@
     <rect x="614" y="710" width="510" height="84" class="caption-card"/>
     <text x="869" y="743" class="caption">도서와 대여 기록</text>
     <text x="869" y="772" class="caption-small">한 도서도 대여 기록이 없거나 여러 개일 수 있다.</text>
-    <text x="600" y="842" class="caption">loans 한 행은 단순 연결이 아니라 대여일·반납예정일·실제반납일을 가진 대여 사건 한 건이다.</text>
+    <text x="600" y="842" class="caption">email과 isbn의 고유성은 후보이며, 정책 확인 전에는 UNIQUE를 적용하지 않습니다.</text>
   </g>
 </svg>
