@@ -32,7 +32,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 01 | AI 시대에 데이터베이스를 왜 배워야 하는가 | 2차 재구성 완료 |
 | Chapter 02 | 데이터와 DBMS의 기본 개념 | 2차 재구성 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver로 실습 환경 만들기 | 2차 재구성 완료 |
-| Chapter 04 | 관계형 데이터베이스와 SQL 시작하기 | 2차 재구성 완료 |
+| Chapter 04 | 관계형 데이터베이스와 SQL 시작하기 | 최종 출판 내용 검수 완료 |
 | Chapter 05 | 요구사항에서 데이터 모델과 ERD 만들기 | 2차 재구성 완료 |
 | Chapter 06 | 정규화와 데이터 무결성으로 좋은 테이블 만들기 | 2차 재구성 완료 |
 | Chapter 07 | 실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기 | 2차 재구성 완료 |
@@ -78,11 +78,12 @@ publish/full_manuscript.md
 | Chapter 01~15 본문 작성 | 완료 |
 | 강의안 표현을 eBook 문체로 1차 수정 | 완료 |
 | 활동 자료를 독자용 실습·워크북 형태로 1차 수정 | 완료 |
+| Chapter 04 실행 위치·정렬·NULL·자동 커밋·데이터 상태 최종 보완 | 완료 |
 | Chapter 07 관계형 DB 설계 프로젝트 재구성 | 완료 |
 | Chapter 14 SQL·Python 분석 방향 전환 | 반영 |
 | Chapter 15 설계·분석·검증 종합 프로젝트 전환 | 반영 |
 | `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
-| 전체 원고 방향·용어 일관성 검수 | 예정 |
+| 전체 원고 방향·용어 일관성 검수 | 진행 중 |
 | 실제 PostgreSQL·Python 통합 실행 검증 | 예정 |
 | Word·PDF·eBook 출판 렌더링 검수 | 예정 |
 
