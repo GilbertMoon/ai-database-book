@@ -1,21 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1360 800" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 1250" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
   <title id="title">AI 추천 인덱스 검토 흐름</title>
-  <desc id="desc">AI가 추천한 인덱스를 기존 인덱스와 비교해 중복 후보를 폐기하고, 남은 후보는 쿼리 패턴과 EXPLAIN ANALYZE BUFFERS 실행 계획을 검증한 뒤 적용 후보 승인 또는 보류로 결정하는 직각 흐름도</desc>
+  <desc id="desc">AI가 추천한 인덱스를 기존 인덱스와 비교해 중복 또는 불필요한 후보를 폐기하고, 남은 후보는 실제 반복 쿼리와 EXPLAIN ANALYZE BUFFERS 실행 계획을 적용 전후로 검증한 뒤 근거와 쓰기 비용에 따라 적용 후보 승인 또는 보류로 결정하는 흐름도</desc>
+
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0 0 L10 5 L0 10 Z" fill="#334155"/>
     </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#db2777"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#f97316"/>
+    </marker>
+
     <style>
       text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#0f172a}
-      .title{font-size:28px;font-weight:700;text-anchor:middle}
-      .sub{font-size:14px;fill:#475569;text-anchor:middle}
-      .head{font-size:17px;font-weight:700;text-anchor:middle}
-      .body{font-size:13.5px;text-anchor:middle;fill:#334155}
-      .small{font-size:12.5px;text-anchor:middle;fill:#475569}
-      .code{font-family:Consolas,D2Coding,"Courier New",monospace;font-size:12.5px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
-      .step{font-size:12px;font-weight:700;fill:#ffffff;text-anchor:middle}
-      .yes{font-size:12px;font-weight:700;fill:#15803d;text-anchor:middle}
-      .no{font-size:12px;font-weight:700;fill:#b45309;text-anchor:middle}
+      .title{font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .subtitle{font-size:15px;text-anchor:middle;fill:#475569}
+      .head{font-size:18px;font-weight:700;text-anchor:middle}
+      .body{font-size:14px;text-anchor:middle;fill:#334155}
+      .small{font-size:13px;text-anchor:middle;fill:#475569}
+      .code{font-family:Consolas,D2Coding,"Courier New",monospace;font-size:13px;font-weight:700;text-anchor:middle;fill:#1d4ed8}
+      .step{font-size:14px;font-weight:700;fill:#ffffff;text-anchor:middle}
+      .branch{font-size:14px;font-weight:700;text-anchor:middle}
+      .branch-blue{fill:#1d4ed8}.branch-pink{fill:#be185d}.branch-green{fill:#15803d}.branch-orange{fill:#c2410c}
       .card{stroke-width:2;rx:14;ry:14}
       .ai{fill:#f5f3ff;stroke:#8b5cf6}
       .review{fill:#eff6ff;stroke:#2563eb}
@@ -24,106 +38,113 @@
       .verify{fill:#ecfdf5;stroke:#22c55e}
       .apply{fill:#dcfce7;stroke:#16a34a}
       .hold{fill:#fff7ed;stroke:#f97316}
-      .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.5;rx:14;ry:14}
+      .note{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.6;rx:14;ry:14}
       .arrow{stroke:#334155;stroke-width:2.2;fill:none;marker-end:url(#arrow);stroke-linejoin:round}
+      .arrow-blue{stroke:#2563eb;stroke-width:2.4;fill:none;marker-end:url(#arrow-blue);stroke-linejoin:round}
+      .arrow-pink{stroke:#db2777;stroke-width:2.4;fill:none;marker-end:url(#arrow-pink);stroke-linejoin:round}
+      .arrow-green{stroke:#16a34a;stroke-width:2.4;fill:none;marker-end:url(#arrow-green);stroke-linejoin:round}
+      .arrow-orange{stroke:#f97316;stroke-width:2.4;fill:none;marker-end:url(#arrow-orange);stroke-linejoin:round}
     </style>
   </defs>
 
-  <rect width="1360" height="800" fill="#ffffff"/>
-  <text x="680" y="48" class="title">AI 추천 인덱스 검토 흐름</text>
-  <text x="680" y="76" class="sub">추천을 바로 적용하지 않고 중복, 조회 패턴, 실행 계획과 쓰기 비용을 단계별로 검증한다</text>
+  <rect width="1200" height="1250" fill="#ffffff"/>
 
-  <!-- Principle -->
-  <rect x="80" y="105" width="1200" height="60" class="note"/>
-  <text x="680" y="132" class="head">핵심 원칙</text>
-  <text x="680" y="154" class="small">AI 추천 인덱스는 후보일 뿐이며, 기존 인덱스와 측정 가능한 실행 계획 개선 근거가 있어야 한다</text>
+  <!-- Title -->
+  <text x="600" y="48" class="title">AI 추천 인덱스 검토 흐름</text>
+  <text x="600" y="78" class="subtitle">추천을 바로 적용하지 않고 기존 구조, 반복 쿼리, 실행 계획과 쓰기 비용을 차례로 검증합니다.</text>
 
-  <!-- Stage 1 -->
-  <rect x="60" y="210" width="180" height="115" class="card ai"/>
-  <circle cx="88" cy="238" r="15" fill="#8b5cf6"/>
-  <text x="88" y="243" class="step">1</text>
-  <text x="150" y="250" class="head">AI 추천</text>
-  <text x="150" y="280" class="body">인덱스 초안</text>
-  <text x="150" y="305" class="code">CREATE INDEX ...</text>
+  <!-- Unified principle -->
+  <rect x="100" y="105" width="1000" height="78" class="note"/>
+  <text x="600" y="134" class="head">핵심 원칙</text>
+  <text x="600" y="160" class="body">최종 판단은 AI의 설명이 아니라 실제 스키마, 반복 쿼리와 적용 전후 실행 계획 측정 결과를 근거로 합니다.</text>
 
-  <rect x="300" y="210" width="220" height="115" class="card review"/>
-  <circle cx="328" cy="238" r="15" fill="#2563eb"/>
-  <text x="328" y="243" class="step">2</text>
-  <text x="410" y="250" class="head">기존 인덱스 확인</text>
-  <text x="410" y="280" class="body">PK · UNIQUE · 수동 인덱스</text>
-  <text x="410" y="305" class="small">컬럼·순서·조건과 목적 비교</text>
+  <!-- Stage 1 and duplicate review -->
+  <rect x="50" y="230" width="190" height="120" class="card ai"/>
+  <circle cx="80" cy="260" r="17" fill="#8b5cf6"/>
+  <text x="80" y="265" class="step">1</text>
+  <text x="145" y="272" class="head">AI 추천</text>
+  <text x="145" y="304" class="body">인덱스 후보 초안</text>
+  <text x="145" y="332" class="code">CREATE INDEX ...</text>
 
-  <polygon points="650,190 770,267.5 650,345 530,267.5" class="decision"/>
-  <circle cx="590" cy="218" r="15" fill="#2563eb"/>
-  <text x="590" y="223" class="step">3</text>
-  <text x="650" y="257" class="head">중복되거나</text>
-  <text x="650" y="282" class="head">기존 인덱스로 충분한가?</text>
-  <text x="650" y="307" class="small">동일·포함·유사 목적 검토</text>
+  <rect x="300" y="230" width="230" height="120" class="card review"/>
+  <circle cx="330" cy="260" r="17" fill="#2563eb"/>
+  <text x="330" y="265" class="step">2</text>
+  <text x="415" y="272" class="head">기존 인덱스 확인</text>
+  <text x="415" y="304" class="body">PK · UNIQUE · 수동 인덱스</text>
+  <text x="415" y="332" class="small">컬럼·순서·조건과 목적 비교</text>
 
-  <rect x="840" y="210" width="200" height="115" class="card discard"/>
-  <text x="940" y="250" class="head">추천 폐기</text>
-  <text x="940" y="280" class="body">새 인덱스를 만들지 않음</text>
-  <text x="940" y="305" class="small">기존 인덱스 삭제가 아님</text>
+  <polygon points="760,215 900,290 760,365 620,290" class="decision"/>
+  <rect x="724" y="192" width="72" height="28" rx="14" fill="#2563eb"/>
+  <text x="760" y="211" class="step">3단계</text>
+  <text x="760" y="278" class="head">중복되거나</text>
+  <text x="760" y="304" class="head">기존 인덱스로 충분한가?</text>
+  <text x="760" y="330" class="small">동일·포함·유사 목적 검토</text>
 
-  <!-- Stage 2 -->
-  <rect x="520" y="400" width="260" height="135" class="card review"/>
-  <circle cx="548" cy="428" r="15" fill="#2563eb"/>
-  <text x="548" y="433" class="step">4</text>
-  <text x="650" y="440" class="head">쿼리 패턴 검토</text>
-  <text x="650" y="470" class="body">WHERE · JOIN · ORDER BY · LIMIT</text>
-  <text x="650" y="496" class="body">빈도 · 선택도 · 쓰기 비용</text>
-  <text x="650" y="520" class="small">실제 반복 쿼리를 기준으로 판단</text>
+  <rect x="950" y="230" width="200" height="120" class="card discard"/>
+  <text x="1050" y="272" class="head">추천 폐기</text>
+  <text x="1050" y="304" class="body">새 인덱스를 만들지 않음</text>
+  <text x="1050" y="332" class="small">기존 인덱스 삭제가 아님</text>
 
-  <rect x="850" y="400" width="240" height="135" class="card verify"/>
-  <circle cx="878" cy="428" r="15" fill="#22c55e"/>
-  <text x="878" y="433" class="step">5</text>
-  <text x="970" y="440" class="head">실행 계획 전후 비교</text>
-  <text x="970" y="470" class="code">EXPLAIN (ANALYZE, BUFFERS)</text>
-  <text x="970" y="496" class="body">비용 · 스캔 · 실제 행 수 · 시간</text>
-  <text x="970" y="520" class="small">동일 조건에서 적용 전후 비교</text>
+  <!-- First-row connectors -->
+  <path d="M240 290 H300" class="arrow"/>
+  <path d="M530 290 H620" class="arrow"/>
+  <path d="M900 290 H950" class="arrow-pink"/>
+  <text x="925" y="270" class="branch branch-pink">중복·불필요</text>
 
-  <polygon points="1220,390 1330,467.5 1220,545 1110,467.5" class="decision"/>
-  <circle cx="1165" cy="418" r="15" fill="#2563eb"/>
-  <text x="1165" y="423" class="step">6</text>
-  <text x="1220" y="455" class="head">개선 근거가 충분하고</text>
-  <text x="1220" y="480" class="head">쓰기 비용을 감당 가능한가?</text>
-  <text x="1220" y="505" class="small">성능과 운영 영향 함께 판단</text>
+  <path d="M760 365 V420" class="arrow-blue"/>
+  <text x="814" y="397" class="branch branch-blue">추가 검토</text>
 
-  <rect x="1090" y="215" width="260" height="105" class="card apply"/>
-  <text x="1220" y="252" class="head">적용 후보 승인</text>
-  <text x="1220" y="280" class="body">운영 반영 전 테스트</text>
-  <text x="1220" y="302" class="small">배포·모니터링·롤백 계획 확인</text>
+  <!-- Query-pattern review -->
+  <rect x="625" y="420" width="270" height="130" class="card review"/>
+  <circle cx="655" cy="450" r="17" fill="#2563eb"/>
+  <text x="655" y="455" class="step">4</text>
+  <text x="760" y="462" class="head">쿼리 패턴 검토</text>
+  <text x="760" y="494" class="body">WHERE · JOIN · ORDER BY · LIMIT</text>
+  <text x="760" y="522" class="body">빈도 · 선택도 · 쓰기 비용</text>
+  <text x="760" y="544" class="small">실제 반복 쿼리를 기준으로 판단</text>
 
-  <rect x="1090" y="590" width="260" height="105" class="card hold"/>
-  <text x="1220" y="627" class="head">보류</text>
-  <text x="1220" y="655" class="body">개선 근거 또는 비용 판단 부족</text>
-  <text x="1220" y="677" class="small">쿼리 패턴과 통계를 다시 확인</text>
+  <path d="M760 550 V595" class="arrow"/>
 
-  <!-- Orthogonal connectors -->
-  <path d="M240 267.5 H300" class="arrow"/>
-  <path d="M520 267.5 H530" class="arrow"/>
+  <!-- Plan verification -->
+  <rect x="610" y="595" width="300" height="135" class="card verify"/>
+  <circle cx="640" cy="625" r="17" fill="#22c55e"/>
+  <text x="640" y="630" class="step">5</text>
+  <text x="760" y="637" class="head">실행 계획 전후 비교</text>
+  <text x="760" y="669" class="code">EXPLAIN (ANALYZE, BUFFERS)</text>
+  <text x="760" y="699" class="body">비용 · 스캔 · 실제 행 수 · 실행 시간</text>
+  <text x="760" y="722" class="small">동일 SQL과 동일 조건에서 적용 전후 비교</text>
 
-  <path d="M770 267.5 H840" class="arrow"/>
-  <text x="805" y="250" class="yes">예</text>
+  <path d="M760 730 V800" class="arrow"/>
 
-  <path d="M650 345 V400" class="arrow"/>
-  <text x="684" y="376" class="no">아니요</text>
+  <!-- Final decision -->
+  <polygon points="760,800 920,875 760,950 600,875" class="decision"/>
+  <rect x="724" y="777" width="72" height="28" rx="14" fill="#2563eb"/>
+  <text x="760" y="796" class="step">6단계</text>
+  <text x="760" y="852" class="head">개선 근거가 충분한가?</text>
+  <text x="760" y="880" class="head">쓰기 비용과 운영 영향을</text>
+  <text x="760" y="906" class="head">감당할 수 있는가?</text>
+  <text x="760" y="929" class="small">성능과 운영 비용을 함께 판단</text>
 
-  <path d="M780 467.5 H850" class="arrow"/>
-  <path d="M1090 467.5 H1110" class="arrow"/>
+  <!-- Same-level outcomes -->
+  <path d="M760 950 V972 H540 V995" class="arrow-green"/>
+  <text x="610" y="970" class="branch branch-green">근거 충분</text>
 
-  <path d="M1220 390 V320" class="arrow"/>
-  <text x="1250" y="354" class="yes">예</text>
+  <path d="M760 950 V972 H980 V995" class="arrow-orange"/>
+  <text x="914" y="970" class="branch branch-orange">근거 부족</text>
 
-  <path d="M1220 545 V590" class="arrow"/>
-  <text x="1256" y="572" class="no">아니요</text>
+  <rect x="390" y="995" width="300" height="110" class="card apply"/>
+  <text x="540" y="1033" class="head">적용 후보 승인</text>
+  <text x="540" y="1063" class="body">운영 반영 전 충분한 테스트 수행</text>
+  <text x="540" y="1087" class="small">배포·모니터링·롤백 계획 확인</text>
 
-  <!-- Review notes -->
-  <rect x="60" y="590" width="870" height="105" class="note"/>
-  <text x="495" y="624" class="head">검토 체크포인트</text>
-  <text x="495" y="652" class="body">중복 인덱스 방지 · 복합 인덱스 컬럼 순서 · 부분 인덱스 조건 · 읽기 이득과 쓰기 비용</text>
-  <text x="495" y="678" class="small">보류한 후보는 쿼리·통계·측정 결과와 결정 근거를 기록한 뒤 필요할 때 다시 검토한다</text>
+  <rect x="830" y="995" width="300" height="110" class="card hold"/>
+  <text x="980" y="1033" class="head">보류</text>
+  <text x="980" y="1063" class="body">개선 근거 부족 또는 쓰기 비용 과다</text>
+  <text x="980" y="1087" class="small">쿼리 패턴·통계·측정 결과 재확인</text>
 
-  <rect x="210" y="725" width="940" height="48" class="note"/>
-  <text x="680" y="756" class="small">최종 판단: AI의 설명이 아니라 실제 스키마, 반복 쿼리와 적용 전후 실행 계획을 근거로 승인한다.</text>
+  <!-- Review checklist -->
+  <rect x="120" y="1140" width="960" height="82" class="note"/>
+  <text x="600" y="1170" class="head">검토 체크포인트</text>
+  <text x="600" y="1197" class="body">중복 인덱스 · 복합 인덱스 컬럼 순서 · 부분 인덱스 조건 · 읽기 이득과 쓰기 비용</text>
+  <text x="600" y="1217" class="small">보류 후보는 쿼리·통계·측정 결과와 결정 근거를 기록해 필요할 때 다시 검토합니다.</text>
 </svg>
