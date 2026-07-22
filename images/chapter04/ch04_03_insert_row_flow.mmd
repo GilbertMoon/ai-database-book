@@ -1,8 +1,8 @@
 flowchart TD
-    A["INSERT INTO students<br/>열 목록: name, email, major, grade<br/>값 목록: '김민지', 'minji@example.com', '컴퓨터공학', 2<br/>선택 출력: RETURNING id, name, created_at"]
+    A["INSERT INTO students (name, email, major, grade)<br/>VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2)<br/>RETURNING id, name, created_at;<br/><br/>열 목록과 값 목록은 같은 위치끼리 대응"]
     B["열 목록과 값 목록 대응<br/>열과 값의 개수가 같고 같은 위치끼리 대응해야 함<br/>열 목록의 순서는 바꿀 수 있지만 각 값은 같은 위치의 열에 저장됨"]
     C["생략된 열의 값 결정<br/>id → IDENTITY로 자동 생성<br/>created_at → DEFAULT CURRENT_TIMESTAMP 적용"]
-    D["기본 형식과 값 검사<br/>열·값 개수 · 데이터 타입 · NOT NULL · UNIQUE"]
+    D["데이터 타입과 제약조건 검사<br/>데이터 타입 · NOT NULL · UNIQUE"]
     E{"검사를 통과했는가?"}
     F["students 테이블에 새 행 추가<br/>기존 행은 유지되고 행 수가 1 증가"]
     G["RETURNING 결과 또는 SELECT로 확인<br/>id: 자동 생성값<br/>name: 김민지<br/>created_at: 현재 시각"]
@@ -23,3 +23,6 @@ flowchart TD
     class E decision;
     class F,G ok;
     class H bad;
+
+    linkStyle 4,5 stroke:#2f9a58,stroke-width:2.5px;
+    linkStyle 6 stroke:#d64545,stroke-width:2.5px;
