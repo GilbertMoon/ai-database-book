@@ -1,13 +1,13 @@
 flowchart TB
-    A["정렬 쿼리<br/>ORDER BY title"] --> P["전제와 판단 원칙<br/>title 인덱스 후보 존재<br/>옵티마이저가 전체 비용 비교"]
+    A["정렬 쿼리<br/>SELECT ... ORDER BY title<br/>인덱스 후보: title"] --> P["옵티마이저 판단 원칙<br/>인덱스 존재만으로 Index Scan이 보장되지 않음<br/>읽을 행 수와 정렬 비용을 포함한 전체 비용 비교"]
 
-    P --> B["전체 행 반환<br/>LIMIT 없음"]
-    B --> B2["Seq Scan + Sort 가능<br/>대부분의 행을 읽으면 순차 읽기가 유리할 수 있음"]
+    P --> B["전체 행 반환<br/>ORDER BY title<br/>LIMIT 없음"]
+    B --> B2["Seq Scan + Sort 가능<br/>대부분의 행을 읽으면 순차 읽기 후 정렬이<br/>더 저렴할 수 있음"]
 
-    P --> C["일부 행 반환<br/>LIMIT 20"]
+    P --> C["일부 행 반환<br/>ORDER BY title LIMIT 20"]
     C --> C2["Index Scan 가능성 증가<br/>인덱스 순서에서 앞의 N건만 읽을 수 있음"]
 
-    B2 --> V["EXPLAIN (ANALYZE, BUFFERS) 비교<br/>Sort 노드·실제 행 수·Buffers·실행 시간 확인"]
+    B2 --> V["EXPLAIN (ANALYZE, BUFFERS)로 검증<br/>Sort 노드 · 실제 행 수 · Buffers · 실행 시간<br/>적용 전후 계획 비교"]
     C2 --> V
 
-    N["인덱스 사용은 보장되지 않음<br/>WHERE 조건·정렬 방향·데이터 분포·통계에 따라 달라짐"]
+    N["ORDER BY 인덱스는 정렬 제거 가능성을 제공하지만<br/>최종 선택은 비용 기반 실행 계획으로 확인"]
