@@ -1,18 +1,16 @@
 flowchart TB
-    P["핵심 원칙<br/>결과 한 행의 기준을 먼저 정하고<br/>ERD의 실제 FK → PK 관계만 따라 JOIN"]
+    G["결과 한 행의 기준: 수강신청 한 건<br/>enrollments 한 행에 학생·강의·강사 정보를 추가<br/>필수 FK가 유효하고 각 FK가 하나의 PK를 참조하면 5행 → 5행"]
 
-    G["결과 한 행의 기준<br/>enrollments 한 건<br/>기준 데이터 5행"]
-
-    subgraph PATH[논리적 다중 JOIN 관계 경로]
+    subgraph PATH[논리적 PK·FK JOIN 관계 경로]
         direction LR
         S["students s<br/>PK id<br/>name"]
-        E["enrollments e<br/>PK id<br/>FK student_id · course_id<br/>status · paid_amount · enrolled_at"]
+        E["enrollments e<br/>PK id<br/>FK student_id<br/>FK course_id<br/>status · paid_amount · enrolled_at"]
         C["courses c<br/>PK id<br/>FK instructor_id<br/>title"]
         I["instructors i<br/>PK id<br/>name"]
 
-        E -->|"e.student_id = s.id"| S
-        E -->|"e.course_id = c.id"| C
-        C -->|"c.instructor_id = i.id"| I
+        E -->|"N → 1<br/>e.student_id = s.id"| S
+        E -->|"N → 1<br/>e.course_id = c.id"| C
+        C -->|"N → 1<br/>c.instructor_id = i.id"| I
     end
 
     subgraph COLS[SELECT 결과 컬럼의 출처]
@@ -23,13 +21,16 @@ flowchart TB
         CI["instructors<br/>instructor_name"]
     end
 
-    V["행 수와 의미 검산<br/>원본 enrollments 5행 → INNER JOIN 결과 5행<br/>같은 학생의 반복은 여러 신청을 가진 정상적인 1:N 결과"]
-    W["결과가 예상과 다르면<br/>JOIN 조건·필터·관계 차수·키 중복을 먼저 확인<br/>원인을 모른 채 DISTINCT를 추가하지 않음"]
-    N["주의<br/>이 그림은 SQL의 논리적 관계 경로이며<br/>DBMS의 물리적 JOIN 실행 순서는 실행 계획이 결정"]
+    subgraph CHECK[JOIN 결과 행 수 검산]
+        direction LR
+        V["정상 결과<br/>enrollments 5행 → JOIN 결과 5행<br/>같은 학생의 반복은 정상적인 1:N 결과"]
+        UP["행 수 증가<br/>잘못된 JOIN 조건 · 고유하지 않은 컬럼<br/>의도하지 않은 N:M 관계 · 키 중복<br/>DISTINCT로 원인을 숨기지 않음"]
+        DOWN["행 수 감소<br/>INNER JOIN에서 연결되지 않은 행 제외<br/>JOIN 조건 · 필터 · NULL · 누락 참조 확인"]
+    end
 
-    P --> G
+    N["주의<br/>화살표는 SQL 작성의 논리적 관계 경로이며<br/>실제 물리적 JOIN 순서는 DBMS 실행 계획이 결정"]
+
     G --> E
     PATH --> COLS
-    COLS --> V
-    V --> W
+    COLS --> CHECK
     PATH --- N
