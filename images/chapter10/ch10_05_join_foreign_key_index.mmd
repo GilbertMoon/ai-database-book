@@ -1,19 +1,18 @@
 flowchart LR
-    subgraph PARENT[부모 PK 자동 인덱스]
-        A[students.id<br/>PK 자동 인덱스]
-        C[courses.id<br/>PK 자동 인덱스]
+    subgraph PARENT[부모 테이블]
+        A["students.id<br/>기본키 PK<br/>자동 인덱스 생성"]
+        C["courses.id<br/>기본키 PK<br/>자동 인덱스 생성"]
     end
 
-    subgraph CHILD[자식 FK 컬럼]
-        B[enrollments.student_id<br/>FK 자식 컬럼<br/>자동 인덱스 없음]
-        D[enrollments.course_id<br/>FK 자식 컬럼<br/>자동 인덱스 없음]
+    subgraph CHILD[자식 테이블]
+        B["enrollments.student_id<br/>외래키 FK 자식 컬럼<br/>PostgreSQL 자동 인덱스 없음"]
+        D["enrollments.course_id<br/>외래키 FK 자식 컬럼<br/>PostgreSQL 자동 인덱스 없음"]
     end
 
     A -->|참조| B
     C -->|참조| D
-    B --> E[인덱스 후보 검토<br/>반복 JOIN·WHERE<br/>선택도·쓰기 비용<br/>실행 계획 비교]
+    B --> E["인덱스 후보 검토<br/>반복 JOIN·WHERE인가?<br/>선택도와 쓰기 비용<br/>실행 계획에서 효과 확인"]
     D --> E
-    E -->|효과 확인| G[수동 인덱스 후보]
-    E -->|효과 불충분| H[보류]
-
-    N[FK는 참조 무결성<br/>인덱스는 조회 성능<br/>목적이 다르다]
+    E -->|효과 확인| G["수동 인덱스 후보<br/>DDL 작성·재검증<br/>운영 반영 전 테스트"]
+    E -->|효과 불충분| H["보류<br/>효과 또는 근거 부족<br/>쓰기 비용 포함 재검토"]
+    N["FK는 참조 무결성을 보장하고<br/>인덱스는 조회 성능을 지원<br/>목적을 구분해 판단"]
