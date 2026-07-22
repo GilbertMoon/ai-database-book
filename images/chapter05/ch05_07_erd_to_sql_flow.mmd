@@ -1,6 +1,6 @@
 flowchart LR
-    A[ERD<br/>members 1 ─ N loans N ─ 1 books]
-    B[요소 변환<br/>엔터티 → CREATE TABLE<br/>속성 → 컬럼 + 타입<br/>PK → PRIMARY KEY<br/>관계 → FOREIGN KEY]
-    C[생성 순서<br/>1. members<br/>2. books<br/>3. loans]
-    D[샘플 데이터와 JOIN으로 검증]
+    A["ERD<br/>members 1 ─ N loans N ─ 1 books"]
+    B["요소 변환<br/>엔터티 → CREATE TABLE 후보<br/>속성 → 열 + 타입<br/>식별자 → PRIMARY KEY<br/>관계 → FOREIGN KEY<br/>확정된 고유값 → UNIQUE 후보"]
+    C["생성 순서<br/>1. public.members<br/>2. public.books<br/>3. public.loans"]
+    D["샘플 데이터·JOIN·요구사항 추적으로 검증"]
     A --> B --> C --> D
