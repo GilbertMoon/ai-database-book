@@ -5,7 +5,7 @@
   <style>
       .ko { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #1f2937; }
       .mono { font-family: Consolas, D2Coding, "Courier New", monospace; fill: #1f2937; }
-      .title { font-size: 28px; font-weight: 700; }
+      .title { font-size: 32px; font-weight: 700; }
       .subtitle { font-size: 15px; fill: #4b5563; }
       .box-title { font-size: 18px; font-weight: 700; }
       .body { font-size: 14px; }
