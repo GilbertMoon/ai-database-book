@@ -10,26 +10,26 @@
       <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/>
     </filter>
     <style>
-      text{font-family:"Malgun Gothic","NanumSquare","Noto Sans CJK KR","Apple SD Gothic Neo","Noto Sans KR","UnDotum",Arial,sans-serif;fill:#172033}
-      .title{font-size:34px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
+      .title{font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .card-outline{fill:#ffffff;stroke:#64748b;stroke-width:2}
       .bridge-outline{fill:#ffffff;stroke:#6d43b5;stroke-width:2.2}
       .entity-head{fill:#e8f2ff}
       .bridge-head{fill:#eee7fb}
       .divider{stroke:#cbd5e1;stroke-width:1.2}
-      .name{font-size:26px;font-weight:700;text-anchor:middle;fill:#172033}
-      .type{font-size:18px;font-weight:600;text-anchor:middle;fill:#475569}
-      .field{font-size:20px;font-weight:600;fill:#334155}
-      .badge-text{font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
+      .name{font-size:20px;font-weight:700;text-anchor:middle;fill:#172033}
+      .type{font-size:16px;font-weight:600;text-anchor:middle;fill:#475569}
+      .field{font-size:18px;font-weight:600;fill:#334155}
+      .badge-text{font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#ffffff}
       .pk-badge{fill:#2f6fad}
       .fk-badge{fill:#6d43b5}
       .ref{stroke:#6d43b5;stroke-width:3;fill:none;marker-end:url(#arrow);stroke-linecap:round;stroke-linejoin:round}
-      .ref-label{font-size:18px;font-weight:700;text-anchor:middle;fill:#563596}
-      .cardinality{font-size:19px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#563596}
+      .ref-label{font-size:16px;font-weight:700;text-anchor:middle;fill:#563596}
+      .cardinality{font-size:18px;font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:#563596}
       .cardinality-box{fill:#ffffff;stroke:#9d83cf;stroke-width:1.5}
-      .bridge-note{font-size:19px;font-weight:700;text-anchor:middle;fill:#563596}
-      .direction-note{font-size:18px;font-weight:600;text-anchor:middle;fill:#475569}
-      .bottom-note{font-size:21px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .bridge-note{font-size:17px;font-weight:700;text-anchor:middle;fill:#563596}
+      .direction-note{font-size:15px;font-weight:600;text-anchor:middle;fill:#475569}
+      .bottom-note{font-size:17px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
 
