@@ -1,6 +1,6 @@
 flowchart LR
-    A[같은 SELECT] --> B[인덱스 전 계획]
-    B --> C[인덱스 생성]
-    C --> D[통계 갱신]
-    D --> E[인덱스 후 계획]
-    E --> F[노드 · rows · Buffers 비교]
+    A["같은 SELECT<br/>SQL과 조건 고정"] --> B["인덱스 전<br/>계획과 결과 기록"]
+    B --> C["CREATE INDEX<br/>후보 인덱스 생성"]
+    C --> D["ANALYZE<br/>통계 정보 갱신"]
+    D --> E["인덱스 후<br/>계획과 결과 비교"]
+    E --> F["계획 노드 · actual rows · Buffers · 실행 시간<br/>결과 동일성 확인<br/>한 번의 실행 시간만으로 결론 내리지 않음"]
