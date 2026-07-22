@@ -7,7 +7,7 @@
     </marker>
     <style>
       text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
-      .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
+      .title{font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .cell{fill:#fff;stroke:#64748b;stroke-width:1.5}
       .head{fill:#e9f2fe;font-weight:700}
       .pk{fill:#e8f2ff;stroke:#1f5fb8;stroke-width:2}
