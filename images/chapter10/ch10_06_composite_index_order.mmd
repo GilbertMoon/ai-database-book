@@ -1,13 +1,13 @@
 flowchart TB
-    A["복합 인덱스<br/>(course_id, status)"] --> P["선두 컬럼 원칙<br/>왼쪽 컬럼부터 조건에 포함될수록 활용 가능성이 높음"]
+    A["복합 인덱스<br/>idx_enrollments_course_status<br/>(course_id, status)"] --> P["선두 컬럼 원칙<br/>왼쪽 컬럼부터 조건에 포함될수록<br/>활용 가능성이 높음"]
 
-    P --> B["WHERE course_id = ?"]
-    B --> B2["선두 컬럼 일치<br/>활용 가능성 있음"]
+    P --> B["course_id 단독 조건<br/>WHERE course_id = ?"]
+    B --> B2["활용 가능성 있음<br/>선두 컬럼이 조건에 포함됨"]
 
-    P --> C["WHERE course_id = ?<br/>AND status = ?"]
-    C --> C2["두 컬럼 모두 일치<br/>가장 잘 맞는 조건"]
+    P --> C["course_id + status 조건<br/>WHERE course_id = ? AND status = ?"]
+    C --> C2["가장 잘 맞는 조건<br/>선두 컬럼부터 두 컬럼 모두 일치"]
 
-    P --> D["WHERE status = ?"]
-    D --> D2["선두 컬럼 없음<br/>활용이 제한될 수 있음"]
+    P --> D["status 단독 조건<br/>WHERE status = ?"]
+    D --> D2["활용이 제한될 수 있음<br/>선두 컬럼 course_id가 조건에 없음"]
 
-    N["(course_id, status)와 (status, course_id)는 서로 다른 인덱스<br/>최종 판단은 EXPLAIN으로 확인"]
+    N["(course_id, status)와 (status, course_id)는 서로 다른 인덱스<br/>최종 판단은 EXPLAIN과 실제 조회 패턴으로 확인"]
