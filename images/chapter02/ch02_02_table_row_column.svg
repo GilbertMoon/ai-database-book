@@ -16,6 +16,22 @@
     .line{stroke:#475569;stroke-width:2;fill:none}
     .t{font-size:15px;text-anchor:middle}
     .th{font-size:16px;font-weight:700;text-anchor:middle}
+
+    .call-table{fill:#eff6ff;stroke:#2f5f9f;stroke-width:2.2}
+    .call-table-text{fill:#1d4f91}
+    .line-table{stroke:#2f5f9f;stroke-width:2.4;fill:none}
+
+    .call-row{fill:#fff7e8;stroke:#e59e0b;stroke-width:2.2}
+    .call-row-text{fill:#b45309}
+    .line-row{stroke:#e59e0b;stroke-width:2.4;fill:none}
+
+    .call-col{fill:#effcf3;stroke:#22a55a;stroke-width:2.2}
+    .call-col-text{fill:#15803d}
+    .line-col{stroke:#22a55a;stroke-width:2.4;fill:none}
+
+    .call-cell{fill:#f6f0ff;stroke:#7c4dcb;stroke-width:2.2}
+    .call-cell-text{fill:#6d28d9}
+    .line-cell{stroke:#7c4dcb;stroke-width:2.4;fill:none}
   </style>
   <rect width="1200" height="650" fill="#fff"/>
   <text x="600" y="48" class="title">테이블, 행, 열과 셀의 구조</text>
@@ -43,14 +59,25 @@
   <rect x="570" y="319" width="230" height="76" class="cell"/><text x="685" y="364" class="t">seoyeon@example.com</text>
   <rect x="800" y="319" width="150" height="76" class="cell col"/><text x="875" y="364" class="t">경영학</text>
 
-  <rect x="55" y="145" width="175" height="70" rx="12" class="call"/><text x="142" y="173" class="label">테이블</text><text x="142" y="197" class="hint">기록의 집합</text>
-  <path d="M230 180H250" class="line"/>
-  <rect x="55" y="280" width="175" height="70" rx="12" class="call"/><text x="142" y="308" class="label">행</text><text x="142" y="332" class="hint">하나의 기록</text>
-  <path d="M230 315H250" class="line"/>
-  <rect x="970" y="145" width="175" height="70" rx="12" class="call"/><text x="1058" y="173" class="label">열</text><text x="1058" y="197" class="hint">데이터 항목</text>
-  <path d="M970 180H875V171" class="line"/>
-  <rect x="970" y="280" width="175" height="70" rx="12" class="call"/><text x="1058" y="308" class="label">셀</text><text x="1058" y="332" class="hint">하나의 값</text>
-  <path d="M970 315H875V245" class="line"/>
+  <rect x="55" y="145" width="175" height="70" rx="12" class="call-table"/>
+  <text x="142" y="171" class="label call-table-text">테이블 (Table)</text>
+  <text x="142" y="197" class="hint">기록의 집합</text>
+  <path d="M230 180H250" class="line-table"/>
+
+  <rect x="55" y="280" width="175" height="70" rx="12" class="call-row"/>
+  <text x="142" y="306" class="label call-row-text">행 (Row)</text>
+  <text x="142" y="332" class="hint">하나의 기록</text>
+  <path d="M230 315H250" class="line-row"/>
+
+  <rect x="970" y="145" width="175" height="70" rx="12" class="call-col"/>
+  <text x="1058" y="171" class="label call-col-text">열 (Column)</text>
+  <text x="1058" y="197" class="hint">데이터 항목</text>
+  <path d="M970 180H875V171" class="line-col"/>
+
+  <rect x="970" y="280" width="175" height="70" rx="12" class="call-cell"/>
+  <text x="1058" y="306" class="label call-cell-text">셀 (Cell)</text>
+  <text x="1058" y="332" class="hint">하나의 값</text>
+  <path d="M970 315H875V245" class="line-cell"/>
 
   <text x="600" y="475" class="label">행과 열이 만나는 지점이 셀이다.</text>
   <text x="600" y="505" class="hint">SQL을 읽을 때는 어떤 테이블의 어떤 열을 기준으로 어떤 행을 다루는지 함께 확인한다.</text>
