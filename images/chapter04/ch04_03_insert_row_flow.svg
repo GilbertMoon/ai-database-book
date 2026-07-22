@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 1160" role="img" aria-labelledby="title desc">
   <title id="title">INSERT로 새 행 추가하기</title>
-  <desc id="desc">완성된 INSERT 문에서 명시한 열과 VALUES 값이 같은 위치끼리 대응하고, 생략한 id와 created_at의 자동값이 결정된 뒤 데이터 타입과 제약조건 검사를 통과하면 students 테이블에 새 행이 추가되며, 실패하면 행이 추가되지 않는 흐름을 보여 주는 도식</desc>
+  <desc id="desc">완성된 INSERT 문에서 명시한 열과 VALUES 값이 같은 위치끼리 대응하고, 생략한 id와 created_at의 자동값이 결정된 뒤 문법, 열 이름, 데이터 타입과 제약조건 검사를 통과하면 students 테이블에 새 행이 추가되며, 실패하면 행이 추가되지 않는 흐름을 보여 주는 도식</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
     <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2f9a58"/></marker>
@@ -13,7 +13,7 @@
       .label{font-size:18px;font-weight:700;text-anchor:middle}
       .sql{font-size:16px;font-weight:700;text-anchor:middle}
       .code{font-size:16px;font-weight:700}
-      .celltext{font-size:14px;font-weight:700}
+      .celltext{font-size:14px;font-weight:700;text-anchor:middle}
       .sub{font-size:14px;text-anchor:middle;fill:#475569}
       .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
       .branch{font-size:16px;font-weight:700;text-anchor:middle}
@@ -33,37 +33,38 @@
   <text x="600" y="56" class="title">INSERT로 새 행 추가하기</text>
 
   <rect x="90" y="90" width="1020" height="338" rx="20" class="insert"/>
-  <text x="600" y="125" class="mono sql">INSERT INTO students (name, email, major, grade)</text>
-  <text x="600" y="150" class="mono sql">VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2) RETURNING id, name, created_at;</text>
-  <text x="360" y="181" class="label">열 목록</text>
-  <text x="840" y="181" class="label">값 목록</text>
+  <text x="600" y="120" class="mono sql">INSERT INTO students (name, email, major, grade)</text>
+  <text x="600" y="145" class="mono sql">VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2)</text>
+  <text x="600" y="170" class="mono sql">RETURNING id, name, created_at;</text>
+  <text x="360" y="199" class="label">열 목록</text>
+  <text x="840" y="199" class="label">값 목록</text>
 
-  <rect x="170" y="196" width="320" height="42" rx="10" class="neutral"/>
-  <rect x="710" y="196" width="320" height="42" rx="10" class="neutral"/>
-  <text x="194" y="223" class="mono code">name</text>
-  <text x="734" y="223" class="mono code">'김민지'</text>
-  <path d="M500 217H700" class="ghost"/>
+  <rect x="170" y="214" width="320" height="42" rx="10" class="neutral"/>
+  <rect x="710" y="214" width="320" height="42" rx="10" class="neutral"/>
+  <text x="194" y="241" class="mono code">name</text>
+  <text x="734" y="241" class="mono code">'김민지'</text>
+  <path d="M500 235H700" class="ghost"/>
 
-  <rect x="170" y="242" width="320" height="42" rx="10" class="neutral"/>
-  <rect x="710" y="242" width="320" height="42" rx="10" class="neutral"/>
-  <text x="194" y="269" class="mono code">email</text>
-  <text x="734" y="269" class="mono code">'minji@example.com'</text>
-  <path d="M500 263H700" class="ghost"/>
+  <rect x="170" y="260" width="320" height="42" rx="10" class="neutral"/>
+  <rect x="710" y="260" width="320" height="42" rx="10" class="neutral"/>
+  <text x="194" y="287" class="mono code">email</text>
+  <text x="734" y="287" class="mono code">'minji@example.com'</text>
+  <path d="M500 281H700" class="ghost"/>
 
-  <rect x="170" y="288" width="320" height="42" rx="10" class="neutral"/>
-  <rect x="710" y="288" width="320" height="42" rx="10" class="neutral"/>
-  <text x="194" y="315" class="mono code">major</text>
-  <text x="734" y="315" class="mono code">'컴퓨터공학'</text>
-  <path d="M500 309H700" class="ghost"/>
+  <rect x="170" y="306" width="320" height="42" rx="10" class="neutral"/>
+  <rect x="710" y="306" width="320" height="42" rx="10" class="neutral"/>
+  <text x="194" y="333" class="mono code">major</text>
+  <text x="734" y="333" class="mono code">'컴퓨터공학'</text>
+  <path d="M500 327H700" class="ghost"/>
 
-  <rect x="170" y="334" width="320" height="42" rx="10" class="neutral"/>
-  <rect x="710" y="334" width="320" height="42" rx="10" class="neutral"/>
-  <text x="194" y="361" class="mono code">grade</text>
-  <text x="734" y="361" class="mono code">2</text>
-  <path d="M500 355H700" class="ghost"/>
+  <rect x="170" y="352" width="320" height="42" rx="10" class="neutral"/>
+  <rect x="710" y="352" width="320" height="42" rx="10" class="neutral"/>
+  <text x="194" y="379" class="mono code">grade</text>
+  <text x="734" y="379" class="mono code">2</text>
+  <path d="M500 373H700" class="ghost"/>
 
-  <text x="600" y="396" class="sub">RETURNING은 추가된 행의 id, name, created_at을 즉시 반환한다</text>
-  <text x="600" y="420" class="sub">문자열은 작은따옴표를 사용하고 숫자는 따옴표 없이 입력한다</text>
+  <text x="600" y="405" class="sub">RETURNING은 추가된 행의 id, name, created_at을 즉시 반환한다</text>
+  <text x="600" y="424" class="sub">문자열은 작은따옴표를 사용하고 숫자는 따옴표 없이 입력한다</text>
 
   <path d="M600 428V462" class="line"/>
 
@@ -76,17 +77,19 @@
 
   <rect x="220" y="626" width="760" height="120" rx="18" class="check"/>
   <text x="600" y="666" class="section">생략된 열의 값 결정</text>
-  <rect x="280" y="686" width="280" height="42" rx="10" class="neutral"/>
-  <rect x="640" y="686" width="280" height="42" rx="10" class="neutral"/>
-  <text x="304" y="713" class="mono celltext">id → IDENTITY로 자동 생성</text>
-  <text x="654" y="713" class="mono celltext">created_at → DEFAULT CURRENT_TIMESTAMP 적용</text>
-  <text x="600" y="738" class="sub">생략한 열에 DEFAULT가 없고 NULL을 허용하면 NULL이 저장될 수 있다</text>
+  <rect x="280" y="682" width="280" height="46" rx="10" class="neutral"/>
+  <rect x="640" y="682" width="280" height="46" rx="10" class="neutral"/>
+  <text x="420" y="701" class="mono celltext">id → IDENTITY</text>
+  <text x="420" y="719" class="mono celltext">자동 생성</text>
+  <text x="780" y="701" class="mono celltext">created_at → DEFAULT</text>
+  <text x="780" y="719" class="mono celltext">CURRENT_TIMESTAMP 적용</text>
+  <text x="600" y="741" class="sub">생략한 열에 DEFAULT가 없고 NULL을 허용하면 NULL이 저장될 수 있다</text>
 
   <path d="M600 746V780" class="line"/>
 
   <rect x="250" y="790" width="700" height="90" rx="18" class="check"/>
-  <text x="600" y="828" class="section">데이터 타입과 제약조건 검사</text>
-  <text x="600" y="858" class="sub">데이터 타입 · NOT NULL · UNIQUE</text>
+  <text x="600" y="826" class="section">문법·열 이름·데이터 타입·제약조건 검사</text>
+  <text x="600" y="858" class="sub">PRIMARY KEY · NOT NULL · UNIQUE</text>
 
   <path d="M600 880V900" class="line"/>
 
@@ -112,6 +115,5 @@
   <text x="895" y="1094" class="sub">id: 자동 생성값 · name: 김민지 · created_at: 현재 시각</text>
   <text x="895" y="1120" class="sub">필요하면 SELECT로 테이블 전체 상태를 다시 확인한다</text>
 
-  <text x="240" y="1066" class="note">실패하면 새 행이 추가되지 않는다.</text>
-  <text x="895" y="1138" class="note">RETURNING 또는 SELECT로 입력 결과를 확인한다.</text>
+  <text x="600" y="1148" class="note">성공하면 반환 결과를 확인하고, 실패하면 오류 메시지에서 원인을 확인한다.</text>
 </svg>
