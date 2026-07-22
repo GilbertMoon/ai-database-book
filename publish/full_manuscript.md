@@ -1308,6 +1308,8 @@ PostgreSQL 서버 실행
 
 - PostgreSQL 서버와 DBeaver의 역할을 구분한다.
 - 로컬 PostgreSQL을 준비하고 실행 상태를 확인한다.
+- 로컬 PostgreSQL과 관리형 PostgreSQL의 차이를 설명한다.
+- Supabase가 PostgreSQL을 중심으로 제공되는 관리형 백엔드 플랫폼임을 설명한다.
 - DBeaver에서 PostgreSQL 연결을 만든다.
 - `ai_database_book` 데이터베이스를 생성한다.
 - 현재 연결된 데이터베이스와 스키마를 SQL로 확인한다.
@@ -1415,6 +1417,52 @@ PostgreSQL과 DBeaver는 같은 종류의 프로그램이 아닙니다.
 - 이후 웹 서비스와 연결할 원격 데이터베이스가 필요하다.
 
 어떤 환경을 선택하더라도 DBeaver 연결에 필요한 기본 정보와 SQL 문법은 거의 같습니다. 다만 이 책의 설치와 오류 설명은 로컬 PostgreSQL을 기본으로 합니다.
+
+### 3.1 관리형 PostgreSQL의 예: Supabase
+
+Supabase는 PostgreSQL을 클라우드에서 사용할 수 있도록 제공하면서 인증, 파일 저장소, 실시간 데이터 전달과 서버 측 함수 같은 기능을 함께 제공하는 백엔드 플랫폼입니다. Supabase 프로젝트를 만들면 PostgreSQL을 단순화한 별도의 데이터베이스가 아니라 실제 PostgreSQL 데이터베이스가 생성됩니다.
+
+따라서 이 책에서 배우는 다음 내용은 Supabase의 데이터베이스에서도 그대로 적용할 수 있습니다.
+
+```text
+테이블과 관계
+PK·FK와 제약조건
+SQL과 CRUD
+JOIN과 집계
+트랜잭션
+인덱스와 실행 계획
+권한과 보안
+```
+
+Supabase의 구조를 단순화하면 다음과 같습니다.
+
+```text
+DBeaver · SQL Editor · 애플리케이션
+                 ↓
+        PostgreSQL 데이터베이스
+     테이블 · 관계 · SQL · 인덱스
+          ↑        ↑        ↑
+        Auth     Storage   Realtime
+```
+
+핵심은 Supabase에서도 데이터의 중심이 PostgreSQL이라는 점입니다. Auth, Storage, Realtime과 Edge Functions는 PostgreSQL을 활용한 웹·모바일 서비스 개발을 돕는 추가 기능입니다.
+
+| 구분 | 로컬 PostgreSQL | Supabase |
+| --- | --- | --- |
+| 서버 준비 | 사용자가 직접 설치 | 클라우드 프로젝트 생성 |
+| 서버 관리 | 사용자가 서비스와 설정 관리 | 플랫폼이 기본 운영 환경 관리 |
+| SQL 실행 | DBeaver·psql | DBeaver·SQL Editor 등 |
+| 외부 연결 | 직접 접속과 별도 애플리케이션 구성 | PostgreSQL 연결과 데이터 API 제공 |
+| 추가 기능 | 필요한 기능을 별도로 구성 | Auth·Storage·Realtime·Edge Functions 제공 |
+| 주요 보안 항목 | DB 사용자와 비밀번호 관리 | 접속 정보·API 키·RLS 정책 관리 |
+
+DBeaver에서는 Supabase가 제공하는 PostgreSQL 접속 정보를 사용해 원격 데이터베이스에 연결할 수 있습니다. 다만 연결 방식과 포트는 직접 연결인지, 연결 풀러를 사용하는지에 따라 달라질 수 있으므로 프로젝트의 최신 연결 안내를 확인해야 합니다.
+
+> **Supabase 보안 주의**
+>
+> 브라우저나 모바일 앱에서 데이터에 접근하도록 구성할 때는 Row Level Security(RLS) 정책을 함께 검토해야 합니다. 공개 가능한 클라이언트용 키와 서버에서만 사용해야 하는 비밀 키를 구분하고, 전체 데이터베이스 접속 문자열과 비밀 키는 공개 저장소나 AI 질문에 포함하지 않습니다.
+
+Supabase는 이 책의 필수 실습 환경이 아닙니다. 본문 실습은 계속 로컬 PostgreSQL과 DBeaver를 기준으로 진행하며, Supabase는 설치 부담을 줄이거나 이후 웹 서비스와 연결할 때 선택할 수 있는 관리형 PostgreSQL의 대표 사례로 이해하면 충분합니다.
 
 ---
 
@@ -2044,6 +2092,10 @@ DBeaver는 클라이언트입니다. 연결할 PostgreSQL 서버가 별도로 �
 | --- | --- |
 | PostgreSQL | 데이터를 저장하고 SQL을 처리하는 관계형 DBMS |
 | DBeaver | PostgreSQL에 연결해 SQL과 결과를 확인하는 클라이언트 |
+| 로컬 PostgreSQL | 자신의 컴퓨터에 직접 설치하고 관리하는 PostgreSQL 환경 |
+| 관리형 PostgreSQL | 클라우드에서 서버 운영 부담을 줄여 제공되는 PostgreSQL 환경 |
+| Supabase | PostgreSQL을 중심으로 Auth·Storage·Realtime 등의 기능을 함께 제공하는 관리형 백엔드 플랫폼 |
+| RLS | 사용자나 역할에 따라 접근 가능한 행을 제한하는 PostgreSQL 보안 정책 |
 | Host | PostgreSQL 서버가 실행되는 컴퓨터의 주소 |
 | Port | PostgreSQL 접속 통로의 번호 |
 | Database | 연결할 논리적 데이터베이스 |
