@@ -1,14 +1,43 @@
 -- Chapter 14. 기간별·범주별 분석
--- 목적: 월별 변화, 범주별 차이와 완료 기간을 분석합니다.
+-- 목적: P14-Q02·Q05 질문을 고정 기간과 재현 가능한 월 기준표로 분석합니다.
+-- paid_amount는 신청 당시 기록 금액입니다.
 
--- 1. 월별 신청 건수와 결제금액
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+
+-- P14-Q02. 데이터가 없는 월도 0으로 유지하는 월별 신청 건수와 기록 금액
+WITH parameters AS (
+    SELECT start_date, end_date_exclusive
+    FROM analysis_lab.analysis_parameters
+),
+months AS (
+    SELECT generate_series(
+        p.start_date,
+        p.end_date_exclusive - INTERVAL '1 month',
+        INTERVAL '1 month'
+    )::date AS enrollment_month
+    FROM parameters AS p
+),
+monthly_actual AS (
+    SELECT
+        DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
+        COUNT(*) AS enrollment_count,
+        SUM(e.paid_amount) AS recorded_amount_sum
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+    GROUP BY DATE_TRUNC('month', e.enrolled_at)
+)
 SELECT
-    DATE_TRUNC('month', enrolled_at)::date AS enrollment_month,
-    COUNT(*) AS enrollment_count,
-    SUM(paid_amount) AS paid_amount_sum
-FROM analysis_lab.enrollments
-GROUP BY DATE_TRUNC('month', enrolled_at)
-ORDER BY enrollment_month;
+    m.enrollment_month,
+    COALESCE(a.enrollment_count, 0) AS enrollment_count,
+    COALESCE(a.recorded_amount_sum, 0) AS recorded_amount_sum
+FROM months AS m
+LEFT JOIN monthly_actual AS a
+    ON a.enrollment_month = m.enrollment_month
+ORDER BY m.enrollment_month;
 
 -- 기대:
 -- 2026-01 3 / 200000
@@ -18,14 +47,38 @@ ORDER BY enrollment_month;
 -- 2026-05 4 / 390000
 -- 2026-06 4 / 570000
 
--- 2. 이전 달 신청 건수와 비교
-WITH monthly AS (
+-- 이전 달과 비교: date spine이 있으므로 중간 월이 비어도 이전 달 의미가 유지됩니다.
+WITH parameters AS (
+    SELECT start_date, end_date_exclusive
+    FROM analysis_lab.analysis_parameters
+),
+months AS (
+    SELECT generate_series(
+        p.start_date,
+        p.end_date_exclusive - INTERVAL '1 month',
+        INTERVAL '1 month'
+    )::date AS enrollment_month
+    FROM parameters AS p
+),
+monthly_actual AS (
     SELECT
-        DATE_TRUNC('month', enrolled_at)::date AS enrollment_month,
+        DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
         COUNT(*) AS enrollment_count,
-        SUM(paid_amount) AS paid_amount_sum
-    FROM analysis_lab.enrollments
-    GROUP BY DATE_TRUNC('month', enrolled_at)
+        SUM(e.paid_amount) AS recorded_amount_sum
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+    GROUP BY DATE_TRUNC('month', e.enrolled_at)
+),
+monthly AS (
+    SELECT
+        m.enrollment_month,
+        COALESCE(a.enrollment_count, 0) AS enrollment_count,
+        COALESCE(a.recorded_amount_sum, 0) AS recorded_amount_sum
+    FROM months AS m
+    LEFT JOIN monthly_actual AS a
+        ON a.enrollment_month = m.enrollment_month
 )
 SELECT
     enrollment_month,
@@ -37,34 +90,48 @@ SELECT
         - LAG(enrollment_count) OVER (
             ORDER BY enrollment_month
         ) AS enrollment_count_change,
-    paid_amount_sum,
-    LAG(paid_amount_sum) OVER (
+    recorded_amount_sum,
+    LAG(recorded_amount_sum) OVER (
         ORDER BY enrollment_month
-    ) AS previous_paid_amount_sum,
-    paid_amount_sum
-        - LAG(paid_amount_sum) OVER (
+    ) AS previous_recorded_amount_sum,
+    recorded_amount_sum
+        - LAG(recorded_amount_sum) OVER (
             ORDER BY enrollment_month
-        ) AS paid_amount_change
+        ) AS recorded_amount_change
 FROM monthly
 ORDER BY enrollment_month;
 
--- 3. 월별 상태 구성
+-- 월별 상태 구성
+WITH filtered_enrollments AS (
+    SELECT e.*
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN analysis_lab.analysis_parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+)
 SELECT
     DATE_TRUNC('month', enrolled_at)::date AS enrollment_month,
     status,
     COUNT(*) AS enrollment_count
-FROM analysis_lab.enrollments
+FROM filtered_enrollments
 GROUP BY DATE_TRUNC('month', enrolled_at), status
 ORDER BY enrollment_month, status;
 
--- 4. 범주별 신청 건수와 결제금액
+-- 범주별 신청 건수와 기록 금액
+WITH filtered_enrollments AS (
+    SELECT e.*
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN analysis_lab.analysis_parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+)
 SELECT
     c.category,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS paid_amount_sum,
-    ROUND(AVG(e.paid_amount), 2) AS avg_paid_amount
-FROM analysis_lab.courses c
-LEFT JOIN analysis_lab.enrollments e
+    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum,
+    ROUND(AVG(e.paid_amount), 2) AS avg_recorded_amount
+FROM analysis_lab.courses AS c
+LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
 GROUP BY c.category
 ORDER BY enrollment_count DESC, c.category;
@@ -75,7 +142,16 @@ ORDER BY enrollment_count DESC, c.category;
 -- Data Analysis 5 / 560000
 -- AI 4 / 640000
 
--- 5. 범주별 완료율
+-- 범주별 현재 완료 상태 비중
+-- 이는 전체 신청 중 현재 완료 상태가 차지하는 비율입니다.
+-- 실제 완료율은 관찰 기간이 충분한 코호트와 취소 포함 여부를 별도로 정의해야 합니다.
+WITH filtered_enrollments AS (
+    SELECT e.*
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN analysis_lab.analysis_parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+)
 SELECT
     c.category,
     COUNT(e.id) AS enrollment_count,
@@ -87,25 +163,40 @@ SELECT
         * 100.0
         / NULLIF(COUNT(e.id), 0),
         2
-    ) AS completion_rate_pct
-FROM analysis_lab.courses c
-LEFT JOIN analysis_lab.enrollments e
+    ) AS completed_share_pct
+FROM analysis_lab.courses AS c
+LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
 GROUP BY c.category
 ORDER BY c.category;
 
--- 6. 완료 기간 요약
+-- P14-Q05. 완료된 신청의 완료 기간 요약
+-- 아직 완료되지 않은 신청은 제외되므로 전체 수강생의 평균 소요 기간으로 일반화하지 않습니다.
+WITH filtered_enrollments AS (
+    SELECT e.*
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN analysis_lab.analysis_parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+)
 SELECT
     COUNT(*) AS completed_count,
     ROUND(AVG(completed_at - enrolled_at), 2) AS avg_completion_days,
     MIN(completed_at - enrolled_at) AS min_completion_days,
     MAX(completed_at - enrolled_at) AS max_completion_days
-FROM analysis_lab.enrollments
+FROM filtered_enrollments
 WHERE status = '완료';
 
 -- 기대: completed_count 12, avg 25, min 18, max 36
 
--- 7. 강의별 평균 완료 기간
+-- 강의별 완료된 신청의 평균 완료 기간
+WITH filtered_enrollments AS (
+    SELECT e.*
+    FROM analysis_lab.enrollments AS e
+    CROSS JOIN analysis_lab.analysis_parameters AS p
+    WHERE e.enrolled_at >= p.start_date
+      AND e.enrolled_at < p.end_date_exclusive
+)
 SELECT
     c.id AS course_id,
     c.title,
@@ -117,20 +208,24 @@ SELECT
             FILTER (WHERE e.status = '완료'),
         2
     ) AS avg_completion_days
-FROM analysis_lab.courses c
-LEFT JOIN analysis_lab.enrollments e
+FROM analysis_lab.courses AS c
+LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
 GROUP BY c.id, c.title
 ORDER BY c.id;
 
--- 8. 분석 기간 검산
+-- 분석 기간 검산
 SELECT
-    MIN(enrolled_at) AS min_enrolled_at,
-    MAX(enrolled_at) AS max_enrolled_at,
+    p.start_date,
+    p.end_date_exclusive,
+    MIN(e.enrolled_at) AS min_enrolled_at,
+    MAX(e.enrolled_at) AS max_enrolled_at,
     COUNT(*) AS enrollment_count,
-    SUM(paid_amount) AS paid_amount_sum
-FROM analysis_lab.enrollments
-WHERE enrolled_at >= DATE '2026-01-01'
-  AND enrolled_at < DATE '2026-07-01';
+    SUM(e.paid_amount) AS recorded_amount_sum
+FROM analysis_lab.enrollments AS e
+CROSS JOIN analysis_lab.analysis_parameters AS p
+WHERE e.enrolled_at >= p.start_date
+  AND e.enrolled_at < p.end_date_exclusive
+GROUP BY p.start_date, p.end_date_exclusive;
 
--- 기대: 2026-01-10 / 2026-06-22 / 24 / 2770000
+-- 기대: 2026-01-01 / 2026-07-01 / 2026-01-10 / 2026-06-22 / 24 / 2770000
