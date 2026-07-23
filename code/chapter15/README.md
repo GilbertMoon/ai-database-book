@@ -2,19 +2,17 @@
 
 ## 데이터베이스 종합 프로젝트
 
-이 폴더는 `tutor_project` 전용 스키마에서 AI 튜터링 질문 관리 서비스를 구축하고, 요구사항·메타데이터·업무 조회·트랜잭션·반례·성능·운영과 SQL·Python 분석을 검증하는 템플릿 패키지를 제공합니다.
+`code/chapter15/templates/`는 `tutor_project`에서 요구사항·구조·Seed·트랜잭션·반례·인덱스·권한·복구와 실제 SQL·pandas 분석을 검증하는 최종 프로젝트 패키지입니다.
 
 ## 보호 범위
 
 ```text
-course_project: 변경하지 않음
-transaction_lab: 변경하지 않음
-performance_lab: 변경하지 않음
-security_lab: 변경하지 않음
-nosql_lab: 변경하지 않음
-ai_review_lab: 변경하지 않음
-analysis_lab: 변경하지 않음
-tutor_project: Chapter 15 프로젝트 대상
+course_project·transaction_lab·performance_lab
+security_lab·nosql_lab·ai_review_lab·analysis_lab·public
+→ 변경하지 않음
+
+tutor_project
+→ Chapter 15 생성·검증·분석·초기화 대상
 ```
 
 ## 폴더 구조
@@ -34,9 +32,11 @@ code/chapter15/templates/
 ├── 08_operations_checks.sql
 ├── 09_analysis_dataset.sql
 ├── 10_completion_gate.sql
+├── 11_restore_validation.sql
 ├── python/
 │   ├── requirements.txt
 │   ├── .env.example
+│   ├── validation_utils.py
 │   ├── 01_load_postgresql.py
 │   ├── 02_pandas_analysis.py
 │   └── 03_result_validation.py
@@ -50,74 +50,62 @@ code/chapter15/templates/
 └── queries.sql
 ```
 
-마지막 세 파일은 기존 링크 호환용 안내 파일입니다.
+마지막 세 SQL은 기존 링크 호환용 안내 파일입니다.
 
-## 필수 실행 순서
+## 실행 순서
 
 ```text
-01_schema.sql
-→ 02_seed.sql
-→ 03_metadata_validation.sql
-→ 04_requirement_queries.sql
-→ 05_transaction_checks.sql
-→ 06_negative_tests.sql
-→ 07_performance_checks.sql
-→ 08_operations_checks.sql
-→ 09_analysis_dataset.sql
-→ Python 분석·검증
-→ 10_completion_gate.sql
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10
+→ Python 01 → 02 → 03
+→ 백업·별도 DB 복원 → 복원 DB에서 11
+→ 보고서·AI diff·최종 판단
 ```
 
-처음부터 다시 시작할 때만 `reset_tutor_project.sql`을 검토·선택 실행합니다.
+처음부터 다시 시작할 때만 보호 구문이 포함된 `reset_tutor_project.sql`을 사용합니다.
 
 ## 기준 결과
 
 | 항목 | 기대 |
 | --- | ---: |
-| students | 4 |
-| tutors | 3 |
-| questions | 5 |
-| answers | 5 |
-| learning_materials | 6 |
-| question_materials | 7 |
-| FK | 5 |
-| IDENTITY PK | 5 |
-| 업무 인덱스 | 3 |
-| CASCADE FK | 0 |
-| 질문 없는 학생 | 1 |
-| 연결되지 않은 자료 | 1 |
-| 답변 없는 open 질문 | 1 |
-| 자동 반례 unexpected | 0 |
-| 분석 VIEW 행 수 | 5 |
-| question_id 중복 | 0 |
-| answer_count 합계 | 5 |
-| material_count 합계 | 7 |
-| `required_completion_gate_passed` | true |
+| base tables / views / sequences | 6 / 4 / 5 |
+| constraints / FK / business indexes | 36 / 5 / 3 |
+| students·tutors·questions | 4·3·5 |
+| answers·materials·links | 5·6·7 |
+| IDENTITY 다음 값 | 105·204·306·406·507 이상 |
+| 업무·시간 정합성 이상 | 0 |
+| 반례·경계값 | 23/23, unexpected 0 |
+| 질문·학생·튜터 VIEW | 5·4·3행 |
+| answer_count·material_count | 5·7 |
+| 첫 답변 | 4건·평균 2시간·음수 0 |
+| DB 완료 게이트 | passed Notice |
+| 실제 SQL·pandas 요약 | 5종 일치 |
+| 별도 DB 복원 검증 | passed Notice |
 
-## 안전 원칙
+## Python 보안·검증
 
 ```text
-- 생성 파일에서 자동 DROP을 실행하지 않습니다.
-- 모든 객체에 tutor_project 스키마를 명시합니다.
-- 명시적 ID와 고정 시각으로 샘플을 재현합니다.
-- Role·GRANT·백업·복원은 자동 실행하지 않습니다.
-- 실제 개인정보·비밀번호·토큰·접속 URL을 기록하지 않습니다.
-- .env·백업·실제 CSV를 커밋하지 않습니다.
-- 분석 코드는 읽기 전용 SELECT를 사용합니다.
-- Python에서 중복·NULL을 임의 제거하지 않습니다.
-- SQL과 pandas 결과를 교차 검증합니다.
+PGHOST·PGPORT·PGDATABASE·PGUSER·PGPASSFILE
+REPEATABLE READ, READ ONLY
+정확한 컬럼·자료형·행 단위 검증
+실제 SQL 결과와 pandas 결과 직접 비교
 ```
 
-## 완료 기준
+`DATABASE_URL`에 비밀번호를 기록하지 않으며 실제 password file은 저장소 밖에서 보호합니다.
+
+## 완료 기준 구분
 
 ```text
-requirements·erd·DDL·SQL·Python·보고서 일치
-기준 행 수와 메타데이터 일치
-ROLLBACK 후 기준 데이터 복구
-반례 unexpected 0
-분석 VIEW 5행·중복 0
-SQL·Python 핵심 집계 일치
-required_completion_gate_passed true
-운영·백업·복구 계획 기록
-AI diff와 미실행 항목 기록
+10 통과
+→ DB 구조·데이터·SQL 검증 완료
+
+Python 03 통과
+→ 같은 스냅샷의 SQL·pandas 결과 일치
+
+11 통과
+→ 백업의 별도 DB 복구 가능성 확인
+
+실제 Role 시험·문서·AI diff 승인
+→ 전체 프로젝트 최종 판단 근거
 ```
+
+미실행 항목은 통과로 기록하지 않습니다. `access_scope`는 업무 분류이며 실제 접근 권한이 아닙니다.
