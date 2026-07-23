@@ -1,218 +1,207 @@
-# Chapter 15 방향 전환 반영 기록
+# Chapter 15 최종 출판 검수 반영 기록
 
-## 대상 Chapter
-
-```text
-기존: 실전 프로젝트 2: 재현 가능한 AI 데이터베이스 서비스 완성하기
-변경: 데이터베이스 종합 프로젝트
-```
-
-## 변경 목적
-
-도서 전체 방향을 PostgreSQL·SQL·데이터 설계·분석 중심으로 조정했습니다. Chapter 15는 요구사항, ERD, DDL, 검증, 운영과 AI 활용뿐 아니라 Chapter 14의 SQL·Python 데이터 분석까지 하나의 프로젝트로 통합합니다.
+## 대상
 
 ```text
-문제·범위
-→ 요구사항·미확정 정책
-→ ERD·DDL
-→ 기준 데이터
-→ 메타데이터·업무 조회
-→ 트랜잭션·반례
-→ 인덱스·운영·복구
-→ 분석용 데이터셋
-→ SQL·Python 분석
-→ AI diff 검토
-→ 완료 게이트
+book/chapter15/chapter15.md
+book/chapter15/chapter15_activity.md
+book/chapter15/chapter15_outline.md
+code/chapter15/templates/ 전체
+code/chapter15/README.md
+notes/chapter15_review_checklist.md
+images/chapter15/ch15_03_project_structure.mmd·svg
+README.md
 ```
 
----
+## 검수 목적
 
-## 1. 제목과 중심 메시지 변경
-
-기존에는 AI 데이터베이스 서비스와 선택 RAG 확장이 강조되었습니다. 변경 후에는 데이터베이스 설계·분석·검증의 통합과 재현성을 중심에 둡니다.
-
-> 프로젝트는 SQL이 실행되거나 그래프가 생성되는 것으로 끝나지 않는다. 설계와 데이터가 요구사항에 맞고, SQL과 Python 결과가 일치하며, 다른 사람이 같은 절차로 재현할 수 있어야 한다.
-
----
-
-## 2. 필수·선택 범위 변경
-
-필수:
+Chapter 15를 단순 종합 예제에서 다음 증거를 분리해 판정하는 최종 프로젝트로 완성했습니다.
 
 ```text
-요구사항·ERD·DDL
-샘플 데이터·업무 조회
-정상·경계·오류·트랜잭션 검증
-인덱스·권한·백업·복구 계획
-분석용 데이터셋
-SQL 분석
-Python·pandas 분석
-SQL·Python 결과 검증
-AI diff 검토
+요구사항·정책
+→ 실제 PostgreSQL 구조
+→ 정상·실패·경계·시간 검증
+→ 고정 기간 SQL 분석
+→ 같은 스냅샷의 pandas 비교
+→ 별도 DB 복원
+→ AI diff와 사람 승인
 ```
 
-선택:
+## 1. 생성·Seed·초기화 보호
+
+- `ai_database_book`이 아니면 생성·Seed·reset을 중단합니다.
+- 기존 `tutor_project`를 자동 덮어쓰지 않습니다.
+- 구조와 Seed는 각각 하나의 트랜잭션에서 처리합니다.
+- 모든 SQL에 `current_database`, `current_schema`, `SHOW search_path`를 통일했습니다.
+
+## 2. 명시적 ID와 IDENTITY
 
 ```text
-웹 CRUD·API
-NoSQL
-배포
+students 101~104 → next 105
+tutors 201~203 → next 204
+questions 301~305 → next 306
+answers 401~405 → next 406
+learning_materials 501~506 → next 507
 ```
 
-Vector DB·RAG는 Chapter 15 범위에서 제거했습니다.
+Seed와 DB·복원 게이트에서 다음 값이 최대 ID보다 큰지 확인합니다.
 
----
+## 3. 무결성과 정확한 메타데이터
 
-## 3. 단계별 실행 구조 변경
+다음을 보완했습니다.
 
 ```text
-01_schema.sql
-02_seed.sql
-03_metadata_validation.sql
-04_requirement_queries.sql
-05_transaction_checks.sql
-06_negative_tests.sql
-07_performance_checks.sql
-08_operations_checks.sql
-09_analysis_dataset.sql
-10_completion_gate.sql
+이메일·코드·버전·URL 공백 CHECK
+questions.updated_at >= created_at
+정확한 테이블 집합 6개
+정확한 제약조건 36개
+FK 이름·출발·대상 컬럼·삭제 규칙 5개
+IDENTITY PK 5개와 연결 테이블 복합 PK
+업무 인덱스 컬럼·정렬 정의 3개
 ```
 
-`09_optional_rag_extension.sql`을 제거하고 `09_analysis_dataset.sql`로 교체합니다. `01~10`은 모두 필수 실행 파일입니다.
+단순 개수가 맞다는 이유로 통과시키지 않습니다.
 
----
-
-## 4. 분석 확장
-
-`09_analysis_dataset.sql`은 질문 1건을 한 행으로 정의한 `tutor_project.question_analysis_dataset` VIEW를 생성합니다.
+## 4. P15 추적 ID
 
 ```text
-VIEW 행 수 5
-question_id 중복 0
-answer_count 합계 5
-material_count 합계 7
-답변 없는 질문 1건
+P15-R01~R13 요구사항
+P15-D01~D08 결정·미확정 정책
+P15-Q01~Q06 분석 질문
+P15-T01~T25 트랜잭션·반례·경계값
+P15-V01~V09 검증 단계
 ```
 
-Python 실습:
+본문·워크북·requirements·erd·SQL·보고서에 같은 ID 체계를 반영했습니다.
+
+## 5. 업무·시간 정합성
 
 ```text
-python/01_load_postgresql.py
-python/02_pandas_analysis.py
-python/03_result_validation.py
+질문 작성일 >= 학생 가입일
+답변 작성 시각 >= 질문 작성 시각
+답변 작성 시각 >= 튜터 생성 시각
+자료 연결 시각 >= 질문 작성 시각
+answered 질문에는 답변 존재
+고아 관계·표시 순서 중복 0
 ```
 
-분석 결과는 `analysis_report.md`에 기록합니다.
+비활성 사용자 작업, closed 질문 추가 답변과 같은 미확정 정책은 DB 제약으로 임의 확정하지 않았습니다.
 
----
+## 6. 트랜잭션과 테스트
 
-## 5. 요구사항 확장
-
-기존 DB 요구사항에 다음을 추가합니다.
+`05_transaction_checks.sql`은 다음을 검증합니다.
 
 ```text
-REQ-12 질문 1건 단위 분석 데이터셋 제공
-REQ-13 SQL과 Python의 핵심 집계 일치
+정상 경로: 답변 INSERT + open→answered 조건부 UPDATE
+영향 행 수 1 확인
+ROLLBACK 후 기준 복구
+실패 경로: 잘못된 tutor INSERT 실패 후 상태 무변경
 ```
 
-분석 기준 시각과 갱신 주기는 미확정 정책으로 남깁니다.
-
----
-
-## 6. 문서 변경
+`06_negative_tests.sql`은 공통 함수로 다음을 기록합니다.
 
 ```text
-chapter15.md
-- Chapter 14 SQL·Python 분석과 연결
-- RAG 설명 제거
-- 분석 데이터셋과 pandas 검증 추가
-
-chapter15_activity.md
-- RAG 선택 항목 제거
-- 분석 질문·VIEW·DataFrame·교차 검증 기록 추가
-
-chapter15_outline.md
-- SQL·Python 분석을 필수 흐름으로 반영
-
-chapter15_project_guide.md
-- 01→10 실행과 Python 분석 절차 반영
-
-requirements.md·erd.md
-- 분석 VIEW와 결과 검증 요구사항 반영
-
-analysis_report.md
-- 분석 질문·SQL 결과·Python 결과·해석·한계 기록
-
-final_report.md
-- SQL·Python 교차 검증과 분석 한계 추가
+expected·actual SQLSTATE
+expected·actual constraint name
+table·column·detail
 ```
 
----
+실패 반례 18개와 정상 경계값 5개, 총 23개를 실행하며 unexpected 0과 기준 데이터 보존을 자동 판정합니다.
 
-## 7. 완료 게이트 변경
+## 7. 인덱스 범위 정리
 
-기존 DB 구조와 기준 데이터 검증에 다음을 추가합니다.
+작은 Seed에서 실행 계획을 보는 작업을 **인덱스 후보·정의 검토**로 명확히 했습니다. 실제 효과는 대용량 통제 데이터의 인덱스 전·후 `EXPLAIN (ANALYZE, BUFFERS)`와 쓰기 비용을 함께 측정하도록 구분했습니다.
+
+## 8. PUBLIC·소유권·보안
+
+기존 PUBLIC 조회 오류를 수정했습니다.
 
 ```text
-question_analysis_dataset VIEW 존재
-VIEW 행 수 5
-question_id 중복 0
-answer_count 합계 5
-material_count 합계 7
-답변 없는 질문 1건
-SQL·Python 핵심 집계 일치 기록
+직접 권한: role_table_grants·role_column_grants
+PUBLIC: table_privileges·column_privileges
+권한 경로: DB ACL·schema ACL·객체 ACL·owner
+최종 권한: has_*_privilege
 ```
 
-`required_completion_gate_passed`는 DB 구조와 SQL 분석 데이터셋의 필수 기준을 판정합니다. Python 실행 증거는 `analysis_report.md`와 최종 보고서에서 별도로 확인합니다.
+`access_scope`는 분류 값이며 실제 접근 통제가 아님을 명시했습니다. 이메일·URL은 `example.test`, 해시는 `demo-sha256-*` 가상값을 사용합니다.
 
----
-
-## 8. 안전성 강화
+## 9. 백업·복원 강화
 
 ```text
-- Python은 개발·테스트 DB의 읽기 전용 연결을 우선한다.
-- 접속 정보는 .env로 관리하고 저장소에는 .env.example만 둔다.
-- 실제 개인정보·백업·운영 CSV를 커밋하지 않는다.
-- drop_duplicates·dropna로 오류를 임의로 숨기지 않는다.
-- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
-- 분석 코드에서 UPDATE·DELETE·DROP을 자동 실행하지 않는다.
+도구·서버 버전 확인
+백업 계정 권한·RLS·외부 의존성
+custom format·목록·SHA-256
+createdb -O <restore_user> -T template0
+pg_restore --single-transaction
 ```
 
----
+신규 `11_restore_validation.sql`은 `tutor_project_restore`에서만 실행되며 구조·데이터·제약·인덱스·시간·IDENTITY·owner·분석 VIEW를 자동 판정합니다.
 
-## 9. 이미지 변경 기준
+## 10. 분석 범위와 행 단위
+
+분석 기간을 고정했습니다.
 
 ```text
-그림 15-1: 필수 흐름에 SQL·Python 분석 추가, RAG 제거
-그림 15-2: Python 분석을 필수로 이동, 선택 확장은 웹·NoSQL·배포
-그림 15-3: 09_analysis_dataset.sql·python·analysis_report 반영
-그림 15-4: 요구사항→설계→SQL 분석→Python 검증 연결
-그림 15-5: AI 생성 Python 코드와 DataFrame 검증 추가
-그림 15-6: 재현 가능한 데이터·SQL·Python으로 문구 조정
-그림 15-7: SQL 분석·Python 분석·한계 기록 추가
-그림 15-8: 분석 VIEW와 SQL·Python 일치 기준 추가
+[2026-01-01 00:00+09, 2026-06-01 00:00+09)
 ```
 
----
-
-## 10. 남은 확인
+VIEW를 역할별로 분리했습니다.
 
 ```text
-- 실제 PostgreSQL에서 01→10 순서 실행
-- 메타데이터와 기준 행 수 확인
-- ROLLBACK 복구 확인
-- 반례 unexpected 0 확인
-- 분석 VIEW 5행·중복 0 확인
-- Python DataFrame 5행 확인
-- SQL·pandas 집계 일치 확인
-- GitHub·Word·PDF·eBook 렌더링 확인
+question_analysis_dataset = 질문 1건
+student_question_summary = 학생 1명, 질문 0건 포함
+tutor_answer_summary = 튜터 1명, 답변 0건 포함
 ```
 
----
+월별 집계는 date spine으로 빈 월을 유지합니다.
+
+## 11. 실제 SQL·pandas 직접 비교
+
+`DATABASE_URL`과 코드 내 기대 상수를 제거했습니다.
+
+```text
+PGHOST·PGPORT·PGDATABASE·PGUSER·PGPASSFILE
+REPEATABLE READ, READ ONLY
+정확한 13개 컬럼·날짜·숫자·boolean 검증
+```
+
+같은 스냅샷에서 SQL 상태·월·학생·튜터·첫 답변 결과와 pandas 결과를 `assert_frame_equal()`로 비교합니다.
+
+## 12. 완료 게이트 분리
+
+`10_completion_gate.sql`은 boolean 출력이 아니라 실패 시 예외를 발생시킵니다. 통과 메시지는 다음과 같습니다.
+
+```text
+Chapter 15 database completion gate passed
+```
+
+전체 프로젝트 완료는 다음을 별도 증거로 확인합니다.
+
+```text
+DB 완료
+Python 교차 검증
+백업·복원
+Role 허용·차단
+문서·AI diff 사람 승인
+```
+
+미실행 항목은 통과로 표시하지 않습니다.
 
 ## 최종 상태
 
-```text
-Chapter 15 본문, 워크북, 구성안과 프로젝트 가이드를 데이터베이스 종합 프로젝트 방향으로 전환했습니다.
-Vector DB·RAG를 제거하고 SQL 분석·Python 분석·교차 검증을 필수 경로에 포함했습니다.
-```
+| 항목 | 상태 |
+| --- | --- |
+| DB 보호·원자성 | 완료 |
+| IDENTITY 조정 | 완료 |
+| 정확한 메타데이터 | 완료 |
+| 업무·시간 검증 | 완료 |
+| 트랜잭션 정상·실패 | 완료 |
+| 23개 테스트·constraint name | 완료 |
+| PUBLIC 권한 조회 | 완료 |
+| 고정 기간·0건 차원 VIEW | 완료 |
+| 실제 SQL·pandas 비교 | 완료 |
+| 예외 기반 DB 게이트 | 완료 |
+| 별도 DB 복원 검증 | 완료 |
+| 본문·워크북·보고서 동기화 | 완료 |
+
+실제 PostgreSQL `01→11`, Python 패키지 설치·교차 검증, Role 시험, custom-format 백업·복원과 Word·PDF·eBook 렌더링은 별도 제작 단계에서 확인합니다.
