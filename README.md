@@ -35,7 +35,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 04 | 관계형 데이터베이스와 SQL 시작하기 | 최종 출판 내용 검수 완료 |
 | Chapter 05 | 요구사항에서 데이터 모델과 ERD 만들기 | 최종 출판 내용 검수 완료 |
 | Chapter 06 | 정규화와 데이터 무결성으로 좋은 테이블 만들기 | 최종 출판 내용 검수 완료 |
-| Chapter 07 | 실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기 | 2차 재구성 완료 |
+| Chapter 07 | 실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기 | 최종 출판 내용 검수 완료 |
 | Chapter 08 | JOIN과 집계로 서비스 질문에 답하기 | 2차 재구성 완료 |
 | Chapter 09 | 트랜잭션으로 데이터 정합성 지키기 | 2차 재구성 완료 |
 | Chapter 10 | 실행 계획으로 인덱스 효과 검증하기 | 2차 재구성 완료 |
@@ -81,7 +81,7 @@ publish/full_manuscript.md
 | Chapter 04 실행 위치·정렬·NULL·자동 커밋·데이터 상태 최종 보완 | 완료 |
 | Chapter 05 요구사항 추적·미확정 정책·샘플 관계·IDENTITY·초기화 안전성 최종 보완 | 완료 |
 | Chapter 06 확정 규칙·활성 대여·IDENTITY·경계값·오류 복구 최종 보완 | 완료 |
-| Chapter 07 관계형 DB 설계 프로젝트 재구성 | 완료 |
+| Chapter 07 요구사항 ID·무료 금액·활성 신청·IDENTITY·상태 변경·경계값 최종 보완 | 완료 |
 | Chapter 14 SQL·Python 분석 방향 전환 | 반영 |
 | Chapter 15 설계·분석·검증 종합 프로젝트 전환 | 반영 |
 | `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
