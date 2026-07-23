@@ -177,8 +177,17 @@ CREATE TABLE ai_review_lab.payments (
             )
         ),
 
+    -- 허용되지 않은 상태값은 위 status CHECK가 전담합니다.
+    -- 이 CHECK는 유효한 상태일 때만 시각 조합을 판정해 반례 원인을 명확히 합니다.
     CONSTRAINT chk_ai_review_payments_timestamps
         CHECK (
+            payment_status NOT IN (
+                '결제대기',
+                '결제완료',
+                '결제실패',
+                '환불'
+            )
+            OR
             (
                 payment_status IN ('결제대기', '결제실패')
                 AND paid_at IS NULL
