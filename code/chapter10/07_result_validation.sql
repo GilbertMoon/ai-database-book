@@ -65,10 +65,22 @@ BEGIN
             current_database();
     END IF;
 
-    IF to_regclass('course_project.enrollments') IS NULL
-       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
+    IF to_regclass('course_project.enrollments') IS NULL THEN
+        RAISE EXCEPTION
+            '검증 실패: course_project.enrollments가 없습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
         RAISE EXCEPTION
             '검증 실패: course_project.enrollments 기준 5행이 유지되지 않았습니다.';
+    END IF;
+
+    IF to_regclass('performance_lab.students') IS NULL
+       OR to_regclass('performance_lab.instructors') IS NULL
+       OR to_regclass('performance_lab.courses') IS NULL
+       OR to_regclass('performance_lab.enrollments') IS NULL THEN
+        RAISE EXCEPTION
+            '검증 실패: performance_lab 핵심 테이블이 없습니다.';
     END IF;
 
     IF (SELECT COUNT(*) FROM performance_lab.students) <> 10003
