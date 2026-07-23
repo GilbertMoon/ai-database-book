@@ -40,7 +40,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 09 | 트랜잭션으로 데이터 정합성 지키기 | 최종 출판 내용 검수 완료 |
 | Chapter 10 | 실행 계획으로 인덱스 효과 검증하기 | 최종 출판 내용 검수 완료 |
 | Chapter 11 | 데이터베이스를 안전하게 지키고 복구하는 방법 | 최종 출판 내용 검수 완료 |
-| Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 2차 재구성 완료 |
+| Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 최종 출판 내용 검수 완료 |
 | Chapter 13 | AI와 실행 증거로 데이터베이스 설계 검증하기 | 2차 재구성 완료 |
 | Chapter 14 | SQL 데이터 분석과 Python 확장 | 방향 전환 반영 |
 | Chapter 15 | 데이터베이스 종합 프로젝트 | 방향 전환 반영 |
@@ -86,6 +86,7 @@ publish/full_manuscript.md
 | Chapter 09 사전 검사·COMMIT 판정·IDENTITY·취소·SAVEPOINT·동시성 최종 보완 | 완료 |
 | Chapter 10 합성 데이터·IDENTITY·실험 통제·결과 검증·Skip Scan·운영 인덱스 최종 보완 | 완료 |
 | Chapter 11 PUBLIC·최소 권한·IDENTITY·password file·원자적 복원·2단계 검증 최종 보완 | 완료 |
+| Chapter 12 원본 매핑·TTL 재현성·JSONB 경계·낙관적 잠금·결정 상태·자동 검증 최종 보완 | 완료 |
 | Chapter 14 SQL·Python 분석 방향 전환 | 반영 |
 | Chapter 15 설계·분석·검증 종합 프로젝트 전환 | 반영 |
 | `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
