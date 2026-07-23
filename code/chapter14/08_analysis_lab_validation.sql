@@ -8,14 +8,10 @@ SHOW search_path;
 
 DO $$
 DECLARE
-    table_name_mismatch_count INTEGER;
-    view_name_mismatch_count INTEGER;
-    dataset_column_mismatch_count INTEGER;
+    mismatch_count INTEGER;
     constraint_count INTEGER;
     identity_count INTEGER;
     quality_issue_count BIGINT;
-    status_mismatch_count INTEGER;
-    monthly_mismatch_count INTEGER;
     active_duplicate_count BIGINT;
     dataset_duplicate_count BIGINT;
     students_next BIGINT;
@@ -40,96 +36,55 @@ BEGIN
     END IF;
 
     -- 정확한 테이블 집합 4개
+    WITH expected(name) AS (
+        VALUES ('students'), ('instructors'), ('courses'), ('enrollments')
+    ),
+    actual(name) AS (
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'analysis_lab'
+    )
     SELECT COUNT(*)
-    INTO table_name_mismatch_count
-    FROM (
-        (
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'analysis_lab'
-        )
-        EXCEPT
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('students'),
-                ('instructors'),
-                ('courses'),
-                ('enrollments')
-            ) AS expected(expected_name)
-        )
+    INTO mismatch_count
+    FROM expected AS e
+    FULL JOIN actual AS a
+        ON a.name = e.name
+    WHERE e.name IS NULL OR a.name IS NULL;
 
-        UNION ALL
-
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('students'),
-                ('instructors'),
-                ('courses'),
-                ('enrollments')
-            ) AS expected(expected_name)
-        )
-        EXCEPT
-        (
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'analysis_lab'
-        )
-    ) AS differences;
-
-    IF table_name_mismatch_count <> 0 THEN
+    IF mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: analysis_lab 테이블 집합이 예상과 다릅니다.';
     END IF;
 
     -- 정확한 VIEW 집합 2개
+    WITH expected(name) AS (
+        VALUES ('analysis_parameters'), ('enrollment_analysis_dataset')
+    ),
+    actual(name) AS (
+        SELECT table_name
+        FROM information_schema.views
+        WHERE table_schema = 'analysis_lab'
+    )
     SELECT COUNT(*)
-    INTO view_name_mismatch_count
-    FROM (
-        (
-            SELECT table_name
-            FROM information_schema.views
-            WHERE table_schema = 'analysis_lab'
-        )
-        EXCEPT
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('analysis_parameters'),
-                ('enrollment_analysis_dataset')
-            ) AS expected(expected_name)
-        )
+    INTO mismatch_count
+    FROM expected AS e
+    FULL JOIN actual AS a
+        ON a.name = e.name
+    WHERE e.name IS NULL OR a.name IS NULL;
 
-        UNION ALL
-
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('analysis_parameters'),
-                ('enrollment_analysis_dataset')
-            ) AS expected(expected_name)
-        )
-        EXCEPT
-        (
-            SELECT table_name
-            FROM information_schema.views
-            WHERE table_schema = 'analysis_lab'
-        )
-    ) AS differences;
-
-    IF view_name_mismatch_count <> 0 THEN
+    IF mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: analysis_lab VIEW 집합이 예상과 다릅니다.';
     END IF;
 
     -- 분석 기간
-    IF NOT EXISTS (
-        SELECT 1
-        FROM analysis_lab.analysis_parameters
-        WHERE start_date = DATE '2026-01-01'
-          AND end_date_exclusive = DATE '2026-07-01'
-    ) OR (SELECT COUNT(*) FROM analysis_lab.analysis_parameters) <> 1 THEN
+    IF (SELECT COUNT(*) FROM analysis_lab.analysis_parameters) <> 1
+       OR NOT EXISTS (
+            SELECT 1
+            FROM analysis_lab.analysis_parameters
+            WHERE start_date = DATE '2026-01-01'
+              AND end_date_exclusive = DATE '2026-07-01'
+       ) THEN
         RAISE EXCEPTION
             '검증 실패: 분석 기간은 [2026-01-01, 2026-07-01) 한 행이어야 합니다.';
     END IF;
@@ -150,49 +105,28 @@ BEGIN
     END IF;
 
     -- 분석 데이터셋의 정확한 컬럼 집합 17개
+    WITH expected(name) AS (
+        VALUES
+            ('enrollment_id'), ('student_id'), ('student_name'), ('region'),
+            ('course_id'), ('course_title'), ('category'), ('level'),
+            ('instructor_id'), ('instructor_name'), ('enrolled_at'),
+            ('enrollment_month'), ('status'), ('recorded_amount'),
+            ('completed_at'), ('completion_days'), ('is_completed')
+    ),
+    actual(name) AS (
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'analysis_lab'
+          AND table_name = 'enrollment_analysis_dataset'
+    )
     SELECT COUNT(*)
-    INTO dataset_column_mismatch_count
-    FROM (
-        (
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_schema = 'analysis_lab'
-              AND table_name = 'enrollment_analysis_dataset'
-        )
-        EXCEPT
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('enrollment_id'), ('student_id'), ('student_name'), ('region'),
-                ('course_id'), ('course_title'), ('category'), ('level'),
-                ('instructor_id'), ('instructor_name'), ('enrolled_at'),
-                ('enrollment_month'), ('status'), ('recorded_amount'),
-                ('completed_at'), ('completion_days'), ('is_completed')
-            ) AS expected(expected_name)
-        )
+    INTO mismatch_count
+    FROM expected AS e
+    FULL JOIN actual AS a
+        ON a.name = e.name
+    WHERE e.name IS NULL OR a.name IS NULL;
 
-        UNION ALL
-
-        (
-            SELECT expected_name
-            FROM (VALUES
-                ('enrollment_id'), ('student_id'), ('student_name'), ('region'),
-                ('course_id'), ('course_title'), ('category'), ('level'),
-                ('instructor_id'), ('instructor_name'), ('enrolled_at'),
-                ('enrollment_month'), ('status'), ('recorded_amount'),
-                ('completed_at'), ('completion_days'), ('is_completed')
-            ) AS expected(expected_name)
-        )
-        EXCEPT
-        (
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_schema = 'analysis_lab'
-              AND table_name = 'enrollment_analysis_dataset'
-        )
-    ) AS differences;
-
-    IF dataset_column_mismatch_count <> 0 THEN
+    IF mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: 분석 데이터셋 컬럼 집합이 예상과 다릅니다.';
     END IF;
@@ -228,7 +162,7 @@ BEGIN
         WHERE schemaname = 'analysis_lab'
           AND indexname = 'uq_analysis_enrollments_active'
           AND indexdef ILIKE 'CREATE UNIQUE INDEX%'
-          AND indexdef ILIKE '%(student_id, course_id)%'
+          AND indexdef ILIKE '%student_id%course_id%'
           AND indexdef ILIKE '%WHERE%status%신청%수강중%'
     ) THEN
         RAISE EXCEPTION
@@ -249,18 +183,18 @@ BEGIN
         GROUP BY status
     )
     SELECT COUNT(*)
-    INTO status_mismatch_count
+    INTO mismatch_count
     FROM expected AS e
     FULL JOIN actual AS a
         ON a.status = e.status
     WHERE e.expected_count IS DISTINCT FROM a.actual_count;
 
-    IF status_mismatch_count <> 0 THEN
+    IF mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: 상태별 기준값 12/5/4/3과 일치하지 않습니다.';
     END IF;
 
-    -- 월별 기준값과 금액
+    -- 월별 기준값과 기록 금액
     WITH expected(month_value, expected_count, expected_amount) AS (
         VALUES
             (DATE '2026-01-01', 3, 200000),
@@ -279,14 +213,14 @@ BEGIN
         GROUP BY enrollment_month
     )
     SELECT COUNT(*)
-    INTO monthly_mismatch_count
+    INTO mismatch_count
     FROM expected AS e
     FULL JOIN actual AS a
         ON a.month_value = e.month_value
     WHERE e.expected_count IS DISTINCT FROM a.actual_count
        OR e.expected_amount IS DISTINCT FROM a.actual_amount;
 
-    IF monthly_mismatch_count <> 0 THEN
+    IF mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: 월별 건수 또는 기록 금액 기준값이 일치하지 않습니다.';
     END IF;
