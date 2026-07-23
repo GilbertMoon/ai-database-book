@@ -6,33 +6,36 @@
 
 ## 권장 분량
 
-24~28페이지
+28~32페이지
 
 ## 이 장의 역할
 
-Chapter 07~09의 데이터를 보호하면서 별도 `performance_lab` 스키마에서 대량 데이터를 생성하고, 같은 SQL의 인덱스 생성 전후 실행 계획을 비교해 적용·보류·제거를 판단한다.
+Chapter 07~09의 데이터를 보호하면서 별도 `performance_lab` 스키마에서 대량 데이터를 생성하고, 같은 데이터·통계·SQL의 인덱스 생성 전후 실행 계획을 비교해 적용·보류·제거를 판단한다.
 
 ```text
-워크로드 정의
-→ 데이터·기존 인덱스 확인
+사전 조건 검사
+→ 재현 가능한 대량 데이터 생성
+→ 통계 수집
 → 기준 실행 계획
-→ 후보 인덱스 생성
-→ 통계 갱신
+→ 실험 후보 인덱스 생성
 → 동일 SQL 재측정
-→ 읽기 이점·쓰기 비용 검토
+→ 결과 행과 상태 자동 검증
+→ 읽기 이점·쓰기 비용·운영 잠금 검토
 → 최종 결정 기록
 ```
 
 ## 핵심 질문
 
 ```text
-실제로 반복되는 SQL인가?
+실제 반복 워크로드인가?
 현재 PK·UNIQUE·수동 인덱스와 겹치는가?
+합성 데이터가 업무 규칙과 기대 분포를 만족하는가?
+기준·사후 측정의 데이터·통계·SQL이 같은가?
 조건이 전체 행 중 적은 행을 선택하는가?
-복합 인덱스 컬럼 순서가 쿼리와 맞는가?
-인덱스 전후 결과 행은 동일한가?
+복합 인덱스 컬럼 순서와 Skip Scan 가능성이 쿼리와 맞는가?
+실행 계획과 결과 행이 모두 검증되었는가?
 계획·Buffers·실행 시간이 의미 있게 개선되는가?
-쓰기 비용과 저장 공간을 감수할 가치가 있는가?
+쓰기 비용·저장 공간·운영 잠금을 감수할 가치가 있는가?
 ```
 
 ## 실습 구조
@@ -47,17 +50,47 @@ performance_lab.enrollments
 앞 장 스키마:
 
 ```text
-course_project: 변경 금지
+course_project: 변경 금지, enrollments 5행 유지
 transaction_lab: 변경 금지
 ```
 
 ## 기준 데이터
 
+| 테이블 | 행 수 |
+| --- | ---: |
+| `students` | 10003 |
+| `instructors` | 2 |
+| `courses` | 2003 |
+| `enrollments` | 100005 |
+
+합성 데이터 기준:
+
 ```text
-students 10003
-instructors 2
-courses 2003
-enrollments 100005
+학생 ID 1001~11000
+학생별 신청 10건
+강의별 신청 50건
+활성 학생·강의 중복 0건
+performance5000@example.com = 학생 ID 5000
+```
+
+기준 결과:
+
+```text
+이메일 검색                    1행
+강의 제목 검색                 1행
+student_id = 5000            10행
+course_id = 1500             50행
+course_id 1500 + 수강중       15행
+전체 수강중                 30001행
+```
+
+## IDENTITY 시작값
+
+```text
+students.id      → 11001
+instructors.id   → 203
+courses.id       → 3001
+enrollments.id   → 110001
 ```
 
 ## 핵심 개념
@@ -72,38 +105,46 @@ enrollments 100005
 - EXPLAIN ANALYZE
 - Buffers
 - 예상·실제 rows
+- 결과 행 검증
+- 통계 표본과 실험 통제
 - JOIN FK 인덱스
 - ORDER BY·LIMIT
 - 복합 인덱스
 - 선두 컬럼
+- Skip Scan
 - 중복 인덱스
-- pg_stat_user_indexes
+- `pg_stat_user_indexes`
 - 읽기·쓰기 비용
+- `CREATE INDEX CONCURRENTLY`
 - AI 추천 검증
 
 ## 본문 구성
 
 1. 프로젝트 데이터와 성능 데이터 분리
-2. 파일과 실행 순서
-3. 인덱스 필요성
-4. 자동·수동 인덱스
-5. 데이터와 통계
-6. 실행 계획 읽기
-7. Seq·Index·Bitmap Scan
-8. WHERE 후보
-9. JOIN과 FK 자식 컬럼
-10. 복합 인덱스와 선두 컬럼
-11. ORDER BY·LIMIT
-12. 인덱스 전후 비교
-13. 예상·실제 행 수
-14. 인덱스 비용
-15. 중복·제거 판단
-16. 사용 통계 주의
-17. AI 추천 검토
-18. 자주 하는 실수
-19. 스스로 확인하기
-20. 핵심 정리
-21. 다음 장 연결
+2. 실습 파일·순서와 단계별 보호
+3. 기준 데이터와 재현성
+4. 명시적 ID와 IDENTITY
+5. 인덱스 필요성
+6. 자동·수동 인덱스
+7. 통계 수집과 비교 조건 통제
+8. 실행 계획과 결과 행 검증
+9. Seq·Index·Bitmap Scan
+10. WHERE 후보
+11. JOIN과 FK 자식 컬럼
+12. 복합 인덱스·선두 컬럼·Skip Scan
+13. ORDER BY·LIMIT
+14. 같은 조건의 전후 비교
+15. 예상·실제 행 수
+16. 인덱스 비용
+17. 일반 CREATE INDEX와 운영 환경
+18. 중복·제거 판단
+19. 사용 통계 주의
+20. AI 추천 검토
+21. 자주 하는 실수
+22. 스스로 확인하기
+23. 권장 해설
+24. 핵심 정리
+25. 다음 장 연결
 
 ## 코드 파일
 
@@ -114,12 +155,26 @@ enrollments 100005
 04_create_candidate_indexes.sql
 05_after_index_explain.sql
 06_index_review.sql
+07_result_validation.sql
 reset_performance_lab.sql
 index_performance_practice.sql
 README.md
 ```
 
-## 최종 수동 인덱스 후보
+## 단계별 상태 보호
+
+```text
+01: DB·Chapter 07 기준 상태·performance_lab 미존재 검사
+02: 빈 테이블·후보 인덱스 미존재 검사
+03: 기준 행 수·후보 인덱스 0개 검사
+04: 기준 행 수·후보 인덱스 0개 검사
+05: 기준 행 수·후보 인덱스 3개 검사
+06: 후보 인덱스 3개 검사
+07: 결과 행·기준 상태·후보 인덱스 자동 판정
+reset: ai_database_book에서만 performance_lab 삭제
+```
+
+## 전후 측정을 위한 실험 후보
 
 ```text
 idx_performance_courses_title
@@ -127,22 +182,49 @@ idx_performance_enrollments_student_id
 idx_performance_enrollments_course_status
 ```
 
+“최종 적용 인덱스”가 아니라 측정 후보로 표현한다. 최종 결정은 워크북 결과에 따라 달라진다.
+
+## 실험 통제 원칙
+
+```text
+02에서 데이터 생성과 ANALYZE
+03에서 기준 계획 기록
+04에서 인덱스만 생성하고 ANALYZE 재실행 없음
+05에서 동일 SQL 재측정
+07에서 결과 행과 상태 검증
+```
+
+인덱스 전후 사이에는 데이터, SQL과 테이블 통계를 변경하지 않는다.
+
+## 운영 인덱스 생성 범위
+
+```text
+실습: 일반 CREATE INDEX
+운영: 잠금·시간·디스크 검토
+필요 시 CREATE INDEX CONCURRENTLY
+트랜잭션 블록 실행 불가와 INVALID 인덱스 확인
+```
+
 ## 안전성 원칙
 
 - `performance_lab`만 생성·초기화한다.
 - 기존 `course_project`, `transaction_lab`, `public` 객체를 삭제하지 않는다.
+- 모든 위치 확인에 DB·스키마·`SHOW search_path`를 사용한다.
 - 생성 파일에서 자동 DROP을 실행하지 않는다.
-- `EXPLAIN ANALYZE`는 SELECT에만 사용한다.
-- 동일 SQL과 데이터 상태로 전후 비교한다.
-- 실행 시간만이 아니라 계획·Buffers·행 수를 함께 본다.
+- 초기화 파일은 DB 보호 구문 안에서만 삭제한다.
+- `EXPLAIN ANALYZE`는 `SELECT`에만 사용한다.
+- 동일 SQL·데이터·통계 상태로 전후 비교한다.
+- 실행 계획과 결과 행 동일성을 별도로 검증한다.
 - 환경에 따른 계획 차이를 오류로 단정하지 않는다.
+- `idx_scan=0`만으로 삭제하지 않는다.
 
 ## AI 활용 원칙
 
 - 실제 SQL·행 수·기존 인덱스 목록을 제공한다.
-- 후보 컬럼 순서와 중복 여부의 근거를 요구한다.
-- 검증 SQL과 적용·보류·제거 기준을 함께 요구한다.
+- 후보 컬럼 순서와 Skip Scan·중복 여부의 근거를 요구한다.
+- 검증 SQL과 결과 동일성 판정을 함께 요구한다.
 - 자동 인덱스 중복, 무조건적인 Index Scan 선호와 쓰기 비용 누락을 검토한다.
+- 운영 환경에서는 잠금과 `CONCURRENTLY` 검토를 요구한다.
 
 ## 다음 장 연결
 
