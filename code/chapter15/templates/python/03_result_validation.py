@@ -2,10 +2,20 @@
 
 from __future__ import annotations
 
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
+
 import pandas as pd
 
 from validation_utils import load_snapshot_frames, load_sql_summaries, read_only_snapshot
-from 02_pandas_analysis import build_summaries
+
+MODULE_PATH = Path(__file__).with_name("02_pandas_analysis.py")
+_spec = spec_from_file_location("chapter15_pandas_analysis", MODULE_PATH)
+if _spec is None or _spec.loader is None:
+    raise RuntimeError(f"분석 모듈을 읽을 수 없습니다: {MODULE_PATH}")
+_analysis = module_from_spec(_spec)
+_spec.loader.exec_module(_analysis)
+build_summaries = _analysis.build_summaries
 
 
 def _normalize(name: str, dataframe: pd.DataFrame) -> pd.DataFrame:
