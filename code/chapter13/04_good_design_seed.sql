@@ -1,14 +1,46 @@
 -- Chapter 13. 좋은 설계 기준 데이터
 -- 실행 전 01→03 파일을 순서대로 실행합니다.
--- 자동 증가값의 이전 상태를 가정하지 않도록 명시적 ID를 사용합니다.
+-- 명시적 ID를 사용하고 마지막에 IDENTITY 다음 값을 조정합니다.
 
 SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+
+-- ============================================================
+-- P13-V04. 테이블 존재·빈 상태 확인
+-- ============================================================
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('ai_review_lab.students') IS NULL
+       OR to_regclass('ai_review_lab.instructors') IS NULL
+       OR to_regclass('ai_review_lab.courses') IS NULL
+       OR to_regclass('ai_review_lab.enrollments') IS NULL
+       OR to_regclass('ai_review_lab.payments') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: 좋은 설계 테이블이 모두 존재해야 합니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM ai_review_lab.students) <> 0
+       OR (SELECT COUNT(*) FROM ai_review_lab.instructors) <> 0
+       OR (SELECT COUNT(*) FROM ai_review_lab.courses) <> 0
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments) <> 0
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments) <> 0 THEN
+        RAISE EXCEPTION
+            '실행 중단: 좋은 설계 테이블은 모두 비어 있어야 합니다.';
+    END IF;
+END
+$$;
+
+BEGIN;
 
 INSERT INTO ai_review_lab.students (
-    id,
-    name,
-    email,
-    joined_at
+    id, name, email, joined_at
 )
 VALUES
     (101, '김학생', 'kim.review@example.com', '2026-07-01'),
@@ -16,10 +48,7 @@ VALUES
     (103, '박학생', 'park.review@example.com', '2026-07-03');
 
 INSERT INTO ai_review_lab.instructors (
-    id,
-    name,
-    email,
-    specialty
+    id, name, email, specialty
 )
 VALUES
     (201, '박강사', 'teacher-park.review@example.com', 'Database'),
@@ -88,6 +117,7 @@ INSERT INTO ai_review_lab.payments (
     amount,
     payment_status,
     paid_at,
+    refunded_at,
     payment_reference
 )
 VALUES
@@ -97,6 +127,7 @@ VALUES
     100000,
     '결제완료',
     '2026-07-01 10:00:00+09',
+    NULL,
     'PAY-REVIEW-TEST-001'
 ),
 (
@@ -105,6 +136,7 @@ VALUES
     150000,
     '결제완료',
     '2026-07-02 11:00:00+09',
+    NULL,
     'PAY-REVIEW-TEST-002'
 ),
 (
@@ -113,6 +145,7 @@ VALUES
     100000,
     '결제대기',
     NULL,
+    NULL,
     'PAY-REVIEW-TEST-003'
 ),
 (
@@ -120,23 +153,55 @@ VALUES
     1004,
     120000,
     '환불',
+    '2026-07-03 12:00:00+09',
     '2026-07-03 15:00:00+09',
     'PAY-REVIEW-TEST-004'
 );
 
-SELECT COUNT(*) AS student_count
-FROM ai_review_lab.students;
+-- 명시적 ID 입력은 IDENTITY 시퀀스를 자동으로 이동시키지 않습니다.
+ALTER TABLE ai_review_lab.students
+    ALTER COLUMN id RESTART WITH 104;
+ALTER TABLE ai_review_lab.instructors
+    ALTER COLUMN id RESTART WITH 203;
+ALTER TABLE ai_review_lab.courses
+    ALTER COLUMN id RESTART WITH 304;
+ALTER TABLE ai_review_lab.enrollments
+    ALTER COLUMN id RESTART WITH 1005;
+ALTER TABLE ai_review_lab.payments
+    ALTER COLUMN id RESTART WITH 9005;
 
-SELECT COUNT(*) AS instructor_count
-FROM ai_review_lab.instructors;
+-- COMMIT 전 기준 상태 자동 판정
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM ai_review_lab.students) <> 3
+       OR (SELECT COUNT(*) FROM ai_review_lab.instructors) <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.courses) <> 3
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments) <> 4
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments) <> 4 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 기준 행 수가 예상과 다릅니다.';
+    END IF;
 
-SELECT COUNT(*) AS course_count
-FROM ai_review_lab.courses;
+    IF EXISTS (
+        SELECT 1
+        FROM ai_review_lab.enrollments AS e
+        JOIN ai_review_lab.payments AS p
+            ON p.enrollment_id = e.id
+        WHERE e.agreed_amount <> p.amount
+    ) THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 신청 합의 금액과 결제 기록 금액이 다릅니다.';
+    END IF;
+END
+$$;
 
-SELECT COUNT(*) AS enrollment_count
-FROM ai_review_lab.enrollments;
+COMMIT;
 
-SELECT COUNT(*) AS payment_count
-FROM ai_review_lab.payments;
+SELECT
+    (SELECT COUNT(*) FROM ai_review_lab.students) AS student_count,
+    (SELECT COUNT(*) FROM ai_review_lab.instructors) AS instructor_count,
+    (SELECT COUNT(*) FROM ai_review_lab.courses) AS course_count,
+    (SELECT COUNT(*) FROM ai_review_lab.enrollments) AS enrollment_count,
+    (SELECT COUNT(*) FROM ai_review_lab.payments) AS payment_count;
 
 -- 기대 결과: 3 / 2 / 3 / 4 / 4
