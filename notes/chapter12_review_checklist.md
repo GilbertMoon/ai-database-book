@@ -1,4 +1,4 @@
-# Chapter 12 리뷰 체크리스트
+# Chapter 12 최종 출판 리뷰 체크리스트
 
 ## 대상 Chapter
 
@@ -8,178 +8,324 @@ Chapter 12. 조회 패턴으로 RDBMS와 NoSQL 선택하기
 
 ## 리뷰 목적
 
-Chapter 12가 NoSQL 유형을 단순 소개하지 않고, 데이터의 시스템 역할·대표 조회·일관성·동기화 실패·운영 비용을 기준으로 RDBMS·JSONB·NoSQL 후보를 비교하도록 구성되었는지 점검합니다.
+Chapter 12가 NoSQL 유형을 단순 소개하지 않고, 시스템 역할·대표 조회·일관성·시간 기준·동기화 실패·복구·결정 상태를 근거로 RDBMS·JSONB·NoSQL 후보를 비교하도록 구성되었는지 점검합니다.
 
 ---
 
 ## 1. Chapter 연속성과 격리
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| course_project 보호 | 통과 | Chapter 12에서 변경 없음 |
-| transaction_lab 보호 | 통과 | Chapter 12에서 변경 없음 |
-| performance_lab 보호 | 통과 | Chapter 12에서 변경 없음 |
-| security_lab 보호 | 통과 | Chapter 12에서 변경 없음 |
+| course_project 보호 | 통과 | 기준 상태 3/2/3/5 검사, 변경 없음 |
+| transaction_lab 보호 | 통과 | 변경 없음 |
+| performance_lab 보호 | 통과 | 변경 없음 |
+| security_lab 보호 | 통과 | 변경 없음 |
 | nosql_lab 전용 | 통과 | 모든 실습 객체 분리 |
-| 자동 DROP 제거 | 통과 | 생성 파일에서 삭제 없음 |
-| 초기화 분리 | 통과 | reset_nosql_lab.sql만 사용 |
+| 자동 DROP 제거 | 통과 | 생성 파일 삭제 없음 |
+| 초기화 분리 | 통과 | reset 파일만 사용 |
 
 ---
 
-## 2. 저장소 선택 프레임
+## 2. 생성·Seed·초기화 안전성
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| Source of Truth | 통과 | 수강신청·결제 원본 구분 |
-| Derived Cache | 통과 | 인기 강의 원본·재생성 경로 설명 |
-| Ephemeral State | 통과 | 로그인 세션과 TTL 구분 |
-| Flexible Metadata | 통과 | 문서형 부가 정보 역할 |
-| Event Log | 통과 | 시간순 이벤트와 재처리 |
-| Relationship Index | 통과 | 추천 그래프를 파생 구조로 검토 |
-| 대표 조회 | 통과 | 키·문서·파티션·관계 탐색 구체화 |
-| 운영 책임 | 통과 | 백업·복구·보안·모니터링 포함 |
+| 현재 DB 확인 | 통과 | ai_database_book 아니면 예외 |
+| `SHOW search_path` | 통과 | 모든 SQL 형식 통일 |
+| Chapter 07 핵심 객체 | 통과 | students·instructors·courses·enrollments 검사 |
+| Chapter 07 기준 행 수 | 통과 | 3/2/3/5 |
+| nosql_lab 중복 생성 차단 | 통과 | 기존 스키마 존재 시 중단 |
+| 구조 생성 원자성 | 통과 | 스키마·테이블 한 트랜잭션 |
+| Seed 재실행 차단 | 통과 | 세 테이블 모두 0행 확인 |
+| Seed 원자성 | 통과 | 세 데이터 묶음 한 트랜잭션 |
+| COMMIT 전 자동 판정 | 통과 | 원본·JSON·TTL·선택 근거 검사 |
+| reset DB 보호 | 통과 | 잘못된 DB에서 DROP 중단 |
 
 ---
 
-## 3. NoSQL 유형 설명
+## 3. Chapter 07 원본 연속성
 
-| 유형 | 상태 | 리뷰 의견 |
+| 점검 항목 | 기대 | 상태 |
 | --- | --- | --- |
-| Key-Value | 통과 | 키 네임스페이스·버전·TTL·미스 |
-| Document | 통과 | 문서 경계·포함·참조·버전 |
-| Column-Family | 통과 | target query·partition·sort key |
-| Graph | 통과 | 단순 JOIN과 다단계 탐색 비교 |
-| 범위 제한 | 통과 | 검색·Vector DB는 별도 Chapter로 분리 |
+| 강의 ID | 301~303 | 통과 |
+| 문서 코드 | COURSE-301~303 | 통과 |
+| 강의 제목 | Chapter 07과 일치 | 통과 |
+| 난이도 | Chapter 07과 일치 | 통과 |
+| 강사 ID | 201·202 | 통과 |
+| 인기 강의 cache IDs | 301·302·303 | 통과 |
+| 만료 세션 학생 | 103 | 통과 |
+| 물리 외부 FK | 미적용 | 이동성 유지 |
+| 최종 원본 대조 | validation SQL | 통과 |
 
 ---
 
-## 4. 트랜잭션·일관성·분산 설명
+## 4. 결제 원본 표현
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| NoSQL 트랜잭션 단정 방지 | 통과 | 제품·설정·범위별 확인 |
-| 강한/최종 일관성 단순화 방지 | 통과 | 업무 데이터별 요구 구분 |
-| CAP 설명 | 통과 | 단순 “항상 둘 선택” 표현 방지 |
-| 네트워크 분할 | 통과 | 분할 시 동작 질문 포함 |
-| 충돌 해결 | 통과 | 제품·정책 검토 요구 |
+| 현재 원본 테이블 | 통과 | students·instructors·courses·enrollments |
+| paid_amount 의미 | 통과 | 신청 당시 기록 금액 |
+| 별도 결제·환불 원장 | 통과 | 현재 범위 밖 명시 |
+| AI 프롬프트 | 통과 | 존재하지 않는 payments 제거 |
+| 선택 사례 이름 | 통과 | 수강신청·신청 당시 금액 기록 |
 
 ---
 
-## 5. 여러 저장소 동기화
+## 5. 혼합 문서 설계
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 항목 | 위치 | 상태 |
 | --- | --- | --- |
-| 이중 쓰기 실패 | 통과 | RDBMS 성공·파생 저장소 실패 예시 |
-| 원본 단일화 | 통과 | Source of Truth 지정 |
-| 변경 이벤트·CDC | 통과 | 비동기 갱신 대안 |
-| 재시도·멱등성 | 통과 | 중복 처리 책임 설명 |
-| 실패 대기열 | 통과 | 재처리 경로 포함 |
-| 대조·재구축 | 통과 | 불일치 탐지·복구 포함 |
+| source_course_id | 일반 컬럼 | 통과 |
+| course_code | 일반 컬럼·UNIQUE·공백 CHECK | 통과 |
+| title | 일반 컬럼·공백 CHECK | 통과 |
+| level | 일반 컬럼·허용값 CHECK | 통과 |
+| document_version | 일반 컬럼·1 이상 CHECK | 통과 |
+| created_at·updated_at | 일반 컬럼·시간 순서 CHECK | 통과 |
+| tags | JSONB | 통과 |
+| options | JSONB | 통과 |
+| instructor_snapshot | JSONB 파생 복사본 | 통과 |
+| metadata 객체 | CHECK | 통과 |
 
 ---
 
-## 6. JSONB 설계·실습
+## 6. 강사 스냅샷
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 핵심 컬럼·가변 metadata 분리 | 통과 | course_code·title·version 분리 |
-| metadata 객체 CHECK | 통과 | jsonb_typeof 검사 |
-| 문서 버전 | 통과 | 1 이상 CHECK |
-| `->`, `->>`, `?`, `@>` | 통과 | 조회 파일 반영 |
-| 깊은 경로 타입 검증 | 통과 | tags·online·level 확인 |
-| 수정 기준 | 통과 | course_code 사용 |
-| ROLLBACK | 통과 | 기준 문서 원복 |
-| GIN·표현식 인덱스 | 통과 | 질의 형태별 후보 구분 |
-| 작은 표본 Seq Scan | 통과 | 오류로 단정하지 않음 |
+| 명칭 | 통과 | instructor_snapshot |
+| source_instructor_id | 통과 | 원본 ID 저장 |
+| name·specialty | 통과 | 표시용 복사본 |
+| copied_at | 통과 | 복사 시각 기록 |
+| 최종 원본 | 통과 | course_project.instructors |
+| 불일치 탐지 | 통과 | validation에서 원본 대조 |
+| 복구 방향 | 통과 | 원본에서 재구축 |
 
 ---
 
-## 7. Key-Value 시뮬레이션
+## 7. Key-Value 시간 기준
 
 | 검증 | 기대 | 상태 |
 | --- | ---: | --- |
 | 전체 캐시 | 4 | 코드 반영 |
-| 유효 캐시 | 3 | 코드 반영 |
-| 만료 캐시 | 1 | 코드 반영 |
-| 정확한 키 조회 | 1행 | 코드 반영 |
-| 만료 키 유효 조회 | 0행 | 코드 반영 |
+| Seed 유효 | 3 | created_at 비교 |
+| Seed 만료 | 1 | created_at 비교 |
+| 현재 유효 | 시간 의존 | 고정 정답 제거 |
+| 만료 정책 없음 | 1 | expired_at NULL |
+| 정확 키 Seed 조회 | 1행 | 코드 반영 |
+| Seed 만료 키 유효 조회 | 0행 | 코드 반영 |
 | 캐시 미스 | cache_miss | 코드 반영 |
-| 자동 TTL 삭제 미구현 | 명시 | 통과 |
-| 실제 분산·복제 미구현 | 명시 | 통과 |
+| 인기 강의 IDs | 301·302·303 | 코드 반영 |
+| 자동 TTL 삭제 | 미구현 명시 | 통과 |
 
 ---
 
-## 8. 저장 선택 사례
+## 8. Key-Value 시뮬레이션 범위
 
-| 항목 | 기대 | 상태 |
-| --- | ---: | --- |
-| 전체 사례 | 6 | 코드 반영 |
-| 시스템 역할 종류 | 6 | 코드 반영 |
-| Source of Truth 사례 | 1 | 코드 반영 |
-| 비원본 사례 | 5 | 코드 반영 |
-| 대표 조회 필수 | 빈 값 0행 | 코드 반영 |
-| 원본 위치 필수 | 빈 값 0행 | 코드 반영 |
-| 동기화 전략 필수 | 빈 값 0행 | 코드 반영 |
-
----
-
-## 9. 단계별 파일
-
-| 파일 | 역할 | 상태 |
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| `01_nosql_lab_schema.sql` | 전용 스키마 생성 | 통과 |
-| `02_nosql_lab_seed.sql` | 문서·캐시·선택 사례 입력 | 통과 |
-| `03_document_jsonb_queries.sql` | JSONB 조회·검증·인덱스 | 통과 |
-| `04_key_value_cache_queries.sql` | 캐시 유효·만료·미스 | 통과 |
-| `05_storage_choice_review.sql` | 선택 근거 검증 | 통과 |
-| `reset_nosql_lab.sql` | 실습 스키마만 초기화 | 통과 |
-| `nosql_jsonb_practice.sql` | 안전한 호환 진입점 | 통과 |
-| `README.md` | 실행 순서·한계·기준 | 통과 |
+| cache_value 객체 강제 제거 | 통과 | JSONB 값 전체 허용 |
+| TTL 선택성 | 통과 | expired_at NULL 허용 |
+| 메모리 저장 | 범위 제외 | 명시 |
+| eviction | 범위 제외 | 명시 |
+| 복제·샤딩 | 범위 제외 | 명시 |
+| 실제 장애 동작 | 범위 제외 | 명시 |
 
 ---
 
-## 10. AI 추천 검토
+## 9. JSONB 연산자·구조 검증
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 항목 | 상태 |
+| --- | --- |
+| `->`, `->>`, `#>`, `#>>` | 통과 |
+| `?`, `@>` | 통과 |
+| metadata 객체 | 통과 |
+| tags 배열 | 통과 |
+| options 객체 | 통과 |
+| online boolean | 통과 |
+| certificate boolean | 통과 |
+| instructor_snapshot 객체 | 통과 |
+| 원본 강사 ID·이름·전문분야 대조 | 통과 |
+| DB·애플리케이션 책임 표 | 통과 |
+
+---
+
+## 10. 낙관적 잠금과 jsonb_set
+
+| 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 원본 위치 | 통과 | 최종 판단 기준 요구 |
-| 대표 조회·쓰기 | 통과 | 키·조건·정렬·관계 깊이 요구 |
-| JSONB 비교 | 통과 | 별도 제품 도입 전 검토 |
-| 트랜잭션·일관성 | 통과 | 제품별 검증 요구 |
-| 동기화 실패 | 통과 | 재시도·멱등성·재구축 포함 |
-| 운영 비용 | 통과 | 배포·보안·백업·복구 포함 |
-| 작은 PoC | 통과 | 성능·실패·복구·비용 기준 |
+| document_version 조건 | 통과 | version=1일 때만 UPDATE |
+| 경로 타입 조건 | 통과 | options 객체 확인 |
+| 영향 행 수 판정 | 통과 | 1이 아니면 예외 |
+| 변경 결과 | 통과 | false/version 2 |
+| ROLLBACK | 통과 | true/version 1 복구 |
+| 중간 경로 전제조건 | 통과 | 본문·코드 설명 |
+| updated_at 책임 | 통과 | SQL·애플리케이션 갱신 |
 
 ---
 
-## 11. 도식
+## 11. NoSQL 유형 설명
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 유형 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 기존 SVG 8종 | 통과 | 일반 저장 모델 흐름과 호환 |
-| 새 제목·nosql_lab 기준 | 통과 | 이미지 README 갱신 |
-| 시스템 역할 표현 | 기존 확인 필요 | 실제 도식 렌더링 수동 검수 |
-| 접근성·XML | 기존 검증 유지 | 출판 변환 확인 필요 |
+| Key-Value | 통과 | 키·TTL·미스·무만료 |
+| Document | 통과 | 문서 경계·버전·스냅샷 |
+| Column-Family | 통과 | 목표 조회·파티션·정렬 키 |
+| Cassandra 계열 범위 | 통과 | 제품별 차이 명시 |
+| Graph | 통과 | 단순 JOIN·다단계 탐색 구분 |
+| 트랜잭션·일관성 | 통과 | 제품·설정·범위별 확인 |
+| CAP | 통과 | 단순 표어 방지 |
 
 ---
 
-## 12. 남은 확인
+## 12. 여러 저장소 동기화
+
+| 점검 항목 | 상태 |
+| --- | --- |
+| 이중 쓰기 실패 | 통과 |
+| 원본 단일화 | 통과 |
+| 변경 이벤트·CDC | 통과 |
+| 재시도·멱등성 | 통과 |
+| 실패 대기열 | 통과 |
+| 주기적 대조 | 통과 |
+| 재구축 전략 | 통과 |
+| 복구 방법을 선택 기록에 포함 | 통과 |
+
+---
+
+## 13. 저장소 선택 기록
+
+| 항목 | 상태 |
+| --- | --- |
+| system_role | 통과 |
+| primary_query | 통과 |
+| candidate_storage | 통과 |
+| source_of_truth | 통과 |
+| consistency_requirement | 통과 |
+| synchronization_strategy | 통과 |
+| recovery_strategy | 통과 |
+| poc_success_criteria | 통과 |
+| decision_status | 통과 |
+| reason | 통과 |
+| reviewed_at | 통과 |
+| 필수 문자열 공백 CHECK | 통과 |
+
+결정 상태:
 
 ```text
-- 실제 PostgreSQL에서 01→05 실행
-- JSONB 검증 boolean 모두 true 확인
-- ROLLBACK 후 certificate=true·version=1 확인
-- 캐시 4/3/1과 cache_miss 확인
-- 저장 선택 6/6/1/5 결과 확인
-- GitHub·Word·PDF·eBook 렌더링 확인
-- 실제 NoSQL 제품 비교 시 공식 문서와 PoC 별도 수행
+candidate / poc_planned / hold / adopted / rejected
+```
+
+| 검증 | 기대 | 상태 |
+| --- | ---: | --- |
+| 전체 사례 | 6 | 통과 |
+| 시스템 역할 | 6종 | 통과 |
+| Source of Truth 사례 | 1 | 통과 |
+| adopted 사례 | 1 | 통과 |
+| 비원본 사례 | 5 | 통과 |
+| 필수 근거 공백 | 0 | 통과 |
+
+---
+
+## 14. JSONB 인덱스 후보
+
+| 점검 항목 | 상태 | 최종 반영 내용 |
+| --- | --- | --- |
+| 인덱스 파일 분리 | 통과 | 06 신규 |
+| 기존 이름 충돌 검사 | 통과 | 미존재 아니면 중단 |
+| `IF NOT EXISTS` 제거 | 통과 | 정의 동일성 오해 방지 |
+| metadata GIN | 통과 | 기본 jsonb_ops |
+| online 표현식 B-tree | 통과 | `#>>` 경로 |
+| jsonb_ops 설명 | 통과 | 다양한 연산 |
+| jsonb_path_ops 설명 | 통과 | 포함·path 중심, `?` 미지원 |
+| 실제 정의 조회 | 통과 | pg_indexes·카탈로그 |
+| 3행 Seq Scan | 통과 | 정상 가능성 설명 |
+
+---
+
+## 15. 최종 자동 검증
+
+| 검증 | 기대 | 상태 |
+| --- | ---: | --- |
+| 현재 DB | ai_database_book | 보호 구문 |
+| Chapter 07 | 3/2/3/5 | 자동 판정 |
+| Chapter 12 | 3/4/6 | 자동 판정 |
+| 원본 강의 불일치 | 0 | 자동 판정 |
+| 강사 스냅샷 불일치 | 0 | 자동 판정 |
+| JSONB 구조 위반 | 0 | 자동 판정 |
+| COURSE-301 기준 | true/version 1 | 자동 판정 |
+| Seed 캐시 | 4/3/1 | 자동 판정 |
+| 인기 강의 IDs | 301~303 | 자동 판정 |
+| 시스템 역할 | 6종 | 자동 판정 |
+| adopted 사례 | 1 | 자동 판정 |
+| 필수 근거 공백 | 0 | 자동 판정 |
+| GIN·표현식 인덱스 | 정상 정의 | 자동 판정 |
+
+통과 메시지:
+
+```text
+Chapter 12 nosql_lab validation passed
 ```
 
 ---
 
-## 13. 최종 판정
+## 16. 단계별 파일
+
+| 파일 | 역할 | 상태 |
+| --- | --- | --- |
+| `01_nosql_lab_schema.sql` | 보호 검사·원자적 구조 생성 | 완료 |
+| `02_nosql_lab_seed.sql` | 원본 연계·재현 TTL·선택 사례·자동 판정 | 완료 |
+| `03_document_jsonb_queries.sql` | JSONB·원본 대조·낙관적 잠금 | 완료 |
+| `04_key_value_cache_queries.sql` | Seed·현재 TTL·미스 | 완료 |
+| `05_storage_choice_review.sql` | 근거·복구·PoC·상태 검토 | 완료 |
+| `06_jsonb_index_candidates.sql` | 인덱스 후보·정의 검증 | 신규 완료 |
+| `07_nosql_lab_validation.sql` | 전체 자동 판정 | 신규 완료 |
+| `reset_nosql_lab.sql` | DB 보호 초기화 | 완료 |
+| `nosql_jsonb_practice.sql` | 읽기 전용 호환 진입점 | 완료 |
+| `README.md` | 실행 순서·기준·한계 | 완료 |
+
+---
+
+## 17. 본문·워크북·구성안 동기화
+
+| 점검 항목 | 상태 |
+| --- | --- |
+| 파일 순서 01→07 | 통과 |
+| Chapter 07 원본 | 통과 |
+| Seed·현재 TTL | 통과 |
+| level 일반 컬럼 | 통과 |
+| instructor_snapshot | 통과 |
+| 결제 원본 범위 | 통과 |
+| 낙관적 잠금 | 통과 |
+| 인덱스 정의 검증 | 통과 |
+| 후보·결정 상태 | 통과 |
+| 최종 자동 판정 | 통과 |
+| 권장 해설 | 통과 |
+
+기존 SVG 8종은 RDBMS·NoSQL 역할, 네 유형, JSONB와 AI 검토라는 일반 메시지와 호환됩니다. SQL 상세를 이미지에 중복하지 않는 원칙에 따라 변경하지 않았습니다.
+
+---
+
+## 18. 남은 실제 검증
 
 ```text
-Chapter 12는 데이터 모양보다 원본 책임, 조회 패턴, 일관성, 동기화 실패와 운영 비용을 기준으로 저장소를 선택하도록 2차 재구성했다.
-실제 PostgreSQL 실행과 제품별 NoSQL 검증은 수동 확인이 필요하다.
+- 실제 PostgreSQL에서 01→07 순차 실행
+- Seed 캐시 4/3/1과 현재 시간 변화 확인
+- COURSE-301 ROLLBACK 결과 확인
+- 원본·스냅샷 대조 0건 확인
+- JSONB 인덱스 정의와 EXPLAIN 확인
+- 07 최종 통과 메시지 확인
+- GitHub·Word·PDF·eBook 렌더링 확인
+- 실제 NoSQL 제품 비교 시 공식 문서·PoC 별도 수행
+```
+
+---
+
+## 19. 최종 판정
+
+```text
+Chapter 12는 시간 의존 TTL, 원본 식별자 불일치, 존재하지 않는 결제 원장,
+안정 필드의 JSONB 저장, 스냅샷 의미, 실행 보호, 문서 버전과 인덱스 정의를 최종 보완했다.
+
+본문·워크북·SQL·구성안이 같은 원본·시간·결정·검증 기준을 사용하므로
+최종 출판 전 내용 검수 완료 상태로 판정한다.
 ```
