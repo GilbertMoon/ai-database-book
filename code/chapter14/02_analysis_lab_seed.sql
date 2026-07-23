@@ -1,7 +1,42 @@
 -- Chapter 14. SQL 데이터 분석과 Python 확장
 -- 목적: 기간·상태·지역·강의별 분석이 가능한 기준 데이터를 입력합니다.
 -- 실행 전 01_analysis_lab_schema.sql을 먼저 실행합니다.
--- 명시적 ID를 사용해 이전 시퀀스 상태에 의존하지 않습니다.
+
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+
+-- ============================================================
+-- 실행 전 상태 확인
+-- ============================================================
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('analysis_lab.students') IS NULL
+       OR to_regclass('analysis_lab.instructors') IS NULL
+       OR to_regclass('analysis_lab.courses') IS NULL
+       OR to_regclass('analysis_lab.enrollments') IS NULL
+       OR to_regclass('analysis_lab.analysis_parameters') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: analysis_lab 핵심 객체가 없습니다. 01 파일을 먼저 실행하세요.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM analysis_lab.students) <> 0
+       OR (SELECT COUNT(*) FROM analysis_lab.instructors) <> 0
+       OR (SELECT COUNT(*) FROM analysis_lab.courses) <> 0
+       OR (SELECT COUNT(*) FROM analysis_lab.enrollments) <> 0 THEN
+        RAISE EXCEPTION
+            '실행 중단: 기준 테이블은 모두 비어 있어야 합니다. 기존 데이터를 확인하세요.';
+    END IF;
+END
+$$;
+
+BEGIN;
 
 INSERT INTO analysis_lab.students (id, name, region, joined_at)
 VALUES
@@ -76,32 +111,66 @@ VALUES
     (1023, 102, 305, '2026-06-15', '수강중', 160000, NULL),
     (1024, 106, 304, '2026-06-22', '신청',   140000, NULL);
 
--- 명시적 ID 이후 자동 생성 ID가 충돌하지 않도록 시퀀스를 맞춥니다.
-SELECT setval(
-    pg_get_serial_sequence('analysis_lab.students', 'id'),
-    (SELECT MAX(id) FROM analysis_lab.students),
-    true
-);
+-- 명시적 ID 입력 뒤 자동값이 기존 PK와 충돌하지 않도록 다음 값을 조정합니다.
+ALTER TABLE analysis_lab.students
+    ALTER COLUMN id RESTART WITH 109;
 
-SELECT setval(
-    pg_get_serial_sequence('analysis_lab.instructors', 'id'),
-    (SELECT MAX(id) FROM analysis_lab.instructors),
-    true
-);
+ALTER TABLE analysis_lab.instructors
+    ALTER COLUMN id RESTART WITH 204;
 
-SELECT setval(
-    pg_get_serial_sequence('analysis_lab.courses', 'id'),
-    (SELECT MAX(id) FROM analysis_lab.courses),
-    true
-);
+ALTER TABLE analysis_lab.courses
+    ALTER COLUMN id RESTART WITH 306;
 
-SELECT setval(
-    pg_get_serial_sequence('analysis_lab.enrollments', 'id'),
-    (SELECT MAX(id) FROM analysis_lab.enrollments),
-    true
-);
+ALTER TABLE analysis_lab.enrollments
+    ALTER COLUMN id RESTART WITH 1025;
 
--- 기대 행 수:
--- students 8, instructors 3, courses 5, enrollments 24
+-- COMMIT 전 기준 상태 자동 판정
+DO $$
+DECLARE
+    active_duplicate_count BIGINT;
+BEGIN
+    IF (SELECT COUNT(*) FROM analysis_lab.students) <> 8
+       OR (SELECT COUNT(*) FROM analysis_lab.instructors) <> 3
+       OR (SELECT COUNT(*) FROM analysis_lab.courses) <> 5
+       OR (SELECT COUNT(*) FROM analysis_lab.enrollments) <> 24 THEN
+        RAISE EXCEPTION
+            'Seed 중단: 기준 행 수 8/3/5/24와 일치하지 않습니다.';
+    END IF;
+
+    IF (SELECT SUM(paid_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
+        RAISE EXCEPTION
+            'Seed 중단: 신청 당시 기록 금액 합계가 2,770,000이 아닙니다.';
+    END IF;
+
+    IF (
+        SELECT COUNT(*)
+        FROM analysis_lab.enrollments
+        WHERE status = '완료'
+    ) <> 12 THEN
+        RAISE EXCEPTION
+            'Seed 중단: 완료 상태는 12건이어야 합니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO active_duplicate_count
+    FROM (
+        SELECT student_id, course_id
+        FROM analysis_lab.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated_active_pairs;
+
+    IF active_duplicate_count <> 0 THEN
+        RAISE EXCEPTION
+            'Seed 중단: 활성 신청 중복 조합이 %건 있습니다.',
+            active_duplicate_count;
+    END IF;
+END
+$$;
+
+COMMIT;
+
+-- 기대 행 수: students 8, instructors 3, courses 5, enrollments 24
 -- 상태별: 완료 12, 수강중 5, 신청 4, 취소 3
--- 결제금액 합계: 2,770,000
+-- 신청 당시 기록 금액 합계: 2,770,000
