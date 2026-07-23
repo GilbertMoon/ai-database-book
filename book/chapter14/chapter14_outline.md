@@ -6,48 +6,58 @@ SQL 데이터 분석과 Python 확장
 
 ## 권장 분량
 
-28~34페이지
+30~36페이지
 
 ## 이 장의 역할
 
-Chapter 14는 앞 장까지 학습한 PostgreSQL·SQL·JOIN·집계·검증 능력을 데이터 분석으로 연결하고, SQL에서 만든 분석 데이터셋을 Python과 pandas로 확장하는 장입니다.
+Chapter 14는 앞 장까지 학습한 PostgreSQL·SQL·JOIN·집계·검증 능력을 데이터 분석으로 연결하고, SQL에서 확정한 분석 데이터셋을 Python과 pandas로 확장한 뒤 실제 SQL 결과와 교차 검증하는 장입니다.
 
 ```text
-분석 질문 정의
-→ 데이터 범위와 행 단위 확정
+분석 질문·P14 ID
+→ 기간·행 단위·지표 의미 확정
 → SQL 필터·JOIN·집계
 → 데이터 품질 점검
-→ 분석용 VIEW 생성
-→ CSV 또는 PostgreSQL 연결
-→ pandas 가공·피벗·시각화
-→ SQL·Python 결과 교차 검증
+→ 기간 제한 분석 VIEW
+→ CSV manifest 또는 읽기 전용 DB 연결
+→ pandas 가공·date spine·피벗·시각화
+→ 실제 SQL·pandas 교차 검증
+→ 관찰·해석·한계 기록
 ```
 
 ## 핵심 메시지
 
-> SQL은 데이터베이스에서 분석 범위와 관계를 정확하게 확정하고, Python은 그 결과를 추가 가공·시각화·분석하는 도구다. 두 결과가 같은 기준값을 만드는지 검증해야 한다.
+> SQL은 분석 범위·관계·행 단위를 확정하고, Python은 그 결과를 확장한다. 같은 기간과 데이터 스냅샷의 실제 SQL 결과와 pandas 결과가 일치해야 한다.
 
-## 핵심 질문
+## P14 분석 질문
 
 ```text
-분석 질문과 기간·단위·기대 결과가 정의되었는가?
-JOIN 경로와 집계 단위가 요구사항에 맞는가?
-NULL·중복·고아·업무 규칙을 집계 전에 확인했는가?
-분석용 데이터셋에서 한 행의 의미가 명확한가?
-SQL에서 처리할 작업과 Python에서 처리할 작업을 구분했는가?
-CSV 또는 DB 연결 후 DataFrame 행 수와 자료형을 확인했는가?
-SQL과 pandas의 건수·합계·평균이 일치하는가?
-그래프의 축·단위·기간이 해석을 왜곡하지 않는가?
-AI가 만든 SQL·Python 코드와 diff를 사람이 검토했는가?
+P14-Q01 상태별 수강신청 건수
+P14-Q02 월별 신청 수와 신청 당시 기록 금액
+P14-Q03 강의별 신청 건수
+P14-Q04 지역별 학생·신청 건수
+P14-Q05 완료된 신청의 완료 기간
 ```
 
-## 실습 스키마
+## 핵심 결정
+
+```text
+분석 기간 = [2026-01-01, 2026-07-01)
+날짜 기준 = enrolled_at
+행 단위 = 수강신청 1건
+paid_amount 의미 = 신청 당시 기록 금액
+분석 VIEW 금액 컬럼 = recorded_amount
+월별 분석 = date spine으로 1~6월 유지
+현재 완료 상태 비중 ≠ 코호트 완료율
+```
+
+## 실습 객체
 
 ```text
 analysis_lab.students
 analysis_lab.instructors
 analysis_lab.courses
 analysis_lab.enrollments
+analysis_lab.analysis_parameters VIEW
 analysis_lab.enrollment_analysis_dataset VIEW
 ```
 
@@ -70,91 +80,113 @@ students 8
 instructors 3
 courses 5
 enrollments 24
-분석 데이터셋 24행
+분석 데이터셋 24
+기록 금액 합계 2,770,000
 ```
 
-상태별 기준:
+상태:
 
 ```text
-완료 12
-수강중 5
 신청 4
+수강중 5
+완료 12
 취소 3
 ```
 
-월별 신청 건수:
+월별:
 
 ```text
-2026-01 3
-2026-02 4
-2026-03 5
-2026-04 4
-2026-05 4
-2026-06 4
+2026-01 3 / 200000
+2026-02 4 / 520000
+2026-03 5 / 540000
+2026-04 4 / 550000
+2026-05 4 / 390000
+2026-06 4 / 570000
 ```
 
-검산 기준:
+완료된 신청:
 
 ```text
-전체 수강신청 24
-결제금액 합계 2,770,000
-완료 수강 12
-평균 완료 기간 25일
-PK 중복 0
-고아 FK 0
-상태·완료일 이상 0
+12건
+평균 25일
+최소 18일
+최대 36일
+```
+
+## 무결성·품질 규칙
+
+```text
+PK·FK·상태·금액·완료일 CHECK
+같은 날짜 동일 원천 행 UNIQUE
+신청·수강중 활성 신청 부분 고유 인덱스
+신청일 >= 학생 가입일
+신청일 >= 강의 개설일
+완료일 >= 신청일
+분석 기간 밖 기준 행 0
 ```
 
 ## 핵심 개념
 
-- 분석 질문
-- 분석 대상과 기간
-- 분석 단위와 행 단위
-- SQL 필터·JOIN·집계
-- `COUNT(*)`와 `COUNT(column)`
-- `COUNT(DISTINCT ...)`
-- `GROUP BY`, `HAVING`
+- 분석 질문과 지표 정의
+- 반개방 날짜 구간
+- 분석 행 단위
+- `COUNT(*)`, `COUNT(column)`, `COUNT(DISTINCT ...)`
+- JOIN 후 중복과 과대 집계
 - `DATE_TRUNC`
-- 윈도 함수 `LAG`
-- NULL과 업무 의미
-- 중복·고아·정합성 점검
-- 분석용 VIEW
-- 원본 데이터와 파생 데이터셋
-- CSV 내보내기
-- PostgreSQL·Python 연결
-- 환경변수와 `.env`
-- pandas DataFrame
-- `groupby`, `agg`, `pivot_table`
-- matplotlib 시각화
-- SQL·Python 교차 검증
-- 분석 결과의 관찰·해석·한계
-- AI 생성 분석 코드 검토
+- date spine과 `generate_series`
+- `LAG`
+- NULL의 업무 의미
+- 현재 완료 상태 비중과 완료율
+- 완료된 행만의 기간 통계 한계
+- 분석 VIEW
+- CSV manifest와 SHA-256
+- libpq password file·`PGPASSFILE`
+- SQLAlchemy `URL.create()`
+- 읽기 전용 연결
+- pandas strict 자료형 검증
+- `errors="raise"`
+- matplotlib `Agg`와 한글 글꼴 경고
+- 실제 SQL DataFrame·pandas DataFrame 비교
+- `REPEATABLE READ`
+- `assert_frame_equal`
+- AI 분석 코드 검토
 
 ## 본문 구성
 
-1. 분석 질문을 먼저 정의한다
-2. SQL과 Python의 역할을 구분한다
-3. Chapter 14 실습 구조
-4. 분석 실습 데이터 이해하기
-5. 분석 전에 데이터 품질을 확인한다
-6. JOIN·필터·집계로 분석한다
-7. 기간별 분석을 수행한다
-8. 분석용 데이터셋을 만든다
-9. DBeaver에서 CSV로 내보낸다
-10. Python 분석 환경을 준비한다
-11. CSV를 pandas로 읽는다
-12. PostgreSQL과 Python을 연결한다
-13. pandas로 집계한다
-14. 간단한 시각화로 확장한다
-15. SQL 결과와 Python 결과를 교차 검증한다
-16. 분석 결과를 해석한다
-17. AI가 만든 분석 코드를 검토한다
-18. 자주 하는 실수
-19. 스스로 확인하기
-20. 핵심 정리
-21. 다음 장 연결
+1. 분석 질문 정의
+2. 금액 지표 의미
+3. SQL·Python 역할
+4. 실습 구조
+5. 생성·Seed·reset 안전성
+6. 활성 신청과 중복 적재
+7. 분석 기간 관리
+8. 기준 데이터
+9. 데이터 품질
+10. JOIN·집계 기본 흐름
+11. COUNT 계열 함수
+12. 강의·강사·지역 분석
+13. date spine
+14. LAG 이전 달 비교
+15. 완료 상태 비중과 완료율
+16. 완료 기간과 해석 한계
+17. 분석 데이터셋
+18. SQL 최종 게이트
+19. CSV와 manifest
+20. Python 환경
+21. libpq 변수와 읽기 전용 연결
+22. 공통 DataFrame 검증
+23. pandas 분석
+24. 헤드리스 시각화
+25. 실제 SQL·pandas 교차 검증
+26. 불일치 원인 확인
+27. 관찰·해석·한계
+28. AI 코드 검토
+29. 자주 하는 실수
+30. 스스로 확인하기
+31. 권장 해설
+32. 핵심 정리와 다음 장
 
-## 코드·문서 파일
+## 코드 파일
 
 ```text
 code/chapter14/
@@ -165,31 +197,66 @@ code/chapter14/
 ├── 05_period_category_analysis.sql
 ├── 06_analysis_dataset.sql
 ├── 07_analysis_validation.sql
+├── 08_analysis_lab_validation.sql
 ├── reset_analysis_lab.sql
 ├── python/
 │   ├── requirements.txt
 │   ├── .env.example
+│   ├── validation_utils.py
 │   ├── 01_load_csv.py
 │   ├── 02_load_postgresql.py
 │   ├── 03_pandas_analysis.py
-│   └── 04_result_validation.py
+│   ├── 04_result_validation.py
+│   ├── reference_metrics.json
+│   └── analysis_manifest.example.json
 └── README.md
 ```
 
+## 파일 역할
+
 | 파일 | 역할 |
 | --- | --- |
-| `01_analysis_lab_schema.sql` | 전용 분석 스키마와 네 테이블 생성 |
-| `02_analysis_lab_seed.sql` | 기간·상태·지역·강의 분석용 기준 데이터 입력 |
-| `03_data_quality_checks.sql` | 행 수·중복·고아 FK·상태·날짜·금액 점검 |
-| `04_summary_analysis.sql` | 상태·강의·지역별 기본 집계 |
-| `05_period_category_analysis.sql` | 월별·범주별 분석과 이전 기간 비교 |
-| `06_analysis_dataset.sql` | 수강신청 1건 단위 분석 VIEW 생성 |
-| `07_analysis_validation.sql` | SQL 기준값과 완료 게이트용 검산 |
-| `01_load_csv.py` | DBeaver에서 내보낸 CSV 읽기·구조 확인 |
-| `02_load_postgresql.py` | 환경변수로 PostgreSQL VIEW 읽기 |
-| `03_pandas_analysis.py` | 상태·월·강의 분석과 피벗·그래프 |
-| `04_result_validation.py` | SQL 기준값과 pandas 결과 자동 비교 |
-| `reset_analysis_lab.sql` | analysis_lab만 선택적으로 초기화 |
+| 01 | DB 보호·원자적 구조·기간 VIEW·활성 인덱스 |
+| 02 | 빈 상태 검사·원자적 Seed·IDENTITY·기준 판정 |
+| 03 | 중복·고아·상태·시간 관계·기간 품질 |
+| 04 | 기간 제한 상태·강의·강사·지역 집계 |
+| 05 | date spine·LAG·범주·완료 비중·완료 기간 |
+| 06 | 기간 제한 수강신청 1건 단위 VIEW |
+| 07 | 상세 SQL 증거 조회 |
+| 08 | 예외 기반 최종 SQL 게이트 |
+| validation_utils.py | 컬럼·자료형·기간·연결·manifest 공통 검증 |
+| 01_load_csv.py | CSV와 선택적 manifest 확인 |
+| 02_load_postgresql.py | 읽기 전용 DB 적재와 CSV·manifest 생성 |
+| 03_pandas_analysis.py | pandas 분석과 헤드리스 그래프 |
+| 04_result_validation.py | 실제 SQL·pandas 직접 비교 |
+| reference_metrics.json | CSV 경로 SQL 기준값 |
+
+## Python 검증 기준
+
+```text
+정확한 17개 컬럼
+24행·고유 enrollment_id
+strict 날짜·숫자·boolean
+status·is_completed 일치
+완료일·completion_days 일치
+분석 기간 안의 행
+errors='coerce'·임의 dropna·drop_duplicates 금지
+```
+
+## SQL·Python 교차 검증
+
+```text
+PostgreSQL 경로
+→ 같은 읽기 전용 REPEATABLE READ 스냅샷
+→ 실제 SQL 상태·월별·완료 기간 DataFrame
+→ pandas DataFrame
+→ assert_frame_equal
+
+CSV 경로
+→ CSV + 출처 manifest·SHA-256
+→ reference_metrics.json
+→ pandas 결과 비교
+```
 
 ## 이미지 구성
 
@@ -204,29 +271,21 @@ ch14_07_pandas_analysis_flow.svg
 ch14_08_analysis_result_validation.svg
 ```
 
-## 안전성 원칙
+기존 8종의 개념 역할은 최종 내용과 호환되므로 파일명과 배치를 유지합니다.
 
-- 앞 장의 스키마와 데이터를 변경하지 않는다.
-- 생성 SQL에서 자동 `DROP`을 실행하지 않는다.
-- 운영 DB가 아닌 개발·테스트 DB를 사용한다.
-- 분석 코드에서 원본 테이블 변경 SQL을 자동 실행하지 않는다.
-- 비밀번호와 접속 URL을 코드·노트북·화면 캡처에 남기지 않는다.
-- `.env`와 실제 분석 데이터 파일을 저장소에 무조건 커밋하지 않는다.
-- Python에서 중복·NULL을 임의 제거해 오류를 숨기지 않는다.
-- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
-- 검증하지 않은 분석 결과를 통과로 기록하지 않는다.
+## 안전 원칙
 
-## AI 활용 원칙
-
-- 분석 질문·기간·행 단위·기대값을 AI에 제공한다.
-- PK·FK와 JOIN 경로를 함께 제공한다.
-- SQL과 Python의 수정 대상과 금지 범위를 명시한다.
-- 파괴적인 SQL과 접속 정보 노출을 확인한다.
-- `dropna`, `drop_duplicates`가 오류를 숨기지 않는지 확인한다.
-- SQL 기준값과 별도 검산 쿼리로 결과를 비교한다.
-- 그래프보다 행 수·건수·합계·평균 검증을 우선한다.
-- AI 결과는 diff와 실행 증거를 확인한 후 사람이 승인한다.
+- 현재 DB와 대상 스키마를 실제 검사한다.
+- 생성·Seed는 트랜잭션으로 처리한다.
+- reset은 올바른 DB에서 명시적 객체만 삭제한다.
+- 분석 기간을 SQL·VIEW·Python에 동일 적용한다.
+- 원본 변경 SQL을 Python에서 실행하지 않는다.
+- PostgreSQL 연결은 읽기 전용으로 설정한다.
+- 비밀번호·전체 접속 URL·password file을 저장소에 기록하지 않는다.
+- CSV·manifest·그래프 생성물은 저장소에서 제외한다.
+- 잘못된 데이터는 coerce·drop으로 숨기지 않는다.
+- SQL·Python 불일치 시 기대값을 변경하기 전에 원인을 찾는다.
 
 ## 다음 장 연결
 
-Chapter 15에서는 요구사항, ERD, SQL 구현, 트랜잭션, 성능, 운영, AI 검토와 SQL·Python 데이터 분석을 하나의 재현 가능한 데이터베이스 종합 프로젝트로 통합합니다.
+Chapter 15에서는 요구사항·ERD·정규화·SQL·트랜잭션·성능·운영·AI 검토와 Chapter 14의 재현 가능한 SQL·Python 분석을 하나의 종합 프로젝트로 통합합니다.
