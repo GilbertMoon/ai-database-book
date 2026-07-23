@@ -26,19 +26,30 @@ SELECT COUNT(*) AS loan_count_before FROM public.loans_nf;
 -- ============================================================
 -- 경계 테스트 A. due_at = borrowed_at, returned_at = borrowed_at 허용
 -- C-04·C-05의 경계값입니다.
--- 두 문장을 순서대로 선택 실행한 뒤 삭제합니다.
+-- 기존 활성 대여와 충돌하지 않도록 임시 도서를 먼저 만든 뒤 테스트합니다.
+-- 네 문장을 순서대로 선택 실행하고 임시 행을 삭제합니다.
 -- ============================================================
+-- INSERT INTO public.books_nf (
+--     id, title, author, published_year, isbn
+-- )
+-- VALUES (
+--     1800, '경계값 테스트 도서', '테스트 저자', 2026, 'ISBN-BOUNDARY-LOAN-001'
+-- );
+--
 -- INSERT INTO public.loans_nf (
 --     id, member_id, book_id,
 --     borrowed_at, due_at, returned_at
 -- )
 -- VALUES (
---     1801, 101, 202,
+--     1801, 101, 1800,
 --     '2026-05-01', '2026-05-01', '2026-05-01'
 -- );
 --
 -- DELETE FROM public.loans_nf
 -- WHERE id = 1801;
+--
+-- DELETE FROM public.books_nf
+-- WHERE id = 1800;
 
 -- ============================================================
 -- 경계 테스트 B. published_year = NULL 허용
