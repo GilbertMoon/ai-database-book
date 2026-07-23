@@ -2,8 +2,12 @@
 -- 목적: SELECT ... FOR UPDATE로 같은 좌석 행을 잠글 때의 대기를 관찰합니다.
 -- 주의: 아래 트랜잭션 SQL은 실수로 대기 상태를 만들지 않도록 모두 주석 처리되어 있습니다.
 -- 서로 다른 연결 세션의 DBeaver SQL Editor 두 개를 열고 필요한 블록만 선택 실행합니다.
+-- 이 실습은 PostgreSQL 기본 격리 수준인 READ COMMITTED를 기준으로 설명합니다.
 
 SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+SHOW transaction_isolation;
 
 -- ============================================================
 -- 사전 조건
@@ -12,6 +16,14 @@ SELECT current_database();
 SELECT *
 FROM transaction_lab.course_inventory
 WHERE course_id = 303;
+
+-- 역할 구분
+-- SELECT ... FOR UPDATE
+--   → 대상 행을 잠그고 현재 세션에서 최신 상태를 관찰합니다.
+-- UPDATE ... WHERE remaining_seats > 0
+--   → 좌석이 실제로 남아 있을 때만 변경합니다.
+-- RETURNING 또는 영향 행 수
+--   → 좌석 확보 성공 여부를 확인합니다.
 
 -- ============================================================
 -- 세션 A
@@ -30,13 +42,19 @@ WHERE course_id = 303;
 -- ============================================================
 -- 세션 B
 -- 세션 A가 잠금을 유지한 상태에서 아래를 실행하면 대기할 수 있습니다.
+-- lock_timeout은 실습 중 무기한 대기를 피하기 위한 선택 설정입니다.
 -- ============================================================
 -- BEGIN;
+--
+-- SET LOCAL lock_timeout = '5s';
 --
 -- SELECT *
 -- FROM transaction_lab.course_inventory
 -- WHERE course_id = 303
 -- FOR UPDATE;
+--
+-- -- lock timeout 오류가 발생했다면 현재 트랜잭션이 오류 상태일 수 있으므로
+-- -- ROLLBACK;으로 종료한 뒤 다시 시작합니다.
 
 -- ============================================================
 -- 세션 A 종료
@@ -46,7 +64,8 @@ WHERE course_id = 303;
 
 -- ============================================================
 -- 세션 B 재개 후 종료
--- A가 종료되면 B가 잠금을 얻고 최신 값을 조회합니다.
+-- READ COMMITTED에서는 A가 종료된 뒤 B가 잠금을 얻고 최신 값을 볼 수 있습니다.
+-- REPEATABLE READ 또는 SERIALIZABLE에서는 동시 변경 오류가 발생할 수 있습니다.
 -- ============================================================
 -- SELECT *
 -- FROM transaction_lab.course_inventory
