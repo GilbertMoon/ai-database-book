@@ -2,21 +2,28 @@
 -- 주의: ai_review_lab 스키마와 실습 데이터만 삭제합니다.
 -- 기존 프로젝트·앞 장 스키마·Role은 변경하지 않습니다.
 
-SELECT
-    current_user,
-    current_database(),
-    current_schema();
+SELECT current_user;
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
 
--- 현재 데이터베이스와 보존 대상을 확인한 뒤
--- 아래 DROP 구간만 선택 실행합니다.
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '초기화 중단: 현재 데이터베이스는 %입니다. ai_database_book에서만 실행하세요.',
+            current_database();
+    END IF;
 
-DROP TABLE IF EXISTS ai_review_lab.payments;
-DROP TABLE IF EXISTS ai_review_lab.enrollments;
-DROP TABLE IF EXISTS ai_review_lab.courses;
-DROP TABLE IF EXISTS ai_review_lab.instructors;
-DROP TABLE IF EXISTS ai_review_lab.students;
-DROP TABLE IF EXISTS ai_review_lab.bad_enrollments;
-DROP SCHEMA IF EXISTS ai_review_lab;
+    DROP TABLE IF EXISTS ai_review_lab.payments;
+    DROP TABLE IF EXISTS ai_review_lab.enrollments;
+    DROP TABLE IF EXISTS ai_review_lab.courses;
+    DROP TABLE IF EXISTS ai_review_lab.instructors;
+    DROP TABLE IF EXISTS ai_review_lab.students;
+    DROP TABLE IF EXISTS ai_review_lab.bad_enrollments;
+    DROP SCHEMA IF EXISTS ai_review_lab;
+END
+$$;
 
 -- 삭제 후 실행 순서:
 -- 1. 01_ai_review_lab_schema.sql
@@ -26,3 +33,4 @@ DROP SCHEMA IF EXISTS ai_review_lab;
 -- 5. 05_metadata_validation.sql
 -- 6. 06_business_validation.sql
 -- 7. 07_negative_tests.sql
+-- 8. 08_ai_review_lab_validation.sql
