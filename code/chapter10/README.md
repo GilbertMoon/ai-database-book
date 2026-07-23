@@ -2,13 +2,13 @@
 
 ## 실행 계획으로 인덱스 효과 검증하기
 
-이 폴더는 기존 프로젝트를 변경하지 않고 `performance_lab`에서 대량 데이터를 생성해 인덱스 전후 실행 계획을 비교하는 SQL 파일을 관리합니다.
+이 폴더는 기존 프로젝트를 변경하지 않고 `performance_lab`에서 대량 데이터를 생성해 같은 SQL의 인덱스 전후 실행 계획을 비교하는 SQL 파일을 관리합니다.
 
 ---
 
 ## 실행 전 조건
 
-Chapter 07의 `course_project`가 준비되어 있어야 합니다. Chapter 10은 해당 데이터를 읽기만 하며 변경하지 않습니다.
+Chapter 07의 `course_project.enrollments`가 기준 5행 상태여야 합니다. Chapter 10은 해당 데이터를 읽기만 하며 변경하지 않습니다.
 
 ```text
 course_project: 변경하지 않음
@@ -16,19 +16,30 @@ transaction_lab: 변경하지 않음
 performance_lab: Chapter 10 전용 실험 공간
 ```
 
+모든 파일은 다음 위치 확인 형식을 사용합니다.
+
+```sql
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+```
+
+모든 실습 객체는 스키마 한정 이름으로 사용하므로 `current_schema()`가 `performance_lab`일 필요는 없습니다.
+
 ---
 
 ## 파일 목록
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_performance_lab_schema.sql` | 전용 스키마와 네 테이블 생성 |
-| `02_performance_lab_seed.sql` | 기본 데이터와 약 10만 건의 성능 데이터 생성 |
-| `03_baseline_explain.sql` | 후보 인덱스 생성 전 기준 실행 계획 |
-| `04_create_candidate_indexes.sql` | 세 개의 수동 인덱스 생성과 통계 갱신 |
-| `05_after_index_explain.sql` | 같은 SQL의 인덱스 생성 후 계획 |
+| `01_performance_lab_schema.sql` | 사전 조건을 검사하고 전용 스키마와 네 테이블을 하나의 트랜잭션에서 생성 |
+| `02_performance_lab_seed.sql` | 일관된 대량 데이터 생성, IDENTITY 시작값 조정과 최초 `ANALYZE` |
+| `03_baseline_explain.sql` | 세 실험 후보 인덱스가 없는 상태의 기준 실행 계획 |
+| `04_create_candidate_indexes.sql` | 세 실험 후보 인덱스 생성, 통계는 다시 수집하지 않음 |
+| `05_after_index_explain.sql` | 세 인덱스가 존재하는 상태에서 같은 SQL 재측정 |
 | `06_index_review.sql` | 자동·수동 인덱스, 크기와 사용 통계 검토 |
-| `reset_performance_lab.sql` | performance_lab만 초기화 |
+| `07_result_validation.sql` | 결과 행 수, 데이터 상태, 프로젝트 보호와 인덱스 존재 자동 검증 |
+| `reset_performance_lab.sql` | DB 보호 구문 안에서 `performance_lab`만 초기화 |
 | `index_performance_practice.sql` | 기존 링크 호환용 안내·상태 확인 |
 
 ---
@@ -42,9 +53,18 @@ performance_lab: Chapter 10 전용 실험 공간
 → 04_create_candidate_indexes.sql
 → 05_after_index_explain.sql
 → 06_index_review.sql
+→ 07_result_validation.sql
 ```
 
-`03`의 결과를 먼저 기록한 뒤 `04`, `05`를 실행해야 인덱스 전후를 비교할 수 있습니다.
+`03`의 결과를 기록한 뒤 `04`, `05`를 실행해야 합니다.
+
+```text
+03 실행 전: 실험 후보 인덱스 0개
+04 실행 전: 실험 후보 인덱스 0개
+05·06·07 실행 전: 실험 후보 인덱스 3개
+```
+
+각 파일은 상태가 맞지 않으면 예외를 발생시켜 잘못된 전후 비교를 차단합니다.
 
 ---
 
@@ -57,17 +77,53 @@ performance_lab: Chapter 10 전용 실험 공간
 | `performance_lab.courses` | 2003 |
 | `performance_lab.enrollments` | 100005 |
 
-PC 성능이 낮으면 `02_performance_lab_seed.sql`의 생성 건수를 줄일 수 있습니다. 다만 행 수가 너무 적으면 PostgreSQL이 합리적으로 `Seq Scan`을 선택해 차이가 작게 보일 수 있습니다.
+대량 데이터의 주요 특징:
+
+```text
+성능 학생 ID: 1001~11000
+성능 학생 이메일: performance{실제 ID}@example.com
+성능 강의 ID: 1001~3000
+학생별 신청: 10건
+강의별 신청: 50건
+동일 학생·강의 활성 신청 중복: 0건
+```
+
+주요 결과 행 수:
+
+```text
+performance5000@example.com → 1행, 학생 ID 5000
+student_id = 5000           → 10행
+course_id = 1500            → 50행
+course_id=1500 + 수강중     → 15행
+전체 수강중                 → 30001행
+```
+
+PC 성능이 낮아 생성 건수를 임의로 줄이면 이 기대값과 자동 검증을 함께 수정해야 합니다. 행 수가 너무 적으면 PostgreSQL이 합리적으로 `Seq Scan`을 선택해 차이가 작게 보일 수 있습니다.
 
 ---
 
-## 최종 수동 인덱스 후보
+## IDENTITY 시작값
+
+명시적 ID 입력은 IDENTITY의 다음 값을 자동으로 변경하지 않습니다. `02` 파일은 다음 값으로 조정합니다.
+
+```text
+students.id      → 11001
+instructors.id   → 203
+courses.id       → 3001
+enrollments.id   → 110001
+```
+
+---
+
+## 전후 측정을 위한 실험 후보
 
 ```text
 idx_performance_courses_title
 idx_performance_enrollments_student_id
 idx_performance_enrollments_course_status
 ```
+
+이 세 인덱스는 측정을 위한 후보입니다. 실제 운영 적용 여부는 워크로드, 계획, Buffers, 시간, 저장 공간과 쓰기 비용을 비교한 뒤 결정합니다.
 
 자동 인덱스:
 
@@ -76,7 +132,7 @@ PRIMARY KEY
 UNIQUE email
 ```
 
-PostgreSQL은 외래키 자식 컬럼에 인덱스를 자동 생성하지 않습니다.
+PostgreSQL은 외래키 자식 컬럼에 인덱스를 자동 생성하지 않습니다. FK 자식 인덱스는 무결성 정확성을 위한 필수 구조는 아니지만 JOIN과 부모 삭제·키 변경 시 자식 검색에 도움이 될 수 있습니다.
 
 ---
 
@@ -93,7 +149,7 @@ ORDER BY title
 ORDER BY title LIMIT 20
 ```
 
-같은 SQL과 같은 데이터 상태를 인덱스 전후에 사용합니다.
+같은 SQL, 같은 데이터, 같은 테이블 통계를 인덱스 전후에 사용합니다. `02`에서 `ANALYZE`한 뒤 `04`에서는 다시 실행하지 않아 새로운 통계 표본의 영향을 섞지 않습니다.
 
 ---
 
@@ -113,7 +169,56 @@ Planning Time
 Execution Time
 ```
 
-`cost`는 실행 시간이 아니며, 환경에 따라 계획과 시간은 달라질 수 있습니다.
+`cost`는 실행 시간이 아닙니다. 계획과 시간은 PostgreSQL 버전, 장비, 캐시와 설정에 따라 달라질 수 있습니다.
+
+`EXPLAIN ANALYZE`는 일반 결과 행 대신 실행 계획을 출력하므로, 결과 동일성은 `07_result_validation.sql`의 별도 `COUNT`와 자동 판정으로 확인합니다.
+
+---
+
+## 복합 인덱스와 Skip Scan
+
+`(course_id, status)`에서는 선두 컬럼인 `course_id` 조건이 있을 때 일반적으로 활용하기 쉽습니다.
+
+```text
+course_id 단독
+course_id + status
+→ 활용 가능성 높음
+
+status 단독
+→ 일반적으로 제한적
+→ 데이터 분포와 비용에 따라 PostgreSQL Skip Scan 가능성 존재
+```
+
+실제 사용 여부는 `Index Cond`와 계획 노드로 확인합니다.
+
+---
+
+## 운영 환경의 인덱스 생성
+
+이 실습은 격리된 스키마이므로 일반 `CREATE INDEX`를 사용합니다.
+
+운영 테이블에서는 다음을 먼저 검토합니다.
+
+```text
+쓰기 잠금 영향
+인덱스 생성 시간과 디스크 공간
+CREATE INDEX CONCURRENTLY 필요 여부
+실패 후 INVALID 인덱스 존재 여부
+```
+
+`CREATE INDEX CONCURRENTLY`는 트랜잭션 블록 안에서 실행할 수 없으며 일반 생성보다 오래 걸릴 수 있습니다.
+
+---
+
+## idx_scan 해석
+
+```text
+- idx_scan = 0만으로 삭제하지 않습니다.
+- 통계 초기화 시점과 관찰 기간을 확인합니다.
+- PK·UNIQUE 인덱스는 제약조건 유지에 직접 사용됩니다.
+- FK 자식 인덱스는 성능 목적이며 업무 패턴을 확인합니다.
+- idx_scan을 사용자 SQL 실행 횟수와 항상 같은 값으로 해석하지 않습니다.
+```
 
 ---
 
@@ -122,10 +227,11 @@ Execution Time
 ```text
 - public, course_project, transaction_lab 객체를 삭제하지 않습니다.
 - 생성 파일에서 자동 DROP을 실행하지 않습니다.
+- reset 파일은 ai_database_book에서만 삭제를 허용합니다.
 - EXPLAIN (ANALYZE, BUFFERS)는 SELECT에만 사용합니다.
 - 실행 시간 한 번만 보고 판단하지 않습니다.
 - 계획, 행 수, Buffers와 결과 동일성을 함께 확인합니다.
-- idx_scan=0만으로 인덱스를 즉시 삭제하지 않습니다.
+- 기준과 사후 측정 사이에 데이터와 통계를 바꾸지 않습니다.
 ```
 
 ---
@@ -138,4 +244,4 @@ Execution Time
 reset_performance_lab.sql
 ```
 
-이 파일은 `performance_lab`의 네 테이블과 스키마만 삭제합니다.
+이 파일은 현재 데이터베이스를 검증한 뒤 `performance_lab`의 네 테이블과 스키마만 삭제합니다.
