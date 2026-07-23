@@ -1,9 +1,9 @@
 flowchart LR
     DB[(PostgreSQL<br/>analysis_lab VIEW)]
     A[읽기 전용 계정<br/>개발·테스트 DB]
-    E[DATABASE_URL<br/>.env]
-    S[SQLAlchemy<br/>psycopg]
+    E[PGHOST·PGPORT·PGDATABASE·PGUSER<br/>PGPASSFILE]
+    S[SQLAlchemy URL.create<br/>psycopg]
     P[pandas.read_sql_query]
-    D[DataFrame<br/>행 수·자료형 확인]
+    D[DataFrame<br/>컬럼·자료형·기간 검증]
 
     DB --> A --> E --> S --> P --> D
