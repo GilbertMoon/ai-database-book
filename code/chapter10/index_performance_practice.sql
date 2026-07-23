@@ -18,6 +18,21 @@ SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
 
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('course_project.enrollments') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: course_project.enrollments가 없습니다. Chapter 07을 먼저 준비하세요.';
+    END IF;
+END
+$$;
+
 -- 앞 장 데이터 보호 확인
 SELECT COUNT(*) AS project_enrollment_count
 FROM course_project.enrollments;
