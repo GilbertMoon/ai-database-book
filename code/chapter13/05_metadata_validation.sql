@@ -3,8 +3,32 @@
 -- 데이터를 변경하지 않습니다.
 
 SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
 
--- 1. Chapter 13 테이블 목록: 기대 6개
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '검증 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('ai_review_lab.payments') IS NULL
+       OR (SELECT COUNT(*) FROM ai_review_lab.students) <> 3
+       OR (SELECT COUNT(*) FROM ai_review_lab.instructors) <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.courses) <> 3
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments) <> 4
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments) <> 4 THEN
+        RAISE EXCEPTION
+            '검증 중단: 01→04 기준 상태가 준비되지 않았습니다.';
+    END IF;
+END
+$$;
+
+-- ============================================================
+-- P13-V05-1. 정확한 테이블 집합
+-- ============================================================
 SELECT
     table_schema,
     table_name
@@ -12,7 +36,9 @@ FROM information_schema.tables
 WHERE table_schema = 'ai_review_lab'
 ORDER BY table_name;
 
--- 2. 좋은 설계 컬럼·타입·NULL·IDENTITY
+-- ============================================================
+-- P13-V05-2. 컬럼·타입·NULL·IDENTITY
+-- ============================================================
 SELECT
     table_name,
     ordinal_position,
@@ -25,16 +51,11 @@ SELECT
     column_default
 FROM information_schema.columns
 WHERE table_schema = 'ai_review_lab'
-  AND table_name IN (
-      'students',
-      'instructors',
-      'courses',
-      'enrollments',
-      'payments'
-  )
 ORDER BY table_name, ordinal_position;
 
--- 3. 제약조건과 PostgreSQL 실제 정의
+-- ============================================================
+-- P13-V05-3. 제약조건 실제 정의
+-- ============================================================
 SELECT
     conrelid::regclass::text AS table_name,
     conname AS constraint_name,
@@ -50,7 +71,10 @@ FROM pg_constraint
 WHERE connamespace = 'ai_review_lab'::regnamespace
 ORDER BY conrelid::regclass::text, contype, conname;
 
--- 4. 외래키 관계: 기대 4개
+-- ============================================================
+-- P13-V05-4. 외래키 이름·출발·대상·삭제 규칙
+-- 기대 4개, 모두 RESTRICT/NO ACTION 계열
+-- ============================================================
 SELECT
     tc.table_name AS source_table,
     kcu.column_name AS source_column,
@@ -73,7 +97,9 @@ WHERE tc.constraint_schema = 'ai_review_lab'
   AND tc.constraint_type = 'FOREIGN KEY'
 ORDER BY source_table, source_column;
 
--- 5. 자동·수동 인덱스 정의
+-- ============================================================
+-- P13-V05-5. 자동·수동 인덱스와 활성 신청 정책
+-- ============================================================
 SELECT
     tablename,
     indexname,
@@ -82,7 +108,11 @@ FROM pg_indexes
 WHERE schemaname = 'ai_review_lab'
 ORDER BY tablename, indexname;
 
--- 6. 좋은 설계에 민감정보 형태 컬럼이 있는지 확인: 기대 0행
+-- ============================================================
+-- P13-R08 보안 증거
+-- 컬럼명 검사만으로 카드정보 미저장을 완전히 증명할 수는 없습니다.
+-- 전용 민감 컬럼 부재와 payment_reference 의미·샘플·앱 흐름을 함께 검토합니다.
+-- ============================================================
 SELECT
     table_name,
     column_name
@@ -95,95 +125,138 @@ WHERE table_schema = 'ai_review_lab'
       'enrollments',
       'payments'
   )
-  AND lower(column_name) SIMILAR TO '%(card|password|secret|token)%'
+  AND lower(column_name) SIMILAR TO '%(card|password|secret|token|pan|cvv)%'
 ORDER BY table_name, column_name;
 
--- 7. 미확정 재신청 정책이 복합 UNIQUE로 고정되었는지 확인: 기대 0행
-SELECT
-    conrelid::regclass::text AS table_name,
-    conname,
-    pg_get_constraintdef(oid) AS constraint_definition
-FROM pg_constraint
-WHERE connamespace = 'ai_review_lab'::regnamespace
-  AND contype = 'u'
-  AND conrelid = 'ai_review_lab.enrollments'::regclass
-  AND pg_get_constraintdef(oid) LIKE '%student_id%course_id%';
+-- ============================================================
+-- P13-V05-6. 전체 자동 판정
+-- ============================================================
+DO $$
+DECLARE
+    actual_tables TEXT[];
+    expected_tables CONSTANT TEXT[] := ARRAY[
+        'bad_enrollments',
+        'courses',
+        'enrollments',
+        'instructors',
+        'payments',
+        'students'
+    ];
+    fk_signature_count INTEGER;
+    good_constraint_count INTEGER;
+    identity_count INTEGER;
+BEGIN
+    SELECT array_agg(table_name ORDER BY table_name)
+    INTO actual_tables
+    FROM information_schema.tables
+    WHERE table_schema = 'ai_review_lab';
 
--- 8. 기본 기대 수치 요약
-SELECT
-    (
-        SELECT COUNT(*)
-        FROM information_schema.tables
-        WHERE table_schema = 'ai_review_lab'
-    ) AS total_tables_expected_6,
-    (
-        SELECT COUNT(*)
-        FROM information_schema.tables
-        WHERE table_schema = 'ai_review_lab'
-          AND table_name IN (
-              'students',
-              'instructors',
-              'courses',
-              'enrollments',
-              'payments'
+    IF actual_tables IS DISTINCT FROM expected_tables THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 테이블 집합이 다릅니다. 실제=%',
+            actual_tables;
+    END IF;
+
+    SELECT COUNT(*)
+    INTO fk_signature_count
+    FROM (
+        SELECT
+            tc.constraint_name,
+            tc.table_name AS source_table,
+            kcu.column_name AS source_column,
+            ccu.table_name AS target_table,
+            ccu.column_name AS target_column,
+            rc.delete_rule
+        FROM information_schema.table_constraints AS tc
+        JOIN information_schema.key_column_usage AS kcu
+            ON kcu.constraint_schema = tc.constraint_schema
+           AND kcu.constraint_name = tc.constraint_name
+        JOIN information_schema.constraint_column_usage AS ccu
+            ON ccu.constraint_schema = tc.constraint_schema
+           AND ccu.constraint_name = tc.constraint_name
+        JOIN information_schema.referential_constraints AS rc
+            ON rc.constraint_schema = tc.constraint_schema
+           AND rc.constraint_name = tc.constraint_name
+        WHERE tc.constraint_schema = 'ai_review_lab'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND (
+              (tc.constraint_name = 'fk_ai_review_courses_instructor'
+               AND tc.table_name = 'courses'
+               AND kcu.column_name = 'instructor_id'
+               AND ccu.table_name = 'instructors'
+               AND ccu.column_name = 'id')
+           OR (tc.constraint_name = 'fk_ai_review_enrollments_student'
+               AND tc.table_name = 'enrollments'
+               AND kcu.column_name = 'student_id'
+               AND ccu.table_name = 'students'
+               AND ccu.column_name = 'id')
+           OR (tc.constraint_name = 'fk_ai_review_enrollments_course'
+               AND tc.table_name = 'enrollments'
+               AND kcu.column_name = 'course_id'
+               AND ccu.table_name = 'courses'
+               AND ccu.column_name = 'id')
+           OR (tc.constraint_name = 'fk_ai_review_payments_enrollment'
+               AND tc.table_name = 'payments'
+               AND kcu.column_name = 'enrollment_id'
+               AND ccu.table_name = 'enrollments'
+               AND ccu.column_name = 'id')
           )
-    ) AS good_tables_expected_5,
-    (
-        SELECT COUNT(*)
-        FROM information_schema.table_constraints
-        WHERE constraint_schema = 'ai_review_lab'
-          AND constraint_type = 'FOREIGN KEY'
-    ) AS foreign_keys_expected_4,
-    (
-        SELECT COUNT(*)
-        FROM information_schema.columns
-        WHERE table_schema = 'ai_review_lab'
-          AND table_name IN (
-              'students',
-              'instructors',
-              'courses',
-              'enrollments',
-              'payments'
-          )
-          AND column_name = 'id'
-          AND is_identity = 'YES'
-    ) AS identity_primary_keys_expected_5;
+          AND rc.delete_rule IN ('RESTRICT', 'NO ACTION')
+    ) AS expected_fks;
 
--- 기대 결과: 6 / 5 / 4 / 5
+    IF fk_signature_count <> 4 THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 정확한 FK 관계는 4개여야 합니다. 실제=%',
+            fk_signature_count;
+    END IF;
 
--- 9. 최종 boolean 요약
-SELECT
-    (
-        SELECT COUNT(*) = 6
-        FROM information_schema.tables
-        WHERE table_schema = 'ai_review_lab'
-    ) AS table_count_ok,
-    (
-        SELECT COUNT(*) = 4
-        FROM information_schema.table_constraints
-        WHERE constraint_schema = 'ai_review_lab'
-          AND constraint_type = 'FOREIGN KEY'
-    ) AS foreign_key_count_ok,
-    NOT EXISTS (
+    SELECT COUNT(*)
+    INTO good_constraint_count
+    FROM pg_constraint
+    WHERE connamespace = 'ai_review_lab'::regnamespace
+      AND conrelid IN (
+          'ai_review_lab.students'::regclass,
+          'ai_review_lab.instructors'::regclass,
+          'ai_review_lab.courses'::regclass,
+          'ai_review_lab.enrollments'::regclass,
+          'ai_review_lab.payments'::regclass
+      );
+
+    IF good_constraint_count <> 29 THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 좋은 설계 제약조건은 29개여야 합니다. 실제=%',
+            good_constraint_count;
+    END IF;
+
+    SELECT COUNT(*)
+    INTO identity_count
+    FROM information_schema.columns
+    WHERE table_schema = 'ai_review_lab'
+      AND column_name = 'id'
+      AND is_identity = 'YES';
+
+    IF identity_count <> 6 THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: IDENTITY 기본키는 6개여야 합니다. 실제=%',
+            identity_count;
+    END IF;
+
+    IF to_regclass('ai_review_lab.uq_ai_review_enrollments_active') IS NULL THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 활성 신청 부분 고유 인덱스가 없습니다.';
+    END IF;
+
+    IF EXISTS (
         SELECT 1
         FROM information_schema.columns
         WHERE table_schema = 'ai_review_lab'
-          AND table_name IN (
-              'students',
-              'instructors',
-              'courses',
-              'enrollments',
-              'payments'
-          )
-          AND lower(column_name) SIMILAR TO '%(card|password|secret|token)%'
-    ) AS sensitive_column_absent,
-    NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE connamespace = 'ai_review_lab'::regnamespace
-          AND contype = 'u'
-          AND conrelid = 'ai_review_lab.enrollments'::regclass
-          AND pg_get_constraintdef(oid) LIKE '%student_id%course_id%'
-    ) AS reenrollment_policy_not_forced;
+          AND table_name IN ('students','instructors','courses','enrollments','payments')
+          AND lower(column_name) SIMILAR TO '%(card|password|secret|token|pan|cvv)%'
+    ) THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 민감정보 전용 컬럼 이름이 발견되었습니다.';
+    END IF;
 
--- 모든 결과가 true여야 합니다.
+    RAISE NOTICE 'Chapter 13 metadata validation passed';
+END
+$$;
