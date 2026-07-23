@@ -1,30 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
   <title id="title">최종 완료 판단 게이트</title>
-  <desc id="desc">필수 설계와 데이터베이스 결과, 분석 VIEW, SQL·Python 비교와 미실행 항목을 확인한 뒤 완료 여부를 판단하는 흐름</desc>
-  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker><marker id="retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#dc2626"/></marker><style>
-  text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.mono{font-family:Consolas,D2Coding,"Courier New",monospace}.t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{stroke-width:2;rx:14;ry:14}.b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.c{fill:#ecfeff;stroke:#06b6d4}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.n{fill:#f8fafc;stroke:#64748b}.head{font-size:16px;font-weight:700;text-anchor:middle}.body{font-size:12.5px;text-anchor:middle;fill:#334155}.small{font-size:11.5px;text-anchor:middle;fill:#475569}.code{font-size:12.5px;font-weight:700;text-anchor:middle;fill:#166534}.line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.back{stroke:#dc2626;stroke-width:2.2;fill:none;marker-end:url(#retry)}.tag{font-size:12px;font-weight:700;fill:#475569}
-  </style></defs>
-  <rect width="1200" height="860" fill="#fff"/>
+  <desc id="desc">데이터베이스 완료 게이트, Python 교차 검증, 백업 복원과 권한 시험, 문서 승인을 서로 다른 증거로 확인한 뒤 프로젝트 완료 여부를 판단하는 흐름</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <marker id="retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#dc2626"/></marker>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#111827}.mono{font-family:Consolas,D2Coding,"Courier New",monospace}
+      .t{font-size:29px;font-weight:800;text-anchor:middle}.s{font-size:15px;text-anchor:middle;fill:#475569}.card{stroke-width:2;rx:14;ry:14}
+      .b{fill:#eff6ff;stroke:#3b82f6}.g{fill:#f0fdf4;stroke:#22c55e}.y{fill:#fffbeb;stroke:#f59e0b}.c{fill:#ecfeff;stroke:#06b6d4}.p{fill:#faf5ff;stroke:#8b5cf6}.r{fill:#fff1f2;stroke:#f43f5e}.n{fill:#f8fafc;stroke:#64748b}
+      .head{font-size:15.5px;font-weight:700;text-anchor:middle}.body{font-size:12px;text-anchor:middle;fill:#334155}.small{font-size:11px;text-anchor:middle;fill:#475569}.code{font-size:12px;font-weight:700;text-anchor:middle;fill:#166534}.line{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.back{stroke:#dc2626;stroke-width:2.2;fill:none;marker-end:url(#retry)}.tag{font-size:12px;font-weight:700;fill:#475569}
+    </style>
+  </defs>
+  <rect width="1200" height="900" fill="#fff"/>
   <text x="600" y="46" class="t">최종 완료 판단 게이트</text>
-  <text x="600" y="76" class="s">데이터베이스와 분석 결과, 미실행 항목을 함께 확인해야 완료 상태를 판단할 수 있습니다.</text>
+  <text x="600" y="76" class="s">DB, Python, 복원·권한, 문서 승인을 별도 증거로 확인해야 전체 완료를 판단할 수 있습니다.</text>
 
-  <rect x="25" y="130" width="250" height="190" class="card b"/><text x="150" y="165" class="head">1. 필수 근거 확인</text><text x="150" y="202" class="body">requirements · ERD · DDL</text><text x="150" y="232" class="body">01~09 SQL · 운영 계획</text><text x="150" y="262" class="body">AI 검토·분석 보고서</text><text x="150" y="292" class="small">문서와 코드의 내용 일치</text>
-  <rect x="315" y="130" width="250" height="190" class="card y"/><text x="440" y="165" class="head">2. DB 결과 검증</text><text x="440" y="202" class="body">행 수 4 · 3 · 5 · 5 · 6 · 7</text><text x="440" y="232" class="body">FK 5 · 인덱스 3 · CASCADE 0</text><text x="440" y="262" class="body">정합성 이상 0 · unexpected 0</text><text x="440" y="292" class="small">ROLLBACK 후 기준 데이터 복구</text>
-  <rect x="605" y="130" width="250" height="190" class="card c"/><text x="730" y="165" class="head">3. 분석 결과 검증</text><text x="730" y="202" class="body">VIEW 5행 · question 중복 0</text><text x="730" y="232" class="body">answer 합계 5 · material 합계 7</text><text x="730" y="262" class="body">SQL·pandas 핵심 집계 일치</text><text x="730" y="292" class="small">오류를 임의 전처리로 숨기지 않음</text>
-  <rect x="895" y="130" width="250" height="190" class="card p"/><text x="1020" y="165" class="head">4. 미실행·미확정 기록</text><text x="1020" y="202" class="body">Role 시험 · 실제 백업·복원</text><text x="1020" y="232" class="body">웹 · NoSQL · 배포</text><text x="1020" y="262" class="body">미확정 정책 · 남은 위험</text><text x="1020" y="292" class="small">검증하지 않은 항목은 통과 금지</text>
-  <path d="M275 225 H315" class="line"/><path d="M565 225 H605" class="line"/><path d="M855 225 H895" class="line"/>
+  <rect x="20" y="130" width="210" height="185" class="card b"/>
+  <text x="125" y="164" class="head">1. DB 구조·데이터</text>
+  <text x="125" y="198" class="body">01~09 SQL 실행</text>
+  <text x="125" y="226" class="body">tables 6 · views 4</text>
+  <text x="125" y="254" class="body">rows 4·3·5·5·6·7</text>
+  <text x="125" y="284" class="small">정확한 제약·시간·분석 단위</text>
 
-  <polygon points="1020,370 1155,455 1020,540 885,455" class="card y"/><text x="1020" y="442" class="head">필수 완료 기준을</text><text x="1020" y="470" class="head">모두 통과했는가?</text><text x="1020" y="498" class="small">실행 증거 기준</text>
-  <path d="M1020 320 V370" class="line"/>
+  <rect x="255" y="130" width="210" height="185" class="card y"/>
+  <text x="360" y="164" class="head">2. DB 완료 게이트</text>
+  <text x="360" y="198" class="body mono">10_completion_gate.sql</text>
+  <text x="360" y="226" class="body">트랜잭션·반례·IDENTITY</text>
+  <text x="360" y="254" class="body">상태·월·첫 답변 기준</text>
+  <text x="360" y="284" class="small">실패 시 RAISE EXCEPTION</text>
 
-  <rect x="780" y="600" width="340" height="100" class="card g"/><text x="950" y="635" class="head">필수 완료 게이트 통과</text><text x="950" y="665" class="code mono">required_completion_gate_passed = true</text><text x="950" y="687" class="small">DB 구조와 SQL 분석 데이터셋 기준</text>
-  <path d="M1020 540 V570 H950 V600" class="line"/><text x="1043" y="565" class="tag">예</text>
-  <rect x="780" y="740" width="340" height="80" class="card p"/><text x="950" y="772" class="head">analysis_report · final_report</text><text x="950" y="798" class="body">근거·한계·선택 확장 판단</text><path d="M950 700 V740" class="line"/>
+  <rect x="490" y="130" width="210" height="185" class="card c"/>
+  <text x="595" y="164" class="head">3. Python 교차 검증</text>
+  <text x="595" y="198" class="body">같은 read-only 스냅샷</text>
+  <text x="595" y="226" class="body">상태·월·학생·튜터·응답</text>
+  <text x="595" y="254" class="body">실제 SQL ↔ pandas</text>
+  <text x="595" y="284" class="small mono">assert_frame_equal()</text>
 
-  <rect x="55" y="415" width="340" height="110" class="card r"/><text x="225" y="450" class="head">누락 항목 보완</text><text x="225" y="480" class="body">SQL·Python 재실행 · 재검증</text><text x="225" y="505" class="small">최초 불일치 지점부터 다시 확인</text>
-  <path d="M885 455 H430 V470 H395" class="back"/><text x="650" y="445" class="tag">아니요</text>
-  <path d="M55 470 H20 V225 H25" class="back"/>
+  <rect x="725" y="130" width="210" height="185" class="card p"/>
+  <text x="830" y="164" class="head">4. 복구·권한</text>
+  <text x="830" y="198" class="body">백업·별도 DB 복원</text>
+  <text x="830" y="226" class="body mono">11_restore_validation.sql</text>
+  <text x="830" y="254" class="body">Role 허용·차단 시험</text>
+  <text x="830" y="284" class="small">owner·ACL·RPO·RTO</text>
 
-  <rect x="55" y="620" width="650" height="170" class="card n"/><text x="380" y="655" class="head">완료 게이트 통과 ≠ 운영 검증 전체 완료</text><text x="380" y="692" class="body">Role별 권한 시험과 실제 백업·복원은 별도 실행 증거가 필요합니다.</text><text x="380" y="722" class="body">웹 API·NoSQL·배포도 실제 요구사항과 검증 결과가 있을 때만 완료로 기록합니다.</text><text x="380" y="752" class="body">Python 실행 결과와 SQL 비교는 analysis_report.md에 남깁니다.</text><text x="380" y="777" class="small">미실행 항목은 final_report.md에 명시합니다.</text>
+  <rect x="960" y="130" width="220" height="185" class="card g"/>
+  <text x="1070" y="164" class="head">5. 문서·사람 승인</text>
+  <text x="1070" y="198" class="body">requirements · ERD</text>
+  <text x="1070" y="226" class="body">분석·AI·최종 보고서</text>
+  <text x="1070" y="254" class="body">미실행·미확정 기록</text>
+  <text x="1070" y="284" class="small">파일별 diff와 사람 승인</text>
+
+  <path d="M230 222 H255" class="line"/><path d="M465 222 H490" class="line"/><path d="M700 222 H725" class="line"/><path d="M935 222 H960" class="line"/>
+
+  <polygon points="600,385 760,480 600,575 440,480" class="card y"/>
+  <text x="600" y="463" class="head">모든 필수 증거가</text><text x="600" y="491" class="head">확인되었는가?</text><text x="600" y="520" class="small">미실행은 통과가 아님</text>
+  <path d="M1070 315 V345 H600 V385" class="line"/>
+
+  <rect x="760" y="650" width="355" height="105" class="card g"/>
+  <text x="937" y="687" class="head">프로젝트 완료</text>
+  <text x="937" y="716" class="code mono">final_report.md</text>
+  <text x="937" y="740" class="small">선택 확장 필요성은 별도로 판단</text>
+  <path d="M690 538 V610 H937 V650" class="line"/><text x="715" y="590" class="tag">예</text>
+
+  <rect x="85" y="650" width="360" height="105" class="card r"/>
+  <text x="265" y="687" class="head">조건부 완료·보류</text>
+  <text x="265" y="716" class="body">누락 증거·정책·후속 조치 기록</text>
+  <text x="265" y="740" class="small">최초 불일치 단계부터 재실행</text>
+  <path d="M510 538 V610 H265 V650" class="back"/><text x="455" y="590" class="tag">아니요</text>
+  <path d="M85 702 H35 V222 H20" class="back"/>
+
+  <rect x="315" y="800" width="570" height="70" class="card n"/>
+  <text x="600" y="830" class="head">DB 게이트 통과 ≠ 전체 프로젝트 완료</text>
+  <text x="600" y="854" class="body">Python·복원·권한·문서 승인은 각각 실제 실행 증거가 필요합니다.</text>
 </svg>
