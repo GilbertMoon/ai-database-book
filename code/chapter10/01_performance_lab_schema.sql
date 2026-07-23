@@ -1,13 +1,62 @@
 -- Chapter 10. performance_lab 스키마 생성
 -- 목적: 기존 프로젝트를 보호하면서 인덱스 성능 실험용 테이블을 만듭니다.
 -- 주의: 기존 스키마나 테이블을 자동으로 삭제하지 않습니다.
+-- 이 파일은 ai_database_book의 Chapter 07 기준 상태를 확인한 뒤 실행됩니다.
 
+-- ============================================================
+-- 0. 현재 실행 위치 확인
+-- ============================================================
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
--- 앞 장 데이터가 유지되는지 확인
-SELECT COUNT(*) AS project_enrollment_count
-FROM course_project.enrollments;
+-- ============================================================
+-- 1. 사전 조건 검사
+-- - 현재 데이터베이스가 ai_database_book이어야 합니다.
+-- - Chapter 07의 신청 5건이 유지되어야 합니다.
+-- - performance_lab 스키마가 아직 없어야 합니다.
+-- ============================================================
+DO $$
+DECLARE
+    project_enrollment_count BIGINT;
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    IF to_regclass('course_project.enrollments') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: course_project.enrollments가 없습니다. Chapter 07 기준 상태를 먼저 준비하세요.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO project_enrollment_count
+    FROM course_project.enrollments;
+
+    IF project_enrollment_count <> 5 THEN
+        RAISE EXCEPTION
+            '실행 중단: course_project.enrollments는 5행이어야 하지만 현재 %행입니다.',
+            project_enrollment_count;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM pg_namespace
+        WHERE nspname = 'performance_lab'
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: performance_lab 스키마가 이미 존재합니다. 기존 실험을 검토하거나 reset_performance_lab.sql을 사용하세요.';
+    END IF;
+END
+$$;
+
+-- ============================================================
+-- 2. 스키마와 테이블을 하나의 트랜잭션에서 생성
+-- 중간 문장에서 오류가 발생하면 전체 생성 작업을 ROLLBACK할 수 있습니다.
+-- ============================================================
+BEGIN;
 
 CREATE SCHEMA performance_lab;
 
@@ -16,8 +65,12 @@ CREATE TABLE performance_lab.students (
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     joined_at DATE NOT NULL,
+
     CONSTRAINT chk_performance_students_name
-        CHECK (char_length(trim(name)) > 0)
+        CHECK (char_length(trim(name)) > 0),
+
+    CONSTRAINT chk_performance_students_email
+        CHECK (char_length(trim(email)) > 0)
 );
 
 CREATE TABLE performance_lab.instructors (
@@ -25,8 +78,15 @@ CREATE TABLE performance_lab.instructors (
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     specialty VARCHAR(100) NOT NULL,
+
     CONSTRAINT chk_performance_instructors_name
-        CHECK (char_length(trim(name)) > 0)
+        CHECK (char_length(trim(name)) > 0),
+
+    CONSTRAINT chk_performance_instructors_email
+        CHECK (char_length(trim(email)) > 0),
+
+    CONSTRAINT chk_performance_instructors_specialty
+        CHECK (char_length(trim(specialty)) > 0)
 );
 
 CREATE TABLE performance_lab.courses (
@@ -78,6 +138,15 @@ CREATE TABLE performance_lab.enrollments (
         CHECK (paid_amount >= 0)
 );
 
+COMMIT;
+
+-- Chapter 07의 활성 신청 부분 고유 인덱스는 performance_lab에 미리 만들지 않습니다.
+-- 이유: 이 장은 enrollments 인덱스의 생성 전 기준 계획을 측정해야 하기 때문입니다.
+-- 대신 02 파일의 합성 데이터 생성식이 학생·강의 조합의 활성 중복을 만들지 않도록 설계합니다.
+
+-- ============================================================
+-- 3. 생성 결과 확인
+-- ============================================================
 SELECT
     table_schema,
     table_name
