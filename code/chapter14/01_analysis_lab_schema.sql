@@ -5,6 +5,30 @@
 SELECT current_database();
 SELECT current_user;
 SELECT current_schema();
+SHOW search_path;
+
+-- ============================================================
+-- P14-V01. 실행 위치와 기존 객체 보호
+-- ============================================================
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    IF to_regnamespace('analysis_lab') IS NOT NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: analysis_lab이 이미 존재합니다. 보존 여부를 확인한 뒤 reset_analysis_lab.sql 사용을 검토하세요.';
+    END IF;
+END
+$$;
+
+-- ============================================================
+-- 스키마·테이블·분석 기간 VIEW를 하나의 트랜잭션에서 생성
+-- ============================================================
+BEGIN;
 
 CREATE SCHEMA analysis_lab;
 
@@ -74,6 +98,7 @@ CREATE TABLE analysis_lab.enrollments (
         REFERENCES analysis_lab.courses(id)
         ON DELETE RESTRICT,
 
+    -- 같은 날짜의 동일 원천 행이 중복 적재되는 것을 막는 수집 규칙입니다.
     CONSTRAINT uq_analysis_enrollments_student_course_date
         UNIQUE (student_id, course_id, enrolled_at),
 
@@ -101,5 +126,37 @@ CREATE TABLE analysis_lab.enrollments (
         CHECK (completed_at IS NULL OR completed_at >= enrolled_at)
 );
 
+-- Chapter 07에서 확정한 활성 신청 규칙을 유지합니다.
+-- 신청·수강중은 학생·강의 조합당 최대 한 건이며 완료·취소 이력 뒤 재신청은 허용합니다.
+CREATE UNIQUE INDEX uq_analysis_enrollments_active
+ON analysis_lab.enrollments (student_id, course_id)
+WHERE status IN ('신청', '수강중');
+
+-- 모든 SQL과 Python 분석이 같은 반개방 기간을 사용하도록 한 곳에 고정합니다.
+CREATE VIEW analysis_lab.analysis_parameters AS
+SELECT
+    DATE '2026-01-01' AS start_date,
+    DATE '2026-07-01' AS end_date_exclusive;
+
+COMMIT;
+
+-- 생성 결과 확인
+SELECT
+    table_schema,
+    table_name
+FROM information_schema.tables
+WHERE table_schema = 'analysis_lab'
+ORDER BY table_name;
+
+SELECT
+    table_schema,
+    table_name
+FROM information_schema.views
+WHERE table_schema = 'analysis_lab'
+ORDER BY table_name;
+
+SELECT *
+FROM analysis_lab.analysis_parameters;
+
 -- DBeaver 탐색 위치:
--- Schemas -> analysis_lab -> Tables
+-- Schemas -> analysis_lab -> Tables / Views
