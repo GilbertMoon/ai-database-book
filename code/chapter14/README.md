@@ -2,11 +2,11 @@
 
 ## SQL 데이터 분석과 Python 확장
 
-이 폴더는 `analysis_lab` 전용 스키마에서 SQL 데이터 분석을 수행하고, 분석용 VIEW를 CSV 또는 PostgreSQL 연결로 Python과 pandas에 전달한 뒤 결과를 교차 검증하는 파일을 관리합니다.
+이 폴더는 `analysis_lab`에서 분석 질문의 기간과 행 단위를 SQL로 확정하고, 분석 VIEW를 CSV 또는 읽기 전용 PostgreSQL 연결로 pandas에 전달한 뒤 **실제 SQL 집계와 Python 집계**를 교차 검증하는 파일을 관리합니다.
 
 ---
 
-## 보호 범위
+## 핵심 범위
 
 ```text
 course_project: 변경하지 않음
@@ -18,7 +18,38 @@ ai_review_lab: 변경하지 않음
 analysis_lab: Chapter 14 실습 대상
 ```
 
-생성 파일에서는 기존 객체를 자동으로 삭제하지 않습니다. 처음부터 다시 시작할 때만 `reset_analysis_lab.sql`을 검토한 후 선택 실행합니다.
+모든 SQL은 다음 위치를 확인합니다.
+
+```sql
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+```
+
+생성·Seed·초기화 파일은 `ai_database_book`인지 실제로 검사합니다.
+
+---
+
+## 분석 기준
+
+```text
+P14-Q01 상태별 수강신청 건수
+P14-Q02 월별 신청 수와 신청 당시 기록 금액
+P14-Q03 강의별 신청 건수
+P14-Q04 지역별 학생·신청 건수
+P14-Q05 완료된 신청의 완료 기간
+```
+
+분석 기간은 한 곳에서 관리합니다.
+
+```text
+analysis_lab.analysis_parameters
+start_date = 2026-01-01
+end_date_exclusive = 2026-07-01
+기간 표현 = [2026-01-01, 2026-07-01)
+```
+
+`paid_amount`는 물리 컬럼 이름이지만 의미는 **신청 당시 기록 금액**입니다. 결제 성공·환불·회계 매출을 의미하지 않습니다. 분석 VIEW에서는 `recorded_amount`로 제공합니다.
 
 ---
 
@@ -26,24 +57,28 @@ analysis_lab: Chapter 14 실습 대상
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_analysis_lab_schema.sql` | 학생·강사·강의·수강신청 분석 스키마 생성 |
-| `02_analysis_lab_seed.sql` | 2026년 1~6월 기준 샘플 데이터 입력 |
-| `03_data_quality_checks.sql` | 행 수·중복·고아 FK·상태·날짜·금액 점검 |
-| `04_summary_analysis.sql` | 상태·강의·지역별 기본 집계 |
-| `05_period_category_analysis.sql` | 월별·범주별 분석, LAG와 완료 기간 확인 |
-| `06_analysis_dataset.sql` | 수강신청 1건 단위 분석 VIEW 생성 |
-| `07_analysis_validation.sql` | 기대값과 실제 결과 최종 검산 |
-| `reset_analysis_lab.sql` | `analysis_lab`만 선택적으로 초기화 |
-| `python/requirements.txt` | Python 분석 패키지 목록 |
-| `python/.env.example` | `DATABASE_URL` 예시 |
-| `python/01_load_csv.py` | DBeaver CSV를 pandas로 읽고 구조 확인 |
-| `python/02_load_postgresql.py` | PostgreSQL 분석 VIEW를 pandas로 읽기 |
-| `python/03_pandas_analysis.py` | 상태·월·강의 분석과 피벗·그래프 |
-| `python/04_result_validation.py` | SQL 기준값과 pandas 결과 자동 비교 |
+| `01_analysis_lab_schema.sql` | DB·기존 스키마를 검사하고 네 테이블·분석 기간 VIEW·활성 신청 인덱스를 한 트랜잭션에서 생성 |
+| `02_analysis_lab_seed.sql` | 빈 상태 검사 후 8·3·5·24행 입력, IDENTITY 조정과 COMMIT 전 자동 판정 |
+| `03_data_quality_checks.sql` | 중복·고아 FK·상태·금액·가입일·개설일·기간·활성 신청 점검 |
+| `04_summary_analysis.sql` | 고정 기간의 상태·강의·강사·지역 집계 |
+| `05_period_category_analysis.sql` | date spine 월별 분석, LAG, 범주별 현재 완료 상태 비중과 완료 기간 |
+| `06_analysis_dataset.sql` | 수강신청 1건 단위, 기간 제한 분석 VIEW 생성 |
+| `07_analysis_validation.sql` | 상태·월·금액·기간·품질 상세 증거 조회 |
+| `08_analysis_lab_validation.sql` | 구조·기간·행 수·품질·기준값·IDENTITY 최종 예외 기반 게이트 |
+| `reset_analysis_lab.sql` | 올바른 DB에서 VIEW와 자식 테이블부터 `analysis_lab`만 초기화 |
+| `python/validation_utils.py` | 공통 컬럼·자료형·기간·연결·manifest 검증 |
+| `python/01_load_csv.py` | CSV 구조 검증과 선택적 manifest 확인 |
+| `python/02_load_postgresql.py` | 읽기 전용 DB 연결, CSV와 SHA-256 manifest 생성 |
+| `python/03_pandas_analysis.py` | 상태·월·강의·피벗·완료 기간과 헤드리스 그래프 생성 |
+| `python/04_result_validation.py` | 실제 SQL 결과와 pandas 결과 직접 비교 |
+| `python/reference_metrics.json` | CSV 경로에서 사용하는 버전 관리 SQL 기준값 |
+| `python/analysis_manifest.example.json` | CSV 출처·기간·시점·해시 manifest 형식 |
+| `python/.env.example` | libpq 방식 연결 변수 이름 |
+| `python/requirements.txt` | Python 패키지 범위 |
 
 ---
 
-## 실행 순서
+## SQL 실행 순서
 
 ```text
 01_analysis_lab_schema.sql
@@ -53,23 +88,16 @@ analysis_lab: Chapter 14 실습 대상
 → 05_period_category_analysis.sql
 → 06_analysis_dataset.sql
 → 07_analysis_validation.sql
+→ 08_analysis_lab_validation.sql
 ```
 
-그다음 두 경로 중 하나를 선택합니다.
+최종 통과 메시지:
 
 ```text
-기본 경로
-DBeaver 조회 결과를 CSV로 저장
-→ python/01_load_csv.py
-→ python/03_pandas_analysis.py
-→ python/04_result_validation.py
-
-확장 경로
-.env에 개발·테스트 DB의 DATABASE_URL 설정
-→ python/02_load_postgresql.py
-→ python/03_pandas_analysis.py
-→ python/04_result_validation.py
+Chapter 14 analysis_lab validation passed
 ```
+
+실패하면 기대값을 바꾸지 않고 DB·기간·Seed·JOIN·품질 검사를 확인합니다.
 
 ---
 
@@ -77,25 +105,26 @@ DBeaver 조회 결과를 CSV로 저장
 
 | 항목 | 기대값 |
 | --- | ---: |
-| `students` | 8 |
-| `instructors` | 3 |
-| `courses` | 5 |
-| `enrollments` | 24 |
-| `enrollment_analysis_dataset` | 24 |
-| 데이터셋 PK 중복 | 0 |
+| students | 8 |
+| instructors | 3 |
+| courses | 5 |
+| enrollments | 24 |
+| enrollment_analysis_dataset | 24 |
+| 데이터셋 enrollment_id 중복 | 0 |
+| 신청 당시 기록 금액 합계 | 2,770,000 |
 
 상태별 기준:
 
-| status | 기대 건수 |
+| status | 건수 |
 | --- | ---: |
-| 완료 | 12 |
-| 수강중 | 5 |
 | 신청 | 4 |
+| 수강중 | 5 |
+| 완료 | 12 |
 | 취소 | 3 |
 
 월별 기준:
 
-| 월 | 신청 건수 | 결제금액 |
+| 월 | 신청 건수 | 기록 금액 |
 | --- | ---: | ---: |
 | 2026-01 | 3 | 200000 |
 | 2026-02 | 4 | 520000 |
@@ -104,18 +133,36 @@ DBeaver 조회 결과를 CSV로 저장
 | 2026-05 | 4 | 390000 |
 | 2026-06 | 4 | 570000 |
 
-추가 기준:
+완료된 신청 기준:
 
 ```text
-전체 수강신청 24
-결제금액 합계 2,770,000
 완료 건수 12
 평균 완료 기간 25일
-최소 완료 기간 18일
-최대 완료 기간 36일
-고아 FK 0
-상태·완료일 이상 0
+최소 18일
+최대 36일
 ```
+
+이 통계는 완료된 행만 대상으로 하므로 전체 수강생의 평균 소요 기간으로 일반화하지 않습니다.
+
+---
+
+## 스키마와 업무 규칙
+
+```text
+students 1 → N enrollments
+instructors 1 → N courses
+courses 1 → N enrollments
+```
+
+Chapter 07의 활성 신청 규칙을 유지합니다.
+
+```sql
+CREATE UNIQUE INDEX uq_analysis_enrollments_active
+ON analysis_lab.enrollments (student_id, course_id)
+WHERE status IN ('신청', '수강중');
+```
+
+같은 날짜의 동일 원천 행 중복은 별도 `UNIQUE(student_id, course_id, enrolled_at)`로 차단합니다. 두 제약은 목적이 다릅니다.
 
 ---
 
@@ -133,7 +180,7 @@ analysis_lab.enrollment_analysis_dataset
 수강신청 1건 = enrollment_id 1개
 ```
 
-주요 컬럼:
+정확한 컬럼:
 
 ```text
 enrollment_id
@@ -144,52 +191,55 @@ course_id
 course_title
 category
 level
+instructor_id
+instructor_name
 enrolled_at
 enrollment_month
 status
-paid_amount
+recorded_amount
 completed_at
 completion_days
 is_completed
 ```
 
-Python 분석 전 다음을 확인합니다.
+VIEW는 분석 기간을 실제로 적용하므로 기간 밖 행이 추가되어도 Chapter 14의 분석 범위는 변하지 않습니다.
+
+---
+
+## 데이터 품질 기준
 
 ```text
-행 수 24
-중복 enrollment_id 0
-날짜 컬럼 형식
-paid_amount 숫자형
-completed_at NULL 허용
+PK·분석 VIEW 중복 0
+고아 학생·강의·강사 0
+완료 상태와 completed_at 조합 이상 0
+완료일 < 신청일 0
+신청일 < 학생 가입일 0
+신청일 < 강의 개설일 0
+음수 기록 금액 0
+취소인데 기록 금액이 0이 아닌 행 0
+분석 기간 밖 기준 데이터 0
+활성 신청 중복 0
 ```
 
 ---
 
-## CSV 경로
+## date spine과 지표 명칭
 
-DBeaver에서 다음 조회를 실행합니다.
-
-```sql
-SELECT *
-FROM analysis_lab.enrollment_analysis_dataset
-ORDER BY enrollment_id;
-```
-
-결과를 UTF-8 CSV로 저장합니다.
-
-권장 경로:
+월별 분석은 `generate_series`로 1~6월 기준표를 먼저 만듭니다. 데이터가 없는 월도 0건으로 유지되므로 `LAG`의 이전 달 의미와 그래프 간격이 보존됩니다.
 
 ```text
-code/chapter14/data/enrollment_analysis_dataset.csv
+completed_share_pct
+→ 전체 신청 중 현재 완료 상태의 비중
+
+completion_rate
+→ 관찰 기간·코호트·취소 포함 여부를 정의한 별도 지표
 ```
 
-`data/` 폴더와 CSV는 실행 과정에서 생성될 수 있습니다. 실제 개인정보가 포함된 파일은 저장소에 커밋하지 않습니다.
+이 장에서는 첫 번째만 계산합니다.
 
 ---
 
 ## Python 환경
-
-가상환경 생성:
 
 ```bash
 python -m venv .venv
@@ -219,67 +269,127 @@ python -c "import pandas, sqlalchemy, psycopg, matplotlib; print('OK')"
 
 ## PostgreSQL 연결
 
-`python/.env.example`을 참고해 `.env`를 만듭니다.
+`python/.env.example`을 복사해 `python/.env`를 만들고 실제 값은 저장소에 커밋하지 않습니다.
 
 ```text
-DATABASE_URL=postgresql+psycopg://db_user:db_password@localhost:5432/db_name
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=ai_database_book
+PGUSER=
+PGPASSFILE=
 ```
 
-안전 원칙:
+실제 password file은 저장소 밖의 보호된 경로에 둡니다. Python은 다음을 확인합니다.
 
 ```text
-- 운영 DB가 아닌 개발·테스트 DB를 사용합니다.
-- 실제 비밀번호를 코드나 노트북에 적지 않습니다.
-- .env를 GitHub에 커밋하지 않습니다.
-- SELECT 중심의 읽기 전용 계정을 우선 검토합니다.
-- Python 분석 코드에서 UPDATE·DELETE·DROP을 자동 실행하지 않습니다.
+현재 DB = ai_database_book
+분석 VIEW 존재
+transaction_read_only = on
+정확한 컬럼과 24행
 ```
 
 ---
 
-## Python 실행 예
+## 권장 Python 실행 경로
 
-CSV 경로:
+### PostgreSQL 직접 경로
+
+같은 읽기 전용 DB에서 CSV와 manifest 생성:
 
 ```bash
-python code/chapter14/python/01_load_csv.py
-python code/chapter14/python/03_pandas_analysis.py
-python code/chapter14/python/04_result_validation.py
+python code/chapter14/python/02_load_postgresql.py \
+  --export-csv code/chapter14/data/enrollment_analysis_dataset.csv
 ```
 
-PostgreSQL 연결 경로:
+pandas 분석:
 
 ```bash
-python code/chapter14/python/02_load_postgresql.py
 python code/chapter14/python/03_pandas_analysis.py --source postgresql
+```
+
+실제 SQL과 pandas를 같은 `REPEATABLE READ`, 읽기 전용 스냅샷에서 직접 비교:
+
+```bash
 python code/chapter14/python/04_result_validation.py --source postgresql
 ```
 
-각 스크립트는 파일 또는 환경변수가 없을 때 명확한 오류 메시지를 출력하도록 구성합니다.
+### CSV 경로
 
----
+기본 구조 확인:
 
-## 결과 검증 원칙
-
-```text
-- SQL과 pandas의 전체 행 수를 비교합니다.
-- 상태별·월별 건수의 합이 24인지 확인합니다.
-- 결제금액 합계가 2,770,000인지 확인합니다.
-- 완료 건수와 완료 기간 통계를 비교합니다.
-- 불일치할 때 기대값을 실제값으로 바꾸지 않습니다.
-- 날짜 범위, JOIN, NULL, 중복, 자료형과 실행 시점을 확인합니다.
+```bash
+python code/chapter14/python/01_load_csv.py
 ```
 
----
+manifest까지 엄격히 확인:
 
-## AI 활용 원칙
+```bash
+python code/chapter14/python/01_load_csv.py --require-manifest
+```
+
+pandas 분석과 기준값 비교:
+
+```bash
+python code/chapter14/python/03_pandas_analysis.py
+python code/chapter14/python/04_result_validation.py --source csv
+```
+
+CSV 최종 검증은 다음 세 증거를 함께 사용합니다.
 
 ```text
-- 분석 질문·기간·행 단위·기대값을 함께 제공합니다.
-- PK·FK와 JOIN 경로를 명시합니다.
-- SQL과 Python 수정 범위를 구분합니다.
-- 파괴적 SQL과 접속 정보 노출을 확인합니다.
-- dropna·drop_duplicates가 오류를 숨기지 않는지 확인합니다.
-- 별도의 SQL 기준값으로 Python 결과를 검산합니다.
-- diff와 실행 결과를 확인한 후 사람이 승인합니다.
+CSV 데이터셋
+CSV manifest: DB·VIEW·기간·생성 시점·행 수·SHA-256
+reference_metrics.json: SQL 기준값
+```
+
+DBeaver에서 직접 CSV를 내보냈다면 `analysis_manifest.example.json`을 참고해 manifest를 작성하고 SHA-256을 계산해야 최종 검증 경로를 사용할 수 있습니다.
+
+---
+
+## Python 공통 검증
+
+`validation_utils.py`가 모든 로더에 같은 기준을 적용합니다.
+
+```text
+정확한 17개 컬럼
+24행과 enrollment_id 고유성
+날짜 컬럼 strict 변환
+recorded_amount strict 숫자 변환
+completion_days strict 숫자 변환
+is_completed boolean
+status와 is_completed 일치
+완료 상태와 완료일·완료 기간 일치
+분석 기간 [2026-01-01, 2026-07-01)
+```
+
+잘못된 문자열을 NULL로 숨기지 않도록 숫자 변환은 `errors="raise"`를 사용합니다.
+
+---
+
+## 시각화
+
+Python 시각화는 GUI가 없는 환경에서도 실행되도록 `Agg` 백엔드를 사용합니다. 설치된 한글 글꼴을 탐색하고 찾지 못하면 경고를 출력합니다. Y축은 0부터 시작합니다.
+
+```text
+그래프는 검증 결과를 대신하지 않는다.
+SQL·pandas 표와 합계를 먼저 확인한 뒤 해석을 돕는 용도로 사용한다.
+```
+
+생성된 그래프는 `code/chapter14/output/`에 저장되며 Git에서 제외됩니다.
+
+---
+
+## 안전 원칙
+
+```text
+- 생성·Seed·reset 파일은 현재 DB를 실제 검사한다.
+- 분석 기간은 SQL·VIEW·Python에서 같은 반개방 구간을 사용한다.
+- 원본 테이블 변경 SQL을 Python에서 실행하지 않는다.
+- PostgreSQL 연결은 읽기 전용으로 설정한다.
+- 비밀번호·전체 접속 URL·password file을 코드에 기록하지 않는다.
+- CSV와 그래프는 저장소에서 제외한다.
+- Python에서 dropna·drop_duplicates·errors='coerce'로 오류를 숨기지 않는다.
+- PostgreSQL 경로는 실제 SQL과 pandas를 같은 스냅샷에서 비교한다.
+- CSV 경로는 출처 manifest와 별도 SQL 기준값을 사용한다.
+- 불일치 시 기대값을 실제값으로 바꾸지 않는다.
 ```
