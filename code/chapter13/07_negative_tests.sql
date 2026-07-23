@@ -44,7 +44,6 @@ CREATE TEMP TABLE negative_test_results (
     detail TEXT
 );
 
--- 예상 실패 테스트를 실행하고 SQLSTATE와 제약조건 이름을 구조적으로 기록합니다.
 CREATE OR REPLACE PROCEDURE pg_temp.expect_failure(
     p_test_order INTEGER,
     p_test_id TEXT,
@@ -64,8 +63,6 @@ DECLARE
 BEGIN
     BEGIN
         EXECUTE p_sql;
-
-        -- 예상과 달리 성공했으면 이 하위 트랜잭션을 취소합니다.
         RAISE EXCEPTION USING
             ERRCODE = 'P0001',
             MESSAGE = '__UNEXPECTED_SUCCESS__';
@@ -82,16 +79,9 @@ BEGIN
                AND v_message = '__UNEXPECTED_SUCCESS__' THEN
                 INSERT INTO pg_temp.negative_test_results
                 VALUES (
-                    p_test_order,
-                    p_test_id,
-                    p_test_name,
-                    'expected_failure',
-                    p_expected_sqlstate,
-                    NULL,
-                    p_expected_constraint,
-                    NULL,
-                    NULL,
-                    NULL,
+                    p_test_order, p_test_id, p_test_name,
+                    'expected_failure', p_expected_sqlstate, NULL,
+                    p_expected_constraint, NULL, NULL, NULL,
                     'unexpected_success',
                     'SQL이 예상과 달리 성공했습니다.'
                 );
@@ -102,41 +92,24 @@ BEGIN
                   ) THEN
                 INSERT INTO pg_temp.negative_test_results
                 VALUES (
-                    p_test_order,
-                    p_test_id,
-                    p_test_name,
-                    'expected_failure',
-                    p_expected_sqlstate,
-                    v_sqlstate,
-                    p_expected_constraint,
-                    v_constraint,
-                    v_table,
-                    v_column,
-                    'expected_failure',
-                    v_message
+                    p_test_order, p_test_id, p_test_name,
+                    'expected_failure', p_expected_sqlstate, v_sqlstate,
+                    p_expected_constraint, v_constraint, v_table, v_column,
+                    'expected_failure', v_message
                 );
             ELSE
                 INSERT INTO pg_temp.negative_test_results
                 VALUES (
-                    p_test_order,
-                    p_test_id,
-                    p_test_name,
-                    'expected_failure',
-                    p_expected_sqlstate,
-                    v_sqlstate,
-                    p_expected_constraint,
-                    v_constraint,
-                    v_table,
-                    v_column,
-                    'unexpected_error',
-                    v_message
+                    p_test_order, p_test_id, p_test_name,
+                    'expected_failure', p_expected_sqlstate, v_sqlstate,
+                    p_expected_constraint, v_constraint, v_table, v_column,
+                    'unexpected_error', v_message
                 );
             END IF;
     END;
 END
 $$;
 
--- 정상 경계값 테스트도 마지막에 의도적으로 예외를 발생시켜 변경을 취소합니다.
 CREATE OR REPLACE PROCEDURE pg_temp.expect_success(
     p_test_order INTEGER,
     p_test_id TEXT,
@@ -154,7 +127,6 @@ DECLARE
 BEGIN
     BEGIN
         EXECUTE p_sql;
-
         RAISE EXCEPTION USING
             ERRCODE = 'P0001',
             MESSAGE = '__ROLLBACK_EXPECTED_SUCCESS__';
@@ -171,34 +143,19 @@ BEGIN
                AND v_message = '__ROLLBACK_EXPECTED_SUCCESS__' THEN
                 INSERT INTO pg_temp.negative_test_results
                 VALUES (
-                    p_test_order,
-                    p_test_id,
-                    p_test_name,
-                    'expected_success',
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL,
+                    p_test_order, p_test_id, p_test_name,
+                    'expected_success', NULL, NULL,
+                    NULL, NULL, NULL, NULL,
                     'expected_success',
                     '정상 경계값이 허용되었으며 변경은 자동 취소되었습니다.'
                 );
             ELSE
                 INSERT INTO pg_temp.negative_test_results
                 VALUES (
-                    p_test_order,
-                    p_test_id,
-                    p_test_name,
-                    'expected_success',
-                    NULL,
-                    v_sqlstate,
-                    NULL,
-                    v_constraint,
-                    v_table,
-                    v_column,
-                    'unexpected_error',
-                    v_message
+                    p_test_order, p_test_id, p_test_name,
+                    'expected_success', NULL, v_sqlstate,
+                    NULL, v_constraint, v_table, v_column,
+                    'unexpected_error', v_message
                 );
             END IF;
     END;
@@ -316,59 +273,112 @@ CALL pg_temp.expect_failure(
     '23503', 'fk_ai_review_payments_enrollment'
 );
 
+-- T15~T21은 각 목표 제약조건보다 enrollment_id UNIQUE가 먼저 실패하지 않도록
+-- 같은 하위 트랜잭션에서 임시 완료 신청을 만든 뒤 결제를 입력합니다.
 CALL pg_temp.expect_failure(
     15, 'P13-T15', 'negative_payment_amount',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9911, 1001, -5000, '결제완료', CURRENT_TIMESTAMP, NULL, 'NEG-AMOUNT')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19115, 101, 301, '완료', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9915, id, -5000, '결제완료', CURRENT_TIMESTAMP, NULL, 'NEG-AMOUNT'
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_amount'
 );
 
 CALL pg_temp.expect_failure(
     16, 'P13-T16', 'invalid_payment_status',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9912, 1001, 100000, '처리완료', CURRENT_TIMESTAMP, NULL, 'NEG-STATUS')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19116, 101, 301, '완료', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9916, id, 100000, '처리완료', CURRENT_TIMESTAMP, NULL, 'NEG-STATUS'
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_status'
 );
 
 CALL pg_temp.expect_failure(
     17, 'P13-T17', 'completed_without_paid_at',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9913, 1001, 100000, '결제완료', NULL, NULL, 'NEG-PAID-NULL')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19117, 101, 301, '완료', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9917, id, 100000, '결제완료', NULL, NULL, 'NEG-PAID-NULL'
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_timestamps'
 );
 
 CALL pg_temp.expect_failure(
     18, 'P13-T18', 'refund_without_refunded_at',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9914, 1001, 100000, '환불', CURRENT_TIMESTAMP, NULL, 'NEG-REFUND-NULL')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19118, 101, 301, '취소', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9918, id, 100000, '환불', CURRENT_TIMESTAMP, NULL, 'NEG-REFUND-NULL'
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_timestamps'
 );
 
 CALL pg_temp.expect_failure(
     19, 'P13-T19', 'refund_before_payment',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9915, 1001, 100000, '환불', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '1 day', 'NEG-REFUND-BEFORE')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19119, 101, 301, '취소', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9919, id, 100000, '환불', CURRENT_TIMESTAMP,
+             CURRENT_TIMESTAMP - INTERVAL '1 day', 'NEG-REFUND-BEFORE'
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_timestamps'
 );
 
 CALL pg_temp.expect_failure(
     20, 'P13-T20', 'blank_payment_reference',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9916, 1001, 100000, '결제완료', CURRENT_TIMESTAMP, NULL, '   ')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19120, 101, 301, '완료', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9920, id, 100000, '결제완료', CURRENT_TIMESTAMP, NULL, '   '
+      FROM new_enrollment$$,
     '23514', 'chk_ai_review_payments_reference_not_blank'
 );
 
 CALL pg_temp.expect_failure(
     21, 'P13-T21', 'duplicate_payment_reference',
-    $$INSERT INTO ai_review_lab.payments
-      (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9917, 1001, 100000, '결제완료', CURRENT_TIMESTAMP, NULL, 'PAY-REVIEW-TEST-001')$$,
+    $$WITH new_enrollment AS (
+          INSERT INTO ai_review_lab.enrollments
+              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+          VALUES (19121, 101, 301, '완료', 100000, CURRENT_DATE)
+          RETURNING id
+      )
+      INSERT INTO ai_review_lab.payments
+          (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
+      SELECT 9921, id, 100000, '결제완료', CURRENT_TIMESTAMP, NULL,
+             'PAY-REVIEW-TEST-001'
+      FROM new_enrollment$$,
     '23505', 'uq_ai_review_payments_reference'
 );
 
@@ -376,7 +386,7 @@ CALL pg_temp.expect_failure(
     22, 'P13-T22', 'duplicate_payment_for_enrollment',
     $$INSERT INTO ai_review_lab.payments
       (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
-      VALUES (9918, 1001, 100000, '결제완료', CURRENT_TIMESTAMP, NULL, 'NEG-DUP-ENROLLMENT')$$,
+      VALUES (9922, 1001, 100000, '결제완료', CURRENT_TIMESTAMP, NULL, 'NEG-DUP-ENROLLMENT')$$,
     '23505', 'uq_ai_review_payments_enrollment'
 );
 
