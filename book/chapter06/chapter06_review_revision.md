@@ -1,4 +1,4 @@
-# Chapter 06 2차 재구성 반영 기록
+# Chapter 06 최종 출판 검수 반영 기록
 
 ## 대상 파일
 
@@ -12,205 +12,245 @@ code/chapter06/normalization_practice.sql
 code/chapter06/integrity_tests.sql
 code/chapter06/reset_normalization.sql
 code/chapter06/README.md
-images/chapter06/README.md
 notes/chapter06_review_checklist.md
 README.md
 ```
 
-## 목적
+## 검수 목적
 
-Chapter 06을 정규형 개념 설명 중심에서 **정규화와 데이터 무결성을 함께 검증하는 장**으로 재구성한다.
-
-Chapter 05에서 이동한 외래키 오류, 참조 무결성과 삭제 정책을 수용하고, Chapter 04·05에서 확립한 안전 실행 원칙과 `IDENTITY` 방식을 유지한다.
-
----
-
-## 1. 제목과 역할 변경
-
-### 기존 제목
-
-```text
-정규화와 좋은 테이블 설계
-```
-
-### 변경 제목
-
-```text
-정규화와 데이터 무결성으로 좋은 테이블 만들기
-```
-
-### 새 흐름
+Chapter 06의 정규화 설명을 Chapter 05의 요구사항·정책 추적 흐름과 연결하고, 실제 PostgreSQL 실습에서 데이터 상태와 제약조건 테스트가 충돌하지 않도록 보완했습니다.
 
 ```text
 행 의미·컬럼 주인
 → 중복과 이상 현상
-→ 함수적 종속
 → 1NF·2NF·3NF
-→ 정규화 구조
-→ PK·FK·NOT NULL·UNIQUE·CHECK
-→ 정상·오류 데이터 테스트
-→ 삭제 정책
-→ 과도한 분리와 AI 검토
+→ 미확정 정책 확인
+→ 확정 규칙 ID
+→ 제약조건·부분 고유 인덱스
+→ 정상·경계·오류 데이터 검증
 ```
 
 ---
 
-## 2. 강화한 내용
+## 1. 샘플 데이터 정합성 수정
 
-| 항목 | 반영 내용 |
+도서 201이 동시에 두 건의 미반납 대여에 포함되던 문제를 수정했습니다.
+
+```text
+대여 1001: 2026-04-01 시작, 2026-04-02 반납
+대여 1003: 2026-04-03 시작, 미반납
+```
+
+따라서 다음 조건이 모두 유지됩니다.
+
+```text
+회원 101의 대여 기록 2건
+도서 201의 시간에 따른 대여 기록 2건
+미반납 기록 2건
+동일 도서의 동시 미반납 없음
+```
+
+본문, 원시 데이터, 정규화 데이터, 워크북과 SQL 검증 기준을 동기화했습니다.
+
+---
+
+## 2. 미확정 정책과 확정 규칙 구분
+
+Chapter 05에서 후보로 남긴 이메일·ISBN 고유성 등을 Chapter 06에서 다음 규칙으로 확정했습니다.
+
+| ID | 규칙 | 구현 |
+| --- | --- | --- |
+| C-01 | 정확히 같은 이메일 문자열 중복 금지 | `UNIQUE` |
+| C-02 | 같은 ISBN 문자열 중복 금지 | `UNIQUE` |
+| C-03 | 이름·제목의 공백 문자열 금지 | `CHECK` |
+| C-04 | 반납예정일은 대여일 이상 | `CHECK` |
+| C-05 | 실제반납일은 `NULL` 또는 대여일 이상 | `CHECK` |
+| C-06 | 존재하는 회원·도서만 참조 | `FOREIGN KEY` |
+| C-07 | 대여 이력 보유 부모 삭제 금지 | `RESTRICT` |
+| C-08 | 도서당 미반납 대여 최대 한 건 | 부분 고유 인덱스 |
+
+이메일 대소문자, 동일 ISBN 복본, 여러 저자와 과거 기간 전체 중첩 검사는 범위 밖으로 명시했습니다.
+
+---
+
+## 3. 활성 대여 중복 차단 추가
+
+Chapter 05에서 후속 구현으로 남긴 도서별 활성 대여 중복을 다음 부분 고유 인덱스로 차단했습니다.
+
+```sql
+CREATE UNIQUE INDEX uq_loans_nf_active_book
+ON public.loans_nf (book_id)
+WHERE returned_at IS NULL;
+```
+
+반납된 과거 대여는 여러 건 허용하지만 같은 도서의 미반납 행은 한 건만 허용합니다. 전체 과거 날짜 구간의 중첩 검사는 범위에서 제외했습니다.
+
+---
+
+## 4. 스키마와 실행 위치 기준 통일
+
+모든 본문·워크북·SQL 파일의 위치 확인을 다음으로 통일했습니다.
+
+```sql
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+```
+
+모든 주요 객체는 `public.members_nf`, `public.loans_nf`처럼 스키마 한정 이름을 사용합니다.
+
+---
+
+## 5. IDENTITY 시작값 조정
+
+명시적 샘플 ID 입력 뒤 다음 자동값을 조정했습니다.
+
+```text
+library_records_raw.loan_id → 1004
+members_nf.id               → 103
+books_nf.id                 → 203
+loans_nf.id                 → 1004
+```
+
+명시적 ID 입력이 연결된 IDENTITY 시퀀스를 자동으로 소비하지 않는다는 설명을 본문·워크북·SQL에 반영했습니다.
+
+---
+
+## 6. 요구사항 근거 없는 CHECK 제거
+
+기존 `published_year >= 1000` 조건은 요구사항 근거가 없어 삭제했습니다. `published_year = NULL`은 허용되어야 하는 경계값으로 테스트합니다.
+
+---
+
+## 7. 오류 테스트 데이터 상태 충돌 해결
+
+회원 101 이메일을 수정한 뒤 기존 이메일을 사용하는 중복 테스트가 성공할 수 있던 문제를 해결했습니다.
+
+중복 이메일 테스트는 변경하지 않은 회원 102의 다음 값을 사용합니다.
+
+```text
+junho@example.com
+```
+
+따라서 회원 101 수정 전후 모두 `UNIQUE` 오류가 발생해야 합니다.
+
+---
+
+## 8. 정상·경계·오류 테스트 확대
+
+### 허용 경계값
+
+```text
+due_at = borrowed_at
+returned_at = borrowed_at
+returned_at = NULL
+published_year = NULL
+공백이 아닌 한 글자 이름
+```
+
+### 실패 테스트
+
+```text
+NOT NULL
+이메일·ISBN UNIQUE
+공백 이름·제목 CHECK
+없는 회원 FOREIGN KEY
+날짜 순서 CHECK
+두 번째 미반납 대여 부분 고유 인덱스
+참조 중 부모 삭제 RESTRICT
+```
+
+오류 후 기준 행 수와 데이터를 다시 확인하도록 구성했습니다.
+
+---
+
+## 9. 오류 후 트랜잭션 복구 안내
+
+수동 커밋이나 명시적 트랜잭션에서 오류 후 다음 메시지가 나타날 수 있음을 설명했습니다.
+
+```text
+current transaction is aborted
+```
+
+이때 다음 명령으로 실패한 트랜잭션을 종료한 뒤 다음 테스트로 이동합니다.
+
+```sql
+ROLLBACK;
+```
+
+상세 트랜잭션 원리는 Chapter 09로 연결했습니다.
+
+---
+
+## 10. 초기화 파일 안전성 강화
+
+`reset_normalization.sql`은 하나의 보호 구문 안에서 다음을 검증합니다.
+
+```text
+current_database() = ai_database_book
+current_schema()   = public
+```
+
+조건이 맞을 때만 다음 순서로 삭제합니다.
+
+```text
+public.loans_nf
+→ public.books_nf
+→ public.members_nf
+→ public.library_records_raw
+```
+
+---
+
+## 11. 정규형·삭제 정책 설명 보완
+
+- 제2정규형 수강 예제에 같은 강의를 한 번만 수강한다는 가정을 명시했습니다.
+- 재수강·학기·분반에는 추가 식별자가 필요함을 설명했습니다.
+- `NO ACTION`의 지연 가능성과 `RESTRICT`의 즉시 거부 차이를 입문 수준으로 보완했습니다.
+- 주문 실습의 이메일·수량·가격 제약조건은 정책 확정 후 적용하는 후보로 수정했습니다.
+
+---
+
+## 12. 자기주도 학습 보완
+
+본문과 워크북에 다음 권장 해설을 추가했습니다.
+
+```text
+위험한 중복과 정상 반복
+삽입·수정·삭제 이상
+함수적 종속
+1NF·2NF·3NF 핵심 판단
+제약조건 대응
+부분 고유 인덱스
+IDENTITY 시작값
+ROLLBACK 상황
+주문 당시 가격
+```
+
+---
+
+## 최종 상태
+
+| 항목 | 상태 |
 | --- | --- |
-| 위험한 중복 | 같은 사실의 복사본과 정상적인 FK 반복 구분 |
-| 컬럼의 주인 | 회원·도서·대여 사실을 소유자 기준으로 분리 |
-| 함수적 종속 | `X → Y`의 업무 규칙 의미 추가 |
-| 정규형 | 1NF·2NF·3NF 독립 예제와 전제 유지 |
-| 데이터 무결성 | 정규화와 제약조건의 역할 차이 추가 |
-| 제약조건 | PK, FK, NOT NULL, UNIQUE, CHECK 상세 연결 |
-| 참조 무결성 | 존재하지 않는 부모 참조 오류 실습 추가 |
-| 삭제 정책 | RESTRICT, NO ACTION, CASCADE, SET NULL 비교 |
-| CASCADE 주의 | 요구사항 근거 없는 자동 삭제 금지 강조 |
-| 오류 테스트 | 실패해야 하는 SQL과 오류 후 데이터 보존 확인 |
-| 이력 데이터 | 주문 당시 가격과 현재 가격의 의미 차이 추가 |
-| AI 검토 | 구조·제약조건·삭제 정책·오류 테스트까지 확대 |
+| 샘플 동시 미반납 문제 해결 | 완료 |
+| 정책 후보와 확정 규칙 분리 | 완료 |
+| 활성 대여 부분 고유 인덱스 | 완료 |
+| `public`·`SHOW search_path` 통일 | 완료 |
+| IDENTITY 시작값 조정 | 완료 |
+| 초기화 보호 구문 | 완료 |
+| 중복 이메일 테스트 충돌 해결 | 완료 |
+| 정상·경계·오류 테스트 | 완료 |
+| `ROLLBACK` 안내 | 완료 |
+| 근거 없는 출판연도 CHECK 제거 | 완료 |
+| 권장 해설 추가 | 완료 |
 
----
-
-## 3. 후속 장과 범위 구분
-
-| 내용 | 처리 |
-| --- | --- |
-| JOIN 문법과 다양한 결합 | Chapter 08에서 상세 학습 |
-| 여러 단계 작업의 원자성 | Chapter 09 트랜잭션에서 학습 |
-| 인덱스·실행 계획과 반정규화 판단 | Chapter 10 이후 측정 기반 검토 |
-| 운영 데이터 정제·중복 병합·마이그레이션 | 이 장 범위 제외 |
-| BCNF·4NF·5NF | 입문 범위 제외 |
-
----
-
-## 4. SQL 구조 변경
-
-### 기존
+## 결론
 
 ```text
-normalization_practice.sql
-- 자동 DROP
-- 원시·정규화 테이블 생성
-- 샘플 데이터 입력
-- JOIN
-- UPDATE
+Chapter 06은 정규형 설명에 머물지 않고,
+요구사항 근거·확정 규칙·PostgreSQL 구현·실패 증거를 연결하는
+데이터 무결성 검증 장으로 최종 보완되었다.
 ```
 
-### 변경
-
-```text
-normalization_schema.sql
-- 현재 DB·스키마 확인
-- 원시·정규화 테이블과 제약조건 생성
-
-normalization_seed.sql
-- 명시적 ID 정상 샘플 입력
-
-normalization_practice.sql
-- 중복·행 수·관계·수정 이상 감소 확인
-
-integrity_tests.sql
-- 실패해야 하는 오류 SQL을 주석 상태로 제공
-
-reset_normalization.sql
-- 필요할 때만 자식→부모 순서로 삭제
-```
-
-### 안전성 개선
-
-```text
-- 자동 DROP 제거
-- SERIAL을 IDENTITY로 변경
-- Chapter 05 테이블과 충돌하지 않도록 _nf 접미사 사용
-- 자동 증가값 1, 2, 3 가정 제거
-- 오류 SQL은 모두 주석 처리하고 한 문장씩 선택 실행
-- 참조 중인 부모 삭제를 ON DELETE RESTRICT로 차단
-```
-
----
-
-## 5. 실습 테이블과 샘플 기준
-
-| 테이블 | 행 수 | ID |
-| --- | ---: | --- |
-| `library_records_raw` | 3 | 1001~1003 |
-| `members_nf` | 2 | 101, 102 |
-| `books_nf` | 2 | 201, 202 |
-| `loans_nf` | 3 | 1001~1003 |
-
-적용 제약조건:
-
-```text
-members_nf.name: NOT NULL + 공백 CHECK
-members_nf.email: NOT NULL + UNIQUE
-books_nf.title: NOT NULL + 공백 CHECK
-books_nf.isbn: NOT NULL + UNIQUE
-loans_nf.member_id, book_id: FK + NOT NULL + RESTRICT
-loans_nf.due_at: 대여일 이후 CHECK
-loans_nf.returned_at: NULL 또는 대여일 이후 CHECK
-```
-
----
-
-## 6. 오류 테스트
-
-`integrity_tests.sql`에 다음 실패 테스트를 추가했다.
-
-```text
-NOT NULL 위반
-UNIQUE 위반
-공백 이름 CHECK 위반
-존재하지 않는 회원 FOREIGN KEY 위반
-잘못된 반납예정일 CHECK 위반
-잘못된 실제반납일 CHECK 위반
-참조 중인 회원 삭제 RESTRICT 위반
-참조되지 않는 회원 정상 삭제
-```
-
-오류 발생 후 행 수와 기존 데이터를 다시 조회하도록 구성했다.
-
----
-
-## 7. 도식 처리
-
-기존 Mermaid·SVG 8종은 정규화 핵심 설명과 호환되므로 유지한다.
-
-```text
-중복 문제
-세 이상 현상
-1NF
-2NF
-3NF
-도서 대여 정규화 흐름
-정규화 저장과 JOIN 조회
-AI 구조 검토
-```
-
-무결성 제약조건과 삭제 정책은 SQL 코드·표가 더 적합하므로 별도 SVG를 추가하지 않았다.
-
----
-
-## 8. 남은 확인 항목
-
-```text
-- 실제 PostgreSQL에서 schema → seed → practice 순서 실행
-- integrity_tests.sql의 오류 SQL을 한 문장씩 실행
-- 제약조건 이름과 오류 메시지 확인
-- 오류 후 정상 행 수가 유지되는지 확인
-- GitHub에서 기존 SVG 8종 표시 확인
-- Word/PDF/eBook 변환 시 표와 SQL 줄바꿈 확인
-- Chapter 07 프로젝트가 새 무결성 검증 기준을 수용하는지 확인
-```
-
----
-
-## 9. 최종 상태
-
-```text
-Chapter 06 본문, 워크북, 구성안과 SQL 실행 구조를 2차 재구성했다.
-정규화와 데이터 무결성을 하나의 검증 흐름으로 연결했다.
-원격 main에는 Chapter 06 관련 변경을 직접 반영했다.
-```
+실제 PostgreSQL에서 `schema → seed → practice → integrity → reset` 전체 실행과 출판 렌더링은 별도 제작 단계에서 확인합니다.
