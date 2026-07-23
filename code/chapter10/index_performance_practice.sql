@@ -10,36 +10,30 @@
 -- 4. 04_create_candidate_indexes.sql
 -- 5. 05_after_index_explain.sql
 -- 6. 06_index_review.sql
+-- 7. 07_result_validation.sql
 --
 -- 처음부터 다시 시작할 때만 reset_performance_lab.sql을 사용합니다.
 
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
 -- 앞 장 데이터 보호 확인
 SELECT COUNT(*) AS project_enrollment_count
 FROM course_project.enrollments;
 
--- performance_lab 테이블 존재 확인
+-- performance_lab 객체 존재 여부를 안전하게 확인
 SELECT
-    table_schema,
-    table_name
-FROM information_schema.tables
-WHERE table_schema = 'performance_lab'
-ORDER BY table_name;
+    to_regclass('performance_lab.students') AS students_table,
+    to_regclass('performance_lab.instructors') AS instructors_table,
+    to_regclass('performance_lab.courses') AS courses_table,
+    to_regclass('performance_lab.enrollments') AS enrollments_table;
 
--- performance_lab이 준비된 경우 행 수 확인
-SELECT COUNT(*) AS student_count
-FROM performance_lab.students;
-
-SELECT COUNT(*) AS instructor_count
-FROM performance_lab.instructors;
-
-SELECT COUNT(*) AS course_count
-FROM performance_lab.courses;
-
-SELECT COUNT(*) AS enrollment_count
-FROM performance_lab.enrollments;
+-- 아래 행 수 조회는 performance_lab이 준비된 상태에서만 실행합니다.
+-- SELECT COUNT(*) AS student_count FROM performance_lab.students;
+-- SELECT COUNT(*) AS instructor_count FROM performance_lab.instructors;
+-- SELECT COUNT(*) AS course_count FROM performance_lab.courses;
+-- SELECT COUNT(*) AS enrollment_count FROM performance_lab.enrollments;
 
 -- 기대 결과: 10003 / 2 / 2003 / 100005
 
@@ -52,7 +46,7 @@ FROM pg_indexes
 WHERE schemaname = 'performance_lab'
 ORDER BY tablename, indexname;
 
--- 최종 수동 후보:
+-- 전후 측정을 위한 실험 후보:
 -- idx_performance_courses_title
 -- idx_performance_enrollments_student_id
 -- idx_performance_enrollments_course_status
