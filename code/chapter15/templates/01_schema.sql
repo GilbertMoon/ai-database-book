@@ -1,20 +1,28 @@
 -- Chapter 15. AI 튜터링 질문 관리 데이터베이스 스키마
+-- P15-V01: 현재 DB와 기존 스키마를 검사하고 전용 구조를 원자적으로 생성합니다.
 -- 기존 프로젝트·앞 장 스키마·Role을 자동으로 변경하지 않습니다.
--- 처음부터 다시 시작할 때만 reset_tutor_project.sql을 별도로 사용합니다.
 
-SELECT
-    current_user AS current_user_name,
-    current_database() AS current_database_name,
-    current_schema() AS current_schema_name;
+SELECT current_user AS current_user_name;
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
 
-SELECT
-    to_regnamespace('course_project') AS course_project_schema,
-    to_regnamespace('transaction_lab') AS transaction_lab_schema,
-    to_regnamespace('performance_lab') AS performance_lab_schema,
-    to_regnamespace('security_lab') AS security_lab_schema,
-    to_regnamespace('nosql_lab') AS nosql_lab_schema,
-    to_regnamespace('ai_review_lab') AS ai_review_lab_schema,
-    to_regnamespace('analysis_lab') AS analysis_lab_schema;
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    IF to_regnamespace('tutor_project') IS NOT NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: tutor_project 스키마가 이미 존재합니다. 보존 여부를 확인한 뒤 reset_tutor_project.sql을 검토하세요.';
+    END IF;
+END
+$$;
+
+BEGIN;
 
 CREATE SCHEMA tutor_project;
 
@@ -28,7 +36,9 @@ CREATE TABLE tutor_project.students (
     CONSTRAINT uq_tutor_project_students_email
         UNIQUE (email),
     CONSTRAINT chk_tutor_project_students_name
-        CHECK (char_length(trim(name)) > 0)
+        CHECK (char_length(trim(name)) > 0),
+    CONSTRAINT chk_tutor_project_students_email
+        CHECK (char_length(trim(email)) > 0)
 );
 
 CREATE TABLE tutor_project.tutors (
@@ -43,6 +53,8 @@ CREATE TABLE tutor_project.tutors (
         UNIQUE (email),
     CONSTRAINT chk_tutor_project_tutors_name
         CHECK (char_length(trim(name)) > 0),
+    CONSTRAINT chk_tutor_project_tutors_email
+        CHECK (char_length(trim(email)) > 0),
     CONSTRAINT chk_tutor_project_tutors_specialty
         CHECK (char_length(trim(specialty)) > 0)
 );
@@ -63,12 +75,16 @@ CREATE TABLE tutor_project.questions (
         ON DELETE RESTRICT,
     CONSTRAINT uq_tutor_project_questions_code
         UNIQUE (question_code),
+    CONSTRAINT chk_tutor_project_questions_code
+        CHECK (char_length(trim(question_code)) > 0),
     CONSTRAINT chk_tutor_project_questions_title
         CHECK (char_length(trim(title)) > 0),
     CONSTRAINT chk_tutor_project_questions_body
         CHECK (char_length(trim(body)) > 0),
     CONSTRAINT chk_tutor_project_questions_status
-        CHECK (status IN ('open', 'answered', 'closed'))
+        CHECK (status IN ('open', 'answered', 'closed')),
+    CONSTRAINT chk_tutor_project_questions_timestamps
+        CHECK (updated_at >= created_at)
 );
 
 CREATE TABLE tutor_project.answers (
@@ -105,6 +121,8 @@ CREATE TABLE tutor_project.learning_materials (
 
     CONSTRAINT uq_tutor_project_materials_code
         UNIQUE (material_code),
+    CONSTRAINT chk_tutor_project_materials_code
+        CHECK (char_length(trim(material_code)) > 0),
     CONSTRAINT chk_tutor_project_materials_title
         CHECK (char_length(trim(title)) > 0),
     CONSTRAINT chk_tutor_project_materials_summary
@@ -113,8 +131,12 @@ CREATE TABLE tutor_project.learning_materials (
         CHECK (material_type IN ('article', 'document', 'video', 'quiz')),
     CONSTRAINT chk_tutor_project_materials_scope
         CHECK (access_scope IN ('public', 'internal', 'restricted')),
+    CONSTRAINT chk_tutor_project_materials_version
+        CHECK (char_length(trim(source_version)) > 0),
     CONSTRAINT chk_tutor_project_materials_hash
-        CHECK (char_length(trim(content_hash)) > 0)
+        CHECK (char_length(trim(content_hash)) > 0),
+    CONSTRAINT chk_tutor_project_materials_url
+        CHECK (source_url IS NULL OR char_length(trim(source_url)) > 0)
 );
 
 CREATE TABLE tutor_project.question_materials (
@@ -149,7 +171,21 @@ ON tutor_project.answers (question_id, created_at);
 CREATE INDEX idx_tutor_project_qm_material
 ON tutor_project.question_materials (material_id);
 
+-- P15-D06: 모든 분석은 같은 고정 반개방 기간을 사용합니다.
+CREATE VIEW tutor_project.analysis_parameters AS
+SELECT
+    TIMESTAMPTZ '2026-01-01 00:00:00+09' AS start_at,
+    TIMESTAMPTZ '2026-06-01 00:00:00+09' AS end_at_exclusive;
+
+COMMIT;
+
 SELECT table_name
 FROM information_schema.tables
+WHERE table_schema = 'tutor_project'
+  AND table_type = 'BASE TABLE'
+ORDER BY table_name;
+
+SELECT table_name
+FROM information_schema.views
 WHERE table_schema = 'tutor_project'
 ORDER BY table_name;
