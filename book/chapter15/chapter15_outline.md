@@ -6,194 +6,147 @@
 
 ## 권장 분량
 
-30~36페이지
+34~40페이지
 
 ## 이 장의 역할
 
-Chapter 15는 책 전체에서 학습한 요구사항 분석, ERD, PostgreSQL 구현, SQL 검증, 운영 계획, AI 검토와 SQL·Python 분석을 `tutor_project` 예제로 통합하는 장입니다.
+책 전체의 요구사항, ERD, PostgreSQL, SQL 검증, 트랜잭션, 인덱스, 보안·복구, SQL·Python 분석과 AI 변경 검토를 `tutor_project`에서 통합합니다.
 
 ```text
 문제·범위
-→ 요구사항·미확정 정책
-→ ERD·DDL
-→ 기준 데이터
-→ 메타데이터·업무 조회
-→ 트랜잭션·반례
-→ 인덱스·운영·복구
-→ 분석용 데이터셋
-→ SQL·Python 분석
-→ AI diff 검토
-→ 완료 게이트
+→ P15 요구사항·정책
+→ 안전한 DDL·Seed·IDENTITY
+→ 정확한 메타데이터·업무·시간 검증
+→ 트랜잭션·반례·경계값
+→ 인덱스 후보·PUBLIC·운영
+→ 고정 기간 분석 VIEW
+→ 예외 기반 DB 게이트
+→ 실제 SQL·pandas 교차 검증
+→ 별도 DB 복원·보고서·최종 판단
 ```
 
 ## 핵심 메시지
 
-> 데이터베이스 프로젝트는 SQL이 실행되는 것으로 끝나지 않는다. 설계와 데이터가 요구사항에 맞고, SQL과 Python 분석 결과가 일치하며, 다른 사람이 같은 절차로 재현할 수 있어야 한다.
+> SQL 실행이나 그래프 생성은 완료의 일부다. 구조·데이터·분석·복구와 사람이 승인한 증거가 함께 재현되어야 프로젝트가 완성된다.
 
-## 핵심 질문
-
-```text
-필수 범위와 선택 확장이 구분되어 있는가?
-요구사항 ID가 ERD·DDL·검증 SQL과 연결되는가?
-전용 스키마와 명시적 ID로 재현할 수 있는가?
-정상·경계·반례·트랜잭션을 모두 검증하는가?
-실제 메타데이터와 업무 정합성이 기대와 일치하는가?
-인덱스가 실제 조회 패턴을 근거로 하는가?
-비밀·권한·백업·복원 계획이 있는가?
-분석 데이터셋의 한 행 단위가 명확한가?
-SQL과 pandas의 핵심 집계가 일치하는가?
-AI 변경을 diff와 실행 증거로 검토하는가?
-미실행 항목과 다음 버전을 명시하는가?
-```
-
-## 실습 스키마
+## 실습 구조
 
 ```text
-tutor_project.students
-tutor_project.tutors
-tutor_project.questions
-tutor_project.answers
-tutor_project.learning_materials
-tutor_project.question_materials
-tutor_project.question_analysis_dataset VIEW
+base tables 6
+analysis views 4
+identity sequences 5
+constraints 36
+foreign keys 5
+business indexes 3
 ```
 
-보호 대상:
+분석 VIEW:
 
 ```text
-course_project
-transaction_lab
-performance_lab
-security_lab
-nosql_lab
-ai_review_lab
-analysis_lab
-public
+analysis_parameters
+question_analysis_dataset       질문 1건
+student_question_summary        학생 1명, 0건 포함
+tutor_answer_summary            튜터 1명, 0건 포함
 ```
 
-## 기준 데이터와 분석 기준
+## 추적 ID
 
 ```text
-students 4
-tutors 3
-questions 5
-answers 5
-learning_materials 6
-question_materials 7
-FK 5
-업무 인덱스 3
-CASCADE 0
-분석 VIEW 5행
-answer_count 합계 5
-material_count 합계 7
-question_id 중복 0
+P15-R01~R13 요구사항
+P15-D01~D08 결정·미확정 정책
+P15-Q01~Q06 분석 질문
+P15-T01~T25 트랜잭션·반례·경계값
+P15-V01~V09 검증 단계
 ```
 
-## 핵심 개념
+## 기준 결과
 
-- 필수 경로와 선택 확장
-- 요구사항 추적과 미확정 정책
-- 전용 스키마와 명시적 ID
-- ERD·DDL·메타데이터 정합성
-- 정상·경계·오류 데이터
-- 트랜잭션·ROLLBACK
-- 자동 반례 테스트
-- 인덱스·EXPLAIN
-- 최소 권한·비밀 관리
-- 백업·복원·RPO·RTO
-- 분석 질문과 행 단위
-- 분석용 VIEW
-- PostgreSQL·Python 연결
-- pandas `groupby`와 결과 검증
-- AI 생성 SQL·Python 코드 검토
-- 완료·조건부 완료·보류·미완료
+```text
+rows 4·3·5·5·6·7
+identity next 105·204·306·406·507 이상
+업무·시간 이상 0
+테스트 23/23, unexpected 0
+질문·학생·튜터 VIEW 5·4·3행
+answer_count 5, material_count 7
+첫 답변 4건·평균 2시간·음수 0
+SQL·pandas 요약 5종 일치
+```
 
 ## 본문 구성
 
 1. 필수 경로와 선택 확장
-2. 재현 가능한 파일 구조
+2. 파일 구조와 실행 순서
 3. 문제·사용자·범위
-4. 요구사항·미확정 정책
-5. ERD·DDL 추적
-6. 전용 스키마
-7. 검증·분석 시나리오 데이터
-8. 실제 메타데이터
-9. 요구사항 조회와 분석 질문
-10. 트랜잭션·반례
-11. 인덱스·운영 안전성
-12. 분석용 데이터셋
-13. AI diff와 실행 증거 검토
-14. 프로젝트 완성도의 일곱 축
-15. 최종 보고서와 완료 게이트
-16. 자주 하는 실수
-17. 책 전체 연결
+4. P15 요구사항·정책
+5. ERD·DDL·메타데이터
+6. 기준 데이터·IDENTITY
+7. 업무·시간 정합성
+8. 트랜잭션 정상·실패 경로
+9. 반례·정상 경계값
+10. 인덱스 후보와 효과 검증 범위
+11. PUBLIC·소유권·access_scope
+12. 백업·별도 DB 원자적 복원
+13. 분석 기간·행 단위·date spine
+14. 실제 SQL·pandas 교차 검증
+15. DB 게이트와 전체 완료 분리
+16. AI diff·실행 증거
+17. 프로젝트 완성도
+18. 자주 하는 실수
+19. 책 전체 연결
 
-## 코드·문서 파일
+## 코드 파일
 
 ```text
-code/chapter15/templates/
-├── README.md
-├── requirements.md
-├── erd.md
-├── 01_schema.sql
-├── 02_seed.sql
-├── 03_metadata_validation.sql
-├── 04_requirement_queries.sql
-├── 05_transaction_checks.sql
-├── 06_negative_tests.sql
-├── 07_performance_checks.sql
-├── 08_operations_checks.sql
-├── 09_analysis_dataset.sql
-├── 10_completion_gate.sql
-├── python/
-│   ├── requirements.txt
-│   ├── .env.example
-│   ├── 01_load_postgresql.py
-│   ├── 02_pandas_analysis.py
-│   └── 03_result_validation.py
-├── OPERATIONS_RUNBOOK.md
-├── ai_review_report.md
-├── analysis_report.md
-├── final_report.md
-└── reset_tutor_project.sql
+01_schema.sql
+02_seed.sql
+03_metadata_validation.sql
+04_requirement_queries.sql
+05_transaction_checks.sql
+06_negative_tests.sql
+07_performance_checks.sql
+08_operations_checks.sql
+09_analysis_dataset.sql
+10_completion_gate.sql
+11_restore_validation.sql
+python/validation_utils.py
+python/01_load_postgresql.py
+python/02_pandas_analysis.py
+python/03_result_validation.py
 ```
 
 | 파일 | 역할 |
 | --- | --- |
-| `01_schema.sql` | 전용 스키마·테이블·제약·업무 인덱스 생성 |
-| `02_seed.sql` | 명시적 ID와 고정 시각 기준 데이터 입력 |
-| `03_metadata_validation.sql` | 테이블·FK·PK·CHECK·인덱스·CASCADE 검증 |
-| `04_requirement_queries.sql` | REQ별 JOIN·집계·경계·정합성 조회 |
-| `05_transaction_checks.sql` | 답변 등록·상태 변경·ROLLBACK 검증 |
-| `06_negative_tests.sql` | 자동 반례와 기준 행 유지 확인 |
-| `07_performance_checks.sql` | 인덱스 존재와 대표 EXPLAIN |
-| `08_operations_checks.sql` | 권한·비밀·백업·복구 계획 점검 |
-| `09_analysis_dataset.sql` | 질문 1건 단위 분석 VIEW와 SQL 기준값 생성 |
-| `10_completion_gate.sql` | DB 구조·기준 데이터·분석 VIEW 최종 판정 |
-| `python/01_load_postgresql.py` | 환경변수로 분석 VIEW 읽기 |
-| `python/02_pandas_analysis.py` | 상태·월·학생별 분석 |
-| `python/03_result_validation.py` | SQL 기준값과 pandas 결과 비교 |
-| `analysis_report.md` | 분석 질문·결과·해석·한계 기록 |
+| `01` | DB 보호·원자적 구조·분석 기준 생성 |
+| `02` | 빈 상태 검사·Seed·IDENTITY·COMMIT 전 검증 |
+| `03` | 정확한 테이블·제약·FK·PK·인덱스 검증 |
+| `04` | P15 요구사항·경계·시간 관계 검증 |
+| `05` | 정상 원자성·실패 무변경·ROLLBACK |
+| `06` | SQLSTATE·constraint name과 23개 테스트 |
+| `07` | 인덱스 후보 정의·대표 EXPLAIN |
+| `08` | PUBLIC·ACL·owner·가상 데이터 점검 |
+| `09` | 고정 기간 분석 VIEW·date spine·SQL 기준 |
+| `10` | 예외 기반 DB 완료 게이트 |
+| `11` | 복원 DB 전용 구조·데이터·owner 검증 |
+| Python | 읽기 전용 동일 스냅샷 SQL·pandas 직접 비교 |
 
-## 안전성 원칙
+## 완료 단계
 
-- 생성 파일에서 자동 `DROP`을 실행하지 않는다.
-- 모든 객체에 `tutor_project` 스키마를 명시한다.
-- 샘플은 명시적 ID와 고정 시각을 사용한다.
-- CASCADE와 Role 변경을 자동 적용하지 않는다.
-- 반례는 기준 데이터를 유지하도록 실행한다.
-- 실제 개인정보·비밀·접속 URL·백업·운영 CSV를 커밋하지 않는다.
-- Python에서 중복·NULL을 임의 제거해 오류를 숨기지 않는다.
-- SQL과 Python 결과가 다르면 기대값을 바꾸기 전에 원인을 확인한다.
+```text
+DB 완료          10 통과
+Python 완료      실제 SQL·pandas 비교 통과
+복구 완료        백업·별도 DB 복원·11 통과
+권한 완료        실제 허용·차단 시험
+문서 완료        요구사항·ERD·보고서·AI diff 승인
+```
 
-## AI 활용 원칙
+## 안전 원칙
 
-- 요구사항·분석 질문·행 단위·기대값을 제공한다.
-- PK·FK와 JOIN 경로를 함께 제공한다.
-- SQL과 Python의 수정·금지 범위를 명시한다.
-- 파괴적인 SQL과 접속 정보 노출을 확인한다.
-- 파일별 diff와 실제 실행 결과를 사람이 검토한다.
-
-## 책의 마무리
-
-재현 가능한 실행 절차, SQL·Python 분석 증거와 남은 한계를 남기는 것을 프로젝트의 최종 완료 기준으로 삼습니다.
+- 생성·Seed·reset은 현재 DB와 상태를 실제 검사한다.
+- 명시적 ID 뒤 IDENTITY를 조정한다.
+- 개수보다 정확한 객체 정의를 검증한다.
+- 모든 시험 변경을 정리하거나 ROLLBACK한다.
+- PUBLIC·직접 GRANT·owner·유효 권한을 구분한다.
+- `access_scope`를 실제 권한으로 오해하지 않는다.
+- 실제 password file·백업·운영 데이터는 저장소 밖에 둔다.
+- Python은 `REPEATABLE READ, READ ONLY`를 사용한다.
+- 미실행 항목은 통과로 표시하지 않는다.
