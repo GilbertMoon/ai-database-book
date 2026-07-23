@@ -1,6 +1,31 @@
 -- Chapter 14. 분석용 데이터셋
--- 목적: 수강신청 1건을 한 행으로 하는 Python 분석용 VIEW를 생성합니다.
+-- 목적: 고정 분석 기간 안에서 수강신청 1건을 한 행으로 하는 Python 분석용 VIEW를 생성합니다.
 -- 주의: 원본 테이블을 변경하거나 데이터를 복제하지 않습니다.
+
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('analysis_lab.enrollments') IS NULL
+       OR to_regclass('analysis_lab.analysis_parameters') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: analysis_lab 기준 객체가 없습니다.';
+    END IF;
+
+    IF to_regclass('analysis_lab.enrollment_analysis_dataset') IS NOT NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: enrollment_analysis_dataset VIEW가 이미 존재합니다.';
+    END IF;
+END
+$$;
 
 CREATE VIEW analysis_lab.enrollment_analysis_dataset AS
 SELECT
@@ -17,7 +42,7 @@ SELECT
     e.enrolled_at,
     DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
     e.status,
-    e.paid_amount,
+    e.paid_amount AS recorded_amount,
     e.completed_at,
     CASE
         WHEN e.completed_at IS NOT NULL
@@ -25,13 +50,16 @@ SELECT
         ELSE NULL
     END AS completion_days,
     (e.status = '완료') AS is_completed
-FROM analysis_lab.enrollments e
-JOIN analysis_lab.students s
+FROM analysis_lab.enrollments AS e
+JOIN analysis_lab.students AS s
     ON s.id = e.student_id
-JOIN analysis_lab.courses c
+JOIN analysis_lab.courses AS c
     ON c.id = e.course_id
-JOIN analysis_lab.instructors i
-    ON i.id = c.instructor_id;
+JOIN analysis_lab.instructors AS i
+    ON i.id = c.instructor_id
+CROSS JOIN analysis_lab.analysis_parameters AS p
+WHERE e.enrolled_at >= p.start_date
+  AND e.enrolled_at < p.end_date_exclusive;
 
 -- 1. 전체 데이터셋
 SELECT *
@@ -50,12 +78,19 @@ FROM analysis_lab.enrollment_analysis_dataset
 GROUP BY enrollment_id
 HAVING COUNT(*) > 1;
 
--- 4. 원본과 데이터셋 행 수 비교: 기대 24 / 24
+-- 4. 같은 기간의 원본과 데이터셋 행 수 비교: 기대 24 / 24
 SELECT
-    (SELECT COUNT(*) FROM analysis_lab.enrollments)
-        AS source_row_count,
-    (SELECT COUNT(*) FROM analysis_lab.enrollment_analysis_dataset)
-        AS dataset_row_count;
+    (
+        SELECT COUNT(*)
+        FROM analysis_lab.enrollments AS e
+        CROSS JOIN analysis_lab.analysis_parameters AS p
+        WHERE e.enrolled_at >= p.start_date
+          AND e.enrolled_at < p.end_date_exclusive
+    ) AS source_row_count,
+    (
+        SELECT COUNT(*)
+        FROM analysis_lab.enrollment_analysis_dataset
+    ) AS dataset_row_count;
 
 -- 5. Python 또는 CSV 내보내기용 조회
 SELECT *
