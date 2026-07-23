@@ -42,7 +42,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter 11 | 데이터베이스를 안전하게 지키고 복구하는 방법 | 최종 출판 내용 검수 완료 |
 | Chapter 12 | 조회 패턴으로 RDBMS와 NoSQL 선택하기 | 최종 출판 내용 검수 완료 |
 | Chapter 13 | AI와 실행 증거로 데이터베이스 설계 검증하기 | 최종 출판 내용 검수 완료 |
-| Chapter 14 | SQL 데이터 분석과 Python 확장 | 방향 전환 반영 |
+| Chapter 14 | SQL 데이터 분석과 Python 확장 | 최종 출판 내용 검수 완료 |
 | Chapter 15 | 데이터베이스 종합 프로젝트 | 방향 전환 반영 |
 
 ---
@@ -88,7 +88,7 @@ publish/full_manuscript.md
 | Chapter 11 PUBLIC·최소 권한·IDENTITY·password file·원자적 복원·2단계 검증 최종 보완 | 완료 |
 | Chapter 12 원본 매핑·TTL 재현성·JSONB 경계·낙관적 잠금·결정 상태·자동 검증 최종 보완 | 완료 |
 | Chapter 13 P13 추적·DB 보호·IDENTITY·활성 신청·NULL·결제 시각·반례·자동 검증 최종 보완 | 완료 |
-| Chapter 14 SQL·Python 분석 방향 전환 | 반영 |
+| Chapter 14 P14 추적·기록 금액·기간·date spine·읽기 전용 연결·manifest·SQL/pandas 교차 검증 최종 보완 | 완료 |
 | Chapter 15 설계·분석·검증 종합 프로젝트 전환 | 반영 |
 | `publish/full_manuscript.md` 최신 원고 통합 | 자동 동기화 |
 | 전체 원고 방향·용어 일관성 검수 | 진행 중 |
@@ -100,10 +100,10 @@ publish/full_manuscript.md
 ## 다음 작업
 
 ```text
-1. Chapter 14·15의 SQL과 Python 실습을 실제 환경에서 통합 검증한다.
-2. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
-3. Chapter 15 이미지 8종을 GitHub·브라우저·Word·PDF에서 렌더링 검수한다.
-4. 전체 원고의 분량, 중복 설명과 장 간 연결 문장을 최종 조정한다.
+1. Chapter 15의 요구사항·설계·운영·분석 종합 프로젝트를 최종 출판 기준으로 검수한다.
+2. Chapter 04~14의 PostgreSQL·Python 실습을 실제 환경에서 통합 실행한다.
+3. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
+4. 전체 원고의 Word·PDF·eBook 렌더링과 분량을 최종 조정한다.
 ```
 
 ---
