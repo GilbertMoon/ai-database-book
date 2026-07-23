@@ -1,16 +1,27 @@
 -- Chapter 10. performance_lab 초기화
 -- 주의: performance_lab 스키마와 성능 실험 데이터만 삭제합니다.
 -- course_project, transaction_lab, public 객체는 변경하지 않습니다.
+-- 처음부터 다시 시작해야 할 때만 사용합니다.
 
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
--- 현재 데이터베이스를 확인한 뒤 아래 DROP 구간만 선택 실행합니다.
-DROP TABLE IF EXISTS performance_lab.enrollments;
-DROP TABLE IF EXISTS performance_lab.courses;
-DROP TABLE IF EXISTS performance_lab.instructors;
-DROP TABLE IF EXISTS performance_lab.students;
-DROP SCHEMA IF EXISTS performance_lab;
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '초기화 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    DROP TABLE IF EXISTS performance_lab.enrollments;
+    DROP TABLE IF EXISTS performance_lab.courses;
+    DROP TABLE IF EXISTS performance_lab.instructors;
+    DROP TABLE IF EXISTS performance_lab.students;
+    DROP SCHEMA IF EXISTS performance_lab;
+END
+$$;
 
 -- 삭제 후 실행 순서:
 -- 1. 01_performance_lab_schema.sql
@@ -19,3 +30,4 @@ DROP SCHEMA IF EXISTS performance_lab;
 -- 4. 04_create_candidate_indexes.sql
 -- 5. 05_after_index_explain.sql
 -- 6. 06_index_review.sql
+-- 7. 07_result_validation.sql
