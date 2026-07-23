@@ -1,175 +1,140 @@
-# Chapter 15 리뷰 체크리스트
+# Chapter 15 최종 출판 리뷰 체크리스트
 
-## 대상 Chapter
+## 대상
 
 ```text
 Chapter 15. 데이터베이스 종합 프로젝트
 ```
 
-## 리뷰 목적
+## 1. 실행 안전성
 
-Chapter 15가 `tutor_project`에서 요구사항·설계·PostgreSQL 실행·SQL 분석·Python 분석·운영·AI 검토를 통합하고, 다른 사람이 같은 순서와 기준값으로 재현할 수 있도록 구성되었는지 점검합니다.
-
----
-
-## 1. 범위와 재현성
-
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 | 상태 | 반영 |
 | --- | --- | --- |
-| 필수·선택 확장 구분 | 코드 반영 | SQL·Python 필수, 웹·NoSQL·배포 선택 |
-| 프로젝트 사용자·문제 | 코드 반영 | 학생·튜터·운영자·분석 담당자 |
-| 전용 스키마 | 통과 | tutor_project 사용 |
-| 앞 장 스키마 보호 | 통과 | analysis_lab 포함 변경 금지 |
-| 자동 DROP 제거 | 통과 | reset 파일 분리 |
-| IDENTITY·명시적 ID | 통과 | 재현 가능한 기준 데이터 |
-| 고정 시각·가상 데이터 | 통과 | 실행 시점·개인정보 의존 제거 |
+| 현재 DB 보호 | 통과 | 생성·Seed·reset은 `ai_database_book` 검사 |
+| 기존 스키마 덮어쓰기 방지 | 통과 | tutor_project 존재 시 생성 중단 |
+| 구조 원자성 | 통과 | 스키마·테이블·인덱스·기준 VIEW 한 트랜잭션 |
+| Seed 재실행 차단 | 통과 | 6개 테이블 빈 상태 확인 |
+| reset 범위 | 통과 | 4개 VIEW와 자식→부모 테이블만 삭제 |
+| search_path 확인 | 통과 | SQL 형식 통일 |
 
----
+## 2. 구조·무결성·IDENTITY
 
-## 2. 요구사항·정책 추적
+| 점검 | 기대 | 상태 |
+| --- | ---: | --- |
+| base tables / views / sequences | 6 / 4 / 5 | 코드 반영 |
+| constraints / FK / indexes | 36 / 5 / 3 | 자동 판정 |
+| CASCADE FK | 0 | 자동 판정 |
+| 복합 PK | question_id·material_id | 자동 판정 |
+| 문자열 공백 CHECK | 이메일·코드·버전·URL 등 | 완료 |
+| 질문 시간 CHECK | updated_at >= created_at | 완료 |
+| IDENTITY 다음 값 | 105·204·306·406·507 이상 | 완료 |
+| 정확한 객체 정의 | 이름·컬럼·대상·순서 | 완료 |
 
-| 점검 항목 | 상태 | 리뷰 의견 |
+## 3. P15 추적성
+
+| 체계 | 범위 | 상태 |
 | --- | --- | --- |
-| REQ-01~11 | 코드 반영 | DB 구조·조회·반례·운영 검증 |
-| REQ-12 | 코드 반영 | 질문 1건 단위 분석 VIEW |
-| REQ-13 | 코드 반영 | SQL·Python 핵심 집계 일치 |
-| 미확정 정책 분리 | 통과 | 복수 답변·상태·삭제·보관·분석 시각 |
-| AI 임의 정책 방지 | 통과 | 제약·트리거·전처리 임의 확정 금지 |
-| requirements·erd 동기화 | 코드 반영 | 분석 구조 포함 |
+| 요구사항 | P15-R01~R13 | 완료 |
+| 결정·미확정 정책 | P15-D01~D08 | 완료 |
+| 분석 질문 | P15-Q01~Q06 | 완료 |
+| 트랜잭션·테스트 | P15-T01~T25 | 완료 |
+| 검증 단계 | P15-V01~V09 | 완료 |
 
----
-
-## 3. DDL·ERD
+## 4. 업무·시간 검증
 
 | 항목 | 기대 | 상태 |
 | --- | ---: | --- |
-| 테이블 | 6 | 코드 반영 |
-| FK | 5 | 코드 반영 |
-| IDENTITY PK | 5 | 코드 반영 |
-| 연결 테이블 복합 PK | 1 | 코드 반영 |
-| 업무 인덱스 | 3 | 코드 반영 |
-| CASCADE FK | 0 | 코드 반영 |
-| 분석 VIEW | 1 | 코드 반영 |
-| 분석 VIEW 한 행 | 질문 1건 | 코드 반영 |
+| 질문 없는 학생 | 1 | 자동 판정 |
+| 연결되지 않은 자료 | 1 | 자동 판정 |
+| 답변 없는 open 질문 | 1 | 자동 판정 |
+| 답변 2개 질문 | 1 | 자동 판정 |
+| 고아 관계 | 0 | 자동 판정 |
+| answered·답변 없음 | 0 | 자동 판정 |
+| 질문 < 가입일 | 0 | 자동 판정 |
+| 답변 < 질문·튜터 시각 | 0 | 자동 판정 |
+| 자료 연결 < 질문 시각 | 0 | 자동 판정 |
+| 미확정 상태·활성 정책 | DB 제약으로 임의 고정하지 않음 | 통과 |
 
----
+## 5. 트랜잭션·반례·경계값
 
-## 4. 기준 데이터·정합성
-
-| 항목 | 기대 | 상태 |
+| 점검 | 기대 | 상태 |
 | --- | ---: | --- |
-| students·tutors·questions | 4·3·5 | 코드 반영 |
-| answers·materials·links | 5·6·7 | 코드 반영 |
-| 질문 없는 학생 | 1 | 코드 반영 |
-| 연결되지 않은 자료 | 1 | 코드 반영 |
-| 답변 없는 open 질문 | 1 | 코드 반영 |
-| 답변 2개 질문 | 1 | 코드 반영 |
-| 고아·상태·표시 순서 이상 | 0 | 실제 실행 필요 |
+| 정상 내부 answers | 6 | 자동 판정 |
+| 조건부 상태 UPDATE | 1행 | 자동 판정 |
+| ROLLBACK 후 | answers 5·question 303 open | 자동 판정 |
+| 실패 경로 부분 변경 | 0 | 자동 판정 |
+| 실패 반례 | 18 | 완료 |
+| 정상 경계값 | 5 | 완료 |
+| 전체 테스트 | 23/23 | 자동 판정 |
+| unexpected | 0 | 자동 판정 |
+| SQLSTATE·constraint name | 정확히 일치 | 완료 |
 
----
+## 6. 인덱스·권한·보안
 
-## 5. 트랜잭션·반례·성능
-
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 점검 | 상태 | 반영 |
 | --- | --- | --- |
-| 답변 INSERT·상태 UPDATE | 코드 반영 | 한 트랜잭션 예제 |
-| ROLLBACK 복구 | 코드 반영 | answers 5·질문 303 open 기대 |
-| 반례 unexpected | 실제 실행 필요 | 기대 0 |
-| 기준 데이터 유지 | 코드 반영 | 하위 트랜잭션 사용 |
-| 업무 인덱스 3개 | 코드 반영 | 실제 조회 패턴 근거 |
-| 대표 EXPLAIN | 코드 반영 | 작은 데이터 Seq Scan 허용 |
+| 업무 인덱스 정확한 정의 | 통과 | 컬럼·정렬까지 검증 |
+| 작은 Seed 한계 | 통과 | 효과 검증과 후보 검토 구분 |
+| PUBLIC 권한 뷰 | 통과 | table·column_privileges 사용 |
+| DB·schema·객체 ACL | 통과 | owner 포함 |
+| 최종 유효 권한 | 통과 | has_*_privilege |
+| access_scope 의미 | 통과 | 데이터 분류, 실제 권한 아님 |
+| 실제 개인정보·비밀 | 통과 | example.test·demo 값 |
+| PGPASSFILE | 통과 | 실제 파일 저장소 밖 |
 
----
+## 7. 분석 구조와 Python
 
-## 6. 분석 데이터셋·Python
-
-| 점검 항목 | 기대 | 상태 |
+| 점검 | 기대 | 상태 |
 | --- | ---: | --- |
-| `09_analysis_dataset.sql` 존재 | 1 | 통과 |
-| VIEW 행 수 | 5 | 실제 실행 필요 |
-| distinct question_id | 5 | 실제 실행 필요 |
-| question_id 중복 | 0 | 실제 실행 필요 |
-| answer_count 합계 | 5 | 실제 실행 필요 |
-| material_count 합계 | 7 | 실제 실행 필요 |
-| 답변 없는 질문 | 1 | 실제 실행 필요 |
-| Python 로더 | 존재 | 통과 |
-| pandas 분석 스크립트 | 존재 | 통과 |
-| 결과 검증 스크립트 | 존재 | 통과 |
-| SQL·pandas 상태별 집계 | 일치 | 실제 실행 필요 |
-| SQL·pandas 월별 집계 | 일치 | 실제 실행 필요 |
-| 임의 dropna·drop_duplicates | 없음 | 코드 검토 필요 |
+| 분석 기간 | 2026-01-01~06-01 미만 | 완료 |
+| 질문 VIEW | 5행 | 자동 판정 |
+| 학생 VIEW | 4행·0건 1명 | 자동 판정 |
+| 튜터 VIEW | 3행·답변 합계 5 | 자동 판정 |
+| 월별 date spine | 1~5월 유지 | 완료 |
+| answer·material 합계 | 5·7 | 자동 판정 |
+| 첫 답변 | 4건·평균 2·음수 0 | 자동 판정 |
+| Python 읽기 전용 | repeatable read·read only | 완료 |
+| 필수 컬럼·자료형 | 엄격 검증 | 완료 |
+| 실제 SQL·pandas 비교 | 상태·월·학생·튜터·첫 답변 | 완료 |
+| 기대 상수만 비교 | 제거 | 완료 |
 
----
+## 8. DB 게이트·복원·전체 완료
 
-## 7. 보안·운영·복구
-
-| 점검 항목 | 상태 | 리뷰 의견 |
+| 단계 | 상태 | 의미 |
 | --- | --- | --- |
-| 실제 개인정보 미사용 | 코드 반영 | example.test·가상 이름 |
-| 비밀 컬럼·값 검사 | 코드 반영 | 08_operations_checks.sql |
-| 읽기 전용 분석 역할 | 문서 반영 | report 계정 계획 |
-| `.env.example` | 통과 | 실제 `.env` 제외 필요 |
-| 백업 명령 | 문서 반영 | custom-format 스키마 백업 |
-| 별도 DB 복원 | 문서 반영 | 03·04·08·09·10 재검증 |
-| RPO·RTO | 문서 반영 | 기록 템플릿 제공 |
-| 실제 CSV·백업 파일 제외 | 확인 필요 | `.gitignore` 수동 검수 |
+| `10_completion_gate.sql` | 예외 기반 | DB 구조·데이터·SQL 완료 |
+| Python `03_result_validation.py` | 직접 비교 | SQL·pandas 완료 |
+| `11_restore_validation.sql` | 복원 DB 전용 | 복구 가능성 완료 |
+| Role 허용·차단 | 실제 실행 필요 | 권한 완료 |
+| 문서·AI diff 승인 | 사람 검토 필요 | 전체 완료 근거 |
 
----
-
-## 8. 파일 구조
+## 9. 문서 동기화
 
 | 파일 | 상태 |
 | --- | --- |
-| `01_schema.sql`~`08_operations_checks.sql` | 반영 |
-| `09_analysis_dataset.sql` | 신규 반영 |
-| `10_completion_gate.sql` | 분석 기준 추가 |
-| `python/01_load_postgresql.py` | 신규 반영 |
-| `python/02_pandas_analysis.py` | 신규 반영 |
-| `python/03_result_validation.py` | 신규 반영 |
-| `analysis_report.md` | 신규 반영 |
-| `OPERATIONS_RUNBOOK.md` | 분석 운영 내용 반영 |
-| `ai_review_report.md` | SQL·Python 검토 반영 |
-| `final_report.md` | 분석·교차 검증 반영 |
-| `09_optional_rag_extension.sql` | 삭제 |
+| 본문 | 완료 |
+| 워크북·권장 해설 | 완료 |
+| 구성안 | 완료 |
+| 검수 기록 | 완료 |
+| requirements·erd | 완료 |
+| template·code README | 완료 |
+| Runbook·분석·AI·최종 보고서 | 완료 |
+| 프로젝트 구조 도식 | 완료 |
+| 루트 README | 완료 |
 
----
-
-## 9. 도식
-
-| 그림 | 검수 기준 | 상태 |
-| --- | --- | --- |
-| 15-1 | SQL·Python 분석 필수 흐름, RAG 제거 | 코드 반영 |
-| 15-2 | Python 필수, 웹·NoSQL·배포 선택 | 코드 반영 |
-| 15-3 | 09 분석 SQL·Python·analysis_report | 코드 반영 |
-| 15-4 | 설계→VIEW→Python→교차 검증 | 코드 반영 |
-| 15-5 | AI 생성 Python·DataFrame 검증 | 코드 반영 |
-| 15-6 | 데이터·SQL·Python 및 분석 증거 | 코드 반영 |
-| 15-7 | SQL 분석·Python 분석·한계 | 코드 반영 |
-| 15-8 | 분석 VIEW·SQL/pandas 일치 기준 | 코드 반영 |
-| 접근성·출판 렌더링 | GitHub·Word·PDF·eBook | 수동 확인 필요 |
-
----
-
-## 10. 남은 확인
+## 10. 남은 실제 검증
 
 ```text
-- 실제 PostgreSQL에서 01→10 실행
-- 메타데이터 boolean과 기준 행 수 확인
-- 트랜잭션 ROLLBACK 복구 확인
-- 반례 unexpected 0 확인
-- 분석 VIEW 5행·중복 0 확인
-- Python DataFrame 5행 확인
-- SQL·pandas 집계 일치 확인
-- 읽기 전용 분석 계정 검토
-- 스키마 백업·별도 DB 복원 시험
-- GitHub·Word·PDF·eBook 렌더링 확인
+- PostgreSQL에서 01→10 순차 실행
+- Python 패키지 설치와 SQL·pandas 5종 직접 비교
+- 관리자 테스트 환경의 Role 허용·차단 시험
+- custom-format 백업·template0 복원 DB·11 실행
+- GitHub·Word·PDF·eBook 렌더링
 ```
-
----
 
 ## 최종 판정
 
 ```text
-Chapter 15는 데이터베이스 설계·SQL 검증·Python 분석을 통합한 종합 프로젝트로 전환했습니다.
-코드와 문서 구조는 반영되었으며, 실제 PostgreSQL·Python 실행과 출판 렌더링은 별도 확인이 필요합니다.
+Chapter 15는 최종 출판 전 내용·코드 검수 완료 상태다.
+실제 DB·Python·복원·렌더링은 제작 단계의 실행 검증으로 남긴다.
 ```
