@@ -1,4 +1,4 @@
-# Chapter 07 2차 재구성 반영 기록
+# Chapter 07 최종 출판 검수 반영 기록
 
 ## 대상 파일
 
@@ -15,221 +15,307 @@ code/chapter07/reset_course_project.sql
 code/chapter07/PROJECT_DECISIONS.md
 code/chapter07/online_course_project.sql
 code/chapter07/README.md
-images/chapter07/README.md
 notes/chapter07_review_checklist.md
 README.md
 ```
 
-## 목적
+## 검수 목적
 
-Chapter 07을 단일 SQL 파일 중심의 예제에서 **요구사항부터 오류 테스트와 설계 결정 기록까지 포함하는 재현 가능한 프로젝트 장**으로 재구성한다.
-
-Chapter 01~06의 내용을 다음 흐름으로 통합한다.
+Chapter 07을 요구사항에서 DDL을 만드는 예제에 머물지 않고, 정책 ID·IDENTITY·상태 전이·경계값·오류 복구와 Chapter 08 인계값까지 재현 가능한 프로젝트로 완성했습니다.
 
 ```text
-범위·가정
-→ 요구사항·미확정 질문
-→ 추적표·관계 문장·ERD
-→ 정규화·무결성
-→ 전용 스키마 DDL
-→ 정상 샘플
-→ 변경 시나리오
+범위
+→ 요구사항·결정·질문 ID
+→ ERD·DDL
+→ 샘플·IDENTITY
+→ 상태 기반 변경
 → 최종 검증
-→ 오류 테스트
-→ AI 제안과 사람의 결정 기록
+→ 경계·오류 테스트
+→ AI 결정 기록
 ```
 
 ---
 
-## 1. 제목 변경
+## 1. 요구사항 추적 체계 보완
 
-### 기존
-
-```text
-실전 프로젝트 1: 온라인 강의 수강신청 데이터베이스 설계
-```
-
-### 변경
+프로젝트 정보를 다음 네 범주로 구분했습니다.
 
 ```text
-실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기
+P07-R: 확정 요구사항
+P07-D: 프로젝트 결정
+P07-Q: 미확정 질문
+P07-O: 범위 제외
 ```
 
-설계뿐 아니라 구현·변경·검증·오류 차단과 재현까지 포함하도록 역할을 확장했다.
+추적표는 `ID | 요구사항·결정 | 상태 | 반영 구조 | 검증` 형식으로 변경했습니다.
 
 ---
 
-## 2. 프로젝트 격리
+## 2. 무료 강의 정책 통일
 
-기존에는 `public.students`, `courses` 등의 테이블을 자동 삭제하고 다시 생성했다.
+기존에는 무료 강의의 `paid_amount`가 0인지 `NULL`인지 문서마다 달랐습니다.
 
-변경 후에는 전용 스키마를 사용한다.
-
-```text
-course_project.students
-course_project.instructors
-course_project.courses
-course_project.enrollments
-```
-
-효과:
+다음 정책으로 통일했습니다.
 
 ```text
-- Chapter 04·05·06 테이블과 이름 충돌 방지
-- 프로젝트 범위 명확화
-- Chapter 08 이후 명확한 데이터 참조
-- 초기화 대상 제한
+P07-D01
+무료 강의의 courses.price와 enrollments.paid_amount는 0으로 저장한다.
+0은 확정된 금액이고 NULL은 미확정·알 수 없는 상태와 구분한다.
 ```
+
+가격 0인 강의와 `paid_amount = 0` 신청을 성공해야 하는 경계 테스트로 추가했습니다.
 
 ---
 
-## 3. 프로젝트 문서 강화
+## 3. 선택 설명 요구사항 정합성
 
-| 항목 | 반영 내용 |
-| --- | --- |
-| 범위 | 포함·제외 기능과 설계 선택 기록 |
-| 미확정 규칙 | 재신청·삭제·무료 강의·상태 이력 질문 분리 |
-| 요구사항 추적표 | 요구사항과 구조·제약조건·테스트 연결 |
-| 관계 문장 | 양방향 관계와 선택성 추가 |
-| 정규화 | 현재 정보와 신청 당시 정보 구분 |
-| 무결성 | PK·FK·NOT NULL·UNIQUE·CHECK·RESTRICT 적용 |
-| 재현성 | 명시적 ID와 기대 행 수 제공 |
-| 오류 검증 | 실패해야 하는 테스트 파일 분리 |
-| 설계 결정 | `PROJECT_DECISIONS.md` 추가 |
-| AI 검토 | 제안·근거·문제·최종 결정 기록 |
+강의 `description`은 선택 속성으로 확정했습니다.
+
+```sql
+description TEXT
+```
+
+요구사항 문장을 “제목·선택 설명·난이도·가격·개설일”로 수정하고 `description = NULL` 경계 테스트를 추가했습니다.
 
 ---
 
-## 4. SQL 구조 변경
+## 4. 이메일 무결성 보완
 
-### 기존
+학생·강사 이메일에 다음 규칙을 적용했습니다.
 
 ```text
-online_course_project.sql
-- 자동 DROP
-- SERIAL 테이블 생성
-- 자동 생성 ID 1, 2, 3 가정
-- 샘플·JOIN·CRUD·오류 테스트 혼합
+NOT NULL
+공백 문자열 CHECK
+각 테이블에서 정확히 같은 문자열 UNIQUE
 ```
 
-### 변경
+대소문자와 별칭 정규화는 범위 밖으로 명시했습니다.
+
+오류 테스트에 학생·강사 이메일 공백과 강사 이메일 중복을 추가했습니다.
+
+---
+
+## 5. 진행 중 중복 신청 차단
+
+전체 이력에 `UNIQUE(student_id, course_id)`를 적용하면 완료·취소 뒤 재신청까지 막을 수 있습니다.
+
+다음 부분 고유 인덱스로 진행 중 신청만 제한했습니다.
+
+```sql
+CREATE UNIQUE INDEX uq_course_enrollments_active
+ON course_project.enrollments (student_id, course_id)
+WHERE status IN ('신청', '수강중');
+```
 
 ```text
-01_course_project_schema.sql
-- 전용 스키마와 IDENTITY 테이블 생성
-
-02_course_project_seed.sql
-- 명시적 ID 기본 샘플 입력
-
-03_course_project_changes.sql
-- 신규 신청과 완료·취소 변경
-
-04_course_project_validation.sql
-- 최종 행 수·관계·고아 데이터·도메인 검증
-
-05_course_project_integrity_tests.sql
-- 실패해야 하는 오류 SQL을 주석 상태로 제공
-
-reset_course_project.sql
-- 필요할 때만 프로젝트 객체 삭제
-
-online_course_project.sql
-- 기존 링크 호환용 안내와 읽기 전용 최종 확인
+신청·수강중 중복 → 실패
+완료·취소 이력 뒤 재신청 → 허용
 ```
 
 ---
 
-## 5. 데이터 상태 기준
+## 6. 취소와 결제 금액 의미 보완
 
-### 기본 샘플
+신청 1004가 취소되어도 `paid_amount = 150000`은 신청 당시 기록으로 남깁니다.
 
-| 테이블 | 행 수 | ID |
-| --- | ---: | --- |
-| students | 3 | 101~103 |
-| instructors | 2 | 201~202 |
-| courses | 3 | 301~303 |
-| enrollments | 4 | 1001~1004 |
+```text
+취소 신청 행 삭제 안 함
+paid_amount를 0으로 변경하지 않음
+환불 금액·상태는 P07-O01 범위 제외
+```
 
-### 변경 후 최종 상태
+Chapter 08의 전체 저장 금액과 취소 제외 금액 차이를 Chapter 07에서 미리 설명했습니다.
+
+---
+
+## 7. IDENTITY 시작값 조정
+
+명시적 ID 입력 뒤 다음 자동값을 조정했습니다.
+
+```text
+students      → 104
+instructors   → 203
+courses       → 304
+enrollments   → seed 후 1005, changes 후 1006
+```
+
+`02_course_project_seed.sql`과 `03_course_project_changes.sql`에 `ALTER COLUMN ... RESTART WITH`를 추가했습니다.
+
+---
+
+## 8. 변경 시나리오 안전성 보완
+
+상태 변경 SQL에 예상 이전 상태를 추가했습니다.
+
+```sql
+UPDATE course_project.enrollments
+SET status = '완료'
+WHERE id = 1001
+  AND status = '수강중'
+RETURNING *;
+```
+
+```sql
+UPDATE course_project.enrollments
+SET status = '취소'
+WHERE id = 1004
+  AND status = '신청'
+RETURNING *;
+```
+
+`RETURNING`이 0행이면 예상 상태와 실제 상태가 다르므로 다음 단계로 넘어가지 않도록 안내했습니다.
+
+자동 커밋에서는 변경 시나리오 일부만 반영될 수 있다는 경고도 추가했습니다.
+
+---
+
+## 9. 상태 CHECK의 범위 명확화
+
+상태 `CHECK`는 허용값만 제한하며 상태 전이 순서를 보장하지 않는다는 설명을 추가했습니다.
+
+```text
+허용값: 신청·수강중·완료·취소
+전이 순서: 변경 SQL의 이전 상태 조건으로 기본 확인
+상태 이력·복잡한 전이: 확장 범위
+```
+
+---
+
+## 10. 위치 확인 기준 통일
+
+모든 SQL 파일에 다음 확인을 반영했습니다.
+
+```sql
+SELECT current_database();
+SELECT current_schema();
+SHOW search_path;
+```
+
+프로젝트 객체에는 모두 `course_project`를 명시하므로 현재 스키마가 `course_project`일 필요는 없음을 설명했습니다.
+
+---
+
+## 11. 초기화 파일 안전성 강화
+
+`reset_course_project.sql`은 하나의 보호 구문 안에서 현재 데이터베이스가 `ai_database_book`인지 확인합니다.
+
+조건이 맞을 때만 알려진 프로젝트 테이블과 스키마를 삭제합니다.
+
+`DROP SCHEMA ... CASCADE`는 사용하지 않습니다. 예상하지 않은 객체가 남아 있으면 스키마 삭제가 실패해 추가 확인을 요구합니다.
+
+---
+
+## 12. 경계·오류 테스트 확대
+
+### 성공해야 하는 경계
+
+```text
+무료 강의 가격 0
+무료 신청 paid_amount 0
+description NULL
+한 글자 학생 이름
+완료 이력 뒤 재신청
+참조되지 않는 학생 삭제
+```
+
+### 실패해야 하는 오류
+
+```text
+학생·강사 이름 공백
+학생·강사 이메일 공백·중복
+강사 전문분야 공백
+강의 제목 공백
+잘못된 난이도·음수 가격
+없는 부모 참조
+잘못된 상태·음수 결제 금액
+두 번째 활성 신청
+참조 중 부모 삭제
+```
+
+수동 커밋 상태에서 오류 후 `current transaction is aborted`가 나타나면 `ROLLBACK;`을 실행하도록 안내했습니다.
+
+---
+
+## 13. 최종 검증과 Chapter 08 인계
+
+`04_course_project_validation.sql`에 다음 검증을 추가했습니다.
+
+```text
+이메일·공백 도메인 위반 0행
+고아 관계 0행
+활성 중복 신청 0행
+전체 저장 금액 590000
+취소 제외 금액 440000
+```
+
+Chapter 08 인계 기준은 다음과 같습니다.
 
 ```text
 students 3
 instructors 2
 courses 3
 enrollments 5
-1001 완료
-1004 취소
-1005 신청
+1001 완료 / 100000
+1004 취소 / 150000
+1005 신청 / 120000
 ```
-
-이 상태를 Chapter 08 인계 기준으로 사용한다.
 
 ---
 
-## 6. 제약조건 기준
+## 14. 자기주도 학습 보완
+
+본문과 워크북에 다음 내용을 추가했습니다.
 
 ```text
-학생·강사 이메일 UNIQUE
-이름·전문분야·제목 공백 CHECK
-강의 level CHECK
-강의 가격·결제 금액 0 이상 CHECK
-수강 상태 CHECK
-학생·강사·강의 FOREIGN KEY
-참조 중인 부모 ON DELETE RESTRICT
+요구사항 ID 작성
+무료 강의 0 정책
+이메일 공백과 정확 문자열 고유성
+IDENTITY 시작값
+부분 고유 인덱스
+상태 전이 조건
+자동 커밋 부분 실행
+경계·오류 테스트
+ROLLBACK
+금액 검산
+권장 해설
 ```
-
-재신청 정책이 미확정이므로 `UNIQUE(student_id, course_id)`는 적용하지 않는다.
 
 ---
 
-## 7. 오류 테스트
+## 15. 도식 처리
 
-다음 오류 SQL을 별도 파일에 추가했다.
+기존 SVG 8종은 프로젝트 흐름, 엔터티, ERD, N:M 해소, 정규화, 검증, AI 검토와 완료 점검의 핵심 의미와 호환됩니다.
+
+부분 고유 인덱스, IDENTITY 시작값과 세부 테스트는 본문·SQL·표가 더 적합하므로 이미지에 과도하게 추가하지 않았습니다.
+
+---
+
+## 최종 상태
+
+| 항목 | 상태 |
+| --- | --- |
+| 요구사항·결정·질문 ID | 완료 |
+| 무료 금액 정책 통일 | 완료 |
+| description 선택성 일치 | 완료 |
+| 이메일 공백·중복 규칙 | 완료 |
+| 활성 신청 부분 고유 인덱스 | 완료 |
+| 취소 금액 의미 | 완료 |
+| IDENTITY 시작값 조정 | 완료 |
+| 이전 상태 조건 UPDATE | 완료 |
+| 자동 커밋 경고 | 완료 |
+| 위치 확인 통일 | 완료 |
+| 초기화 보호 구문 | 완료 |
+| 경계·오류 테스트 | 완료 |
+| `ROLLBACK` 안내 | 완료 |
+| Chapter 08 인계 검산 | 완료 |
+| 권장 해설 | 완료 |
+
+## 결론
 
 ```text
-학생 이름 NULL
-학생 이메일 중복
-공백 강의 제목
-허용되지 않은 난이도
-음수 강의 가격
-존재하지 않는 강사
-존재하지 않는 학생·강의
-허용되지 않은 수강 상태
-음수 결제 금액
-참조 중인 학생·강사·강의 삭제
+Chapter 07은 요구사항과 ERD를 만드는 프로젝트에서 확장되어,
+정책 ID·재현 가능한 IDENTITY·상태 기반 변경·경계와 오류 증거를
+Chapter 08의 분석 기준까지 연결하는 완성형 입문 프로젝트가 되었다.
 ```
 
-모든 오류 SQL은 주석 처리하며 한 번에 하나씩 실행한다.
-
----
-
-## 8. 도식 처리
-
-그림 7-1 프로젝트 흐름 도식은 현재 단계별 SQL 파일 구조와 검증 분기에 맞게 보완했다.
-나머지 Mermaid·SVG 7종은 엔터티 도출, ERD, N:M 관계, 검증, 정규화, AI 검토와 완료 점검의 핵심 메시지가 새 본문과 호환되어 유지한다.
-
-본문에서 그림 번호와 캡션을 새 절 순서에 맞춰 조정했다.
-
-전용 스키마와 요구사항 추적표는 표·코드가 더 적합하여 별도 SVG를 추가하지 않았다. 단계별 파일은 그림 7-1에서 `01 DDL`, `02 Seed`, `03 Changes`, `04 Validation`, `05 Integrity` 역할로 요약했다.
-
----
-
-## 9. 남은 확인 항목
-
-```text
-- 실제 PostgreSQL에서 01→02→03→04 순서 실행
-- 05 오류 테스트를 하나씩 실행
-- Chapter 08을 course_project 최종 5건 기준으로 수정
-- GitHub에서 기존 SVG 8종 표시 확인
-- Word/PDF/eBook에서 긴 테이블과 SQL 줄바꿈 확인
-```
-
----
-
-## 10. 최종 상태
-
-```text
-Chapter 07 본문, 워크북, 구성안, 코드, 결정 기록과 검수 문서를 2차 재구성했다.
-프로젝트는 앞 장 테이블을 삭제하지 않고 전용 스키마에서 재현 가능하다.
-원격 main에 모든 변경을 직접 반영했다.
-```
+실제 PostgreSQL 전체 순차 실행과 출판 렌더링은 별도 제작 단계에서 확인합니다.
