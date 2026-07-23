@@ -1,20 +1,59 @@
 -- Chapter 09. transaction_lab 초기 좌석 데이터
 -- 실행 전 01_transaction_lab_schema.sql을 먼저 실행합니다.
 -- 이 파일은 Chapter 07의 course_project 데이터를 변경하지 않습니다.
+-- 좌석 입력과 검증을 하나의 트랜잭션으로 처리합니다.
 
 SELECT current_database();
 SELECT current_schema();
+SHOW search_path;
 
--- 필요한 학생·강의 마스터 존재 확인
-SELECT id, name
-FROM course_project.students
-WHERE id IN (101, 102, 103)
-ORDER BY id;
+BEGIN;
 
-SELECT id, title, price
-FROM course_project.courses
-WHERE id IN (301, 302, 303)
-ORDER BY id;
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 데이터베이스는 %입니다.',
+            current_database();
+    END IF;
+
+    IF to_regclass('transaction_lab.course_inventory') IS NULL
+       OR to_regclass('transaction_lab.enrollments') IS NULL
+       OR to_regclass('transaction_lab.payments') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: 01_transaction_lab_schema.sql을 먼저 실행하세요.';
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM transaction_lab.course_inventory)
+       OR EXISTS (SELECT 1 FROM transaction_lab.enrollments)
+       OR EXISTS (SELECT 1 FROM transaction_lab.payments) THEN
+        RAISE EXCEPTION
+            '실행 중단: transaction_lab이 비어 있지 않습니다. 현재 상태를 확인하거나 초기화하세요.';
+    END IF;
+
+    IF (
+        SELECT COUNT(*)
+        FROM course_project.students
+        WHERE id IN (101, 102, 103)
+    ) <> 3 THEN
+        RAISE EXCEPTION
+            '실행 중단: 실습 학생 101~103을 확인하세요.';
+    END IF;
+
+    IF (
+        SELECT COUNT(*)
+        FROM course_project.courses
+        WHERE (id, price) IN (
+            (301, 100000),
+            (302, 120000),
+            (303, 150000)
+        )
+    ) <> 3 THEN
+        RAISE EXCEPTION
+            '실행 중단: 강의 301~303의 존재 여부와 가격을 확인하세요.';
+    END IF;
+END
+$$;
 
 INSERT INTO transaction_lab.course_inventory (
     course_id,
@@ -25,6 +64,19 @@ VALUES
     (301, 2, 2),
     (302, 1, 1),
     (303, 1, 1);
+
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM transaction_lab.course_inventory) <> 3
+       OR (SELECT COUNT(*) FROM transaction_lab.enrollments) <> 0
+       OR (SELECT COUNT(*) FROM transaction_lab.payments) <> 0 THEN
+        RAISE EXCEPTION
+            '초기 상태 검증 실패: inventory 3, enrollments 0, payments 0이어야 합니다.';
+    END IF;
+END
+$$;
+
+COMMIT;
 
 -- 초기 상태 확인
 SELECT
