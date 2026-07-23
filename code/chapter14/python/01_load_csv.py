@@ -1,21 +1,21 @@
-"""Chapter 14: DBeaver에서 내보낸 CSV를 pandas로 읽고 구조를 확인합니다."""
+"""Chapter 14: DBeaver 또는 DB export CSV를 엄격하게 읽고 검증합니다."""
 
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
-import pandas as pd
-
-EXPECTED_ROWS = 24
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_CSV_PATH = SCRIPT_DIR.parent / "data" / "enrollment_analysis_dataset.csv"
-DATE_COLUMNS = ["enrolled_at", "enrollment_month", "completed_at"]
+from validation_utils import (
+    DEFAULT_CSV_PATH,
+    DEFAULT_MANIFEST_PATH,
+    load_and_validate_manifest,
+    load_csv_dataset,
+)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Chapter 14 분석 CSV의 행 수, 중복과 자료형을 확인합니다."
+        description="Chapter 14 분석 CSV의 컬럼, 행 단위, 자료형과 manifest를 확인합니다."
     )
     parser.add_argument(
         "--csv",
@@ -23,58 +23,23 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CSV_PATH,
         help=f"CSV 경로. 기본값: {DEFAULT_CSV_PATH}",
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=DEFAULT_MANIFEST_PATH,
+        help=f"manifest 경로. 기본값: {DEFAULT_MANIFEST_PATH}",
+    )
+    parser.add_argument(
+        "--require-manifest",
+        action="store_true",
+        help="manifest가 없으면 경고가 아니라 오류로 중단합니다.",
+    )
     return parser.parse_args()
-
-
-def load_csv(csv_path: Path) -> pd.DataFrame:
-    if not csv_path.exists():
-        raise FileNotFoundError(
-            "CSV 파일을 찾을 수 없습니다. "
-            f"DBeaver에서 분석 VIEW를 UTF-8 CSV로 저장했는지 확인하세요: "
-            f"{csv_path.resolve()}"
-        )
-
-    df = pd.read_csv(csv_path, parse_dates=DATE_COLUMNS)
-
-    required_columns = {
-        "enrollment_id",
-        "student_id",
-        "student_name",
-        "region",
-        "course_id",
-        "course_title",
-        "category",
-        "level",
-        "enrolled_at",
-        "enrollment_month",
-        "status",
-        "paid_amount",
-        "completed_at",
-        "completion_days",
-        "is_completed",
-    }
-    missing_columns = sorted(required_columns - set(df.columns))
-    if missing_columns:
-        raise ValueError(f"필수 컬럼이 없습니다: {missing_columns}")
-
-    if len(df) != EXPECTED_ROWS:
-        raise ValueError(
-            f"기대 행 수는 {EXPECTED_ROWS}이지만 실제는 {len(df)}입니다."
-        )
-
-    duplicated_ids = df.loc[
-        df["enrollment_id"].duplicated(keep=False),
-        "enrollment_id",
-    ].tolist()
-    if duplicated_ids:
-        raise ValueError(f"중복 enrollment_id가 있습니다: {duplicated_ids}")
-
-    return df
 
 
 def main() -> None:
     args = parse_args()
-    df = load_csv(args.csv)
+    df = load_csv_dataset(args.csv)
 
     print("\n[앞 5행]")
     print(df.head().to_string(index=False))
@@ -82,11 +47,30 @@ def main() -> None:
     print("\n[자료형]")
     print(df.dtypes)
 
-    print("\n[검증 결과]")
+    print("\n[기본 검증]")
     print(f"행 수: {len(df)}")
     print(f"고유 enrollment_id: {df['enrollment_id'].nunique()}")
-    print(f"결제금액 합계: {int(df['paid_amount'].sum()):,}")
-    print("CSV 기본 검증을 통과했습니다.")
+    print(f"신청 당시 기록 금액 합계: {int(df['recorded_amount'].sum()):,}")
+
+    if args.manifest.exists():
+        manifest = load_and_validate_manifest(args.manifest, args.csv)
+        print("\n[manifest]")
+        print(f"source_database: {manifest['source_database']}")
+        print(f"source_view: {manifest['source_view']}")
+        print(f"generated_at_utc: {manifest.get('generated_at_utc')}")
+        print(f"sha256: {manifest['sha256']}")
+        print("CSV와 manifest 검증을 통과했습니다.")
+    elif args.require_manifest:
+        raise FileNotFoundError(
+            f"최종 검증에 필요한 manifest가 없습니다: {args.manifest.resolve()}"
+        )
+    else:
+        print(
+            "\n[경고] manifest가 없어 출처·생성 시점·SHA-256은 확인하지 않았습니다. "
+            "최종 검증에서는 --require-manifest를 사용하세요."
+        )
+
+    print("CSV 데이터셋 구조 검증을 통과했습니다.")
 
 
 if __name__ == "__main__":
