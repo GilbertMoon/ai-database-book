@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 import argparse
-import os
+import warnings
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.font_manager as font_manager
 import matplotlib.pyplot as plt
 import pandas as pd
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+
+from validation_utils import (
+    DEFAULT_CSV_PATH,
+    create_read_only_engine,
+    load_csv_dataset,
+    load_postgresql_dataset,
+    validate_connection,
+)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_CSV_PATH = SCRIPT_DIR.parent / "data" / "enrollment_analysis_dataset.csv"
 DEFAULT_CHART_PATH = SCRIPT_DIR.parent / "output" / "monthly_enrollment_count.png"
-EXPECTED_ROWS = 24
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,49 +52,15 @@ def parse_args() -> argparse.Namespace:
 
 def load_dataframe(source: str, csv_path: Path) -> pd.DataFrame:
     if source == "csv":
-        if not csv_path.exists():
-            raise FileNotFoundError(
-                f"CSV 파일을 찾을 수 없습니다: {csv_path.resolve()}"
-            )
-        df = pd.read_csv(
-            csv_path,
-            parse_dates=["enrolled_at", "enrollment_month", "completed_at"],
-        )
-    else:
-        load_dotenv(SCRIPT_DIR / ".env")
-        database_url = os.getenv("DATABASE_URL")
-        if not database_url:
-            raise RuntimeError(
-                "DATABASE_URL이 없습니다. python/.env를 설정하세요."
-            )
+        return load_csv_dataset(csv_path)
 
-        engine = create_engine(database_url, pool_pre_ping=True)
-        query = text(
-            """
-            SELECT *
-            FROM analysis_lab.enrollment_analysis_dataset
-            ORDER BY enrollment_id
-            """
-        )
-        try:
-            with engine.connect() as connection:
-                df = pd.read_sql_query(query, connection)
-        finally:
-            engine.dispose()
-
-    if len(df) != EXPECTED_ROWS:
-        raise ValueError(
-            f"기대 행 수는 {EXPECTED_ROWS}이지만 실제는 {len(df)}입니다."
-        )
-    if df["enrollment_id"].duplicated().any():
-        raise ValueError("중복 enrollment_id가 있어 분석을 중단합니다.")
-
-    df["enrollment_month"] = pd.to_datetime(df["enrollment_month"])
-    df["paid_amount"] = pd.to_numeric(df["paid_amount"], errors="raise")
-    df["completion_days"] = pd.to_numeric(
-        df["completion_days"], errors="coerce"
-    )
-    return df
+    engine = create_read_only_engine()
+    try:
+        with engine.connect() as connection:
+            validate_connection(connection)
+            return load_postgresql_dataset(connection)
+    finally:
+        engine.dispose()
 
 
 def build_status_summary(df: pd.DataFrame) -> pd.DataFrame:
@@ -99,13 +73,33 @@ def build_status_summary(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_monthly_summary(df: pd.DataFrame) -> pd.DataFrame:
-    return (
+    months = pd.DataFrame(
+        {
+            "enrollment_month": pd.date_range(
+                "2026-01-01",
+                "2026-06-01",
+                freq="MS",
+            )
+        }
+    )
+    actual = (
         df.groupby("enrollment_month", as_index=False)
         .agg(
             enrollment_count=("enrollment_id", "count"),
-            paid_amount_sum=("paid_amount", "sum"),
+            recorded_amount_sum=("recorded_amount", "sum"),
+        )
+    )
+    return (
+        months.merge(actual, on="enrollment_month", how="left")
+        .fillna({"enrollment_count": 0, "recorded_amount_sum": 0})
+        .astype(
+            {
+                "enrollment_count": "int64",
+                "recorded_amount_sum": "int64",
+            }
         )
         .sort_values("enrollment_month")
+        .reset_index(drop=True)
     )
 
 
@@ -114,7 +108,7 @@ def build_course_summary(df: pd.DataFrame) -> pd.DataFrame:
         df.groupby(["course_id", "course_title"], as_index=False)
         .agg(
             enrollment_count=("enrollment_id", "count"),
-            paid_amount_sum=("paid_amount", "sum"),
+            recorded_amount_sum=("recorded_amount", "sum"),
         )
         .sort_values(["enrollment_count", "course_id"], ascending=[False, True])
     )
@@ -132,8 +126,32 @@ def build_course_status_pivot(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def configure_korean_font() -> None:
+    preferred_fonts = [
+        "Malgun Gothic",
+        "AppleGothic",
+        "Noto Sans CJK KR",
+        "Noto Sans KR",
+        "NanumGothic",
+    ]
+    installed = {font.name for font in font_manager.fontManager.ttflist}
+    selected = next((font for font in preferred_fonts if font in installed), None)
+
+    if selected:
+        plt.rcParams["font.family"] = selected
+        plt.rcParams["axes.unicode_minus"] = False
+    else:
+        warnings.warn(
+            "사용 가능한 한글 글꼴을 찾지 못했습니다. 그래프의 한글이 깨질 수 있습니다.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+
 def save_monthly_chart(monthly_summary: pd.DataFrame, chart_path: Path) -> None:
+    chart_path = chart_path.resolve()
     chart_path.parent.mkdir(parents=True, exist_ok=True)
+    configure_korean_font()
 
     chart_data = monthly_summary.copy()
     chart_data["month_label"] = chart_data["enrollment_month"].dt.strftime(
@@ -150,6 +168,7 @@ def save_monthly_chart(monthly_summary: pd.DataFrame, chart_path: Path) -> None:
     ax.set_title("월별 수강신청 건수")
     ax.set_xlabel("월")
     ax.set_ylabel("신청 건수")
+    ax.set_ylim(bottom=0)
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig(chart_path, dpi=150)
@@ -168,17 +187,17 @@ def main() -> None:
     print("\n[상태별 신청 건수]")
     print(status_summary.to_string(index=False))
 
-    print("\n[월별 신청 건수와 결제금액]")
+    print("\n[월별 신청 건수와 신청 당시 기록 금액]")
     print(monthly_summary.to_string(index=False))
 
-    print("\n[강의별 신청 건수와 결제금액]")
+    print("\n[강의별 신청 건수와 신청 당시 기록 금액]")
     print(course_summary.to_string(index=False))
 
     print("\n[강의별 상태 피벗]")
     print(course_status_pivot.to_string())
 
     completed = df.loc[df["status"] == "완료", "completion_days"]
-    print("\n[완료 기간]")
+    print("\n[완료된 신청의 완료 기간]")
     print(completed.describe())
 
     save_monthly_chart(monthly_summary, args.chart)
