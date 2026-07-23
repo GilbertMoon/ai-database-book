@@ -1,16 +1,16 @@
 flowchart LR
-    A[1. 필수 근거 확인<br/>requirements · ERD · DDL<br/>01~09 SQL · 운영 계획]
-    B[2. 실제 DB 결과 검증<br/>행 수 4·3·5·5·6·7<br/>FK 5 · 인덱스 3 · CASCADE 0<br/>정합성 이상 0 · unexpected 0]
-    C[3. 분석 결과 검증<br/>VIEW 5행 · 중복 0<br/>answer 합계 5 · material 합계 7<br/>SQL·pandas 핵심 집계 일치]
-    D[4. 미실행·미확정 기록<br/>Role 시험 · 실제 백업·복원<br/>웹 · NoSQL · 배포 · 남은 위험]
-    E{필수 완료 기준을<br/>모두 통과했는가?}
-    F[필수 완료 게이트 통과<br/>required_completion_gate_passed = true]
-    G[analysis_report.md · final_report.md]
-    H[선택 확장 필요성 판단<br/>웹 CRUD/API · NoSQL · 배포]
-    I[누락 항목 보완<br/>SQL·Python 재실행 · 재검증]
-    N[게이트 통과는 운영 검증 전체 완료가 아님]
+    A[1. DB 구조·데이터 검증<br/>01~09 SQL<br/>tables 6 · views 4 · rows 4·3·5·5·6·7]
+    B[2. DB 완료 게이트<br/>10_completion_gate.sql<br/>트랜잭션 · 반례 · 시간 · 분석 기준]
+    C[3. Python 교차 검증<br/>같은 read-only 스냅샷<br/>SQL·pandas 요약 5종 일치]
+    D[4. 복구·권한 검증<br/>백업 · 별도 DB 복원 · 11<br/>Role 허용·차단 시험]
+    E[5. 문서·AI diff 승인<br/>requirements · ERD · 보고서<br/>미실행·미확정 정책]
+    F{모든 필수 증거가<br/>확인되었는가?}
+    G[프로젝트 완료<br/>final_report.md]
+    H[조건부 완료·보류<br/>누락 증거와 후속 조치 기록]
+    I[선택 확장 검토<br/>웹 CRUD/API · NoSQL · 배포]
+    N[DB 게이트 통과만으로<br/>Python·복원·권한 완료를 뜻하지 않음]
 
-    A --> B --> C --> D --> E
-    E -->|예| F --> G --> H
-    E -->|아니요| I --> A
-    F -.-> N
+    A --> B --> C --> D --> E --> F
+    F -->|예| G --> I
+    F -->|아니요| H --> A
+    B -.-> N
