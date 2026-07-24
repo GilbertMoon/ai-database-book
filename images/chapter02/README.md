@@ -1,87 +1,158 @@
-# Chapter 02 이미지/도식 설계
+# Chapter 02 이미지·도식 관리
 
 ## Chapter 02. 데이터와 DBMS의 기본 개념
 
-이 문서는 Chapter 02 본문과 활동 자료에 사용할 도식과 현재 삽입 상태를 정리합니다.
+이 문서는 Chapter 02 본문과 워크북에서 사용하는 도식의 목적, 본문 번호, 제작 방식과 현재 사용 상태를 관리합니다.
 
-Chapter 02는 PostgreSQL 실습 전에 필요한 기본 용어를 다루므로, 도식은 **테이블 구조, 기본키와 외래키, 관계 유형, AI 생성 구조 검토**를 초급자가 한눈에 이해할 수 있도록 구성합니다.
+Chapter 02는 PostgreSQL 실습 전에 필요한 기본 용어를 다루므로 도식은 다음 내용을 초급자가 한눈에 이해하도록 구성합니다.
+
+```text
+테이블·행·열·셀
+업무 관계의 카디널리티
+기본키와 외래키
+AI 생성 구조 검토
+```
 
 ---
 
 ## 1. 도식 설계 원칙
 
 ```text
-- 초급자가 테이블, 행, 열을 직관적으로 구분할 수 있어야 한다.
-- 기본키와 외래키의 차이 및 정확한 참조 대상을 시각적으로 보여 준다.
-- 학생-강의-수강신청 예제를 중심으로 관계를 설명한다.
-- 본문에서 다루지 않는 상세 설계 문법은 도식에 과도하게 추가하지 않는다.
-- 본문 그림 번호와 실제 삽입 상태를 일치시킨다.
+초급자가 테이블, 행, 열을 직관적으로 구분할 수 있어야 한다.
+기본키와 외래키의 차이 및 정확한 참조 대상을 보여 준다.
+릴레이션과 업무 관계를 혼동하지 않도록 캡션을 작성한다.
+학생·강의·수강신청 축약 예제를 사용하되 실제 생성 장을 대신하지 않는다.
+본문에서 다루지 않는 상세 설계 문법을 과도하게 추가하지 않는다.
+본문 그림 번호와 실제 삽입 순서를 일치시킨다.
+SVG와 Mermaid의 제작 관계를 실제 상태대로 기록한다.
 ```
 
 ---
 
-## 2. 본문에 사용 중인 도식
+## 2. 본문에 사용하는 도식
 
 | 본문 번호 | 파일명 | 도식 제목 | 본문 위치 | 상태 |
 | --- | --- | --- | --- | --- |
-| 그림 2-1 | `ch02_02_table_row_column.svg` | 테이블, 행, 열과 셀의 구조 | 5장 테이블, 행, 열과 셀 | 사용 중 |
-| 그림 2-2 | `ch02_03_primary_key_concept.svg` | 기본키가 행을 구분하는 방식 | 7.1 기본키 | 사용 중 |
-| 그림 2-3 | `ch02_04_foreign_key_relationship.svg` | 외래키로 연결되는 학생·강의·수강신청 관계 | 7.2 외래키 | 사용 중 |
-| 그림 2-4 | `ch02_05_relationship_types.svg` | 1:1, 1:N, N:M 관계 유형 | 8장 데이터 관계 미리보기 | 사용 중 |
-| 그림 2-5 | `ch02_08_ai_table_review.svg` | AI 생성 테이블 구조 검토 흐름 | 13장 AI가 만든 구조 검토 | 사용 중 |
+| 그림 2-1 | `ch02_02_table_row_column.svg` | 테이블, 행, 열과 셀의 구조 | 5절 테이블, 행, 열과 셀 | 사용 |
+| 그림 2-2 | `ch02_05_relationship_types.svg` | 업무 관계의 1:1, 1:N, N:M 카디널리티 | 6절 관계 모델과 업무 관계 | 사용 |
+| 그림 2-3 | `ch02_03_primary_key_concept.svg` | 기본키가 행을 구분하는 방식 | 7.1 기본키 | 사용 |
+| 그림 2-4 | `ch02_04_foreign_key_relationship.svg` | 외래키로 연결되는 학생·강의·수강신청 | 7.2 외래키 | 사용 |
+| 그림 2-5 | `ch02_08_ai_table_review.svg` | AI 생성 테이블 구조 검토 흐름 | 13절 AI 구조 검토 | 사용 |
+
+본문 번호는 파일명의 숫자가 아니라 실제 등장 순서를 기준으로 합니다.
 
 ---
 
-## 3. 현재 본문에서 제외된 도식
+## 3. 현재 본문에서 제외한 도식
 
-다음 파일은 보존하지만 현재 `book/chapter02/chapter02.md` 본문에서는 사용하지 않습니다.
+다음 파일은 현재 `book/chapter02/chapter02.md`에서 사용하지 않습니다. 향후 워크북 또는 개정판에서 다시 사용할 가능성을 고려해 보관합니다.
 
 | 파일명 | 기존 목적 | 현재 처리 |
 | --- | --- | --- |
-| `ch02_01_dbms_hierarchy.svg` | DBMS, 데이터베이스, 테이블 계층 | 스키마 단계가 포함되지 않아 본문에서 제외하고 텍스트 계층 구조로 대체 |
-| `ch02_06_crud_flow.svg` | CRUD와 SQL 명령어 흐름 | CRUD를 용어 소개 수준으로 축소하면서 본문에서 제외 |
-| `ch02_07_constraints_guardrail.svg` | 제약조건 안전장치 | 제약조건을 개요 수준으로 축소하면서 본문에서 제외 |
+| `ch02_01_dbms_hierarchy.svg` | DBMS·데이터베이스·테이블 계층 | 스키마 단계가 없어 텍스트 계층으로 대체, 미사용 보관 |
+| `ch02_06_crud_flow.svg` | CRUD와 SQL 흐름 | CRUD를 용어 소개로 축소해 미사용 보관 |
+| `ch02_07_constraints_guardrail.svg` | 제약조건 안전장치 | 제약조건을 개요 수준으로 축소해 미사용 보관 |
 
-사용하지 않는 SVG와 Mermaid 원본은 삭제하지 않습니다. 향후 활동 자료나 개정판에서 다시 사용할 수 있습니다.
-
----
-
-## 4. Mermaid 원본과 SVG 결과물
-
-| Mermaid 원본 | SVG 결과물 | 현재 본문 사용 |
-| --- | --- | --- |
-| `ch02_01_dbms_hierarchy.mmd` | `ch02_01_dbms_hierarchy.svg` | 미사용 |
-| `ch02_02_table_row_column.mmd` | `ch02_02_table_row_column.svg` | 사용 |
-| `ch02_03_primary_key_concept.mmd` | `ch02_03_primary_key_concept.svg` | 사용 |
-| `ch02_04_foreign_key_relationship.mmd` | `ch02_04_foreign_key_relationship.svg` | 사용 |
-| `ch02_05_relationship_types.mmd` | `ch02_05_relationship_types.svg` | 사용 |
-| `ch02_06_crud_flow.mmd` | `ch02_06_crud_flow.svg` | 미사용 |
-| `ch02_07_constraints_guardrail.mmd` | `ch02_07_constraints_guardrail.svg` | 미사용 |
-| `ch02_08_ai_table_review.mmd` | `ch02_08_ai_table_review.svg` | 사용 |
+미사용 SVG와 Mermaid의 삭제 여부는 전체 이미지 자산 정리 단계에서 결정합니다.
 
 ---
 
-## 5. 도식 제작 및 검수 항목
+## 4. Mermaid와 SVG 제작 관계
+
+모든 Mermaid가 SVG를 자동 생성하는 완전한 원본인 것은 아닙니다.
+
+| Mermaid | SVG | 제작 관계 | 본문 사용 |
+| --- | --- | --- | --- |
+| `ch02_01_dbms_hierarchy.mmd` | `ch02_01_dbms_hierarchy.svg` | 같은 개념의 편집 자료 | 미사용 |
+| `ch02_02_table_row_column.mmd` | `ch02_02_table_row_column.svg` | Mermaid 논리를 바탕으로 SVG를 수동 보정 | 사용 |
+| `ch02_03_primary_key_concept.mmd` | `ch02_03_primary_key_concept.svg` | 같은 논리의 원본·결과물 | 사용 |
+| `ch02_04_foreign_key_relationship.mmd` | `ch02_04_foreign_key_relationship.svg` | 같은 논리의 원본·결과물 | 사용 |
+| `ch02_05_relationship_types.mmd` | `ch02_05_relationship_types.svg` | 같은 논리의 원본·결과물 | 사용 |
+| `ch02_06_crud_flow.mmd` | `ch02_06_crud_flow.svg` | 같은 개념의 편집 자료 | 미사용 |
+| `ch02_07_constraints_guardrail.mmd` | `ch02_07_constraints_guardrail.svg` | 같은 개념의 편집 자료 | 미사용 |
+| `ch02_08_ai_table_review.mmd` | `ch02_08_ai_table_review.svg` | 같은 논리의 원본·결과물 | 사용 |
+
+`ch02_02_table_row_column.svg`는 실제 표 안에서 행·열·셀을 색과 연결선으로 강조하기 위해 수동으로 보정했습니다. Mermaid는 자동 재생성용 완전한 기하 원본이 아니라 동일 논리를 유지하기 위한 편집 자료입니다.
+
+---
+
+## 5. 그림별 내용 기준
+
+### 그림 2-1 테이블, 행, 열과 셀
 
 ```text
-- Chapter 02 본문 설명과 도식 내용이 일치하는가?
-- 테이블, 행, 열이 초급자에게 직관적으로 보이는가?
-- PK와 FK가 시각적으로 구분되는가?
-- FK 연결선이 실제로 참조하는 PK 필드에 정확히 도착하는가?
-- 같은 관계를 여러 선으로 중복 표현하지 않았는가?
-- 640px 너비에서도 핵심 필드와 라벨을 읽을 수 있는가?
-- SVG title, desc와 aria-labelledby가 포함되었는가?
-- 본문 그림 번호와 README의 번호가 일치하는가?
+테이블 → 같은 구조를 가진 기록의 집합
+행 → 한 학생에 대한 하나의 기록
+열 → 모든 행이 따르는 데이터 항목
+셀 → 특정 행과 열이 만나는 하나의 값
+```
+
+본문에서는 다음 경계도 함께 설명합니다.
+
+```text
+ORDER BY가 없으면 행 순서는 보장되지 않는다.
+SQL은 화면 셀 위치가 아니라 행 조건과 열 이름으로 값을 다룬다.
+```
+
+### 그림 2-2 업무 관계 카디널리티
+
+`1:1`, `1:N`, `N:M`은 업무 관계의 최대 연결 개수를 나타냅니다. 관계 모델의 릴레이션과 같은 뜻으로 사용하지 않습니다.
+
+### 그림 2-3 기본키
+
+기본키가 자신의 테이블에서 행을 고유하게 구분하고 NULL을 허용하지 않는다는 점을 보여 줍니다.
+
+### 그림 2-4 외래키
+
+연결선은 다음 참조를 정확히 표현해야 합니다.
+
+```text
+enrollments.student_id → students.id
+enrollments.course_id  → courses.id
+```
+
+외래키 값의 반복과 NULL 허용 여부는 도식만으로 단정하지 않고 본문 설명과 함께 이해합니다.
+
+### 그림 2-5 AI 구조 검토
+
+다음 순서를 표현합니다.
+
+```text
+한 행의 의미
+→ 이름
+→ 기본키
+→ 참조 대상
+→ 데이터 혼합
+→ 데이터 타입
+→ 필수값과 선택값
+→ 후속 장 검토
 ```
 
 ---
 
-## 6. 현재 상태
+## 6. 출판 렌더링 점검
 
 ```text
-- Chapter 02 본문 사용 도식: 5종
-- 현재 본문 미사용 도식: 3종
-- ch02_04 외래키 관계 SVG와 Mermaid 원본 동기화 완료
-- 본문 그림 번호 기준으로 README 갱신 완료
-- 미사용 도식 파일은 삭제하지 않고 보존
+본문 설명과 SVG의 제목·용어·흐름이 일치하는가?
+그림 2-1~2-5의 번호와 실제 등장 순서가 일치하는가?
+테이블·행·열·셀이 축소 화면에서도 구분되는가?
+PK와 FK가 시각적으로 구분되는가?
+FK 연결선이 실제 참조 PK 필드에 도착하는가?
+관계형 DB의 릴레이션과 업무 관계가 혼동되지 않는가?
+640px 너비에서도 핵심 필드와 라벨을 읽을 수 있는가?
+SVG의 title·desc·aria-labelledby가 포함되어 있는가?
+GitHub·Word·PDF·eBook에서 정상 표시되는가?
+```
+
+---
+
+## 7. 현재 상태
+
+```text
+본문 사용 도식: 5종
+미사용 보관 도식: 3종
+본문 번호와 README 동기화: 완료
+ch02_02 Mermaid 논리 보완: 완료
+수동 보정 SVG 제작 관계 명시: 완료
+실제 Word·PDF·eBook 렌더링: 전체 출판 렌더링 단계에서 확인 예정
 ```
