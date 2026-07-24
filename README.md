@@ -30,7 +30,7 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 | Chapter | 제목 | 상태 |
 | --- | --- | --- |
 | Chapter 01 | AI 시대에 데이터베이스를 왜 배워야 하는가 | 최종 출판 내용 검수 완료 |
-| Chapter 02 | 데이터와 DBMS의 기본 개념 | 2차 재구성 완료 |
+| Chapter 02 | 데이터와 DBMS의 기본 개념 | 최종 출판 내용 검수 완료 |
 | Chapter 03 | PostgreSQL과 DBeaver로 실습 환경 만들기 | 2차 재구성 완료 |
 | Chapter 04 | 관계형 데이터베이스와 SQL 시작하기 | 최종 출판 내용 검수 완료 |
 | Chapter 05 | 요구사항에서 데이터 모델과 ERD 만들기 | 최종 출판 내용 검수 완료 |
@@ -79,6 +79,7 @@ publish/full_manuscript.md
 | 강의안 표현을 eBook 문체로 1차 수정 | 완료 |
 | 활동 자료를 독자용 실습·워크북 형태로 1차 수정 | 완료 |
 | Chapter 01 범위 분리·JOIN 반례·관리 방식·기준 데이터·AI 재현성·Chapter 07 용어 최종 보완 | 완료 |
+| Chapter 02 실제 실습 계층·행 순서·관계 용어·외래키·VIEW·기준 데이터·금액 용어 최종 보완 | 완료 |
 | Chapter 04 실행 위치·정렬·NULL·자동 커밋·데이터 상태 최종 보완 | 완료 |
 | Chapter 05 요구사항 추적·미확정 정책·샘플 관계·IDENTITY·초기화 안전성 최종 보완 | 완료 |
 | Chapter 06 확정 규칙·활성 대여·IDENTITY·경계값·오류 복구 최종 보완 | 완료 |
@@ -101,7 +102,7 @@ publish/full_manuscript.md
 ## 다음 작업
 
 ```text
-1. Chapter 02~03의 최종 출판 내용 검수를 진행한다.
+1. Chapter 03의 최종 출판 내용 검수를 진행한다.
 2. Chapter 04~15의 PostgreSQL·Python 실습을 실제 환경에서 순차 실행한다.
 3. Chapter 11·15의 Role 시험과 custom-format 백업·별도 DB 복원을 검증한다.
 4. Chapter 01~15의 제목, 용어, 문체, 표·캡션, 내부 링크를 통합 검수한다.
