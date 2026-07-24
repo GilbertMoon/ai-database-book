@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
-  <title id="title">setup_check.sql 실행과 재실행 흐름</title>
-  <desc id="desc">조회문 전용 setup_check.sql 파일을 ai_database_book 연결에서 실행하고 데이터베이스, 스키마, 사용자, 서버 시각과 계산 결과를 확인한 뒤 필요할 때 다시 실행하는 흐름</desc>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="title">환경 조회와 자동 판정 흐름</title>
+  <desc id="desc">setup_check.sql로 환경 정보를 조회한 뒤 데이터베이스, public 스키마, 권한과 쓰기 상태를 확인하고 setup_validate_local.sql로 자동 판정하여 통과 결과를 기록하는 흐름</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0 0L10 5L0 10Z" fill="#475569"/>
@@ -8,7 +9,6 @@
     <style>
       text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
       .title{font-size:30px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
-      .box{fill:#fff;stroke:#64748b;stroke-width:2}
       .check{fill:#eef5ff;stroke:#3174d0;stroke-width:2}
       .run{fill:#eef9f1;stroke:#2f9a58;stroke-width:2}
       .decision{fill:#fffceb;stroke:#d6a600;stroke-width:2}
@@ -23,51 +23,55 @@
       .note{font-size:16px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
     </style>
   </defs>
-  <rect width="1200" height="820" fill="#fff"/>
-  <text x="600" y="48" class="title">setup_check.sql 실행과 재실행 흐름</text>
+  <rect width="1200" height="900" fill="#fff"/>
+  <text x="600" y="48" class="title">환경 조회와 자동 판정 흐름</text>
 
-  <rect x="420" y="82" width="360" height="58" rx="14" class="box"/>
-  <text x="600" y="118" class="name">setup_check.sql 열기</text>
+  <rect x="380" y="82" width="440" height="72" rx="14" class="check"/>
+  <text x="600" y="111" class="name">setup_check.sql 실행</text>
+  <text x="600" y="136" class="sub">환경 정보를 사람이 읽고 기록</text>
 
-  <rect x="390" y="172" width="420" height="72" rx="14" class="check"/>
-  <text x="600" y="201" class="name">실행 연결 확인</text>
-  <text x="600" y="226" class="mono">현재 DB = ai_database_book</text>
+  <rect x="330" y="190" width="540" height="92" rx="14" class="check"/>
+  <text x="600" y="220" class="name">필수 결과 확인</text>
+  <text x="600" y="248" class="sub">DB · public · USAGE · transaction_read_only</text>
+  <text x="600" y="270" class="mono">database_ok · public_schema_usage_ok</text>
 
-  <rect x="390" y="276" width="420" height="72" rx="14" class="run"/>
-  <text x="600" y="305" class="name">조회문 전체 실행</text>
-  <text x="600" y="330" class="sub">테이블·데이터 변경 없이 환경 확인</text>
+  <rect x="390" y="318" width="420" height="70" rx="14" class="decision"/>
+  <text x="600" y="348" class="name">조회 결과가 적절한가?</text>
+  <text x="600" y="372" class="sub">연결·권한·쓰기 상태 확인</text>
 
-  <rect x="330" y="380" width="540" height="92" rx="14" class="check"/>
-  <text x="600" y="410" class="name">결과 확인</text>
-  <text x="600" y="438" class="sub">DB · 스키마 · 사용자 · 서버 시각 · 계산 결과</text>
-  <text x="600" y="460" class="mono">ai_database_book · public · result = 2</text>
+  <rect x="70" y="445" width="320" height="76" rx="14" class="fix"/>
+  <text x="230" y="474" class="name">환경 수정</text>
+  <text x="230" y="499" class="sub">연결·권한·read-only 재확인</text>
 
-  <rect x="390" y="506" width="420" height="70" rx="14" class="decision"/>
-  <text x="600" y="536" class="name">기대 결과와 일치하는가?</text>
-  <text x="600" y="560" class="sub">현재 연결과 실행 결과 비교</text>
+  <rect x="400" y="445" width="400" height="76" rx="14" class="run"/>
+  <text x="600" y="474" class="name">setup_validate_local.sql 실행</text>
+  <text x="600" y="499" class="sub">예외 기반 자동 판정</text>
 
-  <rect x="90" y="630" width="300" height="74" rx="14" class="fix"/>
-  <text x="240" y="659" class="name">연결과 현재 위치 수정</text>
-  <text x="240" y="684" class="sub">DB·스키마·사용자 재확인</text>
+  <rect x="390" y="560" width="420" height="70" rx="14" class="decision"/>
+  <text x="600" y="590" class="name">예외 없이 통과하는가?</text>
+  <text x="600" y="614" class="sub">필수 로컬 조건 검증</text>
 
-  <rect x="455" y="630" width="290" height="74" rx="14" class="record"/>
-  <text x="600" y="659" class="name">실행 결과 기록</text>
-  <text x="600" y="684" class="sub">환경 확인 기록 남기기</text>
+  <rect x="70" y="690" width="320" height="76" rx="14" class="fix"/>
+  <text x="230" y="719" class="name">실패 조건 수정</text>
+  <text x="230" y="744" class="sub">예외 메시지 기준으로 재검증</text>
 
-  <rect x="810" y="630" width="300" height="74" rx="14" class="run"/>
-  <text x="960" y="659" class="name">필요할 때 다시 실행</text>
-  <text x="960" y="684" class="sub">같은 파일로 환경 재검증</text>
+  <rect x="810" y="690" width="320" height="76" rx="14" class="record"/>
+  <text x="970" y="719" class="name">통과 결과 기록</text>
+  <text x="970" y="744" class="sub">필요할 때 두 파일 재실행</text>
 
-  <path d="M600 140V172" class="line"/>
-  <path d="M600 244V276" class="line"/>
-  <path d="M600 348V380" class="line"/>
-  <path d="M600 472V506" class="line"/>
-  <path d="M500 576L315 630" class="loop"/>
-  <text x="408" y="606" class="label" fill="#b42323">아니요</text>
-  <path d="M700 576L600 630" class="line"/>
-  <text x="660" y="606" class="label" fill="#166534">예</text>
-  <path d="M745 667H810" class="line"/>
-  <path d="M240 630V208H390" class="loop"/>
+  <path d="M600 154V190" class="line"/>
+  <path d="M600 282V318" class="line"/>
+  <path d="M500 388L390 483" class="loop"/>
+  <text x="415" y="425" class="label" fill="#b42323">아니요</text>
+  <path d="M600 388V445" class="line"/>
+  <text x="635" y="421" class="label" fill="#166534">예</text>
+  <path d="M600 521V560" class="line"/>
+  <path d="M500 630L390 728" class="loop"/>
+  <text x="415" y="668" class="label" fill="#b42323">아니요</text>
+  <path d="M700 630L810 728" class="line"/>
+  <text x="785" y="668" class="label" fill="#166534">예</text>
+  <path d="M230 445V118H380" class="loop"/>
+  <path d="M230 690V483H400" class="loop"/>
 
-  <text x="600" y="782" class="note">조회문만 포함하므로 여러 번 실행해도 테이블과 데이터는 변경되지 않는다.</text>
+  <text x="600" y="850" class="note">두 파일은 테이블과 데이터를 변경하지 않으므로 반복 실행할 수 있다.</text>
 </svg>
