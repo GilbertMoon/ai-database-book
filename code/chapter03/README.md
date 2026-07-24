@@ -2,69 +2,89 @@
 
 ## PostgreSQL과 DBeaver 실습 환경 확인
 
-이 폴더는 Chapter 03의 환경 확인 SQL 파일을 관리합니다.
+이 폴더는 Chapter 03의 환경 조회와 로컬 필수 경로 자동 검증 SQL을 관리합니다.
 
 ---
 
 ## 파일 목록
 
-| 파일 | 설명 |
+| 파일 | 역할 |
 | --- | --- |
-| `setup_check.sql` | PostgreSQL 서버, 현재 데이터베이스, 스키마, 사용자와 SQL 실행 상태를 확인하는 읽기 전용 스크립트 |
+| `setup_check.sql` | 서버·DB·스키마·검색 경로·사용자·읽기 전용 상태·시간대를 사람이 확인하는 조회 파일 |
+| `setup_validate_local.sql` | Chapter 04 이후 실습에 필요한 로컬 조건을 예외 기반으로 판정하는 완료 게이트 |
+
+두 파일 모두 테이블과 데이터를 생성·수정·삭제하지 않습니다.
 
 ---
 
 ## 실행 전 확인
 
-DBeaver에서 다음 연결 대상을 확인합니다.
+DBeaver에서 다음 대상을 선택합니다.
 
 ```text
-Database: ai_database_book
-Schema: public
+대상 데이터베이스: ai_database_book
+실습 대상 스키마: public
 ```
 
-현재 데이터베이스와 스키마가 확실하지 않다면 `setup_check.sql`을 실행해 확인합니다.
+`current_schema()`가 항상 `public`이어야 하는 것은 아닙니다. 현재 스키마와 `search_path`는 `setup_check.sql`에서 확인하고, `public`의 존재와 사용 권한은 검증 파일에서 별도로 판정합니다.
 
 ---
 
-## 실행 순서
-
-1. DBeaver에서 `ai_database_book` 연결을 선택합니다.
-2. SQL Editor를 엽니다.
-3. `setup_check.sql` 파일을 열거나 내용을 복사합니다.
-4. 한 문장, 선택 영역 또는 전체 스크립트 중 원하는 범위로 실행합니다.
-5. 다음 결과를 확인합니다.
+## 권장 실행 순서
 
 ```text
-PostgreSQL 버전
-현재 데이터베이스
-현재 스키마
-search_path
-현재 사용자
-서버 시각
-계산 결과 2
+1. DBeaver에서 ai_database_book 연결 선택
+2. SQL Editor 열기
+3. setup_check.sql 실행
+4. 한 행 요약 결과 확인
+5. setup_validate_local.sql 실행
+6. 통과 메시지 확인
+```
+
+통과 메시지:
+
+```text
+Chapter 03 local environment validation passed
 ```
 
 ---
 
-## 예상 결과
+## `setup_check.sql` 결과
 
-| 확인 항목 | 일반적인 기대 결과 |
+| 확인 항목 | 필수 판정 또는 참고 내용 |
 | --- | --- |
-| `current_database()` | `ai_database_book` |
-| `current_schema()` | `public` |
-| `SHOW search_path` | `"$user", public`과 유사한 값 |
-| `current_user` | 연결에 사용한 PostgreSQL 사용자 |
-| `CURRENT_TIMESTAMP` | PostgreSQL 서버의 현재 시각 |
+| PostgreSQL 버전 | 버전 문자열 확인 |
+| `current_database()` | `ai_database_book`이어야 함 |
+| `current_schema()` | 환경에 따라 `public`이 아닐 수 있음 |
+| `SHOW search_path` | 검색 순서를 읽고 설명할 수 있어야 함 |
+| `current_user` | 예상한 접속 사용자 |
+| `transaction_read_only` | 로컬 필수 경로는 `off` |
+| `TimeZone` | 현재 세션 시간대 확인 |
+| `CURRENT_TIMESTAMP` | 날짜·시간 값 반환 확인 |
 | `1 + 1` | `2` |
+| 요약 결과 | DB·public·USAGE·읽기 전용 상태를 한 행으로 확인 |
 
-환경에 따라 PostgreSQL 버전 문자열, 사용자와 `search_path` 값은 다를 수 있습니다.
+---
+
+## `setup_validate_local.sql` 판정 기준
+
+```text
+PostgreSQL 15 이상
+current_database() = ai_database_book
+현재 사용자의 CONNECT 권한
+public 스키마 존재
+현재 사용자의 public USAGE 권한
+transaction_read_only = off
+SQL 계산 결과 정상
+```
+
+이 파일은 로컬 필수 경로 전용입니다. 관리형 PostgreSQL, 읽기 전용 복제본 또는 Supabase 선택 경로는 데이터베이스 이름과 권한 정책이 다를 수 있으므로 이 완료 게이트를 그대로 사용하지 않습니다.
 
 ---
 
 ## 재실행 가능성
 
-`setup_check.sql`은 다음 명령을 포함하지 않습니다.
+두 파일은 다음 데이터 변경 명령을 포함하지 않습니다.
 
 ```text
 CREATE TABLE
@@ -74,17 +94,25 @@ DELETE
 DROP
 ```
 
-따라서 여러 번 실행해도 테이블이나 데이터가 추가·수정·삭제되지 않습니다.
-
-테이블 생성과 CRUD 실습은 Chapter 04의 별도 SQL 파일에서 진행합니다. 제약조건 오류 실습은 Chapter 06에서 다룹니다.
+따라서 연결 상태를 다시 확인할 때 반복 실행할 수 있습니다. 테이블 생성과 CRUD는 Chapter 04, 제약조건 오류는 Chapter 06에서 다룹니다.
 
 ---
 
 ## 보안 주의
 
 ```text
-- 데이터베이스 비밀번호를 SQL 파일에 작성하지 않습니다.
+- 비밀번호를 SQL 파일에 작성하지 않습니다.
 - 전체 클라우드 접속 URL을 저장하지 않습니다.
-- 실제 값이 들어 있는 .env 파일을 커밋하지 않습니다.
+- 실제 .env와 password file을 커밋하지 않습니다.
 - 화면 캡처와 AI 질문에도 비밀정보를 포함하지 않습니다.
+```
+
+후속 장의 접속 정보는 다음 libpq 변수 체계를 사용합니다.
+
+```text
+PGHOST
+PGPORT
+PGDATABASE
+PGUSER
+PGPASSFILE
 ```
