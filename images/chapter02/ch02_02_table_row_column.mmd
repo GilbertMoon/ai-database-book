@@ -1,9 +1,31 @@
 flowchart LR
-    T[students 테이블<br/>같은 구조를 가진 기록의 집합]
-    R[행<br/>한 학생에 대한 하나의 기록]
-    C[열<br/>모든 행이 따르는 데이터 항목]
-    S[셀<br/>행과 열이 만나는 하나의 값]
-    T --> R
-    T --> C
-    R --> S
-    C --> S
+    TABLE_LABEL["테이블<br/>같은 구조를 가진 기록의 집합"]
+    ROW_LABEL["행<br/>id = 1인 학생 기록"]
+    COLUMN_LABEL["열<br/>major 데이터 항목"]
+    CELL_LABEL["셀<br/>id = 1 행의 major 값"]
+
+    subgraph STUDENTS["students 테이블"]
+        direction TB
+        HEADER["id | name | email | major"]
+        ROW1["1 | 김민지 | minji@example.com | 컴퓨터공학"]
+        ROW2["2 | 이준호 | junho@example.com | 데이터사이언스"]
+        ROW3["3 | 박서연 | seoyeon@example.com | 경영학"]
+        HEADER --> ROW1 --> ROW2 --> ROW3
+    end
+
+    TABLE_LABEL --> STUDENTS
+    ROW_LABEL --> ROW1
+    COLUMN_LABEL --> HEADER
+    CELL_LABEL --> ROW1
+
+    classDef table fill:#eff6ff,stroke:#2f5f9f,stroke-width:2px,color:#1d4f91;
+    classDef row fill:#fff7e8,stroke:#e59e0b,stroke-width:2px,color:#92400e;
+    classDef column fill:#effcf3,stroke:#22a55a,stroke-width:2px,color:#166534;
+    classDef cell fill:#f6f0ff,stroke:#7c4dcb,stroke-width:2px,color:#6d28d9;
+    classDef sample fill:#ffffff,stroke:#64748b,stroke-width:1px,color:#172033;
+
+    class TABLE_LABEL table;
+    class ROW_LABEL row;
+    class COLUMN_LABEL column;
+    class CELL_LABEL cell;
+    class HEADER,ROW1,ROW2,ROW3 sample;
