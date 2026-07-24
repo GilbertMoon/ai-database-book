@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Database Book - HTML Presentation Template</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-soft: #eef3f8;
+      --text: #182230;
+      --muted: #5d6b7a;
+      --primary: #155eef;
+      --primary-soft: #e8f0ff;
+      --accent: #f59e0b;
+      --danger: #dc2626;
+      --border: #d9e1ea;
+      --shadow: 0 18px 45px rgba(20, 33, 50, 0.12);
+      --slide-width: 1600;
+      --slide-height: 900;
+      --radius: 28px;
+      --content-max: 1380px;
+      --title-size: clamp(42px, 4.2vw, 76px);
+      --section-size: clamp(34px, 3.4vw, 58px);
+      --body-size: clamp(22px, 2vw, 34px);
+      --small-size: clamp(16px, 1.35vw, 24px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #0f1720;
+      color: var(--text);
+      font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+
+    body {
+      cursor: none;
+      user-select: none;
+    }
+
+    body.native-cursor { cursor: auto; }
+
+    .deck {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top left, rgba(21, 94, 239, 0.18), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.14), transparent 28%),
+        #0f1720;
+    }
+
+    .viewport {
+      position: relative;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      overflow: hidden;
+      background: var(--bg);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), var(--shadow);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: 64px 88px 72px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 248, 251, 0.98)), var(--bg);
+      opacity: 0;
+      transform: translateX(34px) scale(0.985);
+      transition: opacity 260ms ease, transform 260ms ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      z-index: 2;
+    }
+
+    .slide.exit-left {
+      display: flex;
+      opacity: 0;
+      transform: translateX(-34px) scale(0.985);
+      z-index: 1;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 10px;
+      background: linear-gradient(90deg, var(--primary), #4f8cff 70%, var(--accent));
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 62px;
+      margin-bottom: 34px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: var(--small-size);
+      letter-spacing: 0.02em;
+    }
+
+    .chapter-label {
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.78);
+      font-size: var(--small-size);
+      font-weight: 700;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      max-width: var(--content-max);
+      margin: 0 auto;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: var(--title-size);
+      line-height: 1.14;
+      letter-spacing: -0.045em;
+    }
+
+    h2 {
+      margin-bottom: 34px;
+      font-size: var(--section-size);
+      line-height: 1.18;
+      letter-spacing: -0.035em;
+    }
+
+    h3 {
+      margin-bottom: 16px;
+      font-size: clamp(25px, 2.25vw, 39px);
+      line-height: 1.28;
+    }
+
+    p, li, td, th {
+      font-size: var(--body-size);
+      line-height: 1.55;
+    }
+
+    .lead {
+      max-width: 1120px;
+      color: var(--muted);
+      font-size: clamp(26px, 2.5vw, 42px);
+      line-height: 1.55;
+    }
+
+    .small { font-size: var(--small-size); color: var(--muted); }
+    .highlight { color: var(--primary); font-weight: 800; }
+    .accent { color: #b46900; font-weight: 800; }
+    .title-slide .slide-body { justify-content: center; }
+    .title-slide h1 { max-width: 1180px; font-size: clamp(52px, 5.2vw, 90px); }
+
+    .title-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 34px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: var(--small-size);
+      font-weight: 800;
+    }
+
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 28px;
+      width: 100%;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .card {
+      min-height: 210px;
+      padding: 30px 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 9px 24px rgba(33, 50, 73, 0.07);
+    }
+
+    .card.soft { background: var(--surface-soft); box-shadow: none; }
+    .card.emphasis { border-color: rgba(21, 94, 239, 0.3); background: var(--primary-soft); }
+
+    .number {
+      display: inline-grid;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 18px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 34px;
+    }
+
+    .bullet-list li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 0.62em;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 7px var(--primary-soft);
+    }
+
+    .quote {
+      padding: 34px 42px;
+      border-left: 10px solid var(--primary);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--primary-soft);
+      font-size: clamp(28px, 2.8vw, 48px);
+      font-weight: 800;
+      line-height: 1.52;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 18px;
+      width: 100%;
+    }
+
+    .flow-step {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      min-height: 155px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+      text-align: center;
+      font-size: clamp(20px, 1.7vw, 30px);
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+      font-size: 42px;
+      font-weight: 900;
+    }
+
+    pre {
+      width: 100%;
+      margin: 0;
+      padding: 30px 34px;
+      overflow: auto;
+      border-radius: 24px;
+      background: #101820;
+      color: #e7eef7;
+      box-shadow: 0 12px 28px rgba(15, 23, 32, 0.18);
+      user-select: text;
+    }
+
+    code {
+      font-family: "JetBrains Mono", "D2Coding", "Consolas", monospace;
+      font-size: clamp(18px, 1.45vw, 27px);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th, td {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--surface-soft); font-weight: 900; }
+    tr:last-child td { border-bottom: 0; }
+
+    .media-frame {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-height: 430px;
+      padding: 22px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .media-frame img, .media-frame svg {
+      display: block;
+      max-width: 100%;
+      max-height: 540px;
+      object-fit: contain;
+    }
+
+    .question-slide {
+      background:
+        radial-gradient(circle at 78% 18%, rgba(245, 158, 11, 0.18), transparent 24%),
+        linear-gradient(180deg, #fffaf0, #f8fafc);
+    }
+
+    .question-mark {
+      margin-bottom: 12px;
+      color: var(--accent);
+      font-size: 84px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .fragment {
+      opacity: 0.15;
+      transform: translateY(16px);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .fragment.visible { opacity: 1; transform: translateY(0); }
+
+    .controls {
+      position: absolute;
+      right: 24px;
+      bottom: 22px;
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .control-button {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 15px;
+      background: rgba(15, 23, 32, 0.72);
+      color: #fff;
+      font-size: 23px;
+      font-weight: 900;
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+    }
+
+    .control-button:hover, .control-button:focus-visible {
+      background: rgba(21, 94, 239, 0.92);
+      outline: none;
+    }
+
+    .slide-number {
+      position: absolute;
+      left: 28px;
+      bottom: 27px;
+      z-index: 20;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .progress-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 7px;
+      background: rgba(24, 34, 48, 0.1);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 240ms ease;
+    }
+
+    .custom-cursor, .cursor-halo {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 120ms ease, width 120ms ease, height 120ms ease;
+    }
+
+    .custom-cursor {
+      width: 15px;
+      height: 15px;
+      background: #ff2f2f;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.92), 0 0 18px rgba(255, 47, 47, 0.8);
+    }
+
+    .cursor-halo {
+      width: 62px;
+      height: 62px;
+      border: 3px solid rgba(255, 47, 47, 0.88);
+      background: rgba(255, 47, 47, 0.08);
+    }
+
+    body.cursor-ready:not(.native-cursor) .custom-cursor,
+    body.cursor-ready:not(.native-cursor) .cursor-halo { opacity: 1; }
+
+    body.cursor-click .cursor-halo {
+      width: 82px;
+      height: 82px;
+      background: rgba(255, 47, 47, 0.16);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: 40px;
+      background: rgba(8, 13, 20, 0.78);
+      backdrop-filter: blur(10px);
+    }
+
+    .overlay.open { display: grid; }
+
+    .overlay-panel {
+      width: min(980px, 92%);
+      max-height: 84%;
+      padding: 38px 42px;
+      overflow: auto;
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      user-select: text;
+    }
+
+    .overlay-panel h2 { font-size: 38px; }
+
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 22px;
+    }
+
+    .shortcut {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--surface-soft);
+      font-size: 20px;
+    }
+
+    kbd {
+      min-width: 86px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-bottom-width: 3px;
+      border-radius: 10px;
+      background: #fff;
+      text-align: center;
+      font: 800 17px/1 "JetBrains Mono", Consolas, monospace;
+    }
+
+    .speaker-notes { display: none; }
+    .notes-panel p, .notes-panel li { font-size: 21px; line-height: 1.65; }
+
+    @media (max-aspect-ratio: 4/3) {
+      .slide { padding-left: 54px; padding-right: 54px; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { gap: 18px; }
+    }
+
+    @media (max-width: 900px) {
+      .slide { padding: 34px 34px 52px; }
+      .slide-header { margin-bottom: 18px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .card { min-height: auto; }
+      .controls { right: 12px; bottom: 14px; }
+      .slide-number { left: 14px; bottom: 17px; }
+    }
+
+    @media print {
+      html, body {
+        width: auto;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+      }
+
+      body { cursor: auto; }
+
+      .deck, .viewport {
+        position: static;
+        display: block;
+        width: auto;
+        height: auto;
+        background: #fff;
+        box-shadow: none;
+      }
+
+      .slide {
+        position: relative;
+        display: flex !important;
+        width: 297mm;
+        height: 167.06mm;
+        page-break-after: always;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .controls, .slide-number, .progress-track, .custom-cursor, .cursor-halo, .overlay {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <main class="viewport" id="presentation" aria-label="HTML 발표 자료">
+      <!--
+        슬라이드 작성 기본 규칙
+        1. 각 슬라이드는 <section class="slide">로 작성합니다.
+        2. 현재 슬라이드에 class="active"를 둡니다.
+        3. 한 슬라이드에는 핵심 메시지 하나만 배치합니다.
+        4. 단계적으로 보여 줄 항목에는 class="fragment"를 추가합니다.
+        5. 발표자 메모는 <aside class="speaker-notes">에 작성합니다.
+      -->
+
+      <section class="slide title-slide active">
+        <div class="slide-header">
+          <span class="eyebrow">HTML PRESENTATION TEMPLATE</span>
+          <span class="chapter-label">16:9 · 1600 × 900</span>
+        </div>
+        <div class="slide-body">
+          <h1>AI 시대의 데이터베이스<br><span class="highlight">발표 자료 템플릿</span></h1>
+          <p class="lead">큰 글자, 한 장 한 메시지, 키보드 이동과 눈에 띄는 발표용 커서를 지원합니다.</p>
+          <div class="title-meta">
+            <span class="pill">← → 이전·다음</span>
+            <span class="pill">F 전체 화면</span>
+            <span class="pill">C 커서 전환</span>
+            <span class="pill">H 도움말</span>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>첫 장에서는 수업 주제와 오늘 다룰 큰 흐름만 소개합니다.</p>
+          <p>세부 내용을 미리 설명하지 않고 학습자의 기대를 열어 둡니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">TODAY'S QUESTION</span>
+          <span class="chapter-label">도입 질문</span>
+        </div>
+        <div class="slide-body">
+          <div class="question-mark">?</div>
+          <h2>AI가 SQL을 작성해 준다면<br>데이터베이스를 직접 배울 필요가 있을까요?</h2>
+          <p class="lead fragment">핵심은 SQL 문법보다 <span class="highlight">결과를 판단하고 검증하는 능력</span>입니다.</p>
+        </div>
+        <aside class="speaker-notes">
+          <p>정답을 바로 제시하지 않고 학생들의 생각을 먼저 듣습니다.</p>
+          <p>스페이스바를 누르면 핵심 문장이 단계적으로 나타납니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">ONE SLIDE, ONE MESSAGE</span>
+          <span class="chapter-label">카드 레이아웃</span>
+        </div>
+        <div class="slide-body">
+          <h2>한 장에는 핵심 메시지 하나만</h2>
+          <div class="grid-3">
+            <article class="card fragment">
+              <span class="number">1</span>
+              <h3>질문</h3>
+              <p class="small">학습자가 먼저 생각할 수 있는 질문을 제시합니다.</p>
+            </article>
+            <article class="card fragment">
+              <span class="number">2</span>
+              <h3>사례</h3>
+              <p class="small">익숙한 업무나 서비스의 상황으로 설명합니다.</p>
+            </article>
+            <article class="card emphasis fragment">
+              <span class="number">3</span>
+              <h3>핵심</h3>
+              <p class="small">마지막에 기억해야 할 문장 하나를 남깁니다.</p>
+            </article>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>카드는 2~3개가 적당합니다. 카드가 많아지면 다음 슬라이드로 나눕니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">FLOW</span>
+          <span class="chapter-label">과정 표현</span>
+        </div>
+        <div class="slide-body">
+          <h2>AI 결과는 반드시 검증 과정을 거칩니다</h2>
+          <div class="flow">
+            <div class="flow-step fragment">요구사항<br>확인</div>
+            <div class="flow-arrow fragment">→</div>
+            <div class="flow-step fragment">AI 초안<br>생성</div>
+            <div class="flow-arrow fragment">→</div>
+            <div class="flow-step fragment">직접 실행</div>
+            <div class="flow-arrow fragment">→</div>
+            <div class="flow-step fragment">결과 비교<br>및 수정</div>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>흐름도는 좌우 4~5단계 이내로 제한합니다.</p>
+          <p>복잡한 도식은 별도의 SVG 파일로 제작하여 media-frame 안에 넣습니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">CODE</span>
+          <span class="chapter-label">SQL 예제</span>
+        </div>
+        <div class="slide-body">
+          <h2>실행되는 SQL과 올바른 SQL은 다릅니다</h2>
+          <pre><code>SELECT COUNT(*) AS student_count
+FROM students AS s
+INNER JOIN questions AS q
+    ON q.student_id = s.id;</code></pre>
+          <p class="small" style="margin-top: 22px;">코드 전체를 보여 주기보다 <span class="accent">이번 장에서 설명할 핵심 구문</span>만 제시합니다.</p>
+        </div>
+        <aside class="speaker-notes">
+          <p>질문이 없는 학생이 제외되는 문제와 학생이 질문 수만큼 반복되는 문제를 설명합니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">COMPARISON</span>
+          <span class="chapter-label">표 레이아웃</span>
+        </div>
+        <div class="slide-body">
+          <h2>저장 방식은 상황에 맞게 선택합니다</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>파일</th>
+                  <th>스프레드시트</th>
+                  <th>DBMS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>적합한 상황</td>
+                  <td>작고 단순한 기록</td>
+                  <td>소규모 공동 관리</td>
+                  <td>관계·정확성·동시 작업</td>
+                </tr>
+                <tr>
+                  <td>반복 조회</td>
+                  <td>별도 코드 필요</td>
+                  <td>필터·함수 사용</td>
+                  <td>SQL로 체계적 처리</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>표는 최대 4열, 4~5행 정도가 적당합니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide question-slide">
+        <div class="slide-header">
+          <span class="eyebrow">MINI ACTIVITY</span>
+          <span class="chapter-label">참여 활동</span>
+        </div>
+        <div class="slide-body">
+          <div class="question-mark">?</div>
+          <h2>온라인 강의 신청 정보를<br>스프레드시트로 계속 관리해도 될까요?</h2>
+          <ul class="bullet-list fragment">
+            <li>여러 운영자가 동시에 수정합니다.</li>
+            <li>학생·강의·신청 상태가 연결됩니다.</li>
+            <li>월별 신청 건수를 반복 조회합니다.</li>
+          </ul>
+        </div>
+        <aside class="speaker-notes">
+          <p>1분 정도 개인 판단 후 2~3명의 의견을 받습니다.</p>
+        </aside>
+      </section>
+
+      <section class="slide">
+        <div class="slide-header">
+          <span class="eyebrow">SUMMARY</span>
+          <span class="chapter-label">마무리</span>
+        </div>
+        <div class="slide-body">
+          <div class="quote">AI가 데이터베이스 작업을 더 많이 도와줄수록,<br>사람에게는 <span class="highlight">구조와 결과를 검증하는 능력</span>이 더 중요해집니다.</div>
+          <p class="small" style="margin-top: 30px;">템플릿의 예시 슬라이드는 실제 강의 내용으로 교체해 사용합니다.</p>
+        </div>
+        <aside class="speaker-notes">
+          <p>마지막에는 오늘의 핵심을 한 문장으로 다시 읽습니다.</p>
+        </aside>
+      </section>
+
+      <div class="slide-number" id="slideNumber">1 / 8</div>
+
+      <nav class="controls" aria-label="발표 이동">
+        <button class="control-button" id="prevButton" type="button" aria-label="이전 슬라이드">←</button>
+        <button class="control-button" id="nextButton" type="button" aria-label="다음 슬라이드">→</button>
+      </nav>
+
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="overlay" id="helpOverlay" role="dialog" aria-modal="true" aria-label="단축키 도움말">
+        <div class="overlay-panel">
+          <h2>발표 단축키</h2>
+          <div class="shortcut-grid">
+            <div class="shortcut"><kbd>→ / ↓</kbd><span>다음 슬라이드 또는 다음 단계</span></div>
+            <div class="shortcut"><kbd>← / ↑</kbd><span>이전 슬라이드</span></div>
+            <div class="shortcut"><kbd>Space</kbd><span>다음 단계 또는 다음 슬라이드</span></div>
+            <div class="shortcut"><kbd>Home</kbd><span>첫 슬라이드</span></div>
+            <div class="shortcut"><kbd>End</kbd><span>마지막 슬라이드</span></div>
+            <div class="shortcut"><kbd>F</kbd><span>전체 화면 전환</span></div>
+            <div class="shortcut"><kbd>C</kbd><span>발표용 커서 / 기본 커서 전환</span></div>
+            <div class="shortcut"><kbd>N</kbd><span>현재 슬라이드 발표자 노트</span></div>
+            <div class="shortcut"><kbd>H</kbd><span>도움말 열기·닫기</span></div>
+            <div class="shortcut"><kbd>Esc</kbd><span>열린 창 닫기</span></div>
+          </div>
+          <p class="small" style="margin-top: 26px;">URL 뒤에 <code>#3</code>을 붙이면 3번째 슬라이드로 바로 열 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div class="overlay" id="notesOverlay" role="dialog" aria-modal="true" aria-label="발표자 노트">
+        <div class="overlay-panel notes-panel">
+          <h2>발표자 노트</h2>
+          <div id="notesContent"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="cursor-halo" id="cursorHalo" aria-hidden="true"></div>
+  <div class="custom-cursor" id="customCursor" aria-hidden="true"></div>
+
+  <script>
+    (() => {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const slideNumber = document.getElementById("slideNumber");
+      const progressBar = document.getElementById("progressBar");
+      const prevButton = document.getElementById("prevButton");
+      const nextButton = document.getElementById("nextButton");
+      const presentation = document.getElementById("presentation");
+      const helpOverlay = document.getElementById("helpOverlay");
+      const notesOverlay = document.getElementById("notesOverlay");
+      const notesContent = document.getElementById("notesContent");
+      const cursor = document.getElementById("customCursor");
+      const cursorHalo = document.getElementById("cursorHalo");
+
+      let currentIndex = getInitialIndex();
+      let wheelLocked = false;
+
+      function getInitialIndex() {
+        const hashNumber = Number.parseInt(location.hash.replace("#", ""), 10);
+        if (Number.isInteger(hashNumber) && hashNumber >= 1 && hashNumber <= slides.length) return hashNumber - 1;
+        return Math.max(0, slides.findIndex((slide) => slide.classList.contains("active")));
+      }
+
+      function currentFragments() {
+        return Array.from(slides[currentIndex].querySelectorAll(".fragment"));
+      }
+
+      function revealNextFragment() {
+        const hidden = currentFragments().find((fragment) => !fragment.classList.contains("visible"));
+        if (!hidden) return false;
+        hidden.classList.add("visible");
+        return true;
+      }
+
+      function resetFragments(index) {
+        slides[index].querySelectorAll(".fragment").forEach((fragment) => fragment.classList.remove("visible"));
+      }
+
+      function showSlide(index, direction = 1) {
+        const nextIndex = Math.min(Math.max(index, 0), slides.length - 1);
+        if (nextIndex === currentIndex && slides[currentIndex].classList.contains("active")) {
+          updateStatus();
+          return;
+        }
+
+        const previous = slides[currentIndex];
+        currentIndex = nextIndex;
+
+        slides.forEach((slide) => {
+          slide.classList.remove("active", "exit-left");
+          slide.style.display = "none";
+        });
+
+        if (previous && previous !== slides[currentIndex]) {
+          previous.style.display = "flex";
+          if (direction > 0) previous.classList.add("exit-left");
+          setTimeout(() => {
+            previous.style.display = "none";
+            previous.classList.remove("exit-left");
+          }, 280);
+        }
+
+        slides[currentIndex].style.display = "flex";
+        requestAnimationFrame(() => slides[currentIndex].classList.add("active"));
+
+        if (direction < 0) currentFragments().forEach((fragment) => fragment.classList.add("visible"));
+        else resetFragments(currentIndex);
+
+        updateStatus();
+      }
+
+      function next() {
+        if (revealNextFragment()) return;
+        if (currentIndex < slides.length - 1) showSlide(currentIndex + 1, 1);
+      }
+
+      function previous() {
+        const visibleFragments = currentFragments().filter((fragment) => fragment.classList.contains("visible"));
+        if (visibleFragments.length > 0) {
+          visibleFragments[visibleFragments.length - 1].classList.remove("visible");
+          return;
+        }
+        if (currentIndex > 0) showSlide(currentIndex - 1, -1);
+      }
+
+      function updateStatus() {
+        slideNumber.textContent = `${currentIndex + 1} / ${slides.length}`;
+        progressBar.style.width = `${((currentIndex + 1) / slides.length) * 100}%`;
+        history.replaceState(null, "", `#${currentIndex + 1}`);
+        document.title = `${currentIndex + 1}/${slides.length} · AI Database Presentation`;
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) presentation.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+
+      function toggleCursor() {
+        document.body.classList.toggle("native-cursor");
+      }
+
+      function toggleOverlay(overlay) {
+        const shouldOpen = !overlay.classList.contains("open");
+        [helpOverlay, notesOverlay].forEach((item) => item.classList.remove("open"));
+        if (shouldOpen) overlay.classList.add("open");
+      }
+
+      function showNotes() {
+        const notes = slides[currentIndex].querySelector(".speaker-notes");
+        notesContent.innerHTML = notes ? notes.innerHTML : "<p>이 슬라이드에는 작성된 발표자 노트가 없습니다.</p>";
+        toggleOverlay(notesOverlay);
+      }
+
+      document.addEventListener("keydown", (event) => {
+        const key = event.key.toLowerCase();
+
+        if (key === "escape") {
+          helpOverlay.classList.remove("open");
+          notesOverlay.classList.remove("open");
+          return;
+        }
+
+        if (helpOverlay.classList.contains("open") || notesOverlay.classList.contains("open")) {
+          if (key === "h") toggleOverlay(helpOverlay);
+          if (key === "n") showNotes();
+          return;
+        }
+
+        if (["arrowright", "arrowdown", "pagedown", " "].includes(key)) {
+          event.preventDefault();
+          next();
+        } else if (["arrowleft", "arrowup", "pageup"].includes(key)) {
+          event.preventDefault();
+          previous();
+        } else if (key === "home") {
+          event.preventDefault();
+          showSlide(0, -1);
+        } else if (key === "end") {
+          event.preventDefault();
+          showSlide(slides.length - 1, 1);
+        } else if (key === "f") toggleFullscreen();
+        else if (key === "c") toggleCursor();
+        else if (key === "h" || key === "?") toggleOverlay(helpOverlay);
+        else if (key === "n") showNotes();
+      });
+
+      prevButton.addEventListener("click", previous);
+      nextButton.addEventListener("click", next);
+
+      presentation.addEventListener("click", (event) => {
+        if (event.target.closest("button") || event.target.closest(".overlay-panel")) return;
+        const rect = presentation.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        if (x < rect.width * 0.32) previous();
+        else next();
+      });
+
+      presentation.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        if (wheelLocked) return;
+        wheelLocked = true;
+        if (event.deltaY > 0) next();
+        else previous();
+        setTimeout(() => (wheelLocked = false), 420);
+      }, { passive: false });
+
+      [helpOverlay, notesOverlay].forEach((overlay) => {
+        overlay.addEventListener("click", (event) => {
+          if (event.target === overlay) overlay.classList.remove("open");
+        });
+      });
+
+      document.addEventListener("mousemove", (event) => {
+        document.body.classList.add("cursor-ready");
+        cursor.style.left = `${event.clientX}px`;
+        cursor.style.top = `${event.clientY}px`;
+        cursorHalo.style.left = `${event.clientX}px`;
+        cursorHalo.style.top = `${event.clientY}px`;
+      });
+
+      document.addEventListener("mousedown", () => document.body.classList.add("cursor-click"));
+      document.addEventListener("mouseup", () => document.body.classList.remove("cursor-click"));
+
+      window.addEventListener("hashchange", () => {
+        const hashIndex = Number.parseInt(location.hash.replace("#", ""), 10) - 1;
+        if (Number.isInteger(hashIndex) && hashIndex >= 0 && hashIndex < slides.length) {
+          showSlide(hashIndex, hashIndex >= currentIndex ? 1 : -1);
+        }
+      });
+
+      slides.forEach((slide, index) => {
+        slide.classList.toggle("active", index === currentIndex);
+        slide.style.display = index === currentIndex ? "flex" : "none";
+      });
+
+      updateStatus();
+    })();
+  </script>
+</body>
+</html>
