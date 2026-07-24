@@ -1,12 +1,14 @@
 flowchart TD
-    A[setup_check.sql 열기]
-    B[ai_database_book 연결 확인]
-    C[조회문 전체 실행]
-    D[DB · 스키마 · 사용자 · 서버 시각 · 계산 결과 확인]
-    E{기대 결과와 일치하는가?}
-    F[연결과 현재 위치 수정]
-    G[실행 결과 기록]
-    H[필요할 때 같은 파일 다시 실행]
-    A --> B --> C --> D --> E
-    E -- 아니요 --> F --> B
+    A[setup_check.sql<br/>환경 정보 조회]
+    B{DB · public · USAGE · 쓰기 상태 확인}
+    C[연결 · 권한 · read-only 설정 수정]
+    D[setup_validate_local.sql 실행]
+    E{예외 없이 통과하는가?}
+    F[예외 메시지의 실패 조건 수정]
+    G[통과 메시지와 환경 결과 기록]
+    H[필요할 때 두 파일 다시 실행]
+    A --> B
+    B -- 아니요 --> C --> A
+    B -- 예 --> D --> E
+    E -- 아니요 --> F --> A
     E -- 예 --> G --> H
