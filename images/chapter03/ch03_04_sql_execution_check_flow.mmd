@@ -1,13 +1,14 @@
 flowchart TD
     A[ai_database_book 연결 선택]
-    B[SQL Editor 열기]
-    C[version<br/>PostgreSQL 서버 확인]
-    D[current_database · current_schema<br/>DB와 스키마 확인]
-    E[current_user · CURRENT_TIMESTAMP<br/>사용자와 서버 시각 확인]
-    F[1 + 1<br/>SQL 실행 결과 확인]
-    G{결과가 예상과 일치하는가?}
-    H[연결·DB·스키마·사용자 재확인]
-    I[실습 환경 준비 완료]
-    A --> B --> C --> D --> E --> F --> G
-    G -- 아니요 --> H --> A
-    G -- 예 --> I
+    B[setup_check.sql 실행]
+    C[version · current_database<br/>서버와 DB 확인]
+    D[current_schema · search_path<br/>스키마 검색 순서 확인]
+    E[current_user · transaction_read_only<br/>사용자와 쓰기 가능 상태 확인]
+    F[TimeZone · CURRENT_TIMESTAMP<br/>시간대와 시각 확인]
+    G[한 행 요약<br/>DB · public · USAGE · 계산 결과]
+    H{필수 결과가 맞는가?}
+    I[연결 · 권한 · 읽기 전용 상태 재확인]
+    J[setup_validate_local.sql로 이동]
+    A --> B --> C --> D --> E --> F --> G --> H
+    H -- 아니요 --> I --> A
+    H -- 예 --> J
