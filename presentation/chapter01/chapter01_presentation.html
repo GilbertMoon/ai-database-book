@@ -29,8 +29,11 @@ function textOf(markup){const d=document.createElement('div');d.innerHTML=markup
 function paragraphs(value){return value.split(/\n\s*\n/).map(p=>`<p>${p.trim()}</p>`).join('')}
 function scriptFor(s){
  if(s.s)return paragraphs(s.s);
- const txt=textOf(s.h);const phrases=txt.split(/[.!?。]|\n/).map(v=>v.trim()).filter(Boolean).slice(0,8);const listed=phrases.map((p,k)=>`${k+1}번째로, ${p}.`).join(' ');
- return `<p>이번 장표는 ${s.t||s.l}에 대한 내용입니다. 화면에 보이는 내용을 위에서 아래 순서로 천천히 살펴보겠습니다. ${listed} 이 장표에서 중요한 것은 문장을 그대로 외우는 것이 아니라, 데이터의 의미와 관계, 그리고 결과를 검증하는 기준을 이해하는 것입니다. 화면의 항목을 하나씩 가리키면서 왜 이런 기준이 필요한지 설명하겠습니다. 특히 에이아이는 초안을 빠르게 만들 수 있지만, 실제 요구사항과 기준 데이터에 맞는지 확인하는 책임은 사람에게 있습니다. 다음 장표에서는 이 개념이 실제 사례에서 어떻게 적용되는지 이어서 확인하겠습니다.</p>`
+ const title=s.t||s.l||'핵심 내용';
+ const txt=textOf(s.h);
+ const phrases=txt.split(/[.!?。]|\n/).map(v=>v.trim()).filter(v=>v&&v!==title).slice(0,5);
+ const summary=phrases.length?`${phrases.join('. ')}.`:'';
+ return `<p>이번에는 ‘${title}’이라는 주제를 살펴보겠습니다. ${summary} 각 항목의 뜻을 단순히 외우기보다 데이터의 의미와 업무 요구사항에 연결해 이해하는 것이 중요합니다. AI가 만든 결과도 같은 기준으로 확인해야 합니다.</p>`
 }
 function render(){
  const s=CH1_SLIDES[i];
