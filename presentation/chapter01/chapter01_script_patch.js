@@ -29,6 +29,50 @@
 따라서 오늘 수업의 흐름은 질문을 이해하고, 사례에 적용하고, 판단 기준을 직접 말해 보는 순서입니다.`
     };
   }
+
+  if (window.CH1_SLIDES[14]) {
+    window.CH1_SLIDES[14].s = `이 사례에서는 학생 A가 질문 두 개, 학생 B가 질문 한 개, 학생 C가 질문을 작성하지 않은 상황을 가정합니다.
+
+전체 학생 수는 세 명입니다. 그런데 학생과 질문을 이너 조인한 뒤 행 수를 세어도 결과가 우연히 세 행으로 나타납니다. 학생 A가 두 번, 학생 B가 한 번 나타나고 학생 C는 결과에서 빠지기 때문입니다.
+
+두 결과의 숫자는 모두 3이지만 의미는 전혀 다릅니다. 하나는 학생 세 명을 센 결과이고, 다른 하나는 질문과 연결된 행 세 개를 센 결과입니다.
+
+따라서 결과 숫자만 보고 SQL이 맞다고 판단해서는 안 됩니다. 어떤 테이블의 한 행을 기준으로 계산했는지, 누락된 대상과 중복된 대상은 없는지를 함께 확인해야 합니다.`;
+  }
+
+  const oldPositionSentence = '화면에 보이는 내용을 위에서 아래 순서로 천천히 살펴보겠습니다.';
+
+  const textFromMarkup = (markup) => {
+    const element = document.createElement('div');
+    element.innerHTML = String(markup || '');
+    return element.innerText.replace(/\s+/g, ' ').trim();
+  };
+
+  const buildContextScript = (slide) => {
+    const title = slide.t || slide.l || '핵심 내용';
+    const text = textFromMarkup(slide.h);
+    const points = text
+      .split(/[.!?。]/)
+      .map((value) => value.trim())
+      .filter((value) => value && value !== title)
+      .slice(0, 5);
+
+    const summary = points.length ? ` ${points.join('. ')}.` : '';
+    return `이번에는 ‘${title}’이라는 주제를 살펴보겠습니다.${summary} 각 항목의 뜻을 단순히 외우기보다 데이터의 의미와 업무 요구사항에 연결해 이해하는 것이 중요합니다. 에이아이가 만든 결과도 같은 기준으로 확인해야 합니다.`;
+  };
+
+  window.CH1_SLIDES.forEach((slide) => {
+    if (!slide || typeof slide !== 'object') return;
+
+    if (typeof slide.s !== 'string' || !slide.s.trim()) {
+      slide.s = buildContextScript(slide);
+      return;
+    }
+
+    if (slide.s.includes(oldPositionSentence)) {
+      slide.s = slide.s.replace(oldPositionSentence, '').replace(/\s{2,}/g, ' ').trim();
+    }
+  });
 })();
 
 document.write('<script src="../common/screen_position_patch.js"><\/script>');
