@@ -11,3 +11,5 @@
 
 오늘은 전체 과정의 출발점으로, 에이아이 시대에도 데이터베이스 지식이 필요한 이유와 에이아이 결과를 검증하는 기본 관점을 살펴보겠습니다.`;
 })();
+
+document.write('<script src="../common/screen_position_patch.js"><\/script>');
