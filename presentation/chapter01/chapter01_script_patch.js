@@ -71,23 +71,13 @@
 
   const oldPositionSentence = '화면에 보이는 내용을 위에서 아래 순서로 천천히 살펴보겠습니다.';
 
-  const textFromMarkup = (markup) => {
-    const element = document.createElement('div');
-    element.innerHTML = String(markup || '');
-    return element.innerText.replace(/\s+/g, ' ').trim();
-  };
-
   const buildContextScript = (slide) => {
     const title = slide.t || slide.l || '핵심 내용';
-    const text = textFromMarkup(slide.h);
-    const points = text
-      .split(/[.!?。]/)
-      .map((value) => value.trim())
-      .filter((value) => value && value !== title)
-      .slice(0, 5);
+    return `이번 장표에서는 ‘${title}’을 살펴봅니다.
 
-    const summary = points.length ? ` ${points.join('. ')}.` : '';
-    return `이번에는 ‘${title}’이라는 주제를 살펴보겠습니다.${summary} 각 항목의 뜻을 단순히 외우기보다 데이터의 의미와 업무 요구사항에 연결해 이해하는 것이 중요합니다. 에이아이가 만든 결과도 같은 기준으로 확인해야 합니다.`;
+지금은 장표의 모든 문장을 외우기보다, 이 장표가 던지는 핵심 질문이나 판단 기준이 무엇인지 확인하면 됩니다.
+
+이어지는 장표와 사례에서 같은 개념을 다시 적용해 볼 예정이므로, 처음 보는 표현이 있더라도 흐름을 따라가며 의미를 잡아가면 됩니다.`;
   };
 
   window.CH1_SLIDES.forEach((slide) => {
