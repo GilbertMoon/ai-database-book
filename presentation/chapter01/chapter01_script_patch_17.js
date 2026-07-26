@@ -1,4 +1,26 @@
 (() => {
+  const customCursor = document.getElementById('cursor');
+  const customHalo = document.getElementById('halo');
+
+  window.cursor = customCursor;
+  window.halo = customHalo;
+
+  function moveCustomCursor(event) {
+    if (!customCursor || !customHalo || document.body.classList.contains('native')) return;
+    document.body.classList.add('ready');
+    customCursor.style.left = `${event.clientX}px`;
+    customCursor.style.top = `${event.clientY}px`;
+    customHalo.style.left = `${event.clientX}px`;
+    customHalo.style.top = `${event.clientY}px`;
+  }
+
+  if (customCursor && customHalo) {
+    document.addEventListener('pointermove', moveCustomCursor, { passive: true });
+    document.addEventListener('mousemove', moveCustomCursor, { passive: true });
+  } else {
+    document.body.classList.add('native');
+  }
+
   if (!window.CH1_SLIDES) return;
 
   if (window.CH1_SLIDES[16]) {
