@@ -26,16 +26,20 @@ const app=document.getElementById('app');
 const replacements=[
 [/포스트그레스큐엘/g,'PostgreSQL'],[/디비버/g,'DBeaver'],[/알디비엠에스/g,'RDBMS'],[/노에스큐엘/g,'NoSQL'],[/디비엠에스/g,'DBMS'],[/에스큐엘/g,'SQL'],[/에이아이/g,'AI'],[/이알디/g,'ERD'],[/디디엘/g,'DDL'],[/크러드/g,'CRUD'],[/파이썬/g,'Python'],[/이너 조인/g,'INNER JOIN'],[/조인/g,'JOIN'],[/널/g,'NULL'],[/아이디/g,'ID'],[/카운트 별표/g,'COUNT(*)']
 ];
+const ttsReplacements=[
+[/\bPostgreSQL\b/g,'포스트그레스큐엘'],[/\bDBeaver\b/g,'디비버'],[/\bRDBMS\b/g,'알디비엠에스'],[/\bNoSQL\b/g,'노에스큐엘'],[/\bDBMS\b/g,'디비엠에스'],[/\bSQLSTATE\b/g,'에스큐엘 스테이트'],[/\bSQL\b/g,'에스큐엘'],[/\bAI\b/g,'에이아이'],[/\bERD\b/g,'이알디'],[/\bDDL\b/g,'디디엘'],[/\bDML\b/g,'디엠엘'],[/\bDCL\b/g,'디씨엘'],[/\bTCL\b/g,'티씨엘'],[/\bCRUD\b/g,'크러드'],[/\bPython\b/g,'파이썬'],[/\bINNER JOIN\b/g,'이너 조인'],[/\bLEFT JOIN\b/g,'레프트 조인'],[/\bJOIN\b/g,'조인'],[/\bNULL\b/g,'널'],[/\bID\b/g,'아이디'],[/COUNT\(\*\)/g,'카운트 별표']
+];
 function displayEnglish(markup){return replacements.reduce((value,[pattern,replacement])=>value.replace(pattern,replacement),markup)}
+function ttsText(value){return ttsReplacements.reduce((v,[pattern,replacement])=>v.replace(pattern,replacement),value)}
 function textOf(markup){const d=document.createElement('div');d.innerHTML=markup;return d.innerText.replace(/\s+/g,' ').trim()}
-function paragraphs(value){return value.split(/\n\s*\n/).map(p=>`<p>${p.trim()}</p>`).join('')}
+function paragraphs(value){return ttsText(value).split(/\n\s*\n/).map(p=>`<p>${p.trim()}</p>`).join('')}
 function scriptFor(s){
  if(s.s)return paragraphs(s.s);
  const title=s.t||s.l||'핵심 내용';
  const txt=textOf(s.h);
  const phrases=txt.split(/[.!?。]|\n/).map(v=>v.trim()).filter(v=>v&&v!==title).slice(0,5);
  const summary=phrases.length?`${phrases.join('. ')}.`:'';
- return `<p>이번에는 ‘${title}’이라는 주제를 살펴보겠습니다. ${summary} 각 항목의 뜻을 단순히 외우기보다 데이터의 의미와 업무 요구사항에 연결해 이해하는 것이 중요합니다. AI가 만든 결과도 같은 기준으로 확인해야 합니다.</p>`
+ return paragraphs(`이번에는 ‘${title}’이라는 주제를 살펴보겠습니다. ${summary} 각 항목의 뜻을 단순히 외우기보다 데이터의 의미와 업무 요구사항에 연결해 이해하는 것이 중요합니다. 에이아이가 만든 결과도 같은 기준으로 확인해야 합니다.`)
 }
 function render(){
  const s=CH1_SLIDES[i];
