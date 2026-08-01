@@ -6,133 +6,141 @@
 
 ## 권장 분량
 
-22~26페이지
+21~24페이지
+
+## 대상 독자
+
+- SQL을 처음 실행하는 독자
+- PostgreSQL에서 첫 테이블과 데이터를 직접 다루려는 독자
+- 조회와 변경 결과를 실행 전후로 검증하는 습관을 익히려는 독자
+- AI가 만든 SQL을 안전하게 검토하려는 독자
+
+## 선수 지식
+
+Chapter 03에서 PostgreSQL과 DBeaver 연결 환경을 준비했다면 별도의 SQL 경험은 필요하지 않다.
 
 ## 이 장의 역할
 
-PostgreSQL에서 첫 테이블을 만들고 데이터를 입력·조회·수정·삭제하면서, SQL 실행 전 예상 결과와 실행 후 실제 변화를 비교하는 습관을 익히도록 한다.
+Chapter 04는 SQL 기능을 최대한 많이 소개하는 장이 아니다. 독자가 첫 테이블을 만들고 기본 CRUD를 실행하면서 다음 검증 순환을 익히는 장이다.
 
-Chapter 03에서 환경 확인만 완료했으므로 Chapter 04에서 실제 테이블 생성과 CRUD 실습을 처음 시작한다. 실행 위치와 `search_path`, 자동 커밋, 결과 순서, `NULL`, 영향받은 행 수와 기준 데이터 상태를 함께 확인한다. 제약조건 오류와 참조 무결성은 Chapter 06, 트랜잭션은 Chapter 09, AI SQL 상세 검증은 Chapter 13으로 연결한다.
+```text
+SQL 읽기
+→ 예상 결과 작성
+→ 현재 연결과 실행 범위 확인
+→ 실행
+→ 반환 행 또는 영향받은 행 수 확인
+→ 실제 데이터와 비교
+```
+
+## 핵심 메시지
+
+```text
+SQL은 실행하는 것보다,
+실행 전에 어떤 데이터가 영향을 받고
+실행 후 실제 결과가 예상과 일치하는지 확인하는 것이 더 중요하다.
+```
+
+## 이 장을 마치면
+
+독자는 다음 작업을 수행할 수 있다.
+
+- `public.students` 테이블을 생성한다.
+- 한 행과 여러 행을 입력한다.
+- 필요한 열과 조건에 맞는 행을 조회한다.
+- `AND`, `OR`, `IN`과 문자열 패턴을 사용한다.
+- `NULL` 값을 올바르게 확인한다.
+- `DISTINCT`, `ORDER BY`, `LIMIT`을 사용한다.
+- 대상 행을 먼저 확인한 뒤 수정하거나 삭제한다.
+- 예상 결과와 실제 실행 결과를 비교한다.
+
+## 학습 표시
+
+```text
+핵심 학습
+→ 처음 SQL을 배우는 독자가 직접 실행할 내용
+
+선택 학습
+→ PostgreSQL의 편리한 기능과 추가 문법
+
+심화 학습
+→ 데이터 타입과 내부 동작을 더 정확하게 이해할 내용
+```
 
 ## 핵심 질문
 
 ```text
-현재 어떤 데이터베이스, 스키마와 search_path에서 SQL을 실행하는가?
-CREATE TABLE의 각 열과 제약조건은 무엇을 의미하는가?
-TIMESTAMPTZ와 CURRENT_TIMESTAMP는 등록 시각을 어떻게 저장하는가?
-IDENTITY 값은 왜 빈틈없는 순번이나 행 수가 아닌가?
-INSERT 후 자동 생성되는 값은 무엇인가?
-ORDER BY가 없는 결과 순서를 신뢰할 수 있는가?
-NULL은 일반 비교 연산에서 어떻게 처리되는가?
-ORDER BY와 LIMIT을 안정적으로 사용하는 방법은 무엇인가?
-UPDATE와 DELETE의 영향 범위와 자동 커밋 상태를 어떻게 확인하는가?
-실습 과정에서 달라지는 데이터 상태를 어떻게 구분하는가?
-AI가 만든 SQL의 예상 결과와 실제 결과를 어떻게 비교하는가?
+현재 어느 데이터베이스와 사용자로 실행하는가?
+SQL의 문자열·숫자·식별자는 어떻게 작성하는가?
+CREATE TABLE의 열, 타입과 제약조건은 무엇을 의미하는가?
+INSERT와 SELECT는 데이터를 어떻게 추가하고 조회하는가?
+WHERE와 논리 연산자는 대상 행을 어떻게 결정하는가?
+NULL은 왜 일반 값처럼 비교하지 않는가?
+DISTINCT, ORDER BY와 LIMIT은 각각 어떤 역할을 하는가?
+UPDATE와 DELETE의 대상을 어떻게 안전하게 확인하는가?
+AI가 만든 SQL의 예상 영향 범위를 어떻게 검토하는가?
 ```
 
-## 독자가 얻게 될 것
+## 주요 개념
 
-- `current_database()`, `current_schema()`와 `SHOW search_path`로 실행 위치를 확인할 수 있다.
-- `CREATE TABLE` 문을 읽고 `public.students` 테이블을 만들 수 있다.
-- 문자열, 정수와 시간대가 포함된 날짜시간 타입을 구분할 수 있다.
-- `IDENTITY`, `PRIMARY KEY`, `NOT NULL`, `UNIQUE`, `DEFAULT`의 기본 의미를 읽을 수 있다.
-- IDENTITY 값이 빈틈없는 순번을 보장하지 않는 이유를 설명할 수 있다.
-- `CURRENT_TIMESTAMP`가 현재 트랜잭션의 시작 시각을 반환함을 설명할 수 있다.
-- 단일 행과 여러 행을 `INSERT`할 수 있다.
-- `RETURNING`으로 자동 생성값을 확인할 수 있다.
-- 전체 열과 필요한 열만 `SELECT`할 수 있다.
-- `ORDER BY`가 없는 결과 순서가 보장되지 않음을 설명할 수 있다.
-- `WHERE`, 비교 연산자, `AND`, `OR`, `IN`, `LIKE`를 사용할 수 있다.
-- PostgreSQL의 `ILIKE`와 `_` 패턴을 설명할 수 있다.
-- 일반 비교에서 `NULL`이 `UNKNOWN`을 만드는 원리를 설명할 수 있다.
-- `IS NULL`, `IS NOT NULL`, `IS DISTINCT FROM`을 구분할 수 있다.
-- `ORDER BY`, `NULLS LAST`, 보조 정렬 기준과 `LIMIT`을 사용할 수 있다.
-- `UPDATE`와 `DELETE` 전에 같은 조건으로 `SELECT`할 수 있다.
-- 자동 커밋 상태와 영향받은 행 수를 확인할 수 있다.
-- 실습의 데이터 상태 체크포인트 A·B·C를 구분할 수 있다.
-- 초기화 SQL의 안전 보호 구문이 필요한 이유를 설명할 수 있다.
-- SQL 실행 전 예상 결과와 실행 후 실제 결과를 비교할 수 있다.
+### 핵심 학습
 
-## 핵심 개념
-
-- `current_database()`
-- `current_schema()`
-- `SHOW search_path`
-- `public.students`
+- 현재 데이터베이스와 사용자
+- 실행 문장·선택 영역·Auto-commit
+- SQL 키워드와 식별자 작성 규칙
+- 문자열 작은따옴표
 - `CREATE TABLE`
-- 데이터 타입
-- `TIMESTAMPTZ`
-- `CURRENT_TIMESTAMP`
-- `IDENTITY`
-- 시퀀스와 번호 공백
-- `PRIMARY KEY`
-- `NOT NULL`
-- `UNIQUE`
-- `DEFAULT`
+- `INTEGER`, `VARCHAR`, `NUMERIC`, `BOOLEAN`, `DATE`, `TIMESTAMPTZ`
+- `PRIMARY KEY`, `NOT NULL`, `UNIQUE`, `DEFAULT`
 - `INSERT`
-- `RETURNING`
 - `SELECT`
-- 열 별칭 `AS`
-- 결과 순서의 비결정성
 - `WHERE`
 - 비교 연산자
 - `AND`, `OR`, `IN`
-- `LIKE`, `ILIKE`, `%`, `_`
-- `NULL`, `UNKNOWN`
-- `IS NULL`, `IS NOT NULL`
-- `IS DISTINCT FROM`
-- `ORDER BY`
+- `LIKE`, `%`, `_`
+- `NULL`, `IS NULL`, `IS NOT NULL`
+- `DISTINCT`
+- `ORDER BY`, `LIMIT`
+- `UPDATE`, `DELETE`
+- 예상 결과와 영향받은 행 수
+
+### 선택 학습
+
+- 열 별칭 `AS`
+- PostgreSQL의 `RETURNING`
+- PostgreSQL의 `ILIKE`
 - `NULLS FIRST`, `NULLS LAST`
-- 보조 정렬 기준
-- `LIMIT`
-- `UPDATE`
-- `DELETE`
-- CRUD
-- 자동 커밋
-- 영향받은 행 수
-- 데이터 상태 체크포인트
-- 예상 결과와 실제 결과
-- 안전한 초기화
+- `IS DISTINCT FROM`
+- `CAST()`와 `::`
+- 여러 열 `UPDATE`
+- `UUID`, `JSONB` 미리보기
+
+### 심화 학습
+
+- IDENTITY 번호 공백
+- `CURRENT_TIMESTAMP`와 트랜잭션 시각
+- `NULL`의 3값 논리
+- `TIMESTAMP`와 `TIMESTAMPTZ` 확장
+- 시퀀스 내부 동작
 
 ## 본문 구성
 
-1. 첫 번째 테이블과 기본 SQL
-2. 실습 위치부터 확인하기
-3. SQL을 실행하고 검증하는 기본 순서
-   - 자동 커밋 경고
+1. 첫 번째 테이블과 SQL 실습 흐름
+2. 실습 위치와 실행 범위 확인하기
+3. SQL의 기본 작성 규칙
 4. `CREATE TABLE`로 첫 테이블 만들기
-   - `TIMESTAMPTZ`
-   - IDENTITY 번호 공백
-   - `CURRENT_TIMESTAMP`
 5. 열, 데이터 타입과 제약조건 읽기
-   - 교육용 최소 구조의 한계
-6. `INSERT`로 단일 행 입력하기
-7. 여러 행 입력과 자동값 확인
-   - 체크포인트 A
-8. `SELECT`로 데이터 조회하기
-   - `ORDER BY` 없는 순서
-9. `WHERE`와 비교 연산자
-   - `<>`와 `NULL`
-10. `AND`, `OR`, `IN`과 괄호
-11. `LIKE`와 `ILIKE`로 문자열 검색하기
-12. `NULL`, `IS NULL`, `IS NOT NULL`
-13. `ORDER BY`와 `LIMIT`
-   - `NULLS LAST`
-   - 동률 보조 정렬
-14. `UPDATE`를 안전하게 실행하기
-   - 체크포인트 B
-15. `DELETE`를 안전하게 실행하기
-   - 체크포인트 C
-16. CRUD와 서비스 기능 연결하기
-17. AI가 만든 SQL 검토하기
-   - 실행하지 않는 가상 삭제 예제
-18. 종합 실습과 독자 워크북 연결
-19. 자주 하는 실수
-20. 스스로 확인하기
-   - 체크포인트 A 복원 안내
-21. 권장 해설
-22. 핵심 정리
-23. 다음 장에서는
+6. `INSERT`로 데이터 입력하기
+7. `SELECT`로 필요한 데이터 조회하기
+8. `WHERE`와 비교 연산자
+9. `AND`, `OR`, `IN`으로 조건 조합하기
+10. `LIKE`로 문자열 검색하기
+11. `NULL` 값 확인하기
+12. `DISTINCT`, `ORDER BY`와 `LIMIT`
+13. `UPDATE`를 안전하게 실행하기
+14. `DELETE`를 안전하게 실행하기
+15. AI가 만든 SQL 검토하기
+16. 자주 하는 실수와 스스로 확인하기
+17. 핵심 정리와 다음 장
 
 ## 실습 테이블
 
@@ -147,11 +155,9 @@ CREATE TABLE public.students (
 );
 ```
 
-이 구조는 기본 SQL을 배우기 위한 최소 구조이다. 학년 범위, 전공 표준화와 이메일 업무 규칙은 Chapter 06에서 보완한다.
+이 구조는 기본 SQL 학습용 최소 구조다. 학년 범위, 전공 표준화, 이메일 업무 규칙과 삭제 정책은 Chapter 06에서 보완한다.
 
-## 실습 데이터
-
-`students` 테이블에 다음 6명을 사용한다.
+## 샘플 데이터
 
 | 이름 | 이메일 | 전공 | 학년 |
 | --- | --- | --- | ---: |
@@ -162,61 +168,90 @@ CREATE TABLE public.students (
 | 정하늘 | haneul@example.com | AI데이터공학 | 2 |
 | 윤서진 | seojin@example.com | NULL | NULL |
 
-## 데이터 상태 체크포인트
+## 데이터 상태 표현
 
-| 체크포인트 | 학생 수 | 이준호 학년 | 박서연 |
-| --- | ---: | ---: | --- |
-| A: 입력 완료 | 6 | 3 | 존재 |
-| B: UPDATE 완료 | 6 | 4 | 존재 |
-| C: DELETE 완료 | 5 | 4 | 삭제 |
+```text
+초기 데이터 상태
+→ 학생 6명, 이준호 grade 3, 박서연 존재
 
-AI 삭제 예제는 체크포인트 C에서 컴퓨터공학 학생 2명을 대상으로 검토만 하고 실행하지 않는다. 자기 확인 문제는 체크포인트 A 기준이며 필요하면 초기화 후 입력 구간까지만 다시 실행한다.
+수정 실습 후 상태
+→ 학생 6명, 이준호 grade 4, 박서연 존재
 
-## 정렬 원칙
-
-```sql
--- 학년 정렬
-ORDER BY grade DESC NULLS LAST, id ASC
-
--- 최신 3명
-ORDER BY created_at DESC, id DESC
-LIMIT 3
+삭제 실습 후 상태
+→ 학생 5명, 이준호 grade 4, 박서연 삭제
 ```
 
-`ORDER BY`가 없는 행 순서는 보장되지 않는다. `LIMIT`에는 동률을 구분하는 보조 정렬 기준을 사용한다.
+기존 체크포인트 A·B·C 표현은 독자의 현재 상태를 설명하는 문장으로 대체한다.
 
 ## 코드 구조
 
 ```text
 code/chapter04/
-├── basic_crud.sql
+├── 01_create_students.sql
+├── 02_insert_students.sql
+├── 03_select_students.sql
+├── 04_update_delete_students.sql
+├── verify_students.sql
 ├── reset_students.sql
+├── basic_crud.sql
 └── README.md
 ```
 
-- `basic_crud.sql`: 위치 확인, 테이블 생성, 입력, 조회, 조건, `NULL`, 안정적인 정렬, 수정과 삭제 실습
-- `reset_students.sql`: 현재 데이터베이스와 스키마를 검증하는 보호 구문 안에서 `public.students`를 삭제하는 초기화 파일
+- 번호 파일: 처음 학습하는 독자의 권장 실행 흐름
+- `verify_students.sql`: 현재 테이블 구조와 데이터 상태 확인
+- `reset_students.sql`: 안전 조건을 확인한 뒤 실습 테이블 초기화
+- `basic_crud.sql`: 기존 링크와 사용자를 위한 통합 참고 파일
+
+## SQL 파일별 상태
+
+| 파일 | 시작 상태 | 완료 상태 | 반복 실행 |
+| --- | --- | --- | --- |
+| `01_create_students.sql` | 테이블 없음 | 빈 테이블 | 한 번 |
+| `02_insert_students.sql` | 빈 테이블 | 학생 6명 | 한 번 |
+| `03_select_students.sql` | 학생 6명 | 변경 없음 | 가능 |
+| `04_update_delete_students.sql` | 학생 6명 | 수정·삭제 상태 | 한 번씩 선택 실행 |
+| `verify_students.sql` | 어떤 상태 | 상태 조회 | 가능 |
+| `reset_students.sql` | 어떤 실습 상태 | 테이블 없음 | 필요할 때만 |
+
+## AI SQL 검토 질문
+
+```text
+1. 현재 연결과 테이블이 맞는가?
+2. 사용하는 열과 데이터 타입이 맞는가?
+3. WHERE 조건과 NULL 처리가 요구사항과 맞는가?
+4. 예상 반환 행 또는 영향받는 행 수는 몇 개인가?
+5. UPDATE·DELETE 전에 같은 조건으로 SELECT했는가?
+6. 실행 결과가 예상과 일치하는가?
+```
 
 ## 편집 원칙
 
-- 관계형 데이터베이스 기본 개념은 Chapter 02와 중복하지 않고 실제 SQL 코드에 연결한다.
-- DDL·DML·DCL·TCL 분류는 참고 수준으로만 다룬다.
-- 모든 위치 확인에는 `current_database()`, `current_schema()`, `SHOW search_path`를 사용한다.
-- 테이블명은 `public.students`로 명시한다.
-- `created_at`은 `TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP`로 통일한다.
-- IDENTITY는 행 식별용이며 빈틈없는 순번이 아님을 설명한다.
-- 기본 SQL 파일에 자동 `DROP TABLE`을 포함하지 않는다.
-- SQL 파일은 구간별 선택 실행을 기본으로 안내한다.
-- 자동 커밋 상태에서는 변경이 즉시 확정될 수 있음을 경고한다.
-- 조회 결과 순서가 필요하면 항상 `ORDER BY`를 사용한다.
-- 동률이 가능한 정렬에는 `id` 보조 기준을 사용한다.
-- UPDATE와 DELETE는 `SELECT → 변경 RETURNING → 영향 행 수 → SELECT` 흐름으로 설명한다.
-- `= NULL`은 문법 오류가 아니라 `UNKNOWN` 결과를 만든다는 점을 설명한다.
-- `<>` 조건에서도 `NULL` 행이 제외됨을 설명한다.
-- DBeaver의 특정 상태 문구보다 영향받은 행 수와 `RETURNING` 결과를 확인하도록 안내한다.
-- AI가 만든 SQL은 기준 데이터 상태, 구조, 타입, 조건, `NULL`, 영향 범위, 자동 커밋과 실행 결과로 검증한다.
-- 자기 확인 문제에는 권장 해설을 제공한다.
-- 본문, 워크북, SQL 파일과 README의 예제 구조와 데이터 상태를 동기화한다.
+- `current_schema() = public`을 절대 완료 조건으로 사용하지 않는다.
+- 주요 테이블은 `public.students`처럼 스키마를 명시한다.
+- SQL 기본 작성 규칙을 한 절에 모아 설명한다.
+- 데이터 타입은 대표 범주와 사용 목적을 중심으로 소개한다.
+- 금액은 `NUMERIC`을 우선 검토한다는 원칙을 제시한다.
+- `CAST()`와 `::`는 선택 학습으로 소개한다.
+- `RETURNING`, `ILIKE`, `IS DISTINCT FROM`, `NULLS LAST`는 PostgreSQL 기능으로 표시한다.
+- IDENTITY와 시간의 내부 동작은 심화 박스로 이동한다.
+- `DISTINCT`가 원본 데이터를 변경하지 않는 조회 기능임을 설명한다.
+- `ORDER BY` 없는 결과 순서를 가정하지 않는다.
+- `LIMIT`에는 안정적인 정렬 기준을 함께 사용한다.
+- UPDATE와 DELETE는 `SELECT → 변경 → 영향 행 확인 → SELECT` 흐름으로 설명한다.
+- Auto-commit 경고를 각 절에서 반복하지 않고 공통 실행 원칙으로 제시한다.
+- 종합 실습의 본문 반복은 제거하고 워크북과 번호 SQL 파일로 연결한다.
+- 자기 확인 문제는 초기 데이터 상태를 기준으로 한다.
+
+## 후속 장으로 이동
+
+| 내용 | 이동 장 |
+| --- | --- |
+| 학년 범위와 복잡한 제약조건 | Chapter 06 |
+| 정규화와 이메일 업무 규칙 | Chapter 06 |
+| 집계 함수 | Chapter 08 |
+| 트랜잭션과 ROLLBACK | Chapter 09 |
+| JSONB와 비정형 확장 | Chapter 12 |
+| AI SQL 체계적 검증 | Chapter 13 |
 
 ## 다음 장 연결
 
