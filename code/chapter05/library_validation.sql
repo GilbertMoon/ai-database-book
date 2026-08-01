@@ -1,88 +1,148 @@
--- Chapter 05. 도서 대여 시스템 구조 확인
--- 목적: 샘플 데이터의 행 수, 선택값과 테이블 관계가 ERD와 일치하는지 확인합니다.
--- 실행 전 library_schema.sql과 library_seed.sql을 순서대로 실행합니다.
+-- Chapter 05 호환 파일: 03_library_validation.sql과 같은 역할
+-- 기존 링크와 강의 자료 호환을 위해 유지합니다.
+-- 이 파일은 데이터를 변경하지 않으므로 반복 실행할 수 있습니다.
 
--- ============================================================
--- 0. 현재 실행 위치 확인
--- 기대 결과: ai_database_book / public
--- ============================================================
 SELECT current_database();
+SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
--- ============================================================
--- 1. 테이블별 행 수 확인
--- 기대 결과: members 3, books 3, loans 4
--- ============================================================
-SELECT COUNT(*) AS member_count FROM public.members;
-SELECT COUNT(*) AS book_count FROM public.books;
-SELECT COUNT(*) AS loan_count FROM public.loans;
+DO $$
+DECLARE
+    v_member_count bigint;
+    v_book_count bigint;
+    v_loan_count bigint;
+    v_open_loan_count bigint;
+    v_orphan_member_count bigint;
+    v_orphan_book_count bigint;
+    v_book_201_count bigint;
+    v_book_201_invalid_order bigint;
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '검증 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
 
--- ============================================================
--- 2. 각 테이블의 원본 데이터 확인
--- ============================================================
-SELECT * FROM public.members ORDER BY id;
-SELECT * FROM public.books ORDER BY id;
-SELECT * FROM public.loans ORDER BY id;
+    IF to_regclass('public.members') IS NULL
+       OR to_regclass('public.books') IS NULL
+       OR to_regclass('public.loans') IS NULL THEN
+        RAISE EXCEPTION
+            '검증 중단: Chapter 05 테이블이 모두 존재하지 않습니다.';
+    END IF;
 
--- ============================================================
--- 3. ERD 관계가 실제 데이터로 연결되는지 확인
--- JOIN 문법은 Chapter 08에서 자세히 다룹니다.
--- 기대 결과: 대여 기록 4행
--- ============================================================
+    SELECT COUNT(*) INTO v_member_count FROM public.members;
+    SELECT COUNT(*) INTO v_book_count FROM public.books;
+    SELECT COUNT(*) INTO v_loan_count FROM public.loans;
+
+    SELECT COUNT(*) INTO v_open_loan_count
+    FROM public.loans
+    WHERE returned_at IS NULL;
+
+    SELECT COUNT(*) INTO v_orphan_member_count
+    FROM public.loans AS l
+    LEFT JOIN public.members AS m
+        ON l.member_id = m.id
+    WHERE m.id IS NULL;
+
+    SELECT COUNT(*) INTO v_orphan_book_count
+    FROM public.loans AS l
+    LEFT JOIN public.books AS b
+        ON l.book_id = b.id
+    WHERE b.id IS NULL;
+
+    SELECT COUNT(*) INTO v_book_201_count
+    FROM public.loans
+    WHERE book_id = 201;
+
+    SELECT COUNT(*) INTO v_book_201_invalid_order
+    FROM public.loans AS earlier
+    JOIN public.loans AS later
+        ON earlier.book_id = later.book_id
+       AND earlier.borrowed_at < later.borrowed_at
+    WHERE earlier.book_id = 201
+      AND earlier.returned_at IS NOT NULL
+      AND earlier.returned_at >= later.borrowed_at;
+
+    IF v_member_count <> 3
+       OR v_book_count <> 3
+       OR v_loan_count <> 4
+       OR v_open_loan_count <> 3
+       OR v_orphan_member_count <> 0
+       OR v_orphan_book_count <> 0
+       OR v_book_201_count <> 2
+       OR v_book_201_invalid_order <> 0 THEN
+        RAISE EXCEPTION
+            '검증 실패: members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, book201=%, invalid_order=%',
+            v_member_count,
+            v_book_count,
+            v_loan_count,
+            v_open_loan_count,
+            v_orphan_member_count,
+            v_orphan_book_count,
+            v_book_201_count,
+            v_book_201_invalid_order;
+    END IF;
+
+    RAISE NOTICE 'Chapter 05 library model validation passed';
+END
+$$;
+
+SELECT id, name, email, joined_at
+FROM public.members
+ORDER BY id;
+
+SELECT id, title, author, published_year, isbn
+FROM public.books
+ORDER BY id;
+
+SELECT id, member_id, book_id, borrowed_at, due_at, returned_at
+FROM public.loans
+ORDER BY id;
+
 SELECT
-    loans.id,
-    members.name AS member_name,
-    books.title AS book_title,
-    loans.borrowed_at,
-    loans.due_at,
-    loans.returned_at
-FROM public.loans AS loans
-JOIN public.members AS members
-    ON loans.member_id = members.id
-JOIN public.books AS books
-    ON loans.book_id = books.id
-ORDER BY loans.id;
+    l.id AS loan_id,
+    m.name AS member_name,
+    b.title AS book_title,
+    l.borrowed_at,
+    l.due_at,
+    l.returned_at
+FROM public.loans AS l
+JOIN public.members AS m
+    ON l.member_id = m.id
+JOIN public.books AS b
+    ON l.book_id = b.id
+ORDER BY l.id;
 
--- ============================================================
--- 4. 선택 속성 returned_at 확인
--- 기대 결과: 미반납 기록 3행
--- ============================================================
-SELECT
-    id,
-    member_id,
-    book_id,
-    borrowed_at,
-    due_at
+SELECT id, member_id, book_id, borrowed_at, due_at
 FROM public.loans
 WHERE returned_at IS NULL
 ORDER BY due_at, id;
 
--- ============================================================
--- 5. 1:N 관계 확인
--- 회원 101과 도서 201이 여러 대여 기록을 가지는지 확인합니다.
--- ============================================================
-SELECT *
+SELECT id, member_id, book_id, borrowed_at, returned_at
 FROM public.loans
 WHERE member_id = 101
-ORDER BY id;
+ORDER BY borrowed_at, id;
 
-SELECT *
+SELECT id, member_id, borrowed_at, due_at, returned_at
 FROM public.loans
 WHERE book_id = 201
 ORDER BY borrowed_at, id;
 
--- ============================================================
--- 6. 도서 201의 시간 순서 확인
--- 첫 대여가 4월 2일 반납된 뒤 4월 3일 다시 대여되었습니다.
--- 정상 샘플에서는 같은 한 권이 동시에 두 미반납 대여에 속하지 않습니다.
--- ============================================================
 SELECT
-    id,
-    member_id,
-    borrowed_at,
-    due_at,
-    returned_at
-FROM public.loans
-WHERE book_id = 201
-ORDER BY borrowed_at, id;
+    (SELECT COUNT(*) FROM public.members) AS member_count,
+    (SELECT COUNT(*) FROM public.books) AS book_count,
+    (SELECT COUNT(*) FROM public.loans) AS loan_count,
+    (SELECT COUNT(*) FROM public.loans WHERE returned_at IS NULL) AS open_loan_count,
+    (
+        SELECT COUNT(*)
+        FROM public.loans AS l
+        LEFT JOIN public.members AS m ON l.member_id = m.id
+        WHERE m.id IS NULL
+    ) AS orphan_member_reference_count,
+    (
+        SELECT COUNT(*)
+        FROM public.loans AS l
+        LEFT JOIN public.books AS b ON l.book_id = b.id
+        WHERE b.id IS NULL
+    ) AS orphan_book_reference_count;
