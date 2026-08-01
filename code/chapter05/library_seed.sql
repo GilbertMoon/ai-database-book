@@ -1,55 +1,74 @@
--- Chapter 05. 도서 대여 시스템 샘플 데이터
--- 목적: ERD의 1:N 관계와 선택 가능한 returned_at을 작은 데이터로 확인합니다.
--- 실행 전 library_schema.sql을 먼저 실행합니다.
--- 이 파일은 관계를 재현하기 위해 명시적인 실습 ID를 사용합니다.
--- 명시적 ID 입력은 IDENTITY의 다음 값을 자동으로 바꾸지 않으므로 마지막에 재시작 값을 조정합니다.
--- 주의: 자동 커밋 상태에서는 일부 INSERT만 반영될 수 있으므로 실행 후 validation 파일로 확인합니다.
+-- Chapter 05 호환 파일: 02_library_seed.sql과 같은 역할
+-- 기존 링크와 강의 자료 호환을 위해 유지합니다.
+-- 번호 파일과 이 파일을 모두 실행하지 마세요.
 
--- ============================================================
--- 0. 현재 실행 위치 확인
--- 기대 결과: ai_database_book / public
--- ============================================================
 SELECT current_database();
+SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
--- ============================================================
--- 1. 회원 3명
--- ============================================================
+DO $$
+DECLARE
+    v_member_count bigint;
+    v_book_count bigint;
+    v_loan_count bigint;
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '입력 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    IF current_setting('transaction_read_only')::boolean THEN
+        RAISE EXCEPTION
+            '입력 중단: 현재 연결이 읽기 전용입니다.';
+    END IF;
+
+    IF to_regclass('public.members') IS NULL
+       OR to_regclass('public.books') IS NULL
+       OR to_regclass('public.loans') IS NULL THEN
+        RAISE EXCEPTION
+            '입력 중단: Chapter 05 테이블이 모두 존재하지 않습니다. 01_library_schema.sql 또는 library_schema.sql을 먼저 실행하세요.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_member_count FROM public.members;
+    SELECT COUNT(*) INTO v_book_count FROM public.books;
+    SELECT COUNT(*) INTO v_loan_count FROM public.loans;
+
+    IF v_member_count <> 0 OR v_book_count <> 0 OR v_loan_count <> 0 THEN
+        RAISE EXCEPTION
+            '입력 중단: 테이블이 비어 있지 않습니다. members=%, books=%, loans=%',
+            v_member_count, v_book_count, v_loan_count;
+    END IF;
+END
+$$;
+
 INSERT INTO public.members (id, name, email, joined_at)
 VALUES
-    (101, '김민지', 'minji@example.com', '2026-03-01'),
-    (102, '이준호', 'junho@example.com', '2026-03-05'),
-    (103, '박서연', 'seoyeon@example.com', '2026-03-10');
+    (101, '김민지', 'minji@example.com', DATE '2026-03-01'),
+    (102, '이준호', 'junho@example.com', DATE '2026-03-05'),
+    (103, '박서연', 'seoyeon@example.com', DATE '2026-03-10');
 
--- ============================================================
--- 2. 도서 3건
--- ============================================================
 INSERT INTO public.books (id, title, author, published_year, isbn)
 VALUES
     (201, '데이터베이스 입문', '문길래', 2026, 'ISBN-001'),
     (202, 'SQL 기초', '홍길동', 2025, 'ISBN-002'),
     (203, 'ERD 설계 연습', '이몽룡', 2024, 'ISBN-003');
 
--- ============================================================
--- 3. 대여 기록 4건
--- 회원 101은 여러 대여 기록을 가집니다.
--- 도서 201은 4월 1일 대여가 반납된 뒤 4월 3일 다시 대여됩니다.
--- 동일한 한 권이 동시에 두 회원에게 미반납 상태가 되지 않도록 샘플을 구성합니다.
--- returned_at이 NULL인 3행은 아직 반납되지 않은 기록입니다.
--- ============================================================
-INSERT INTO public.loans (id, member_id, book_id, borrowed_at, due_at, returned_at)
+INSERT INTO public.loans (
+    id,
+    member_id,
+    book_id,
+    borrowed_at,
+    due_at,
+    returned_at
+)
 VALUES
-    (1001, 101, 201, '2026-04-01', '2026-04-15', '2026-04-02'),
-    (1002, 101, 202, '2026-04-02', '2026-04-16', NULL),
-    (1003, 102, 201, '2026-04-03', '2026-04-17', NULL),
-    (1004, 103, 203, '2026-04-05', '2026-04-19', NULL);
+    (1001, 101, 201, DATE '2026-04-01', DATE '2026-04-15', DATE '2026-04-02'),
+    (1002, 101, 202, DATE '2026-04-02', DATE '2026-04-16', NULL),
+    (1003, 102, 201, DATE '2026-04-03', DATE '2026-04-17', NULL),
+    (1004, 103, 203, DATE '2026-04-05', DATE '2026-04-19', NULL);
 
--- ============================================================
--- 4. IDENTITY 다음 값 조정
--- 명시적 ID 입력은 연결된 IDENTITY 시퀀스를 소비하지 않습니다.
--- 이후 자동 ID가 샘플 ID 범위와 충돌하지 않도록 다음 값을 조정합니다.
--- ============================================================
 ALTER TABLE public.members
     ALTER COLUMN id RESTART WITH 104;
 
@@ -59,5 +78,7 @@ ALTER TABLE public.books
 ALTER TABLE public.loans
     ALTER COLUMN id RESTART WITH 1005;
 
--- 같은 파일을 다시 실행하면 PK 중복 오류가 발생할 수 있습니다.
--- 처음부터 다시 시작해야 할 때만 reset_library.sql을 먼저 실행합니다.
+SELECT
+    (SELECT COUNT(*) FROM public.members) AS member_count,
+    (SELECT COUNT(*) FROM public.books) AS book_count,
+    (SELECT COUNT(*) FROM public.loans) AS loan_count;
