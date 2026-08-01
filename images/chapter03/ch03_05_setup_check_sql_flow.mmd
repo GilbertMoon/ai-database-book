@@ -1,10 +1,10 @@
 flowchart TD
     A[setup_check.sql<br/>환경 정보 조회]
     B{DB · public · USAGE · 쓰기 상태 확인}
-    C[연결 · 권한 · read-only 설정 수정]
+    C[연결 · 권한 · read-only 설정 재확인]
     D[setup_validate_local.sql 실행]
-    E{예외 없이 통과하는가?}
-    F[예외 메시지의 실패 조건 수정]
+    E{권장 로컬 조건을 통과하는가?}
+    F[예외 메시지의 확인 항목 수정]
     G[통과 메시지와 환경 결과 기록]
     H[필요할 때 두 파일 다시 실행]
     A --> B
