@@ -6,7 +6,7 @@ flowchart TD
     E[current_user · transaction_read_only<br/>사용자와 쓰기 가능 상태 확인]
     F[TimeZone · CURRENT_TIMESTAMP<br/>시간대와 시각 확인]
     G[한 행 요약<br/>DB · public · USAGE · 계산 결과]
-    H{필수 결과가 맞는가?}
+    H{기본 결과를 확인했는가?}
     I[연결 · 권한 · 읽기 전용 상태 재확인]
     J[setup_validate_local.sql로 이동]
     A --> B --> C --> D --> E --> F --> G --> H
