@@ -2,40 +2,61 @@
 
 ## 관계형 데이터베이스와 SQL 시작하기
 
-이 폴더는 Chapter 04의 기본 SQL 실습 파일을 관리합니다.
+이 폴더는 Chapter 04의 첫 테이블과 기본 SQL 실습 파일을 관리합니다.
 
 ---
 
 ## 파일 목록
 
-| 파일 | 설명 |
-| --- | --- |
-| `basic_crud.sql` | 위치 확인, 테이블 생성, INSERT, SELECT, 조건, NULL, 정렬, UPDATE와 DELETE 실습 |
-| `reset_students.sql` | 현재 데이터베이스와 스키마를 검증한 뒤 `public.students`를 삭제하는 초기화 파일 |
+| 파일 | 시작 상태 | 완료 상태 | 반복 실행 |
+| --- | --- | --- | --- |
+| `01_create_students.sql` | 테이블 없음 | 빈 `public.students` | 한 번 |
+| `02_insert_students.sql` | 빈 테이블 | 샘플 학생 6명 | 한 번 |
+| `03_select_students.sql` | 학생 6명 | 데이터 변경 없음 | 가능 |
+| `04_update_delete_students.sql` | 초기 학생 6명 | 이준호 수정·박서연 삭제 | 한 번씩 확인 실행 |
+| `verify_students.sql` | 어떤 실습 상태 | 구조와 데이터 상태 조회 | 가능 |
+| `reset_students.sql` | 어떤 실습 상태 | `public.students` 삭제 | 필요할 때만 |
+| `basic_crud.sql` | 상태에 따라 다름 | 통합 참고 | 구간별 선택 실행 |
+
+처음 학습하는 독자는 번호 파일을 순서대로 사용합니다. `basic_crud.sql`은 기존 링크와 사용자를 위한 통합 참고 파일입니다.
 
 ---
 
-## 기본 실행 순서
+## 권장 실행 순서
 
-1. DBeaver에서 `ai_database_book` 데이터베이스에 연결합니다.
-2. 다음 위치 확인 SQL을 실행합니다.
-
-```sql
-SELECT current_database();
-SELECT current_schema();
-SHOW search_path;
+```text
+현재 연결 확인
+→ 01_create_students.sql
+→ 02_insert_students.sql
+→ verify_students.sql
+→ 03_select_students.sql
+→ 04_update_delete_students.sql
+→ verify_students.sql
 ```
 
-3. DBeaver의 자동 커밋 상태를 확인합니다.
-4. `basic_crud.sql`을 엽니다.
-5. 파일 전체가 아니라 현재 학습 중인 구간만 선택해 실행합니다.
-6. `CREATE TABLE` 구간은 테이블이 없을 때 한 번만 실행합니다.
-7. 샘플 데이터 입력 후 전체 행 수가 6인지 확인합니다.
-8. 조회 SQL은 실행 전 반환 열, 예상 행과 정렬 순서를 먼저 적습니다.
-9. `UPDATE`와 `DELETE`는 반드시 앞뒤의 `SELECT`와 함께 실행합니다.
-10. 영향받은 행 수와 `RETURNING` 결과를 확인합니다.
+처음부터 다시 시작할 때는 다음 순서를 사용합니다.
 
-> 자동 커밋 상태에서는 `INSERT`, `UPDATE`, `DELETE` 실행 직후 변경이 확정될 수 있습니다. 일반적인 실행 취소 기능으로 되돌릴 수 있다고 가정하지 않습니다.
+```text
+reset_students.sql
+→ 01_create_students.sql
+→ 02_insert_students.sql
+→ verify_students.sql
+```
+
+---
+
+## 공통 실행 원칙
+
+```text
+1. ai_database_book 연결인지 확인한다.
+2. 현재 사용자와 search_path를 확인한다.
+3. 실행할 문장 또는 영역만 선택한다.
+4. Auto-commit 상태를 확인한다.
+5. 실행 전 예상 반환 행 또는 영향 행 수를 적는다.
+6. 실행 후 실제 결과와 비교한다.
+```
+
+현재 스키마는 환경에 따라 `public`이 아닐 수 있습니다. 파일은 `public.students`처럼 스키마를 명시하므로 현재 스키마를 `public`으로 강제하지 않습니다.
 
 ---
 
@@ -52,134 +73,152 @@ CREATE TABLE public.students (
 );
 ```
 
-- `id`는 행을 고유하게 구분하는 내부 식별자입니다.
-- IDENTITY 번호는 입력 실패, 삭제와 트랜잭션 취소로 빈 구간이 생길 수 있습니다.
-- `id`를 학생 수나 빈틈없는 순번으로 사용하지 않습니다.
-- `CURRENT_TIMESTAMP`는 현재 트랜잭션의 시작 시각을 반환합니다.
-- `created_at`이 같은 행이 있을 수 있으므로 최신 정렬에는 `id`를 보조 기준으로 사용합니다.
-
----
-
-## 데이터 상태 체크포인트
-
-| 체크포인트 | 학생 수 | 이준호 학년 | 박서연 |
-| --- | ---: | ---: | --- |
-| A: 입력 완료 | 6 | 3 | 존재 |
-| B: UPDATE 완료 | 6 | 4 | 존재 |
-| C: DELETE 완료 | 5 | 4 | 삭제 |
-
-본문의 자기 확인 문제는 체크포인트 A를 기준으로 합니다. 앞에서 수정과 삭제를 완료했다면 초기화 후 생성·입력 구간까지만 다시 실행합니다.
-
----
-
-## 안정적인 조회와 정렬
-
-`ORDER BY`가 없는 조회 결과의 행 순서는 보장되지 않습니다.
-
-```sql
-SELECT id, name, email
-FROM public.students
-ORDER BY id ASC;
-```
-
-학년 내림차순에서 `NULL`을 마지막에 표시합니다.
-
-```sql
-SELECT *
-FROM public.students
-ORDER BY grade DESC NULLS LAST, id ASC;
-```
-
-최신 3명은 동률을 구분하는 보조 정렬 기준을 사용합니다.
-
-```sql
-SELECT *
-FROM public.students
-ORDER BY created_at DESC, id DESC
-LIMIT 3;
-```
-
----
-
-## NULL 비교 주의
-
-```sql
--- 원하는 결과를 반환하지 않는 예
-WHERE major = NULL
-
--- NULL 여부 확인
-WHERE major IS NULL
-```
-
-`major <> '경영학'`은 `major`가 `NULL`인 행을 포함하지 않습니다.
-
-```sql
--- NULL도 포함
-WHERE major <> '경영학'
-   OR major IS NULL
-```
-
-PostgreSQL에서는 다음 비교도 사용할 수 있습니다.
-
-```sql
-WHERE major IS DISTINCT FROM '경영학'
-```
-
----
-
-## 반복 실습 방법
-
-`basic_crud.sql`은 기존 테이블을 자동으로 삭제하지 않습니다.
-
-실습을 처음부터 다시 시작해야 할 때만 다음 순서를 따릅니다.
+이 구조는 기본 SQL 학습용 최소 구조입니다.
 
 ```text
-현재 데이터베이스·스키마·search_path 확인
-→ reset_students.sql 실행
-→ basic_crud.sql의 CREATE TABLE 구간 실행
-→ 단일·다중·NULL 행 입력 구간 실행
-→ 학생 수 6명 확인
+id
+→ 내부 식별자이며 학생 수나 학번이 아님
+
+major, grade
+→ 값을 생략하면 NULL 가능
+
+created_at
+→ 값을 생략하면 기본 시각 값 저장
 ```
 
-`reset_students.sql`은 하나의 `DO` 블록 안에서 다음을 수행합니다.
-
-```text
-현재 데이터베이스가 ai_database_book인지 확인
-→ 현재 스키마가 public인지 확인
-→ 조건이 맞을 때만 public.students 삭제
-```
-
-보존해야 할 데이터가 없는지 확인한 뒤 실행합니다.
+학년 범위, 전공 표준화, 이메일 업무 규칙은 Chapter 06에서 보완합니다.
 
 ---
 
-## 샘플 데이터 기준
+## 데이터 상태
 
-| 이름 | 이메일 | 전공 | 학년 |
-| --- | --- | --- | ---: |
-| 김민지 | minji@example.com | 컴퓨터공학 | 2 |
-| 이준호 | junho@example.com | 데이터사이언스 | 3 |
-| 박서연 | seoyeon@example.com | 경영학 | 1 |
-| 최현우 | hyunwoo@example.com | 컴퓨터공학 | 4 |
-| 정하늘 | haneul@example.com | AI데이터공학 | 2 |
-| 윤서진 | seojin@example.com | NULL | NULL |
+### 초기 데이터 상태
+
+| 항목 | 상태 |
+| --- | --- |
+| 학생 수 | 6 |
+| 이준호 학년 | 3 |
+| 박서연 | 존재 |
+| 컴퓨터공학 학생 | 김민지, 최현우 |
+| 전공·학년이 `NULL`인 학생 | 윤서진 |
+
+### 수정 실습 후 상태
+
+```text
+학생 6명
+이준호 grade 4
+박서연 존재
+```
+
+### 삭제 실습 후 상태
+
+```text
+학생 5명
+이준호 grade 4
+박서연 삭제
+```
+
+기존 체크포인트 A·B·C 대신 상태를 문장으로 표현합니다.
+
+---
+
+## 조회 파일 범위
+
+`03_select_students.sql`에는 다음 내용이 포함됩니다.
+
+### 핵심
+
+```text
+SELECT와 필요한 열
+WHERE와 비교 연산자
+AND·OR·IN
+LIKE
+NULL·IS NULL·IS NOT NULL
+DISTINCT
+ORDER BY·LIMIT
+```
+
+### 선택
+
+```text
+ILIKE
+NULLS LAST
+IS DISTINCT FROM
+CAST()
+PostgreSQL의 :: 형 변환
+```
+
+선택 문법은 PostgreSQL 고유 기능이 포함될 수 있습니다.
+
+---
+
+## 안전한 변경 순서
+
+`04_update_delete_students.sql`은 초기 데이터 상태인지 먼저 확인합니다.
+
+```text
+SELECT로 대상 확인
+→ UPDATE 또는 DELETE
+→ RETURNING 결과 확인
+→ 영향받은 행 수 확인
+→ SELECT로 다시 확인
+```
+
+다음 SQL은 문법적으로 유효하지만 전체 행을 변경하므로 주석 상태로 유지합니다.
+
+```sql
+-- UPDATE public.students SET grade = 1;
+-- DELETE FROM public.students;
+```
+
+---
+
+## 상태 확인 파일
+
+`verify_students.sql`은 다음을 조회합니다.
+
+```text
+현재 데이터베이스·사용자·스키마·search_path
+public.students 존재 여부
+열 구조와 기본값
+전체 학생 수와 NULL 개수
+이준호 학년
+박서연 존재 여부
+현재 전체 데이터
+```
+
+데이터를 변경하지 않으므로 필요할 때 반복 실행할 수 있습니다.
+
+---
+
+## 초기화 파일
+
+`reset_students.sql`은 다음 조건을 확인합니다.
+
+```text
+현재 데이터베이스 = ai_database_book
+public 스키마 존재
+읽기 전용 연결이 아님
+```
+
+현재 스키마가 `public`인지 여부는 검사하지 않습니다. 삭제 대상이 `public.students`로 명확하게 지정되어 있기 때문입니다.
+
+이 파일은 테이블과 모든 샘플 데이터를 삭제합니다. 보존할 데이터가 없는지 확인한 뒤 실행합니다.
 
 ---
 
 ## 주의 사항
 
 ```text
-- 현재 데이터베이스, 스키마와 search_path를 확인하지 않고 CREATE 또는 DROP을 실행하지 않습니다.
-- basic_crud.sql 전체를 반복 실행하지 않습니다.
-- 자동 커밋 상태를 확인합니다.
-- 문자열은 작은따옴표로 감쌉니다.
-- NULL은 = NULL이 아니라 IS NULL로 확인합니다.
-- <> 비교는 NULL 행을 포함하지 않습니다.
-- ORDER BY가 없는 결과 순서를 가정하지 않습니다.
-- LIMIT에는 동률을 구분하는 정렬 기준을 사용합니다.
-- UPDATE와 DELETE는 WHERE 조건 없이 실행하지 않습니다.
-- 수정·삭제 전 같은 WHERE 조건으로 SELECT를 실행합니다.
-- 실행 후 영향받은 행 수와 RETURNING 결과를 확인합니다.
-- 위험한 SQL 예시는 주석을 해제하지 않습니다.
-- IDENTITY 값을 학생 수나 빈틈없는 순번으로 사용하지 않습니다.
+- 번호 파일을 순서와 시작 상태에 맞게 실행한다.
+- CREATE와 INSERT 파일을 반복 실행하지 않는다.
+- basic_crud.sql 전체를 한꺼번에 반복 실행하지 않는다.
+- 문자열 값은 작은따옴표로 감싼다.
+- NULL은 = NULL이 아니라 IS NULL로 확인한다.
+- DISTINCT는 조회 결과의 중복만 제거한다.
+- ORDER BY가 없는 결과 순서를 가정하지 않는다.
+- LIMIT에는 정렬 기준을 함께 사용한다.
+- UPDATE와 DELETE 전에는 같은 조건으로 SELECT한다.
+- Auto-commit과 영향받은 행 수를 확인한다.
+- 자동 생성 id를 학생 수나 학번으로 사용하지 않는다.
 ```
