@@ -1,35 +1,25 @@
 -- Chapter 09. 최종 트랜잭션 정합성 검증
 -- 실행 전 01→02→03→04→05 파일을 순서대로 실행합니다.
--- 이 파일은 데이터를 변경하지 않으며 마지막에 전체 상태를 판정합니다.
+-- 이 파일은 데이터를 변경하지 않습니다.
 
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
 
--- ============================================================
 -- 1. Chapter 07 프로젝트 데이터 보호 확인
--- ============================================================
 SELECT
     COUNT(*) AS project_enrollment_count,
     COUNT(*) = 5 AS project_enrollment_count_ok
 FROM course_project.enrollments;
 
--- ============================================================
 -- 2. lab 최종 행 수
--- ============================================================
-SELECT
-    COUNT(*) AS lab_enrollment_count,
-    COUNT(*) = 2 AS lab_enrollment_count_ok
+SELECT COUNT(*) AS lab_enrollment_count
 FROM transaction_lab.enrollments;
 
-SELECT
-    COUNT(*) AS payment_count,
-    COUNT(*) = 2 AS payment_count_ok
+SELECT COUNT(*) AS payment_count
 FROM transaction_lab.payments;
 
--- ============================================================
 -- 3. 최종 좌석 상태
--- ============================================================
 SELECT
     ci.course_id,
     c.title,
@@ -46,9 +36,7 @@ JOIN course_project.courses AS c
     ON c.id = ci.course_id
 ORDER BY ci.course_id;
 
--- ============================================================
--- 4. 신청·결제 연결 전체 확인
--- ============================================================
+-- 4. 신청·결제 연결 확인
 SELECT
     e.id AS enrollment_id,
     e.student_id,
@@ -56,10 +44,10 @@ SELECT
     e.course_id,
     c.title AS course_title,
     e.status,
-    e.paid_amount,
+    e.recorded_amount,
     p.id AS payment_id,
     p.amount,
-    e.paid_amount = p.amount AS amount_matches,
+    e.recorded_amount = p.amount AS amount_matches,
     ci.remaining_seats
 FROM transaction_lab.enrollments AS e
 JOIN course_project.students AS s
@@ -72,19 +60,15 @@ JOIN transaction_lab.course_inventory AS ci
     ON ci.course_id = e.course_id
 ORDER BY e.id;
 
--- ============================================================
--- 5. 위반 데이터 조회: 모두 0행이어야 합니다.
--- ============================================================
--- 좌석 범위 위반
+-- 5. 위반 데이터 조회: 모두 0행
 SELECT *
 FROM transaction_lab.course_inventory
 WHERE remaining_seats < 0
    OR remaining_seats > capacity;
 
--- 수강중 신청의 결제 누락·금액 불일치
 SELECT
     e.id AS enrollment_id,
-    e.paid_amount,
+    e.recorded_amount,
     p.amount AS payment_amount
 FROM transaction_lab.enrollments AS e
 LEFT JOIN transaction_lab.payments AS p
@@ -92,37 +76,31 @@ LEFT JOIN transaction_lab.payments AS p
 WHERE e.status = '수강중'
   AND (
       p.id IS NULL
-      OR e.paid_amount <> p.amount
+      OR e.recorded_amount <> p.amount
   );
 
--- 고아 payment
 SELECT p.*
 FROM transaction_lab.payments AS p
 LEFT JOIN transaction_lab.enrollments AS e
     ON e.id = p.enrollment_id
 WHERE e.id IS NULL;
 
--- 중복 활성 신청
 SELECT student_id, course_id, COUNT(*) AS active_count
 FROM transaction_lab.enrollments
 WHERE status = '수강중'
 GROUP BY student_id, course_id
 HAVING COUNT(*) > 1;
 
--- ============================================================
 -- 6. 좌석 사용량과 활성 신청 비교
--- ============================================================
 SELECT
     ci.course_id,
     c.title,
     ci.capacity,
     ci.remaining_seats,
-    COUNT(e.id) FILTER (WHERE e.status = '수강중')
-        AS active_enrollment_count,
+    COUNT(e.id) FILTER (WHERE e.status = '수강중') AS active_enrollment_count,
     ci.capacity - ci.remaining_seats AS used_seats,
     COUNT(e.id) FILTER (WHERE e.status = '수강중')
-        = ci.capacity - ci.remaining_seats
-        AS is_consistent
+        = ci.capacity - ci.remaining_seats AS is_consistent
 FROM transaction_lab.course_inventory AS ci
 JOIN course_project.courses AS c
     ON c.id = ci.course_id
@@ -135,9 +113,7 @@ GROUP BY
     ci.remaining_seats
 ORDER BY ci.course_id;
 
--- ============================================================
--- 7. ROLLBACK·좌석 부족 테스트 잔여 행: 모두 0행
--- ============================================================
+-- 7. 좌석 부족 테스트 잔여 행: 모두 0행
 SELECT *
 FROM transaction_lab.enrollments
 WHERE id = 9003;
@@ -146,10 +122,7 @@ SELECT *
 FROM transaction_lab.payments
 WHERE id = 9903;
 
--- ============================================================
 -- 8. 전체 상태 자동 판정
--- 하나라도 어긋나면 예외를 발생시킵니다.
--- ============================================================
 DO $$
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
@@ -201,7 +174,7 @@ BEGIN
         LEFT JOIN transaction_lab.payments AS p
             ON p.enrollment_id = e.id
         WHERE e.status = '수강중'
-          AND (p.id IS NULL OR e.paid_amount <> p.amount)
+          AND (p.id IS NULL OR e.recorded_amount <> p.amount)
     ) THEN
         RAISE EXCEPTION
             '최종 검증 실패: 수강중 신청의 결제 누락 또는 금액 불일치가 있습니다.';
