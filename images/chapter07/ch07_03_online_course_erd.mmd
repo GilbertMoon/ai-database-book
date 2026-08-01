@@ -13,12 +13,12 @@ erDiagram
     COURSES {
         int id PK
         int instructor_id FK
-        int price
+        numeric price
     }
     ENROLLMENTS {
         int id PK
         int student_id FK
         int course_id FK
         string status
-        int paid_amount
+        numeric recorded_amount
     }
