@@ -1,16 +1,21 @@
 -- Chapter 07. 온라인 강의 프로젝트 초기화
--- 주의: course_project 스키마와 모든 프로젝트 데이터를 삭제합니다.
+-- 주의: course_project 스키마와 프로젝트 데이터를 삭제합니다.
 -- 처음부터 다시 시작해야 할 때만 사용합니다.
+-- DROP SCHEMA ... CASCADE는 사용하지 않습니다.
 
--- 현재 위치 확인
 SELECT current_database();
+SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
--- 안전 보호 구문
--- ai_database_book 데이터베이스가 아니면 예외를 발생시키며 삭제하지 않습니다.
--- 전용 스키마의 알려진 테이블만 자식에서 부모 순서로 삭제합니다.
--- DROP SCHEMA에 CASCADE를 사용하지 않으므로 예상하지 않은 객체가 남아 있으면 마지막 문장이 실패합니다.
+-- 삭제 전 알려진 객체 확인
+SELECT
+    to_regclass('course_project.students') AS students_before_reset,
+    to_regclass('course_project.instructors') AS instructors_before_reset,
+    to_regclass('course_project.courses') AS courses_before_reset,
+    to_regclass('course_project.enrollments') AS enrollments_before_reset,
+    to_regclass('course_project.uq_course_enrollments_active') AS active_index_before_reset;
+
 DO $$
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
@@ -19,17 +24,39 @@ BEGIN
             current_database();
     END IF;
 
+    IF current_setting('transaction_read_only')::boolean THEN
+        RAISE EXCEPTION
+            '초기화 중단: 현재 연결이 읽기 전용입니다.';
+    END IF;
+
+    IF to_regnamespace('course_project') IS NULL THEN
+        RAISE NOTICE
+            '초기화할 course_project 스키마가 존재하지 않습니다.';
+        RETURN;
+    END IF;
+
+    -- 외래키를 가진 자식에서 부모 순서로 삭제합니다.
     DROP TABLE IF EXISTS course_project.enrollments;
     DROP TABLE IF EXISTS course_project.courses;
     DROP TABLE IF EXISTS course_project.instructors;
     DROP TABLE IF EXISTS course_project.students;
-    DROP SCHEMA IF EXISTS course_project;
+
+    -- 예상하지 않은 객체가 남아 있으면 CASCADE 없이 실패합니다.
+    DROP SCHEMA course_project;
 END
 $$;
 
--- 삭제 후 실행 순서:
+SELECT
+    to_regnamespace('course_project') AS schema_after_reset,
+    to_regclass('course_project.students') AS students_after_reset,
+    to_regclass('course_project.instructors') AS instructors_after_reset,
+    to_regclass('course_project.courses') AS courses_after_reset,
+    to_regclass('course_project.enrollments') AS enrollments_after_reset;
+
+-- 다시 시작하는 순서
 -- 1. 01_course_project_schema.sql
 -- 2. 02_course_project_seed.sql
 -- 3. 03_course_project_changes.sql
 -- 4. 04_course_project_validation.sql
--- 5. 05_course_project_integrity_tests.sql에서 필요한 테스트만 실행
+-- 5. 05_course_project_integrity_tests.sql에서 핵심 테스트 선택 실행
+-- 6. 06_course_project_optional_tests.sql에서 선택 테스트 실행
