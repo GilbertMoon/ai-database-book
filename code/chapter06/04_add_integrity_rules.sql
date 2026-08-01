@@ -212,6 +212,6 @@ WHERE conname IN (
     'chk_loans_nf_due_date',
     'chk_loans_nf_returned_date'
 )
-ORDER BY table_name::text, constraint_name;
+ORDER BY conrelid::regclass::text, conname;
 
 SELECT to_regclass('public.uq_loans_nf_active_book') AS active_loan_unique_index;
