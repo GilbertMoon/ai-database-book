@@ -25,7 +25,9 @@ BEGIN
     FROM public.students
     WHERE email = 'seoyeon@example.com';
 
-    IF v_count <> 6 OR v_junho_grade <> 3 OR v_seoyeon_count <> 1 THEN
+    IF v_count <> 6
+       OR v_junho_grade IS DISTINCT FROM 3
+       OR v_seoyeon_count <> 1 THEN
         RAISE EXCEPTION
             '변경 중단: 초기 데이터 상태가 아닙니다. 학생 수=%, 이준호 학년=%, 박서연 행 수=%',
             v_count, v_junho_grade, v_seoyeon_count;
