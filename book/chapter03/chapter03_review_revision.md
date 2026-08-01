@@ -1,341 +1,285 @@
-# Chapter 03 최종 출판 내용 검수 반영 완료
+# Chapter 03 자율 학습형 개편 반영 기록
 
 ## 대상 파일
 
 ```text
 book/chapter03/chapter03.md
-book/chapter03/chapter03_activity.md
 book/chapter03/chapter03_outline.md
+book/chapter03/chapter03_activity.md
+book/chapter03/chapter03_review_revision.md
+notes/chapter03_review_checklist.md
 code/chapter03/setup_check.sql
 code/chapter03/setup_validate_local.sql
-code/chapter03/README.md
-notes/chapter03_review_checklist.md
-images/chapter03/README.md
-images/chapter03/ch03_04_sql_execution_check_flow.mmd
-images/chapter03/ch03_04_sql_execution_check_flow.svg
-images/chapter03/ch03_05_setup_check_sql_flow.mmd
-images/chapter03/ch03_05_setup_check_sql_flow.svg
-README.md
 ```
 
-## 검수 목적
+## 개편 목적
 
-Chapter 03을 단순 설치 안내가 아니라 다음 조건을 실제로 확인하고 자동 판정하는 환경 준비 장으로 완성했습니다.
+Chapter 03을 특정 수업 환경을 강제하는 설치 안내가 아니라, 일반 독자가 자신의 환경에 맞는 경로를 선택하고 동일한 완료 상태를 확인하는 자율 학습형 장으로 정리했다.
+
+```text
+화면 위치보다 성공 상태를 설명한다.
+권장 기본 경로와 대안 경로를 구분한다.
+빠르게 변하는 서비스별 상세를 본문에서 줄인다.
+설치·서버·연결·SQL 실행 문제를 구분한다.
+환경 조회와 자동 확인을 구분한다.
+운영 보안 상세는 후속 장으로 이동한다.
+```
+
+---
+
+## 1. 대상 독자와 선수 지식
+
+다음 내용을 장 시작 부분에 추가했다.
+
+- PostgreSQL을 처음 설치하고 사용하는 독자를 대상으로 함
+- Chapter 02의 기본 용어 외 별도 선수 지식 없음
+- 운영체제와 버전에 따라 화면이 다를 수 있음을 명시
+- 버튼 위치보다 기본 완료 기준을 확인하도록 안내
+- PostgreSQL 15 이상을 SQL 호환 기준으로 사용
+
+정확한 최신 패치 버전과 확인일은 본문에서 제거하고 README·정오표·설치 업데이트 문서에서 관리하도록 원칙을 변경했다.
+
+---
+
+## 2. 필수 경로를 권장 기본 경로로 변경
+
+기존의 강제적인 로컬 필수 경로 표현을 다음처럼 수정했다.
+
+```text
+권장 기본 경로
+→ 로컬 PostgreSQL + DBeaver Community
+
+대안 경로
+→ 기존 PostgreSQL
+→ macOS·Linux 로컬 환경
+→ Docker
+→ 관리형 PostgreSQL
+```
+
+환경이 달라도 현재 연결 대상과 실행 권한을 알고 다음 장의 테이블 생성이 가능하면 진행할 수 있도록 설명했다.
+
+`setup_validate_local.sql`은 관리형 환경까지 강제하는 완료 게이트가 아니라 권장 로컬 환경 자동 확인 파일로 정의했다.
+
+---
+
+## 3. 완료 기준 단순화
+
+기존의 세부 점검 항목을 다음 핵심 상태로 정리했다.
 
 ```text
 PostgreSQL 서버 실행
-→ DBeaver 연결
-→ ai_database_book 확인·생성
-→ 새 DB로 다시 연결
-→ 환경 정보 조회
-→ 로컬 필수 조건 자동 검증
+DBeaver 연결 테스트 성공
+작업 데이터베이스 연결
+현재 데이터베이스와 사용자 확인
+SQL 실행 범위 구분
+환경 확인 SQL 재실행
+비밀정보 비공개
 ```
+
+`current_schema`, `TimeZone`, `public USAGE`와 읽기 전용 상태는 환경 확인 결과의 참고 또는 자동 확인 항목으로 유지한다.
 
 ---
 
-## 1. 출판 기준 환경과 검증 상태 구분
+## 4. 본문 구조 19절에서 15절로 정리
 
-출판 기준 환경을 다음처럼 명시했습니다.
-
-```text
-기준 버전 확인일: 2026-07-24
-운영체제 기준: Windows 11
-PostgreSQL 기준: 18.4
-DBeaver Community 기준: 26.1.3
-호환 목표: PostgreSQL 15 이상
-```
-
-`원고 최종 검증 환경`이라는 과도한 표현을 제거하고 다음을 구분했습니다.
+최종 본문은 다음 15개 절로 구성한다.
 
 ```text
-공식 문서의 버전·정책 확인
-실제 설치·연결 실행
-SQL 자동 검증
-Word·PDF·eBook 렌더링
+1. 이 장에서 준비할 환경
+2. PostgreSQL과 DBeaver 역할 복습
+3. 나에게 맞는 설치 경로 선택하기
+4. PostgreSQL 설치와 서버 상태 확인
+5. DBeaver 설치하기
+6. PostgreSQL 연결 만들기
+7. 연결 정보 이해하기
+8. 작업용 데이터베이스 준비하기
+9. ai_database_book으로 다시 연결하기
+10. 현재 데이터베이스와 스키마 확인하기
+11. SQL을 안전하게 실행하기
+12. 환경 확인 파일 실행하기
+13. 자주 발생하는 연결 오류 해결하기
+14. 비밀번호와 접속 정보 보호하기
+15. 완료 점검과 다음 장
 ```
 
-실제 독자 PC의 통합 실행과 출판 렌더링은 별도 단계입니다.
+AI 질문 작성, 완료 점검과 자주 하는 실수는 관련 절과 워크북에 통합했다.
 
 ---
 
-## 2. 데이터베이스 생성 안전성
+## 5. 설치 경로 선택 안내 추가
 
-기존에는 바로 `CREATE DATABASE`를 실행했습니다. 최종 원고에서는 먼저 존재 여부와 소유자를 조회합니다.
-
-```sql
-SELECT datname,
-       pg_get_userbyid(datdba) AS database_owner
-FROM pg_database
-WHERE datname = 'ai_database_book';
-```
-
-기존 DB가 있을 때 다음 선택을 구분했습니다.
+독자의 상황에 따라 진행 경로를 선택할 수 있도록 판단표를 추가했다.
 
 ```text
-기존 DB 계속 사용
-→ 소유자·스키마·객체 확인
-
-다른 학습 DB 생성
-→ 충돌 없는 새 이름 사용
-
-초기화 필요
-→ 백업과 삭제 대상을 확인한 별도 절차 사용
+Windows 처음 설치
+PostgreSQL 기존 설치
+macOS
+Ubuntu 계열 Linux
+설치 권한 없음
+Docker 경험 있음
+관리형 PostgreSQL 보유
 ```
 
-자동 `DROP DATABASE`를 안내하지 않습니다.
+Docker는 핵심 경로가 아니라 경험이 있는 독자를 위한 선택 학습으로 추가했다.
 
 ---
 
-## 3. 관리자 계정 경계
+## 6. 설치 성공과 연결 성공 구분
 
-`postgres` 관리자 계정은 개인 컴퓨터의 가상 데이터로 초기 환경을 구성할 때만 사용할 수 있다고 명시했습니다.
+다음 네 단계를 명확히 분리했다.
 
 ```text
-로컬 개인 학습
-→ 초기 구성에 관리자 계정 사용 가능
-
-실제 애플리케이션·공용 서버
-→ 관리자 계정 연결 금지
-→ 최소 권한 전용 역할 사용
+설치 성공
+서버 실행 성공
+연결 성공
+SQL 실행 성공
 ```
 
-역할과 권한 구성은 Chapter 11로 연결했습니다.
+문제 해결도 설치·서버·연결·SQL 단계로 먼저 분류하도록 변경했다.
 
 ---
 
-## 4. 현재 스키마 판정 수정
+## 7. 연결 정보와 연결 이름 보완
 
-기존 완료 기준의 `current_schema() = public` 절대 조건을 제거했습니다.
+Host, Port, Database, Username과 Password의 의미를 별도로 설명했다.
 
-```text
-current_schema()
-→ search_path에서 실제로 사용할 수 있는 첫 스키마
-→ 사용자 이름과 같은 스키마가 있으면 public이 아닐 수 있음
-```
-
-최종 완료 기준:
+연결이 여러 개일 때 혼동을 줄이기 위한 이름 예시도 추가했다.
 
 ```text
-current_database() = ai_database_book
-public 스키마 존재
-현재 사용자의 public USAGE 권한
-search_path 의미 확인
+local-postgres-admin
+local-ai-database-book
 ```
 
-Chapter 04는 `public.students`처럼 스키마를 명시합니다.
+연결 이름에 비밀번호와 민감정보를 포함하지 않도록 안내했다.
 
 ---
 
-## 5. 환경 조회와 자동 판정 분리
+## 8. 데이터베이스 생성 안전 기준 유지
 
-### `setup_check.sql`
-
-사람이 환경 정보를 읽고 기록하는 조회 파일입니다.
+다음 원칙을 유지했다.
 
 ```text
-version
-current_database
-current_schema
-search_path
-current_user
-transaction_read_only
-TimeZone
-CURRENT_TIMESTAMP
-1 + 1
-한 행 요약
+존재 여부와 소유자를 먼저 조회한다.
+기존 데이터베이스를 자동으로 삭제하지 않는다.
+CREATE DATABASE는 열린 트랜잭션 밖에서 실행한다.
+생성 후 새 데이터베이스로 다시 연결한다.
+관리자 역할은 개인 로컬 초기 설정에 한정한다.
 ```
 
-### `setup_validate_local.sql`
-
-신규 파일이며 로컬 필수 경로를 예외 기반으로 판정합니다.
-
-```text
-PostgreSQL 15 이상
-DB = ai_database_book
-CONNECT 권한
-public 존재
-public USAGE 권한
-transaction_read_only = off
-SQL 계산 정상
-```
-
-통과 메시지:
-
-```text
-Chapter 03 local environment validation passed
-```
-
-두 파일 모두 테이블과 데이터를 변경하지 않습니다.
+권한과 운영 역할 설계는 Chapter 11로 이동했다.
 
 ---
 
-## 6. 읽기 전용·시간대 확인
+## 9. SQL 실행 안전 기준 단순화
 
-Chapter 04의 변경 SQL을 실행할 수 있도록 다음을 추가했습니다.
+실행 전 다음 세 가지를 확인하도록 압축했다.
 
-```sql
-SHOW transaction_read_only;
-SHOW TimeZone;
+```text
+현재 연결
+선택한 SQL
+Auto-commit 상태
 ```
 
-Test Connection 성공이 쓰기 가능성을 보장하지 않는다는 설명을 추가했습니다. 시간대는 이후 `TIMESTAMPTZ`와 분석 기간 해석의 기초 정보로 사용합니다.
+트랜잭션 원리는 Chapter 09로 이동하고, 이 장에서는 의도하지 않은 전체 스크립트 실행을 막는 데 집중한다.
 
 ---
 
-## 7. 실행 범위와 Auto-commit
+## 10. 환경 조회와 자동 확인 구분
 
-DBeaver 기능 이름을 다음처럼 통일했습니다.
+두 파일의 역할을 다음처럼 통일했다.
 
 ```text
-Statement 실행
-선택 영역 실행
-Script 실행
+setup_check.sql
+→ 환경 정보를 사람이 확인
+
+setup_validate_local.sql
+→ 권장 로컬 환경의 주요 조건을 자동 확인
 ```
 
-Script 실행이 자동으로 하나의 트랜잭션이 아니라는 점과 Auto-commit·Manual commit의 차이를 설명했습니다. 화면 위치는 버전에 따라 다를 수 있으므로 현재 연결의 트랜잭션 표시와 Commit mode를 확인하도록 안내했습니다.
+자동 확인을 통과시키기 위해 관리형 환경의 권한을 무리하게 변경하지 않도록 경고를 추가했다.
 
 ---
 
-## 8. 비밀정보 정책 통일
+## 11. Supabase 상세 축소
 
-책 전체의 최종 정책과 맞춰 다음 libpq 변수 체계를 사용합니다.
-
-```text
-PGHOST
-PGPORT
-PGDATABASE
-PGUSER
-PGPASSFILE
-```
-
-실제 비밀번호를 기본 `.env` 예제로 권장하지 않고 password file로 분리했습니다. 다음 항목도 공개 금지 대상으로 명시했습니다.
+본문에는 다음 개념만 남겼다.
 
 ```text
-실제 .env
-.pgpass·pgpass.conf
-DBeaver 연결 설정 내보내기
-비밀번호가 보이는 화면 캡처
-전체 클라우드 접속 문자열
+실제 PostgreSQL을 제공한다.
+Auth·Storage·Realtime 같은 기능이 연결된다.
+로컬과 연결 방식·권한 구조가 다를 수 있다.
 ```
+
+다음 내용은 온라인 업데이트 문서 또는 별도 심화 자료로 이동했다.
+
+```text
+Pooler 종류와 포트
+IPv4·IPv6
+prepared statement 제한
+API 키 종류와 중단 일정
+RLS 우회
+Storage 메타데이터 조작 규칙
+```
+
+서비스 정책이 빠르게 변경될 수 있어 일반 eBook 본문에 고정하지 않는 방향이다.
 
 ---
 
-## 9. 운영체제별 설치 범위
+## 12. 비밀정보 범위 단순화
 
-Windows를 필수 본문 경로로 유지하고 다음 내용을 보완했습니다.
+Chapter 03에서는 다음 네 가지 원칙만 핵심으로 유지한다.
 
 ```text
-Stack Builder는 기본 실습에 필수 아님
-Ubuntu의 postgresql-contrib는 선택 확장 모음
-운영체제 저장소 버전은 Windows 기준 버전과 다를 수 있음
-psql PATH 오류와 서버 설치 성공을 구분
+비밀번호를 SQL 파일에 작성하지 않는다.
+전체 접속 URL을 공개하지 않는다.
+화면 캡처 전에 연결 정보를 확인한다.
+공용 PC에서는 비밀번호 저장에 주의한다.
 ```
 
-macOS·Linux 상세 기록은 워크북 선택 활동으로 축소했습니다.
+`PGPASSFILE`, 운영체제별 password file 위치와 파일 권한은 Chapter 11로 이동했다.
+
+비밀번호나 키가 노출되면 파일 삭제뿐 아니라 즉시 변경·폐기해야 한다는 내용은 유지했다.
 
 ---
 
-## 10. Supabase 선택 읽기 최신화
+## 13. 워크북 재구성
 
-본문에서 Supabase의 핵심 차이만 유지했습니다.
-
-```text
-실제 PostgreSQL 제공
-Storage 메타데이터와 객체 저장소 구분
-storage 스키마 레코드는 SQL에서 읽기 전용 취급
-파일 수정·삭제는 Storage API 사용
-Direct 5432
-Session pooler 5432
-Transaction pooler 6543
-Transaction pooler prepared statement 미지원
-```
-
-API 키도 다음처럼 최신화했습니다.
+워크북을 다음 세 범위로 분리했다.
 
 ```text
-publishable
-→ 공개 클라이언트용, 인증·RLS 필요
+핵심 활동
+→ 서버 상태, DBeaver 연결, 작업 DB, 실행 범위, 환경 확인, 오류 기록
 
-secret
-→ 신뢰할 수 있는 서버 전용, RLS 우회
+선택 활동
+→ macOS·Linux, Docker, 관리형 PostgreSQL, Supabase, AI 오류 질문
 
-legacy anon·service_role
-→ 2026년 말 사용 중단 예정
+심화 활동
+→ search_path, 읽기 전용 상태, 접속 변수, 최소 권한과 password file 연결
 ```
 
-세부 비교와 기록은 워크북 선택 활동으로 이동했습니다.
+본문과 워크북의 통과 메시지와 용어를 동일하게 맞췄다.
 
 ---
 
-## 11. 워크북 재구성
+## 14. 장 간 범위 정리
 
-### 핵심 활동
-
-```text
-환경 기록
-역할 구분
-연결
-DB 존재·소유자 확인
-DB 생성
-현재 위치 확인
-실행 범위·커밋 모드
-setup_check
-setup_validate_local
-오류·보안 점검
-```
-
-### 선택 활동
-
-```text
-macOS·Linux
-관리형 PostgreSQL·Supabase
-AI 오류 질문
-```
-
-기존 18개 이상의 세부 활동을 핵심·선택 구조로 압축했습니다.
-
----
-
-## 12. 도식 동기화
-
-본문 도식은 6종을 유지했습니다.
-
-```text
-그림 3-1 전체 환경
-그림 3-2 로컬·관리형 연결
-그림 3-3 DBeaver 연결
-그림 3-4 환경 정보 조회
-그림 3-5 조회와 자동 판정
-그림 3-6 오류 해결
-```
-
-그림 3-4에 읽기 전용 상태와 시간대를, 그림 3-5에 `setup_check.sql → setup_validate_local.sql` 역할 분리를 반영했습니다.
-
----
-
-## 13. 최종 상태
-
-| 항목 | 상태 |
+| 내용 | 이동 위치 |
 | --- | --- |
-| 본문 최종 검수 | 완료 |
-| 워크북 핵심·선택 활동 분리 | 완료 |
-| 구성안 동기화 | 완료 |
-| `setup_check.sql` 확장 | 완료 |
-| `setup_validate_local.sql` 신규 | 완료 |
-| 코드 README 동기화 | 완료 |
-| 최종 리뷰 체크리스트 교체 | 완료 |
-| 도식 원본·SVG 동기화 | 완료 |
-| 루트 README 상태 변경 | 완료 |
-| 실제 PostgreSQL 실행 | 별도 통합 실행 단계에서 확인 예정 |
-| Word·PDF·eBook 렌더링 | 전체 출판 렌더링 단계에서 확인 예정 |
+| 테이블과 CRUD | Chapter 04 |
+| 관계와 외래키 설계 | Chapter 05 |
+| 제약조건 오류 | Chapter 06 |
+| 트랜잭션 상세 | Chapter 09 |
+| 사용자·역할·최소 권한 | Chapter 11 |
+| password file과 `PGPASSFILE` | Chapter 11 |
+| AI 설계·SQL 검증 | Chapter 13 |
 
 ---
 
-## 결론
+## 최종 상태
+
+Chapter 03은 다음 질문에 답하는 장으로 정리되었다.
 
 ```text
-Chapter 03은 설치 방법을 나열하는 장이 아니라,
-올바른 데이터베이스와 스키마 권한에 연결하고
-쓰기 가능 상태와 실행 결과를 자동 검증해
-다음 장의 SQL을 재현 가능하게 시작하는 장으로 최종 정리했다.
+PostgreSQL 서버를 준비하고 DBeaver로 작업용 데이터베이스에 연결한 뒤,
+현재 환경을 확인하고 안전하게 SQL을 실행할 수 있는가?
 ```
