@@ -1,87 +1,86 @@
--- Chapter 06. 정규화 전후 정상 샘플 데이터
--- 실행 전 normalization_schema.sql을 먼저 실행합니다.
--- 관계를 명확히 재현하기 위해 명시적인 실습 ID를 사용합니다.
--- 명시적 ID 입력은 IDENTITY의 다음 값을 자동으로 바꾸지 않으므로 마지막에 시작값을 조정합니다.
--- 자동 커밋 상태에서는 일부 INSERT만 반영될 수 있으므로 실행 후 practice 파일로 확인합니다.
+-- Chapter 06 호환 파일: 02_normalization_seed.sql과 같은 역할
+-- 새 학습 흐름에서는 02_normalization_seed.sql 사용을 권장합니다.
+-- 시작 상태: 네 테이블이 모두 존재하고 비어 있음
+-- 완료 상태: raw 3행, members 2행, books 2행, loans 3행
 
--- ============================================================
--- 0. 현재 실행 위치 확인
--- 기대 결과: ai_database_book / public
--- ============================================================
 SELECT current_database();
+SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
--- ============================================================
--- 1. 정규화 전 원시 데이터 3행
--- 도서 201의 첫 대여는 4월 2일 반납된 뒤 4월 3일 다시 시작됩니다.
--- ============================================================
+DO $$
+DECLARE
+    v_raw_count bigint;
+    v_member_count bigint;
+    v_book_count bigint;
+    v_loan_count bigint;
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '입력 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
+            current_database();
+    END IF;
+
+    IF current_setting('transaction_read_only')::boolean THEN
+        RAISE EXCEPTION '입력 중단: 현재 연결이 읽기 전용입니다.';
+    END IF;
+
+    IF to_regclass('public.library_records_raw') IS NULL
+       OR to_regclass('public.members_nf') IS NULL
+       OR to_regclass('public.books_nf') IS NULL
+       OR to_regclass('public.loans_nf') IS NULL THEN
+        RAISE EXCEPTION '입력 중단: Chapter 06 테이블이 모두 존재하지 않습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_raw_count FROM public.library_records_raw;
+    SELECT COUNT(*) INTO v_member_count FROM public.members_nf;
+    SELECT COUNT(*) INTO v_book_count FROM public.books_nf;
+    SELECT COUNT(*) INTO v_loan_count FROM public.loans_nf;
+
+    IF v_raw_count <> 0
+       OR v_member_count <> 0
+       OR v_book_count <> 0
+       OR v_loan_count <> 0 THEN
+        RAISE EXCEPTION
+            '입력 중단: 빈 테이블이 아닙니다. raw=%, members=%, books=%, loans=%',
+            v_raw_count, v_member_count, v_book_count, v_loan_count;
+    END IF;
+END
+$$;
+
 INSERT INTO public.library_records_raw (
-    loan_id,
-    member_name,
-    member_email,
-    book_title,
-    author,
-    borrowed_at,
-    due_at,
-    returned_at
+    loan_id, member_name, member_email, book_title, author,
+    borrowed_at, due_at, returned_at
 )
 VALUES
     (1001, '김민지', 'minji@example.com', '데이터베이스 입문', '문길래', '2026-04-01', '2026-04-15', '2026-04-02'),
     (1002, '김민지', 'minji@example.com', 'SQL 기초', '홍길동', '2026-04-02', '2026-04-16', NULL),
     (1003, '이준호', 'junho@example.com', '데이터베이스 입문', '문길래', '2026-04-03', '2026-04-17', NULL);
 
--- ============================================================
--- 2. 정규화 후 회원 2명
--- ============================================================
 INSERT INTO public.members_nf (id, name, email, joined_at)
 VALUES
     (101, '김민지', 'minji@example.com', '2026-03-01'),
     (102, '이준호', 'junho@example.com', '2026-03-05');
 
--- ============================================================
--- 3. 정규화 후 도서 2건
--- ============================================================
 INSERT INTO public.books_nf (id, title, author, published_year, isbn)
 VALUES
     (201, '데이터베이스 입문', '문길래', 2026, 'ISBN-001'),
     (202, 'SQL 기초', '홍길동', 2025, 'ISBN-002');
 
--- ============================================================
--- 4. 정규화 후 대여 기록 3건
--- 회원 101은 여러 대여 기록을 가집니다.
--- 도서 201은 시간에 따라 여러 대여 이력을 가집니다.
--- 같은 도서의 미반납 대여는 동시에 한 건만 존재합니다.
--- ============================================================
 INSERT INTO public.loans_nf (
-    id,
-    member_id,
-    book_id,
-    borrowed_at,
-    due_at,
-    returned_at
+    id, member_id, book_id, borrowed_at, due_at, returned_at
 )
 VALUES
     (1001, 101, 201, '2026-04-01', '2026-04-15', '2026-04-02'),
     (1002, 101, 202, '2026-04-02', '2026-04-16', NULL),
     (1003, 102, 201, '2026-04-03', '2026-04-17', NULL);
 
--- ============================================================
--- 5. IDENTITY 다음 값 조정
--- 명시적 ID 입력은 연결된 IDENTITY 시퀀스를 소비하지 않습니다.
--- 이후 자동 생성값이 샘플 ID 범위와 충돌하지 않도록 조정합니다.
--- ============================================================
-ALTER TABLE public.library_records_raw
-    ALTER COLUMN loan_id RESTART WITH 1004;
+ALTER TABLE public.library_records_raw ALTER COLUMN loan_id RESTART WITH 1004;
+ALTER TABLE public.members_nf ALTER COLUMN id RESTART WITH 103;
+ALTER TABLE public.books_nf ALTER COLUMN id RESTART WITH 203;
+ALTER TABLE public.loans_nf ALTER COLUMN id RESTART WITH 1004;
 
-ALTER TABLE public.members_nf
-    ALTER COLUMN id RESTART WITH 103;
-
-ALTER TABLE public.books_nf
-    ALTER COLUMN id RESTART WITH 203;
-
-ALTER TABLE public.loans_nf
-    ALTER COLUMN id RESTART WITH 1004;
-
--- 같은 파일을 다시 실행하면 PK 또는 UNIQUE 중복 오류가 발생할 수 있습니다.
--- 처음부터 다시 시작해야 할 때만 reset_normalization.sql을 먼저 실행합니다.
+SELECT COUNT(*) AS raw_count FROM public.library_records_raw;
+SELECT COUNT(*) AS member_count FROM public.members_nf;
+SELECT COUNT(*) AS book_count FROM public.books_nf;
+SELECT COUNT(*) AS loan_count FROM public.loans_nf;
