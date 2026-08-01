@@ -6,292 +6,315 @@ PostgreSQL과 DBeaver로 실습 환경 만들기
 
 ## 권장 분량
 
-18~22페이지
+18~20페이지
+
+## 대상 독자
+
+- PostgreSQL을 처음 설치하고 사용하는 독자
+- 데이터베이스 서버와 클라이언트의 연결을 직접 확인하려는 독자
+- 자신의 운영체제와 환경에 맞는 실습 경로를 선택하려는 독자
+- 연결 오류와 비밀정보 노출을 스스로 점검하려는 독자
+
+## 선수 지식
+
+Chapter 02의 데이터베이스, DBMS, 클라이언트, 스키마와 테이블 개념을 이해했다면 별도의 선수 지식은 필요하지 않다.
 
 ## 이 장의 역할
 
-관계형 데이터베이스를 직접 다룰 수 있도록 PostgreSQL과 DBeaver를 설치·연결하고, 현재 데이터베이스·검색 경로·읽기 전용 상태를 확인하며, 이후 장의 SQL을 안전하게 실행할 수 있는 환경을 완성한다.
+Chapter 03은 여러 클라우드 서비스와 보안 운영 기술을 자세히 설명하는 장이 아니다. 독자가 다음 상태를 직접 만들도록 안내하는 환경 구성 장이다.
 
-이 장의 필수 실습은 로컬 PostgreSQL에서 `ai_database_book`을 사용하는 경로를 기준으로 한다. Supabase는 관리형 PostgreSQL의 차이를 이해하기 위한 선택 읽기로 축소하며 로컬 완료 기준을 대체하지 않는다.
+```text
+PostgreSQL 서버를 준비한다.
+DBeaver로 PostgreSQL에 연결한다.
+작업용 데이터베이스를 준비한다.
+현재 연결 대상을 확인한다.
+SQL을 안전하게 실행한다.
+환경을 다시 검증할 수 있다.
+```
 
-이 장에서는 테이블 생성, 데이터 입력과 제약조건 실습을 진행하지 않는다. CRUD는 Chapter 04, 무결성 오류는 Chapter 06, 트랜잭션은 Chapter 09, 사용자·권한·password file은 Chapter 11로 연결한다.
+## 핵심 메시지
+
+```text
+설치가 끝났다는 사실보다
+어느 서버와 데이터베이스에 연결되어 있으며
+어떤 SQL을 실행하는지 확인하는 습관이 중요하다.
+```
+
+## 권장 기본 경로와 대안 경로
+
+```text
+권장 기본 경로
+→ 로컬 PostgreSQL + DBeaver Community
+
+대안 경로
+→ 이미 설치된 PostgreSQL
+→ macOS·Linux 로컬 PostgreSQL
+→ Docker 기반 PostgreSQL
+→ 관리형 PostgreSQL
+```
+
+환경이 달라도 기본 완료 기준을 만족하면 다음 장으로 진행할 수 있다. `setup_validate_local.sql`은 권장 로컬 환경을 확인하는 파일이며 관리형 환경의 절대 기준으로 사용하지 않는다.
+
+## 이 장을 마치면
+
+독자는 다음 작업을 수행할 수 있다.
+
+- PostgreSQL과 DBeaver의 역할을 구분한다.
+- 자신의 환경에 맞는 설치 경로를 선택한다.
+- PostgreSQL 서버 상태를 확인한다.
+- DBeaver에서 PostgreSQL 연결을 만든다.
+- Host, Port, Database와 Username의 의미를 설명한다.
+- `ai_database_book`의 존재 여부를 확인하고 필요한 경우 생성한다.
+- 새 데이터베이스로 연결을 전환한다.
+- 현재 데이터베이스, 사용자, 스키마와 `search_path`를 확인한다.
+- SQL 한 문장, 선택 영역과 전체 스크립트 실행을 구분한다.
+- `setup_check.sql`과 `setup_validate_local.sql`의 역할을 구분한다.
+- 오류를 설치·서버·연결·SQL 문제로 나누어 확인한다.
+- 비밀번호와 전체 접속 URL을 공개 자료에서 분리한다.
+
+## 학습 표시
+
+```text
+핵심 학습
+→ 권장 기본 환경을 준비하는 데 필요한 내용
+
+선택 학습
+→ macOS·Linux, Docker와 관리형 PostgreSQL을 사용하는 경우 참고할 내용
+
+심화 학습
+→ 권한, 비밀정보 파일과 운영 환경으로 확장되는 내용
+```
 
 ## 핵심 질문
 
 ```text
 PostgreSQL과 DBeaver는 각각 어떤 역할을 하는가?
-로컬 필수 경로와 관리형 PostgreSQL 선택 경로는 어떻게 다른가?
-DBeaver 연결값은 무엇을 의미하는가?
-ai_database_book이 이미 존재하는지 어떻게 확인하는가?
-현재 데이터베이스·스키마·search_path는 무엇인가?
-current_schema()가 항상 public은 아닌 이유는 무엇인가?
-현재 연결이 읽기 전용인지 어떻게 확인하는가?
-Statement·선택 영역·Script 실행은 어떻게 다른가?
-setup_check와 setup_validate_local은 역할이 어떻게 다른가?
-비밀번호와 접속 정보는 어떻게 분리하는가?
-오류가 발생했을 때 무엇부터 확인해야 하는가?
+나의 환경에 적합한 설치 경로는 무엇인가?
+설치 성공과 서버 실행·연결·SQL 실행 성공은 어떻게 다른가?
+Host·Port·Database·Username은 무엇을 의미하는가?
+ai_database_book을 어떻게 확인하고 준비하는가?
+데이터베이스를 만든 뒤 왜 다시 연결해야 하는가?
+현재 데이터베이스와 사용자를 어떻게 확인하는가?
+한 문장·선택 영역·전체 스크립트 실행은 어떻게 다른가?
+환경 조회와 자동 확인 파일은 어떻게 다른가?
+오류가 발생했을 때 무엇부터 확인하는가?
+비밀번호와 접속 정보는 어떻게 보호하는가?
 ```
 
-## 독자가 얻게 될 것
+## 주요 개념
 
-- PostgreSQL이 DBMS이고 DBeaver가 클라이언트임을 설명할 수 있다.
-- Windows에서 로컬 PostgreSQL을 설치하고 서비스 상태를 확인할 수 있다.
-- macOS·Ubuntu의 대표 설치 차이를 설명할 수 있다.
-- DBeaver에서 PostgreSQL 연결을 만들 수 있다.
-- `postgres` 사용자와 `postgres` 데이터베이스를 구분할 수 있다.
-- 관리자 계정의 로컬 학습 범위와 운영 환경의 최소 권한 원칙을 구분할 수 있다.
-- `ai_database_book`의 존재와 소유자를 조회한 뒤 필요한 경우 생성할 수 있다.
-- 새 데이터베이스로 연결을 전환할 수 있다.
-- `current_database()`, `current_schema()`와 `SHOW search_path`를 해석할 수 있다.
-- `public` 스키마 존재와 `USAGE` 권한을 확인할 수 있다.
-- `transaction_read_only`와 `TimeZone`을 확인할 수 있다.
-- Statement·선택 영역·Script 실행과 Auto-commit을 구분할 수 있다.
-- `setup_check.sql`로 환경 정보를 조회할 수 있다.
-- `setup_validate_local.sql`로 로컬 필수 경로를 자동 판정할 수 있다.
-- libpq 변수와 `PGPASSFILE` 중심의 비밀정보 정책을 설명할 수 있다.
-- 연결 오류를 유형별로 분류하고 실제 재실행으로 검증할 수 있다.
+### 핵심 학습
 
-## 출판 기준 환경
-
-```text
-기준 버전 확인일: 2026-07-24
-운영체제 기준: Windows 11
-PostgreSQL 기준: 18.4
-DBeaver Community 기준: 26.1.3
-호환 목표: PostgreSQL 15 이상
-```
-
-공식 문서상 버전 확인과 실제 설치·SQL 실행·출판 렌더링 검증을 구분한다.
-
-## 핵심 개념
-
-- PostgreSQL / Postgres
-- DBeaver Community
-- 서버와 클라이언트
-- 로컬 필수 경로
-- 관리형 PostgreSQL
-- Supabase 선택 읽기
-- Direct / Session / Transaction pooler
-- IPv4 / IPv6
-- publishable / secret key
-- legacy anon / service_role
-- RLS
-- Storage API와 읽기 전용 메타데이터
-- Host / Port / Database / Username
-- `postgres` 사용자와 데이터베이스
+- PostgreSQL 서버
+- DBeaver 클라이언트
+- 로컬 PostgreSQL
+- Host / Port / Database / Username / Password
+- `postgres` 사용자와 `postgres` 데이터베이스
 - `ai_database_book`
 - `CREATE DATABASE`
-- `CREATEDB`
-- Auto-commit / Manual commit
+- 현재 연결 대상
 - `current_database()`
+- `current_user`
 - `current_schema()`
 - `search_path`
-- `public`
-- `transaction_read_only`
-- `TimeZone`
+- 현재 문장·선택 영역·전체 스크립트 실행
+- Auto-commit / Manual commit 미리보기
 - `setup_check.sql`
 - `setup_validate_local.sql`
-- `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSFILE`
-- 재현 가능한 오류 질문
+- 오류 분류와 재실행
+- 최소 비밀정보 보호 원칙
+
+### 선택 학습
+
+- macOS 설치 경로
+- Ubuntu 계열 Linux 설치 경로
+- Docker 기반 PostgreSQL
+- 관리형 PostgreSQL
+- Supabase 개요
+- AI 오류 질문 템플릿
+
+### 후속 장으로 이동
+
+- 트랜잭션 상세: Chapter 09
+- 사용자·역할·최소 권한: Chapter 11
+- `PGPASSFILE`과 password file 운영: Chapter 11
+- AI 설계·SQL 검증 절차: Chapter 13
 
 ## 본문 구성
 
-1. 이 장에서 완성할 실습 환경
+1. 이 장에서 준비할 환경
 2. PostgreSQL과 DBeaver 역할 복습
-3. 로컬과 관리형 PostgreSQL
-   - Supabase 선택 읽기
-   - Storage API와 메타데이터
-   - 연결 방식
-   - 최신 API 키와 RLS
-4. 설치 전 확인
-5. PostgreSQL 설치와 서버 상태
-   - Windows
-   - macOS
-   - Ubuntu
-   - `psql` 선택 확인
-6. DBeaver 설치와 연결
-7. 작업용 데이터베이스 확인·생성
-   - 존재 여부와 소유자 조회
-   - 관리자 계정 경계
-   - 트랜잭션 밖 실행
-8. 새 데이터베이스로 다시 연결
-9. 현재 DB·스키마·검색 경로 확인
-10. 실행 범위와 Auto-commit
-11. `setup_check.sql`
-12. `setup_validate_local.sql`
-13. 접속 정보와 비밀정보
-14. 오류 해결
-15. AI 질문 작성
-16. 완료 점검
-17. 자주 하는 실수
-18. 핵심 정리
-19. 다음 장 연결
+3. 나에게 맞는 설치 경로 선택하기
+4. PostgreSQL 설치와 서버 상태 확인
+5. DBeaver 설치하기
+6. PostgreSQL 연결 만들기
+7. 연결 정보 이해하기
+8. 작업용 데이터베이스 준비하기
+9. `ai_database_book`으로 다시 연결하기
+10. 현재 데이터베이스와 스키마 확인하기
+11. SQL을 안전하게 실행하기
+12. 환경 확인 파일 실행하기
+13. 자주 발생하는 연결 오류 해결하기
+14. 비밀번호와 접속 정보 보호하기
+15. 완료 점검과 다음 장
 
-## 로컬 필수 흐름
+## 기본 완료 기준
 
 ```text
-PostgreSQL 서버 준비
-→ DBeaver Test Connection
-→ postgres 데이터베이스 접속
-→ ai_database_book 존재·소유자 확인
-→ 필요한 경우 CREATE DATABASE
-→ ai_database_book으로 다시 연결
-→ current_database·current_schema·search_path 확인
-→ transaction_read_only·TimeZone 확인
-→ setup_check.sql 실행
-→ setup_validate_local.sql 통과
+PostgreSQL 서버가 실행된다.
+DBeaver Test Connection이 성공한다.
+ai_database_book에 연결된다.
+현재 데이터베이스와 사용자를 SQL로 확인한다.
+한 문장과 전체 스크립트 실행을 구분한다.
+setup_check.sql 결과를 읽을 수 있다.
+권장 로컬 환경에서는 setup_validate_local.sql이 통과한다.
+공개 파일에 비밀번호와 전체 접속 URL이 없다.
 ```
 
-## 데이터베이스 생성 안전 기준
+## 설치 경로 선택 기준
+
+| 현재 상황 | 권장 진행 |
+| --- | --- |
+| Windows에서 처음 설치 | 본문 기본 경로 |
+| PostgreSQL이 이미 설치됨 | 서버 상태와 버전 확인 후 연결부터 진행 |
+| macOS 사용 | 선택 학습의 macOS 경로 |
+| Ubuntu 계열 사용 | 선택 학습의 Ubuntu 경로 |
+| 설치 권한 없음 | 관리형 또는 제공된 원격 PostgreSQL 검토 |
+| Docker 경험 있음 | 컨테이너 방식 선택 가능 |
+
+## 설치·실행 단계 구분
 
 ```text
-변경 전에 존재 여부를 조회한다.
-기존 DB가 있으면 소유자와 객체 상태를 확인한다.
-자동 DROP DATABASE를 안내하지 않는다.
-CREATE DATABASE는 트랜잭션 밖에서 실행한다.
-관리자 계정 사용은 개인 로컬 학습 초기 구성으로 제한한다.
+설치 문제
+→ 프로그램이나 서비스가 준비되지 않음
+
+서버 실행 문제
+→ 설치됐지만 PostgreSQL 서비스가 중지됨
+
+연결 문제
+→ 서버는 실행되지만 연결값이나 인증이 잘못됨
+
+SQL 문제
+→ 연결은 성공했지만 SQL 실행에 문제가 있음
 ```
 
-## 환경 조회와 자동 판정 분리
+## 환경 조회와 자동 확인 분리
 
 ### `setup_check.sql`
 
 ```text
-version
-current_database
-current_schema
-search_path
-current_user
-transaction_read_only
-TimeZone
-CURRENT_TIMESTAMP
-1 + 1
-한 행 요약 결과
+환경 정보를 사람이 읽고 확인한다.
+데이터를 변경하지 않는다.
+여러 번 실행할 수 있다.
 ```
 
 ### `setup_validate_local.sql`
 
 ```text
-PostgreSQL 15 이상
-DB = ai_database_book
-CONNECT 권한
-public 존재
-public USAGE 권한
-transaction_read_only = off
-SQL 계산 정상
+권장 로컬 환경의 주요 조건을 자동 확인한다.
+관리형 환경을 통과시키기 위해 권한을 억지로 변경하지 않는다.
+실패 메시지의 항목을 확인하고 다시 실행한다.
 ```
 
-통과 메시지:
+## 비밀정보 원칙
+
+Chapter 03에서는 다음 네 가지를 핵심으로 다룬다.
 
 ```text
-Chapter 03 local environment validation passed
+비밀번호를 SQL 파일에 작성하지 않는다.
+전체 접속 URL을 공개하지 않는다.
+화면 캡처 전에 연결 정보를 확인한다.
+공용 PC에서는 비밀번호 저장에 주의한다.
 ```
 
-## `current_schema()` 설명 원칙
+`PGPASSFILE`, 운영체제별 password file 위치, 파일 형식과 권한은 Chapter 11로 이동한다.
+
+## Supabase 선택 학습 범위
+
+본문에는 다음만 남긴다.
 
 ```text
-current_schema()
-→ search_path에서 실제로 사용할 수 있는 첫 번째 스키마
-→ 사용자 스키마가 있으면 public이 아닐 수 있음
+Supabase는 실제 PostgreSQL을 제공한다.
+Auth·Storage·Realtime 같은 기능이 연결된다.
+로컬 환경과 연결 방식·권한 구조가 다를 수 있다.
 ```
 
-완료 기준은 `current_schema() = public`이 아니라 `public`의 존재와 사용 권한, `search_path` 해석 가능 여부다. Chapter 04에서는 `public.students`처럼 스키마를 명시한다.
-
-## 비밀정보 정책
+다음 내용은 온라인 업데이트 문서 또는 별도 심화 자료로 이동한다.
 
 ```text
-PGHOST
-PGPORT
-PGDATABASE
-PGUSER
-PGPASSFILE
+Direct·Session·Transaction Pooler 상세
+IPv4·IPv6 차이
+prepared statement 제한
+API 키 종류와 중단 일정
+RLS 우회
+Storage 메타데이터 조작 규칙
 ```
 
-실제 비밀번호를 기본 `.env` 예제로 권장하지 않는다. password file과 실제 `.env`는 Git에서 제외한다. 공용 PC의 DBeaver 비밀번호 저장, 연결 설정 내보내기와 화면 캡처 노출도 경고한다.
+## 버전 표기 원칙
 
-## Supabase 선택 읽기 범위
-
-본문은 다음 핵심만 유지한다.
+본문에는 정확한 최신 패치 버전을 고정하지 않는다.
 
 ```text
-실제 PostgreSQL 제공
-Storage 메타데이터와 객체 저장소 구분
-Storage 수정·삭제는 API 사용
-Direct 5432
-Session pooler 5432
-Transaction pooler 6543
-Transaction pooler prepared statement 미지원
-publishable은 공개 클라이언트용이지만 인증·RLS 필요
-secret은 서버 전용이며 RLS 우회
-legacy anon·service_role은 2026년 말 사용 중단 예정
+이 책의 SQL은 PostgreSQL 15 이상을 기준으로 작성했다.
+화면 예시는 집필 당시 버전이며 최신 버전에서는 달라질 수 있다.
 ```
 
-세부 비교와 기록 활동은 워크북의 선택 활동으로 이동한다.
+정확한 최신 버전과 확인일은 README, 정오표 또는 설치 업데이트 문서에서 관리한다.
 
 ## 독자 참여 요소
 
-### 핵심
+### 핵심 활동
 
-- 자신의 환경 기록
-- PostgreSQL·DBeaver 역할 구분
-- 연결값 확인
-- DB 존재·소유자 조회
-- `CREATE DATABASE` 사전 조건
-- 새 연결 전환
-- DB·스키마·search_path 확인
-- Statement·Script와 커밋 모드 비교
-- `setup_check.sql` 결과 기록
-- `setup_validate_local.sql` 통과
-- 오류와 비밀정보 점검
+- 자신의 환경과 설치 방식 기록
+- PostgreSQL 서버 상태 확인
+- DBeaver 연결값 작성
+- `ai_database_book` 존재·소유자 확인
+- 새 데이터베이스 연결 전환
+- 현재 데이터베이스와 사용자 확인
+- 실행 범위와 Auto-commit 확인
+- 환경 확인 SQL 실행
+- 오류와 해결 결과 기록
+- 비밀정보 노출 점검
 
-### 선택
+### 선택 활동
 
-- macOS·Linux 설치 방식
-- 관리형 PostgreSQL·Supabase
+- macOS·Linux 설치 차이
+- Docker 환경 기록
+- 관리형 PostgreSQL과 Supabase 개념
 - AI 오류 질문 작성
 
-## AI 활용 포인트
+### 심화 활동
 
-- 운영체제, 버전, 연결 방식, 마스킹한 연결값, 실행 작업, 오류 원문과 커밋 모드를 제공한다.
-- 비밀번호, 전체 접속 URL과 API 키는 제공하지 않는다.
-- 삭제·초기화·권한 변경 명령은 목적과 대상을 이해하기 전 실행하지 않는다.
-- AI 답변의 정확성은 실제 재실행 결과로 검증한다.
-
-## 후속 장으로 이동하는 내용
-
-| 내용 | 이동 장 |
-| --- | --- |
-| 첫 테이블과 CRUD | Chapter 04 |
-| 관계와 외래키 설계 | Chapter 05 |
-| 제약조건 오류 | Chapter 06 |
-| 트랜잭션 제어 | Chapter 09 |
-| 사용자·역할·password file·백업 | Chapter 11 |
-| AI 설계·SQL 검증 | Chapter 13 |
+- `search_path` 상세 해석
+- 읽기 전용 연결
+- 접속 정보 환경 변수
+- 관리자와 최소 권한
+- password file 개념
 
 ## 도식
 
-본문 사용 도식은 6종을 유지한다.
+본문 도식은 다음 6종을 유지한다.
 
 ```text
 그림 3-1 전체 환경
 그림 3-2 로컬·관리형 연결
 그림 3-3 DBeaver 연결
 그림 3-4 환경 정보 조회
-그림 3-5 조회와 자동 판정
+그림 3-5 조회와 자동 확인
 그림 3-6 오류 해결
 ```
 
-그림 3-4와 3-5는 읽기 전용 상태·시간대·자동 검증 역할을 반영한다.
-
 ## 편집 원칙
 
-- 설치 화면을 그대로 복제하지 않고 성공 기준을 설명한다.
-- Windows를 본문 기본 경로로 사용한다.
-- macOS·Linux와 Supabase 세부 활동은 워크북 선택 영역으로 축소한다.
-- 실행 결과와 자동 판정을 분리한다.
-- 환경 조회 파일에 데이터 변경 SQL을 포함하지 않는다.
-- 실제 통합 실행과 출판 렌더링 미수행 상태를 과장하지 않는다.
+- 특정 화면과 버튼 위치보다 성공 상태와 확인 방법을 설명한다.
+- Windows를 권장 기본 경로로 사용한다.
+- 다른 운영체제와 Docker는 선택 학습으로 분리한다.
+- 관리형 서비스의 빠르게 변하는 상세는 본문에서 최소화한다.
+- 설치 성공, 서버 실행, 연결 성공과 SQL 실행 성공을 구분한다.
+- 환경 조회와 자동 확인을 구분한다.
+- 운영 보안 상세는 Chapter 11로 이동한다.
+- 수업 일정·과제·평가와 연결되는 표현을 사용하지 않는다.
 
 ## 다음 장 연결
 
-Chapter 04에서는 `setup_validate_local.sql`을 통과한 `ai_database_book` 연결에서 `public.students`를 생성하고 CRUD를 실행한다.
+Chapter 04에서는 준비한 연결에서 `public.students` 테이블을 만들고 데이터를 입력·조회·수정·삭제한다.
