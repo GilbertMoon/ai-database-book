@@ -2,6 +2,13 @@
   const CHANNEL = 'chapter03-presentation-sync';
   const app = document.getElementById('app');
   if (!app) return;
+  if (!app.parentElement?.classList.contains('deck')) {
+    const deck = document.createElement('div');
+    deck.className = 'deck';
+    app.parentNode.insertBefore(deck, app);
+    deck.appendChild(app);
+  }
+  app.classList.add('view');
 
   const blockFromPage = document.body?.dataset?.chapter03Block === 'practice' ? 'practice' : 'theory';
   const blockLabel = blockFromPage === 'practice' ? '실습' : '이론';
