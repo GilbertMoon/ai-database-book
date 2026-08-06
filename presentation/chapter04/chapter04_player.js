@@ -19,13 +19,14 @@
   };
 
   const scriptSegments = (slide) => {
-    const raw = String(slide?.s || '').trim();
-    let parts = raw.split(/\n\s*\n/).map((value) => value.replace(/\s+/g, ' ').trim()).filter(Boolean);
-    if (parts.length === 1) {
-      const sentences = (parts[0].match(/[^.!?。]+[.!?。]?/g) || []).map((value) => value.trim()).filter(Boolean);
-      if (sentences.length > 1) parts = sentences;
-    }
-    return parts.length ? parts : ['핵심 내용을 설명합니다.'];
+    const paragraphs = String(slide?.s || '').trim().split(/\n\s*\n/).map((value) => value.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    if (paragraphs.length > 1) return paragraphs;
+    const sentences = (paragraphs[0]?.match(/[^.!?。]+[.!?。]?/g) || []).map((value) => value.trim()).filter(Boolean);
+    if (sentences.length <= 1) return paragraphs.length ? paragraphs : ['핵심 내용을 설명합니다.'];
+    const size = Math.max(1, Math.ceil(sentences.length / 4));
+    const result = [];
+    for (let index = 0; index < sentences.length; index += size) result.push(sentences.slice(index, index + size).join(' '));
+    return result;
   };
 
   let { slideIndex, stepIndex } = parseHash();
