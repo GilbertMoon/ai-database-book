@@ -1,106 +1,15 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Chapter 06 이론 강의</title>
-  <style>
-    :root{--p:#155eef;--s:#e8f0ff;--t:#182230;--m:#5d6b7a;--b:#d9e1ea;--a:#f59e0b}
-    *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0f1720;color:var(--t);font-family:Pretendard,'Noto Sans KR','Malgun Gothic',sans-serif}
-    body{cursor:none}.native{cursor:auto}
-    .deck{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at top left,rgba(21,94,239,.18),transparent 34%),#0f1720}
-    .view{position:relative;width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100vw*9/16));background:#f6f8fb;overflow:hidden;box-shadow:0 18px 45px rgba(20,33,50,.18)}
-    .slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:60px 84px 74px;background:linear-gradient(180deg,#fff,#f6f8fb)}
-    .slide:before{content:'';position:absolute;inset:0 0 auto;height:10px;background:linear-gradient(90deg,var(--p),#4f8cff 70%,var(--a))}
-    .head{display:flex;justify-content:space-between;align-items:center;min-height:58px;margin-bottom:24px}
-    .k{color:var(--p);font-weight:900;font-size:20px}
-    .l{padding:10px 18px;border:1px solid var(--b);border-radius:999px;color:var(--m);font-size:18px;font-weight:800;background:#fff}
-    .body{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1380px;width:100%;margin:auto}
-    h1{font-size:76px;line-height:1.12;letter-spacing:-.045em;margin:0 0 24px}
-    h2{font-size:54px;line-height:1.18;letter-spacing:-.035em;margin:0 0 24px}
-    h3{font-size:31px;margin:0 0 10px}
-    .lead,.body-text{color:var(--m);font-size:32px;line-height:1.55}
-    .title-meta,.chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
-    .pill,.chip{padding:12px 18px;border-radius:999px;background:var(--s);color:var(--p);font-size:21px;font-weight:900}
-    .grid-2,.grid-3{display:grid;gap:24px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}
-    .card{min-height:160px;padding:24px 27px;border:1px solid var(--b);border-radius:28px;background:#fff;box-shadow:0 9px 24px rgba(33,50,73,.07);font-size:25px;line-height:1.45}
-    .card p{margin:0;color:var(--m);font-size:25px;line-height:1.45}
-    .emphasis,.current{background:var(--s)!important;border-color:rgba(21,94,239,.3)!important}.done{background:#e9f8ef!important}
-    .number{display:inline-grid;place-items:center;min-width:48px;height:48px;padding:0 12px;margin-bottom:14px;border-radius:15px;background:var(--p);color:#fff;font-weight:900}
-    .bullet-list{display:grid;gap:14px;list-style:none;padding:0;margin:0}
-    .bullet-list li{position:relative;padding-left:34px;font-size:29px;line-height:1.48}
-    .bullet-list li:before{content:'';position:absolute;left:3px;top:.62em;width:13px;height:13px;border-radius:50%;background:var(--p);box-shadow:0 0 0 7px var(--s)}
-    .quote{padding:34px 42px;border-left:10px solid var(--p);background:var(--s);border-radius:0 28px 28px 0;font-size:40px;font-weight:900;line-height:1.52}
-    .flow{display:flex;align-items:stretch;gap:14px}
-    .flow-step{flex:1;display:grid;place-items:center;min-height:135px;padding:18px;border:1px solid var(--b);border-radius:24px;background:#fff;text-align:center;font-size:23px;font-weight:900;line-height:1.35}
-    .flow-arrow{display:grid;place-items:center;color:var(--p);font-size:36px}
-    .table-wrap{overflow:hidden;border:1px solid var(--b);border-radius:24px;background:#fff}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:15px 18px;border-bottom:1px solid var(--b);text-align:left;font-size:24px;line-height:1.42}
-    th{background:#eef3f8;font-weight:900}
-    pre,.codebox{padding:26px 32px;border-radius:24px;background:#101820;color:#eef7ff;white-space:pre-wrap;overflow:auto;font:24px/1.55 Consolas,'D2Coding',monospace}
-    .btn{width:48px;height:48px;border:0;border-radius:15px;background:rgba(15,23,32,.78);color:#fff;font-size:23px;font-weight:900}
-    .ctrl{position:absolute;right:24px;bottom:22px;display:flex;gap:10px;z-index:10}
-    .sbtn{position:absolute;left:28px;bottom:24px;width:34px;height:34px;border:1px solid rgba(21,94,239,.35);border-radius:50%;background:#fff;color:var(--p);font-weight:900;z-index:10}
-    .num{position:absolute;left:74px;bottom:29px;color:var(--m);font-size:18px;font-weight:800}
-    .track{position:absolute;left:0;right:0;bottom:0;height:7px;background:rgba(24,34,48,.1)}
-    .bar{height:100%;background:linear-gradient(90deg,var(--p),var(--a))}
-    .ov{position:absolute;inset:0;display:none;place-items:center;padding:40px;background:rgba(8,13,20,.78);z-index:100}.ov.open{display:grid}
-    .panel{width:min(1040px,92%);max-height:84%;overflow:auto;padding:38px 42px;border-radius:28px;background:#fff}.panel h2{font-size:38px}
-    .script p{font-size:27px;line-height:1.75;color:#263445}
-    .cursor,.halo{position:fixed;z-index:9999;pointer-events:none;transform:translate(-50%,-50%);border-radius:50%;opacity:0}
-    .cursor{width:15px;height:15px;background:#ff2f2f;box-shadow:0 0 0 4px #fff,0 0 18px rgba(255,47,47,.8)}
-    .halo{width:62px;height:62px;border:3px solid rgba(255,47,47,.88);background:rgba(255,47,47,.08)}
-    body.ready:not(.native) .cursor,body.ready:not(.native) .halo{opacity:1}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 06 이론 강의</title>
+<link rel="stylesheet" href="chapter06_player.css">
 </head>
-<body>
-  <div class="deck"><main class="view" id="app"></main></div>
-  <div class="halo" id="halo"></div>
-  <div class="cursor" id="cursor"></div>
-
-  <script src="chapter06_theory_slides.js"></script>
-  <script src="chapter06_theory_patch.js"></script>
-  <script>
-    let i=Math.max(0,Math.min((parseInt(location.hash.slice(1))||1)-1,CH6_SLIDES.length-1));
-    const app=document.getElementById('app');
-    function ps(v){return String(v||'').split(/\n\s*\n/).map(p=>`<p>${p.trim()}</p>`).join('')}
-    function render(){
-      const s=CH6_SLIDES[i];
-      app.innerHTML=`<section class="slide"><div class="head"><span class="k">${s.k}</span><span class="l">${s.l}</span></div><div class="body">${s.h}</div></section><button class="sbtn" id="sb">s</button><div class="num">${i+1} / ${CH6_SLIDES.length}</div><nav class="ctrl"><button class="btn" id="p">←</button><button class="btn" id="n">→</button></nav><div class="track"><div class="bar" style="width:${(i+1)/CH6_SLIDES.length*100}%"></div></div><div class="ov" id="ov"><div class="panel"><h2>스크립트 · ${i+1}장</h2><div class="script">${ps(s.s)}</div></div></div>`;
-      location.hash=i+1;
-      p.onclick=prev;n.onclick=next;
-      sb.onclick=e=>{e.stopPropagation();ov.classList.add('open')};
-      ov.onclick=e=>{if(e.target.id==='ov')ov.classList.remove('open')};
-    }
-    function next(){if(i<CH6_SLIDES.length-1){i++;render()}}
-    function prev(){if(i>0){i--;render()}}
-    document.addEventListener('keydown',e=>{
-      if(e.key==='Escape'){ov?.classList.remove('open');return}
-      if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();next()}
-      else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();prev()}
-      else if(e.key==='Home'){i=0;render()}
-      else if(e.key==='End'){i=CH6_SLIDES.length-1;render()}
-      else if(e.key.toLowerCase()==='s')sb?.click();
-      else if(e.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():app.requestFullscreen?.()}
-      else if(e.key.toLowerCase()==='c')document.body.classList.toggle('native');
-    });
-    app.addEventListener('click',e=>{
-      if(e.target.closest('button')||e.target.closest('.panel'))return;
-      const r=app.getBoundingClientRect();
-      e.clientX-r.left<r.width*.32?prev():next();
-    });
-    document.addEventListener('mousemove',e=>{
-      document.body.classList.add('ready');
-      cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';
-      halo.style.left=e.clientX+'px';halo.style.top=e.clientY+'px';
-    });
-    window.addEventListener('hashchange',()=>{
-      const n=parseInt(location.hash.slice(1));
-      if(n&&n-1!==i){i=Math.max(0,Math.min(n-1,CH6_SLIDES.length-1));render()}
-    });
-    render();
-  </script>
+<body data-chapter06-block="theory">
+<div class="deck"><main class="view" id="app"></main></div>
+<script src="chapter06_theory_slides.js"></script>
+<script src="chapter06_theory_patch.js"></script>
+<script src="chapter06_player.js"></script>
 </body>
 </html>
