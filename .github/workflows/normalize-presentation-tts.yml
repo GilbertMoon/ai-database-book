@@ -6,6 +6,10 @@ on:
     paths:
       - scripts/normalize_presentation_tts_terms.py
       - presentation/common/tts_pronunciation.js
+      - presentation/course_overview_script.html
+      - presentation/chapter*/chapter*_script.html
+      - presentation/chapter*/chapter*_lecture_plan.md
+      - presentation/chapter*/**/*.js
       - .github/workflows/normalize-presentation-tts.yml
   workflow_dispatch:
 
