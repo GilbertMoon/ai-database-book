@@ -55,6 +55,10 @@
     .replace(/셀렉트/g, 'select')
     .replace(/업데이트/g, 'update')
     .replace(/딜리트/g, 'delete')
+    .replace(/조회/g, 'select')
+    .replace(/수정/g, 'update')
+    .replace(/삭제/g, 'delete')
+    .replace(/입력/g, 'insert')
     .replace(/웨어/g, 'where')
     .replace(/오더 바이/g, 'order by')
     .replace(/널스 라스트/g, 'nulls last')
@@ -64,6 +68,14 @@
     .replace(/아이디/g, 'id')
     .replace(/퍼블릭/g, 'public')
     .replace(/스튜던츠/g, 'students')
+    .replace(/등록 시각/g, 'created at')
+    .replace(/이메일/g, 'email')
+    .replace(/전공/g, 'major')
+    .replace(/학년/g, 'grade')
+    .replace(/이름/g, 'name')
+    .replace(/학생/g, 'students')
+    .replace(/열/g, 'column')
+    .replace(/행/g, 'row')
     .replace(/커런트 데이터베이스/g, 'current database')
     .replace(/커런트 스키마/g, 'current schema')
     .replace(/쇼 서치 패스/g, 'search path')
@@ -91,14 +103,14 @@
     .replace(/체크포인트 에이/g, 'checkpoint a')
     .replace(/체크포인트 비/g, 'checkpoint b')
     .replace(/체크포인트 씨/g, 'checkpoint c')
-    .replace(/영 행/g, '0 row')
-    .replace(/한 행/g, '1 row')
-    .replace(/일 행/g, '1 row')
-    .replace(/네 행/g, '4 row')
+    .replace(/영 row/g, '0 row')
+    .replace(/한 row/g, '1 row')
+    .replace(/일 row/g, '1 row')
+    .replace(/네 row/g, '4 row')
     .replace(/여섯 명/g, '6')
     .replace(/다섯 명/g, '5')
-    .replace(/삼 학년/g, '3')
-    .replace(/사 학년/g, '4')
+    .replace(/삼 grade/g, '3')
+    .replace(/사 grade/g, '4')
     .replace(/[_·/()=<>,'";:+-]+/g, ' ')
     .replace(/[^0-9a-z가-힣%]+/g, ' ')
     .replace(/\s+/g, ' ')
@@ -143,16 +155,23 @@
 
   const keys = (targets, prefix) => targets.filter((target) => target.prefix === prefix).map((target) => target.key);
 
-  const scoreTarget = (sentenceTokens, target, sentence) => {
+  const baseOverlapScore = (sentenceTokens, target) => {
     let score = 0;
     sentenceTokens.forEach((token) => {
       if (target.tokens.has(token)) score += token.length >= 5 ? 4 : token.length >= 3 ? 3 : 2;
     });
+    return score;
+  };
 
+  const scoreTarget = (sentenceTokens, target, sentence) => {
+    let score = baseOverlapScore(sentenceTokens, target);
     const normalized = normalizeForMatch(sentence);
-    if (target.prefix === 'expect' && /(예상|완료 기준|완료|영향.*row|반환.*row|확인)/.test(sentence)) score += 4;
+    if (target.prefix === 'expect') {
+      if (/(예상|완료 기준|영향.*row|반환.*row|0 row|1 row)/.test(normalized)) score += 4;
+      else if (/확인/.test(sentence) && score > 0) score += 2;
+    }
     if (target.prefix === 'code' && /\b(select|insert|update|delete|where|order|returning|null|limit|like|ilike|current|show|create)\b/.test(normalized)) score += 2;
-    if (target.prefix === 'row' && /(체크포인트|학생 수|학년|존재|삭제|column|type|rule|crud)/i.test(normalized)) score += 2;
+    if (target.prefix === 'row' && /(checkpoint|students|grade|존재|delete|column|type|rule|crud)/i.test(normalized)) score += 2;
     if (target.prefix === 'flow' && /(먼저|다음|그다음|마지막|흐름|순서|재확인)/.test(sentence)) score += 1;
     if (target.prefix === 'item' && /(검토|확인|기준|조건|없음|위험|안전)/.test(sentence)) score += 1;
     return score;
@@ -220,6 +239,8 @@
     const itemKeys = keys(targets, 'item');
     const rowKeys = keys(targets, 'row');
     const quoteKeys = keys(targets, 'quote');
+    const expectKeys = keys(targets, 'expect');
+    const executableKeys = [...keys(targets, 'code'), ...keys(targets, 'codebox')];
 
     if (key === 'CHAPTER GOALS' && itemKeys.length >= 5) {
       return [
@@ -333,6 +354,23 @@
         { text: sentences[5] || '', focusKeys: [itemKeys[4]] },
         { text: sentences.slice(6).join(' '), focusKeys: [itemKeys[5]] }
       ].filter((step) => step.text);
+    }
+
+    if (expectKeys.length && executableKeys.length && (/^STEP \d+/.test(key) || /^CHECKPOINT/.test(key))) {
+      const expectTarget = targets.find((target) => target.key === expectKeys[0]);
+      let splitAt = -1;
+      sentences.forEach((sentence, index) => {
+        if (splitAt >= 0) return;
+        const normalized = normalizeForMatch(sentence);
+        const semanticScore = expectTarget ? baseOverlapScore(tokensOf(sentence), expectTarget) : 0;
+        if (/(예상|완료 기준)/.test(sentence) || /\b(0|1|2|3|4|5|6)\b/.test(normalized) && semanticScore >= 3 || semanticScore >= 6) splitAt = index;
+      });
+      if (splitAt > 0) {
+        return [
+          { text: sentences.slice(0, splitAt).join(' '), focusKeys: executableKeys },
+          { text: sentences.slice(splitAt).join(' '), focusKeys: expectKeys }
+        ].filter((step) => step.text);
+      }
     }
 
     return null;
