@@ -13,7 +13,7 @@
           .filter(Number.isFinite)
           .sort((left, right) => left - right);
         if (steps.length <= 1) return;
-        element.removeAttribute('data-focus-step');
+        element.dataset.focusStep = String(steps[0]);
         element.dataset.focusFrom = String(steps[0]);
         element.dataset.focusTo = String(steps[steps.length - 1]);
       });
