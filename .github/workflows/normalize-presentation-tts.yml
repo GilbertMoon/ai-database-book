@@ -38,6 +38,9 @@ jobs:
       - name: Check presentation JavaScript syntax
         run: |
           node --check presentation/chapter01/chapter01_navigation.js
+          node --check presentation/chapter05/chapter05_navigation.js
+          node --check presentation/chapter05/chapter05_player.js
+          node --check presentation/chapter05/chapter05_script.js
           node --check presentation/common/tts_pronunciation.js
 
       - name: Check Chapter 01 navigation coverage
@@ -70,6 +73,45 @@ jobs:
               raise SystemExit(f'Chapter 01 navigation mismatch: missing={missing}, extra={extra}')
 
           print(f'Chapter 01 navigation coverage OK: {len(slide_keys)} / {len(slide_keys)} slides')
+          PY
+
+      - name: Check Chapter 05 navigation coverage
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path('presentation/chapter05')
+          nav_text = (root / 'chapter05_navigation.js').read_text(encoding='utf-8')
+          marker = 'const PLANS = {'
+          if marker not in nav_text:
+              raise SystemExit('Chapter 05 PLANS not found')
+          plans = nav_text.split(marker, 1)[1].split('\n  };', 1)[0]
+          if 'theory: {' not in plans or 'practice: {' not in plans:
+              raise SystemExit('Chapter 05 theory/practice plan blocks not found')
+          theory_plan = plans.split('theory: {', 1)[1].split('\n    },\n    practice: {', 1)[0]
+          practice_plan = plans.split('\n    practice: {', 1)[1]
+
+          cases = [
+              ('theory', 'chapter05_theory_slides_raw.js', theory_plan, 26),
+              ('practice', 'chapter05_practice_slides_raw.js', practice_plan, 29),
+          ]
+          for block, filename, plan_text, expected in cases:
+              slides_text = (root / filename).read_text(encoding='utf-8')
+              slide_keys = re.findall(r"\bk:\s*'([^']+)'", slides_text)
+              plan_keys = re.findall(r"^\s{6}'([^']+)':", plan_text, flags=re.M)
+              if len(slide_keys) != expected:
+                  raise SystemExit(f'Expected {expected} Chapter 05 {block} slides, found {len(slide_keys)}')
+              if len(set(slide_keys)) != len(slide_keys):
+                  raise SystemExit(f'Duplicate Chapter 05 {block} slide keys found')
+              if len(set(plan_keys)) != len(plan_keys):
+                  raise SystemExit(f'Duplicate Chapter 05 {block} navigation plan keys found')
+              missing = sorted(set(slide_keys) - set(plan_keys))
+              extra = sorted(set(plan_keys) - set(slide_keys))
+              if missing or extra:
+                  raise SystemExit(f'Chapter 05 {block} navigation mismatch: missing={missing}, extra={extra}')
+              print(f'Chapter 05 {block} navigation coverage OK: {len(slide_keys)} / {expected} slides')
           PY
 
       - name: Normalize narration sources and script pages
