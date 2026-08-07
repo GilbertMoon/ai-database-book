@@ -1,84 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
-  <title id="title">테이블, 행, 열과 셀의 구조</title>
-  <desc id="desc">students 테이블에서 전체 테이블, 한 행, major 열, 행과 열이 만나는 셀을 강조한 구조 설명</desc>
-  <style>
-    text{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;fill:#172033}
-    .title{font-size:32px;font-weight:700;text-anchor:middle;fill:#0f2d5c}
-    .label{font-size:16px;font-weight:700;text-anchor:middle}
-    .hint{font-size:14px;text-anchor:middle;fill:#475569}
-    .cell{fill:#fff;stroke:#64748b;stroke-width:1.4}
-    .head{fill:#e9f2fe;font-weight:700}
-    .row{fill:#fff6e6}
-    .col{fill:#eef9f1}
-    .hit{fill:#f2e9ff;stroke:#7c4dcb;stroke-width:2.4}
-    .table-border{fill:none;stroke:#2f5f9f;stroke-width:3}
-    .call{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.8}
-    .line{stroke:#475569;stroke-width:2;fill:none}
-    .t{font-size:15px;text-anchor:middle}
-    .th{font-size:16px;font-weight:700;text-anchor:middle}
-
-    .call-table{fill:#eff6ff;stroke:#2f5f9f;stroke-width:2.2}
-    .call-table-text{fill:#1d4f91}
-    .line-table{stroke:#2f5f9f;stroke-width:2.4;fill:none}
-
-    .call-row{fill:#fff7e8;stroke:#e59e0b;stroke-width:2.2}
-    .call-row-text{fill:#b45309}
-    .line-row{stroke:#e59e0b;stroke-width:2.4;fill:none}
-
-    .call-col{fill:#effcf3;stroke:#22a55a;stroke-width:2.2}
-    .call-col-text{fill:#15803d}
-    .line-col{stroke:#22a55a;stroke-width:2.4;fill:none}
-
-    .call-cell{fill:#f6f0ff;stroke:#7c4dcb;stroke-width:2.2}
-    .call-cell-text{fill:#6d28d9}
-    .line-cell{stroke:#7c4dcb;stroke-width:2.4;fill:none}
-  </style>
-  <rect width="1200" height="650" fill="#fff"/>
-  <text x="600" y="48" class="title">테이블, 행, 열과 셀의 구조</text>
-
-  <text x="600" y="93" class="label">students 테이블</text>
-  <rect x="250" y="115" width="700" height="280" class="table-border" rx="8"/>
-
-  <rect x="250" y="115" width="150" height="56" class="cell head"/><text x="325" y="150" class="th">id</text>
-  <rect x="400" y="115" width="170" height="56" class="cell head"/><text x="485" y="150" class="th">name</text>
-  <rect x="570" y="115" width="230" height="56" class="cell head"/><text x="685" y="150" class="th">email</text>
-  <rect x="800" y="115" width="150" height="56" class="cell head col"/><text x="875" y="150" class="th">major</text>
-
-  <rect x="250" y="171" width="150" height="74" class="cell row"/><text x="325" y="215" class="t">1</text>
-  <rect x="400" y="171" width="170" height="74" class="cell row"/><text x="485" y="215" class="t">김민지</text>
-  <rect x="570" y="171" width="230" height="74" class="cell row"/><text x="685" y="215" class="t">minji@example.com</text>
-  <rect x="800" y="171" width="150" height="74" class="hit"/><text x="875" y="215" class="t">컴퓨터공학</text>
-
-  <rect x="250" y="245" width="150" height="74" class="cell"/><text x="325" y="289" class="t">2</text>
-  <rect x="400" y="245" width="170" height="74" class="cell"/><text x="485" y="289" class="t">이준호</text>
-  <rect x="570" y="245" width="230" height="74" class="cell"/><text x="685" y="289" class="t">junho@example.com</text>
-  <rect x="800" y="245" width="150" height="74" class="cell col"/><text x="875" y="289" class="t">데이터사이언스</text>
-
-  <rect x="250" y="319" width="150" height="76" class="cell"/><text x="325" y="364" class="t">3</text>
-  <rect x="400" y="319" width="170" height="76" class="cell"/><text x="485" y="364" class="t">박서연</text>
-  <rect x="570" y="319" width="230" height="76" class="cell"/><text x="685" y="364" class="t">seoyeon@example.com</text>
-  <rect x="800" y="319" width="150" height="76" class="cell col"/><text x="875" y="364" class="t">경영학</text>
-
-  <rect x="55" y="125" width="175" height="70" rx="12" class="call-table"/>
-  <text x="142" y="151" class="label call-table-text">테이블 (Table)</text>
-  <text x="142" y="177" class="hint">기록의 집합</text>
-  <path d="M230 160H250" class="line-table"/>
-
-  <rect x="55" y="218" width="175" height="70" rx="12" class="call-row"/>
-  <text x="142" y="246" class="label call-row-text">행 (Row)</text>
-  <text x="142" y="266" class="hint">하나의 기록</text>
-  <path d="M230 235H250" class="line-row"/>
-
-  <rect x="970" y="133" width="175" height="70" rx="12" class="call-col"/>
-  <text x="1058" y="159" class="label call-col-text">열 (Column)</text>
-  <text x="1058" y="185" class="hint">데이터 항목</text>
-  <path d="M970 168H875V159" class="line-col"/>
-
-  <rect x="970" y="270" width="175" height="70" rx="12" class="call-cell"/>
-  <text x="1058" y="296" class="label call-cell-text">셀 (Cell)</text>
-  <text x="1058" y="322" class="hint">하나의 값</text>
-  <path d="M970 305H875V235" class="line-cell"/>
-
-  <text x="600" y="475" class="label">행과 열이 만나는 지점이 셀이다.</text>
-  <text x="600" y="505" class="hint">SQL을 읽을 때는 어떤 테이블의 어떤 열을 기준으로 어떤 행을 다루는지 함께 확인한다.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 450" role="img" aria-labelledby="title desc">
+<title id="title">테이블, 행, 열과 셀의 구조</title><desc id="desc">students 표에서 1번 굵은 외곽선은 테이블 전체, 2번 긴 점선은 가로 행 전체, 3번 짧은 점선은 major 열 전체, 4번 굵은 보라색 선은 하나의 셀을 가리킨다</desc>
+<style>text{font-family:"Malgun Gothic",sans-serif;fill:#172033}.title{font-size:30px;font-weight:800;text-anchor:middle}.head{fill:#e8f0ff}.cell{fill:#fff;stroke:#94a3b8;stroke-width:2}.row{fill:#fff7e8}.col{fill:#effaf3}.hit{fill:#f6f0ff;stroke:#7950b7;stroke-width:4}.table{fill:none;stroke:#155eef;stroke-width:6}.txt{font-size:20px;text-anchor:middle}.th{font-size:21px;font-weight:800;text-anchor:middle}.label{font-size:22px;font-weight:800}.sub{font-size:17px;fill:#526171}.num{fill:#172033}.nt{fill:#fff;font-size:18px;font-weight:800;text-anchor:middle;dominant-baseline:middle}.l1{stroke:#155eef;stroke-width:4;fill:none}.l2{stroke:#d97706;stroke-width:5;stroke-dasharray:15 7;fill:none}.l3{stroke:#16834a;stroke-width:5;stroke-dasharray:4 7;fill:none}.l4{stroke:#7950b7;stroke-width:6;fill:none}</style>
+<rect width="1400" height="450" fill="#fff"/><text x="700" y="35" class="title">students 테이블에서 네 범위를 읽습니다</text>
+<rect x="300" y="70" width="800" height="300" rx="8" class="table"/>
+<rect x="300" y="70" width="140" height="60" class="cell head"/><rect x="440" y="70" width="180" height="60" class="cell head"/><rect x="620" y="70" width="300" height="60" class="cell head"/><rect x="920" y="70" width="180" height="60" class="cell head col"/>
+<text x="370" y="108" class="th">id</text><text x="530" y="108" class="th">name</text><text x="770" y="108" class="th">email</text><text x="1010" y="108" class="th">major</text>
+<g class="row"><rect x="300" y="130" width="140" height="80" class="cell row"/><rect x="440" y="130" width="180" height="80" class="cell row"/><rect x="620" y="130" width="300" height="80" class="cell row"/><rect x="920" y="130" width="180" height="80" class="hit"/></g>
+<text x="370" y="178" class="txt">1</text><text x="530" y="178" class="txt">김민지</text><text x="770" y="178" class="txt">minji@example.com</text><text x="1010" y="178" class="txt">컴퓨터공학</text>
+<rect x="300" y="210" width="140" height="80" class="cell"/><rect x="440" y="210" width="180" height="80" class="cell"/><rect x="620" y="210" width="300" height="80" class="cell"/><rect x="920" y="210" width="180" height="80" class="cell col"/>
+<text x="370" y="258" class="txt">2</text><text x="530" y="258" class="txt">이준호</text><text x="770" y="258" class="txt">junho@example.com</text><text x="1010" y="258" class="txt">데이터사이언스</text>
+<rect x="300" y="290" width="140" height="80" class="cell"/><rect x="440" y="290" width="180" height="80" class="cell"/><rect x="620" y="290" width="300" height="80" class="cell"/><rect x="920" y="290" width="180" height="80" class="cell col"/>
+<text x="370" y="338" class="txt">3</text><text x="530" y="338" class="txt">박서연</text><text x="770" y="338" class="txt">seoyeon@example.com</text><text x="1010" y="338" class="txt">경영학</text>
+<circle cx="70" cy="102" r="20" class="num"/><text x="70" y="102" class="nt">1</text><text x="105" y="99" class="label">테이블 전체</text><text x="105" y="125" class="sub">굵은 외곽선</text><path d="M225 105H300" class="l1"/>
+<circle cx="70" cy="202" r="20" class="num"/><text x="70" y="202" class="nt">2</text><text x="105" y="199" class="label">행(Row)</text><text x="105" y="225" class="sub">가로 기록 전체</text><path d="M225 205H285V170H300" class="l2"/>
+<circle cx="1160" cy="112" r="20" class="num"/><text x="1160" y="112" class="nt">3</text><text x="1195" y="109" class="label">열(Column)</text><text x="1195" y="135" class="sub">세로 항목 전체</text><path d="M1150 145H1120V220H1100" class="l3"/>
+<circle cx="1160" cy="260" r="20" class="num"/><text x="1160" y="260" class="nt">4</text><text x="1195" y="257" class="label">셀(Cell)</text><text x="1195" y="283" class="sub">행과 열의 교차 값</text><path d="M1150 290H1125V170H1100" class="l4"/>
+<text x="700" y="420" class="title" style="font-size:23px">students 한 행 = 학생 한 명</text>
 </svg>
