@@ -48,5 +48,6 @@
   const initial=parseHash();slideIndex=initial.slideIndex;stepIndex=initial.stepIndex;loadBlock(block,{preserve:true}).then(()=>{if(presentationWindow&&!presentationWindow.closed){presentationWindow.postMessage({channel:CHANNEL,type:'script-ready',block},'*');setTimeout(sendState,250)}}).catch(error=>{console.error(error);card.innerHTML='<div class="loading">Chapter 04 스크립트를 불러오지 못했습니다.</div>'});
 })();
 </script>
+<script src="../common/tts_pronunciation.js"></script>
 </body>
 </html>

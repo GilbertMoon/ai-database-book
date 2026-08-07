@@ -37,5 +37,6 @@ document.getElementById('prevPage').onclick=()=>showState(slideIndex-1,0);docume
 addEventListener('keydown',event=>{if(['ArrowRight','ArrowDown','PageDown',' '].includes(event.key)){event.preventDefault();requestNext()}else if(['ArrowLeft','ArrowUp','PageUp'].includes(event.key)){event.preventDefault();requestPrev()}else if(event.key==='Home')showState(0,0);else if(event.key==='End')showState(slides.length-1,maxStep(slides.length-1))});addEventListener('hashchange',()=>{const hash=parseInt(location.hash.slice(1),10);if(Number.isFinite(hash)&&hash-1!==slideIndex)showState(hash-1,0,{notifyParent:false})});render();if(presentationWindow&&!presentationWindow.closed){try{presentationWindow.postMessage({channel:CHANNEL,type:'script-ready'},'*')}catch(e){}setTimeout(sendState,250)}
 })();
 </script>
+<script src="../common/tts_pronunciation.js"></script>
 </body>
 </html>
