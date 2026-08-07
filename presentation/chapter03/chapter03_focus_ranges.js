@@ -23,5 +23,17 @@
   };
 
   window.normalizeChapter03FocusRanges = normalizeSlides;
+
+  if (window.CH3Navigation?.prepareSlides) {
+    const navigation = window.CH3Navigation;
+    const originalPrepareSlides = navigation.prepareSlides;
+    window.CH3Navigation = Object.freeze({
+      ...navigation,
+      prepareSlides(slides, block) {
+        return normalizeSlides(originalPrepareSlides(slides, block));
+      }
+    });
+  }
+
   if (Array.isArray(window.CH3_SLIDES)) normalizeSlides(window.CH3_SLIDES);
 })();
