@@ -49,6 +49,8 @@
     .replace(/크러드/g, 'crud')
     .replace(/크리에이트 테이블/g, 'create table')
     .replace(/크리에이트 데이터베이스/g, 'create database')
+    .replace(/크리에이트/g, 'create')
+    .replace(/리드/g, 'read')
     .replace(/인서트/g, 'insert')
     .replace(/셀렉트/g, 'select')
     .replace(/업데이트/g, 'update')
@@ -84,9 +86,11 @@
     .replace(/이즈 널/g, 'is null')
     .replace(/앤드/g, 'and')
     .replace(/오알/g, 'or')
-    .replace(/\b인\b/g, 'in')
     .replace(/오름차순/g, 'asc')
     .replace(/내림차순/g, 'desc')
+    .replace(/체크포인트 에이/g, 'checkpoint a')
+    .replace(/체크포인트 비/g, 'checkpoint b')
+    .replace(/체크포인트 씨/g, 'checkpoint c')
     .replace(/영 행/g, '0 row')
     .replace(/한 행/g, '1 row')
     .replace(/일 행/g, '1 row')
@@ -179,7 +183,9 @@
     const best = scored[0]?.score || 0;
     if (best < 3) return [];
     const threshold = Math.max(3, Math.ceil(best * 0.72));
-    return scored.filter((entry) => entry.score >= threshold).slice(0, 4).map((entry) => entry.target.key);
+    const selected = scored.filter((entry) => entry.score >= threshold).slice(0, 4).map((entry) => entry.target.key);
+    if (best <= 3 && selected.length > 1) return [];
+    return selected;
   };
 
   const sameFocus = (left, right) => left.length === right.length && left.every((key, index) => key === right[index]);
@@ -212,13 +218,13 @@
     const cardKeys = keys(targets, 'card');
     const flowKeys = keys(targets, 'flow');
     const itemKeys = keys(targets, 'item');
+    const rowKeys = keys(targets, 'row');
     const quoteKeys = keys(targets, 'quote');
 
     if (key === 'CHAPTER GOALS' && itemKeys.length >= 5) {
       return [
-        { text: sentences.slice(0, 2).join(' '), focusKeys: itemKeys.slice(0, 2) },
-        { text: sentences[2] || '', focusKeys: [itemKeys[2]] },
-        { text: sentences.slice(3).join(' '), focusKeys: itemKeys.slice(3, 5) }
+        { text: sentences.slice(0, 2).join(' '), focusKeys: itemKeys.slice(0, 3) },
+        { text: sentences.slice(2).join(' '), focusKeys: itemKeys.slice(3, 5) }
       ].filter((step) => step.text);
     }
 
@@ -239,6 +245,33 @@
       ].filter((step) => step.text);
     }
 
+    if (key === 'TABLE SCOPE' && rowKeys.length >= 5) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: rowKeys.slice(0, 2) },
+        { text: sentences[2] || '', focusKeys: [rowKeys[2]] },
+        { text: sentences[3] || '', focusKeys: [rowKeys[3]] },
+        { text: sentences.slice(4).join(' '), focusKeys: [rowKeys[4]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'CRUD OVERVIEW' && rowKeys.length >= 4) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: [rowKeys[0]] },
+        { text: sentences[2] || '', focusKeys: [rowKeys[1]] },
+        { text: sentences[3] || '', focusKeys: [rowKeys[2]] },
+        { text: sentences.slice(4).join(' '), focusKeys: [rowKeys[3]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'COLUMN MEANING' && rowKeys.length >= 5) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: [rowKeys[0]] },
+        { text: sentences[2] || '', focusKeys: [rowKeys[1]] },
+        { text: sentences[3] || '', focusKeys: [rowKeys[2]] },
+        { text: sentences.slice(4).join(' '), focusKeys: rowKeys.slice(3, 5) }
+      ].filter((step) => step.text);
+    }
+
     if ((key === 'UPDATE SAFETY' || key === 'DELETE SAFETY') && flowKeys.length >= 4) {
       const parts = sentences.filter(Boolean);
       return [
@@ -246,6 +279,34 @@
         { text: parts[2] || '', focusKeys: [flowKeys[1]] },
         { text: parts[3] || '', focusKeys: [flowKeys[2]] },
         { text: parts.slice(4).join(' '), focusKeys: [flowKeys[3]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'CHECKPOINTS' && rowKeys.length >= 3) {
+      return [
+        { text: sentences.slice(0, 3).join(' '), focusKeys: [rowKeys[0]] },
+        { text: sentences.slice(3, 5).join(' '), focusKeys: [rowKeys[1]] },
+        { text: sentences.slice(5).join(' '), focusKeys: [rowKeys[2]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'AI SQL REVIEW' && itemKeys.length >= 5) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: [itemKeys[0]] },
+        { text: sentences[2] || '', focusKeys: [itemKeys[1]] },
+        { text: sentences[3] || '', focusKeys: [itemKeys[2]] },
+        { text: sentences[4] || '', focusKeys: [itemKeys[3]] },
+        { text: sentences.slice(5).join(' '), focusKeys: [itemKeys[4]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'SUMMARY' && itemKeys.length >= 4) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: quoteKeys },
+        { text: sentences[2] || '', focusKeys: [itemKeys[0]] },
+        { text: sentences[3] || '', focusKeys: [itemKeys[1]] },
+        { text: sentences[4] || '', focusKeys: [itemKeys[2]] },
+        { text: sentences.slice(5).join(' '), focusKeys: [itemKeys[3]] }
       ].filter((step) => step.text);
     }
 
@@ -260,6 +321,17 @@
       return [
         { text: sentences.slice(0, 2).join(' '), focusKeys: [cardKeys[0]] },
         { text: sentences.slice(2).join(' '), focusKeys: [cardKeys[1]] }
+      ].filter((step) => step.text);
+    }
+
+    if (key === 'PRACTICE SUMMARY' && itemKeys.length >= 6) {
+      return [
+        { text: sentences.slice(0, 2).join(' '), focusKeys: [itemKeys[0]] },
+        { text: sentences[2] || '', focusKeys: [itemKeys[1]] },
+        { text: sentences[3] || '', focusKeys: [itemKeys[2]] },
+        { text: sentences[4] || '', focusKeys: [itemKeys[3]] },
+        { text: sentences[5] || '', focusKeys: [itemKeys[4]] },
+        { text: sentences.slice(6).join(' '), focusKeys: [itemKeys[5]] }
       ].filter((step) => step.text);
     }
 
