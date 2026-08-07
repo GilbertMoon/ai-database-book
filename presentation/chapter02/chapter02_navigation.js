@@ -153,9 +153,8 @@
     ],
     7: [
       { p: [0], f: ['explorer-0'] },
-      { p: [1], f: ['activity-0'] },
-      { p: [2], f: ['activity-1'] },
-      { p: [3], f: ['answer-0'] }
+      { p: [1], f: ['activity-0', 'activity-1'] },
+      { p: [2], f: ['answer-0'] }
     ],
     8: [
       { p: [0], f: ['media-0', 'legend-0'] },
@@ -198,14 +197,9 @@
     ],
     15: [
       { p: [0], f: ['prompt-0'] },
-      { p: [1], f: ['review-0'] },
-      { p: [2], f: ['review-1'] },
-      { p: [3], f: ['review-2'] },
-      { p: [4], f: ['review-3'] },
-      { p: [5], f: ['kind-0'] },
-      { p: [6], f: ['kind-1'] },
-      { p: [7], f: ['kind-2'] },
-      { p: [8], f: ['next-0', 'next-1'] }
+      { p: [1], f: all('review', 4) },
+      { p: [2], f: all('kind', 3) },
+      { p: [3], f: ['next-0', 'next-1'] }
     ]
   };
 
@@ -226,12 +220,25 @@
 
   const applyFocus = (root, slide, slideIndex, stepIndex) => {
     const targets = prepareDOM(root);
-    targets.forEach(({ element }) => element.classList.remove('focus-muted', 'focus-active'));
+    targets.forEach(({ element }) => element.classList.remove('focus-muted', 'focus-context', 'focus-active'));
     if (stepIndex <= 0) return;
     const step = buildSteps(slide, slideIndex)[stepIndex - 1];
     if (!step || !step.focusKeys.length) return;
     const selected = new Set(step.focusKeys);
-    targets.forEach(({ key, element }) => element.classList.add(selected.has(key) ? 'focus-active' : 'focus-muted'));
+    const activeElements = new Set(targets.filter(({ key }) => selected.has(key)).map(({ element }) => element));
+    const contextElements = new Set();
+    activeElements.forEach((element) => {
+      let parent = element.parentElement?.closest('.focus-target');
+      while (parent && root.contains(parent)) {
+        contextElements.add(parent);
+        parent = parent.parentElement?.closest('.focus-target');
+      }
+    });
+    targets.forEach(({ element }) => {
+      if (activeElements.has(element)) element.classList.add('focus-active');
+      else if (contextElements.has(element)) element.classList.add('focus-context');
+      else element.classList.add('focus-muted');
+    });
   };
 
   window.CH2Navigation = Object.freeze({ buildSteps, prepareDOM, applyFocus, splitParagraphs, slideCount: slides.length });

@@ -27,6 +27,7 @@
 (() => {
   'use strict';
   const CHANNEL = 'chapter02-presentation-sync';
+  const TARGET_ORIGIN = location.protocol === 'file:' ? '*' : location.origin;
   const slides = window.CH2_SLIDES || [];
   const navigation = window.CH2Navigation;
   const card = document.getElementById('card');
@@ -46,7 +47,7 @@
 
   const send = (type, extra = {}) => {
     if (!presentationWindow || presentationWindow.closed) return false;
-    try { presentationWindow.postMessage({ channel: CHANNEL, type, ...extra }, '*'); return true; } catch (_) { return false; }
+    try { presentationWindow.postMessage({ channel: CHANNEL, type, ...extra }, TARGET_ORIGIN); return true; } catch (_) { return false; }
   };
   const sendState = () => send('navigate-presentation', { slideIndex, stepIndex });
 
@@ -116,7 +117,9 @@
   addEventListener('message', (event) => {
     const data = event.data || {};
     if (data.channel !== CHANNEL) return;
-    if (event.source && !event.source.closed) presentationWindow = event.source;
+    if (location.protocol !== 'file:' && event.origin !== location.origin) return;
+    if (presentationWindow && event.source !== presentationWindow) return;
+    if (!presentationWindow || !event.source || event.source.closed) return;
     if (data.type === 'presentation-state') showState(data.slideIndex, data.stepIndex, { notifyParent: false, scroll: false });
   });
 
