@@ -1,0 +1,12 @@
+@import url('../chapter04/chapter04_player.css');
+
+.loading-slide{display:grid;place-items:center;width:100%;height:100%;padding:48px;color:#667085;font-size:24px;font-weight:850;text-align:center}
+.error-slide{color:#b42318}
+.screen-text{margin:12px 0;padding:18px 22px;border:1px solid var(--b);border-radius:18px;background:#fff;color:var(--m);font-size:27px;line-height:1.5}
+.code-lines{display:grid;gap:0;padding:18px 0;overflow:hidden}
+.code-line{min-height:37px;padding:3px 27px;border-left:4px solid transparent;white-space:pre-wrap;font:22px/1.45 Consolas,'D2Coding',monospace}
+.code-line:nth-child(odd){background:rgba(255,255,255,.035)}
+.body .table-wrap{max-height:48vh;overflow:auto}
+.body code{padding:.08em .32em;border-radius:.35em;background:#e8f0ff;color:#155eef;font-family:Consolas,'D2Coding',monospace}
+.transaction-flow,.lock-flow,.commit-state,.rollback-state{display:grid;gap:14px}
+.focus-active.code-line{border-left-color:#4f8cff}

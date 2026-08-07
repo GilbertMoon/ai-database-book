@@ -1,3 +1,18 @@
-document.write('<script src="chapter04_theory_slides_raw.js"><\/script>');
-document.write('<script src="chapter04_intro_patch.js"><\/script>');
-document.write('<script src="../common/screen_position_patch.js"><\/script>');
+(() => {
+  const sources = [
+    'chapter04_theory_slides_raw.js',
+    'chapter04_intro_patch.js',
+    '../common/screen_position_patch.js'
+  ];
+  const load = (src) => new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  (async () => {
+    for (const src of sources) await load(src);
+    dispatchEvent(new Event('chapter04-slides-ready'));
+  })().catch((error) => console.error('Chapter 04 이론 슬라이드 로드 실패', error));
+})();

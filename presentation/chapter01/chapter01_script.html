@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 01 발표 스크립트</title>
+<style>
+:root{--bg:#eef2f6;--surface:#fff;--text:#182230;--muted:#667085;--primary:#155eef;--primary-soft:#e8f0ff;--border:#d9e1ea;--success:#138a55;--success-soft:#e9f8f0}
+*{box-sizing:border-box}html,body{min-height:100%;margin:0;font-family:Pretendard,"Noto Sans KR","Malgun Gothic",sans-serif;background:var(--bg);color:var(--text)}body{padding:22px}.shell{max-width:960px;margin:0 auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:15px;color:var(--muted);font-size:15px;font-weight:850}.topbar b{color:var(--primary)}.card{min-height:650px;padding:31px 35px;border:1px solid var(--border);border-radius:22px;background:var(--surface);box-shadow:0 12px 28px rgba(24,34,48,.08)}h1{margin:0 0 8px;font-size:29px;line-height:1.3;letter-spacing:-.03em}.meta{margin:0 0 24px;color:var(--muted);font-size:15px}.script-text{font-size:21px;line-height:1.82;letter-spacing:-.012em}.script-text p{margin:0 0 18px;white-space:pre-line}.cue{display:flex;align-items:center;gap:12px;margin:2px 0 20px;padding:9px 11px;border:1px dashed #bcc8d8;border-radius:14px;background:#f8fafc}.line{flex:1;height:1px;background:#d7dee8}.cue-button{min-height:38px;padding:0 14px;border:1px solid #b8c8f5;border-radius:999px;background:#fff;color:#98a2b3;font-weight:850}.cue-button.next{background:var(--primary-soft);color:var(--primary);cursor:pointer}.cue-button.done{background:var(--success-soft);color:var(--success);border-color:#a7dec1}.cue-button.current{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 0 4px rgba(21,94,239,.12)}.cue-button:disabled{opacity:1}.focus-note{margin:-7px 0 18px;color:var(--muted);font-size:14px}.hint{margin-top:25px;padding:14px 16px;border-radius:14px;background:var(--primary-soft);color:#344054;font-size:15px;line-height:1.55}.nav{position:sticky;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:17px;padding:14px 0 2px;background:linear-gradient(180deg,rgba(238,242,246,0),var(--bg) 28%)}.nav-group{display:flex;gap:9px}.nav button{min-height:45px;padding:0 17px;border:0;border-radius:12px;background:#182230;color:#fff;font-weight:850;cursor:pointer}.nav button:disabled{opacity:.35;cursor:default}#focusSlides{background:var(--primary-soft);color:var(--primary)}.state-wrap{text-align:center;color:var(--muted);font-weight:800}#state{display:block;margin-top:4px;font-size:13px}.loading{padding:80px 20px;text-align:center;color:var(--muted);font-size:20px;font-weight:800}@media(max-width:720px){body{padding:12px}.topbar{align-items:flex-start;flex-direction:column}.card{min-height:auto;padding:24px 20px}.script-text{font-size:19px}.nav{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="topbar"><div><b>Chapter 01 · 발표 스크립트</b><span id="topCounter" style="margin-left:10px">01 / 49</span></div><span>문단과 화면 강조가 의미 기준으로 연결됩니다.</span></div>
+  <section class="card" id="card"><div class="loading">Chapter 01 스크립트를 불러오는 중입니다.</div></section>
+  <nav class="nav">
+    <div class="nav-group"><button id="prevPage" type="button">← 이전 장표</button><button id="nextPage" type="button">다음 장표 →</button></div>
+    <div class="state-wrap"><span id="counter">01 / 49</span><span id="state">전체 보기</span></div>
+    <button id="focusSlides" type="button">장표 창 보기 ↗</button>
+  </nav>
+</main>
+<script src="chapter01_final_lecture_patch.js"></script>
+<script src="chapter01_navigation.js"></script>
+<script src="../common/tts_pronunciation.js"></script>
+<script>
+(() => {
+  'use strict';
+  const CHANNEL = 'chapter01-presentation-sync';
+  const slides = window.CH1_SLIDES || [];
+  const navigation = window.CH1Navigation;
+  const card = document.getElementById('card');
+  let presentationWindow = window.opener && !window.opener.closed ? window.opener : null;
+
+  const displayReplacements = [
+    [/포스트그레스큐엘/g,'PostgreSQL'],[/디비버/g,'DBeaver'],[/알디비엠에스/g,'RDBMS'],[/노에스큐엘/g,'NoSQL'],[/디비엠에스/g,'DBMS'],[/에스큐엘/g,'SQL'],[/에이아이/g,'AI'],[/이알디/g,'ERD'],[/디디엘/g,'DDL'],[/크러드/g,'CRUD'],[/파이썬/g,'Python'],[/이너 조인/g,'INNER JOIN'],[/조인/g,'JOIN'],[/널/g,'NULL'],[/아이디/g,'ID'],[/카운트 별표/g,'COUNT(*)']
+  ];
+  const displayEnglish = (value) => displayReplacements.reduce((result,[pattern,replacement]) => result.replace(pattern,replacement), String(value || ''));
+  const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  const parseHash = () => {
+    const match = location.hash.match(/^#(\d+)(?:\/(\d+))?$/);
+    return match ? { slideIndex: Number(match[1]) - 1, stepIndex: Number(match[2] || 0) } : { slideIndex: 0, stepIndex: 0 };
+  };
+  const initial = parseHash();
+  let slideIndex = Math.max(0, Math.min(slides.length - 1, initial.slideIndex));
+  let stepIndex = 0;
+
+  const steps = (index = slideIndex) => navigation.buildSteps(slides[index], index);
+  const maxStep = (index = slideIndex) => steps(index).length;
+
+  const send = (type, extra = {}) => {
+    if (!presentationWindow || presentationWindow.closed) return false;
+    try { presentationWindow.postMessage({ channel: CHANNEL, type, ...extra }, '*'); return true; } catch (_) { return false; }
+  };
+  const sendState = () => send('navigate-presentation', { slideIndex, stepIndex });
+
+  const render = () => {
+    const slide = slides[slideIndex];
+    const currentSteps = steps();
+    const page = String(slideIndex + 1).padStart(2, '0');
+    const total = String(slides.length).padStart(2, '0');
+    document.getElementById('topCounter').textContent = `${page} / ${total}`;
+    document.getElementById('counter').textContent = `${page} / ${total}`;
+    document.getElementById('state').textContent = stepIndex === 0 ? '전체 보기' : `스크립트 단계 ${stepIndex} / ${maxStep()}`;
+    document.getElementById('prevPage').disabled = slideIndex === 0;
+    document.getElementById('nextPage').disabled = slideIndex === slides.length - 1;
+
+    card.innerHTML = `<h1>${escapeHtml(displayEnglish(slide.t || slide.l || '핵심 내용'))}</h1><p class="meta">${escapeHtml(displayEnglish(slide.k || 'CHAPTER 01'))} · 파란 버튼은 부모 장표의 다음 단계와 동일하게 동작합니다.</p>${currentSteps.map((step, index) => `<div class="script-text"><p>${escapeHtml(step.text)}</p></div><p class="focus-note">${step.focusKeys.length ? '이 문단과 관련된 화면 요소를 강조합니다.' : '이 문단은 장표 전체를 보며 설명합니다.'}</p><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}<div class="hint">도입·전환·마무리 문장은 관련 설명 단계와 묶었습니다. 표는 행 단위, 활동은 항목 단위, 코드는 줄 단위로 강조됩니다.</div>`;
+
+    card.querySelectorAll('.cue-button').forEach((button) => {
+      const target = Number(button.dataset.step);
+      button.classList.toggle('done', target < stepIndex);
+      button.classList.toggle('current', target === stepIndex && stepIndex > 0);
+      button.classList.toggle('next', target === stepIndex + 1);
+      button.disabled = target !== stepIndex + 1;
+      button.addEventListener('click', requestNext);
+    });
+    history.replaceState(null, '', `#${slideIndex + 1}/${stepIndex}`);
+  };
+
+  const showState = (newSlide, newStep = 0, { notifyParent = true, scroll = true } = {}) => {
+    const oldSlide = slideIndex;
+    slideIndex = Math.max(0, Math.min(slides.length - 1, Number(newSlide) || 0));
+    stepIndex = Math.max(0, Math.min(maxStep(slideIndex), Number(newStep) || 0));
+    render();
+    if (notifyParent) sendState();
+    if (scroll && oldSlide !== slideIndex) window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const localNext = () => {
+    if (stepIndex < maxStep()) showState(slideIndex, stepIndex + 1);
+    else if (slideIndex < slides.length - 1) showState(slideIndex + 1, 0);
+  };
+  const localPrevious = () => {
+    if (stepIndex > 0) showState(slideIndex, stepIndex - 1);
+    else if (slideIndex > 0) showState(slideIndex - 1, maxStep(slideIndex - 1));
+  };
+
+  function requestNext() {
+    if (send('request-next')) return;
+    try { if (presentationWindow?.chapter01NextFromScript) { presentationWindow.chapter01NextFromScript(); return; } } catch (_) {}
+    localNext();
+  }
+  function requestPrevious() {
+    if (send('request-prev')) return;
+    try { if (presentationWindow?.chapter01PrevFromScript) { presentationWindow.chapter01PrevFromScript(); return; } } catch (_) {}
+    localPrevious();
+  }
+
+  window.setScriptState = (newSlide, newStep = 0) => showState(newSlide, newStep, { notifyParent: false });
+
+  document.getElementById('prevPage').addEventListener('click', () => showState(slideIndex - 1, 0));
+  document.getElementById('nextPage').addEventListener('click', () => showState(slideIndex + 1, 0));
+  document.getElementById('focusSlides').addEventListener('click', () => {
+    if (presentationWindow && !presentationWindow.closed) { presentationWindow.focus(); sendState(); return; }
+    presentationWindow = window.open(`chapter01_presentation.html#${slideIndex + 1}/${stepIndex}`, 'chapter01Presentation');
+    if (presentationWindow) { presentationWindow.focus(); setTimeout(() => send('script-ready'), 300); }
+  });
+
+  addEventListener('message', (event) => {
+    const data = event.data || {};
+    if (data.channel !== CHANNEL) return;
+    if (event.source && !event.source.closed) presentationWindow = event.source;
+    if (data.type === 'presentation-state') showState(data.slideIndex, data.stepIndex, { notifyParent: false, scroll: false });
+  });
+
+  addEventListener('keydown', (event) => {
+    if (['ArrowRight','ArrowDown',' ','PageDown'].includes(event.key)) { event.preventDefault(); requestNext(); }
+    else if (['ArrowLeft','ArrowUp','PageUp'].includes(event.key)) { event.preventDefault(); requestPrevious(); }
+    else if (event.key === 'Home') showState(0, 0);
+    else if (event.key === 'End') showState(slides.length - 1, maxStep(slides.length - 1));
+  });
+
+  addEventListener('hashchange', () => {
+    const parsed = parseHash();
+    if (parsed.slideIndex !== slideIndex || parsed.stepIndex !== stepIndex) showState(parsed.slideIndex, parsed.stepIndex);
+  });
+
+  stepIndex = Math.max(0, Math.min(maxStep(slideIndex), initial.stepIndex));
+  render();
+  if (presentationWindow && !presentationWindow.closed) {
+    send('script-ready');
+    setTimeout(() => send('script-ready'), 250);
+  }
+})();
+</script>
+</body>
+</html>

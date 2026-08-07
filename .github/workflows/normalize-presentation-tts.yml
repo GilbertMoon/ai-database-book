@@ -1,0 +1,89 @@
+name: Normalize presentation TTS terms
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/normalize_presentation_tts_terms.py
+      - presentation/common/tts_pronunciation.js
+      - presentation/course_overview_script.html
+      - presentation/chapter*/chapter*_script.html
+      - presentation/chapter*/chapter*_lecture_plan.md
+      - presentation/chapter*/**/*.js
+      - .github/workflows/normalize-presentation-tts.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: normalize-presentation-tts-main
+  cancel-in-progress: false
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check presentation JavaScript syntax
+        run: |
+          node --check presentation/chapter01/chapter01_navigation.js
+          node --check presentation/common/tts_pronunciation.js
+
+      - name: Check Chapter 01 navigation coverage
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          slides_text = Path('presentation/chapter01/chapter01_final_lecture_patch.js').read_text(encoding='utf-8')
+          nav_text = Path('presentation/chapter01/chapter01_navigation.js').read_text(encoding='utf-8')
+
+          slide_keys = re.findall(r"\bk:\s*'([^']+)'", slides_text)
+          marker = 'const FOCUS_SEQUENCES = {'
+          if marker not in nav_text:
+              raise SystemExit('FOCUS_SEQUENCES not found')
+          plan_text = nav_text.split(marker, 1)[1].split('\n  };', 1)[0]
+          plan_keys = re.findall(r"^\s{4}'([^']+)':", plan_text, flags=re.M)
+
+          if len(slide_keys) != 49:
+              raise SystemExit(f'Expected 49 Chapter 01 slides, found {len(slide_keys)}')
+          if len(set(slide_keys)) != len(slide_keys):
+              raise SystemExit('Duplicate Chapter 01 slide keys found')
+          if len(set(plan_keys)) != len(plan_keys):
+              raise SystemExit('Duplicate Chapter 01 navigation plan keys found')
+
+          missing = sorted(set(slide_keys) - set(plan_keys))
+          extra = sorted(set(plan_keys) - set(slide_keys))
+          if missing or extra:
+              raise SystemExit(f'Chapter 01 navigation mismatch: missing={missing}, extra={extra}')
+
+          print(f'Chapter 01 navigation coverage OK: {len(slide_keys)} / {len(slide_keys)} slides')
+          PY
+
+      - name: Normalize narration sources and script pages
+        run: python scripts/normalize_presentation_tts_terms.py --apply
+
+      - name: Commit normalized presentation scripts
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No presentation TTS changes were needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add presentation scripts/normalize_presentation_tts_terms.py
+          git commit -m "Normalize Korean pronunciations in presentation scripts"
+          git push origin main
