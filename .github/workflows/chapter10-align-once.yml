@@ -1,0 +1,112 @@
+name: Align Chapter 10 Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chapter10-align-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align Chapter 10 sources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          roots = [
+              Path('book/chapter10'),
+              Path('code/chapter10'),
+              Path('presentation/chapter10'),
+          ]
+          files = []
+          for root in roots:
+              for p in root.rglob('*'):
+                  if p.is_file() and p.suffix.lower() in {'.md', '.sql', '.js', '.html', '.mmd', '.svg'}:
+                      files.append(p)
+          files += [Path('notes/chapter10_review_checklist.md')]
+
+          for p in files:
+              text = p.read_text(encoding='utf-8')
+              text = text.replace('paid_amount', 'recorded_amount')
+              text = text.replace('Skip Scan', 'PostgreSQL 18+ Skip Scan')
+              p.write_text(text, encoding='utf-8')
+
+          # Root README has a short Chapter 10 summary that should use the same version label.
+          root_readme = Path('README.md')
+          text = root_readme.read_text(encoding='utf-8')
+          text = text.replace('Skip Scan', 'PostgreSQL 18+ Skip Scan')
+          root_readme.write_text(text, encoding='utf-8')
+
+          version = '20260809a'
+          for p in Path('presentation/chapter10').iterdir():
+              if p.is_file() and p.suffix.lower() in {'.js', '.html'}:
+                  text = p.read_text(encoding='utf-8').replace('20260808a', version)
+                  p.write_text(text, encoding='utf-8')
+
+          version_note = (
+              '> **검증 기준 버전**\n>\n'
+              '> 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. '
+              '**B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.\n'
+          )
+
+          chapter = Path('book/chapter10/chapter10.md')
+          text = chapter.read_text(encoding='utf-8')
+          marker = '# Chapter 10. 실행 계획으로 인덱스 효과 검증하기\n\n---'
+          if marker in text and '검증 기준 버전' not in text:
+              text = text.replace(marker, '# Chapter 10. 실행 계획으로 인덱스 효과 검증하기\n\n' + version_note + '\n---', 1)
+          chapter.write_text(text, encoding='utf-8')
+
+          readme = Path('code/chapter10/README.md')
+          text = readme.read_text(encoding='utf-8')
+          marker = '## 실행 계획으로 인덱스 효과 검증하기\n\n'
+          if marker in text and '검증 기준 버전' not in text:
+              text = text.replace(marker, marker + version_note + '\n', 1)
+          readme.write_text(text, encoding='utf-8')
+
+          for name in ['chapter10_theory_lecture_plan.md', 'chapter10_practice_lecture_plan.md']:
+              p = Path('presentation/chapter10') / name
+              text = p.read_text(encoding='utf-8')
+              if '검증 기준 버전' not in text:
+                  first_rule = '\n---\n'
+                  if first_rule in text:
+                      text = text.replace(first_rule, '\n\n' + version_note + '\n---\n', 1)
+              p.write_text(text, encoding='utf-8')
+
+          for name in ['chapter10_outline.md', 'chapter10_activity.md']:
+              p = Path('book/chapter10') / name
+              text = p.read_text(encoding='utf-8')
+              if '검증 기준 버전' not in text:
+                  lines = text.splitlines()
+                  insert_at = 1
+                  lines[insert_at:insert_at] = ['', version_note.rstrip(), '']
+                  text = '\n'.join(lines) + ('\n' if text.endswith('\n') else '')
+              p.write_text(text, encoding='utf-8')
+
+          # Ensure the stale amount term is gone from Chapter 10 learning/execution sources.
+          stale = 'paid' + '_amount'
+          bad = []
+          for p in files:
+              if stale in p.read_text(encoding='utf-8', errors='ignore'):
+                  bad.append(str(p))
+          if bad:
+              raise SystemExit('stale Chapter 10 amount term remains: ' + ', '.join(bad))
+          PY
+
+      - name: Commit aligned files and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/chapter10-align-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add book/chapter10 code/chapter10 presentation/chapter10 notes/chapter10_review_checklist.md README.md .github/workflows/chapter10-align-once.yml
+          git commit -m 'Align Chapter 10 terminology and version guidance'
+          git push origin HEAD:main
