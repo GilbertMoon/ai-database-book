@@ -72,14 +72,17 @@ jobs:
 
               html = script_html.read_text(encoding='utf-8')
               js = script_js.read_text(encoding='utf-8')
+              compact = ''.join(js.split())
               if '../common/script_content_enhancer.js?v=20260808e' not in html:
                   errors.append(f'Chapter {chapter}: shared script enhancer not loaded')
-              if "stepIndex === 0 ? '전체 보기'" not in js:
+              if "stepIndex===0?'전체보기'" not in compact:
                   errors.append(f'Chapter {chapter}: whole-view state missing')
-              if "request-next" not in js or "request-prev" not in js:
+              if 'request-next' not in js or 'request-prev' not in js:
                   errors.append(f'Chapter {chapter}: parent/child step delegation missing')
-              if 'stepIndex + 1' not in js:
-                  errors.append(f'Chapter {chapter}: sequential next-step behavior missing')
+              if 'stepIndex+1' not in compact or 'stepIndex-1' not in compact:
+                  errors.append(f'Chapter {chapter}: sequential step behavior missing')
+              if 'slideIndex+1,0' not in compact and 'slideIndex+1,0)' not in compact:
+                  errors.append(f'Chapter {chapter}: next slide does not reset to whole-view step')
 
           ch8 = root / 'chapter08'
           nav8 = (ch8 / 'chapter08_navigation.js').read_text(encoding='utf-8')
