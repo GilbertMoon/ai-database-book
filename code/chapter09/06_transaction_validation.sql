@@ -6,10 +6,14 @@ SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
 
--- 1. Chapter 07 프로젝트 데이터 보호 확인
+-- 1. Chapter 07·08 프로젝트 데이터 보호 확인
 SELECT
     COUNT(*) AS project_enrollment_count,
-    COUNT(*) = 5 AS project_enrollment_count_ok
+    SUM(recorded_amount) AS project_recorded_amount,
+    COUNT(*) FILTER (WHERE status IN ('신청', '수강중')) AS active_enrollment_count,
+    SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')) AS active_recorded_amount,
+    COUNT(*) FILTER (WHERE status <> '취소') AS non_cancelled_count,
+    SUM(recorded_amount) FILTER (WHERE status <> '취소') AS non_cancelled_recorded_amount
 FROM course_project.enrollments;
 
 -- 2. lab 최종 행 수
@@ -124,21 +128,111 @@ WHERE id = 9903;
 
 -- 8. 전체 상태 자동 판정
 DO $$
+DECLARE
+    v_requested_count INTEGER;
+    v_learning_count INTEGER;
+    v_completed_count INTEGER;
+    v_cancelled_count INTEGER;
+    v_total_amount NUMERIC;
+    v_active_count INTEGER;
+    v_active_amount NUMERIC;
+    v_non_cancelled_count INTEGER;
+    v_non_cancelled_amount NUMERIC;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
             '최종 검증 실패: 현재 데이터베이스가 ai_database_book이 아닙니다.';
     END IF;
 
-    IF (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
+    IF (SELECT COUNT(*) FROM course_project.students) <> 3
+       OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
+       OR (SELECT COUNT(*) FROM course_project.courses) <> 3
+       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
         RAISE EXCEPTION
-            '최종 검증 실패: course_project.enrollments는 5행이어야 합니다.';
+            '최종 검증 실패: Chapter 07 기준 행 수 3/2/3/5가 유지되지 않았습니다.';
     END IF;
 
-    IF (SELECT COUNT(*) FROM transaction_lab.enrollments) <> 2
+    SELECT
+        COUNT(*) FILTER (WHERE status = '신청'),
+        COUNT(*) FILTER (WHERE status = '수강중'),
+        COUNT(*) FILTER (WHERE status = '완료'),
+        COUNT(*) FILTER (WHERE status = '취소'),
+        SUM(recorded_amount),
+        COUNT(*) FILTER (WHERE status IN ('신청', '수강중')),
+        SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')),
+        COUNT(*) FILTER (WHERE status <> '취소'),
+        SUM(recorded_amount) FILTER (WHERE status <> '취소')
+    INTO
+        v_requested_count,
+        v_learning_count,
+        v_completed_count,
+        v_cancelled_count,
+        v_total_amount,
+        v_active_count,
+        v_active_amount,
+        v_non_cancelled_count,
+        v_non_cancelled_amount
+    FROM course_project.enrollments;
+
+    IF v_requested_count <> 2
+       OR v_learning_count <> 1
+       OR v_completed_count <> 1
+       OR v_cancelled_count <> 1
+       OR v_total_amount <> 590000
+       OR v_active_count <> 3
+       OR v_active_amount <> 340000
+       OR v_non_cancelled_count <> 4
+       OR v_non_cancelled_amount <> 440000 THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07·08 상태·금액 기준값이 유지되지 않았습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1001 AND status = '완료' AND recorded_amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1004 AND status = '취소' AND recorded_amount = 150000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1005 AND status = '신청' AND recorded_amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07 핵심 신청 1001·1004·1005가 변경되었습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM transaction_lab.course_inventory) <> 3
+       OR (SELECT COUNT(*) FROM transaction_lab.enrollments) <> 2
        OR (SELECT COUNT(*) FROM transaction_lab.payments) <> 2 THEN
         RAISE EXCEPTION
-            '최종 검증 실패: lab enrollment와 payment는 각각 2행이어야 합니다.';
+            '최종 검증 실패: inventory/enrollment/payment는 3/2/2행이어야 합니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p ON p.enrollment_id = e.id
+        WHERE e.id = 9001
+          AND e.student_id = 101
+          AND e.course_id = 301
+          AND e.status = '수강중'
+          AND e.recorded_amount = 100000
+          AND p.id = 9901
+          AND p.amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p ON p.enrollment_id = e.id
+        WHERE e.id = 9002
+          AND e.student_id = 103
+          AND e.course_id = 302
+          AND e.status = '수강중'
+          AND e.recorded_amount = 120000
+          AND p.id = 9902
+          AND p.amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: 확정된 신청·결제 9001/9901 또는 9002/9902가 기대 상태와 다릅니다.';
     END IF;
 
     IF NOT EXISTS (
@@ -178,6 +272,28 @@ BEGIN
     ) THEN
         RAISE EXCEPTION
             '최종 검증 실패: 수강중 신청의 결제 누락 또는 금액 불일치가 있습니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM transaction_lab.payments AS p
+        LEFT JOIN transaction_lab.enrollments AS e
+            ON e.id = p.enrollment_id
+        WHERE e.id IS NULL
+    ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: 고아 payment가 있습니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT student_id, course_id
+        FROM transaction_lab.enrollments
+        WHERE status = '수강중'
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: 중복 활성 신청이 있습니다.';
     END IF;
 
     IF EXISTS (
