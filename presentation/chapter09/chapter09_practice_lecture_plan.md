@@ -59,7 +59,10 @@ SHOW search_path;
 
 ```text
 ai_database_book
-course_project.enrollments = 5행
+course_project = 3 / 2 / 3 / 5행
+recorded_amount = NUMERIC(12,0)
+상태 = 신청2 / 수강중1 / 완료1 / 취소1
+전체 590000 / 활성 3·340000 / 취소 제외 4·440000
 transaction_lab 기존 없음
 ```
 

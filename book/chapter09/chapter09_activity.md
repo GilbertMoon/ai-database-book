@@ -59,9 +59,15 @@ SHOW search_path;
 | 현재 스키마 | 제한 없음 |  |
 | `search_path` | 직접 확인 |  |
 | 같은 SQL Editor·연결 사용 | 예 |  |
-| `course_project.students` | 존재 |  |
-| `course_project.courses` | 존재 |  |
+| `course_project.students` | 3행 |  |
+| `course_project.instructors` | 2행 |  |
+| `course_project.courses` | 3행 |  |
 | `course_project.enrollments` | 5행 |  |
+| 상태별 건수 | 신청2·수강중1·완료1·취소1 |  |
+| `recorded_amount` 타입 | `NUMERIC(12,0)` |  |
+| 전체 기록 금액 | 590000 |  |
+| 활성 신청 | 3건 / 340000 |  |
+| 취소 제외 | 4건 / 440000 |  |
 | `transaction_lab` 기존 존재 | 아니요 |  |
 
 필요한 기준 마스터:

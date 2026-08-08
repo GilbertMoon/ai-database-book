@@ -103,10 +103,16 @@ transaction_lab.payments
 ```text
 current_database() = ai_database_book
 course_project 핵심 테이블 존재
+students / instructors / courses / enrollments = 3 / 2 / 3 / 5
 학생 101~103 존재
-강의 301~303 존재
-강의 가격 100000·120000·150000
-course_project.enrollments = 5
+강의 301~303 가격 = 100000·120000·150000
+recorded_amount = NUMERIC(12,0)
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+전체 = 5 / 590000
+활성 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 완료 / 100000, 1004 취소 / 150000, 1005 신청 / 120000
+uq_course_enrollments_active 존재
 transaction_lab 미생성 상태
 ```
 

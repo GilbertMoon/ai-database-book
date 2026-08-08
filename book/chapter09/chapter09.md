@@ -178,10 +178,16 @@ SHOW search_path;
 ```text
 현재 데이터베이스 = ai_database_book
 course_project 핵심 테이블 존재
+students / instructors / courses / enrollments = 3 / 2 / 3 / 5
 학생 101~103 존재
-강의 301~303 존재
-강의 기준 가격 일치
-course_project.enrollments = 5행
+강의 301~303와 기준 가격 100000 / 120000 / 150000 일치
+recorded_amount = NUMERIC(12,0)
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 신청 이력 = 4 / 440000
+신청 1001·1004·1005의 상태와 기록 금액 일치
+course_project.uq_course_enrollments_active 존재
 transaction_lab 스키마가 아직 없음
 ```
 
