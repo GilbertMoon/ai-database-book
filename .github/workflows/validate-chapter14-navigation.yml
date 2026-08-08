@@ -77,7 +77,19 @@ jobs:
               raise SystemExit('Chapter 14 still contains duplicated local TTS rules')
           if 'window.PresentationTTS?.normalize' not in script_text:
               raise SystemExit('Chapter 14 script is not using shared PresentationTTS')
-          print('Chapter 14 shared TTS usage OK')
+
+          tts_text = Path('presentation/common/tts_pronunciation.js').read_text(encoding='utf-8')
+          required_terms = [
+              'transaction_read_only', 'assert_frame_equal', 'reference_metrics',
+              'enrollment_analysis_dataset', 'analysis_parameters', 'recorded_amount_sum',
+              'recorded_amount', 'completion_days', 'is_completed', 'enrollment_id',
+              'paid_amount', 'date spine', 'manifest', 'SHA-256', 'PGDATABASE',
+              'DATABASE_URL', 'DataFrame', 'P14-Q', 'analysis_lab'
+          ]
+          missing_terms = [term for term in required_terms if term not in tts_text]
+          if missing_terms:
+              raise SystemExit(f'Chapter 14 shared TTS terms missing: {missing_terms}')
+          print('Chapter 14 shared TTS terms OK')
 
           for filename in ['chapter14_theory_presentation.html', 'chapter14_practice_presentation.html']:
               html = (root / filename).read_text(encoding='utf-8')
