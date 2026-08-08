@@ -7,11 +7,10 @@
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-  const normalizeSource = (value) => String(value ?? '')
-    .replace(/total_stored_paid_amount/g, 'total_recorded_amount')
-    .replace(/non_cancelled_paid_amount/g, 'non_cancelled_recorded_amount')
-    .replace(/paid_amount/g, 'recorded_amount')
-    .replace(/무료 신청의 결제 금액 0/g, '무료 신청의 기록 금액 0');
+  // 강의안 원본을 그대로 렌더링합니다.
+  // 오래된 용어를 런타임에서 조용히 치환하면 소스 불일치를 숨길 수 있으므로
+  // 용어 변경은 Markdown 강의안 자체에 반영하고 CI에서 검증합니다.
+  const normalizeSource = (value) => String(value ?? '');
 
   function renderTable(lines) {
     const rows = lines
