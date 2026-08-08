@@ -1,1 +1,11 @@
 @import url('../chapter04/chapter04_player.css');
+
+/* Chapter 06 semantic navigation overrides */
+.script-icon{width:34px;height:34px;padding:7px}
+.code-line{display:block;min-height:1.55em;padding:0 6px;margin:0 -6px;border-left:3px solid transparent;border-radius:4px;white-space:pre-wrap;transition:opacity .2s ease,background .2s ease,border-color .2s ease}
+.code-line[data-focusable="false"]{min-height:.75em}
+.code-line.focus-active{background:rgba(21,94,239,.12);border-left-color:var(--p);box-shadow:none!important;transform:none!important}
+.code-line.focus-muted{opacity:.22;transform:none!important;filter:none}
+table tbody tr.focus-active td{background:rgba(21,94,239,.08)}
+table tbody tr.focus-active,table tbody tr.focus-muted,.bullet-list li.focus-active,.bullet-list li.focus-muted{transform:none!important}
+@media print{.code-line.focus-muted{opacity:1}.code-line.focus-active{background:transparent;border-left-color:transparent}}
