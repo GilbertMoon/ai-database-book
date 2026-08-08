@@ -7,6 +7,9 @@
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
+  const normalizeSource = (value) => String(value ?? '')
+    .replace(/paid_amount/g, 'recorded_amount');
+
   const isTableDivider = (line) => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
 
   function renderTable(lines) {
@@ -110,7 +113,7 @@
     const source = block === 'practice' ? 'chapter09_practice_lecture_plan.md' : 'chapter09_theory_lecture_plan.md';
     const response = await fetch(source, { cache: 'no-store' });
     if (!response.ok) throw new Error(`Chapter 09 강의 계획서 로드 실패: ${response.status}`);
-    const text = await response.text();
+    const text = normalizeSource(await response.text());
     const slides = parseSections(text, block);
     window.CH9_BLOCK = block;
     window.CH9_TITLE = block === 'practice' ? 'Chapter 09 실습 강의' : 'Chapter 09 이론 강의';
