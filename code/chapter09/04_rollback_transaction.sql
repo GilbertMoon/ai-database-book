@@ -110,6 +110,9 @@ BEGIN
         JOIN transaction_lab.course_inventory AS ci
             ON ci.course_id = e.course_id
         WHERE e.id = 9002
+          AND e.student_id = 102
+          AND e.course_id = 302
+          AND e.status = '수강중'
           AND p.id = 9902
           AND e.recorded_amount = 120000
           AND p.amount = 120000
@@ -134,3 +137,45 @@ WHERE id = 9002;
 SELECT *
 FROM transaction_lab.payments
 WHERE id = 9902;
+
+DO $$
+BEGIN
+    IF (SELECT remaining_seats
+        FROM transaction_lab.course_inventory
+        WHERE course_id = 302) IS DISTINCT FROM 1 THEN
+        RAISE EXCEPTION
+            'ROLLBACK 검증 실패: 강의 302의 잔여 좌석이 1로 복구되지 않았습니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM transaction_lab.enrollments WHERE id = 9002
+    ) OR EXISTS (
+        SELECT 1 FROM transaction_lab.payments WHERE id = 9902
+    ) THEN
+        RAISE EXCEPTION
+            'ROLLBACK 검증 실패: 임시 신청 9002 또는 결제 9902가 남아 있습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p
+            ON p.enrollment_id = e.id
+        JOIN transaction_lab.course_inventory AS ci
+            ON ci.course_id = e.course_id
+        WHERE e.id = 9001
+          AND e.student_id = 101
+          AND e.course_id = 301
+          AND e.status = '수강중'
+          AND e.recorded_amount = 100000
+          AND p.id = 9901
+          AND p.amount = 100000
+          AND ci.remaining_seats = 1
+    ) THEN
+        RAISE EXCEPTION
+            'ROLLBACK 검증 실패: 이전 COMMIT 결과 9001·9901 또는 강의 301 좌석이 손상되었습니다.';
+    END IF;
+END
+$$;
+
+SELECT 'Chapter 09 rollback validation passed' AS validation_result;
