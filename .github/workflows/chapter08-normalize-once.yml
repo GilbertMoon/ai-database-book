@@ -1,0 +1,92 @@
+name: Normalize Chapter 08 Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chapter08-normalize-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize Chapter 08 sources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          targets = [
+              Path('book/chapter08/chapter08.md'),
+              Path('book/chapter08/chapter08_activity.md'),
+              Path('book/chapter08/chapter08_outline.md'),
+              Path('book/chapter08/chapter08_review_revision.md'),
+              Path('notes/chapter08_review_checklist.md'),
+              Path('presentation/chapter08/chapter08_theory_lecture_plan.md'),
+              Path('presentation/chapter08/chapter08_practice_lecture_plan.md'),
+          ]
+
+          for path in targets:
+              text = path.read_text(encoding='utf-8')
+              text = text.replace('paid_amount', 'recorded_amount')
+              path.write_text(text, encoding='utf-8')
+
+          main = Path('book/chapter08/chapter08.md')
+          text = main.read_text(encoding='utf-8')
+          text = text.replace(
+              "PostgreSQL에서 정수 컬럼의 `AVG`는 `numeric`을 반환합니다.",
+              "`recorded_amount`는 `NUMERIC(12,0)`이며 PostgreSQL의 `AVG(recorded_amount)`는 `numeric`을 반환합니다."
+          )
+          main.write_text(text, encoding='utf-8')
+
+          review = Path('book/chapter08/chapter08_review_revision.md')
+          text = review.read_text(encoding='utf-8')
+          text = text.replace(
+              "PostgreSQL의 `AVG(INTEGER)`는 `numeric`을 반환하므로",
+              "Chapter 07의 `recorded_amount`는 `NUMERIC(12,0)`이며 PostgreSQL의 `AVG(recorded_amount)`는 `numeric`을 반환하므로"
+          )
+          review.write_text(text, encoding='utf-8')
+
+          image_targets = [
+              Path('images/chapter08/ch08_06_course_revenue_summary.mmd'),
+              Path('images/chapter08/ch08_06_course_revenue_summary.svg'),
+              Path('images/chapter08/README.md'),
+          ]
+          for path in image_targets:
+              text = path.read_text(encoding='utf-8')
+              text = text.replace('paid_amount', 'recorded_amount')
+              text = text.replace('결제금액', '기록 금액')
+              path.write_text(text, encoding='utf-8')
+
+          # Chapter 08의 현재 스키마에 존재하지 않는 구용어가 남으면 실패합니다.
+          scan_roots = [Path('book/chapter08'), Path('code/chapter08'), Path('presentation/chapter08'), Path('images/chapter08')]
+          stale = []
+          for root in scan_roots:
+              for path in root.rglob('*'):
+                  if path.is_file() and path.suffix.lower() in {'.md', '.sql', '.js', '.html', '.mmd', '.svg'}:
+                      text = path.read_text(encoding='utf-8', errors='ignore')
+                      if 'paid_amount' in text:
+                          stale.append(str(path))
+          if stale:
+              raise SystemExit('paid_amount remains in: ' + ', '.join(stale))
+          PY
+
+      - name: Commit normalized sources and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/chapter08-normalize-once.yml
+          git add book/chapter08 notes/chapter08_review_checklist.md presentation/chapter08 images/chapter08
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Normalize Chapter 08 source terminology"
+          git push
