@@ -2,19 +2,21 @@
 -- 주의: course_project 스키마와 프로젝트 데이터를 삭제합니다.
 -- 처음부터 다시 시작해야 할 때만 사용합니다.
 -- DROP SCHEMA ... CASCADE는 사용하지 않습니다.
+-- 예상하지 않은 객체가 있으면 전체 초기화를 롤백합니다.
 
 SELECT current_database();
 SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
--- 삭제 전 알려진 객체 확인
 SELECT
     to_regclass('course_project.students') AS students_before_reset,
     to_regclass('course_project.instructors') AS instructors_before_reset,
     to_regclass('course_project.courses') AS courses_before_reset,
     to_regclass('course_project.enrollments') AS enrollments_before_reset,
     to_regclass('course_project.uq_course_enrollments_active') AS active_index_before_reset;
+
+BEGIN;
 
 DO $$
 BEGIN
@@ -28,21 +30,36 @@ BEGIN
         RAISE EXCEPTION
             '초기화 중단: 현재 연결이 읽기 전용입니다.';
     END IF;
+END
+$$;
 
+DO $$
+BEGIN
     IF to_regnamespace('course_project') IS NULL THEN
-        RAISE NOTICE
-            '초기화할 course_project 스키마가 존재하지 않습니다.';
+        RAISE NOTICE '초기화할 course_project 스키마가 존재하지 않습니다.';
         RETURN;
     END IF;
 
-    -- 외래키를 가진 자식에서 부모 순서로 삭제합니다.
+    -- 외래키를 가진 자식에서 부모 순서로 알려진 테이블만 삭제합니다.
     DROP TABLE IF EXISTS course_project.enrollments;
     DROP TABLE IF EXISTS course_project.courses;
     DROP TABLE IF EXISTS course_project.instructors;
     DROP TABLE IF EXISTS course_project.students;
 
-    -- 예상하지 않은 객체가 남아 있으면 CASCADE 없이 실패합니다.
+    -- 예상하지 않은 객체가 남아 있으면 CASCADE 없이 실패하며 BEGIN 전체가 롤백됩니다.
     DROP SCHEMA course_project;
+END
+$$;
+
+COMMIT;
+
+DO $$
+BEGIN
+    IF to_regnamespace('course_project') IS NOT NULL THEN
+        RAISE EXCEPTION '초기화 검증 실패: course_project 스키마가 남아 있습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 07 course project reset passed';
 END
 $$;
 
