@@ -22,108 +22,116 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          replacements = {
-              Path('book/chapter09/chapter09.md'): [(
-                  """현재 데이터베이스 = ai_database_book
-course_project 핵심 테이블 존재
-학생 101~103 존재
-강의 301~303 존재
-강의 기준 가격 일치
-course_project.enrollments = 5행
-transaction_lab 스키마가 아직 없음""",
-                  """현재 데이터베이스 = ai_database_book
-course_project 핵심 테이블 존재
-students / instructors / courses / enrollments = 3 / 2 / 3 / 5
-학생 101~103 존재
-강의 301~303와 기준 가격 100000 / 120000 / 150000 일치
-recorded_amount = NUMERIC(12,0)
-상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
-전체 기록 금액 = 590000
-활성 신청 = 3 / 340000
-취소 제외 신청 이력 = 4 / 440000
-신청 1001·1004·1005의 상태와 기록 금액 일치
-course_project.uq_course_enrollments_active 존재
-transaction_lab 스키마가 아직 없음"""
-              )],
-              Path('book/chapter09/chapter09_outline.md'): [(
-                  """current_database() = ai_database_book
-course_project 핵심 테이블 존재
-학생 101~103 존재
-강의 301~303 존재
-강의 가격 100000·120000·150000
-course_project.enrollments = 5
-transaction_lab 미생성 상태""",
-                  """current_database() = ai_database_book
-course_project 핵심 테이블 존재
-students / instructors / courses / enrollments = 3 / 2 / 3 / 5
-학생 101~103 존재
-강의 301~303 가격 = 100000·120000·150000
-recorded_amount = NUMERIC(12,0)
-상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
-전체 = 5 / 590000
-활성 = 3 / 340000
-취소 제외 = 4 / 440000
-1001 완료 / 100000, 1004 취소 / 150000, 1005 신청 / 120000
-uq_course_enrollments_active 존재
-transaction_lab 미생성 상태"""
-              )],
-              Path('presentation/chapter09/chapter09_theory_lecture_plan.md'): [(
-                  """현재 DB = ai_database_book
-course_project 핵심 테이블 존재
-학생 101~103 존재
-강의 301~303 존재
-course_project.enrollments = 5행
-transaction_lab 기존 없음""",
-                  """현재 DB = ai_database_book
-course_project = 3 / 2 / 3 / 5행
-recorded_amount = NUMERIC(12,0)
-상태 = 신청2 / 수강중1 / 완료1 / 취소1
-전체 = 590000 / 활성 = 3·340000 / 취소 제외 = 4·440000
-학생 101~103·강의 301~303 기준값 일치
-transaction_lab 기존 없음"""
-              ),(
-                  """트랜잭션 실습은 기준 데이터가 맞아야 의미가 있습니다. 학생과 강의가 없거나 챕터 07 데이터가 달라져 있으면 좌석·신청·결제 실습 결과도 달라집니다.""",
-                  """트랜잭션 실습은 기준 데이터가 맞아야 의미가 있습니다. 학생과 강의가 없거나 챕터 07·08의 행 수, 상태 범위, `recorded_amount` 기준값이 달라져 있으면 좌석·신청·결제 실습 결과도 달라집니다."""
-              )],
-              Path('presentation/chapter09/chapter09_practice_lecture_plan.md'): [(
-                  """ai_database_book
-course_project.enrollments = 5행
-transaction_lab 기존 없음""",
-                  """ai_database_book
-course_project = 3 / 2 / 3 / 5행
-recorded_amount = NUMERIC(12,0)
-상태 = 신청2 / 수강중1 / 완료1 / 취소1
-전체 590000 / 활성 3·340000 / 취소 제외 4·440000
-transaction_lab 기존 없음"""
-              )],
-              Path('book/chapter09/chapter09_activity.md'): [(
-                  """| `course_project.students` | 존재 |  |
-| `course_project.courses` | 존재 |  |
-| `course_project.enrollments` | 5행 |  |
-| `transaction_lab` 기존 존재 | 아니요 |  |""",
-                  """| `course_project.students` | 3행 |  |
-| `course_project.instructors` | 2행 |  |
-| `course_project.courses` | 3행 |  |
-| `course_project.enrollments` | 5행 |  |
-| 상태별 건수 | 신청2·수강중1·완료1·취소1 |  |
-| `recorded_amount` 타입 | `NUMERIC(12,0)` |  |
-| 전체 기록 금액 | 590000 |  |
-| 활성 신청 | 3건 / 340000 |  |
-| 취소 제외 | 4건 / 440000 |  |
-| `transaction_lab` 기존 존재 | 아니요 |  |"""
-              )],
-          }
-
-          for path, pairs in replacements.items():
+          def replace_block(path_text, old_lines, new_lines):
+              path = Path(path_text)
               text = path.read_text(encoding='utf-8')
-              original = text
-              for old, new in pairs:
-                  if old not in text:
-                      raise SystemExit(f'expected block not found in {path}: {old[:80]!r}')
-                  text = text.replace(old, new, 1)
-              if text == original:
-                  raise SystemExit(f'no changes made to {path}')
-              path.write_text(text, encoding='utf-8')
+              old = '\n'.join(old_lines)
+              new = '\n'.join(new_lines)
+              if old not in text:
+                  raise SystemExit(f'expected block not found in {path}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_block('book/chapter09/chapter09.md', [
+              '현재 데이터베이스 = ai_database_book',
+              'course_project 핵심 테이블 존재',
+              '학생 101~103 존재',
+              '강의 301~303 존재',
+              '강의 기준 가격 일치',
+              'course_project.enrollments = 5행',
+              'transaction_lab 스키마가 아직 없음',
+          ], [
+              '현재 데이터베이스 = ai_database_book',
+              'course_project 핵심 테이블 존재',
+              'students / instructors / courses / enrollments = 3 / 2 / 3 / 5',
+              '학생 101~103 존재',
+              '강의 301~303와 기준 가격 100000 / 120000 / 150000 일치',
+              'recorded_amount = NUMERIC(12,0)',
+              '상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1',
+              '전체 기록 금액 = 590000',
+              '활성 신청 = 3 / 340000',
+              '취소 제외 신청 이력 = 4 / 440000',
+              '신청 1001·1004·1005의 상태와 기록 금액 일치',
+              'course_project.uq_course_enrollments_active 존재',
+              'transaction_lab 스키마가 아직 없음',
+          ])
+
+          replace_block('book/chapter09/chapter09_outline.md', [
+              'current_database() = ai_database_book',
+              'course_project 핵심 테이블 존재',
+              '학생 101~103 존재',
+              '강의 301~303 존재',
+              '강의 가격 100000·120000·150000',
+              'course_project.enrollments = 5',
+              'transaction_lab 미생성 상태',
+          ], [
+              'current_database() = ai_database_book',
+              'course_project 핵심 테이블 존재',
+              'students / instructors / courses / enrollments = 3 / 2 / 3 / 5',
+              '학생 101~103 존재',
+              '강의 301~303 가격 = 100000·120000·150000',
+              'recorded_amount = NUMERIC(12,0)',
+              '상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1',
+              '전체 = 5 / 590000',
+              '활성 = 3 / 340000',
+              '취소 제외 = 4 / 440000',
+              '1001 완료 / 100000, 1004 취소 / 150000, 1005 신청 / 120000',
+              'uq_course_enrollments_active 존재',
+              'transaction_lab 미생성 상태',
+          ])
+
+          replace_block('presentation/chapter09/chapter09_theory_lecture_plan.md', [
+              '현재 DB = ai_database_book',
+              'course_project 핵심 테이블 존재',
+              '학생 101~103 존재',
+              '강의 301~303 존재',
+              'course_project.enrollments = 5행',
+              'transaction_lab 기존 없음',
+          ], [
+              '현재 DB = ai_database_book',
+              'course_project = 3 / 2 / 3 / 5행',
+              'recorded_amount = NUMERIC(12,0)',
+              '상태 = 신청2 / 수강중1 / 완료1 / 취소1',
+              '전체 = 590000 / 활성 = 3·340000 / 취소 제외 = 4·440000',
+              '학생 101~103·강의 301~303 기준값 일치',
+              'transaction_lab 기존 없음',
+          ])
+
+          replace_block('presentation/chapter09/chapter09_theory_lecture_plan.md', [
+              '트랜잭션 실습은 기준 데이터가 맞아야 의미가 있습니다. 학생과 강의가 없거나 챕터 07 데이터가 달라져 있으면 좌석·신청·결제 실습 결과도 달라집니다.',
+          ], [
+              '트랜잭션 실습은 기준 데이터가 맞아야 의미가 있습니다. 학생과 강의가 없거나 챕터 07·08의 행 수, 상태 범위, `recorded_amount` 기준값이 달라져 있으면 좌석·신청·결제 실습 결과도 달라집니다.',
+          ])
+
+          replace_block('presentation/chapter09/chapter09_practice_lecture_plan.md', [
+              'ai_database_book',
+              'course_project.enrollments = 5행',
+              'transaction_lab 기존 없음',
+          ], [
+              'ai_database_book',
+              'course_project = 3 / 2 / 3 / 5행',
+              'recorded_amount = NUMERIC(12,0)',
+              '상태 = 신청2 / 수강중1 / 완료1 / 취소1',
+              '전체 590000 / 활성 3·340000 / 취소 제외 4·440000',
+              'transaction_lab 기존 없음',
+          ])
+
+          replace_block('book/chapter09/chapter09_activity.md', [
+              '| `course_project.students` | 존재 |  |',
+              '| `course_project.courses` | 존재 |  |',
+              '| `course_project.enrollments` | 5행 |  |',
+              '| `transaction_lab` 기존 존재 | 아니요 |  |',
+          ], [
+              '| `course_project.students` | 3행 |  |',
+              '| `course_project.instructors` | 2행 |  |',
+              '| `course_project.courses` | 3행 |  |',
+              '| `course_project.enrollments` | 5행 |  |',
+              '| 상태별 건수 | 신청2·수강중1·완료1·취소1 |  |',
+              '| `recorded_amount` 타입 | `NUMERIC(12,0)` |  |',
+              '| 전체 기록 금액 | 590000 |  |',
+              '| 활성 신청 | 3건 / 340000 |  |',
+              '| 취소 제외 | 4건 / 440000 |  |',
+              '| `transaction_lab` 기존 존재 | 아니요 |  |',
+          ])
 
           required = [
               Path('book/chapter09/chapter09.md'),
