@@ -70,7 +70,7 @@ jobs:
               '01_normalization_schema.sql', '02_normalization_seed.sql',
               '03_normalization_compare.sql', '04_add_integrity_rules.sql',
               '05_integrity_tests.sql', '대여 대상으로 관리하는 도서 한 건',
-              'uq_loans_nf_active_book', 'Chapter 06 normalization comparison passed'
+              'uq_loans_nf_active_book'
           ]
           missing = [term for term in required_book if term not in chapter]
           if missing:
@@ -234,8 +234,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
-          # 허용 경계값
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1800,'경계값 테스트 도서','테스트 저자',2026,'ISBN-BOUNDARY-LOAN-001');"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.loans_nf (id,member_id,book_id,borrowed_at,due_at,returned_at) VALUES (1801,101,1800,DATE '2026-05-01',DATE '2026-05-01',DATE '2026-05-01');"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "DELETE FROM public.loans_nf WHERE id=1801; DELETE FROM public.books_nf WHERE id=1800;"
@@ -272,7 +270,6 @@ jobs:
           expect_fail "bad returned date" "chk_loans_nf_returned_date" "INSERT INTO public.loans_nf (id,member_id,book_id,borrowed_at,due_at,returned_at) VALUES (1908,101,202,DATE '2026-04-20',DATE '2026-05-04',DATE '2026-04-10');"
           expect_fail "active duplicate" "uq_loans_nf_active_book" "INSERT INTO public.loans_nf (id,member_id,book_id,borrowed_at,due_at,returned_at) VALUES (1909,101,201,DATE '2026-04-10',DATE '2026-04-24',NULL);"
           expect_fail "restrict parent delete" "fk_loans_nf_member" "DELETE FROM public.members_nf WHERE id=101;"
-
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/05_integrity_tests.sql
 
       - name: Verify seed transaction rollback
@@ -282,7 +279,6 @@ jobs:
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/reset_normalization.sql
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/01_normalization_schema.sql
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "ALTER TABLE public.loans_nf ADD CONSTRAINT chk_seed_force_fail CHECK (false);"
-
           set +e
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/02_normalization_seed.sql
           status=$?
@@ -291,7 +287,6 @@ jobs:
             echo "02 seed should have failed for rollback test" >&2
             exit 1
           fi
-
           counts=$(psql -d ai_database_book -Atc "SELECT (SELECT COUNT(*) FROM public.library_records_raw)||','||(SELECT COUNT(*) FROM public.members_nf)||','||(SELECT COUNT(*) FROM public.books_nf)||','||(SELECT COUNT(*) FROM public.loans_nf);")
           test "$counts" = "0,0,0,0" || { echo "Partial seed state remained: $counts" >&2; exit 1; }
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/reset_normalization.sql
@@ -303,7 +298,6 @@ jobs:
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/01_normalization_schema.sql
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/02_normalization_seed.sql
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.members_nf (id,name,email,joined_at) VALUES (1999,'중복 사전검사','minji@example.com',DATE '2026-03-21');"
-
           set +e
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/04_add_integrity_rules.sql
           status=$?
@@ -312,7 +306,6 @@ jobs:
             echo "04 rules should have rejected duplicate pre-existing data" >&2
             exit 1
           fi
-
           constraints=$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM pg_constraint WHERE conrelid IN ('public.members_nf'::regclass,'public.books_nf'::regclass,'public.loans_nf'::regclass) AND conname IN ('uq_members_nf_email','chk_members_nf_name_not_blank','uq_books_nf_isbn','chk_books_nf_title_not_blank','fk_loans_nf_member','fk_loans_nf_book','chk_loans_nf_due_date','chk_loans_nf_returned_date');")
           test "$constraints" = "0" || { echo "Partial constraints remained: $constraints" >&2; exit 1; }
           active_index=$(psql -d ai_database_book -Atc "SELECT to_regclass('public.uq_loans_nf_active_book') IS NULL;")
