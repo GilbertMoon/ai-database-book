@@ -109,7 +109,7 @@ jobs:
               '초기 데이터 상태', '수정 실습 후 상태', '삭제 실습 후 상태',
               '01_create_students.sql', '02_insert_students.sql',
               '03_select_students.sql', '04_update_delete_students.sql',
-              'basic_crud.sql은 기존 링크용 통합 참고',
+              'basic_crud.sql', '통합 참고',
               '-- UPDATE public.students', '-- DELETE FROM public.students;'
           ]
           missing_terms = [term for term in required_patch_terms if term not in patch]
