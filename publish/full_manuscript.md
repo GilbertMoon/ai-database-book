@@ -5013,6 +5013,8 @@ code/chapter08/
 
 `00_check_course_project.sql`은 현재 데이터베이스, 프로젝트 테이블, 행 수와 기준 금액이 예상과 다르면 예외를 발생시켜 실행을 중단합니다.
 
+`03_join_aggregation_validation.sql`은 상세·그룹·JOIN 결과의 핵심 검산값을 자동으로 비교합니다. 하나라도 다르면 예외로 중단하고, 모두 맞으면 `Chapter 08 join and aggregation validation passed` 메시지를 출력합니다.
+
 ---
 
 ## 2. SQL 작성 전에 업무 질문을 정확히 정의한다
