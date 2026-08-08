@@ -5,8 +5,7 @@ on:
     branches: [main]
     paths:
       - presentation/chapter02/**
-      - presentation/common/presentation_runtime.js
-      - presentation/common/presentation.css
+      - presentation/common/tts_pronunciation.js
       - .github/workflows/validate-chapter02-presentation.yml
   workflow_dispatch:
 
@@ -20,24 +19,37 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Validate Chapter 02 source and syntax
+      - name: Validate Chapter 02 Chapter 01 style navigation
         run: |
           node presentation/chapter02/validate_chapter02.mjs
-          node --check presentation/common/presentation_runtime.js
           python - <<'PY'
           from pathlib import Path
 
           chapter = Path('presentation/chapter02')
           html = (chapter / 'chapter02_presentation.html').read_text(encoding='utf-8')
+          script_html = (chapter / 'chapter02_script.html').read_text(encoding='utf-8')
           css = (chapter / 'chapter02.css').read_text(encoding='utf-8')
-          runtime = Path('presentation/common/presentation_runtime.js').read_text(encoding='utf-8')
+          player = (chapter / 'chapter02_player.js').read_text(encoding='utf-8')
+          script = (chapter / 'chapter02_script.js').read_text(encoding='utf-8')
 
           if 'cursor-halo' in html or 'id="cursor"' in html:
               raise SystemExit('Chapter 02 presentation still contains legacy cursor elements')
-          if 'pointermove' in runtime or 'native-cursor' in runtime:
-              raise SystemExit('Presentation runtime still contains custom cursor tracking')
-          if 'script-button-icon' not in runtime or '발표 스크립트 열기' not in runtime:
-              raise SystemExit('Chapter 02 document script icon is missing')
+          if 'pointermove' in player or 'native-cursor' in player:
+              raise SystemExit('Chapter 02 player still contains custom cursor tracking')
+          if 'chapter02_navigation.js' not in html or 'chapter02_player.js' not in html:
+              raise SystemExit('Chapter 02 presentation does not load semantic navigation/player')
+          if '../common/presentation_runtime.js' in html:
+              raise SystemExit('Chapter 02 presentation still loads the legacy common runtime')
+          if '../common/script_runtime.js' in script_html:
+              raise SystemExit('Chapter 02 script still loads the legacy common script runtime')
+          if 'chapter02_navigation.js' not in script_html or 'chapter02_script.js' not in script_html:
+              raise SystemExit('Chapter 02 script does not load shared navigation/runtime')
+          if "stepIndex === 0 ? '전체 보기'" not in player or "stepIndex === 0 ? '전체 보기'" not in script:
+              raise SystemExit('Chapter 02 whole-view step does not match Chapter 01 behavior')
+          if "send('request-next')" not in script or "send('request-prev')" not in script:
+              raise SystemExit('Chapter 02 script keyboard/buttons do not delegate semantic steps to presentation')
+          if 'target !== stepIndex + 1' not in script:
+              raise SystemExit('Chapter 02 script cue buttons are not sequential like Chapter 01')
           required_css = [
               'cursor: auto !important',
               'right: 20px !important',
@@ -45,14 +57,17 @@ jobs:
               'width: 34px !important',
               'height: 34px !important',
               '.script-button-icon',
+              '.focus-muted',
+              '.focus-active',
           ]
           missing = [item for item in required_css if item not in css]
           if missing:
-              raise SystemExit(f'Chapter 02 script icon layout is incomplete: {missing}')
-          if 'v=20260808b' not in html:
-              raise SystemExit('Chapter 02 presentation cache version was not bumped')
+              raise SystemExit(f'Chapter 02 presentation styling is incomplete: {missing}')
+          if 'v=20260808c' not in html or 'v=20260808c' not in script_html:
+              raise SystemExit('Chapter 02 cache version was not bumped to 20260808c')
 
-          print('Chapter 02 cursor removal OK')
+          print('Chapter 02 whole-view and sequential semantic steps OK')
+          print('Chapter 02 presentation-script bidirectional synchronization OK')
           print('Chapter 02 34x34 top-right document script icon OK')
           print('Chapter 02 cache version OK')
           PY
