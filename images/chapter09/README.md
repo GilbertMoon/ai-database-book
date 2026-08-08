@@ -53,7 +53,7 @@ transaction_lab.payments.enrollment_id
 capacity > 0
 0 <= remaining_seats <= capacity
 payment는 enrollment를 UNIQUE FK로 참조
-수강중 신청의 paid_amount와 payment.amount 일치
+수강중 신청의 recorded_amount와 payment.amount 일치
 active enrollment 수 = capacity - remaining_seats
 좌석 UPDATE 0행이면 신청·결제 미생성
 COMMIT 전 좌석·신청·결제 확인

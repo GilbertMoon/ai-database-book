@@ -251,7 +251,7 @@ remaining_seats는 0 이상 capacity 이하다.
 각 payment는 하나의 유효한 lab enrollment를 참조한다.
 한 enrollment에는 payment가 최대 한 건 연결된다.
 수강중 enrollment에는 payment가 한 건 존재해야 한다.
-enrollment.paid_amount와 payment.amount는 같아야 한다.
+enrollment.recorded_amount와 payment.amount는 같아야 한다.
 학생·강의 조합의 수강중 enrollment는 최대 한 건이다.
 활성 신청 수와 사용 좌석 수가 같아야 한다.
 ```
@@ -374,26 +374,26 @@ WITH seat AS (
 new_enrollment AS (
     INSERT INTO transaction_lab.enrollments (
         id, student_id, course_id,
-        enrolled_at, status, paid_amount
+        enrolled_at, status, recorded_amount
     )
     SELECT
         9001, 101, course_id,
         CURRENT_TIMESTAMP, '수강중', price
     FROM seat
-    RETURNING id, paid_amount
+    RETURNING id, recorded_amount
 )
 INSERT INTO transaction_lab.payments (
     id, enrollment_id, amount, paid_at
 )
 SELECT
-    9901, id, paid_amount, CURRENT_TIMESTAMP
+    9901, id, recorded_amount, CURRENT_TIMESTAMP
 FROM new_enrollment
 RETURNING id, enrollment_id, amount;
 ```
 
 좌석 UPDATE가 1행이면 신청과 결제가 각각 1건 생성됩니다. 좌석이 없어 UPDATE가 0행이면 `seat` CTE가 비어 후속 INSERT도 실행 대상이 없습니다.
 
-이 실습에서는 할인과 쿠폰을 적용하지 않습니다. 신청 당시 `course_project.courses.price`를 `paid_amount`와 `payment.amount`에 기록합니다. 이후 강의의 현재 가격이 바뀌더라도 과거 신청 금액을 자동으로 변경하지 않습니다.
+이 실습에서는 할인과 쿠폰을 적용하지 않습니다. 신청 당시 `course_project.courses.price`를 `recorded_amount`와 `payment.amount`에 기록합니다. 이후 강의의 현재 가격이 바뀌더라도 과거 신청 금액을 자동으로 변경하지 않습니다.
 
 ### 9.3 COMMIT 전 검증
 

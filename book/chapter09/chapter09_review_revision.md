@@ -124,7 +124,7 @@ payment는 존재하는 enrollment를 참조한다.
 
 ```text
 모든 수강중 enrollment에는 payment가 최소 한 건 존재한다.
-paid_amount와 payment.amount는 같다.
+recorded_amount와 payment.amount는 같다.
 ```
 
 “정확히 한 건”을 FK·UNIQUE만으로 보장하는 것처럼 보이던 표현을 수정했습니다.

@@ -7,8 +7,7 @@
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-  const normalizeSource = (value) => String(value ?? '')
-    .replace(/paid_amount/g, 'recorded_amount');
+  const normalizeSource = (value) => String(value ?? '');
 
   const isTableDivider = (line) => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
 

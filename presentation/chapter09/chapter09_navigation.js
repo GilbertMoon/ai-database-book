@@ -74,7 +74,7 @@
     .replace(/course_inventory/g, '좌석')
     .replace(/enrollments/g, '수강신청')
     .replace(/payments/g, '결제')
-    .replace(/recorded_amount|paid_amount/g, '기록 금액')
+    .replace(/recorded_amount/g, '기록 금액')
     .replace(/remaining_seats/g, '잔여 좌석')
     .replace(/for update/g, '행 잠금')
     .replace(/rollback to savepoint/g, '세이브포인트 복구')

@@ -218,7 +218,7 @@ payment 9901 = 1행
 |---|---:|
 | enrollment 9001 | 1행 |
 | payment 9901 | 1행 |
-| paid_amount | 100000 |
+| recorded_amount | 100000 |
 | payment amount | 100000 |
 | course 301 remaining | 1 |
 

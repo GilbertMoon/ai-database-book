@@ -2,7 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter09-presentation-sync';
-  const ASSET_VERSION = '20260808a';
+  const ASSET_VERSION = '20260809a';
   const card = document.getElementById('card');
   const navigation = window.CH9Navigation;
   const params = new URLSearchParams(location.search);

@@ -116,7 +116,7 @@ transaction_lab 미생성 상태
 capacity > 0
 0 <= remaining_seats <= capacity
 status IN ('수강중', '취소')
-paid_amount >= 0
+recorded_amount >= 0
 payment.amount >= 0
 동일 학생·강의의 수강중 신청 최대 한 건
 payment는 존재하는 enrollment만 참조

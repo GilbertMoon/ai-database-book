@@ -2,7 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter09-presentation-sync';
-  const ASSET_VERSION = '20260808a';
+  const ASSET_VERSION = '20260809a';
   const app = document.getElementById('app');
   if (!app) return;
 
