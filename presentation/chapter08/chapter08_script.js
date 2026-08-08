@@ -2,6 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter08-presentation-sync';
+  const ASSET_VERSION = '20260809a';
   const card = document.getElementById('card');
   const navigation = window.CH8Navigation;
   let block = document.body.dataset.chapter08Block === 'practice' ? 'practice' : 'theory';
@@ -122,13 +123,13 @@
   document.getElementById('nextPage').onclick = () => showState(block, slideIndex + 1, 0);
   document.getElementById('focusSlides').onclick = () => {
     if (presentationWindow && !presentationWindow.closed) { presentationWindow.focus(); sendState(); return; }
-    presentationWindow = window.open(`${presentationFile()}#${block}/${slideIndex + 1}/${stepIndex}`, 'chapter08Presentation');
+    presentationWindow = window.open(`${presentationFile()}?v=${ASSET_VERSION}#${block}/${slideIndex + 1}/${stepIndex}`, 'chapter08Presentation');
     if (presentationWindow) { presentationWindow.focus(); setTimeout(sendState, 400); }
   };
 
   async function switchBlock(target) {
     if (target === block) return;
-    presentationWindow = window.open(`${target === 'practice' ? 'chapter08_practice_presentation.html' : 'chapter08_theory_presentation.html'}#${target}/1/0`, 'chapter08Presentation');
+    presentationWindow = window.open(`${target === 'practice' ? 'chapter08_practice_presentation.html' : 'chapter08_theory_presentation.html'}?v=${ASSET_VERSION}#${target}/1/0`, 'chapter08Presentation');
     await loadBlock(target);
     setTimeout(sendState, 450);
   }
