@@ -1,5 +1,6 @@
 -- Chapter 06 호환 파일: 03_normalization_compare.sql과 같은 역할
 -- 새 학습 흐름에서는 03_normalization_compare.sql 사용을 권장합니다.
+-- 번호 파일과 이 파일을 모두 실행하지 마세요.
 -- 데이터를 변경하지 않고 정규화 전후 구조와 샘플 상태를 확인합니다.
 
 SELECT current_database();
@@ -14,9 +15,12 @@ DECLARE
     v_book_count bigint;
     v_loan_count bigint;
     v_open_count bigint;
+    v_member_101_count bigint;
+    v_book_201_count bigint;
     v_orphan_member_count bigint;
     v_orphan_book_count bigint;
-    v_book_201_count bigint;
+    v_invalid_date_count bigint;
+    v_book_201_invalid_order bigint;
     v_active_duplicate_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
@@ -37,6 +41,8 @@ BEGIN
     SELECT COUNT(*) INTO v_book_count FROM public.books_nf;
     SELECT COUNT(*) INTO v_loan_count FROM public.loans_nf;
     SELECT COUNT(*) INTO v_open_count FROM public.loans_nf WHERE returned_at IS NULL;
+    SELECT COUNT(*) INTO v_member_101_count FROM public.loans_nf WHERE member_id = 101;
+    SELECT COUNT(*) INTO v_book_201_count FROM public.loans_nf WHERE book_id = 201;
 
     SELECT COUNT(*) INTO v_orphan_member_count
     FROM public.loans_nf AS l
@@ -48,9 +54,19 @@ BEGIN
     LEFT JOIN public.books_nf AS b ON l.book_id = b.id
     WHERE b.id IS NULL;
 
-    SELECT COUNT(*) INTO v_book_201_count
+    SELECT COUNT(*) INTO v_invalid_date_count
     FROM public.loans_nf
-    WHERE book_id = 201;
+    WHERE due_at < borrowed_at
+       OR (returned_at IS NOT NULL AND returned_at < borrowed_at);
+
+    SELECT COUNT(*) INTO v_book_201_invalid_order
+    FROM public.loans_nf AS earlier
+    JOIN public.loans_nf AS later
+        ON earlier.book_id = later.book_id
+       AND earlier.borrowed_at < later.borrowed_at
+    WHERE earlier.book_id = 201
+      AND earlier.returned_at IS NOT NULL
+      AND earlier.returned_at >= later.borrowed_at;
 
     SELECT COUNT(*) INTO v_active_duplicate_count
     FROM (
@@ -66,15 +82,27 @@ BEGIN
        OR v_book_count <> 2
        OR v_loan_count <> 3
        OR v_open_count <> 2
+       OR v_member_101_count <> 2
+       OR v_book_201_count <> 2
        OR v_orphan_member_count <> 0
        OR v_orphan_book_count <> 0
-       OR v_book_201_count <> 2
+       OR v_invalid_date_count <> 0
+       OR v_book_201_invalid_order <> 0
        OR v_active_duplicate_count <> 0 THEN
         RAISE EXCEPTION
-            '비교 검증 실패: raw=%, members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, book201=%, active_duplicate=%',
-            v_raw_count, v_member_count, v_book_count, v_loan_count,
-            v_open_count, v_orphan_member_count, v_orphan_book_count,
-            v_book_201_count, v_active_duplicate_count;
+            '비교 검증 실패: raw=%, members=%, books=%, loans=%, open=%, member101=%, book201=%, orphan_member=%, orphan_book=%, invalid_date=%, book201_order=%, active_duplicate=%',
+            v_raw_count,
+            v_member_count,
+            v_book_count,
+            v_loan_count,
+            v_open_count,
+            v_member_101_count,
+            v_book_201_count,
+            v_orphan_member_count,
+            v_orphan_book_count,
+            v_invalid_date_count,
+            v_book_201_invalid_order,
+            v_active_duplicate_count;
     END IF;
 
     RAISE NOTICE 'Chapter 06 normalization comparison passed';
@@ -111,6 +139,6 @@ JOIN public.members_nf AS m ON l.member_id = m.id
 JOIN public.books_nf AS b ON l.book_id = b.id
 ORDER BY l.id;
 
-SELECT * FROM public.loans_nf WHERE member_id = 101 ORDER BY id;
+SELECT * FROM public.loans_nf WHERE member_id = 101 ORDER BY borrowed_at, id;
 SELECT * FROM public.loans_nf WHERE book_id = 201 ORDER BY borrowed_at, id;
 SELECT * FROM public.loans_nf WHERE returned_at IS NULL ORDER BY due_at, id;
