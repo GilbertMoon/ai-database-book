@@ -215,11 +215,17 @@ $$;
 
 ROLLBACK;
 
+-- 명시적 ID 입력은 IDENTITY 다음 값을 자동으로 이동시키지 않으므로
+-- 두 시퀀스 조정을 하나의 트랜잭션으로 묶습니다.
+BEGIN;
+
 ALTER TABLE transaction_lab.enrollments
     ALTER COLUMN id RESTART WITH 9003;
 
 ALTER TABLE transaction_lab.payments
     ALTER COLUMN id RESTART WITH 9903;
+
+COMMIT;
 
 SELECT *
 FROM transaction_lab.course_inventory
@@ -227,10 +233,69 @@ WHERE course_id = 302;
 
 SELECT id, student_id, course_id, status, recorded_amount
 FROM transaction_lab.enrollments
-WHERE id IN (9002, 9003)
+WHERE id IN (9001, 9002, 9003)
 ORDER BY id;
 
 SELECT *
 FROM transaction_lab.payments
-WHERE id IN (9902, 9903)
+WHERE id IN (9901, 9902, 9903)
 ORDER BY id;
+
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM transaction_lab.enrollments) <> 2
+       OR (SELECT COUNT(*) FROM transaction_lab.payments) <> 2 THEN
+        RAISE EXCEPTION
+            '좌석 부족 최종 검증 실패: lab enrollment와 payment는 각각 2행이어야 합니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p ON p.enrollment_id = e.id
+        WHERE e.id = 9001
+          AND e.student_id = 101
+          AND e.course_id = 301
+          AND e.status = '수강중'
+          AND e.recorded_amount = 100000
+          AND p.id = 9901
+          AND p.amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p ON p.enrollment_id = e.id
+        WHERE e.id = 9002
+          AND e.student_id = 103
+          AND e.course_id = 302
+          AND e.status = '수강중'
+          AND e.recorded_amount = 120000
+          AND p.id = 9902
+          AND p.amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '좌석 부족 최종 검증 실패: 확정된 신청·결제 9001/9901 또는 9002/9902가 다릅니다.';
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM transaction_lab.enrollments WHERE id = 9003)
+       OR EXISTS (SELECT 1 FROM transaction_lab.payments WHERE id = 9903) THEN
+        RAISE EXCEPTION
+            '좌석 부족 최종 검증 실패: 9003 또는 9903이 생성되었습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM transaction_lab.course_inventory
+        WHERE course_id = 301 AND capacity = 2 AND remaining_seats = 1
+    ) OR NOT EXISTS (
+        SELECT 1 FROM transaction_lab.course_inventory
+        WHERE course_id = 302 AND capacity = 1 AND remaining_seats = 0
+    ) OR NOT EXISTS (
+        SELECT 1 FROM transaction_lab.course_inventory
+        WHERE course_id = 303 AND capacity = 1 AND remaining_seats = 1
+    ) THEN
+        RAISE EXCEPTION
+            '좌석 부족 최종 검증 실패: 강의별 좌석 상태가 다릅니다.';
+    END IF;
+END
+$$;
+
+SELECT 'Chapter 09 sold-out validation passed' AS validation_result;
