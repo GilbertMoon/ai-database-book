@@ -120,6 +120,33 @@ for (const token of ['CH3SemanticPlan', 'buildPlannedSteps', 'planGroups', 'bala
 }
 assert(!navigation.includes('Math.floor(index * total'), 'navigation must not use proportional screen focus mapping');
 
+const forbiddenNarration = [
+  '앞뒤 과정에서 어떤 역할을 하는지 연결해서 이해하면 다음 작업을 더 정확하게 진행할 수 있습니다.',
+  '이 내용을 앞뒤 단계와 연결해서 이해하면 실행 결과를 더 정확하게 판단할 수 있습니다.',
+  '앞선 과정',
+  '앞선 단계',
+  '다음 작업을 더 정확하게',
+  '실행 결과를 더 정확하게 판단'
+];
+const narrationFiles = [
+  'chapter03_navigation.js',
+  'chapter03_script.js',
+  'chapter03_deck.js',
+  'chapter03_theory_slides_raw.js',
+  'chapter03_practice_slides_raw.js',
+  'chapter03_theory_script_expansion.js',
+  'chapter03_practice_script_expansion.js'
+];
+for (const phrase of forbiddenNarration) {
+  const matches = narrationFiles.filter((file) => read(file).includes(phrase));
+  assert(matches.length === 0, `forbidden generic narration remains: ${phrase} (${matches.join(', ')})`);
+}
+const ensureNarrationSource = navigation.slice(navigation.indexOf('const ensureNarration'), navigation.indexOf('const buildPlannedSteps'));
+assert(!/output\.push\s*\(/.test(ensureNarrationSource), 'ensureNarration must not pad a one-sentence script');
+for (const file of narrationFiles) {
+  assert(!read(file).includes('핵심 내용을 설명합니다.'), `generic empty-script fallback remains: ${file}`);
+}
+
 const htmlFiles = [
   ['chapter03_theory_presentation.html', 'theory'],
   ['chapter03_practice_presentation.html', 'practice'],

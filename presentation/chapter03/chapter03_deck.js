@@ -42,7 +42,7 @@
   const segments = (slide) => {
     const raw = String(slide?.s || '').trim();
     const parts = raw.split(/\n\s*\n/).map((value) => value.replace(/\s+/g, ' ').trim()).filter(Boolean);
-    return parts.length ? parts : ['핵심 내용을 설명합니다.'];
+    return parts;
   };
 
   const maxStep = (index = slideIndex) => Number(slides[index]?.steps || segments(slides[index]).length || 1);

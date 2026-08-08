@@ -61,7 +61,7 @@
 
   const splitParagraphs = (value) => {
     const raw = String(value || '').trim();
-    if (!raw) return ['핵심 내용을 설명합니다.'];
+    if (!raw) return [];
     const paragraphs = raw.split(/\n\s*\n/).map((part) => part.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const output = [];
     paragraphs.forEach((paragraph) => {
@@ -242,19 +242,11 @@
   };
 
   const ensureNarration = (sentences, focusKeys, targets) => {
-    let output = compressSentences(sentences);
+    const output = compressSentences(sentences);
+    if (output.length) return output.join(' ');
+
     const label = labelForKeys(focusKeys, targets);
-    if (!output.length) {
-      output = [
-        label ? `${label} 항목을 중심으로 현재 단계의 의미를 확인합니다.` : '현재 단계의 핵심 의미를 화면과 함께 확인합니다.',
-        '이 단계가 앞뒤 과정에서 어떤 역할을 하는지 연결해서 이해하면 다음 작업을 더 정확하게 진행할 수 있습니다.'
-      ];
-    } else if (output.length === 1) {
-      output.push(label
-        ? `${label} 항목이 다른 설정이나 결과와 어떻게 연결되는지도 함께 확인합니다.`
-        : '이 내용을 앞뒤 단계와 연결해서 이해하면 실행 결과를 더 정확하게 판단할 수 있습니다.');
-    }
-    return output.join(' ');
+    return label ? `${label} 항목을 화면에서 확인합니다.` : '';
   };
 
   const buildPlannedSteps = (slide, targets) => {
@@ -297,7 +289,7 @@
     const steps = [];
     sequentialKeys.forEach((focusKey, index) => {
       const textIndex = Math.min(index, meaningful.length - 1);
-      const text = meaningful[textIndex] || meaningful[0] || '핵심 내용을 확인합니다.';
+      const text = meaningful[textIndex] || meaningful[0] || '';
       steps.push({ text, focusKeys: [focusKey] });
     });
     if (meaningful.length > sequentialKeys.length && steps.length) {
@@ -340,7 +332,7 @@
     return slides || [];
   };
 
-  const buildSteps = (slide) => slide?.__chapter03Steps || [{ text: String(slide?.s || '핵심 내용을 설명합니다.'), focusKeys: [] }];
+  const buildSteps = (slide) => slide?.__chapter03Steps || [{ text: String(slide?.s || ''), focusKeys: [] }];
 
   const style = document.createElement('style');
   style.textContent = `

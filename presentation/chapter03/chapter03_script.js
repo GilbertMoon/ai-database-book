@@ -40,7 +40,7 @@
   });
 
   const steps = (index = slideIndex) => window.CH3Navigation?.buildSteps(slides[index]) || [{
-    text: String(slides[index]?.s || '핵심 내용을 설명합니다.'), focusKeys: []
+    text: String(slides[index]?.s || ''), focusKeys: []
   }];
   const maxStep = (index = slideIndex) => steps(index).length;
 
