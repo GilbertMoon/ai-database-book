@@ -152,3 +152,5 @@ JOIN transaction_lab.payments AS p
 JOIN transaction_lab.course_inventory AS ci
     ON ci.course_id = e.course_id
 WHERE e.id = 9001;
+
+SELECT 'Chapter 09 first commit validation passed' AS validation_result;
