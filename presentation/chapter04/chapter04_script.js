@@ -2,7 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter04-presentation-sync';
-  const CACHE_VERSION = '20260807b';
+  const CACHE_VERSION = '20260808f';
   const card = document.getElementById('card');
   const navigation = window.CH4Navigation;
   const params = new URLSearchParams(location.search);
@@ -13,8 +13,8 @@
   let presentationWindow = window.opener && !window.opener.closed ? window.opener : null;
 
   const sources = {
-    theory: ['chapter04_theory_slides_raw.js', 'chapter04_intro_patch.js', '../common/screen_position_patch.js'],
-    practice: ['chapter04_practice_slides_raw.js', '../common/screen_position_patch.js']
+    theory: ['chapter04_theory_slides_raw.js', 'chapter04_intro_patch.js', 'chapter04_content_patch.js', '../common/screen_position_patch.js'],
+    practice: ['chapter04_practice_slides_raw.js', 'chapter04_content_patch.js', '../common/screen_position_patch.js']
   };
 
   const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
@@ -85,7 +85,7 @@
     document.getElementById('theoryBlock').classList.toggle('active', block === 'theory');
     document.getElementById('practiceBlock').classList.toggle('active', block === 'practice');
 
-    card.innerHTML = `<h1>${escapeHtml(slide.t || slide.l || '핵심 내용')}</h1><p class="meta">${escapeHtml(slide.k || 'CHAPTER 04')} · ${block === 'practice' ? '실습 강의' : '이론 강의'} · 파란 버튼은 장표 창의 다음 스크립트 단계와 같습니다.</p>${currentSteps.map((step, index) => `<div class="script-text"><p>${escapeHtml(step.text)}</p></div><p class="focus-note">${step.focusKeys.length ? '이 설명과 관련된 화면 요소를 강조합니다.' : '이 설명은 장표 전체를 보며 진행합니다.'}</p><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}<div class="hint">도입·전환·정리 문장은 관련 단계에 합치고, 표는 행 단위, SQL은 코드 줄 단위, 예상·완료 기준은 별도 요소로 연결합니다.</div>`;
+    card.innerHTML = `<h1>${escapeHtml(slide.t || slide.l || '핵심 내용')}</h1><p class="meta">${escapeHtml(slide.l || slide.k || 'CHAPTER 04')} · ${block === 'practice' ? '실습 강의' : '이론 강의'} · 파란 버튼은 장표 창의 다음 스크립트 단계와 같습니다.</p>${currentSteps.map((step, index) => `<div class="script-text"><p>${escapeHtml(step.text)}</p></div><p class="focus-note">${step.focusKeys.length ? '이 설명과 관련된 화면 요소를 강조합니다.' : '이 설명은 장표 전체를 보며 진행합니다.'}</p><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}<div class="hint">도입·전환·정리 문장은 관련 단계에 합치고, 표는 행 단위, SQL은 코드 줄 단위, 예상·완료 기준은 별도 요소로 연결합니다.</div>`;
 
     card.querySelectorAll('.cue-button').forEach((button) => {
       const target = Number(button.dataset.step);
