@@ -1,0 +1,101 @@
+name: Align Chapter 09 Terms Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chapter09-align-terms-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align Chapter 09 terminology and cache version
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          roots = [
+              Path('book/chapter09'),
+              Path('code/chapter09'),
+              Path('images/chapter09'),
+              Path('presentation/chapter09'),
+              Path('notes'),
+          ]
+          allowed = {'.md', '.sql', '.js', '.html', '.mmd', '.svg'}
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob('*'):
+                  if not path.is_file() or path.suffix.lower() not in allowed:
+                      continue
+                  if root == Path('notes') and not path.name.startswith('chapter09_'):
+                      continue
+                  text = path.read_text(encoding='utf-8')
+                  new = text.replace('paid_amount', 'recorded_amount')
+                  if path.parts[:2] == ('presentation', 'chapter09'):
+                      new = new.replace('20260808a', '20260809a')
+                  if new != text:
+                      path.write_text(new, encoding='utf-8')
+
+          slides = Path('presentation/chapter09/chapter09_slides.js')
+          text = slides.read_text(encoding='utf-8')
+          text = text.replace(
+              "  const normalizeSource = (value) => String(value ?? '')\n    .replace(/recorded_amount/g, 'recorded_amount');",
+              "  const normalizeSource = (value) => String(value ?? '');"
+          )
+          slides.write_text(text, encoding='utf-8')
+
+          nav = Path('presentation/chapter09/chapter09_navigation.js')
+          text = nav.read_text(encoding='utf-8').replace(
+              '/recorded_amount|recorded_amount/g',
+              '/recorded_amount/g'
+          )
+          nav.write_text(text, encoding='utf-8')
+
+          index = Path('presentation/chapter09/index.html')
+          text = index.read_text(encoding='utf-8')
+          text = text.replace(
+              'chapter09_theory_presentation.html#theory/1/0',
+              'chapter09_theory_presentation.html?v=20260809a#theory/1/0'
+          ).replace(
+              'chapter09_practice_presentation.html#practice/1/0',
+              'chapter09_practice_presentation.html?v=20260809a#practice/1/0'
+          )
+          index.write_text(text, encoding='utf-8')
+
+          stale = []
+          for root in [Path('book/chapter09'), Path('code/chapter09'), Path('images/chapter09'), Path('presentation/chapter09')]:
+              for path in root.rglob('*'):
+                  if path.is_file() and path.suffix.lower() in allowed:
+                      if 'paid_amount' in path.read_text(encoding='utf-8', errors='ignore'):
+                          stale.append(str(path))
+          if stale:
+              raise SystemExit('stale Chapter 09 amount term remains: ' + ', '.join(stale))
+
+          if ".replace(/recorded_amount/g, 'recorded_amount')" in slides.read_text(encoding='utf-8'):
+              raise SystemExit('chapter09_slides.js still contains no-op runtime replacement')
+          if '/recorded_amount|recorded_amount/g' in nav.read_text(encoding='utf-8'):
+              raise SystemExit('chapter09_navigation.js contains duplicated amount normalization')
+          PY
+
+      - name: Commit aligned files and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/chapter09-align-terms-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add book/chapter09 code/chapter09 images/chapter09 presentation/chapter09 notes .github/workflows/chapter09-align-terms-once.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git commit -m 'Align Chapter 09 terminology and presentation assets'
+          git push origin HEAD:main
