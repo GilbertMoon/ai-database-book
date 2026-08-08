@@ -44,6 +44,10 @@ jobs:
           node --check presentation/chapter06/chapter06_navigation.js
           node --check presentation/chapter06/chapter06_player.js
           node --check presentation/chapter06/chapter06_script.js
+          node --check presentation/chapter07/chapter07_slides.js
+          node --check presentation/chapter07/chapter07_navigation.js
+          node --check presentation/chapter07/chapter07_player.js
+          node --check presentation/chapter07/chapter07_script.js
           node --check presentation/common/tts_pronunciation.js
 
       - name: Check Chapter 01 navigation coverage
@@ -154,6 +158,62 @@ jobs:
             console.log(`Chapter 06 ${block} navigation coverage OK: ${slides.length} / ${expected} slides`);
           }
           NODE
+
+      - name: Check Chapter 07 navigation coverage
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path('presentation/chapter07')
+          nav_text = (root / 'chapter07_navigation.js').read_text(encoding='utf-8')
+          marker = 'const PLANS = {'
+          if marker not in nav_text:
+              raise SystemExit('Chapter 07 PLANS not found')
+          plans = nav_text.split(marker, 1)[1].split('\n  };', 1)[0]
+          if 'theory: {' not in plans or 'practice: {' not in plans:
+              raise SystemExit('Chapter 07 theory/practice plan blocks not found')
+          theory_plan = plans.split('theory: {', 1)[1].split('\n    },\n    practice: {', 1)[0]
+          practice_plan = plans.split('\n    practice: {', 1)[1]
+
+          cases = [
+              ('theory', 'chapter07_theory_lecture_plan.md', theory_plan, 18),
+              ('practice', 'chapter07_practice_lecture_plan.md', practice_plan, 20),
+          ]
+          for block, filename, plan_text, expected in cases:
+              text = (root / filename).read_text(encoding='utf-8')
+              slide_titles = re.findall(r'^##\s+\d+\.\s+(.+)$', text, flags=re.M)
+              plan_titles = re.findall(r"^\s{6}'([^']+)':", plan_text, flags=re.M)
+              if len(slide_titles) != expected:
+                  raise SystemExit(f'Expected {expected} Chapter 07 {block} slides, found {len(slide_titles)}')
+              if len(set(slide_titles)) != len(slide_titles):
+                  raise SystemExit(f'Duplicate Chapter 07 {block} slide titles found')
+              if len(set(plan_titles)) != len(plan_titles):
+                  raise SystemExit(f'Duplicate Chapter 07 {block} navigation plan titles found')
+              missing = sorted(set(slide_titles) - set(plan_titles))
+              extra = sorted(set(plan_titles) - set(slide_titles))
+              if missing or extra:
+                  raise SystemExit(f'Chapter 07 {block} navigation mismatch: missing={missing}, extra={extra}')
+              sections = re.split(r'(?=^##\s+\d+\.\s+)', text, flags=re.M)[1:]
+              if len(sections) != expected:
+                  raise SystemExit(f'Chapter 07 {block} section parse mismatch')
+              for index, section in enumerate(sections, start=1):
+                  if '**화면 구성**' not in section or '**발표 스크립트**' not in section:
+                      raise SystemExit(f'Chapter 07 {block} slide {index} is missing screen or script content')
+              print(f'Chapter 07 {block} navigation coverage OK: {len(slide_titles)} / {expected} slides')
+
+          slides_js = (root / 'chapter07_slides.js').read_text(encoding='utf-8')
+          required_fixes = [
+              "paid_amount/g, 'recorded_amount'",
+              "total_stored_paid_amount/g, 'total_recorded_amount'",
+              "non_cancelled_paid_amount/g, 'non_cancelled_recorded_amount'",
+          ]
+          missing_fixes = [value for value in required_fixes if value not in slides_js]
+          if missing_fixes:
+              raise SystemExit(f'Chapter 07 recorded_amount compatibility fixes missing: {missing_fixes}')
+          print('Chapter 07 recorded_amount compatibility fixes OK')
+          PY
 
       - name: Normalize narration sources and script pages
         run: python scripts/normalize_presentation_tts_terms.py --apply
