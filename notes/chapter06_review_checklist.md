@@ -72,14 +72,14 @@ loans_nf
 
 | 규칙 | 구현 | 상태 |
 | --- | --- | --- |
-| C-01 동일 이메일 문자열 중복 금지 | `UNIQUE (email)` | 코드 반영 |
-| C-02 동일 ISBN 문자열 중복 금지 | `UNIQUE (isbn)` | 코드 반영 |
-| C-03 공백 이름·제목 금지 | `CHECK` | 코드 반영 |
-| C-04 `due_at >= borrowed_at` | `CHECK` | 코드 반영 |
-| C-05 `returned_at IS NULL OR returned_at >= borrowed_at` | `CHECK` | 코드 반영 |
-| C-06 존재하는 회원·도서만 참조 | `FOREIGN KEY` | 코드 반영 |
-| C-07 참조 중 부모 삭제 금지 | `ON DELETE RESTRICT` | 코드 반영 |
-| C-08 도서당 미반납 최대 한 건 | 부분 고유 인덱스 | 코드 반영 |
+| C-01 동일 이메일 문자열 중복 금지 | `UNIQUE (email)` | PostgreSQL 실제 검증 |
+| C-02 동일 ISBN 문자열 중복 금지 | `UNIQUE (isbn)` | PostgreSQL 실제 검증 |
+| C-03 공백 이름·제목 금지 | `CHECK` | PostgreSQL 실제 검증 |
+| C-04 `due_at >= borrowed_at` | `CHECK` | PostgreSQL 실제 검증 |
+| C-05 `returned_at IS NULL OR returned_at >= borrowed_at` | `CHECK` | PostgreSQL 실제 검증 |
+| C-06 존재하는 회원·도서만 참조 | `FOREIGN KEY` | PostgreSQL 실제 검증 |
+| C-07 참조 중 부모 삭제 금지 | `ON DELETE RESTRICT` | PostgreSQL 실제 검증 |
+| C-08 도서당 미반납 최대 한 건 | 부분 고유 인덱스 | PostgreSQL 실제 검증 |
 
 범위 제외:
 
@@ -104,14 +104,14 @@ BCNF·4NF·5NF 상세
 → 05_integrity_tests.sql
 ```
 
-| 파일 | 정적 점검 상태 | 핵심 확인 |
+| 파일 | 최종 상태 | 핵심 확인 |
 | --- | --- | --- |
-| `01_normalization_schema.sql` | 반영 완료 | 환경·미존재 검사, 트랜잭션, 4테이블 0행 확인 |
-| `02_normalization_seed.sql` | 반영 완료 | 빈 상태, 트랜잭션, 3/2/2/3·관계·IDENTITY 확인 |
-| `03_normalization_compare.sql` | 반영 완료 | 반복·고아·날짜·재대여 순서·활성 중복 |
-| `04_add_integrity_rules.sql` | 반영 완료 | 데이터 선검사, 정확한 대상 규칙, 원자적 적용, 메타데이터 확인 |
-| `05_integrity_tests.sql` | 반영 완료 | 경계·오류 예제, 양쪽 FK, 테스트 후 기준 상태 |
-| `reset_normalization.sql` | 확인 완료 | DB/public/read-only 보호, 자식→부모 삭제 |
+| `01_normalization_schema.sql` | 실제 실행 성공 | 환경·미존재 검사, 트랜잭션, 4테이블 0행 확인 |
+| `02_normalization_seed.sql` | 실제 실행·롤백 검증 성공 | 빈 상태, 트랜잭션, 3/2/2/3·관계·IDENTITY 확인 |
+| `03_normalization_compare.sql` | 실제 실행 성공 | 반복·고아·날짜·재대여 순서·활성 중복 |
+| `04_add_integrity_rules.sql` | 실제 실행·거부 원자성 검증 성공 | 데이터 선검사, 정확한 대상 규칙, 메타데이터 확인 |
+| `05_integrity_tests.sql` | 실제 실행 성공 | 경계·오류 예제, 양쪽 FK, 테스트 후 기준 상태 |
+| `reset_normalization.sql` | 실제 실행 성공 | DB/public/read-only 보호, 자식→부모 삭제 |
 
 ---
 
@@ -124,7 +124,10 @@ BCNF·4NF·5NF 상세
 - [x] `BEGIN`·`COMMIT`으로 네 `CREATE TABLE`을 묶음
 - [x] 커밋 전 네 테이블 존재 확인
 - [x] 커밋 전 네 테이블 모두 0행 확인
-- [ ] 의도적 중간 실패 시 PostgreSQL 실제 롤백 확인
+- [x] PostgreSQL 16에서 정상 생성 경로 실제 실행
+- [ ] 의도적으로 두 번째·세 번째 `CREATE TABLE`을 실패시켜 전체 롤백되는 별도 실패 주입 테스트
+
+마지막 항목은 코드 구조상 트랜잭션으로 보호되지만 Run 6에서 별도 실패 주입까지 하지는 않았다.
 
 ---
 
@@ -154,7 +157,17 @@ loans = 1004
 - [x] 입력 전 네 테이블 0행 확인
 - [x] 전체 INSERT·IDENTITY 조정을 하나의 트랜잭션으로 처리
 - [x] 커밋 전 기준 상태 자동 확인
-- [ ] 의도적 loans 입력 실패 시 raw/member/book 입력도 롤백되는지 실제 확인
+- [x] PostgreSQL 16에서 정상 입력 실제 확인
+- [x] 의도적 `loans_nf` 입력 실패 시 raw/member/book 입력까지 전체 롤백 실제 확인
+
+실패 주입 뒤 실제 행 수:
+
+```text
+raw = 0
+members = 0
+books = 0
+loans = 0
+```
 
 ---
 
@@ -177,16 +190,11 @@ loans 3
 활성 중복 0
 ```
 
-통과 메시지 코드:
-
-```text
-Chapter 06 normalization comparison passed
-```
-
 - [x] 데이터 비변경 파일
 - [x] 정규화 전 현재 사실 반복 조회
 - [x] 정규화 후 관계를 최소 JOIN으로 재구성
-- [ ] PostgreSQL 실제 메시지 확인
+- [x] PostgreSQL 실제 기준값 확인
+- [x] 실제 통과 메시지 확인: `Chapter 06 normalization comparison passed`
 
 ---
 
@@ -200,24 +208,25 @@ Chapter 06 normalization comparison passed
 - [x] 활성 대여 중복 검사
 - [x] 기존 규칙 존재 여부를 정확한 `conrelid`와 이름으로 확인
 - [x] `SET NOT NULL`·`UNIQUE`·`CHECK`·FK·부분 고유 인덱스 원자적 적용
-- [x] 커밋 전 명명 제약조건 8개 확인
-- [x] 커밋 전 NOT NULL 열 10개 확인
-- [x] 커밋 전 `uq_loans_nf_active_book` 확인
-- [ ] 기존 위반 데이터에서 04 전체 롤백 실제 확인
+- [x] 실제 명명 제약조건 8개 확인
+- [x] 실제 NOT NULL 열 10개 확인
+- [x] 실제 `uq_loans_nf_active_book` 존재 확인
+- [x] 기존 중복 이메일 데이터를 넣은 뒤 04가 적용을 거부하는지 실제 확인
+- [x] 거부 시 Chapter 06 명명 제약조건 0개·부분 고유 인덱스 미생성 확인
 
 ---
 
 ## 11. 05 정상·경계·오류 테스트
 
-### 허용 경계값
+### 허용 경계값 실제 성공
 
-- [x] `due_at = borrowed_at` 예제 존재
-- [x] `returned_at = borrowed_at` 예제 존재
-- [x] `returned_at = NULL` 기준 데이터 존재
-- [x] `published_year = NULL` 예제 존재
-- [x] 공백 아닌 한 글자 이름 예제 존재
+- [x] `due_at = borrowed_at`
+- [x] `returned_at = borrowed_at`
+- [x] `returned_at = NULL` 기준 데이터
+- [x] `published_year = NULL`
+- [x] 공백 아닌 한 글자 이름
 
-### 실패 예제
+### 오류값 실제 거부
 
 - [x] NOT NULL
 - [x] 이메일 UNIQUE
@@ -231,7 +240,7 @@ Chapter 06 normalization comparison passed
 - [x] 두 번째 활성 대여 부분 고유 인덱스
 - [x] 참조 중 부모 삭제 FK/RESTRICT
 
-각 예제에는 기대 객체 이름을 가능한 경우 명시한다.
+각 테스트는 실제 PostgreSQL 오류 메시지에서 기대 제약조건 또는 인덱스 이름을 확인했다.
 
 테스트 후 자동 판정:
 
@@ -240,10 +249,17 @@ raw 3 / members 2 / books 2 / loans 3 / 미반납 2
 회원101 2 / 도서201 2 / 고아 0 / 활성 중복 0
 ```
 
-통과 메시지 코드:
+- [x] 실제 통과 메시지 확인: `Chapter 06 integrity test baseline preserved`
+
+경계 테스트에서 발견한 오류:
 
 ```text
-Chapter 06 integrity test baseline preserved
+기존 ISBN-BOUNDARY-LOAN-001
+→ VARCHAR(20) 초과
+→ 날짜 경계값보다 먼저 문자열 길이 오류 발생
+
+수정 ISBN-BND-LOAN-001
+→ VARCHAR(20) 범위 안에서 날짜 경계값을 정상 검증
 ```
 
 ---
@@ -252,13 +268,13 @@ Chapter 06 integrity test baseline preserved
 
 | 호환 파일 | 번호 파일 대응 | 상태 |
 | --- | --- | --- |
-| `normalization_schema.sql` | 01 | 최신 안전 기준 동기화 |
-| `normalization_seed.sql` | 02 | 최신 안전 기준 동기화 |
-| `normalization_practice.sql` | 03 | 최신 검증 기준 동기화 |
-| `integrity_tests.sql` | 05 | 최신 테스트 기준 동기화 |
+| `normalization_schema.sql` | 01 | 최신 안전 기준 동기화·실제 실행 성공 |
+| `normalization_seed.sql` | 02 | 최신 안전 기준 동기화·실제 실행 성공 |
+| `normalization_practice.sql` | 03 | 최신 검증 기준 동기화·실제 실행 성공 |
+| `integrity_tests.sql` | 05 | 최신 테스트 기준 동기화·실제 실행 성공 |
 
 - [x] 번호 파일과 호환 파일을 중복 실행하지 않는다는 경고
-- [ ] PostgreSQL에서 호환 경로 전체 실제 실행 확인
+- [x] PostgreSQL 16에서 호환 경로 전체 실제 실행 확인
 
 ---
 
@@ -323,13 +339,14 @@ normalization_schema.sql
 ## 16. 의미 단위 내비게이션·스크립트·TTS
 
 - [x] `chapter06_navigation.js`에서 이론·실습 계획 유지
-- [x] 실습 runtime 16개 제목이 navigation 대상과 일치하도록 구성
+- [x] 실습 runtime 16개 제목이 navigation 대상과 일치
 - [x] `chapter06_script.js`가 theory/practice patch를 사용
 - [x] `window.PresentationTTS.normalize()` 사용
 - [x] `presentation/common/tts_pronunciation.js` 로드
 - [x] `presentation/common/script_content_enhancer.js` 로드
+- [x] JavaScript 정적 문법 검증 통과
 - [ ] 실제 포커스 단계와 장표 시각 동기화 확인
-- [ ] 실제 TTS 발음 확인
+- [ ] 실제 TTS 청취 발음 확인
 
 ---
 
@@ -346,34 +363,44 @@ ch06_07_before_after_join_tradeoff
 ch06_08_ai_normalization_review_flow
 ```
 
-- [x] Mermaid 원본·SVG 결과물 8쌍을 검증 대상으로 지정
+- [x] Mermaid 원본 8개 존재 확인
+- [x] SVG 결과물 8개 존재 확인
 - [x] 도식과 SQL의 역할 분리
+- [ ] Mermaid CLI 재생성 검증
+- [ ] GitHub 브라우저 실제 렌더링 확인
 - [ ] Word·PDF·eBook 최종 SVG 가독성 확인
 
 ---
 
 ## 18. Chapter 06 자동 검증
 
-신규 workflow:
-
 ```text
-.github/workflows/validate-chapter06.yml
+Workflow: Validate Chapter 06
+Run: 6
+Commit: 0f7505a2ffe431c31c1396f69649faa910733f5c
+Status: completed
+Conclusion: success
+PostgreSQL: 16
+Date: 2026-08-08
 ```
 
-검증 대상:
+- [x] 본문 18개 절 정적 검증
+- [x] 실습 강의안 16개 절 정적 검증
+- [x] 실습 runtime 16개 장표와 navigation 제목 대응
+- [x] TTS·script enhancer 연결
+- [x] Mermaid·SVG 8쌍 존재
+- [x] 번호형 `reset→01→02→03→04→05` 실제 실행
+- [x] 허용 경계값 실제 성공
+- [x] NOT NULL·UNIQUE·CHECK·양쪽 FK·부분 고유 인덱스·RESTRICT 실제 실패
+- [x] 02 중간 실패 전체 롤백
+- [x] 04 위반 데이터 거부와 일부 규칙 미적용
+- [x] 호환 SQL 전체 경로 실제 실행
+
+상세 실행 기록:
 
 ```text
-정적 본문·강의안·runtime·navigation·TTS·SQL·이미지 일관성
-PostgreSQL 16 번호형 reset→01→02→03→04→05
-허용 경계값 실제 성공
-NOT NULL·UNIQUE·CHECK·양쪽 FK·부분 고유 인덱스·RESTRICT 실제 실패
-02 트랜잭션 부분 입력 롤백
-04 위반 데이터 거부와 일부 규칙 미적용
-호환 SQL 전체 경로
+notes/chapter06_validation_result.md
 ```
-
-- [ ] 최종 Actions 실행 성공 확인
-- [ ] 최종 run 번호·commit·결론을 검증 결과 문서에 기록
 
 ---
 
@@ -384,7 +411,7 @@ NOT NULL·UNIQUE·CHECK·양쪽 FK·부분 고유 인덱스·RESTRICT 실제 실
 - [ ] 브라우저 이론 발표자료 최종 렌더링
 - [ ] 브라우저 실습 발표자료 최종 렌더링
 - [ ] 발표자 스크립트와 의미 단위 포커스 실제 동기화
-- [ ] TTS 실제 발음
+- [ ] TTS 실제 청취 발음
 - [ ] Word·PDF·eBook SVG 가독성
 - [ ] 최종 편집 분량 23~26페이지 여부
 
