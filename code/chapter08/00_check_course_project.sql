@@ -9,15 +9,30 @@ SHOW search_path;
 
 DO $$
 DECLARE
-    v_student_count BIGINT;
-    v_instructor_count BIGINT;
-    v_course_count BIGINT;
-    v_enrollment_count BIGINT;
-    v_total_recorded_amount NUMERIC;
-    v_active_count BIGINT;
-    v_active_recorded_amount NUMERIC;
-    v_non_cancelled_count BIGINT;
-    v_non_cancelled_recorded_amount NUMERIC;
+    v_student_count bigint;
+    v_instructor_count bigint;
+    v_course_count bigint;
+    v_enrollment_count bigint;
+    v_total_recorded_amount numeric;
+    v_avg_recorded_amount numeric;
+    v_active_count bigint;
+    v_active_recorded_amount numeric;
+    v_non_cancelled_count bigint;
+    v_non_cancelled_recorded_amount numeric;
+    v_requested_count bigint;
+    v_learning_count bigint;
+    v_completed_count bigint;
+    v_cancelled_count bigint;
+    v_orphan_student_count bigint;
+    v_orphan_course_count bigint;
+    v_orphan_instructor_count bigint;
+    v_active_duplicate_count bigint;
+    v_status_1001 text;
+    v_amount_1001 numeric;
+    v_status_1004 text;
+    v_amount_1004 numeric;
+    v_status_1005 text;
+    v_amount_1005 numeric;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -28,9 +43,10 @@ BEGIN
     IF to_regclass('course_project.students') IS NULL
        OR to_regclass('course_project.instructors') IS NULL
        OR to_regclass('course_project.courses') IS NULL
-       OR to_regclass('course_project.enrollments') IS NULL THEN
+       OR to_regclass('course_project.enrollments') IS NULL
+       OR to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07의 course_project 테이블이 모두 준비되지 않았습니다.';
+            '실행 중단: Chapter 07의 course_project 객체가 모두 준비되지 않았습니다.';
     END IF;
 
     IF NOT EXISTS (
@@ -39,9 +55,12 @@ BEGIN
         WHERE table_schema = 'course_project'
           AND table_name = 'enrollments'
           AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
     ) THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07의 recorded_amount 열이 없습니다.';
+            '실행 중단: enrollments.recorded_amount NUMERIC(12,0) 열이 없습니다.';
     END IF;
 
     SELECT COUNT(*) INTO v_student_count
@@ -53,47 +72,124 @@ BEGIN
     SELECT COUNT(*) INTO v_course_count
     FROM course_project.courses;
 
-    SELECT COUNT(*) INTO v_enrollment_count
-    FROM course_project.enrollments;
-
-    SELECT COALESCE(SUM(recorded_amount), 0)
-    INTO v_total_recorded_amount
-    FROM course_project.enrollments;
-
     SELECT
         COUNT(*),
-        COALESCE(SUM(recorded_amount), 0)
-    INTO v_active_count, v_active_recorded_amount
-    FROM course_project.enrollments
-    WHERE status IN ('신청', '수강중');
+        COALESCE(SUM(recorded_amount), 0),
+        ROUND(AVG(recorded_amount), 2),
+        COUNT(*) FILTER (WHERE status = '신청'),
+        COUNT(*) FILTER (WHERE status = '수강중'),
+        COUNT(*) FILTER (WHERE status = '완료'),
+        COUNT(*) FILTER (WHERE status = '취소'),
+        COUNT(*) FILTER (WHERE status IN ('신청', '수강중')),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')), 0),
+        COUNT(*) FILTER (WHERE status <> '취소'),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status <> '취소'), 0)
+    INTO
+        v_enrollment_count,
+        v_total_recorded_amount,
+        v_avg_recorded_amount,
+        v_requested_count,
+        v_learning_count,
+        v_completed_count,
+        v_cancelled_count,
+        v_active_count,
+        v_active_recorded_amount,
+        v_non_cancelled_count,
+        v_non_cancelled_recorded_amount
+    FROM course_project.enrollments;
 
-    SELECT
-        COUNT(*),
-        COALESCE(SUM(recorded_amount), 0)
-    INTO v_non_cancelled_count, v_non_cancelled_recorded_amount
+    SELECT COUNT(*) INTO v_orphan_student_count
+    FROM course_project.enrollments AS e
+    LEFT JOIN course_project.students AS s
+        ON e.student_id = s.id
+    WHERE s.id IS NULL;
+
+    SELECT COUNT(*) INTO v_orphan_course_count
+    FROM course_project.enrollments AS e
+    LEFT JOIN course_project.courses AS c
+        ON e.course_id = c.id
+    WHERE c.id IS NULL;
+
+    SELECT COUNT(*) INTO v_orphan_instructor_count
+    FROM course_project.courses AS c
+    LEFT JOIN course_project.instructors AS i
+        ON c.instructor_id = i.id
+    WHERE i.id IS NULL;
+
+    SELECT COUNT(*) INTO v_active_duplicate_count
+    FROM (
+        SELECT student_id, course_id
+        FROM course_project.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated_active_enrollments;
+
+    SELECT status, recorded_amount
+    INTO v_status_1001, v_amount_1001
     FROM course_project.enrollments
-    WHERE status <> '취소';
+    WHERE id = 1001;
+
+    SELECT status, recorded_amount
+    INTO v_status_1004, v_amount_1004
+    FROM course_project.enrollments
+    WHERE id = 1004;
+
+    SELECT status, recorded_amount
+    INTO v_status_1005, v_amount_1005
+    FROM course_project.enrollments
+    WHERE id = 1005;
 
     IF v_student_count <> 3
        OR v_instructor_count <> 2
        OR v_course_count <> 3
        OR v_enrollment_count <> 5
        OR v_total_recorded_amount <> 590000
+       OR v_avg_recorded_amount <> 118000.00
+       OR v_requested_count <> 2
+       OR v_learning_count <> 1
+       OR v_completed_count <> 1
+       OR v_cancelled_count <> 1
        OR v_active_count <> 3
        OR v_active_recorded_amount <> 340000
        OR v_non_cancelled_count <> 4
-       OR v_non_cancelled_recorded_amount <> 440000 THEN
+       OR v_non_cancelled_recorded_amount <> 440000
+       OR v_orphan_student_count <> 0
+       OR v_orphan_course_count <> 0
+       OR v_orphan_instructor_count <> 0
+       OR v_active_duplicate_count <> 0
+       OR v_status_1001 IS DISTINCT FROM '완료'
+       OR v_amount_1001 IS DISTINCT FROM 100000::numeric
+       OR v_status_1004 IS DISTINCT FROM '취소'
+       OR v_amount_1004 IS DISTINCT FROM 150000::numeric
+       OR v_status_1005 IS DISTINCT FROM '신청'
+       OR v_amount_1005 IS DISTINCT FROM 120000::numeric THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07 기준 상태와 다릅니다. students=%, instructors=%, courses=%, enrollments=%, total=%, active=%/%, non_cancelled=%/%',
+            '실행 중단: Chapter 07 기준 상태와 다릅니다. rows=%/%/%/%, total=% avg=%, status=%/%/%/%, active=%/%, non_cancelled=%/%, orphan=%/%/%, active_duplicate=%, 1001=%/%, 1004=%/%, 1005=%/%',
             v_student_count,
             v_instructor_count,
             v_course_count,
             v_enrollment_count,
             v_total_recorded_amount,
+            v_avg_recorded_amount,
+            v_requested_count,
+            v_learning_count,
+            v_completed_count,
+            v_cancelled_count,
             v_active_count,
             v_active_recorded_amount,
             v_non_cancelled_count,
-            v_non_cancelled_recorded_amount;
+            v_non_cancelled_recorded_amount,
+            v_orphan_student_count,
+            v_orphan_course_count,
+            v_orphan_instructor_count,
+            v_active_duplicate_count,
+            v_status_1001,
+            v_amount_1001,
+            v_status_1004,
+            v_amount_1004,
+            v_status_1005,
+            v_amount_1005;
     END IF;
 
     RAISE NOTICE 'Chapter 08 prerequisite check passed';
@@ -108,16 +204,12 @@ SELECT
     COUNT(*) AS enrollment_count,
     SUM(recorded_amount) AS total_recorded_amount,
     ROUND(AVG(recorded_amount), 2) AS avg_recorded_amount,
-    COUNT(*) FILTER (
-        WHERE status IN ('신청', '수강중')
-    ) AS active_enrollment_count,
-    SUM(recorded_amount) FILTER (
-        WHERE status IN ('신청', '수강중')
-    ) AS active_recorded_amount,
-    COUNT(*) FILTER (
-        WHERE status <> '취소'
-    ) AS non_cancelled_count,
-    SUM(recorded_amount) FILTER (
-        WHERE status <> '취소'
-    ) AS non_cancelled_recorded_amount
+    COUNT(*) FILTER (WHERE status = '신청') AS requested_count,
+    COUNT(*) FILTER (WHERE status = '수강중') AS learning_count,
+    COUNT(*) FILTER (WHERE status IN ('신청', '수강중')) AS active_enrollment_count,
+    SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')) AS active_recorded_amount,
+    COUNT(*) FILTER (WHERE status = '완료') AS completed_count,
+    COUNT(*) FILTER (WHERE status = '취소') AS cancelled_count,
+    COUNT(*) FILTER (WHERE status <> '취소') AS non_cancelled_count,
+    SUM(recorded_amount) FILTER (WHERE status <> '취소') AS non_cancelled_recorded_amount
 FROM course_project.enrollments;
