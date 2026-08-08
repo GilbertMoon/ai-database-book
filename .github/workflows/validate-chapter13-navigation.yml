@@ -1,0 +1,139 @@
+name: Validate Chapter 13 navigation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - presentation/chapter13/**
+      - code/chapter13/**
+      - presentation/common/tts_pronunciation.js
+      - .github/workflows/validate-chapter13-navigation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Chapter 13 JavaScript syntax
+        run: |
+          node --check presentation/chapter13/chapter13_slides.js
+          node --check presentation/chapter13/chapter13_navigation.js
+          node --check presentation/chapter13/chapter13_player.js
+          node --check presentation/chapter13/chapter13_script.js
+          node --check presentation/common/tts_pronunciation.js
+
+      - name: Check Chapter 13 navigation and lab evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path('presentation/chapter13')
+          nav_text = (root / 'chapter13_navigation.js').read_text(encoding='utf-8')
+          marker = 'const PLANS = {'
+          if marker not in nav_text:
+              raise SystemExit('Chapter 13 PLANS not found')
+          plans = nav_text.split(marker, 1)[1].split('\n  };', 1)[0]
+          if 'theory: {' not in plans or 'practice: {' not in plans:
+              raise SystemExit('Chapter 13 theory/practice plan blocks not found')
+          theory_plan = plans.split('theory: {', 1)[1].split('\n    },\n    practice: {', 1)[0]
+          practice_plan = plans.split('\n    practice: {', 1)[1]
+
+          cases = [
+              ('theory', 'chapter13_theory_lecture_plan.md', theory_plan, 20),
+              ('practice', 'chapter13_practice_lecture_plan.md', practice_plan, 20),
+          ]
+          for block, filename, plan_text, expected in cases:
+              text = (root / filename).read_text(encoding='utf-8')
+              slide_titles = re.findall(r'^##\s+\d+\.\s+(.+)$', text, flags=re.M)
+              plan_titles = re.findall(r"^\s{6}'([^']+)':", plan_text, flags=re.M)
+              if len(slide_titles) != expected:
+                  raise SystemExit(f'Expected {expected} Chapter 13 {block} slides, found {len(slide_titles)}')
+              if len(set(slide_titles)) != len(slide_titles):
+                  raise SystemExit(f'Duplicate Chapter 13 {block} slide titles found')
+              if len(set(plan_titles)) != len(plan_titles):
+                  raise SystemExit(f'Duplicate Chapter 13 {block} navigation plan titles found')
+              missing = sorted(set(slide_titles) - set(plan_titles))
+              extra = sorted(set(plan_titles) - set(slide_titles))
+              if missing or extra:
+                  raise SystemExit(f'Chapter 13 {block} navigation mismatch: missing={missing}, extra={extra}')
+              sections = re.split(r'(?=^##\s+\d+\.\s+)', text, flags=re.M)[1:]
+              if len(sections) != expected:
+                  raise SystemExit(f'Chapter 13 {block} section parse mismatch')
+              for index, section in enumerate(sections, start=1):
+                  if '**화면 구성**' not in section or '**발표 스크립트**' not in section:
+                      raise SystemExit(f'Chapter 13 {block} slide {index} is missing screen or script content')
+              print(f'Chapter 13 {block} navigation coverage OK: {len(slide_titles)} / {expected} slides')
+
+          script_text = (root / 'chapter13_script.js').read_text(encoding='utf-8')
+          if 'const ttsRules' in script_text or 'ttsRules.reduce' in script_text:
+              raise SystemExit('Chapter 13 still contains a duplicated local TTS rule table')
+          if 'window.PresentationTTS?.normalize' not in script_text:
+              raise SystemExit('Chapter 13 script is not using shared PresentationTTS')
+
+          tts_text = Path('presentation/common/tts_pronunciation.js').read_text(encoding='utf-8')
+          required_terms = [
+              'ALTER COLUMN TYPE', 'SET NOT NULL', 'IS DISTINCT FROM', 'NO ACTION',
+              'P13-R', 'P13-D', 'P13-T', 'P13-V', 'ai_review_lab', 'bad_enrollments',
+              'agreed_amount', 'payment_reference', 'payment_status', 'paid_at', 'refunded_at'
+          ]
+          missing_terms = [term for term in required_terms if term not in tts_text]
+          if missing_terms:
+              raise SystemExit(f'Chapter 13 shared TTS terms missing: {missing_terms}')
+          print('Chapter 13 shared TTS terms OK')
+
+          for filename in ['chapter13_theory_presentation.html', 'chapter13_practice_presentation.html']:
+              html = (root / filename).read_text(encoding='utf-8')
+              slides_pos = html.find('chapter13_slides.js')
+              nav_pos = html.find('chapter13_navigation.js')
+              player_pos = html.find('chapter13_player.js')
+              if min(slides_pos, nav_pos, player_pos) < 0 or not (slides_pos < nav_pos < player_pos):
+                  raise SystemExit(f'{filename} asset order is invalid')
+          script_html = (root / 'chapter13_script.html').read_text(encoding='utf-8')
+          order = [
+              script_html.find('chapter13_slides.js'),
+              script_html.find('chapter13_navigation.js'),
+              script_html.find('../common/tts_pronunciation.js'),
+              script_html.find('chapter13_script.js'),
+          ]
+          if any(value < 0 for value in order) or order != sorted(order):
+              raise SystemExit('Chapter 13 script asset order is invalid')
+          print('Chapter 13 asset order OK')
+
+          code_root = Path('code/chapter13')
+          required_files = [
+              '01_ai_review_lab_schema.sql', '02_bad_design_seed.sql',
+              '03_good_design_schema.sql', '04_good_design_seed.sql',
+              '05_metadata_validation.sql', '06_business_validation.sql',
+              '07_negative_tests.sql', '08_ai_review_lab_validation.sql'
+          ]
+          missing_files = [name for name in required_files if not (code_root / name).exists()]
+          if missing_files:
+              raise SystemExit(f'Chapter 13 practice SQL files missing: {missing_files}')
+
+          metadata = (code_root / '05_metadata_validation.sql').read_text(encoding='utf-8')
+          negative = (code_root / '07_negative_tests.sql').read_text(encoding='utf-8')
+          final = (code_root / '08_ai_review_lab_validation.sql').read_text(encoding='utf-8')
+          evidence_checks = {
+              '29 constraints': 'good_constraint_count <> 29' in metadata and 'good_constraint_count <> 29' in final,
+              '4 foreign keys': 'fk_signature_count <> 4' in metadata and 'fk_count <> 4' in final,
+              '6 identity ids': 'identity_count <> 6' in metadata and 'identity_count <> 6' in final,
+              '22 negative tests': 'P13-T01~P13-T22' in negative,
+              '5 boundary tests': 'P13-T23~P13-T27' in negative,
+              '27 of 27': 'total_count <> 27' in negative and 'pass_count <> 27' in negative,
+              'final row counts': '기준 행 수 3/3/2/3/4/4' in final,
+              'chapter07 source preserved': 'course_project.enrollments) <> 5' in final,
+              'final pass notice': 'Chapter 13 AI review lab validation passed' in final,
+          }
+          failed = [name for name, ok in evidence_checks.items() if not ok]
+          if failed:
+              raise SystemExit(f'Chapter 13 lab evidence mismatch: {failed}')
+          print('Chapter 13 lab evidence OK')
+          PY
