@@ -2,9 +2,10 @@
   'use strict';
 
   const slides = window.CHAPTER_DATA?.slides || [];
+  const enrichment = window.CH2ScriptEnrichment;
 
-  const buildSteps = (slide) => (slide?.steps || []).map((step) => ({
-    text: String(step.script || step.label || '').trim(),
+  const buildSteps = (slide) => (slide?.steps || []).map((step, index) => ({
+    text: String(enrichment?.stepText ? enrichment.stepText(slide, index) : (step.script || step.label || '')).trim(),
     label: String(step.label || '').trim(),
     target: String(step.target || '').trim(),
     pointerNote: String(step.pointerNote || '').trim(),
