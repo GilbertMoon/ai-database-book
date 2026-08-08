@@ -1,0 +1,365 @@
+name: Validate Chapter 07
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - book/chapter07/**
+      - code/chapter07/**
+      - images/chapter07/**
+      - presentation/chapter07/**
+      - code/chapter08/00_check_course_project.sql
+      - presentation/common/tts_pronunciation.js
+      - presentation/common/script_content_enhancer.js
+      - .github/workflows/validate-chapter07.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Chapter 07 JavaScript syntax
+        run: |
+          node --check presentation/chapter07/chapter07_slides.js
+          node --check presentation/chapter07/chapter07_navigation.js
+          node --check presentation/chapter07/chapter07_player.js
+          node --check presentation/chapter07/chapter07_script.js
+
+      - name: Check Chapter 07 content alignment
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          root = Path('.')
+          chapter = (root / 'book/chapter07/chapter07.md').read_text(encoding='utf-8')
+          headings = re.findall(r'^##\s+(\d+)\.\s+', chapter, flags=re.M)
+          if headings != [str(i) for i in range(1, 18)]:
+              raise SystemExit(f'Chapter 07 section sequence mismatch: {headings}')
+          for term in [
+              'P07-R01', 'P07-R09', 'P07-D01', 'P07-D06',
+              'recorded_amount', 'NUMERIC(12, 0)',
+              '01_course_project_schema.sql', '04_course_project_validation.sql',
+              '590000', '440000', 'Chapter 07 course project validation passed'
+          ]:
+              if term not in chapter:
+                  raise SystemExit(f'Chapter 07 book term missing: {term}')
+          if 'paid_amount' in chapter:
+              raise SystemExit('Chapter 07 body still contains paid_amount')
+          print('Chapter 07 book structure OK: 17 sections')
+
+          plans = [
+              ('theory', root / 'presentation/chapter07/chapter07_theory_lecture_plan.md', 18),
+              ('practice', root / 'presentation/chapter07/chapter07_practice_lecture_plan.md', 20),
+          ]
+          nav = (root / 'presentation/chapter07/chapter07_navigation.js').read_text(encoding='utf-8')
+          for label, path, expected_count in plans:
+              text = path.read_text(encoding='utf-8')
+              sections = re.split(r'(?=^##\s+\d+\.\s+)', text, flags=re.M)[1:]
+              if len(sections) != expected_count:
+                  raise SystemExit(f'Expected {expected_count} {label} sections, found {len(sections)}')
+              for index, section in enumerate(sections, start=1):
+                  if '**화면 구성**' not in section or '**발표 스크립트**' not in section:
+                      raise SystemExit(f'{label} section {index} missing screen/script content')
+              titles = re.findall(r'^##\s+\d+\.\s+(.+)$', text, flags=re.M)
+              for title in titles:
+                  if title not in nav:
+                      raise SystemExit(f'Navigation missing {label} title: {title}')
+              if 'paid_amount' in text:
+                  raise SystemExit(f'{label} lecture plan still contains paid_amount')
+          print('Chapter 07 theory/practice plans and navigation OK')
+
+          slides_js = (root / 'presentation/chapter07/chapter07_slides.js').read_text(encoding='utf-8')
+          if '.replace(/paid_amount' in slides_js or 'total_stored_paid_amount' in slides_js:
+              raise SystemExit('Chapter 07 runtime still masks stale amount terminology')
+
+          script_html = (root / 'presentation/chapter07/chapter07_script.html').read_text(encoding='utf-8')
+          script_js = (root / 'presentation/chapter07/chapter07_script.js').read_text(encoding='utf-8')
+          if '../common/tts_pronunciation.js' not in script_html:
+              raise SystemExit('Chapter 07 TTS normalizer is not loaded')
+          if '../common/script_content_enhancer.js' not in script_html:
+              raise SystemExit('Chapter 07 script content enhancer is not loaded')
+          if 'window.PresentationTTS?.normalize' not in script_js:
+              raise SystemExit('Chapter 07 script does not use shared TTS normalization')
+          for path in [
+              root / 'presentation/chapter07/chapter07_theory_presentation.html',
+              root / 'presentation/chapter07/chapter07_practice_presentation.html',
+              root / 'presentation/chapter07/chapter07_script.html',
+              root / 'presentation/chapter07/chapter07_script.js',
+          ]:
+              if '20260809a' not in path.read_text(encoding='utf-8'):
+                  raise SystemExit(f'Chapter 07 asset version not refreshed: {path}')
+          print('Chapter 07 script/TTS/cache wiring OK')
+
+          code_root = root / 'code/chapter07'
+          required_sql = [
+              '01_course_project_schema.sql', '02_course_project_seed.sql',
+              '03_course_project_changes.sql', '04_course_project_validation.sql',
+              '05_course_project_integrity_tests.sql', '06_course_project_optional_tests.sql',
+              'reset_course_project.sql', 'online_course_project.sql',
+              'README.md', 'PROJECT_DECISIONS.md'
+          ]
+          missing = [name for name in required_sql if not (code_root / name).exists()]
+          if missing:
+              raise SystemExit(f'Chapter 07 files missing: {missing}')
+
+          checks = {
+              '01_course_project_schema.sql': [
+                  'BEGIN;', 'COMMIT;', 'v_named_constraint_count <> 15',
+                  'v_not_null_count <> 20', 'Chapter 07 course project schema creation passed'
+              ],
+              '02_course_project_seed.sql': [
+                  'BEGIN;', 'COMMIT;', 'v_recorded_total <> 470000',
+                  'v_student_101_enrollments <> 2', 'v_course_301_enrollments <> 2',
+                  'v_instructor_201_courses <> 2', 'Chapter 07 course project seed passed'
+              ],
+              '03_course_project_changes.sql': [
+                  'BEGIN;', 'COMMIT;', 'v_recorded_total <> 470000',
+                  'v_non_cancelled_count <> 4', 'v_non_cancelled_recorded <> 440000',
+                  'Chapter 07 course project changes passed'
+              ],
+              '04_course_project_validation.sql': [
+                  'v_named_constraint_count <> 15', 'v_not_null_count <> 20',
+                  'v_service_join_count <> 5', 'v_student_101_enrollments <> 2',
+                  'v_course_301_enrollments <> 2', 'v_instructor_201_courses <> 2',
+                  'Chapter 07 course project validation passed'
+              ],
+              '05_course_project_integrity_tests.sql': [
+                  'uq_course_students_email', 'uq_course_instructors_email',
+                  'fk_course_courses_instructor', 'fk_course_enrollments_student',
+                  'fk_course_enrollments_course', 'chk_course_courses_level',
+                  'chk_course_courses_price', 'chk_course_enrollments_status',
+                  'chk_course_enrollments_recorded_amount', 'uq_course_enrollments_active',
+                  'Chapter 07 core integrity test baseline preserved'
+              ],
+              '06_course_project_optional_tests.sql': [
+                  'chk_course_students_name_not_blank', 'chk_course_students_email_not_blank',
+                  'chk_course_instructors_name_not_blank', 'chk_course_instructors_email_not_blank',
+                  'chk_course_instructors_specialty_not_blank', 'chk_course_courses_title_not_blank',
+                  'Chapter 07 optional integrity test baseline preserved'
+              ],
+              'reset_course_project.sql': [
+                  'BEGIN;', 'COMMIT;', 'DROP SCHEMA course_project;',
+                  'Chapter 07 course project reset passed'
+              ],
+          }
+          for name, terms in checks.items():
+              text = (code_root / name).read_text(encoding='utf-8')
+              for term in terms:
+                  if term not in text:
+                      raise SystemExit(f'{name} safety term missing: {term}')
+          print('Chapter 07 SQL static safety checks OK')
+
+          image_root = root / 'images/chapter07'
+          stems = [
+              'ch07_01_project_flow',
+              'ch07_02_requirement_to_entities',
+              'ch07_03_online_course_erd',
+              'ch07_04_many_to_many_enrollments',
+              'ch07_05_sql_validation_flow',
+              'ch07_06_normalization_review_flow',
+              'ch07_07_ai_review_flow',
+              'ch07_08_project_completion_checklist',
+          ]
+          for stem in stems:
+              mmd = image_root / f'{stem}.mmd'
+              svg = image_root / f'{stem}.svg'
+              if not mmd.exists() or not svg.exists():
+                  raise SystemExit(f'Chapter 07 diagram pair missing: {stem}')
+              tree = ET.parse(svg)
+              svg_root = tree.getroot()
+              if svg_root.attrib.get('role') != 'img' or not svg_root.attrib.get('viewBox'):
+                  raise SystemExit(f'SVG accessibility/viewBox missing: {svg.name}')
+              ns = {'svg': 'http://www.w3.org/2000/svg'}
+              if svg_root.find('svg:title', ns) is None or svg_root.find('svg:desc', ns) is None:
+                  raise SystemExit(f'SVG title/desc missing: {svg.name}')
+          print('Chapter 07 Mermaid/SVG set OK: 8 pairs')
+
+          chapter08_gate = (root / 'code/chapter08/00_check_course_project.sql').read_text(encoding='utf-8')
+          if 'recorded_amount' not in chapter08_gate or 'paid_amount' in chapter08_gate:
+              raise SystemExit('Chapter 08 executable handoff does not match Chapter 07 recorded_amount')
+          for term in ['590000', '340000', '440000', 'Chapter 08 prerequisite check passed']:
+              if term not in chapter08_gate:
+                  raise SystemExit(f'Chapter 08 handoff gate missing: {term}')
+          print('Chapter 07 -> 08 executable handoff OK')
+          PY
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create Chapter 07 test database
+        run: |
+          psql -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE ai_database_book;"
+
+      - name: Verify wrong database protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          output=$(psql -d postgres -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql 2>&1)
+          status=$?
+          set -e
+          echo "$output"
+          test "$status" -ne 0 || { echo '01 should fail in postgres database' >&2; exit 1; }
+          echo "$output" | grep -F 'ai_database_book' >/dev/null
+          absent=$(psql -d postgres -Atc "SELECT to_regnamespace('course_project') IS NULL;")
+          test "$absent" = "t" || { echo 'course_project leaked into wrong database' >&2; exit 1; }
+
+      - name: Run canonical Chapter 07 path
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/02_course_project_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/03_course_project_changes.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/04_course_project_validation.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/05_course_project_integrity_tests.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/06_course_project_optional_tests.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/online_course_project.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql
+
+      - name: Verify boundary and expected failure tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          expect_fail() {
+            local label="$1"
+            local expected="$2"
+            local sql="$3"
+            set +e
+            output=$(psql -d ai_database_book -v ON_ERROR_STOP=1 -c "$sql" 2>&1)
+            status=$?
+            set -e
+            echo "$output"
+            if [ "$status" -eq 0 ]; then
+              echo "Expected failure did not occur: $label" >&2
+              exit 1
+            fi
+            echo "$output" | grep -F "$expected" >/dev/null || {
+              echo "Expected marker not found for $label: $expected" >&2
+              exit 1
+            }
+          }
+
+          # 허용 경계
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO course_project.courses (id,instructor_id,title,description,level,price,opened_at) VALUES (1801,202,'무료 체험 강의',NULL,'basic',0,DATE '2026-05-01');"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1802,103,1801,DATE '2026-05-02','신청',0);"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "DELETE FROM course_project.enrollments WHERE id=1802; DELETE FROM course_project.courses WHERE id=1801;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO course_project.students (id,name,email,joined_at) VALUES (1803,'김','one-char@example.com',DATE '2026-03-20'); DELETE FROM course_project.students WHERE id=1803;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1805,101,301,DATE '2026-05-03','신청',100000); DELETE FROM course_project.enrollments WHERE id=1805;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO course_project.students (id,name,email,joined_at) VALUES (1806,'미신청 학생','unused-student@example.com',DATE '2026-03-20'); DELETE FROM course_project.students WHERE id=1806;"
+
+          # 핵심 실패
+          expect_fail "duplicate student email" "uq_course_students_email" "INSERT INTO course_project.students (id,name,email,joined_at) VALUES (1901,'중복 학생','minji@example.com',DATE '2026-03-20');"
+          expect_fail "duplicate instructor email" "uq_course_instructors_email" "INSERT INTO course_project.instructors (id,name,email,specialty) VALUES (1902,'중복 강사','gilbert@example.com','Database');"
+          expect_fail "missing instructor" "fk_course_courses_instructor" "INSERT INTO course_project.courses (id,instructor_id,title,description,level,price,opened_at) VALUES (1903,999,'없는 강사',NULL,'basic',10000,DATE '2026-05-01');"
+          expect_fail "invalid level" "chk_course_courses_level" "INSERT INTO course_project.courses (id,instructor_id,title,description,level,price,opened_at) VALUES (1904,201,'잘못된 난이도',NULL,'expert',10000,DATE '2026-05-01');"
+          expect_fail "negative price" "chk_course_courses_price" "INSERT INTO course_project.courses (id,instructor_id,title,description,level,price,opened_at) VALUES (1905,201,'잘못된 가격',NULL,'basic',-1,DATE '2026-05-01');"
+          expect_fail "invalid status" "chk_course_enrollments_status" "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1906,101,303,DATE '2026-05-02','대기',150000);"
+          expect_fail "negative recorded amount" "chk_course_enrollments_recorded_amount" "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1907,101,303,DATE '2026-05-02','신청',-1);"
+          expect_fail "missing student" "fk_course_enrollments_student" "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1908,999,303,DATE '2026-05-02','신청',150000);"
+          expect_fail "missing course" "fk_course_enrollments_course" "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1909,101,999,DATE '2026-05-02','신청',150000);"
+          expect_fail "active duplicate" "uq_course_enrollments_active" "INSERT INTO course_project.enrollments (id,student_id,course_id,enrolled_at,status,recorded_amount) VALUES (1910,101,302,DATE '2026-05-03','수강중',120000);"
+          expect_fail "referenced student delete" "fk_course_enrollments_student" "DELETE FROM course_project.students WHERE id=101;"
+          expect_fail "referenced instructor delete" "fk_course_courses_instructor" "DELETE FROM course_project.instructors WHERE id=201;"
+
+          # 선택 공백 실패
+          expect_fail "blank student name" "chk_course_students_name_not_blank" "INSERT INTO course_project.students (id,name,email,joined_at) VALUES (1911,'   ','blank-student@example.com',DATE '2026-03-20');"
+          expect_fail "blank student email" "chk_course_students_email_not_blank" "INSERT INTO course_project.students (id,name,email,joined_at) VALUES (1912,'공백 이메일 학생','   ',DATE '2026-03-20');"
+          expect_fail "blank instructor name" "chk_course_instructors_name_not_blank" "INSERT INTO course_project.instructors (id,name,email,specialty) VALUES (1913,'   ','blank-instructor@example.com','Database');"
+          expect_fail "blank instructor email" "chk_course_instructors_email_not_blank" "INSERT INTO course_project.instructors (id,name,email,specialty) VALUES (1914,'공백 이메일 강사','   ','Database');"
+          expect_fail "blank specialty" "chk_course_instructors_specialty_not_blank" "INSERT INTO course_project.instructors (id,name,email,specialty) VALUES (1915,'전문분야 없음','blank-specialty@example.com','   ');"
+          expect_fail "blank course title" "chk_course_courses_title_not_blank" "INSERT INTO course_project.courses (id,instructor_id,title,description,level,price,opened_at) VALUES (1916,201,'   ',NULL,'basic',10000,DATE '2026-05-01');"
+
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/04_course_project_validation.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/05_course_project_integrity_tests.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/06_course_project_optional_tests.sql
+
+      - name: Verify seed transaction rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "ALTER TABLE course_project.enrollments ADD CONSTRAINT chk_seed_force_fail CHECK (false);"
+          set +e
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/02_course_project_seed.sql
+          status=$?
+          set -e
+          test "$status" -ne 0 || { echo '02 seed should have failed' >&2; exit 1; }
+          counts=$(psql -d ai_database_book -Atc "SELECT (SELECT COUNT(*) FROM course_project.students)||','||(SELECT COUNT(*) FROM course_project.instructors)||','||(SELECT COUNT(*) FROM course_project.courses)||','||(SELECT COUNT(*) FROM course_project.enrollments);")
+          test "$counts" = "0,0,0,0" || { echo "Partial seed state remained: $counts" >&2; exit 1; }
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "ALTER TABLE course_project.enrollments DROP CONSTRAINT chk_seed_force_fail;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+
+      - name: Verify change transaction rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/02_course_project_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "ALTER TABLE course_project.enrollments ADD CONSTRAINT chk_change_force_fail CHECK (id <> 1005);"
+          set +e
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/03_course_project_changes.sql
+          status=$?
+          set -e
+          test "$status" -ne 0 || { echo '03 changes should have failed' >&2; exit 1; }
+          state=$(psql -d ai_database_book -Atc "SELECT COUNT(*)||','||SUM(recorded_amount)||','||(SELECT status FROM course_project.enrollments WHERE id=1001)||','||(SELECT status FROM course_project.enrollments WHERE id=1004)||','||(SELECT COUNT(*) FROM course_project.enrollments WHERE id=1005) FROM course_project.enrollments;")
+          test "$state" = "4,470000,수강중,신청,0" || { echo "Partial change state remained: $state" >&2; exit 1; }
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "ALTER TABLE course_project.enrollments DROP CONSTRAINT chk_change_force_fail;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+
+      - name: Verify reset atomicity with unexpected object
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/02_course_project_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/03_course_project_changes.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "CREATE TABLE course_project.keep_me (id integer PRIMARY KEY);"
+          set +e
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+          status=$?
+          set -e
+          test "$status" -ne 0 || { echo 'reset should fail with unexpected object' >&2; exit 1; }
+          objects=$(psql -d ai_database_book -Atc "SELECT (to_regclass('course_project.students') IS NOT NULL)::int||','||(to_regclass('course_project.instructors') IS NOT NULL)::int||','||(to_regclass('course_project.courses') IS NOT NULL)::int||','||(to_regclass('course_project.enrollments') IS NOT NULL)::int||','||(to_regclass('course_project.keep_me') IS NOT NULL)::int;")
+          test "$objects" = "1,1,1,1,1" || { echo "Reset was not atomic: $objects" >&2; exit 1; }
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "DROP TABLE course_project.keep_me;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/reset_course_project.sql
+
+      - name: Rebuild and verify Chapter 08 handoff
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/01_course_project_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/02_course_project_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/03_course_project_changes.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter07/04_course_project_validation.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql
