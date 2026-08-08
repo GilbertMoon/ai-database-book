@@ -1,6 +1,7 @@
 (() => {
   const sources = [
     'chapter04_practice_slides_raw.js',
+    'chapter04_content_patch.js',
     '../common/screen_position_patch.js'
   ];
   const load = (src) => new Promise((resolve, reject) => {
