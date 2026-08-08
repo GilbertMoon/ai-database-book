@@ -7,6 +7,12 @@
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
+  const normalizeSource = (value) => String(value ?? '')
+    .replace(/total_stored_paid_amount/g, 'total_recorded_amount')
+    .replace(/non_cancelled_paid_amount/g, 'non_cancelled_recorded_amount')
+    .replace(/paid_amount/g, 'recorded_amount')
+    .replace(/무료 신청의 결제 금액 0/g, '무료 신청의 기록 금액 0');
+
   function renderTable(lines) {
     const rows = lines
       .filter((line, index) => index !== 1 || !/^\|?\s*:?-{3,}/.test(line.replace(/\|/g, '')))
@@ -103,7 +109,7 @@
     const source = block === 'practice' ? 'chapter07_practice_lecture_plan.md' : 'chapter07_theory_lecture_plan.md';
     const response = await fetch(source, { cache: 'no-store' });
     if (!response.ok) throw new Error(`Chapter 07 강의 계획서 로드 실패: ${response.status}`);
-    const text = await response.text();
+    const text = normalizeSource(await response.text());
     const slides = parseSections(text, block);
     window.CH7_BLOCK = block;
     window.CH7_TITLE = block === 'practice' ? 'Chapter 07 실습 강의' : 'Chapter 07 이론 강의';
