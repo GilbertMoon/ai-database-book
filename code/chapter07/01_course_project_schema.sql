@@ -1,6 +1,6 @@
 -- Chapter 07. 01 온라인 강의 프로젝트 스키마 생성
 -- 시작 상태: course_project 스키마가 존재하지 않음
--- 완료 상태: 전용 스키마·네 테이블·활성 신청 인덱스 생성
+-- 완료 상태: 전용 스키마·네 테이블·활성 신청 인덱스 생성, 네 테이블 0행
 -- 전체 생성을 하나의 트랜잭션으로 실행합니다.
 
 SELECT current_database();
@@ -126,6 +126,13 @@ ON course_project.enrollments (student_id, course_id)
 WHERE status IN ('신청', '수강중');
 
 DO $$
+DECLARE
+    v_named_constraint_count bigint;
+    v_not_null_count bigint;
+    v_student_count bigint;
+    v_instructor_count bigint;
+    v_course_count bigint;
+    v_enrollment_count bigint;
 BEGIN
     IF to_regclass('course_project.students') IS NULL
        OR to_regclass('course_project.instructors') IS NULL
@@ -135,6 +142,61 @@ BEGIN
         RAISE EXCEPTION
             '스키마 생성 검증 실패: 프로젝트 객체가 모두 생성되지 않았습니다.';
     END IF;
+
+    SELECT COUNT(*) INTO v_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    SELECT COUNT(*) INTO v_student_count FROM course_project.students;
+    SELECT COUNT(*) INTO v_instructor_count FROM course_project.instructors;
+    SELECT COUNT(*) INTO v_course_count FROM course_project.courses;
+    SELECT COUNT(*) INTO v_enrollment_count FROM course_project.enrollments;
+
+    IF v_named_constraint_count <> 15
+       OR v_not_null_count <> 20
+       OR v_student_count <> 0
+       OR v_instructor_count <> 0
+       OR v_course_count <> 0
+       OR v_enrollment_count <> 0 THEN
+        RAISE EXCEPTION
+            '스키마 생성 검증 실패: named_constraints=%, not_null_columns=%, rows=%/%/%/%',
+            v_named_constraint_count,
+            v_not_null_count,
+            v_student_count,
+            v_instructor_count,
+            v_course_count,
+            v_enrollment_count;
+    END IF;
+
+    RAISE NOTICE 'Chapter 07 course project schema creation passed';
 END
 $$;
 
