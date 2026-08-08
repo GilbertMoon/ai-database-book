@@ -2,11 +2,14 @@
 -- 시작 상태: public.members, public.books, public.loans가 존재하지 않음
 -- 완료 상태: 세 테이블이 생성되고 데이터는 비어 있음
 -- 주의: 이 파일은 기존 테이블을 자동으로 삭제하지 않습니다.
+-- 세 테이블 생성은 하나의 트랜잭션으로 묶어 중간 실패 시 부분 생성 상태를 남기지 않습니다.
 
 SELECT current_database();
 SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
+
+BEGIN;
 
 DO $$
 BEGIN
@@ -65,6 +68,32 @@ CREATE TABLE public.loans (
     due_at DATE NOT NULL,
     returned_at DATE
 );
+
+DO $$
+DECLARE
+    v_member_count bigint;
+    v_book_count bigint;
+    v_loan_count bigint;
+BEGIN
+    IF to_regclass('public.members') IS NULL
+       OR to_regclass('public.books') IS NULL
+       OR to_regclass('public.loans') IS NULL THEN
+        RAISE EXCEPTION '생성 검증 실패: 세 테이블이 모두 생성되지 않았습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_member_count FROM public.members;
+    SELECT COUNT(*) INTO v_book_count FROM public.books;
+    SELECT COUNT(*) INTO v_loan_count FROM public.loans;
+
+    IF v_member_count <> 0 OR v_book_count <> 0 OR v_loan_count <> 0 THEN
+        RAISE EXCEPTION
+            '생성 검증 실패: 새 테이블이 비어 있지 않습니다. members=%, books=%, loans=%',
+            v_member_count, v_book_count, v_loan_count;
+    END IF;
+END
+$$;
+
+COMMIT;
 
 SELECT
     to_regclass('public.members') AS members_table,
