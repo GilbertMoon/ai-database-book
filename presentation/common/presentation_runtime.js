@@ -4,6 +4,7 @@
   if (!data || !app) throw new Error('CHAPTER_DATA와 #app이 필요합니다.');
 
   const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+  const scriptIcon = '<svg class="script-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>';
   let scriptWindow = null;
   let scriptReady = false;
   let scriptReadyTimer = null;
@@ -28,7 +29,7 @@
       <header class="slide-header"><span class="eyebrow">${slide.eyebrow}</span><span class="chapter-label">${slide.label}</span></header>
       <div class="slide-body"><h2 id="slide-title">${slide.title}</h2>${slide.body}<div class="detail-panel" aria-live="polite">${steps[state.stepIndex]?.label || slide.summary || ''}</div></div>
     </section>
-    <button class="script-button" id="script-button" aria-label="발표자 스크립트 열기">S</button>
+    <button class="script-button" id="script-button" type="button" title="발표 스크립트 열기" aria-label="현재 슬라이드 발표 스크립트 창 열기">${scriptIcon}</button>
     <div class="slide-counter">${state.slideIndex + 1} / ${data.slides.length}</div>
     <div class="part-counter">${slide.part === 0 ? '시작' : `Part ${slide.part}`} · 단계 ${state.stepIndex + 1}/${Math.max(steps.length, 1)}</div>
     <nav class="controls" aria-label="슬라이드 이동"><button class="control-button" id="prev" aria-label="이전 단계">←</button><button class="control-button" id="next" aria-label="다음 단계">→</button></nav>
@@ -92,7 +93,6 @@
     else if (event.key === 'Home') goTo({ slideIndex: 0, stepIndex: 0 });
     else if (event.key === 'End') goTo({ slideIndex: data.slides.length - 1, stepIndex: 0 });
     else if (event.key.toLowerCase() === 's') openScript();
-    else if (event.key.toLowerCase() === 'c') document.body.classList.toggle('native-cursor');
     else if (event.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
 
@@ -111,12 +111,5 @@
     }
     if (event.data?.type === 'script-navigate') goTo(event.data);
   });
-  document.addEventListener('pointermove', (event) => {
-    const cursor = document.getElementById('cursor');
-    const halo = document.getElementById('cursor-halo');
-    if (!cursor || !halo) return;
-    document.body.classList.add('cursor-ready');
-    [cursor, halo].forEach((item) => { item.style.left = `${event.clientX}px`; item.style.top = `${event.clientY}px`; });
-  }, { passive: true });
   render();
 })();
