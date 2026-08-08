@@ -1,0 +1,291 @@
+name: Validate Chapter 08
+
+on:
+  push:
+    paths:
+      - 'book/chapter08/**'
+      - 'code/chapter08/**'
+      - 'images/chapter08/**'
+      - 'presentation/chapter08/**'
+      - 'notes/chapter08_review_checklist.md'
+      - '.github/workflows/validate-chapter08.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Chapter 08 JavaScript syntax
+        run: |
+          node --check presentation/chapter08/chapter08_slides.js
+          node --check presentation/chapter08/chapter08_navigation.js
+          node --check presentation/chapter08/chapter08_player.js
+          node --check presentation/chapter08/chapter08_script.js
+
+      - name: Check Chapter 08 source alignment
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import xml.etree.ElementTree as ET
+
+          chapter = Path('book/chapter08/chapter08.md').read_text(encoding='utf-8')
+          outline = Path('book/chapter08/chapter08_outline.md').read_text(encoding='utf-8')
+          activity = Path('book/chapter08/chapter08_activity.md').read_text(encoding='utf-8')
+          theory = Path('presentation/chapter08/chapter08_theory_lecture_plan.md').read_text(encoding='utf-8')
+          practice = Path('presentation/chapter08/chapter08_practice_lecture_plan.md').read_text(encoding='utf-8')
+          script_html = Path('presentation/chapter08/chapter08_script.html').read_text(encoding='utf-8')
+          script_js = Path('presentation/chapter08/chapter08_script.js').read_text(encoding='utf-8')
+          theory_html = Path('presentation/chapter08/chapter08_theory_presentation.html').read_text(encoding='utf-8')
+          practice_html = Path('presentation/chapter08/chapter08_practice_presentation.html').read_text(encoding='utf-8')
+          index_html = Path('presentation/chapter08/index.html').read_text(encoding='utf-8')
+          code_readme = Path('code/chapter08/README.md').read_text(encoding='utf-8')
+          image_readme = Path('images/chapter08/README.md').read_text(encoding='utf-8')
+
+          numbered = re.findall(r'^##\s+(\d+)\.\s+', chapter, re.M)
+          if numbered != [str(i) for i in range(1, 24)]:
+              raise SystemExit(f'Chapter 08 body sections mismatch: {numbered}')
+
+          for name, text in [('chapter', chapter), ('outline', outline), ('activity', activity), ('theory', theory), ('practice', practice)]:
+              for token in ['recorded_amount', '590000', '340000', '440000']:
+                  if token not in text:
+                      raise SystemExit(f'{name} missing {token}')
+
+          roots = [Path('book/chapter08'), Path('code/chapter08'), Path('presentation/chapter08'), Path('images/chapter08')]
+          stale = []
+          for root in roots:
+              for path in root.rglob('*'):
+                  if path.is_file() and path.suffix.lower() in {'.md', '.sql', '.js', '.html', '.mmd', '.svg'}:
+                      if 'paid_amount' in path.read_text(encoding='utf-8', errors='ignore'):
+                          stale.append(str(path))
+          if stale:
+              raise SystemExit('stale paid_amount remains: ' + ', '.join(stale))
+
+          if 'NUMERIC(12,0)' not in chapter.replace(' ', ''):
+              raise SystemExit('Chapter body missing NUMERIC(12,0) recorded_amount description')
+
+          def check_plan(label, text, expected):
+              sections = list(re.finditer(r'^##\s+(\d+)\.\s+(.+)$', text, re.M))
+              nums = [int(match.group(1)) for match in sections]
+              if nums != list(range(1, expected + 1)):
+                  raise SystemExit(f'{label} section numbers mismatch: {nums}')
+              for index, match in enumerate(sections):
+                  end = sections[index + 1].start() if index + 1 < len(sections) else len(text)
+                  block = text[match.end():end]
+                  if '**화면 구성**' not in block or '**발표 스크립트**' not in block:
+                      raise SystemExit(f'{label} section {match.group(1)} missing screen/script')
+
+          check_plan('theory', theory, 20)
+          check_plan('practice', practice, 20)
+          if index_html.count('20장') < 2:
+              raise SystemExit('Chapter 08 index must advertise 20 theory and 20 practice slides')
+
+          version = '20260809a'
+          for name, text in [('script', script_html), ('theory html', theory_html), ('practice html', practice_html)]:
+              if version not in text:
+                  raise SystemExit(f'{name} missing asset version {version}')
+          if f"const ASSET_VERSION = '{version}';" not in script_js:
+              raise SystemExit('script.js missing Chapter 08 ASSET_VERSION')
+          if '?v=${ASSET_VERSION}#' not in script_js:
+              raise SystemExit('script.js does not propagate asset version to presentation windows')
+
+          if '../common/tts_pronunciation.js' not in script_html:
+              raise SystemExit('shared TTS normalization is not loaded')
+          if '../common/script_content_enhancer.js' not in script_html:
+              raise SystemExit('shared script content enhancer is not loaded')
+          if 'PresentationTTS?.normalize' not in script_js:
+              raise SystemExit('Chapter 08 presenter does not use shared TTS normalization')
+
+          required_sql = [
+              '00_check_course_project.sql',
+              '01_join_queries.sql',
+              '02_aggregation_queries.sql',
+              '03_join_aggregation_validation.sql',
+              'join_aggregation_practice.sql',
+              'README.md',
+          ]
+          for name in required_sql:
+              if not (Path('code/chapter08') / name).exists():
+                  raise SystemExit(f'missing code/chapter08/{name}')
+
+          check_sql = Path('code/chapter08/00_check_course_project.sql').read_text(encoding='utf-8')
+          validation_sql = Path('code/chapter08/03_join_aggregation_validation.sql').read_text(encoding='utf-8')
+          for token in [
+              "current_database() <> 'ai_database_book'",
+              "numeric_precision = 12",
+              "numeric_scale = 0",
+              'v_requested_count <> 2',
+              'v_learning_count <> 1',
+              'v_active_count <> 3',
+              'v_non_cancelled_count <> 4',
+              'Chapter 08 prerequisite check passed',
+          ]:
+              if token not in check_sql:
+                  raise SystemExit(f'00 prerequisite gate missing {token}')
+          for token in [
+              'v_on_student_count <> 3',
+              'v_where_student_count <> 2',
+              'v_course303_joined_rows <> 1',
+              'v_course303_count <> 0',
+              'v_instructor201_courses <> 2',
+              'Chapter 08 join and aggregation validation passed',
+          ]:
+              if token not in validation_sql:
+                  raise SystemExit(f'03 validation gate missing {token}')
+
+          sql_paths = [Path('code/chapter08') / name for name in required_sql if name.endswith('.sql')]
+          forbidden = re.compile(r'\b(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE)\b', re.I)
+          for path in sql_paths:
+              text = path.read_text(encoding='utf-8')
+              without_comments = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+              without_comments = re.sub(r'--.*$', '', without_comments, flags=re.M)
+              if forbidden.search(without_comments):
+                  raise SystemExit(f'Chapter 08 query file contains data/schema modification keyword: {path}')
+
+          mmds = sorted(Path('images/chapter08').glob('*.mmd'))
+          svgs = sorted(Path('images/chapter08').glob('*.svg'))
+          if len(mmds) != 8 or len(svgs) != 8:
+              raise SystemExit(f'expected 8 Mermaid/SVG pairs, got {len(mmds)}/{len(svgs)}')
+          if {p.stem for p in mmds} != {p.stem for p in svgs}:
+              raise SystemExit('Mermaid/SVG stems do not match')
+
+          for path in svgs:
+              raw = path.read_text(encoding='utf-8')
+              root = ET.fromstring(raw)
+              if root.attrib.get('role') != 'img':
+                  raise SystemExit(f'{path} missing role=img')
+              if not root.attrib.get('viewBox'):
+                  raise SystemExit(f'{path} missing viewBox')
+              if root.attrib.get('width') != '100%':
+                  raise SystemExit(f'{path} width must be 100%')
+              tags = {elem.tag.split('}')[-1] for elem in root.iter()}
+              if 'title' not in tags or 'desc' not in tags:
+                  raise SystemExit(f'{path} missing title/desc')
+              if 'paid_amount' in raw:
+                  raise SystemExit(f'{path} contains stale paid_amount')
+
+          for token in ['ch08_01_join_why_needed.svg', 'ch08_03_multi_table_join_path.svg', 'ch08_07_where_group_having_order.svg', 'ch08_08_ai_join_sql_review_flow.svg']:
+              if token not in chapter:
+                  raise SystemExit(f'Chapter body missing current image {token}')
+
+          if '03_join_aggregation_validation.sql' not in code_readme or '자동' not in code_readme:
+              raise SystemExit('code README does not describe automatic validation')
+          if 'recorded_amount' not in image_readme:
+              raise SystemExit('image README missing recorded_amount terminology')
+
+          print('Chapter 08 static alignment passed')
+          PY
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create Chapter 08 test database
+        run: |
+          psql -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE ai_database_book;"
+
+      - name: Verify wrong database protection
+        shell: bash
+        run: |
+          if psql -d postgres -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql > /tmp/ch8_wrong_db.log 2>&1; then
+            cat /tmp/ch8_wrong_db.log
+            echo "00 check unexpectedly passed on postgres database"
+            exit 1
+          fi
+          cat /tmp/ch8_wrong_db.log
+          grep -q "ai_database_book" /tmp/ch8_wrong_db.log
+
+      - name: Build Chapter 07 canonical baseline
+        shell: bash
+        run: |
+          for file in \
+            code/chapter07/01_course_project_schema.sql \
+            code/chapter07/02_course_project_seed.sql \
+            code/chapter07/03_course_project_changes.sql \
+            code/chapter07/04_course_project_validation.sql
+          do
+            psql -d ai_database_book -v ON_ERROR_STOP=1 -f "$file" 2>&1 | tee -a /tmp/ch8_baseline.log
+          done
+          grep -q "Chapter 07 course project validation passed" /tmp/ch8_baseline.log
+
+      - name: Run Chapter 08 canonical path in read-only transaction
+        shell: bash
+        run: |
+          BEFORE=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) || ':' || SUM(recorded_amount) || ':' || string_agg(id || '=' || status, ',' ORDER BY id) FROM course_project.enrollments;")
+          psql -d ai_database_book -v ON_ERROR_STOP=1 \
+            -c "BEGIN TRANSACTION READ ONLY;" \
+            -f code/chapter08/00_check_course_project.sql \
+            -f code/chapter08/01_join_queries.sql \
+            -f code/chapter08/02_aggregation_queries.sql \
+            -f code/chapter08/03_join_aggregation_validation.sql \
+            -f code/chapter08/join_aggregation_practice.sql \
+            -c "ROLLBACK;" 2>&1 | tee /tmp/ch8_canonical.log
+          AFTER=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) || ':' || SUM(recorded_amount) || ':' || string_agg(id || '=' || status, ',' ORDER BY id) FROM course_project.enrollments;")
+          test "$BEFORE" = "$AFTER"
+          grep -q "Chapter 08 prerequisite check passed" /tmp/ch8_canonical.log
+          grep -q "Chapter 08 join and aggregation validation passed" /tmp/ch8_canonical.log
+
+      - name: Verify prerequisite drift detection
+        shell: bash
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "UPDATE course_project.enrollments SET status = '완료' WHERE id = 1002;"
+          if psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql > /tmp/ch8_drift_00.log 2>&1; then
+            cat /tmp/ch8_drift_00.log
+            echo "00 prerequisite gate failed to detect baseline drift"
+            exit 1
+          fi
+          cat /tmp/ch8_drift_00.log
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "UPDATE course_project.enrollments SET status = '신청' WHERE id = 1002;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql > /tmp/ch8_restored_00.log 2>&1
+          grep -q "Chapter 08 prerequisite check passed" /tmp/ch8_restored_00.log
+
+      - name: Verify aggregation validation detects drift
+        shell: bash
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "UPDATE course_project.enrollments SET recorded_amount = 120001 WHERE id = 1005;"
+          if psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/03_join_aggregation_validation.sql > /tmp/ch8_drift_03.log 2>&1; then
+            cat /tmp/ch8_drift_03.log
+            echo "03 validation gate failed to detect aggregate drift"
+            exit 1
+          fi
+          cat /tmp/ch8_drift_03.log
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "UPDATE course_project.enrollments SET recorded_amount = 120000 WHERE id = 1005;"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/03_join_aggregation_validation.sql > /tmp/ch8_restored_03.log 2>&1
+          grep -q "Chapter 08 join and aggregation validation passed" /tmp/ch8_restored_03.log
+
+      - name: Verify final Chapter 08 baseline
+        shell: bash
+        run: |
+          RESULT=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) || ':' || SUM(recorded_amount) || ':' || COUNT(*) FILTER (WHERE status IN ('신청','수강중')) || ':' || SUM(recorded_amount) FILTER (WHERE status IN ('신청','수강중')) || ':' || COUNT(*) FILTER (WHERE status <> '취소') || ':' || SUM(recorded_amount) FILTER (WHERE status <> '취소') FROM course_project.enrollments;")
+          test "$RESULT" = "5:590000:3:340000:4:440000"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql > /tmp/ch8_final_00.log 2>&1
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/03_join_aggregation_validation.sql > /tmp/ch8_final_03.log 2>&1
+          grep -q "Chapter 08 prerequisite check passed" /tmp/ch8_final_00.log
+          grep -q "Chapter 08 join and aggregation validation passed" /tmp/ch8_final_03.log
+          echo "Chapter 08 PostgreSQL validation passed"
