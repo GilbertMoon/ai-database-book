@@ -4,9 +4,10 @@
   const CHANNEL = 'chapter02-presentation-sync';
   const data = window.CHAPTER_DATA;
   const slides = data?.slides || [];
+  const enrichment = window.CH2ScriptEnrichment;
   const navigation = window.CH2Navigation;
   const card = document.getElementById('card');
-  if (!data || !slides.length || !navigation || !card) throw new Error('Chapter 02 script dependencies are missing.');
+  if (!data || !slides.length || !enrichment || !navigation || !card) throw new Error('Chapter 02 script dependencies are missing.');
 
   let presentationWindow = window.opener && !window.opener.closed ? window.opener : null;
 
@@ -51,13 +52,13 @@
     document.getElementById('prevPage').disabled = slideIndex === 0;
     document.getElementById('nextPage').disabled = slideIndex === slides.length - 1;
 
-    const overview = escapeHtml(normalizeTts(slide.script));
+    const overview = escapeHtml(normalizeTts(enrichment.overviewText(slide)));
     card.innerHTML = `<h1>${escapeHtml(slide.title)}</h1>
       <p class="meta">${escapeHtml(slide.eyebrow)} · 파란 버튼은 부모 장표의 다음 단계와 동일하게 동작합니다.</p>
       <div class="script-text overview"><p>${overview}</p></div>
-      <p class="focus-note">이 문단은 장표 전체의 설명입니다. 아래 단계 버튼부터 화면 요소가 순서대로 강조됩니다.</p>
+      <p class="focus-note">상단은 장표 전체를 여는 1~2문장 도입입니다. 아래 단계에서는 개념·의미·예시와 주의점을 더 자세히 설명합니다.</p>
       ${currentSteps.map((step, index) => `<div class="script-text"><p>${escapeHtml(normalizeTts(step.text))}</p></div><p class="focus-note">${step.target ? '이 문단과 관련된 화면 요소를 강조합니다.' : '이 문단은 장표 전체를 보며 설명합니다.'}</p><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}
-      <div class="hint">Chapter 01과 동일하게 전체 보기에서 시작합니다. 단계 버튼·키보드·부모 장표의 다음 동작은 모두 같은 순서로 이동합니다.</div>`;
+      <div class="hint">Chapter 01과 동일하게 전체 보기에서 시작합니다. 각 단계 설명은 보통 2~4문장으로 구성하고, 단계 버튼·키보드·부모 장표의 다음 동작은 모두 같은 순서로 이동합니다.</div>`;
 
     card.querySelectorAll('.cue-button').forEach((button) => {
       const target = Number(button.dataset.step);
@@ -122,7 +123,7 @@
       sendState();
       return;
     }
-    presentationWindow = window.open(`chapter02_presentation.html?v=20260808c#${slideIndex + 1}/${stepIndex}`, 'chapter02Presentation');
+    presentationWindow = window.open(`chapter02_presentation.html?v=20260808d#${slideIndex + 1}/${stepIndex}`, 'chapter02Presentation');
     if (presentationWindow) {
       presentationWindow.focus();
       setTimeout(() => send('script-ready'), 300);
