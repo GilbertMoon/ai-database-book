@@ -63,7 +63,7 @@ SELECT
     s.name AS student_name,
     c.title AS course_title,
     e.status,
-    e.paid_amount
+    e.recorded_amount
 FROM performance_lab.enrollments AS e
 JOIN performance_lab.students AS s ON s.id = e.student_id
 JOIN performance_lab.courses AS c ON c.id = e.course_id
@@ -71,13 +71,13 @@ WHERE e.student_id = 5000;
 
 -- 4. course_id 단독 조건: 50행
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, student_id, course_id, status, paid_amount
+SELECT id, student_id, course_id, status, recorded_amount
 FROM performance_lab.enrollments
 WHERE course_id = 1500;
 
 -- 5. course_id + status 복합 조건: 수강중 15행
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, student_id, course_id, status, paid_amount
+SELECT id, student_id, course_id, status, recorded_amount
 FROM performance_lab.enrollments
 WHERE course_id = 1500
   AND status = '수강중';

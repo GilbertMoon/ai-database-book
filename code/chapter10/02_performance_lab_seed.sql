@@ -78,7 +78,7 @@ VALUES
 
 -- 기본 신청 5건
 INSERT INTO performance_lab.enrollments (
-    id, student_id, course_id, enrolled_at, status, paid_amount
+    id, student_id, course_id, enrolled_at, status, recorded_amount
 )
 VALUES
     (1001, 101, 301, '2026-04-02', '완료', 100000),
@@ -138,7 +138,7 @@ WITH generated_enrollments AS (
     FROM generate_series(1, 100000) AS gs
 )
 INSERT INTO performance_lab.enrollments (
-    id, student_id, course_id, enrolled_at, status, paid_amount
+    id, student_id, course_id, enrolled_at, status, recorded_amount
 )
 SELECT
     g.enrollment_id,

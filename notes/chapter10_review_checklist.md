@@ -53,7 +53,7 @@ Chapter 10이 기존 프로젝트를 보호하면서 `performance_lab`에서 재
 | 강의별 신청 | 50 | 생성식·검증 반영 |
 | 활성 학생·강의 중복 | 0 | 생성식·검증 반영 |
 | 이메일 번호와 학생 ID | 일치 | `performance5000` = ID 5000 |
-| paid_amount | 강의 가격 | JOIN 생성 적용 |
+| recorded_amount | 강의 가격 | JOIN 생성 적용 |
 
 ---
 
@@ -125,7 +125,7 @@ Chapter 10이 기존 프로젝트를 보호하면서 `performance_lab`에서 재
 | 선택도 | 통과 | 반환 비율과 판단 |
 | 복합 인덱스 | 통과 | `(course_id, status)` |
 | 선두 컬럼 | 통과 | 단독·복합 조건 비교 |
-| Skip Scan | 통과 | 절대 규칙 대신 비용 기반 가능성 설명 |
+| PostgreSQL 18+ Skip Scan | 통과 | 절대 규칙 대신 비용 기반 가능성 설명 |
 | ORDER BY·LIMIT | 통과 | 전체와 상위 20건 비교 |
 | 중복 인덱스 | 통과 | email·course_id 역할 중복 검토 |
 
@@ -177,10 +177,10 @@ Chapter 10이 기존 프로젝트를 보호하면서 `performance_lab`에서 재
 | --- | --- | --- |
 | 워크북 기대값 | 통과 | 1·10·50·15·30001 반영 |
 | 결과 자동 검증 | 통과 | 07 파일 연결 |
-| Skip Scan 활동 | 통과 | 개념·계획 기록 |
+| PostgreSQL 18+ Skip Scan 활동 | 통과 | 개념·계획 기록 |
 | 운영 생성 비교 | 통과 | 일반·CONCURRENTLY 표 |
 | 권장 해설 | 통과 | 자동 인덱스·계획·통제·통계 해설 |
-| AI 검토 | 통과 | 결과 검증·잠금·Skip Scan 포함 |
+| AI 검토 | 통과 | 결과 검증·잠금·PostgreSQL 18+ Skip Scan 포함 |
 
 ---
 
@@ -206,7 +206,7 @@ Chapter 10이 기존 프로젝트를 보호하면서 `performance_lab`에서 재
 
 ```text
 Chapter 10은 합성 데이터 정합성, IDENTITY, 상태 보호,
-통계 조건 통제, 결과 행 검증, Skip Scan과 운영 잠금 안내를 보완했다.
+통계 조건 통제, 결과 행 검증, PostgreSQL 18+ Skip Scan과 운영 잠금 안내를 보완했다.
 
 본문·워크북·SQL·구성안·코드 안내가 동일한 기준값과 실험 순서를 사용하므로
 최종 출판 전 내용 검수 완료 상태로 판정한다.

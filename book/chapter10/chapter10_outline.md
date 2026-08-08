@@ -1,5 +1,10 @@
 # Chapter 10 구성안
 
+> **검증 기준 버전**
+>
+> 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. **B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.
+
+
 ## 제목
 
 실행 계획으로 인덱스 효과 검증하기
@@ -32,7 +37,7 @@ Chapter 07~09의 데이터를 보호하면서 별도 `performance_lab` 스키마
 합성 데이터가 업무 규칙과 기대 분포를 만족하는가?
 기준·사후 측정의 데이터·통계·SQL이 같은가?
 조건이 전체 행 중 적은 행을 선택하는가?
-복합 인덱스 컬럼 순서와 Skip Scan 가능성이 쿼리와 맞는가?
+복합 인덱스 컬럼 순서와 PostgreSQL 18+ Skip Scan 가능성이 쿼리와 맞는가?
 실행 계획과 결과 행이 모두 검증되었는가?
 계획·Buffers·실행 시간이 의미 있게 개선되는가?
 쓰기 비용·저장 공간·운영 잠금을 감수할 가치가 있는가?
@@ -111,7 +116,7 @@ enrollments.id   → 110001
 - ORDER BY·LIMIT
 - 복합 인덱스
 - 선두 컬럼
-- Skip Scan
+- PostgreSQL 18+ Skip Scan
 - 중복 인덱스
 - `pg_stat_user_indexes`
 - 읽기·쓰기 비용
@@ -131,7 +136,7 @@ enrollments.id   → 110001
 9. Seq·Index·Bitmap Scan
 10. WHERE 후보
 11. JOIN과 FK 자식 컬럼
-12. 복합 인덱스·선두 컬럼·Skip Scan
+12. 복합 인덱스·선두 컬럼·PostgreSQL 18+ Skip Scan
 13. ORDER BY·LIMIT
 14. 같은 조건의 전후 비교
 15. 예상·실제 행 수
@@ -221,7 +226,7 @@ idx_performance_enrollments_course_status
 ## AI 활용 원칙
 
 - 실제 SQL·행 수·기존 인덱스 목록을 제공한다.
-- 후보 컬럼 순서와 Skip Scan·중복 여부의 근거를 요구한다.
+- 후보 컬럼 순서와 PostgreSQL 18+ Skip Scan·중복 여부의 근거를 요구한다.
 - 검증 SQL과 결과 동일성 판정을 함께 요구한다.
 - 자동 인덱스 중복, 무조건적인 Index Scan 선호와 쓰기 비용 누락을 검토한다.
 - 운영 환경에서는 잠금과 `CONCURRENTLY` 검토를 요구한다.

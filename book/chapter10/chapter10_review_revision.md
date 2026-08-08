@@ -51,7 +51,7 @@ Chapter 10을 단순히 인덱스를 만들고 실행 시간이 줄었는지 확
 활성 신청 중복 조합 0건
 ```
 
-`paid_amount`는 연결된 강의의 가격을 JOIN해 저장합니다.
+`recorded_amount`는 연결된 강의의 가격을 JOIN해 저장합니다.
 
 ---
 
@@ -176,13 +176,13 @@ performance_lab 기준 행 수
 
 ---
 
-## 9. 복합 인덱스와 Skip Scan 보완
+## 9. 복합 인덱스와 PostgreSQL 18+ Skip Scan 보완
 
 `(course_id, status)`에서 선두 컬럼 조건이 일반적으로 중요하다는 설명을 유지하면서 다음을 추가했습니다.
 
 ```text
 선두 컬럼 조건이 없다고 절대 사용되지 않는 것은 아니다.
-PostgreSQL은 데이터 분포와 비용에 따라 Skip Scan을 선택할 수 있다.
+PostgreSQL은 데이터 분포와 비용에 따라 PostgreSQL 18+ Skip Scan을 선택할 수 있다.
 실제 선택은 실행 계획으로 확인한다.
 ```
 
@@ -249,7 +249,7 @@ Filter와 Index Cond
 ANALYZE와 EXPLAIN ANALYZE
 결과 행 별도 검증
 통계 조건 통제
-복합 인덱스와 Skip Scan
+복합 인덱스와 PostgreSQL 18+ Skip Scan
 ORDER BY LIMIT
 일반 CREATE INDEX와 CONCURRENTLY
 idx_scan 해석
@@ -270,7 +270,7 @@ idx_scan 해석
 | 기준·사후 인덱스 상태 검사 | 완료 |
 | 사후 ANALYZE 제거 | 완료 |
 | 결과 검증 파일 추가 | 완료 |
-| Skip Scan 설명 | 완료 |
+| PostgreSQL 18+ Skip Scan 설명 | 완료 |
 | 운영 CONCURRENTLY 안내 | 완료 |
 | 실험 후보 표현 통일 | 완료 |
 | idx_scan·FK 설명 보완 | 완료 |

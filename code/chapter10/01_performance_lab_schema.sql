@@ -119,7 +119,7 @@ CREATE TABLE performance_lab.enrollments (
     course_id INTEGER NOT NULL,
     enrolled_at DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
-    paid_amount INTEGER NOT NULL,
+    recorded_amount INTEGER NOT NULL,
 
     CONSTRAINT fk_performance_enrollments_student
         FOREIGN KEY (student_id)
@@ -135,7 +135,7 @@ CREATE TABLE performance_lab.enrollments (
         CHECK (status IN ('신청', '수강중', '완료', '취소')),
 
     CONSTRAINT chk_performance_enrollments_amount
-        CHECK (paid_amount >= 0)
+        CHECK (recorded_amount >= 0)
 );
 
 COMMIT;

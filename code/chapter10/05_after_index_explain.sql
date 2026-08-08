@@ -57,7 +57,7 @@ SELECT
     s.name AS student_name,
     c.title AS course_title,
     e.status,
-    e.paid_amount
+    e.recorded_amount
 FROM performance_lab.enrollments AS e
 JOIN performance_lab.students AS s ON s.id = e.student_id
 JOIN performance_lab.courses AS c ON c.id = e.course_id
@@ -65,19 +65,19 @@ WHERE e.student_id = 5000;
 
 -- 4. 복합 인덱스 선두 컬럼만 사용
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, student_id, course_id, status, paid_amount
+SELECT id, student_id, course_id, status, recorded_amount
 FROM performance_lab.enrollments
 WHERE course_id = 1500;
 
 -- 5. 복합 인덱스 두 컬럼 사용
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, student_id, course_id, status, paid_amount
+SELECT id, student_id, course_id, status, recorded_amount
 FROM performance_lab.enrollments
 WHERE course_id = 1500
   AND status = '수강중';
 
 -- 6. 선두 컬럼 없이 status만 사용
--- 데이터 분포와 비용에 따라 Skip Scan 가능성도 있지만,
+-- 데이터 분포와 비용에 따라 PostgreSQL 18+ Skip Scan 가능성도 있지만,
 -- course_id 고유값이 많고 반환 비율이 높아 Seq Scan이 더 합리적일 수 있습니다.
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, student_id, course_id, status

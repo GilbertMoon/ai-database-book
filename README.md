@@ -87,7 +87,7 @@ publish/full_manuscript.md
 | Chapter 07 요구사항 ID·무료 금액·활성 신청·IDENTITY·상태 변경·경계값 최종 보완 | 완료 |
 | Chapter 08 사전 상태·활성 범위·NULL·상태 순서·과대 집계·검산 최종 보완 | 완료 |
 | Chapter 09 사전 검사·COMMIT 판정·IDENTITY·취소·SAVEPOINT·동시성 최종 보완 | 완료 |
-| Chapter 10 합성 데이터·IDENTITY·실험 통제·결과 검증·Skip Scan·운영 인덱스 최종 보완 | 완료 |
+| Chapter 10 합성 데이터·IDENTITY·실험 통제·결과 검증·PostgreSQL 18+ Skip Scan·운영 인덱스 최종 보완 | 완료 |
 | Chapter 11 PUBLIC·최소 권한·IDENTITY·password file·원자적 복원·2단계 검증 최종 보완 | 완료 |
 | Chapter 12 원본 매핑·TTL 재현성·JSONB 경계·낙관적 잠금·결정 상태·자동 검증 최종 보완 | 완료 |
 | Chapter 13 P13 추적·DB 보호·IDENTITY·활성 신청·NULL·결제 시각·반례·자동 검증 최종 보완 | 완료 |

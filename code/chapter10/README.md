@@ -2,6 +2,10 @@
 
 ## 실행 계획으로 인덱스 효과 검증하기
 
+> **검증 기준 버전**
+>
+> 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. **B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.
+
 이 폴더는 기존 프로젝트를 변경하지 않고 `performance_lab`에서 대량 데이터를 생성해 같은 SQL의 인덱스 전후 실행 계획을 비교하는 SQL 파일을 관리합니다.
 
 ---
@@ -175,7 +179,7 @@ Execution Time
 
 ---
 
-## 복합 인덱스와 Skip Scan
+## 복합 인덱스와 PostgreSQL 18+ Skip Scan
 
 `(course_id, status)`에서는 선두 컬럼인 `course_id` 조건이 있을 때 일반적으로 활용하기 쉽습니다.
 
@@ -186,7 +190,7 @@ course_id + status
 
 status 단독
 → 일반적으로 제한적
-→ 데이터 분포와 비용에 따라 PostgreSQL Skip Scan 가능성 존재
+→ 데이터 분포와 비용에 따라 PostgreSQL PostgreSQL 18+ Skip Scan 가능성 존재
 ```
 
 실제 사용 여부는 `Index Cond`와 계획 노드로 확인합니다.
