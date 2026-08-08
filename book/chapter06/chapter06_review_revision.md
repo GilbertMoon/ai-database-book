@@ -24,7 +24,7 @@ Chapter 06을 다음 흐름으로 전체 대조했다.
 → 실패 후 기준 상태 보존
 ```
 
-검토 대상은 본문뿐 아니라 다음을 포함한다.
+검토 대상:
 
 ```text
 book/chapter06/chapter06.md
@@ -32,6 +32,7 @@ book/chapter06/chapter06_outline.md
 book/chapter06/chapter06_activity.md
 book/chapter06/chapter06_review_revision.md
 notes/chapter06_review_checklist.md
+notes/chapter06_validation_result.md
 
 code/chapter06/01_normalization_schema.sql
 code/chapter06/02_normalization_seed.sql
@@ -94,8 +95,6 @@ presentation/common/script_content_enhancer.js
 
 정규화는 “테이블 수를 늘리는 작업”이 아니라 같은 현재 사실의 복사본을 여러 곳에서 관리하지 않도록 사실의 주인을 정하는 과정으로 설명한다.
 
-무결성은 정규화와 분리해 다음처럼 정의한다.
-
 ```text
 정규화
 → 각 사실을 적절한 테이블에 배치
@@ -108,7 +107,7 @@ presentation/common/script_content_enhancer.js
 
 ## 2. 한 행 의미와 Chapter 05 연결
 
-다음 의미를 본문·워크북·코드 README·실습 발표자료의 기준으로 사용한다.
+본문·워크북·코드 README·실습 발표자료의 기준:
 
 ```text
 library_records_raw 한 행
@@ -184,7 +183,7 @@ course_id → course_name
 
 ## 5. 번호형 SQL 실행 경로
 
-기본 학습 경로는 다음으로 통일한다.
+기본 학습 경로:
 
 ```text
 01_normalization_schema.sql
@@ -194,13 +193,13 @@ course_id → course_name
 → 05_integrity_tests.sql에서 한 테스트씩 실행
 ```
 
-초기화가 필요한 경우에만 다음을 사용한다.
+초기화가 필요한 경우에만:
 
 ```text
 reset_normalization.sql
 ```
 
-기존 링크 호환 파일:
+호환 파일:
 
 ```text
 normalization_schema.sql
@@ -231,15 +230,13 @@ DB·public·쓰기 가능 여부 확인
 → COMMIT
 ```
 
-중간 오류가 발생하면 트랜잭션이 완료되지 않으므로 부분 생성 상태를 정상 완료 상태로 남기지 않는다.
-
 호환 `normalization_schema.sql`도 같은 안전 기준으로 동기화했다.
+
+PostgreSQL 16에서 정상 생성 경로는 실제 실행해 확인했다. 별도의 의도적 CREATE 중간 실패 주입 테스트까지는 하지 않았으므로 그 항목은 체크리스트에서 별도 미확인으로 유지한다.
 
 ---
 
-## 7. 02 입력 파일 원자성 보강
-
-기존 샘플 입력은 여러 INSERT와 IDENTITY 조정이 하나의 트랜잭션으로 묶여 있지 않았다.
+## 7. 02 입력 파일 원자성 보강 및 실제 검증
 
 현재 흐름:
 
@@ -279,18 +276,20 @@ loans_nf.id = 1004부터
 
 호환 `normalization_seed.sql`도 같은 동작으로 맞췄다.
 
+Actions에서 `loans_nf` 입력을 강제로 실패시킨 뒤 실제 행 수가 다음처럼 모두 0으로 돌아가는 것을 확인했다.
+
+```text
+raw = 0
+members = 0
+books = 0
+loans = 0
+```
+
+따라서 부분 입력 상태가 남지 않는 것을 실제 PostgreSQL에서 검증했다.
+
 ---
 
 ## 8. 03 정규화 비교 자동 검증 강화
-
-기존 행 수·고아 참조·활성 중복 확인에 다음을 추가했다.
-
-```text
-회원 101 대여 이력 = 2
-도서 201 대여 이력 = 2
-날짜 순서 오류 = 0
-도서 201 재대여 시간 순서 오류 = 0
-```
 
 최종 자동 판정:
 
@@ -305,7 +304,7 @@ loans 3
 회원 고아 0
 도서 고아 0
 날짜 오류 0
-도서201 시간 순서 오류 0
+도서201 재대여 시간 순서 오류 0
 활성 중복 0
 ```
 
@@ -317,9 +316,11 @@ Chapter 06 normalization comparison passed
 
 호환 `normalization_practice.sql`도 같은 판정을 사용한다.
 
+Run 6에서 실제 기준값과 통과 메시지를 확인했다.
+
 ---
 
-## 9. 04 무결성 규칙 적용 보강
+## 9. 04 무결성 규칙 적용 보강 및 실제 검증
 
 기존 제약조건 존재 확인이 `conname`만 검사하여 다른 테이블이나 스키마에 같은 이름이 있으면 오탐할 가능성이 있었다.
 
@@ -351,7 +352,17 @@ NOT NULL 적용 열 = 10개
 uq_loans_nf_active_book 존재
 ```
 
-따라서 일부 규칙만 적용된 상태를 완료로 판단하지 않는다.
+Run 6에서 실제 PostgreSQL 메타데이터까지 확인했다.
+
+또한 04 실행 전에 중복 이메일 데이터를 미리 넣어 기존 데이터 검사에서 실패하도록 만든 결과:
+
+```text
+04 실행 실패
+Chapter 06 명명 제약조건 = 0
+uq_loans_nf_active_book 미생성
+```
+
+따라서 일부 규칙만 적용된 상태가 남지 않는 것도 실제 확인했다.
 
 ---
 
@@ -385,8 +396,6 @@ NOT NULL 이름
 참조 중인 회원 삭제
 ```
 
-기존에는 없는 회원 FK 테스트 중심이었으나 없는 도서 FK 테스트도 별도로 추가했다.
-
 각 오류 예제에 기대 제약조건 또는 인덱스 이름을 표시했다.
 
 테스트 후 다음 기준을 자동 재검증한다.
@@ -403,11 +412,41 @@ raw 3 / members 2 / books 2 / loans 3 / 미반납 2
 Chapter 06 integrity test baseline preserved
 ```
 
-호환 `integrity_tests.sql`도 같은 기준으로 동기화했다.
+Run 6에서 허용 경계값의 실제 성공과 11개 오류 SQL의 실제 실패, 기대 제약조건·인덱스 이름, 테스트 후 기준 상태 보존을 확인했다.
 
 ---
 
-## 11. reset 안전성
+## 11. 경계 테스트 ISBN 실제 오류 발견·수정
+
+자동 검증 과정에서 실제 콘텐츠 오류를 발견했다.
+
+기존 경계 테스트 값:
+
+```text
+ISBN-BOUNDARY-LOAN-001
+```
+
+이 문자열은 `books_nf.isbn VARCHAR(20)`보다 길었다. 따라서 같은 날 대여·반납 경계 규칙을 검증하기 전에 문자열 길이 오류가 먼저 발생했다.
+
+현재 값:
+
+```text
+ISBN-BND-LOAN-001
+```
+
+다음 세 위치를 모두 같은 값으로 맞췄다.
+
+```text
+05_integrity_tests.sql
+integrity_tests.sql
+Validate Chapter 06 workflow의 실제 PostgreSQL 경계 테스트
+```
+
+수정 후 Run 6에서 날짜 경계값이 실제 성공하는 것을 확인했다.
+
+---
+
+## 12. reset 안전성
 
 `reset_normalization.sql`은 다음 환경을 확인한다.
 
@@ -426,15 +465,15 @@ public.loans_nf
 → public.library_records_raw
 ```
 
-부분 고유 인덱스와 테이블 소속 제약조건은 대상 테이블 삭제 시 함께 제거된다.
+Run 6의 번호형·호환 경로에서 실제 실행했다.
 
 ---
 
-## 12. 워크북 동기화
+## 13. 워크북 동기화
 
-워크북의 권장 경로는 이미 번호형 01→05 기준이다.
+워크북의 권장 경로는 번호형 01→05 기준이다.
 
-핵심 활동은 다음 판단을 직접 기록하게 한다.
+핵심 활동:
 
 ```text
 원시 행 의미
@@ -449,13 +488,13 @@ C-01~C-08
 정상·경계·오류 결과
 ```
 
-선택 활동은 `ALTER TABLE`, NULL 처리, 삭제 정책, 부분 고유 인덱스와 주문 예제로 분리되어 있고, 운영 마이그레이션과 고급 제약조건은 심화 범위다.
+선택 활동은 `ALTER TABLE`, NULL 처리, 삭제 정책, 부분 고유 인덱스와 주문 예제로 분리되어 있고 운영 마이그레이션과 고급 제약조건은 심화 범위다.
 
 ---
 
-## 13. 실습 강의안의 오래된 실행 흐름 수정
+## 14. 실습 강의안의 오래된 실행 흐름 수정
 
-기존 실습 강의안과 실제 런타임에는 다음 구형 흐름이 남아 있었다.
+기존 실습 강의안과 런타임에는 다음 구형 흐름이 남아 있었다.
 
 ```text
 normalization_schema.sql
@@ -476,9 +515,9 @@ normalization_schema.sql
 → 05 경계·오류 테스트
 ```
 
-실습 발표 강의안은 실제 런타임 내비게이션과 같은 **16개 장표**로 재구성했다.
+실습 발표 강의안은 실제 런타임 내비게이션과 같은 16개 장표로 재구성했다.
 
-각 장표에는 `화면 구성`과 `발표 스크립트`가 있으며 다음 기준을 직접 반영한다.
+각 장표에는 `화면 구성`과 `발표 스크립트`가 있으며 다음 기준을 반영한다.
 
 ```text
 3 / 2 / 2 / 3 / 미반납 2
@@ -492,13 +531,13 @@ NOT NULL 열 10개
 
 ---
 
-## 14. 실습 발표 런타임 전체 재정렬
+## 15. 실습 발표 런타임 전체 재정렬
 
 `chapter06_practice_patch.js`를 현재 코드·본문 기준으로 다시 구성했다.
 
 기존 의미 단위 내비게이션이 사용하는 16개 장표 제목은 유지하면서 실제 표시 내용과 발표 스크립트를 최신화했다.
 
-특히 다음 오해를 제거했다.
+다음 오해를 제거했다.
 
 ```text
 01에서 모든 제약조건을 생성한다
@@ -514,7 +553,7 @@ NOT NULL 열 10개
 
 ---
 
-## 15. 이론 발표자료·의미 단위 내비게이션·TTS
+## 16. 이론 발표자료·의미 단위 내비게이션·TTS
 
 이론 발표자료는 다음 핵심 흐름을 유지한다.
 
@@ -539,11 +578,13 @@ presentation/common/script_content_enhancer.js
 
 `chapter06_script.js`는 `window.PresentationTTS.normalize()`를 사용하며 이론·실습 patch를 모두 로드한다.
 
+Run 6에서 JavaScript 문법, 16개 실습 장표 제목과 navigation 대응, 공통 TTS·script enhancer 연결을 정적으로 검증했다.
+
 ---
 
-## 16. 이미지·도식
+## 17. 이미지·도식
 
-Mermaid 원본과 SVG 결과물 8쌍을 유지한다.
+Mermaid 원본과 SVG 결과물 8쌍:
 
 ```text
 01 normalization problem overview
@@ -556,79 +597,81 @@ Mermaid 원본과 SVG 결과물 8쌍을 유지한다.
 08 AI normalization review flow
 ```
 
-도식은 사고 흐름과 관계를 설명하고, 실제 제약조건·오류 테스트는 SQL과 표가 담당한다.
+Run 6에서 8개의 `.mmd`와 8개의 `.svg` 존재를 확인했다.
+
+도식은 사고 흐름과 관계를 설명하고 실제 제약조건·오류 테스트는 SQL과 표가 담당한다.
 
 ---
 
-## 17. Chapter 06 전용 자동 검증
-
-신규 파일:
+## 18. Chapter 06 전용 자동 검증 최종 결과
 
 ```text
-.github/workflows/validate-chapter06.yml
+Workflow: Validate Chapter 06
+Run: 6
+Commit: 0f7505a2ffe431c31c1396f69649faa910733f5c
+Status: completed
+Conclusion: success
+PostgreSQL: 16
+Date: 2026-08-08
 ```
 
-정적 검증:
+최종 통과:
 
 ```text
 본문 18개 절
-C-01~C-08와 번호형 파일 연결
 실습 강의안 16개 절
-실습 런타임 16개 장표와 navigation 제목 대응
+실습 runtime 16개 장표와 navigation 제목 대응
+JavaScript 문법
 TTS·script_content_enhancer 연결
-01·02 트랜잭션 안전 문구와 검증 코드
-03 반복·고아·날짜·활성 중복 판정
-04 정확한 대상 테이블·8 제약조건·10 NOT NULL 판정
-05 FK 양방향 오류 예제와 기준 상태 복원 판정
 Mermaid·SVG 8쌍
+reset → 01 → 02 → 03 → 04 → 05 실제 PostgreSQL 실행
+허용 경계값 실제 성공
+NOT NULL·UNIQUE·CHECK·양쪽 FK·부분 고유 인덱스·RESTRICT 실제 실패
+02 입력 중간 실패 시 전체 롤백
+04 기존 위반 데이터 발견 시 일부 규칙 미적용
+호환 SQL 전체 경로 실제 실행
 ```
 
-PostgreSQL 16 통합 검증:
+상세 기록:
 
 ```text
-reset → 01 → 02 → 03 → 04 → 05 실제 실행
-허용 경계값 실제 성공
-NOT NULL·UNIQUE·CHECK·FK·부분 고유 인덱스·RESTRICT 실제 실패
-02 중간 실패 시 전체 입력 롤백
-04 기존 위반 데이터 발견 시 일부 규칙 미적용 확인
-호환 파일 경로 실제 실행
+notes/chapter06_validation_result.md
 ```
-
-이 workflow 성공 여부는 별도 검증 결과 문서에 기록한다.
 
 ---
 
-## 현재 판정
+## 최종 상태
 
 | 영역 | 상태 |
 | --- | --- |
 | 본문 18절 구조 | 반영 완료 |
 | 정규형 설명·범위 | 반영 완료 |
-| C-01~C-08 | 반영 완료 |
+| C-01~C-08 | PostgreSQL 실제 검증 완료 |
 | 워크북 | 동기화 확인 |
-| 01 생성 원자성 | 보강 완료 |
-| 02 입력 원자성 | 보강 완료 |
-| 03 비교 검증 | 보강 완료 |
-| 04 규칙 적용·메타데이터 | 보강 완료 |
-| 05 정상·경계·오류 기준 | 보강 완료 |
-| 호환 SQL | 동기화 완료 |
-| reset 보호 | 확인 완료 |
+| 01 생성 원자성 | 코드 보강·정상 경로 실제 확인 |
+| 02 입력 원자성 | 보강·실패 롤백 실제 확인 |
+| 03 비교 검증 | 보강·실제 통과 |
+| 04 규칙 적용·메타데이터 | 보강·실제 통과·거부 원자성 확인 |
+| 05 정상·경계·오류 | 실제 검증 완료 |
+| 호환 SQL | 동기화·실제 실행 완료 |
+| reset | 실제 실행 완료 |
 | 실습 강의안 | 16장표 기준 재구성 완료 |
 | 실습 발표 런타임 | 번호형 01→05 기준 재작성 완료 |
-| 의미 단위 내비게이션 | 연결 유지 |
-| 공통 TTS·스크립트 보강 | 연결 확인 |
-| Mermaid·SVG 8쌍 | 정적 확인 대상 |
-| Chapter 06 Actions | 실행 결과 확인 필요 |
+| 의미 단위 내비게이션 | 정적 연결 검증 완료 |
+| 공통 TTS·스크립트 보강 | 정적 연결 검증 완료 |
+| Mermaid·SVG 8쌍 | 존재 정적 확인 완료 |
+| Chapter 06 Actions | Run 6 success |
 
-## 별도 실제 확인 대상
+## 별도 직접 확인 대상
 
-자동화와 저장소 정적 검증으로 대체할 수 없는 항목은 다음과 같이 남긴다.
+자동 검증으로 대신할 수 없는 항목:
 
 ```text
-브라우저 이론·실습 최종 시각 렌더링
+브라우저 이론 발표자료 최종 시각 렌더링
+브라우저 실습 발표자료 최종 시각 렌더링
 의미 단위 포커스와 발표자 창의 실제 동기화
-TTS 실제 발음
-Word·PDF·eBook의 SVG 가독성
+TTS 실제 청취 발음
+Word·PDF·eBook SVG 최종 가독성
 최종 편집 분량 23~26페이지 여부
 ```
 
