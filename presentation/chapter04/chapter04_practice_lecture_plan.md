@@ -2,84 +2,80 @@
 
 ## 첫 테이블과 기본 SQL을 실행 결과로 검증하기
 
-> 목적: `basic_crud.sql`을 한꺼번에 실행하지 않고 구간별로 선택 실행하면서, 첫 테이블 생성부터 입력·조회·조건·NULL·정렬·수정·삭제까지 결과를 검증한다.  
-> 기준: 초보자가 “어느 구간을 실행해야 하는지, 실행 전 무엇을 예상해야 하는지, 실행 후 무엇을 확인해야 하는지” 직관적으로 이해할 수 있어야 한다.
+> 목적: 번호 SQL 파일을 순서대로 사용하면서 첫 테이블 생성부터 입력·조회·조건·NULL·정렬·수정·삭제까지 결과를 검증한다.  
+> 기준: 초보자가 “어느 파일과 구간을 실행해야 하는지, 실행 전 무엇을 예상해야 하는지, 실행 후 무엇을 확인해야 하는지” 설명할 수 있어야 한다.
 
 ---
 
-## 1. 이번 실습은 전체 파일 실행이 아니라 구간별 실행입니다
+## 1. 이번 실습은 번호 파일을 순서대로 사용합니다
 
 **화면 구성**
 
-- 파일: `code/chapter04/basic_crud.sql`
-- 주의 문구:
-
 ```text
-파일 전체를 무조건 실행하지 않습니다.
-현재 학습 중인 구간만 선택해 실행합니다.
+01_create_students.sql
+→ 02_insert_students.sql
+→ 03_select_students.sql
+→ 04_update_delete_students.sql
 ```
 
-**스크립트**
+보조 파일:
 
-오늘 사용할 파일은 `basic_crud.sql`입니다. 이 파일에는 테이블 생성, 데이터 입력, 조회, 수정, 삭제 예제가 모두 들어 있습니다.
+```text
+verify_students.sql → 현재 상태 확인
+reset_students.sql  → 처음부터 다시 시작할 때만 사용
+basic_crud.sql      → 기존 링크용 통합 참고
+```
 
-하지만 이 파일을 처음부터 끝까지 한 번에 실행하면 안 됩니다. 이미 테이블이 있으면 생성 오류가 날 수 있고, 이미 데이터가 있으면 중복 이메일 오류가 날 수 있습니다. 또 수정과 삭제까지 한꺼번에 실행되어 데이터 상태가 예상과 달라질 수 있습니다.
+**발표 스크립트**
 
-오늘은 구간을 선택하고, 실행 전에 예상하고, 실행 후 결과를 확인하는 방식으로 진행합니다.
+이번 실습은 `basic_crud.sql` 전체를 한꺼번에 실행하는 방식이 아닙니다.
+
+처음 학습하는 경우에는 번호 파일을 순서대로 사용합니다. 공일 파일에서 테이블을 만들고, 공이 파일에서 샘플 데이터를 입력하고, 공삼 파일에서 조회를 반복하고, 공사 파일에서 수정과 삭제를 안전하게 확인합니다.
+
+현재 상태가 궁금하면 `verify_students.sql`을 사용하고, 처음부터 다시 시작해야 할 때만 `reset_students.sql`을 사용합니다. `basic_crud.sql`은 기존 링크와 사용자를 위한 통합 참고 파일입니다.
 
 ---
 
-## 2. 실행 전 위치를 확인합니다
+## 2. 실행 전 현재 위치와 쓰기 가능 상태를 확인합니다
 
 **화면 구성**
 
 ```sql
 SELECT current_database();
+SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 ```
 
-**예상 결과**
+완료 기준:
 
 ```text
 current_database = ai_database_book
-대상 스키마 = public
+실습 대상 = public.students
+Auto-commit 상태 확인
 ```
 
-**스크립트**
+**발표 스크립트**
 
-첫 번째로 실행할 구간은 현재 위치 확인입니다.
+첫 번째로 현재 위치를 확인합니다.
 
-DBeaver에서 SQL 편집기가 열려 있다고 해서 반드시 `ai_database_book`에 연결된 것은 아닙니다. 먼저 현재 데이터베이스와 현재 스키마, 검색 경로를 확인합니다.
+DBeaver에서 편집기가 열려 있다고 해서 반드시 원하는 데이터베이스에 연결되어 있는 것은 아닙니다. 현재 데이터베이스와 사용자, 현재 스키마와 검색 경로를 확인합니다.
 
-`current_database()` 결과가 `ai_database_book`이 아니면 여기서 멈추고 연결을 바꿉니다. 위치가 틀린 상태에서 다음 구간으로 넘어가면 테이블이 엉뚱한 곳에 만들어질 수 있습니다.
+이번 장의 객체는 `public.students`처럼 스키마를 명시합니다. 따라서 현재 스키마가 반드시 `public`이어야 하는 것은 아니지만, 데이터베이스는 `ai_database_book`이어야 합니다. 변경 SQL을 실행하기 전에는 Auto-commit 상태도 함께 확인합니다.
 
 ---
 
-## 3. 자동 커밋과 실행 범위를 확인합니다
+## 3. `01_create_students.sql`로 테이블을 생성합니다
 
 **화면 구성**
 
 ```text
-Statement 실행
-선택 영역 실행
-Script 실행
-Auto-commit / Manual commit
+파일: code/chapter04/01_create_students.sql
+시작 상태: public.students 없음
+완료 상태: 빈 public.students
 ```
 
-**스크립트**
-
-이번 장부터는 데이터를 바꾸는 SQL이 등장합니다. 그래서 실행 범위와 자동 커밋 상태를 확인해야 합니다.
-
-Statement 실행은 보통 현재 커서가 있는 한 문장을 실행합니다. 선택 영역 실행은 드래그한 SQL만 실행합니다. Script 실행은 파일의 여러 문장을 이어서 실행할 수 있습니다.
-
-변경 SQL을 실수로 여러 문장 실행하면 예상보다 많은 데이터가 바뀔 수 있습니다. Chapter 09에서 트랜잭션을 배우기 전까지는 변경 SQL을 한 문장 또는 확인한 선택 영역 단위로 실행합니다.
-
----
-
-## 4. `students` 테이블을 생성합니다
-
-**실행 구간**
+핵심 SQL:
 
 ```sql
 CREATE TABLE public.students (
@@ -92,30 +88,80 @@ CREATE TABLE public.students (
 );
 ```
 
-**확인 방법**
+**발표 스크립트**
+
+공일 파일은 테이블을 만드는 단계입니다.
+
+파일은 먼저 현재 데이터베이스가 `ai_database_book`인지, `public` 스키마가 존재하는지, 현재 연결이 읽기 전용인지 확인합니다. 조건이 맞아야 `public.students`를 생성합니다.
+
+같은 이름의 테이블이 이미 있다면 바로 삭제하지 않습니다. 먼저 `verify_students.sql`로 현재 상태를 확인하고 정말 초기화가 필요한지 판단합니다.
+
+---
+
+## 4. DBeaver에서 실제 테이블 구조를 확인합니다
+
+**화면 구성**
 
 ```text
-DBeaver Navigator 새로고침
-→ ai_database_book
+ai_database_book
 → Schemas
 → public
 → Tables
 → students
 ```
 
-**스크립트**
+확인 항목:
 
-이제 첫 번째 테이블을 만듭니다. 실행 전에 이 테이블의 한 행이 학생 한 명을 의미한다는 점을 다시 확인합니다.
+```text
+id / name / email / major / grade / created_at
+PK / NOT NULL / UNIQUE / DEFAULT
+```
 
-이 SQL은 `public.students`라는 이름으로 테이블을 만듭니다. 스키마를 명시했기 때문에 `search_path`가 조금 달라도 대상을 분명히 지정할 수 있습니다.
+**발표 스크립트**
 
-이미 테이블이 있다는 오류가 나오면 바로 삭제하지 않습니다. 기존 데이터가 있을 수 있기 때문에, 초기화가 정말 필요한 경우에만 `reset_students.sql`을 사용합니다.
+테이블 생성 메시지만 보고 끝내지 않습니다. DBeaver Navigator를 새로고침하고 실제 `students` 테이블이 보이는지 확인합니다.
+
+또 공일 파일 마지막의 `information_schema` 조회 결과로 열 이름, 데이터 타입, NULL 허용 여부와 기본값을 확인합니다.
+
+SQL 문장이 실행되었다는 사실과 실제 원하는 구조가 만들어졌다는 사실을 구분해서 확인하는 것이 중요합니다.
 
 ---
 
-## 5. 단일 행을 입력하고 자동 생성값을 확인합니다
+## 5. `02_insert_students.sql`은 빈 테이블에서 시작합니다
 
-**실행 구간**
+**화면 구성**
+
+```text
+파일: code/chapter04/02_insert_students.sql
+시작 상태: public.students = 0행
+완료 상태: 학생 6명
+```
+
+보호 검사:
+
+```text
+Database = ai_database_book
+public 존재
+쓰기 가능한 연결
+students 존재
+현재 행 수 = 0
+```
+
+**발표 스크립트**
+
+공이 파일은 샘플 학생 데이터를 입력합니다.
+
+입력 전에 현재 데이터베이스와 쓰기 가능 상태를 확인하고, `public.students`가 존재하며 현재 행 수가 0인지 검사합니다. 이미 데이터가 있으면 중복 입력을 시도하지 않고 중단합니다.
+
+여러 INSERT를 하나의 트랜잭션으로 묶었기 때문에 중간 문장이 실패한 상태를 정상적인 초기 데이터로 남기지 않도록 구성했습니다.
+
+---
+
+## 6. 단일 행과 여러 행, NULL 행을 입력합니다
+
+**화면 구성**
+
+단일 행:
 
 ```sql
 INSERT INTO public.students (name, email, major, grade)
@@ -123,377 +169,303 @@ VALUES ('김민지', 'minji@example.com', '컴퓨터공학', 2)
 RETURNING id, name, created_at;
 ```
 
-**실행 전 예상**
+추가 입력:
 
 ```text
-추가 행 수: 1
-직접 입력하지 않은 값: id, created_at
-반환 열: id, name, created_at
+이준호·박서연·최현우·정하늘 4행
+윤서진 1행 → major·grade NULL
 ```
 
-**스크립트**
+**발표 스크립트**
 
-이번에는 학생 한 명을 추가합니다.
+먼저 김민지 한 명을 입력하면서 `RETURNING`으로 자동 생성된 `id`와 `created_at`을 확인합니다.
 
-실행 전에 먼저 예상합니다. 추가되는 행은 한 행입니다. `id`와 `created_at`은 직접 입력하지 않았지만 PostgreSQL이 자동으로 만듭니다.
+그다음 네 명을 한 문장으로 입력하고, 윤서진은 이름과 이메일만 입력해서 `major`와 `grade`가 `NULL`이 되는 것을 확인합니다.
 
-실행 후에는 `RETURNING` 결과를 확인합니다. 여기서 실제 생성된 `id`를 기록하되, 이 값이 반드시 1이라고 가정하지 않습니다. 이미 실행했던 이력이 있으면 다른 값이 나올 수 있습니다.
+실제 `id` 값은 미리 단정하지 않습니다. 자동 생성 ID는 학생 수와 같은 의미가 아니기 때문입니다.
 
 ---
 
-## 6. 여러 행과 NULL 행을 입력합니다
+## 7. COMMIT 전에 초기 데이터 상태를 자동 판정합니다
 
-**실행 구간**
-
-```sql
-INSERT INTO public.students (name, email, major, grade)
-VALUES
-    ('이준호', 'junho@example.com', '데이터사이언스', 3),
-    ('박서연', 'seoyeon@example.com', '경영학', 1),
-    ('최현우', 'hyunwoo@example.com', '컴퓨터공학', 4),
-    ('정하늘', 'haneul@example.com', 'AI데이터공학', 2);
-
-INSERT INTO public.students (name, email)
-VALUES ('윤서진', 'seojin@example.com');
-```
-
-**예상**
+**화면 구성**
 
 ```text
-여러 행 INSERT: 4행 추가
-윤서진: major와 grade가 NULL
+학생 수 = 6
+이준호 grade = 3
+박서연 = 존재
+윤서진 major·grade = NULL
 ```
 
-**스크립트**
+```text
+검증 성공 → COMMIT
+검증 실패 → 정상 완료로 보지 않음
+```
 
-이번에는 여러 학생을 한 번에 입력합니다. 열 이름의 개수와 각 행의 값 개수가 맞는지 먼저 봅니다.
+**발표 스크립트**
 
-그다음 윤서진 학생은 이름과 이메일만 입력합니다. `major`와 `grade`에는 값을 넣지 않았기 때문에 `NULL`이 저장됩니다.
+공이 파일은 마지막에 단순히 `COUNT(*)`를 보여 주는 데서 끝나지 않습니다.
 
-여기서 `NULL`은 0이나 빈 문자열이 아닙니다. 아직 모르는 값 또는 입력하지 않은 상태입니다. 이후 조회에서 `NULL`을 일반 비교로 찾으면 원하는 결과가 나오지 않는다는 점을 기억합니다.
+학생 수가 정확히 여섯 명인지, 이준호 학년이 삼 학년인지, 박서연이 한 행 존재하는지, 윤서진의 전공과 학년이 `NULL`인지 검사합니다.
+
+이 조건이 모두 맞아야 초기 데이터 상태라고 판단하고 커밋합니다. 이 상태가 이후 조회 실습의 기준입니다.
 
 ---
 
-## 7. 체크포인트 A를 확인합니다
+## 8. `verify_students.sql`로 현재 상태를 반복 확인합니다
 
-**실행 구간**
-
-```sql
-SELECT COUNT(*) AS student_count
-FROM public.students;
-```
-
-**기대 상태**
+**화면 구성**
 
 ```text
-학생 수: 6명
-이준호 학년: 3
-박서연: 존재
-윤서진 major·grade: NULL
+현재 Database·User·Schema·search_path
+students 존재 여부
+Column 구조
+학생 수와 NULL 수
+이준호 grade
+박서연 존재 여부
+현재 전체 데이터
 ```
 
-**스크립트**
+**발표 스크립트**
 
-샘플 데이터를 모두 입력했으면 체크포인트 A를 확인합니다.
+상태가 헷갈릴 때는 파일을 다시 실행해서 맞추려고 하지 말고 `verify_students.sql`을 먼저 사용합니다.
 
-정상적으로 한 번씩 실행했다면 학생 수는 6명입니다. 여기서 주의할 점은 `COUNT(*)` 결과와 가장 큰 `id`가 항상 같지는 않다는 것입니다.
+이 파일은 데이터를 변경하지 않고 현재 구조와 데이터를 조회합니다. 그래서 필요할 때 반복해서 실행할 수 있습니다.
 
-앞으로 조회 문제 중 “초기 데이터 기준”이라고 되어 있으면 이 체크포인트 A를 기준으로 생각합니다.
+현재 데이터 상태를 확인한 뒤 다음 파일을 실행할지, 초기화가 필요한지를 판단합니다.
 
 ---
 
-## 8. 전체 조회와 필요한 열 조회를 비교합니다
+## 9. `03_select_students.sql`은 반복 실행할 수 있습니다
 
-**실행 구간**
-
-```sql
-SELECT *
-FROM public.students;
-
-SELECT id, name, email, major
-FROM public.students
-ORDER BY id ASC;
-```
-
-**확인**
+**화면 구성**
 
 ```text
-SELECT *는 모든 열
-열 이름 명시는 필요한 열만
-ORDER BY 없으면 순서 보장 안 됨
+SELECT
+WHERE
+AND / OR / IN
+LIKE
+NULL
+DISTINCT
+ORDER BY / LIMIT
 ```
 
-**스크립트**
+```text
+데이터 변경 없음 → 반복 실행 가능
+```
 
-`SELECT *`는 모든 열을 조회합니다. 처음 확인할 때는 편리하지만 실제 업무에서는 필요한 열만 선택하는 것이 좋습니다.
+**발표 스크립트**
 
-두 번째 SQL은 `id`, `name`, `email`, `major`만 조회합니다. 또 `ORDER BY id ASC`를 사용해 결과 순서를 명확히 합니다.
+공삼 파일은 조회문만 포함하므로 데이터를 변경하지 않습니다.
 
-DBeaver 화면에서 행이 입력 순서대로 보일 수 있지만, `ORDER BY`가 없으면 그 순서를 믿으면 안 됩니다.
+이 파일에서는 전체 열 조회와 필요한 열 조회를 비교하고, `WHERE`로 행을 고르고, `AND`, `OR`, `IN`으로 조건을 조합합니다. 문자열 검색과 `NULL`, 중복 제거, 정렬과 개수 제한까지 반복해서 확인합니다.
+
+각 SQL은 실행 전에 반환 열과 예상 행을 생각한 뒤 실제 결과와 비교합니다.
 
 ---
 
-## 9. 조건 조회를 실행하기 전에 결과를 예상합니다
+## 10. WHERE 결과를 실행 전에 예상합니다
 
-**실행 구간**
+**화면 구성**
 
 ```sql
-SELECT *
+SELECT id, name, major
 FROM public.students
 WHERE major = '컴퓨터공학'
 ORDER BY id ASC;
+```
 
-SELECT *
+```sql
+SELECT id, name, grade
 FROM public.students
 WHERE grade >= 3
 ORDER BY grade DESC, id ASC;
 ```
 
-**예상**
+예상:
 
 ```text
-컴퓨터공학: 김민지, 최현우
-grade >= 3: 최현우, 이준호
+컴퓨터공학 → 김민지, 최현우
+grade >= 3 → 최현우, 이준호
 ```
 
-**스크립트**
+**발표 스크립트**
 
-조건 조회는 실행 전에 예상 결과를 말로 먼저 적어 봅니다.
+조건 조회는 실행 전에 결과를 먼저 예상합니다.
 
-첫 번째 SQL은 전공이 컴퓨터공학인 학생을 찾습니다. 체크포인트 A 기준으로 김민지와 최현우가 나와야 합니다.
+전공이 컴퓨터공학인 학생은 김민지와 최현우입니다. 학년이 삼 이상인 학생은 최현우와 이준호이며, 학년 내림차순으로 정렬됩니다.
 
-두 번째 SQL은 학년이 3 이상인 학생입니다. 정렬은 학년 내림차순이고, 같은 학년이면 `id` 오름차순입니다. 예상 결과와 실제 결과를 비교합니다.
+예상과 실제가 다르면 SQL 문법만 보지 말고 현재 데이터 상태와 조건, 정렬 기준을 다시 확인합니다.
 
 ---
 
-## 10. `NULL`이 조건에서 빠지는 상황을 확인합니다
+## 11. AND·OR·IN은 괄호와 함께 읽습니다
 
-**실행 구간**
-
-```sql
-SELECT *
-FROM public.students
-WHERE major <> '경영학'
-ORDER BY id ASC;
-
-SELECT *
-FROM public.students
-WHERE major <> '경영학'
-   OR major IS NULL
-ORDER BY id ASC;
-```
-
-**확인 질문**
-
-```text
-윤서진은 첫 번째 결과에 포함되는가?
-두 번째 결과에는 왜 포함되는가?
-```
-
-**스크립트**
-
-이 구간은 초보자가 꼭 이해해야 하는 부분입니다.
-
-`major <> '경영학'`은 전공이 경영학이 아닌 학생을 찾는 것처럼 보입니다. 그런데 전공이 `NULL`인 윤서진은 포함되지 않습니다. `NULL`과의 비교 결과는 참이나 거짓이 아니라 `UNKNOWN`이기 때문입니다.
-
-윤서진까지 포함하려면 `OR major IS NULL`을 명시해야 합니다. 즉, `NULL`을 포함할지 제외할지는 사람이 의도를 분명히 써야 합니다.
-
----
-
-## 11. `AND`, `OR`, `IN` 구간은 괄호를 보며 읽습니다
-
-**실행 구간**
+**화면 구성**
 
 ```sql
-SELECT *
+SELECT id, name, major, grade
 FROM public.students
 WHERE major = '컴퓨터공학'
   AND (grade = 2 OR grade = 3)
 ORDER BY id ASC;
 ```
 
-**확인**
-
 ```text
 컴퓨터공학이면서
-학년이 2 또는 3인 학생
+학년이 2 또는 3
 ```
 
-**스크립트**
+**발표 스크립트**
 
-이번 구간에서는 조건을 조합합니다.
+복합 조건에서는 `AND`와 `OR`의 범위를 괄호로 명확하게 표시합니다.
 
-`AND`는 두 조건을 모두 만족해야 하고, `OR`는 둘 중 하나 이상을 만족하면 됩니다. 둘을 함께 사용할 때는 괄호를 보며 읽습니다.
-
-화면의 SQL은 컴퓨터공학 전공이면서 학년이 2 또는 3인 학생을 찾습니다. 괄호가 없으면 사람이 의도한 범위와 다르게 이해할 수 있으므로, 복합 조건에서는 괄호를 습관적으로 사용합니다.
+같은 열을 여러 값과 비교할 때는 `IN`을 사용할 수도 있습니다. 중요한 것은 짧은 SQL을 만드는 것이 아니라 사람이 요구사항과 조건 범위를 분명하게 읽을 수 있도록 작성하는 것입니다.
 
 ---
 
-## 12. 문자열 검색과 대소문자 검색을 확인합니다
+## 12. 문자열 검색과 NULL을 구분해서 확인합니다
 
-**실행 구간**
+**화면 구성**
 
 ```sql
-SELECT *
-FROM public.students
 WHERE name LIKE '김%'
-ORDER BY id ASC;
-
-SELECT *
-FROM public.students
 WHERE email ILIKE '%EXAMPLE.COM'
-ORDER BY id ASC;
+WHERE major IS NULL
+WHERE major IS NOT NULL
 ```
 
-**확인**
+추가 비교:
 
-```text
-% = 0개 이상의 문자
-_ = 정확히 한 문자
-ILIKE = PostgreSQL 대소문자 비구분 검색
+```sql
+WHERE major <> '경영학'
+WHERE major <> '경영학' OR major IS NULL
 ```
 
-**스크립트**
+**발표 스크립트**
 
-이제 문자열 일부를 기준으로 검색합니다.
+`LIKE`의 `%`와 `_`를 사용해 문자열 패턴을 확인하고, PostgreSQL의 `ILIKE`로 대소문자 비구분 검색을 경험합니다.
 
-`LIKE '김%'`은 김으로 시작하는 이름을 찾습니다. `%`는 뒤에 어떤 글자가 몇 개 오든 괜찮다는 의미입니다.
-
-`ILIKE`는 PostgreSQL에서 대소문자를 구분하지 않고 검색할 때 사용할 수 있습니다. 이메일 도메인처럼 대소문자가 섞여 있을 수 있는 값에서 동작을 확인해 봅니다.
+`NULL`은 일반 값처럼 비교하지 않습니다. 특히 `major <> '경영학'`에는 `major`가 `NULL`인 윤서진이 포함되지 않습니다. 윤서진까지 포함하려면 `OR major IS NULL`처럼 의도를 직접 표현해야 합니다.
 
 ---
 
-## 13. `IS NULL`과 `IS NOT NULL`을 실행합니다
+## 13. DISTINCT·ORDER BY·LIMIT의 역할을 분리합니다
 
-**실행 구간**
+**화면 구성**
 
 ```sql
-SELECT *
-FROM public.students
-WHERE major IS NULL
-ORDER BY id ASC;
-
-SELECT *
+SELECT DISTINCT major
 FROM public.students
 WHERE major IS NOT NULL
-ORDER BY id ASC;
+ORDER BY major ASC;
 ```
-
-**예상**
-
-```text
-major IS NULL: 윤서진
-major IS NOT NULL: 전공 값이 있는 학생들
-```
-
-**스크립트**
-
-`NULL`을 찾을 때는 `=`을 사용하지 않습니다. `IS NULL`을 사용합니다.
-
-체크포인트 A 기준으로 전공이 `NULL`인 학생은 윤서진입니다. 반대로 `IS NOT NULL`은 전공 값이 입력된 학생들을 반환합니다.
-
-이 구간은 이후 JOIN과 집계에서 계속 중요해집니다. `NULL`은 일반 값이 아니라 별도로 확인해야 하는 상태입니다.
-
----
-
-## 14. 정렬과 최신 3명을 안정적으로 조회합니다
-
-**실행 구간**
 
 ```sql
-SELECT *
+SELECT id, name, created_at
 FROM public.students
 ORDER BY created_at DESC, id DESC
 LIMIT 3;
 ```
 
-**확인**
+**발표 스크립트**
 
-```text
-created_at이 같을 수 있음
-id DESC로 동률 처리
-LIMIT만 단독으로 해석하지 않음
-```
+`DISTINCT`는 조회 결과의 중복만 제거하며 원본 데이터를 바꾸지 않습니다.
 
-**스크립트**
-
-최신 3명을 조회할 때는 `LIMIT 3`만 보면 안 됩니다. 어떤 순서에서 3명을 고를지가 먼저 정해져야 합니다.
-
-여기서는 `created_at DESC`로 등록 시각이 최신인 행부터 봅니다. 그런데 여러 행이 같은 문장이나 같은 트랜잭션에서 입력되면 `created_at`이 같을 수 있습니다.
-
-그래서 `id DESC`를 보조 정렬 기준으로 추가합니다. 정렬 기준이 안정적이어야 `LIMIT` 결과도 안정적으로 해석할 수 있습니다.
+`ORDER BY`는 결과의 순서를 정하고 `LIMIT`은 그 순서에서 몇 행을 가져올지 정합니다. 최신 세 명처럼 순서가 중요한 질문에서는 `created_at`이 같을 수 있으므로 `id` 같은 보조 정렬 기준을 함께 사용합니다.
 
 ---
 
-## 15. `UPDATE`는 수정 전후를 모두 확인합니다
+## 14. `04_update_delete_students.sql`은 초기 상태를 먼저 검사합니다
 
-**실행 구간**
+**화면 구성**
+
+```text
+Database = ai_database_book
+쓰기 가능한 연결
+학생 수 = 6
+이준호 grade = 3
+박서연 = 1행
+```
+
+변경 원칙:
+
+```text
+SELECT → 변경 RETURNING → SELECT
+```
+
+**발표 스크립트**
+
+공사 파일은 데이터를 바꾸므로 시작 상태를 더 엄격하게 확인합니다.
+
+현재 데이터베이스가 맞는지, 읽기 전용 연결이 아닌지, 학생이 정확히 여섯 명인지, 이준호가 삼 학년인지, 박서연이 존재하는지를 확인합니다.
+
+초기 데이터 상태가 아니라면 바로 수정과 삭제를 실행하지 않고 현재 상태부터 확인합니다.
+
+---
+
+## 15. UPDATE 후 수정 실습 상태를 확인합니다
+
+**화면 구성**
 
 ```sql
-SELECT *
+SELECT id, name, email, grade
 FROM public.students
 WHERE email = 'junho@example.com';
+```
 
+```sql
 UPDATE public.students
 SET grade = 4
 WHERE email = 'junho@example.com'
 RETURNING id, name, grade;
-
-SELECT *
-FROM public.students
-WHERE email = 'junho@example.com';
 ```
 
-**기대**
+수정 실습 후 상태:
 
 ```text
-영향받은 행 수: 1
-이준호 grade: 4
+학생 수 = 6
+이준호 grade = 4
+박서연 = 존재
 ```
 
-**스크립트**
+**발표 스크립트**
 
-이번에는 데이터를 수정합니다. 이 구간은 반드시 세 문장을 나누어 확인합니다.
+먼저 같은 조건의 `SELECT`로 대상이 이준호 한 명인지 확인합니다.
 
-먼저 `SELECT`로 수정 대상이 이준호 한 명인지 확인합니다. 그다음 `UPDATE ... RETURNING`으로 수정된 행과 변경값을 확인합니다. 마지막으로 다시 조회해 실제 데이터가 바뀌었는지 확인합니다.
-
-여기까지가 체크포인트 B입니다. 학생 수는 그대로 6명이고, 이준호의 학년만 4로 바뀐 상태입니다.
+그다음 `UPDATE ... RETURNING`으로 실제 수정된 행과 값을 확인하고 다시 조회합니다. 학생 수는 그대로 여섯 명이고 이준호 학년만 사 학년으로 바뀐 것이 수정 실습 후 상태입니다.
 
 ---
 
-## 16. `DELETE`도 삭제 전후를 모두 확인합니다
+## 16. DELETE 후 삭제 실습 상태를 확인합니다
 
-**실행 구간**
+**화면 구성**
 
 ```sql
-SELECT *
+SELECT id, name, email, major
 FROM public.students
 WHERE email = 'seoyeon@example.com';
+```
 
+```sql
 DELETE FROM public.students
 WHERE email = 'seoyeon@example.com'
 RETURNING id, name, email;
-
-SELECT *
-FROM public.students
-WHERE email = 'seoyeon@example.com';
 ```
 
-**기대**
+삭제 실습 후 상태:
 
 ```text
-삭제 대상: 박서연 1명
-삭제 후 같은 조건 조회: 0행
-남은 학생 수: 5명
+학생 수 = 5
+이준호 grade = 4
+박서연 = 0행
 ```
 
-**스크립트**
+**발표 스크립트**
 
-이번에는 박서연 학생을 삭제합니다.
+삭제도 먼저 `SELECT`로 대상이 박서연 한 명인지 확인합니다.
 
-삭제 전 `SELECT`로 대상이 한 명인지 확인합니다. `DELETE ... RETURNING`으로 실제 삭제된 행이 박서연인지 확인합니다. 삭제 후 같은 조건으로 다시 조회했을 때 0행이 나와야 합니다.
-
-이후 `COUNT(*)`로 남은 학생 수가 5명인지 확인합니다. 여기까지가 체크포인트 C입니다.
+`DELETE ... RETURNING`으로 실제 삭제된 행을 확인한 뒤 같은 조건의 조회가 0행인지 확인합니다. 파일 마지막의 자동 판정에서도 학생 수 다섯 명, 이준호 사 학년, 박서연 0행을 확인합니다.
 
 ---
 
@@ -502,47 +474,53 @@ WHERE email = 'seoyeon@example.com';
 **화면 구성**
 
 ```sql
--- 실행하지 않는 예
-UPDATE public.students
-SET grade = 1;
+-- 실행하지 않습니다.
+-- UPDATE public.students
+-- SET grade = 1;
 
-DELETE FROM public.students;
-
-SELECT *
-FROM public.students
-WHERE major = NULL;
+-- 실행하지 않습니다.
+-- DELETE FROM public.students;
 ```
 
-**스크립트**
+```text
+WHERE 없음 → 전체 Table 영향 가능
+```
 
-파일 마지막에는 실행하지 않는 위험 SQL 예시가 있습니다.
+**발표 스크립트**
 
-`WHERE` 없는 `UPDATE`는 모든 학생의 학년을 바꿉니다. `WHERE` 없는 `DELETE`는 모든 학생 행을 삭제합니다. `major = NULL`은 문법 오류가 아닐 수 있지만 원하는 `NULL` 행을 찾지 못합니다.
+화면의 위험 SQL은 주석 상태이며 실행하는 것이 목적이 아닙니다.
 
-이 구간은 실행하는 것이 목적이 아닙니다. 어떤 문제가 생길지 설명할 수 있는지가 목적입니다.
+`WHERE` 없는 `UPDATE`는 모든 학생의 학년을 바꿀 수 있고, `WHERE` 없는 `DELETE`는 모든 학생 행을 삭제할 수 있습니다. 문법 오류가 아니기 때문에 더 위험합니다.
+
+변경 SQL을 실행하기 전에 같은 조건의 `SELECT`로 영향 범위를 확인하는 습관을 다시 강조합니다.
 
 ---
 
-## 18. AI SQL 검토 결과를 기록합니다
+## 18. AI가 만든 SQL은 현재 데이터 상태부터 확인합니다
 
 **화면 구성**
 
-```markdown
-## 기준 데이터 상태
-## AI가 만든 SQL
-## 예상 결과
-## 검토한 문제
-## 수정한 SQL
-## 실제 실행 결과
+```sql
+DELETE FROM public.students
+WHERE major = '컴퓨터공학';
 ```
 
-**스크립트**
+검토 질문:
 
-마지막으로 AI가 만든 SQL을 검토하는 연습을 합니다.
+```text
+현재 데이터 상태는 무엇인가?
+삭제 대상은 몇 Row인가?
+정말 물리 삭제가 요구사항인가?
+먼저 같은 조건의 SELECT를 했는가?
+```
 
-먼저 현재 데이터 상태가 체크포인트 A인지 B인지 C인지 적습니다. 그다음 AI가 만든 SQL을 그대로 붙여 넣기 전에, 사용하는 테이블과 열, 조건, `NULL` 처리, 정렬, 변경 위험을 확인합니다.
+**발표 스크립트**
 
-실행 가능한 SQL이 항상 실행해도 되는 SQL은 아닙니다. 실행 전 예상과 실행 후 결과를 기록해야 AI SQL을 안전하게 활용할 수 있습니다.
+AI가 만든 SQL도 바로 실행하지 않습니다.
+
+먼저 현재 데이터 상태가 초기 상태인지, 수정 후인지, 삭제 후인지 확인합니다. 그다음 삭제 대상이 몇 행인지 같은 조건의 `SELECT`로 확인합니다.
+
+실행 가능한 SQL과 실행해도 되는 SQL은 다릅니다. 실제 요구사항과 영향 범위를 확인한 뒤 최종 실행 여부를 사람이 결정합니다.
 
 ---
 
@@ -551,19 +529,18 @@ WHERE major = NULL;
 **화면 구성**
 
 ```text
-public.students 생성 확인
-체크포인트 A: 6명
-체크포인트 B: 이준호 grade 4
-체크포인트 C: 박서연 삭제, 5명
-NULL 조회 가능
-WHERE 없는 변경 SQL 위험 설명 가능
-AI SQL 검토 기록 작성
+01→02→03→04 파일 역할 설명
+초기 데이터 상태: 학생 6명·이준호 grade 3
+NULL·조건·정렬·LIMIT 조회 가능
+수정 실습 후 상태: 학생 6명·이준호 grade 4
+삭제 실습 후 상태: 학생 5명·박서연 없음
+위험 SQL·AI SQL 영향 범위 설명
 ```
 
-**스크립트**
+**발표 스크립트**
 
 이번 실습이 끝났다는 것은 파일을 끝까지 실행했다는 뜻이 아닙니다.
 
-`public.students` 테이블이 만들어졌고, 샘플 데이터 6명을 입력했으며, 조회·조건·정렬·NULL을 확인했고, 수정과 삭제를 안전 절차에 따라 실행했으며, 각 체크포인트의 데이터 상태를 설명할 수 있어야 합니다.
+번호 파일의 역할과 시작 상태를 설명할 수 있어야 하고, 초기 데이터 상태에서 조회 결과를 예상할 수 있어야 합니다. 수정 후와 삭제 후 상태의 차이도 설명할 수 있어야 합니다.
 
-또 위험 SQL을 실행하지 않고도 왜 위험한지 말할 수 있어야 합니다. 이것이 Chapter 04의 실습 완료 기준입니다.
+또 위험 SQL을 실행하지 않고도 왜 위험한지, AI가 만든 SQL을 실행하기 전에 무엇을 확인해야 하는지 설명할 수 있어야 Chapter 04의 실습 목표를 달성한 것입니다.
