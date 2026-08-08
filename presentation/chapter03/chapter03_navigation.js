@@ -53,18 +53,21 @@
 
   const textOf = (element) => (element?.innerText || element?.textContent || '').replace(/\s+/g, ' ').trim();
 
+  const splitSentences = (value) => {
+    const raw = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return [];
+    return (raw.match(/[^.!?。]+(?:[.!?。]+|$)/g) || [raw]).map((part) => part.trim()).filter(Boolean);
+  };
+
   const splitParagraphs = (value) => {
     const raw = String(value || '').trim();
     if (!raw) return ['핵심 내용을 설명합니다.'];
     const paragraphs = raw.split(/\n\s*\n/).map((part) => part.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const output = [];
     paragraphs.forEach((paragraph) => {
-      const sentences = (paragraph.match(/[^.!?。]+[.!?。]?/g) || []).map((part) => part.trim()).filter(Boolean);
-      if (paragraph.length > 170 && sentences.length >= 3) {
-        sentences.forEach((sentence) => output.push(sentence));
-      } else {
-        output.push(paragraph);
-      }
+      const sentences = splitSentences(paragraph);
+      if (paragraph.length > 170 && sentences.length >= 3) sentences.forEach((sentence) => output.push(sentence));
+      else output.push(paragraph);
     });
     return output.length ? output : [raw.replace(/\s+/g, ' ').trim()];
   };
@@ -104,12 +107,13 @@
     TARGET_SPECS.forEach(([selector, prefix]) => {
       [...root.querySelectorAll(selector)].forEach((element) => {
         if (seen.has(element)) return;
+        const text = textOf(element);
+        if (!text && (prefix === 'code' || prefix === 'prompt')) return;
         seen.add(element);
         const index = targets.filter((target) => target.prefix === prefix).length;
         const key = `${prefix}-${index}`;
         element.dataset.focusKey = key;
         element.classList.add('focus-target');
-        const text = textOf(element);
         targets.push({ key, element, prefix, index, text, tokens: tokensOf(text) });
       });
     });
@@ -142,7 +146,7 @@
     const ordinals = [
       ['첫째',0],['첫 번째',0],['첫번째',0],['둘째',1],['두 번째',1],['두번째',1],
       ['셋째',2],['세 번째',2],['세번째',2],['넷째',3],['네 번째',3],['네번째',3],
-      ['다섯째',4],['다섯 번째',4],['다섯번째',4]
+      ['다섯째',4],['다섯 번째',4],['다섯번째',4],['여섯째',5],['여섯 번째',5],['여섯번째',5]
     ];
     const found = ordinals.find(([word]) => paragraph.includes(word));
     if (!found) return [];
@@ -194,6 +198,77 @@
 
   const orderedTargets = (targets, prefixes) => prefixes.flatMap((prefix) => targets.filter((target) => target.prefix === prefix).map((target) => target.key));
 
+  const keysFromSpec = (spec, targets) => {
+    const [prefix, rawIndex = '*'] = String(spec || '').split(':');
+    if (!prefix) return [];
+    if (rawIndex === '*' || rawIndex === '') return targets.filter((target) => target.prefix === prefix).map((target) => target.key);
+    const index = Number(rawIndex);
+    if (!Number.isFinite(index)) return [];
+    const match = targets.find((target) => target.prefix === prefix && target.index === index);
+    return match ? [match.key] : [];
+  };
+
+  const planGroups = (plan, targets) => {
+    if (!plan) return [];
+    if (Array.isArray(plan.sequence)) {
+      return plan.sequence.flatMap((prefix) => targets.filter((target) => target.prefix === prefix).map((target) => [target.key]));
+    }
+    if (Array.isArray(plan.groups)) {
+      return plan.groups.map((group) => [...new Set((group || []).flatMap((spec) => keysFromSpec(spec, targets)))]).filter((group) => group.length);
+    }
+    return [];
+  };
+
+  const balancedChunks = (items, count) => {
+    if (!count) return [];
+    return Array.from({ length: count }, (_, index) => {
+      const start = Math.floor(index * items.length / count);
+      const end = Math.floor((index + 1) * items.length / count);
+      return items.slice(start, end);
+    });
+  };
+
+  const compressSentences = (sentences) => {
+    const cleaned = sentences.map((sentence) => sentence.trim()).filter(Boolean);
+    if (cleaned.length <= 4) return cleaned;
+    const merged = cleaned.slice(3).map((sentence) => sentence.replace(/[.!?。]+$/g, '').trim()).filter(Boolean).join(' 그리고 ');
+    return cleaned.slice(0, 3).concat(merged ? `${merged}.` : []);
+  };
+
+  const labelForKeys = (focusKeys, targets) => {
+    const labels = focusKeys.map((key) => targets.find((target) => target.key === key)?.text || '').filter(Boolean);
+    const joined = labels.join(' · ').replace(/\s+/g, ' ').trim();
+    return joined.length > 72 ? `${joined.slice(0, 69)}...` : joined;
+  };
+
+  const ensureNarration = (sentences, focusKeys, targets) => {
+    let output = compressSentences(sentences);
+    const label = labelForKeys(focusKeys, targets);
+    if (!output.length) {
+      output = [
+        label ? `${label} 항목을 중심으로 현재 단계의 의미를 확인합니다.` : '현재 단계의 핵심 의미를 화면과 함께 확인합니다.',
+        '이 단계가 앞뒤 과정에서 어떤 역할을 하는지 연결해서 이해하면 다음 작업을 더 정확하게 진행할 수 있습니다.'
+      ];
+    } else if (output.length === 1) {
+      output.push(label
+        ? `${label} 항목이 다른 설정이나 결과와 어떻게 연결되는지도 함께 확인합니다.`
+        : '이 내용을 앞뒤 단계와 연결해서 이해하면 실행 결과를 더 정확하게 판단할 수 있습니다.');
+    }
+    return output.join(' ');
+  };
+
+  const buildPlannedSteps = (slide, targets) => {
+    const plan = slide?.__chapter03SemanticPlan;
+    const groups = planGroups(plan, targets);
+    if (!groups.length) return null;
+    const sentences = splitSentences(slide.s);
+    const chunks = balancedChunks(sentences, groups.length);
+    return groups.map((focusKeys, index) => ({
+      text: ensureNarration(chunks[index] || [], focusKeys, targets),
+      focusKeys
+    }));
+  };
+
   const buildGuidedSteps = (slide, paragraphs, targets) => {
     const key = String(slide.k || '');
     const sequentialKeys = {
@@ -237,9 +312,10 @@
     root.innerHTML = slide.h || '';
     const targets = collectTargets(root);
     const paragraphs = splitParagraphs(slide.s);
-    const guided = buildGuidedSteps(slide, paragraphs, targets);
-    const steps = guided || buildAutomaticSteps(paragraphs, targets);
-    const finalSteps = steps.length ? steps : [{ text: paragraphs.join('\n\n'), focusKeys: [] }];
+    const planned = buildPlannedSteps(slide, targets);
+    const guided = planned ? null : buildGuidedSteps(slide, paragraphs, targets);
+    const steps = planned || guided || buildAutomaticSteps(paragraphs, targets);
+    const finalSteps = steps.length ? steps : [{ text: ensureNarration(splitSentences(slide.s), [], targets), focusKeys: [] }];
 
     finalSteps.forEach((step, index) => {
       step.focusKeys.forEach((focusKey) => {
@@ -258,6 +334,7 @@
   };
 
   const prepareSlides = (slides, block = 'theory') => {
+    window.CH3SemanticPlan?.apply?.(slides, block);
     (slides || []).forEach(prepareSlide);
     window.CH3_NAV_BLOCK = block;
     return slides || [];
@@ -275,6 +352,6 @@ tbody tr.focus-active td{background:#e8f0ff}tbody tr.focus-muted{opacity:.25;tra
 `;
   document.head.appendChild(style);
 
-  window.CH3Navigation = Object.freeze({ prepareSlides, buildSteps, splitParagraphs });
+  window.CH3Navigation = Object.freeze({ prepareSlides, buildSteps, splitParagraphs, splitSentences });
   if (Array.isArray(window.CH3_SLIDES)) prepareSlides(window.CH3_SLIDES, document.body?.dataset?.chapter03Block || 'theory');
 })();
