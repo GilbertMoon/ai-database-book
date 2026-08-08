@@ -1,0 +1,63 @@
+name: Align Chapter 08 Content Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chapter08-content-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align validation explanations
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          practice = Path('presentation/chapter08/chapter08_practice_lecture_plan.md')
+          text = practice.read_text(encoding='utf-8')
+          text = text.replace('| 전체 기록 금액 | 590000 |', '| 전체 `recorded_amount` | 590000 |')
+          text = text.replace(
+              "03_join_aggregation_validation.sql\n\n전체 5 / 590000",
+              "03_join_aggregation_validation.sql\n→ Chapter 08 join and aggregation validation passed\n\n전체 5 / 590000"
+          )
+          text = text.replace(
+              "마지막으로 검산 파일을 실행합니다. 이 파일은 상세 기준값과 집계 기준값이 맞는지 확인합니다.",
+              "마지막으로 검산 파일을 실행합니다. 이 파일은 상세 기준값과 집계 기준값을 자동으로 비교하고, 하나라도 다르면 예외로 중단합니다. 모두 맞으면 `Chapter 08 join and aggregation validation passed` 메시지가 표시됩니다."
+          )
+          practice.write_text(text, encoding='utf-8')
+
+          chapter = Path('book/chapter08/chapter08.md')
+          text = chapter.read_text(encoding='utf-8')
+          anchor = "`00_check_course_project.sql`은 현재 데이터베이스, 프로젝트 테이블, 행 수와 기준 금액이 예상과 다르면 예외를 발생시켜 실행을 중단합니다."
+          addition = anchor + "\n\n`03_join_aggregation_validation.sql`은 상세·그룹·JOIN 결과의 핵심 검산값을 자동으로 비교합니다. 하나라도 다르면 예외로 중단하고, 모두 맞으면 `Chapter 08 join and aggregation validation passed` 메시지를 출력합니다."
+          if anchor in text and 'Chapter 08 join and aggregation validation passed' not in text:
+              text = text.replace(anchor, addition, 1)
+          chapter.write_text(text, encoding='utf-8')
+
+          outline = Path('book/chapter08/chapter08_outline.md')
+          text = outline.read_text(encoding='utf-8')
+          text = text.replace(
+              '`03_join_aggregation_validation.sql` | 상세·그룹 결과 검산',
+              '`03_join_aggregation_validation.sql` | 상세·그룹·JOIN 결과 자동 완료 검증'
+          )
+          outline.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/chapter08-content-once.yml
+          git add book/chapter08 presentation/chapter08
+          git commit -m "Align Chapter 08 automatic validation explanations"
+          git push
