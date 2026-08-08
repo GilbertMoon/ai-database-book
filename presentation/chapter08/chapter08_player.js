@@ -1,7 +1,10 @@
 (() => {
+  'use strict';
+
   const CHANNEL = 'chapter08-presentation-sync';
   const app = document.getElementById('app');
-  if (!app) return;
+  const navigation = window.CH8Navigation;
+  if (!app || !navigation) return;
 
   const block = document.body?.dataset?.chapter08Block === 'practice' ? 'practice' : 'theory';
   const blockLabel = block === 'practice' ? '실습' : '이론';
@@ -25,80 +28,14 @@
     };
   }
 
-  function scriptSegments(slide) {
-    const paragraphs = String(slide?.s || '')
-      .trim()
-      .split(/\n\s*\n/)
-      .map((value) => value.replace(/\s+/g, ' ').trim())
-      .filter(Boolean);
-    if (paragraphs.length > 1) return paragraphs;
-
-    const sentences = (paragraphs[0]?.match(/[^.!?。]+[.!?。]?/g) || [])
-      .map((value) => value.trim())
-      .filter(Boolean);
-    if (sentences.length <= 1) return paragraphs.length ? paragraphs : ['핵심 내용을 설명합니다.'];
-
-    const size = Math.max(1, Math.ceil(sentences.length / 4));
-    const result = [];
-    for (let index = 0; index < sentences.length; index += size) {
-      result.push(sentences.slice(index, index + size).join(' '));
-    }
-    return result;
-  }
-
-  const maxStep = (index = slideIndex) => Number(slides[index]?.steps || scriptSegments(slides[index]).length || 1);
-
-  function focusTargets(root) {
-    const explicit = [...root.querySelectorAll('[data-focus-step]')];
-    if (explicit.length) return explicit;
-
-    const selectors = [
-      '.card', '.flow-step', '.road-step', '.path-node', '.relation-node', '.code-line',
-      '.bullet-list li', '.table-wrap tbody tr', '.quote', '.prompt-box', 'pre',
-      '.expect', '.note', '.callout', '.step-box', '.rule', '.decision', '.question',
-      '.test-case', '.success', '.failure', '.error', '.warning', '.result', '.scenario',
-      '.example', '.screen-text', '.join-path', '.aggregate', '.metric', '.scope',
-      '.pill', '.chip', 'article'
-    ];
-
-    let targets = [...new Set(selectors.flatMap((selector) => [...root.querySelectorAll(selector)]))];
-    targets = targets.filter((element) => !targets.some((other) => other !== element && element.contains(other)));
-    if (!targets.length) targets = [...root.children].filter((element) => !['H1', 'H2'].includes(element.tagName));
-    return targets;
-  }
-
-  function prepareFocus() {
-    const root = app.querySelector('.body');
-    if (!root) return;
-    const targets = focusTargets(root);
-    const total = Math.max(1, maxStep());
-
-    targets.forEach((element, index) => {
-      element.classList.add('focus-target');
-      if (!element.dataset.focusStep) {
-        const from = Math.floor(index * total / Math.max(1, targets.length)) + 1;
-        const to = Math.max(from, Math.floor((index + 1) * total / Math.max(1, targets.length)));
-        element.dataset.focusFrom = String(Math.min(total, from));
-        element.dataset.focusTo = String(Math.min(total, to));
-      }
-    });
-  }
+  const stepsFor = (index = slideIndex) => navigation.buildSteps(slides[index]);
+  const maxStep = (index = slideIndex) => Math.max(1, stepsFor(index).length);
 
   function applyFocus() {
     const root = app.querySelector('.body');
-    if (!root) return;
-
-    root.querySelectorAll('[data-focus-step],[data-focus-from]').forEach((element) => {
-      const exact = Number(element.dataset.focusStep || 0);
-      const from = Number(element.dataset.focusFrom || exact);
-      const to = Number(element.dataset.focusTo || exact);
-      const active = stepIndex > 0 && stepIndex >= from && stepIndex <= to;
-      element.classList.toggle('focus-active', active);
-      element.classList.toggle('focus-muted', stepIndex > 0 && !active);
-    });
-
+    navigation.applyFocus(root, stepIndex);
     const state = document.getElementById('state');
-    if (state) state.textContent = stepIndex === 0 ? '전체 보기' : `강조 ${stepIndex} / ${maxStep()}`;
+    if (state) state.textContent = stepIndex === 0 ? '전체 보기' : `스크립트 단계 ${stepIndex} / ${maxStep()}`;
   }
 
   function updateButtons() {
@@ -110,16 +47,11 @@
     const slide = slides[slideIndex];
     if (!slide) return;
 
-    app.innerHTML = `<section class="slide"><div class="head"><span class="k">${slide.k || ''}</span><div class="head-actions"><span class="l">${slide.l || blockLabel}</span><span class="counter">${String(slideIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><button class="script-icon" id="scriptButton" type="button" title="발표 스크립트 열기" aria-label="현재 슬라이드 발표 스크립트 창 열기">${icon}</button></div></div><div class="body">${slide.h || ''}</div></section><a class="home" href="index.html">목차</a><div class="num">Chapter 08 · ${blockLabel}</div><div class="step-state" id="state" aria-live="polite"></div><nav class="ctrl"><button class="btn" id="previousButton" aria-label="이전 강조 또는 슬라이드">←</button><button class="btn" id="nextButton" aria-label="다음 강조 또는 슬라이드">→</button></nav><div class="track"><div class="bar" style="width:${((slideIndex + 1) / slides.length) * 100}%"></div></div>`;
+    app.innerHTML = `<section class="slide"><div class="head"><span class="k">${slide.k || ''}</span><div class="head-actions"><span class="l">${slide.l || blockLabel}</span><span class="counter">${String(slideIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><button class="script-icon" id="scriptButton" type="button" title="발표 스크립트 열기" aria-label="현재 슬라이드 발표 스크립트 창 열기">${icon}</button></div></div><div class="body">${slide.h || ''}</div></section><a class="home" href="index.html">목차</a><div class="num">Chapter 08 · ${blockLabel}</div><div class="step-state" id="state" aria-live="polite"></div><nav class="ctrl"><button class="btn" id="previousButton" aria-label="이전 단계 또는 슬라이드">←</button><button class="btn" id="nextButton" aria-label="다음 단계 또는 슬라이드">→</button></nav><div class="track"><div class="bar" style="width:${((slideIndex + 1) / slides.length) * 100}%"></div></div>`;
 
     document.getElementById('previousButton').onclick = previous;
     document.getElementById('nextButton').onclick = next;
-    document.getElementById('scriptButton').onclick = (event) => {
-      event.stopPropagation();
-      openScript();
-    };
-
-    prepareFocus();
+    document.getElementById('scriptButton').onclick = (event) => { event.stopPropagation(); openScript(); };
     applyFocus();
     updateButtons();
     history.replaceState(null, '', `#${block}/${slideIndex + 1}/${stepIndex}`);
@@ -130,7 +62,7 @@
     if (!scriptWindow || scriptWindow.closed) return;
     try {
       scriptWindow.postMessage({ channel: CHANNEL, type: 'presentation-state', block, slideIndex, stepIndex }, '*');
-    } catch (error) {
+    } catch (_) {
       try { scriptWindow.setScriptState?.(block, slideIndex, stepIndex); } catch (ignore) {}
     }
   }
@@ -159,7 +91,6 @@
       sendStateToScript();
       return;
     }
-
     scriptWindow = window.open(url, 'chapter08Script', 'width=900,height=960,resizable=yes,scrollbars=yes');
     if (scriptWindow) {
       scriptWindow.focus();
@@ -170,9 +101,8 @@
 
   function boot() {
     if (booted) return;
-    slides = window.CH8_SLIDES || [];
+    slides = navigation.prepareSlides(window.CH8_SLIDES || []);
     if (!slides.length) return;
-
     booted = true;
     const initial = parseHash();
     slideIndex = Math.max(0, Math.min(slides.length - 1, initial.slideIndex));
@@ -200,18 +130,12 @@
 
   addEventListener('keydown', (event) => {
     if (!booted) return;
-    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) {
-      event.preventDefault();
-      next();
-    } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) {
-      event.preventDefault();
-      previous();
-    } else if (event.key === 'Home') showState(0, 0);
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); next(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); previous(); }
+    else if (event.key === 'Home') showState(0, 0);
     else if (event.key === 'End') showState(slides.length - 1, maxStep(slides.length - 1));
     else if (event.key.toLowerCase() === 's') openScript();
-    else if (event.key.toLowerCase() === 'f') {
-      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
-    }
+    else if (event.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
 
   app.addEventListener('click', (event) => {
@@ -223,9 +147,7 @@
   addEventListener('hashchange', () => {
     if (!booted) return;
     const state = parseHash();
-    if (state.slideIndex !== slideIndex || state.stepIndex !== stepIndex) {
-      showState(state.slideIndex, state.stepIndex);
-    }
+    if (state.slideIndex !== slideIndex || state.stepIndex !== stepIndex) showState(state.slideIndex, state.stepIndex);
   });
 
   addEventListener('chapter08-slides-ready', boot, { once: true });
