@@ -2,7 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter05-presentation-sync';
-  const ASSET_VERSION = '20260808a';
+  const ASSET_VERSION = '20260808b';
   const card = document.getElementById('card');
   const params = new URLSearchParams(location.search);
   const navigation = window.CH5Navigation;
@@ -13,8 +13,8 @@
   let presentationWindow = window.opener && !window.opener.closed ? window.opener : null;
 
   const sources = {
-    theory: ['chapter05_theory_slides_raw.js', 'chapter05_intro_patch.js', '../common/screen_position_patch.js'],
-    practice: ['chapter05_practice_slides_raw.js', '../common/screen_position_patch.js']
+    theory: ['chapter05_theory_slides_raw.js', 'chapter05_intro_patch.js', 'chapter05_content_patch.js', '../common/screen_position_patch.js'],
+    practice: ['chapter05_practice_slides_raw.js', 'chapter05_content_patch.js', '../common/screen_position_patch.js']
   };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -90,7 +90,7 @@
     document.getElementById('nextPage').disabled = slideIndex === slides.length - 1;
     document.getElementById('theoryBlock').classList.toggle('active', block === 'theory');
     document.getElementById('practiceBlock').classList.toggle('active', block === 'practice');
-    card.innerHTML = `<h1>${escapeHtml(slide.t || slide.l || '핵심 내용')}</h1><p class="meta">${escapeHtml(slide.k || 'CHAPTER 05')} · ${block === 'practice' ? '실습 강의' : '이론 강의'} · 파란 버튼은 장표 창의 다음 단계와 동일하게 동작합니다.</p>${parts.map((step, index) => `<div class="script-text"><p>${escapeHtml(ttsText(step.text))}</p></div><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}<div class="hint">스크립트 단계와 발표 장표 강조는 같은 내비게이션 데이터를 사용합니다. 표는 행 단위, 목록은 항목 단위, 코드와 요구사항은 논리 단위로 이동합니다.</div>`;
+    card.innerHTML = `<h1>${escapeHtml(slide.t || slide.l || '핵심 내용')}</h1><p class="meta">${escapeHtml(slide.l || slide.k || 'CHAPTER 05')} · ${block === 'practice' ? '실습 강의' : '이론 강의'} · 파란 버튼은 장표 창의 다음 단계와 동일하게 동작합니다.</p>${parts.map((step, index) => `<div class="script-text"><p>${escapeHtml(ttsText(step.text))}</p></div><div class="cue"><span class="line"></span><button class="cue-button" type="button" data-step="${index + 1}">${index + 1}단계 진행</button><span class="line"></span></div>`).join('')}<div class="hint">스크립트 단계와 발표 장표 강조는 같은 내비게이션 데이터를 사용합니다. 표는 행 단위, 목록은 항목 단위, 코드와 요구사항은 논리 단위로 이동합니다.</div>`;
     card.querySelectorAll('.cue-button').forEach((button) => {
       const target = Number(button.dataset.step);
       button.classList.toggle('done', target < stepIndex);
