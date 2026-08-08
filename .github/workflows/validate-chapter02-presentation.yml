@@ -19,9 +19,37 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Validate Chapter 02 Chapter 01 style navigation
+      - name: Validate Chapter 02 Chapter 01 style navigation and narration
         run: |
           node presentation/chapter02/validate_chapter02.mjs
+          node --check presentation/chapter02/chapter02_script_enrichment.js
+          node --check presentation/chapter02/chapter02_navigation.js
+          node --check presentation/chapter02/chapter02_player.js
+          node --check presentation/chapter02/chapter02_script.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const root = 'presentation/chapter02';
+          const context = { window: {} };
+          vm.createContext(context);
+          for (const file of ['chapter02_data.js', 'chapter02_script_enrichment.js']) {
+            vm.runInContext(fs.readFileSync(`${root}/${file}`, 'utf8'), context, { filename: file });
+          }
+          const slides = context.window.CHAPTER_DATA?.slides || [];
+          const enrichment = context.window.CH2ScriptEnrichment;
+          if (slides.length !== 45) throw new Error(`Expected 45 Chapter 02 slides, got ${slides.length}`);
+          if (!enrichment) throw new Error('CH2ScriptEnrichment is missing');
+          const report = enrichment.audit(slides);
+          if (report.slides !== 45) throw new Error(`Narration audit covered ${report.slides}/45 slides`);
+          if (report.shortSteps.length) throw new Error(`Chapter 02 short step narration remains: ${report.shortSteps.join(', ')}`);
+          if (report.longSteps.length) throw new Error(`Chapter 02 step narration exceeds 4 sentences: ${report.longSteps.join(', ')}`);
+          if (report.averageSentences < 2.5) throw new Error(`Average step narration is too short: ${report.averageSentences.toFixed(2)} sentences`);
+          for (const [index, slide] of slides.entries()) {
+            const overviewCount = enrichment.splitSentences(enrichment.overviewText(slide)).length;
+            if (overviewCount < 1 || overviewCount > 2) throw new Error(`Slide ${index + 1} overview must be 1-2 sentences, got ${overviewCount}`);
+          }
+          console.log(`Chapter 02 enriched narration OK: ${report.slides} slides, ${report.steps} steps, average ${report.averageSentences.toFixed(2)} sentences/step`);
+          NODE
           python - <<'PY'
           from pathlib import Path
 
@@ -31,25 +59,30 @@ jobs:
           css = (chapter / 'chapter02.css').read_text(encoding='utf-8')
           player = (chapter / 'chapter02_player.js').read_text(encoding='utf-8')
           script = (chapter / 'chapter02_script.js').read_text(encoding='utf-8')
+          navigation = (chapter / 'chapter02_navigation.js').read_text(encoding='utf-8')
 
           if 'cursor-halo' in html or 'id="cursor"' in html:
               raise SystemExit('Chapter 02 presentation still contains legacy cursor elements')
           if 'pointermove' in player or 'native-cursor' in player:
               raise SystemExit('Chapter 02 player still contains custom cursor tracking')
-          if 'chapter02_navigation.js' not in html or 'chapter02_player.js' not in html:
-              raise SystemExit('Chapter 02 presentation does not load semantic navigation/player')
+          required_assets = ['chapter02_script_enrichment.js', 'chapter02_navigation.js', 'chapter02_player.js']
+          if any(asset not in html for asset in required_assets):
+              raise SystemExit('Chapter 02 presentation does not load enriched semantic navigation/player in the required order')
+          script_assets = ['chapter02_script_enrichment.js', 'chapter02_navigation.js', '../common/tts_pronunciation.js', 'chapter02_script.js']
+          if any(asset not in script_html for asset in script_assets):
+              raise SystemExit('Chapter 02 script does not load enriched semantic narration/runtime')
           if '../common/presentation_runtime.js' in html:
               raise SystemExit('Chapter 02 presentation still loads the legacy common runtime')
           if '../common/script_runtime.js' in script_html:
               raise SystemExit('Chapter 02 script still loads the legacy common script runtime')
-          if 'chapter02_navigation.js' not in script_html or 'chapter02_script.js' not in script_html:
-              raise SystemExit('Chapter 02 script does not load shared navigation/runtime')
           if "stepIndex === 0 ? '전체 보기'" not in player or "stepIndex === 0 ? '전체 보기'" not in script:
               raise SystemExit('Chapter 02 whole-view step does not match Chapter 01 behavior')
           if "send('request-next')" not in script or "send('request-prev')" not in script:
               raise SystemExit('Chapter 02 script keyboard/buttons do not delegate semantic steps to presentation')
           if 'target !== stepIndex + 1' not in script:
               raise SystemExit('Chapter 02 script cue buttons are not sequential like Chapter 01')
+          if 'enrichment.stepText' not in navigation or 'enrichment.overviewText' not in script:
+              raise SystemExit('Chapter 02 enriched narration is not connected to navigation/script UI')
           required_css = [
               'cursor: auto !important',
               'right: 20px !important',
@@ -63,11 +96,12 @@ jobs:
           missing = [item for item in required_css if item not in css]
           if missing:
               raise SystemExit(f'Chapter 02 presentation styling is incomplete: {missing}')
-          if 'v=20260808c' not in html or 'v=20260808c' not in script_html:
-              raise SystemExit('Chapter 02 cache version was not bumped to 20260808c')
+          if 'v=20260808d' not in html or 'v=20260808d' not in script_html:
+              raise SystemExit('Chapter 02 cache version was not bumped to 20260808d')
 
           print('Chapter 02 whole-view and sequential semantic steps OK')
           print('Chapter 02 presentation-script bidirectional synchronization OK')
+          print('Chapter 02 expanded 2-4 sentence step narration connected OK')
           print('Chapter 02 34x34 top-right document script icon OK')
           print('Chapter 02 cache version OK')
           PY
