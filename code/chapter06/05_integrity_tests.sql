@@ -61,10 +61,11 @@ SELECT COUNT(*) AS open_loan_count_before FROM public.loans_nf WHERE returned_at
 -- ============================================================
 -- 경계 테스트 A: 같은 날 대여·반납 허용
 -- C-04·C-05 경계값
+-- ISBN은 books_nf.isbn VARCHAR(20) 범위 안의 테스트 값을 사용합니다.
 -- 아래 네 문장을 순서대로 실행한 뒤 임시 행을 삭제합니다.
 -- ============================================================
 -- INSERT INTO public.books_nf (id, title, author, published_year, isbn)
--- VALUES (1800, '경계값 테스트 도서', '테스트 저자', 2026, 'ISBN-BOUNDARY-LOAN-001');
+-- VALUES (1800, '경계값 테스트 도서', '테스트 저자', 2026, 'ISBN-BND-LOAN-001');
 --
 -- INSERT INTO public.loans_nf (
 --     id, member_id, book_id, borrowed_at, due_at, returned_at
