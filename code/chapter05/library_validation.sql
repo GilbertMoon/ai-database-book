@@ -15,6 +15,7 @@ DECLARE
     v_open_loan_count bigint;
     v_orphan_member_count bigint;
     v_orphan_book_count bigint;
+    v_member_101_count bigint;
     v_book_201_count bigint;
     v_book_201_invalid_order bigint;
 BEGIN
@@ -41,15 +42,17 @@ BEGIN
 
     SELECT COUNT(*) INTO v_orphan_member_count
     FROM public.loans AS l
-    LEFT JOIN public.members AS m
-        ON l.member_id = m.id
+    LEFT JOIN public.members AS m ON l.member_id = m.id
     WHERE m.id IS NULL;
 
     SELECT COUNT(*) INTO v_orphan_book_count
     FROM public.loans AS l
-    LEFT JOIN public.books AS b
-        ON l.book_id = b.id
+    LEFT JOIN public.books AS b ON l.book_id = b.id
     WHERE b.id IS NULL;
+
+    SELECT COUNT(*) INTO v_member_101_count
+    FROM public.loans
+    WHERE member_id = 101;
 
     SELECT COUNT(*) INTO v_book_201_count
     FROM public.loans
@@ -70,16 +73,18 @@ BEGIN
        OR v_open_loan_count <> 3
        OR v_orphan_member_count <> 0
        OR v_orphan_book_count <> 0
+       OR v_member_101_count <> 2
        OR v_book_201_count <> 2
        OR v_book_201_invalid_order <> 0 THEN
         RAISE EXCEPTION
-            '검증 실패: members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, book201=%, invalid_order=%',
+            '검증 실패: members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, member101=%, book201=%, invalid_order=%',
             v_member_count,
             v_book_count,
             v_loan_count,
             v_open_loan_count,
             v_orphan_member_count,
             v_orphan_book_count,
+            v_member_101_count,
             v_book_201_count,
             v_book_201_invalid_order;
     END IF;
@@ -108,10 +113,8 @@ SELECT
     l.due_at,
     l.returned_at
 FROM public.loans AS l
-JOIN public.members AS m
-    ON l.member_id = m.id
-JOIN public.books AS b
-    ON l.book_id = b.id
+JOIN public.members AS m ON l.member_id = m.id
+JOIN public.books AS b ON l.book_id = b.id
 ORDER BY l.id;
 
 SELECT id, member_id, book_id, borrowed_at, due_at
@@ -134,6 +137,8 @@ SELECT
     (SELECT COUNT(*) FROM public.books) AS book_count,
     (SELECT COUNT(*) FROM public.loans) AS loan_count,
     (SELECT COUNT(*) FROM public.loans WHERE returned_at IS NULL) AS open_loan_count,
+    (SELECT COUNT(*) FROM public.loans WHERE member_id = 101) AS member_101_loan_count,
+    (SELECT COUNT(*) FROM public.loans WHERE book_id = 201) AS book_201_loan_count,
     (
         SELECT COUNT(*)
         FROM public.loans AS l
