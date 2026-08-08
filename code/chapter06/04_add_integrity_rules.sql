@@ -41,19 +41,21 @@ BEGIN
             '규칙 추가 중단: 정규화 후 테이블이 모두 존재하지 않습니다.';
     END IF;
 
+    -- 같은 제약조건 이름이 다른 테이블·스키마에 있어도 오탐하지 않도록 대상 테이블까지 확인합니다.
     IF EXISTS (
         SELECT 1
         FROM pg_constraint
-        WHERE conname IN (
-            'uq_members_nf_email',
-            'chk_members_nf_name_not_blank',
-            'uq_books_nf_isbn',
-            'chk_books_nf_title_not_blank',
-            'fk_loans_nf_member',
-            'fk_loans_nf_book',
-            'chk_loans_nf_due_date',
-            'chk_loans_nf_returned_date'
-        )
+        WHERE (conrelid = 'public.members_nf'::regclass
+               AND conname IN ('uq_members_nf_email', 'chk_members_nf_name_not_blank'))
+           OR (conrelid = 'public.books_nf'::regclass
+               AND conname IN ('uq_books_nf_isbn', 'chk_books_nf_title_not_blank'))
+           OR (conrelid = 'public.loans_nf'::regclass
+               AND conname IN (
+                   'fk_loans_nf_member',
+                   'fk_loans_nf_book',
+                   'chk_loans_nf_due_date',
+                   'chk_loans_nf_returned_date'
+               ))
     ) OR to_regclass('public.uq_loans_nf_active_book') IS NOT NULL THEN
         RAISE EXCEPTION
             '규칙 추가 중단: Chapter 06 무결성 규칙이 이미 존재합니다.';
@@ -194,6 +196,47 @@ CREATE UNIQUE INDEX uq_loans_nf_active_book
 ON public.loans_nf (book_id)
 WHERE returned_at IS NULL;
 
+-- 적용 결과를 커밋 전에 검증합니다.
+DO $$
+DECLARE
+    v_constraint_count bigint;
+    v_not_null_count bigint;
+BEGIN
+    SELECT COUNT(*) INTO v_constraint_count
+    FROM pg_constraint
+    WHERE (conrelid = 'public.members_nf'::regclass
+           AND conname IN ('uq_members_nf_email', 'chk_members_nf_name_not_blank'))
+       OR (conrelid = 'public.books_nf'::regclass
+           AND conname IN ('uq_books_nf_isbn', 'chk_books_nf_title_not_blank'))
+       OR (conrelid = 'public.loans_nf'::regclass
+           AND conname IN (
+               'fk_loans_nf_member',
+               'fk_loans_nf_book',
+               'chk_loans_nf_due_date',
+               'chk_loans_nf_returned_date'
+           ));
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM pg_attribute
+    WHERE (attrelid = 'public.members_nf'::regclass
+           AND attname IN ('name', 'email', 'joined_at') AND attnotnull)
+       OR (attrelid = 'public.books_nf'::regclass
+           AND attname IN ('title', 'author', 'isbn') AND attnotnull)
+       OR (attrelid = 'public.loans_nf'::regclass
+           AND attname IN ('member_id', 'book_id', 'borrowed_at', 'due_at') AND attnotnull);
+
+    IF v_constraint_count <> 8
+       OR v_not_null_count <> 10
+       OR to_regclass('public.uq_loans_nf_active_book') IS NULL THEN
+        RAISE EXCEPTION
+            '규칙 적용 검증 실패: constraints=%, not_null_columns=%, active_index=%',
+            v_constraint_count,
+            v_not_null_count,
+            to_regclass('public.uq_loans_nf_active_book');
+    END IF;
+END
+$$;
+
 COMMIT;
 
 -- 적용 결과 확인
@@ -202,16 +245,17 @@ SELECT
     conname AS constraint_name,
     contype AS constraint_type
 FROM pg_constraint
-WHERE conname IN (
-    'uq_members_nf_email',
-    'chk_members_nf_name_not_blank',
-    'uq_books_nf_isbn',
-    'chk_books_nf_title_not_blank',
-    'fk_loans_nf_member',
-    'fk_loans_nf_book',
-    'chk_loans_nf_due_date',
-    'chk_loans_nf_returned_date'
-)
+WHERE (conrelid = 'public.members_nf'::regclass
+       AND conname IN ('uq_members_nf_email', 'chk_members_nf_name_not_blank'))
+   OR (conrelid = 'public.books_nf'::regclass
+       AND conname IN ('uq_books_nf_isbn', 'chk_books_nf_title_not_blank'))
+   OR (conrelid = 'public.loans_nf'::regclass
+       AND conname IN (
+           'fk_loans_nf_member',
+           'fk_loans_nf_book',
+           'chk_loans_nf_due_date',
+           'chk_loans_nf_returned_date'
+       ))
 ORDER BY conrelid::regclass::text, conname;
 
 SELECT to_regclass('public.uq_loans_nf_active_book') AS active_loan_unique_index;
