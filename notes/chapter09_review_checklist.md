@@ -8,201 +8,219 @@ Chapter 09. 트랜잭션으로 데이터 정합성 지키기
 
 ## 리뷰 목적
 
-Chapter 09가 Chapter 07·08의 `course_project` 데이터를 보호하면서 별도 `transaction_lab`에서 성공·ROLLBACK·좌석 부족·오류·취소·동시성 경로를 안전하게 검증하는지 점검합니다.
+Chapter 09가 Chapter 07·08의 `course_project` 기준 데이터를 보호하면서 별도 `transaction_lab`에서 정상 COMMIT, ROLLBACK, 좌석 부족, 취소, 오류 복구와 동시성 대기를 안전하게 설명·실행·검증하는지 확인합니다.
 
 ---
 
-## 1. Chapter 연속성과 격리
+## 1. Chapter 연속성과 사전 조건
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| `course_project` 보호 | 통과 | DROP·ALTER·UPDATE 없이 읽기·FK 참조만 수행 |
-| `transaction_lab` 격리 | 통과 | 좌석·신청·결제 실습 상태 분리 |
-| 학생·강의 ID 연속성 | 통과 | 101~103, 301~303 사용 |
-| Chapter 08 기준 유지 | 통과 | project enrollments 5행 검사 |
-| 위치 확인 통일 | 통과 | DB·스키마·`SHOW search_path` |
-| 초기화 범위 | 통과 | 현재 DB 검사 후 `transaction_lab`만 삭제 |
+| Chapter 07·08 데이터 사용 | 통과 | 동일 `course_project` 기준 상태 사용 |
+| `course_project` 행 수 | 통과 | 3 / 2 / 3 / 5 자동 검사 |
+| 상태별 건수 | 통과 | 신청2·수강중1·완료1·취소1 |
+| 전체 기록 금액 | 통과 | 590000 |
+| 활성 신청 | 통과 | 3 / 340000 |
+| 취소 제외 | 통과 | 4 / 440000 |
+| 핵심 신청 | 통과 | 1001·1004·1005 상태·금액 검사 |
+| 금액 타입 | 통과 | `recorded_amount NUMERIC(12,0)` |
+| 활성 부분 고유 인덱스 | 통과 | `uq_course_enrollments_active` 존재 확인 |
+| 잘못된 DB | 실제 통과 | `postgres` DB에서 01 실행 실패 확인 |
+| 기존 lab 스키마 | 실제 통과 | 재실행 시 생성 차단 확인 |
 
 ---
 
-## 2. 사전 조건과 재실행 안전성
+## 2. 원고·워크북·발표자료
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 현재 DB 실제 차단 | 통과 | `ai_database_book`이 아니면 예외 |
-| 프로젝트 테이블 존재 | 통과 | `to_regclass` 기반 검사 |
-| 학생 101~103 | 통과 | 모두 존재해야 진행 |
-| 강의 301~303·가격 | 통과 | 100000·120000·150000 검사 |
-| project 신청 수 | 통과 | 5행 검사 |
-| 중복 schema 생성 | 통과 | 기존 `transaction_lab` 존재 시 예외 |
-| 원자적 schema 생성 | 통과 | 검사·CREATE·COMMIT을 한 트랜잭션으로 처리 |
-| seed 재실행 | 통과 | lab이 비어 있지 않으면 예외 |
-| 트랜잭션 파일 재실행 | 통과 | 좌석·ID·동일 활성 신청 사전 검사 |
+| 본문 구조 | 통과 | 번호 절 1~23 유지 |
+| 구성안 | 통과 | 현재 기준 상태·트랜잭션 흐름 동기화 |
+| 워크북 | 통과 | 3/2/3/5·상태·금액·타입 기록 표 반영 |
+| 이론 발표 | 통과 | 20장, 모든 절 화면 구성·발표 스크립트 |
+| 실습 발표 | 통과 | 20장, 모든 절 화면 구성·발표 스크립트 |
+| 실제 금액 열 이름 | 통과 | `recorded_amount`로 원본 자체 통일 |
+| 런타임 열 이름 우회 | 제거 | 원고를 화면에서만 치환하던 코드 제거 |
+| 자산 버전 | 통과 | `20260809a` |
+| 공통 TTS | 정적 통과 | `tts_pronunciation.js` 연결 |
+| 스크립트 보완 | 정적 통과 | `script_content_enhancer.js` 연결 |
+| 창 동기화 | 정적 통과 | postMessage·자산 버전 전달 구조 유지 |
 
 ---
 
-## 3. 트랜잭션 개념
+## 3. 스키마·제약조건
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 업무 단위 | 통과 | 좌석·신청·결제 세 변경 |
-| BEGIN·COMMIT·ROLLBACK | 통과 | 같은 연결 사용 강조 |
-| ACID | 통과 | 특성과 오해 구분 |
-| 제약조건·트랜잭션 역할 | 통과 | 값·관계와 여러 변경 경계 분리 |
-| COMMIT 전 검증 | 통과 | 사람이 보는 SELECT와 자동 `DO` 판정 |
-| 잘못된 결과 COMMIT 차단 | 통과 | 기대 상태 불일치 시 예외 |
-| 이미 COMMIT된 변경 | 통과 | 같은 ROLLBACK으로 취소 불가 설명 |
-
----
-
-## 4. IDENTITY와 ROLLBACK
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| 명시적 ID 재사용 | 통과 | ROLLBACK된 행의 9002·9902 직접 재사용 |
-| 자동값 회수 오해 제거 | 통과 | IDENTITY 자동 번호는 회수되지 않을 수 있음 |
-| 명시적 ID와 시퀀스 | 통과 | 다음 값 자동 이동 없음 설명 |
-| 최종 IDENTITY 조정 | 통과 | enrollment 9003, payment 9903 |
-
----
-
-## 5. 스키마·제약조건과 업무 규칙
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| 좌석 CHECK | 통과 | `0 <= remaining <= capacity` |
-| lab enrollment FK | 통과 | project students·courses 참조 |
+| 실습 스키마 분리 | 통과 | `transaction_lab` 사용 |
+| 좌석 CHECK | 통과 | `0 <= remaining_seats <= capacity` |
+| 학생·강의 FK | 통과 | `course_project` 참조 |
 | payment FK | 통과 | lab enrollment 참조 |
-| 신청당 payment 최대 한 건 | 통과 | 명시적 UNIQUE 제약조건 |
-| payment 최소 한 건 규칙 | 통과 | 제약조건 범위와 트랜잭션 검증 구분 |
-| 상태 CHECK | 통과 | 수강중·취소 |
-| 금액 CHECK | 통과 | 0 이상 |
-| 중복 활성 신청 | 통과 | 부분 고유 인덱스 적용 |
-| 신청·결제 금액 | 통과 | 신청 시점 가격 복사와 최종 일치 검증 |
+| payment 최대 한 건 | 통과 | enrollment_id UNIQUE |
+| 중복 활성 신청 | 통과 | 부분 고유 인덱스 |
+| 신청 기록 금액 | 통과 | `NUMERIC(12,0)`·0 이상 |
+| payment 금액 | 통과 | `NUMERIC(12,0)`·0 이상 |
+| 스키마 생성 원자성 | 실제 통과 | BEGIN→생성→자동 판정→COMMIT |
 
 ---
 
-## 6. 정상·실패 경로
+## 4. 주 실습 01→06
+
+| 단계 | 기대 결과 | 실제 검증 |
+| --- | --- | --- |
+| 01 schema | lab 3개 테이블·인덱스 생성, 빈 상태 | 통과 |
+| 02 seed | inventory 3 / enrollment 0 / payment 0 | 통과 |
+| 03 COMMIT | 9001·9901, 301 remaining 1 | 통과 |
+| 04 ROLLBACK | 임시 9002·9902 제거, 302 remaining 1 복구 | 통과 |
+| 05 COMMIT | 9002·9902, 302 remaining 0 | 통과 |
+| 05 sold-out | 9003·9903 미생성, 좌석 0 유지 | 통과 |
+| 06 final | inventory/enrollment/payment = 3/2/2 | 통과 |
+| 최종 좌석 | 301/302/303 = 1/0/1 | 통과 |
+| project 보호 | 전체 데이터 fingerprint 불변 | 통과 |
+
+주 실습의 모든 자동 통과 메시지를 PostgreSQL 16에서 실제 확인했습니다.
+
+---
+
+## 5. ROLLBACK과 IDENTITY
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 성공 COMMIT 1 | 통과 | 9001·9901, course 301 좌석 1 |
-| ROLLBACK | 통과 | 임시 9002·9902 제거, 좌석 복구 |
-| 성공 COMMIT 2 | 통과 | 9002·9902, course 302 좌석 0 |
-| 좌석 부족 | 통과 | 9003·9903 0건, SQL 오류와 구분 |
-| CTE 연결 | 통과 | 좌석 성공 결과가 있을 때만 후속 INSERT |
-| 조건부 UPDATE | 통과 | `remaining_seats > 0` 적용 |
-| 최종 행 수 | 통과 | lab enrollments 2, payments 2 |
+| 임시 행 전체 취소 | 실제 통과 | 9002·9902 제거 |
+| 좌석 복구 | 실제 통과 | 302 remaining 0→1 |
+| 이전 COMMIT 보존 | 실제 통과 | 9001·9901·301 remaining 1 유지 |
+| 명시적 ID 재사용 | 통과 | ROLLBACK 후 9002·9902 직접 재사용 |
+| IDENTITY 회수 오해 | 통과 | 자동 할당 번호는 일반적으로 회수되지 않음 설명 |
+| RESTART 원자성 | 통과 | enrollment/payment 두 조정을 한 트랜잭션으로 처리 |
 
 ---
 
-## 7. FOR UPDATE와 동시성
+## 6. FOR UPDATE·좌석 확보·0행
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| FOR UPDATE 역할 | 통과 | 행 잠금과 상태 관찰 |
-| 조건부 UPDATE 역할 | 통과 | 실제 변경 가능 여부 판단 |
-| 영향 행 수 | 통과 | 성공 증거로 사용 |
-| 격리 수준 | 통과 | READ COMMITTED 기준 명시 |
-| `SHOW transaction_isolation` | 통과 | 코드 반영 |
-| Lock timeout | 통과 | 선택적으로 5초 설정 |
-| timeout 후 복구 | 통과 | ROLLBACK 안내 |
-| Lock 대기 | 통과 | 한 잠금 해제 대기 |
-| Deadlock | 통과 | 순환 대기와 구분 |
-| 다른 격리 수준 | 통과 | 동시 변경 오류 가능성 설명 |
+| `FOR UPDATE` 역할 | 통과 | 잠금·최신 상태 관찰 |
+| 조건부 UPDATE | 통과 | `remaining_seats > 0`으로 실제 자격 판단 |
+| `RETURNING` | 통과 | 좌석 확보 성공 결과 전달 |
+| data-modifying CTE | 통과 | 좌석 성공 시에만 신청·결제 생성 |
+| UPDATE 0행 | 실제 통과 | 좌석 부족 업무 실패로 처리 |
+| 9003·9903 | 실제 통과 | 생성되지 않음 |
 
 ---
 
-## 8. 오류와 SAVEPOINT
+## 7. 최종 정합성 자동 게이트
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| UPDATE 0행 | 통과 | 업무상 실패이며 문장 오류 아님 |
-| aborted transaction | 통과 | 오류 후 일반 SQL 거부 가능 설명 |
-| 전체 ROLLBACK | 통과 | 기본 복구 방법 |
-| SAVEPOINT 파일 | 통과 | `09_error_and_savepoint.sql` 추가 |
-| 실제 오류 근거 | 통과 | 중복 활성 신청 부분 인덱스 위반 |
-| 부분 복구 | 통과 | 좌석 임시 차감까지 SAVEPOINT로 복구 |
-| 안전 실행 | 통과 | 오류 유발 문장 기본 주석 상태 |
-
----
-
-## 9. 취소와 좌석 복구
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| 취소 선택 파일 | 통과 | `08_cancel_and_restore.sql` 추가 |
-| 상태 변경과 좌석 | 통과 | 같은 트랜잭션에서 처리 |
-| COMMIT 전 검증 | 통과 | 취소 상태·좌석·payment 확인 |
-| 기준 상태 보존 | 통과 | 기본 ROLLBACK |
-| 환불 범위 | 통과 | 금액·상태·승인 ID는 확장 범위 |
-
----
-
-## 10. 최종 정합성 자동 판정
-
-| 검증 | 기대 | 상태 |
+| 검증 | 기대 | 실제 결과 |
 | --- | ---: | --- |
-| `course_project.enrollments` | 5 | 자동 판정 |
-| lab enrollments | 2 | 자동 판정 |
-| payments | 2 | 자동 판정 |
-| 301 remaining | 1 | 자동 판정 |
-| 302 remaining | 0 | 자동 판정 |
-| 303 remaining | 1 | 자동 판정 |
-| 좌석 범위 위반 | 0행 | 코드 반영 |
-| 결제 누락·금액 불일치 | 0행 | 코드 반영 |
-| 고아 payment | 0행 | 코드 반영 |
-| 중복 활성 신청 | 0행 | 코드 반영 |
-| active enrollment = used seats | 모두 true | 자동 판정 |
-| 9003·9903 | 0행 | 자동 판정 |
-| 최종 통과 메시지 | 출력 | 코드 반영 |
+| project 4테이블 | 3/2/3/5 | 통과 |
+| project 상태 | 2/1/1/1 | 통과 |
+| project 금액 | 590000 / 340000 / 440000 | 통과 |
+| lab inventory/enrollment/payment | 3/2/2 | 통과 |
+| 9001 / 9901 | 101·301·100000 | 통과 |
+| 9002 / 9902 | 103·302·120000 | 통과 |
+| 좌석 범위 위반 | 0 | 통과 |
+| 결제 누락·금액 불일치 | 0 | 통과 |
+| 고아 payment | 0 | 통과 |
+| 중복 활성 신청 | 0 | 통과 |
+| 활성 신청 = 사용 좌석 | 모두 일치 | 통과 |
+| 9003·9903 | 0행 | 통과 |
 
 ---
 
-## 11. 코드 파일
+## 8. 취소와 좌석 복구
 
-| 파일 | 역할 | 상태 |
+| 점검 항목 | 상태 | 실제 검증 |
 | --- | --- | --- |
-| `01_transaction_lab_schema.sql` | 사전 검사·원자적 스키마 생성 | 완료 |
-| `02_transaction_lab_seed.sql` | 초기 좌석·자동 검증 | 완료 |
-| `03_commit_transaction.sql` | 첫 성공 COMMIT·자동 판정 | 완료 |
-| `04_rollback_transaction.sql` | ROLLBACK·IDENTITY 설명 | 완료 |
-| `05_commit_and_sold_out.sql` | 두 번째 COMMIT·좌석 부족·시퀀스 | 완료 |
-| `06_transaction_validation.sql` | 최종 pass/fail 판정 | 완료 |
-| `07_concurrency_two_sessions.sql` | 격리 수준·Lock 대기 | 완료 |
-| `08_cancel_and_restore.sql` | 취소·좌석 복구 | 완료 |
-| `09_error_and_savepoint.sql` | aborted·SAVEPOINT | 완료 |
-| `reset_transaction_lab.sql` | DB 보호 초기화 | 완료 |
-| `transaction_consistency_practice.sql` | 읽기 전용 안전 진입점 | 완료 |
-| `README.md` | 실행 순서·규칙·주의 | 완료 |
+| 9001 수강중→취소 | 통과 | 트랜잭션 내부 확인 |
+| 301 좌석 1→2 | 통과 | 트랜잭션 내부 확인 |
+| payment 9901 유지 | 통과 | 100000 유지 |
+| 선택 실습 ROLLBACK | 통과 | 실행 |
+| 원래 9001 상태 복구 | 통과 | 수강중·100000 |
+| 301 좌석 복구 | 통과 | remaining 1 |
+| 최종 06 재검증 | 통과 | 주 실습 기준 상태 유지 |
 
 ---
 
-## 12. 자기주도 학습 지원
+## 9. 오류와 SAVEPOINT
+
+| 점검 항목 | 상태 | 실제 검증 |
+| --- | --- | --- |
+| SAVEPOINT 설명 | 통과 | 수동 실습 파일 제공 |
+| 실제 중복 오류 | 통과 | `uq_transaction_enrollments_active` 위반 재현 |
+| aborted 상태 복구 | 통과 | `ROLLBACK TO SAVEPOINT` 실행 |
+| 좌석 임시 변경 복구 | 통과 | 301 remaining 1 |
+| 오류 행 제거 | 통과 | 9003 없음 |
+| 최종 06 재검증 | 통과 | 기준 상태 유지 |
+
+---
+
+## 10. 동시성
+
+| 점검 항목 | 상태 | 실제 검증 |
+| --- | --- | --- |
+| 기본 격리 수준 설명 | 통과 | `READ COMMITTED` 기준 |
+| 두 세션 사용 | 실제 통과 | 독립 psql 세션 A/B 실행 |
+| Session A `FOR UPDATE` | 실제 통과 | course 303 잠금 |
+| Session B Lock 대기 | 실제 통과 | 동일 행 잠금 시도 |
+| `lock_timeout` | 실제 통과 | 1초 timeout 재현 |
+| timeout 후 복구 | 실제 통과 | 트랜잭션 종료 후 상태 정상 |
+| course 303 | 실제 통과 | remaining 1 유지 |
+| Lock vs Deadlock | 통과 | 개념 구분 유지 |
+
+---
+
+## 11. reset
+
+| 점검 항목 | 상태 | 실제 검증 |
+| --- | --- | --- |
+| 현재 DB 검사 | 통과 | 보호 구문 |
+| `course_project` 존재 검사 | 통과 | 보호 대상 확인 |
+| lab 객체만 삭제 | 실제 통과 | transaction_lab 제거 |
+| reset 트랜잭션 | 실제 통과 | BEGIN/COMMIT |
+| project 행 수·금액 | 실제 통과 | 3/2/3/5·590000 유지 |
+| project fingerprint | 실제 통과 | reset 전후 동일 |
+| Chapter 08 사전 게이트 | 실제 통과 | reset 후 재검증 성공 |
+
+---
+
+## 12. 이미지·도식
 
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
-| 워크북 동기화 | 통과 | 사전 조건·ID·취소·SAVEPOINT·격리 반영 |
-| 권장 해설 | 통과 | 업무 경계·0행·잠금·결제·IDENTITY·취소 |
-| AI 검토 | 통과 | 중복·복구·격리·재실행·외부 작업 추가 |
-| 실행 결과 기록 | 통과 | 주 실습과 선택 실습 표 제공 |
+| Mermaid | 통과 | 8개 |
+| SVG | 통과 | 8개, stem 일치 |
+| 본문 연결 | 통과 | 그림 9-1~9-8 모두 사용 |
+| XML 파싱 | 통과 | 자동 검사 |
+| 접근성 메타 | 통과 | role·title·desc |
+| 반응형 | 통과 | width=100%·viewBox |
+| 실제 출력 가독성 | 수동 확인 필요 | 브라우저·인쇄·eBook |
 
 ---
 
-## 13. 도식
+## 13. 자동 검증 결과
 
-기존 SVG 8종은 트랜잭션 필요성, 기본 흐름, 정합성, ACID, 성공·ROLLBACK, Lock과 AI 검토의 일반 메시지와 호환됩니다. 상세 SQL·SAVEPOINT·취소 표는 본문과 코드에서 설명하므로 이미지에 과도하게 중복하지 않았습니다.
+```text
+Workflow: Validate Chapter 09
+Run: 2
+Run ID: 31282972035
+Commit: 39775d598692f434133302a4c1a3485ccfd37e51
+Status: completed
+Conclusion: success
+PostgreSQL: 16
+Date: 2026-08-09 (Asia/Seoul)
+```
+
+초기 Run 1은 이론 발표자료가 자연어 “기록 금액”만 사용하고 실제 컬럼명 `recorded_amount`를 직접 표시하지 않아 정적 검증에서 실패했습니다. 이론·실습·본문·워크북의 사전 조건을 실제 스키마 및 Chapter 07·08 기준값과 연결한 뒤 Run 2에서 전체 검증을 통과했습니다.
 
 ---
 
 ## 14. 최종 판정
 
 ```text
-Chapter 09는 사전 상태, COMMIT 전 판정, IDENTITY,
-활성 중복, 취소·좌석 복구, 오류·SAVEPOINT와 READ COMMITTED를 보완했다.
-
-본문·워크북·SQL·구성안·코드 안내가 같은 기준 상태와 규칙을 사용하므로
-최종 출판 전 내용 검수 완료 상태로 판정한다.
+Chapter 09은 앞 장의 기준 데이터 보호부터
+정상 COMMIT, 전체 ROLLBACK, 좌석 부족 0행,
+취소 복구, SAVEPOINT 오류 복구, 실제 두 세션 Lock 대기와 reset까지
+PostgreSQL 16에서 재현·검증된 상태다.
 ```
 
-실제 PostgreSQL에서 주 실습 `01→06`과 선택 실습 `07→09`를 수동으로 실행하는 통합 검증은 별도 제작 단계에서 확인합니다.
+자동 검증과 별개로 브라우저 최종 렌더링, 단계별 강조 실제 조작, TTS 청취, 모바일·프로젝터·Word·PDF·eBook 출력은 수동 제작 검수 범위로 남깁니다.
