@@ -5,20 +5,55 @@
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
+SHOW server_version;
 
 DO $$
+DECLARE
+    v_index_count bigint;
+    v_candidate_count bigint;
+    v_invalid_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
-            '실행 중단: 현재 데이터베이스는 %입니다.',
-            current_database();
+            '인덱스 리뷰 중단: 현재 데이터베이스는 %입니다.', current_database();
     END IF;
 
-    IF to_regclass('performance_lab.idx_performance_courses_title') IS NULL
-       OR to_regclass('performance_lab.idx_performance_enrollments_student_id') IS NULL
-       OR to_regclass('performance_lab.idx_performance_enrollments_course_status') IS NULL THEN
+    IF (SELECT COUNT(*) FROM performance_lab.students) <> 10003
+       OR (SELECT COUNT(*) FROM performance_lab.instructors) <> 2
+       OR (SELECT COUNT(*) FROM performance_lab.courses) <> 2003
+       OR (SELECT COUNT(*) FROM performance_lab.enrollments) <> 100005 THEN
         RAISE EXCEPTION
-            '실행 중단: 세 실험 후보 인덱스가 모두 필요합니다.';
+            '인덱스 리뷰 중단: performance_lab 기준 행 수가 예상과 다릅니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_index_count
+    FROM pg_indexes
+    WHERE schemaname = 'performance_lab';
+
+    SELECT COUNT(*) INTO v_candidate_count
+    FROM pg_indexes
+    WHERE schemaname = 'performance_lab'
+      AND indexname IN (
+          'idx_performance_courses_title',
+          'idx_performance_enrollments_student_id',
+          'idx_performance_enrollments_course_status'
+      );
+
+    SELECT COUNT(*) INTO v_invalid_count
+    FROM pg_index AS ix
+    JOIN pg_class AS i ON i.oid = ix.indexrelid
+    JOIN pg_namespace AS n ON n.oid = i.relnamespace
+    WHERE n.nspname = 'performance_lab'
+      AND i.relname IN (
+          'idx_performance_courses_title',
+          'idx_performance_enrollments_student_id',
+          'idx_performance_enrollments_course_status'
+      )
+      AND (NOT ix.indisvalid OR NOT ix.indisready);
+
+    IF v_index_count <> 9 OR v_candidate_count <> 3 OR v_invalid_count <> 0 THEN
+        RAISE EXCEPTION
+            '인덱스 리뷰 중단: 전체 9개, 후보 3개가 모두 valid/ready여야 합니다.';
     END IF;
 END
 $$;
@@ -33,7 +68,12 @@ FROM pg_indexes
 WHERE schemaname = 'performance_lab'
 ORDER BY tablename, indexname;
 
--- 2. 인덱스 크기와 사용 통계
+-- 2. 통계가 언제 초기화되었는지 함께 확인합니다.
+SELECT datname, stats_reset
+FROM pg_stat_database
+WHERE datname = current_database();
+
+-- 3. 인덱스 크기와 사용 통계
 SELECT
     psi.schemaname,
     psi.relname AS table_name,
@@ -46,11 +86,10 @@ FROM pg_stat_user_indexes AS psi
 WHERE psi.schemaname = 'performance_lab'
 ORDER BY psi.relname, psi.indexrelname;
 
--- idx_scan은 단순한 사용자 SQL 실행 횟수와 항상 같지 않습니다.
--- 하나의 실행 계획 안에서도 내부 인덱스 탐색 방식에 따라 값이 증가할 수 있습니다.
--- 통계 수집 기간과 실제 워크로드를 함께 해석합니다.
+-- idx_scan은 사용자 SQL 횟수와 1:1로 대응하지 않을 수 있습니다.
+-- 통계 초기화 시점, 관찰 기간, 실제 워크로드와 함께 해석합니다.
 
--- 3. 테이블·인덱스 전체 크기
+-- 4. 테이블·인덱스 전체 크기
 SELECT
     schemaname,
     relname AS table_name,
@@ -61,20 +100,19 @@ FROM pg_stat_user_tables
 WHERE schemaname = 'performance_lab'
 ORDER BY relname;
 
--- 4. 인덱스 키 컬럼과 제약조건 역할 확인
+-- 5. 인덱스 키 컬럼과 제약조건 역할 확인
 SELECT
     t.relname AS table_name,
     i.relname AS index_name,
     ix.indisprimary AS is_primary,
     ix.indisunique AS is_unique,
+    ix.indisvalid AS is_valid,
+    ix.indisready AS is_ready,
     pg_get_indexdef(ix.indexrelid) AS index_definition
 FROM pg_index AS ix
-JOIN pg_class AS i
-    ON i.oid = ix.indexrelid
-JOIN pg_class AS t
-    ON t.oid = ix.indrelid
-JOIN pg_namespace AS n
-    ON n.oid = t.relnamespace
+JOIN pg_class AS i ON i.oid = ix.indexrelid
+JOIN pg_class AS t ON t.oid = ix.indrelid
+JOIN pg_namespace AS n ON n.oid = t.relnamespace
 WHERE n.nspname = 'performance_lab'
 ORDER BY t.relname, i.relname;
 
@@ -84,12 +122,16 @@ ORDER BY t.relname, i.relname;
 -- idx_performance_enrollments_course_status
 
 -- 제거는 자동 실행하지 않습니다.
--- 전후 측정과 워크로드를 검토한 뒤 필요한 문장만 선택 실행합니다.
 -- DROP INDEX performance_lab.idx_performance_courses_title;
 -- DROP INDEX performance_lab.idx_performance_enrollments_student_id;
 -- DROP INDEX performance_lab.idx_performance_enrollments_course_status;
 
--- 주의:
 -- PK·UNIQUE 인덱스는 제약조건 유지에 직접 사용됩니다.
--- FK 자식 컬럼 인덱스는 FK 정확성을 위해 필수는 아니지만 JOIN과 부모 삭제·키 변경 성능에 도움이 될 수 있습니다.
--- idx_scan = 0만으로 어떤 인덱스도 즉시 삭제하지 않습니다.
+-- FK 자식 컬럼 인덱스는 FK 정확성을 위한 필수 구조는 아니며 조회·부모 변경 성능을 위해 검토합니다.
+-- idx_scan = 0만으로 즉시 삭제하지 않습니다.
+
+DO $$
+BEGIN
+    RAISE NOTICE 'Chapter 10 index review validation passed';
+END
+$$;
