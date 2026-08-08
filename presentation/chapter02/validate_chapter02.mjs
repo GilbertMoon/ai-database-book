@@ -95,14 +95,30 @@ for (const [name, pattern] of consistency) assert(pattern.test(combined), `개�
 
 const presentationHtml = read(path.join(here, 'chapter02_presentation.html'));
 const scriptHtml = read(path.join(here, 'chapter02_script.html'));
+const navigationSource = read(path.join(here, 'chapter02_navigation.js'));
+const playerSource = read(path.join(here, 'chapter02_player.js'));
+const scriptSource = read(path.join(here, 'chapter02_script.js'));
 for (const oldName of ['chapter02_slides_01.js', 'chapter02_slides_02.js', 'chapter02_intro_patch.js']) assert(!presentationHtml.includes(oldName) && !scriptHtml.includes(oldName), `기존 파일 참조가 남아 있습니다: ${oldName}`);
-for (const required of ['chapter02_data.js', '../common/presentation_runtime.js']) assert(presentationHtml.includes(required), `발표 HTML 참조가 없습니다: ${required}`);
-for (const required of ['chapter02_data.js', '../common/script_runtime.js']) assert(scriptHtml.includes(required), `스크립트 HTML 참조가 없습니다: ${required}`);
+for (const required of ['chapter02_data.js', 'chapter02_navigation.js', 'chapter02_player.js']) assert(presentationHtml.includes(required), `발표 HTML 참조가 없습니다: ${required}`);
+for (const required of ['chapter02_data.js', 'chapter02_navigation.js', '../common/tts_pronunciation.js', 'chapter02_script.js']) assert(scriptHtml.includes(required), `스크립트 HTML 참조가 없습니다: ${required}`);
+assert(!presentationHtml.includes('../common/presentation_runtime.js'), 'Chapter 02가 구형 공통 presentation_runtime을 계속 사용합니다.');
+assert(!scriptHtml.includes('../common/script_runtime.js'), 'Chapter 02가 구형 공통 script_runtime을 계속 사용합니다.');
+assert(navigationSource.includes('window.CHAPTER_DATA?.slides'), 'Chapter 02 navigation이 현재 45장 데이터를 사용하지 않습니다.');
+assert(navigationSource.includes("querySelectorAll('[data-cue]')"), 'Chapter 02 navigation이 실제 data-cue 화면 요소를 사용하지 않습니다.');
+assert(playerSource.includes("stepIndex === 0 ? '전체 보기'"), '발표창의 전체 보기 단계가 없습니다.');
+assert(scriptSource.includes("stepIndex === 0 ? '전체 보기'"), '스크립트창의 전체 보기 단계가 없습니다.');
+assert(playerSource.includes("type: 'presentation-state'") && playerSource.includes("message.type === 'request-next'") && playerSource.includes("message.type === 'request-prev'"), '발표창의 양방향 단계 동기화가 없습니다.');
+assert(scriptSource.includes("send('request-next')") && scriptSource.includes("send('request-prev')"), '스크립트 버튼/키보드가 부모 장표 단계 이동과 연결되지 않았습니다.');
+assert(scriptSource.includes("target !== stepIndex + 1"), '스크립트 단계 버튼이 Chapter 01처럼 순차 진행으로 제한되지 않았습니다.');
+assert(!playerSource.includes('pointermove') && !playerSource.includes('native-cursor'), 'Chapter 02 player에 커서 추적 코드가 남아 있습니다.');
+assert(presentationHtml.includes('v=20260808c') && scriptHtml.includes('v=20260808c'), 'Chapter 02 캐시 버전이 20260808c가 아닙니다.');
 
 const jsFiles = [
   dataFile,
-  path.join(root, 'presentation/common/presentation_runtime.js'),
-  path.join(root, 'presentation/common/script_runtime.js')
+  path.join(here, 'chapter02_navigation.js'),
+  path.join(here, 'chapter02_player.js'),
+  path.join(here, 'chapter02_script.js'),
+  path.join(root, 'presentation/common/tts_pronunciation.js')
 ];
 for (const file of jsFiles) {
   const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
@@ -118,10 +134,11 @@ const speechMinutes = scriptChars / data.speechCharsPerMinute;
 assert(speechMinutes >= 60 && speechMinutes <= 70, `스크립트 글자 수 기반 음성 시간 ${speechMinutes.toFixed(1)}분이 60~70분 범위를 벗어납니다.`);
 
 console.log(`PASS: ${slides.length} slides, ${parts.length} parts, ${scriptChars.toLocaleString('ko-KR')} script chars, ${speechMinutes.toFixed(1)} estimated speech minutes`);
+console.log('PASS: Chapter 02 uses Chapter 01 style whole-view and sequential semantic steps');
 for (const warning of warnings) console.log(`WARN: ${warning}`);
 if (errors.length) {
   console.error(`FAIL: ${errors.length} issue(s)`);
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('PASS: data, scripts, cues, assets, accessibility metadata, chapter boundary, syntax, README and outline');
+console.log('PASS: data, scripts, cues, assets, synchronization, syntax, README and outline');
