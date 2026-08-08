@@ -2,6 +2,7 @@
   const sources = [
     'chapter05_theory_slides_raw.js',
     'chapter05_intro_patch.js',
+    'chapter05_content_patch.js',
     '../common/screen_position_patch.js'
   ];
   const load = src => new Promise((resolve, reject) => {
