@@ -44,22 +44,17 @@ BEGIN
           AND table_name = 'enrollments'
           AND column_name = 'recorded_amount'
           AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
     ) THEN
         RAISE EXCEPTION
-            '샘플 입력 중단: enrollments.recorded_amount NUMERIC 열이 없습니다.';
+            '샘플 입력 중단: enrollments.recorded_amount NUMERIC(12,0) 열이 없습니다.';
     END IF;
 
-    SELECT COUNT(*) INTO v_student_count
-    FROM course_project.students;
-
-    SELECT COUNT(*) INTO v_instructor_count
-    FROM course_project.instructors;
-
-    SELECT COUNT(*) INTO v_course_count
-    FROM course_project.courses;
-
-    SELECT COUNT(*) INTO v_enrollment_count
-    FROM course_project.enrollments;
+    SELECT COUNT(*) INTO v_student_count FROM course_project.students;
+    SELECT COUNT(*) INTO v_instructor_count FROM course_project.instructors;
+    SELECT COUNT(*) INTO v_course_count FROM course_project.courses;
+    SELECT COUNT(*) INTO v_enrollment_count FROM course_project.enrollments;
 
     IF v_student_count <> 0
        OR v_instructor_count <> 0
@@ -133,33 +128,84 @@ DECLARE
     v_course_count bigint;
     v_enrollment_count bigint;
     v_recorded_total numeric;
+    v_student_101_enrollments bigint;
+    v_course_301_enrollments bigint;
+    v_instructor_201_courses bigint;
+    v_active_duplicate_count bigint;
+    v_status_1001 text;
+    v_status_1004 text;
+    v_id_1005_count bigint;
 BEGIN
-    SELECT COUNT(*) INTO v_student_count
-    FROM course_project.students;
+    SELECT COUNT(*) INTO v_student_count FROM course_project.students;
+    SELECT COUNT(*) INTO v_instructor_count FROM course_project.instructors;
+    SELECT COUNT(*) INTO v_course_count FROM course_project.courses;
 
-    SELECT COUNT(*) INTO v_instructor_count
-    FROM course_project.instructors;
-
-    SELECT COUNT(*) INTO v_course_count
-    FROM course_project.courses;
-
-    SELECT COUNT(*), SUM(recorded_amount)
+    SELECT COUNT(*), COALESCE(SUM(recorded_amount), 0)
     INTO v_enrollment_count, v_recorded_total
     FROM course_project.enrollments;
+
+    SELECT COUNT(*) INTO v_student_101_enrollments
+    FROM course_project.enrollments
+    WHERE student_id = 101;
+
+    SELECT COUNT(*) INTO v_course_301_enrollments
+    FROM course_project.enrollments
+    WHERE course_id = 301;
+
+    SELECT COUNT(*) INTO v_instructor_201_courses
+    FROM course_project.courses
+    WHERE instructor_id = 201;
+
+    SELECT COUNT(*) INTO v_active_duplicate_count
+    FROM (
+        SELECT student_id, course_id
+        FROM course_project.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated_active_enrollments;
+
+    SELECT status INTO v_status_1001
+    FROM course_project.enrollments
+    WHERE id = 1001;
+
+    SELECT status INTO v_status_1004
+    FROM course_project.enrollments
+    WHERE id = 1004;
+
+    SELECT COUNT(*) INTO v_id_1005_count
+    FROM course_project.enrollments
+    WHERE id = 1005;
 
     IF v_student_count <> 3
        OR v_instructor_count <> 2
        OR v_course_count <> 3
        OR v_enrollment_count <> 4
-       OR v_recorded_total <> 470000 THEN
+       OR v_recorded_total <> 470000
+       OR v_student_101_enrollments <> 2
+       OR v_course_301_enrollments <> 2
+       OR v_instructor_201_courses <> 2
+       OR v_active_duplicate_count <> 0
+       OR v_status_1001 IS DISTINCT FROM '수강중'
+       OR v_status_1004 IS DISTINCT FROM '신청'
+       OR v_id_1005_count <> 0 THEN
         RAISE EXCEPTION
-            '샘플 입력 검증 실패: students=%, instructors=%, courses=%, enrollments=%, recorded_total=%',
+            '샘플 입력 검증 실패: rows=%/%/%/%, total=%, student101=%, course301=%, instructor201=%, active_duplicate=%, 1001=%, 1004=%, id1005=%',
             v_student_count,
             v_instructor_count,
             v_course_count,
             v_enrollment_count,
-            v_recorded_total;
+            v_recorded_total,
+            v_student_101_enrollments,
+            v_course_301_enrollments,
+            v_instructor_201_courses,
+            v_active_duplicate_count,
+            v_status_1001,
+            v_status_1004,
+            v_id_1005_count;
     END IF;
+
+    RAISE NOTICE 'Chapter 07 course project seed passed';
 END
 $$;
 
