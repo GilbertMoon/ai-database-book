@@ -136,7 +136,7 @@ jobs:
           }
 
           const cases = [
-            ['theory', ['chapter06_theory_slides.js', 'chapter06_theory_patch.js'], 26],
+            ['theory', ['chapter06_theory_slides.js', 'chapter06_theory_patch.js'], 43],
             ['practice', ['chapter06_practice_slides.js', 'chapter06_practice_patch.js'], 16],
           ];
 
