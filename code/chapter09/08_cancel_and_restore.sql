@@ -23,9 +23,21 @@ BEGIN
         WHERE id = 9001
           AND status = '수강중'
           AND course_id = 301
+          AND recorded_amount = 100000
     ) THEN
         RAISE EXCEPTION
-            '실행 중단: 신청 9001은 강의 301의 수강중 상태여야 합니다.';
+            '실행 중단: 신청 9001은 강의 301의 수강중·100000 상태여야 합니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.payments
+        WHERE id = 9901
+          AND enrollment_id = 9001
+          AND amount = 100000
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: 결제 9901의 기준 상태를 확인하세요.';
     END IF;
 
     IF (SELECT remaining_seats
@@ -82,11 +94,13 @@ BEGIN
             ON ci.course_id = e.course_id
         WHERE e.id = 9001
           AND e.status = '취소'
+          AND e.recorded_amount = 100000
           AND p.id = 9901
+          AND p.amount = 100000
           AND ci.remaining_seats = 2
     ) THEN
         RAISE EXCEPTION
-            '취소 검증 실패: 상태 변경과 좌석 복구 결과가 예상과 다릅니다.';
+            '취소 검증 실패: 상태 변경·결제 기록·좌석 복구 결과가 예상과 다릅니다.';
     END IF;
 END
 $$;
@@ -98,8 +112,45 @@ ROLLBACK;
 SELECT
     e.id,
     e.status,
+    e.recorded_amount,
+    p.id AS payment_id,
+    p.amount,
     ci.remaining_seats
 FROM transaction_lab.enrollments AS e
+JOIN transaction_lab.payments AS p
+    ON p.enrollment_id = e.id
 JOIN transaction_lab.course_inventory AS ci
     ON ci.course_id = e.course_id
 WHERE e.id = 9001;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM transaction_lab.enrollments AS e
+        JOIN transaction_lab.payments AS p
+            ON p.enrollment_id = e.id
+        JOIN transaction_lab.course_inventory AS ci
+            ON ci.course_id = e.course_id
+        WHERE e.id = 9001
+          AND e.student_id = 101
+          AND e.course_id = 301
+          AND e.status = '수강중'
+          AND e.recorded_amount = 100000
+          AND p.id = 9901
+          AND p.amount = 100000
+          AND ci.remaining_seats = 1
+    ) THEN
+        RAISE EXCEPTION
+            '취소 ROLLBACK 검증 실패: 신청 9001·결제 9901·강의 301 좌석이 원래 상태로 복구되지 않았습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM transaction_lab.enrollments) <> 2
+       OR (SELECT COUNT(*) FROM transaction_lab.payments) <> 2 THEN
+        RAISE EXCEPTION
+            '취소 ROLLBACK 검증 실패: 주 실습의 2/2 최종 행 수가 유지되지 않았습니다.';
+    END IF;
+END
+$$;
+
+SELECT 'Chapter 09 cancel rollback validation passed' AS validation_result;
