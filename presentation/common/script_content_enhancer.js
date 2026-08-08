@@ -117,7 +117,7 @@
     if (!original.length) {
       return `이 단계의 핵심 내용을 화면 요소와 연결해서 확인합니다. ${supportSentence('', title, index)}`;
     }
-    const output = original.slice(0, 4);
+    const output = original.slice();
     while (output.length < 2) {
       const addition = supportSentence(output.join(' '), title, index + output.length - 1);
       if (!output.includes(addition)) output.push(addition);
