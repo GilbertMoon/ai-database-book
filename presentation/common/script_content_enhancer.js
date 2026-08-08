@@ -132,10 +132,16 @@
   };
 
   const enhanceCard = (card) => {
-    if (!card || card.dataset.scriptEnhancerVersion === VERSION) return;
+    if (!card) return;
     const title = card.querySelector('h1')?.textContent?.trim() || '이 장표';
     const scriptBlocks = [...card.querySelectorAll('.script-text')];
     if (!scriptBlocks.length) return;
+
+    const stepParagraphs = [...card.querySelectorAll('.script-text:not(.overview) p')];
+    const alreadyEnhanced = Boolean(card.querySelector('.script-text.overview')) &&
+      stepParagraphs.length > 0 &&
+      stepParagraphs.every((paragraph) => paragraph.dataset.scriptEnhanced === VERSION);
+    if (alreadyEnhanced) return;
 
     let overview = card.querySelector('.script-text.overview');
     if (!overview) {
@@ -154,8 +160,8 @@
       if (paragraph && splitSentences(paragraph.textContent).length > 2) paragraph.textContent = overviewText(title);
     }
 
-    const steps = [...card.querySelectorAll('.script-text:not(.overview) p')];
-    steps.forEach((paragraph, index) => {
+    [...card.querySelectorAll('.script-text:not(.overview) p')].forEach((paragraph, index) => {
+      if (paragraph.dataset.scriptEnhanced === VERSION) return;
       paragraph.textContent = enrichText(paragraph.textContent, title, index);
       paragraph.dataset.scriptEnhanced = VERSION;
     });
