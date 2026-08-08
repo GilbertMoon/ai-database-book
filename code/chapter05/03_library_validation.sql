@@ -1,6 +1,6 @@
 -- Chapter 05. 03 도서 대여 시스템 구조 검증
 -- 시작 상태: 02_library_seed.sql 실행 완료
--- 완료 상태: 행 수·선택값·관계·고아 행·시간 순서 검증
+-- 완료 상태: 행 수·선택값·관계·고아 행·반복 이력·시간 순서 검증
 -- 이 파일은 데이터를 변경하지 않으므로 반복 실행할 수 있습니다.
 
 SELECT current_database();
@@ -16,6 +16,7 @@ DECLARE
     v_open_loan_count bigint;
     v_orphan_member_count bigint;
     v_orphan_book_count bigint;
+    v_member_101_count bigint;
     v_book_201_count bigint;
     v_book_201_invalid_order bigint;
 BEGIN
@@ -52,6 +53,10 @@ BEGIN
         ON l.book_id = b.id
     WHERE b.id IS NULL;
 
+    SELECT COUNT(*) INTO v_member_101_count
+    FROM public.loans
+    WHERE member_id = 101;
+
     SELECT COUNT(*) INTO v_book_201_count
     FROM public.loans
     WHERE book_id = 201;
@@ -71,16 +76,18 @@ BEGIN
        OR v_open_loan_count <> 3
        OR v_orphan_member_count <> 0
        OR v_orphan_book_count <> 0
+       OR v_member_101_count <> 2
        OR v_book_201_count <> 2
        OR v_book_201_invalid_order <> 0 THEN
         RAISE EXCEPTION
-            '검증 실패: members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, book201=%, invalid_order=%',
+            '검증 실패: members=%, books=%, loans=%, open=%, orphan_member=%, orphan_book=%, member101=%, book201=%, invalid_order=%',
             v_member_count,
             v_book_count,
             v_loan_count,
             v_open_loan_count,
             v_orphan_member_count,
             v_orphan_book_count,
+            v_member_101_count,
             v_book_201_count,
             v_book_201_invalid_order;
     END IF;
@@ -124,7 +131,7 @@ FROM public.loans
 WHERE returned_at IS NULL
 ORDER BY due_at, id;
 
--- 회원 101은 여러 대여 기록을 가짐
+-- 회원 101은 두 개의 대여 기록을 가짐
 SELECT id, member_id, book_id, borrowed_at, returned_at
 FROM public.loans
 WHERE member_id = 101
@@ -142,6 +149,8 @@ SELECT
     (SELECT COUNT(*) FROM public.books) AS book_count,
     (SELECT COUNT(*) FROM public.loans) AS loan_count,
     (SELECT COUNT(*) FROM public.loans WHERE returned_at IS NULL) AS open_loan_count,
+    (SELECT COUNT(*) FROM public.loans WHERE member_id = 101) AS member_101_loan_count,
+    (SELECT COUNT(*) FROM public.loans WHERE book_id = 201) AS book_201_loan_count,
     (
         SELECT COUNT(*)
         FROM public.loans AS l
