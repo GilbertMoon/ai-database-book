@@ -1,9 +1,10 @@
 (() => {
   const sources = [
-    'chapter03_theory_slides_raw.js',
-    'chapter03_intro_patch.js',
-    'chapter03_theory_script_expansion.js',
-    '../common/screen_position_patch.js'
+    'chapter03_theory_slides_raw.js?v=20260808f',
+    'chapter03_intro_patch.js?v=20260808f',
+    'chapter03_theory_script_expansion.js?v=20260808f',
+    '../common/screen_position_patch.js?v=20260808f',
+    'chapter03_semantic_plan.js?v=20260808f'
   ];
   const load = (src) => new Promise((resolve, reject) => {
     const script = document.createElement('script');
