@@ -1,13 +1,15 @@
 -- Chapter 06. 01 정규화 전·후 기본 구조 생성
 -- 시작 상태: Chapter 06 실습 테이블이 없음
--- 완료 상태: 원시 테이블과 정규화 후 기본 테이블이 비어 있는 상태로 생성됨
+-- 완료 상태: 원시 테이블과 정규화 후 기본 테이블이 모두 비어 있는 상태로 생성됨
 -- 이 단계에서는 PK와 데이터 타입만 만들고 업무 규칙은 04_add_integrity_rules.sql에서 추가합니다.
+-- 생성 작업은 하나의 트랜잭션으로 묶어 중간 오류 시 부분 생성 상태를 남기지 않습니다.
 
 SELECT current_database();
 SELECT current_user;
 SELECT current_schema();
 SHOW search_path;
 
+-- 변경 전 환경·시작 상태 확인
 DO $$
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
@@ -33,6 +35,8 @@ BEGIN
     END IF;
 END
 $$;
+
+BEGIN;
 
 -- 정규화 전 구조: 대여 사건과 회원·도서 현재 사실이 한 행에 섞여 있음
 CREATE TABLE public.library_records_raw (
@@ -70,6 +74,39 @@ CREATE TABLE public.loans_nf (
     due_at DATE,
     returned_at DATE
 );
+
+-- 완료 상태를 같은 트랜잭션 안에서 확인
+DO $$
+DECLARE
+    v_raw_count bigint;
+    v_member_count bigint;
+    v_book_count bigint;
+    v_loan_count bigint;
+BEGIN
+    IF to_regclass('public.library_records_raw') IS NULL
+       OR to_regclass('public.members_nf') IS NULL
+       OR to_regclass('public.books_nf') IS NULL
+       OR to_regclass('public.loans_nf') IS NULL THEN
+        RAISE EXCEPTION '생성 검증 실패: Chapter 06 테이블이 모두 생성되지 않았습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_raw_count FROM public.library_records_raw;
+    SELECT COUNT(*) INTO v_member_count FROM public.members_nf;
+    SELECT COUNT(*) INTO v_book_count FROM public.books_nf;
+    SELECT COUNT(*) INTO v_loan_count FROM public.loans_nf;
+
+    IF v_raw_count <> 0
+       OR v_member_count <> 0
+       OR v_book_count <> 0
+       OR v_loan_count <> 0 THEN
+        RAISE EXCEPTION
+            '생성 검증 실패: 새 테이블이 비어 있지 않습니다. raw=%, members=%, books=%, loans=%',
+            v_raw_count, v_member_count, v_book_count, v_loan_count;
+    END IF;
+END
+$$;
+
+COMMIT;
 
 SELECT
     to_regclass('public.library_records_raw') AS raw_table,
