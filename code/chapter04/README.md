@@ -122,6 +122,33 @@ created_at
 
 ---
 
+## 입력 파일의 안전성
+
+`02_insert_students.sql`은 샘플 데이터가 일부만 들어간 상태를 남기지 않도록 세 INSERT를 하나의 명시적 트랜잭션으로 묶습니다.
+
+실행 전 다음을 확인합니다.
+
+```text
+현재 데이터베이스 = ai_database_book
+public 스키마 존재
+읽기 전용 연결이 아님
+public.students 존재
+현재 행 수 = 0
+```
+
+COMMIT 전에는 다음 초기 데이터 상태를 다시 판정합니다.
+
+```text
+학생 수 = 6
+이준호 grade = 3
+박서연 = 1행
+윤서진 major·grade = NULL
+```
+
+중간 INSERT 또는 최종 판정에서 오류가 발생하면 해당 트랜잭션을 정상 완료하지 않습니다.
+
+---
+
 ## 조회 파일 범위
 
 `03_select_students.sql`에는 다음 내용이 포함됩니다.
@@ -154,7 +181,7 @@ PostgreSQL의 :: 형 변환
 
 ## 안전한 변경 순서
 
-`04_update_delete_students.sql`은 초기 데이터 상태인지 먼저 확인합니다.
+`04_update_delete_students.sql`은 현재 데이터베이스와 쓰기 가능 상태, 초기 데이터 상태를 먼저 확인합니다.
 
 ```text
 SELECT로 대상 확인
@@ -162,6 +189,14 @@ SELECT로 대상 확인
 → RETURNING 결과 확인
 → 영향받은 행 수 확인
 → SELECT로 다시 확인
+```
+
+UPDATE·DELETE 완료 뒤에는 다음 상태를 자동 판정합니다.
+
+```text
+학생 수 = 5
+이준호 grade = 4
+박서연 = 0행
 ```
 
 다음 SQL은 문법적으로 유효하지만 전체 행을 변경하므로 주석 상태로 유지합니다.
@@ -204,6 +239,21 @@ public 스키마 존재
 현재 스키마가 `public`인지 여부는 검사하지 않습니다. 삭제 대상이 `public.students`로 명확하게 지정되어 있기 때문입니다.
 
 이 파일은 테이블과 모든 샘플 데이터를 삭제합니다. 보존할 데이터가 없는지 확인한 뒤 실행합니다.
+
+---
+
+## 발표자료와 같은 실행 기준
+
+발표 화면에서도 다음 원칙을 사용합니다.
+
+```text
+01_create_students.sql
+→ 02_insert_students.sql
+→ 03_select_students.sql
+→ 04_update_delete_students.sql
+```
+
+`basic_crud.sql`은 기본 실습 파일이 아니라 통합 참고 파일로 표시합니다. 데이터 상태도 `체크포인트 A/B/C`가 아니라 `초기 데이터 상태`, `수정 실습 후 상태`, `삭제 실습 후 상태`로 표현합니다.
 
 ---
 
