@@ -143,6 +143,8 @@ for (const phrase of forbiddenNarration) {
 }
 const ensureNarrationSource = navigation.slice(navigation.indexOf('const ensureNarration'), navigation.indexOf('const buildPlannedSteps'));
 assert(!/output\.push\s*\(/.test(ensureNarrationSource), 'ensureNarration must not pad a one-sentence script');
+const compressSource = navigation.slice(navigation.indexOf('const compressSentences'), navigation.indexOf('const labelForKeys'));
+assert(!compressSource.includes("join(' 그리고 ')"), 'sentence compression must not inject conjunctions between source sentences');
 for (const file of narrationFiles) {
   assert(!read(file).includes('핵심 내용을 설명합니다.'), `generic empty-script fallback remains: ${file}`);
 }

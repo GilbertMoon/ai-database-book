@@ -231,8 +231,8 @@
   const compressSentences = (sentences) => {
     const cleaned = sentences.map((sentence) => sentence.trim()).filter(Boolean);
     if (cleaned.length <= 4) return cleaned;
-    const merged = cleaned.slice(3).map((sentence) => sentence.replace(/[.!?。]+$/g, '').trim()).filter(Boolean).join(' 그리고 ');
-    return cleaned.slice(0, 3).concat(merged ? `${merged}.` : []);
+    const merged = cleaned.slice(3).join(' ');
+    return cleaned.slice(0, 3).concat(merged ? [merged] : []);
   };
 
   const labelForKeys = (focusKeys, targets) => {
