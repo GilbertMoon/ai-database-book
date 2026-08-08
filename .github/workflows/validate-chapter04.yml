@@ -1,0 +1,134 @@
+name: Validate Chapter 04
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - book/chapter04/**
+      - code/chapter04/**
+      - images/chapter04/**
+      - presentation/chapter04/**
+      - presentation/common/tts_pronunciation.js
+      - presentation/common/script_content_enhancer.js
+      - .github/workflows/validate-chapter04.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Chapter 04 JavaScript syntax
+        run: |
+          node --check presentation/chapter04/chapter04_content_patch.js
+          node --check presentation/chapter04/chapter04_navigation.js
+          node --check presentation/chapter04/chapter04_player.js
+          node --check presentation/chapter04/chapter04_script.js
+          node --check presentation/chapter04/chapter04_theory_slides.js
+          node --check presentation/chapter04/chapter04_practice_slides.js
+
+      - name: Check Chapter 04 content and lab safety
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+          chapter = (root / 'book/chapter04/chapter04.md').read_text(encoding='utf-8')
+          headings = re.findall(r'^##\s+(\d+)\.\s+', chapter, flags=re.M)
+          if headings != [str(i) for i in range(1, 18)]:
+              raise SystemExit(f'Chapter 04 section sequence mismatch: {headings}')
+          print('Chapter 04 book structure OK: 17 sections')
+
+          code_root = root / 'code/chapter04'
+          required = [
+              '01_create_students.sql', '02_insert_students.sql', '03_select_students.sql',
+              '04_update_delete_students.sql', 'verify_students.sql', 'reset_students.sql',
+              'basic_crud.sql', 'README.md'
+          ]
+          missing = [name for name in required if not (code_root / name).exists()]
+          if missing:
+              raise SystemExit(f'Chapter 04 code files missing: {missing}')
+
+          insert = (code_root / '02_insert_students.sql').read_text(encoding='utf-8')
+          insert_checks = {
+              'database guard': "current_database() <> 'ai_database_book'" in insert,
+              'read-only guard': "current_setting('transaction_read_only')" in insert,
+              'atomic begin': re.search(r'^BEGIN;$', insert, flags=re.M) is not None,
+              'atomic commit': re.search(r'^COMMIT;$', insert, flags=re.M) is not None,
+              'six-row validation': 'v_count <> 6' in insert,
+              'null sample validation': 'v_null_student_count <> 1' in insert,
+          }
+          failed = [name for name, ok in insert_checks.items() if not ok]
+          if failed:
+              raise SystemExit(f'Chapter 04 insert safety mismatch: {failed}')
+          print('Chapter 04 insert safety OK')
+
+          change = (code_root / '04_update_delete_students.sql').read_text(encoding='utf-8')
+          change_checks = {
+              'database guard': "current_database() <> 'ai_database_book'" in change,
+              'read-only guard': "current_setting('transaction_read_only')" in change,
+              'initial six rows': 'v_count <> 6' in change,
+              'final five rows': 'v_count <> 5' in change,
+              'final junho grade': 'v_junho_grade IS DISTINCT FROM 4' in change,
+              'final seoyeon absent': 'v_seoyeon_count <> 0' in change,
+              'dangerous update commented': '-- UPDATE public.students' in change,
+              'dangerous delete commented': '-- DELETE FROM public.students;' in change,
+          }
+          failed = [name for name, ok in change_checks.items() if not ok]
+          if failed:
+              raise SystemExit(f'Chapter 04 update/delete safety mismatch: {failed}')
+          print('Chapter 04 update/delete safety OK')
+
+          presentation = root / 'presentation/chapter04'
+          patch = (presentation / 'chapter04_content_patch.js').read_text(encoding='utf-8')
+          required_patch_terms = [
+              '초기 데이터 상태', '수정 실습 후 상태', '삭제 실습 후 상태',
+              '01_create_students.sql', '02_insert_students.sql',
+              '03_select_students.sql', '04_update_delete_students.sql',
+              'basic_crud.sql은 기존 링크용 통합 참고',
+              '-- UPDATE public.students', '-- DELETE FROM public.students;'
+          ]
+          missing_terms = [term for term in required_patch_terms if term not in patch]
+          if missing_terms:
+              raise SystemExit(f'Chapter 04 presentation alignment terms missing: {missing_terms}')
+
+          theory_loader = (presentation / 'chapter04_theory_slides.js').read_text(encoding='utf-8')
+          practice_loader = (presentation / 'chapter04_practice_slides.js').read_text(encoding='utf-8')
+          script = (presentation / 'chapter04_script.js').read_text(encoding='utf-8')
+          script_html = (presentation / 'chapter04_script.html').read_text(encoding='utf-8')
+          for name, text in [
+              ('theory loader', theory_loader),
+              ('practice loader', practice_loader),
+              ('script runtime', script),
+          ]:
+              if 'chapter04_content_patch.js' not in text:
+                  raise SystemExit(f'Chapter 04 content patch not loaded in {name}')
+          if '../common/script_content_enhancer.js' not in script_html:
+              raise SystemExit('Chapter 04 script enhancer is not loaded')
+          if 'slide.l || slide.k' not in script:
+              raise SystemExit('Chapter 04 script metadata still exposes stale internal labels first')
+          print('Chapter 04 presentation alignment OK')
+
+          image_root = root / 'images/chapter04'
+          svg_names = [
+              'ch04_01_sql_crud_overview.svg',
+              'ch04_02_select_projection_flow.svg',
+              'ch04_03_insert_row_flow.svg',
+              'ch04_04_where_filter_flow.svg',
+              'ch04_05_order_by_sort_flow.svg',
+              'ch04_06_update_safe_flow.svg',
+              'ch04_07_delete_safe_flow.svg',
+              'ch04_08_ai_sql_review_flow.svg',
+          ]
+          missing_svgs = [name for name in svg_names if not (image_root / name).exists()]
+          if missing_svgs:
+              raise SystemExit(f'Chapter 04 SVG files missing: {missing_svgs}')
+          print('Chapter 04 SVG set OK: 8 / 8')
+          PY
