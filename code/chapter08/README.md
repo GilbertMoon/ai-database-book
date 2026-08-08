@@ -28,9 +28,9 @@ students 3
 instructors 2
 courses 3
 enrollments 5
-1001 완료
-1004 취소
-1005 신청
+1001 완료 / recorded_amount 100000
+1004 취소 / recorded_amount 150000
+1005 신청 / recorded_amount 120000
 ```
 
 ## 파일 목록과 실행 순서
@@ -44,13 +44,40 @@ enrollments 5
 
 | 파일 | 설명 |
 | --- | --- |
-| `00_check_course_project.sql` | Chapter 07 객체·행 수·상태·기록 금액 검사 |
-| `01_join_queries.sql` | INNER·다중·LEFT JOIN과 ON/WHERE 비교 |
-| `02_aggregation_queries.sql` | COUNT·SUM·AVG·GROUP BY·FILTER·HAVING |
-| `03_join_aggregation_validation.sql` | 상세·그룹별 결과 검산 |
-| `join_aggregation_practice.sql` | 기존 링크 호환용 읽기 전용 진입점 |
+| `00_check_course_project.sql` | Chapter 07 최종 구조·행 수·상태·관계·기록 금액 자동 사전 검사 |
+| `01_join_queries.sql` | INNER·다중·LEFT JOIN과 ON/WHERE·anti-join 비교 |
+| `02_aggregation_queries.sql` | COUNT·SUM·AVG·GROUP BY·FILTER·HAVING·과대 집계 사례 |
+| `03_join_aggregation_validation.sql` | JOIN·집계 핵심 결과를 자동 판정하는 완료 게이트 |
+| `join_aggregation_practice.sql` | 기존 링크 호환용 읽기 전용 핵심 조회 |
 
-모든 파일은 조회 전용이며 `course_project.table_name` 형식을 사용합니다.
+모든 Chapter 08 SQL은 조회 전용이며 `course_project.table_name` 형식을 사용합니다.
+
+## 00 사전 검사 게이트
+
+`00_check_course_project.sql`은 단순 행 수만 확인하지 않습니다.
+
+```text
+current_database = ai_database_book
+students / instructors / courses / enrollments 존재
+uq_course_enrollments_active 존재
+recorded_amount = NUMERIC(12,0)
+행 수 = 3 / 2 / 3 / 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+전체 = 5 / 590000 / 평균 118000.00
+활성 = 3 / 340000
+취소 제외 = 4 / 440000
+고아 관계 = 0 / 0 / 0
+활성 중복 = 0
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+```
+
+통과 메시지:
+
+```text
+Chapter 08 prerequisite check passed
+```
 
 ## 금액 열
 
@@ -75,6 +102,7 @@ enrollments.recorded_amount
 
 ```text
 전체 평균 recorded_amount = 118000.00
+취소 제외 평균 recorded_amount = 110000.00
 ```
 
 `recorded_amount`는 `NUMERIC(12,0)`이며 `AVG(recorded_amount)`는 `numeric` 결과를 반환합니다.
@@ -94,9 +122,19 @@ COUNT(DISTINCT e.student_id)
 
 LEFT JOIN에서 자식 사건 수를 계산할 때 `COUNT(*)`를 사용하면 자식이 없는 부모도 한 행처럼 보일 수 있습니다.
 
+Chapter 07 기준 데이터에서 강의 303은 취소 제외 신청이 없습니다.
+
+```text
+강의 303
+COUNT(*) = 1
+COUNT(e.id) = 0
+COUNT(DISTINCT e.student_id) = 0
+기록 금액 = 0
+```
+
 ## ON과 WHERE
 
-모든 부모를 유지하면서 연결 대상을 제한하려면 조건을 `ON`에 둡니다.
+모든 부모를 유지하면서 연결 대상을 제한하려면 오른쪽 조건을 `ON`에 둡니다.
 
 ```sql
 LEFT JOIN course_project.enrollments AS e
@@ -104,7 +142,20 @@ LEFT JOIN course_project.enrollments AS e
    AND e.status <> '취소'
 ```
 
-같은 조건을 `WHERE`에 두면 연결 행이 없는 부모가 제거될 수 있습니다.
+학생 기준 예제의 실제 결과:
+
+```text
+ON에 조건 사용 → 학생 3명 유지
+WHERE에 조건 사용 → 취소 제외 신청이 없는 박서연 제외, 학생 2명
+```
+
+취소 제외 신청이 없는 학생 찾기:
+
+```text
+LEFT JOIN ... IS NULL = 1명
+NOT EXISTS = 1명
+결과 = 박서연
+```
 
 ## 집계와 NULL
 
@@ -120,16 +171,53 @@ SUM·AVG·MIN·MAX
 
 ## 과대 집계 주의
 
-강의와 신청을 JOIN하면 강의 한 행이 신청 수만큼 반복됩니다. 이 상태에서 `SUM(c.price)`를 계산하면 강의 가격이 과대 합산될 수 있습니다. 강의 가격 합계가 질문이면 신청 테이블을 JOIN하지 않고 강의 수준에서 계산합니다.
-
-## 검산 원칙
+강의와 신청을 JOIN하면 강의 한 행이 신청 수만큼 반복됩니다. 이 상태에서 `SUM(c.price)`를 계산하면 강의 가격이 과대 합산될 수 있습니다.
 
 ```text
-상태별 건수 합 = 전체 5
-상태별 기록 금액 합 = 전체 590000
-활성 건수 합 = 3
-활성 기록 금액 합 = 340000
-강의별 취소 제외 건수 합 = 4
-강의별 취소 제외 기록 금액 합 = 440000
-INNER JOIN 결과 행 수 = enrollments 5
+강사 201
+실제 강의: 301, 302 두 개
+신청 JOIN 뒤에는 두 강의가 각각 신청 수만큼 반복
 ```
+
+강의 가격 합계가 질문이면 신청 테이블을 JOIN하지 않고 강의 수준에서 계산합니다. `SUM(DISTINCT c.price)` 역시 서로 다른 강의의 가격이 같을 때 하나를 제거할 수 있으므로 일반적인 해결책이 아닙니다.
+
+## 03 자동 완료 게이트
+
+`03_join_aggregation_validation.sql`은 다음 결과를 자동 판정하고 하나라도 다르면 예외를 발생시킵니다.
+
+```text
+상세 신청 수 = 5
+상태별 건수 합 = 5
+상세 기록 금액 = 590000
+강의별 기록 금액 합 = 590000
+활성 상세·그룹 = 3 / 340000
+취소 제외 상세·강의별 = 4 / 440000
+INNER JOIN 결과 = 5
+고아 관계 = 0 / 0 / 0
+anti-join 두 방식 = 각각 1명
+ON 조건 학생 수 = 3
+WHERE 조건 학생 수 = 2
+강의 301 = 2건 / 2명 / 200000
+강의 302 = 2건 / 2명 / 240000
+강의 303 = LEFT JOIN 결과 1행 / 실제 신청 0 / 고유 학생 0 / 0원
+강사 201 = 강의 2 / 신청 4 / 취소 제외 4
+강사 202 = 강의 1 / 신청 1 / 취소 제외 0
+```
+
+통과 메시지:
+
+```text
+Chapter 08 join and aggregation validation passed
+```
+
+## 최종 검산 원칙
+
+```text
+전체 신청 이력: 5 / 590000
+활성 신청: 3 / 340000
+취소 제외 신청 이력: 4 / 440000
+INNER JOIN 결과: 5행
+고아 관계: 0행
+```
+
+복잡한 SQL 결과가 이 기준과 다르면 `DISTINCT`나 `COALESCE`를 먼저 추가하지 않고 결과 한 행의 기준, JOIN 경로, 상태 범위, 조건 위치와 집계 대상을 먼저 확인합니다.
