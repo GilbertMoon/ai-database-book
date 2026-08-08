@@ -62,7 +62,7 @@ presentation/chapter08/index.html
 
 ---
 
-## 1. 가장 큰 정합성 문제: `paid_amount` 구용어
+## 1. 가장 큰 정합성 문제: 과거 결제형 금액 열 이름
 
 Chapter 07의 현재 스키마는 다음과 같습니다.
 
@@ -70,12 +70,12 @@ Chapter 07의 현재 스키마는 다음과 같습니다.
 course_project.enrollments.recorded_amount NUMERIC(12,0)
 ```
 
-그러나 Chapter 08의 본문·워크북·구성안·이론 발표자료와 일부 Mermaid/SVG에는 과거 `paid_amount`가 남아 있었습니다. 본문의 SQL 예제를 그대로 실행하면 현재 Chapter 07 스키마에서 컬럼 오류가 발생할 수 있는 상태였습니다.
+그러나 Chapter 08의 본문·워크북·구성안·이론 발표자료와 일부 Mermaid/SVG에는 과거 결제형 금액 열 이름이 남아 있었습니다. 본문의 SQL 예제를 그대로 실행하면 현재 Chapter 07 스키마에서 컬럼 오류가 발생할 수 있는 상태였습니다.
 
 이번 점검에서 Chapter 08 범위의 구용어를 다음처럼 통일했습니다.
 
 ```text
-paid_amount
+과거 금액 열 이름
 → recorded_amount
 
 결제금액
@@ -335,7 +335,7 @@ join_aggregation_practice.sql
 보완:
 
 ```text
-발표 강의안의 paid_amount 제거
+발표 강의안의 과거 금액 열 이름 제거
 실습 장표에 recorded_amount 실제 열 이름 표시
 03 자동 완료 게이트와 통과 메시지 연결
 자산 버전 = 20260809a
@@ -362,7 +362,7 @@ ch08_07_where_group_having_order
 ch08_08_ai_join_sql_review_flow
 ```
 
-01·03 도식에 남아 있던 `paid_amount`를 `recorded_amount`로 수정했습니다. 06 도식의 `결제금액` 표현도 `기록 금액`으로 수정했습니다.
+01·03 도식에 남아 있던 과거 금액 열 이름을 `recorded_amount`로 수정했습니다. 06 도식의 `결제금액` 표현도 `기록 금액`으로 수정했습니다.
 
 `ch08_06_course_revenue_summary` 파일명은 기존 링크 호환을 위해 유지하지만, 현재 표시 의미는 실제 회계 매출이 아니라 기록 금액 집계입니다.
 
@@ -383,7 +383,7 @@ JavaScript 문법
 본문 23개 절
 이론 20 / 실습 20
 화면 구성·발표 스크립트 존재
-paid_amount 잔존 차단
+과거 금액 열 이름 잔존 차단
 recorded_amount·기준값 정합성
 발표 자산 버전·TTS·스크립트 연결
 조회 SQL의 DML·DDL 부재

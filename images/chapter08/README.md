@@ -68,7 +68,7 @@ LEFT JOIN 결과 6행
 
 ## Mermaid 원본과 SVG
 
-모든 SVG에는 같은 이름의 `.mmd` 원본이 있습니다. `paid_amount` 구용어는 Chapter 08의 Mermaid·SVG 전체에서 제거하고 `recorded_amount`로 통일합니다.
+모든 SVG에는 같은 이름의 `.mmd` 원본이 있습니다. 과거 결제형 금액 열 이름는 Chapter 08의 Mermaid·SVG 전체에서 제거하고 `recorded_amount`로 통일합니다.
 
 ## 검수 기준
 
@@ -78,7 +78,7 @@ LEFT JOIN 결과 6행
 - width="100%"와 viewBox 유지
 - role="img", title, desc 유지
 - 외부 CSS·JS·웹폰트·foreignObject 미사용
-- paid_amount 구용어 없음
+- 과거 결제형 금액 열 이름 없음
 - PK·FK 경로가 본문과 일치
 - 그림 번호와 캡션이 현재 본문 순서와 일치
 - GitHub·브라우저·Word·PDF·eBook 실제 렌더링은 수동 확인
