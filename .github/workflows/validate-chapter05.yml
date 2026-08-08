@@ -1,0 +1,227 @@
+name: Validate Chapter 05
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - book/chapter05/**
+      - code/chapter05/**
+      - images/chapter05/**
+      - presentation/chapter05/**
+      - presentation/common/tts_pronunciation.js
+      - presentation/common/script_content_enhancer.js
+      - .github/workflows/validate-chapter05.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Chapter 05 JavaScript syntax
+        run: |
+          node --check presentation/chapter05/chapter05_content_patch.js
+          node --check presentation/chapter05/chapter05_intro_patch.js
+          node --check presentation/chapter05/chapter05_navigation.js
+          node --check presentation/chapter05/chapter05_player.js
+          node --check presentation/chapter05/chapter05_script.js
+          node --check presentation/chapter05/chapter05_theory_slides.js
+          node --check presentation/chapter05/chapter05_practice_slides.js
+
+      - name: Check Chapter 05 content and lab safety
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+          chapter = (root / 'book/chapter05/chapter05.md').read_text(encoding='utf-8')
+          headings = re.findall(r'^##\s+(\d+)\.\s+', chapter, flags=re.M)
+          if headings != [str(i) for i in range(1, 18)]:
+              raise SystemExit(f'Chapter 05 section sequence mismatch: {headings}')
+          book_terms = [
+              'members: 3행', 'books: 3행', 'loans: 4행', '미반납 대여: 3행',
+              '대여 대상으로 관리하는 도서 한 건',
+              'isbn VARCHAR(20) NOT NULL',
+              'title VARCHAR(200) NOT NULL', 'author VARCHAR(100) NOT NULL'
+          ]
+          missing = [term for term in book_terms if term not in chapter]
+          if missing:
+              raise SystemExit(f'Chapter 05 book alignment terms missing: {missing}')
+          print('Chapter 05 book structure and sample state OK')
+
+          code_root = root / 'code/chapter05'
+          required = [
+              '01_library_schema.sql', '02_library_seed.sql', '03_library_validation.sql',
+              'library_schema.sql', 'library_seed.sql', 'library_validation.sql',
+              'reset_library.sql', 'README.md'
+          ]
+          missing = [name for name in required if not (code_root / name).exists()]
+          if missing:
+              raise SystemExit(f'Chapter 05 code files missing: {missing}')
+
+          schema_files = ['01_library_schema.sql', 'library_schema.sql']
+          for name in schema_files:
+              text = (code_root / name).read_text(encoding='utf-8')
+              checks = {
+                  'database guard': "current_database() <> 'ai_database_book'" in text,
+                  'read-only guard': "current_setting('transaction_read_only')" in text,
+                  'public guard': "to_regnamespace('public')" in text,
+                  'atomic begin': re.search(r'^BEGIN;$', text, flags=re.M) is not None,
+                  'atomic commit': re.search(r'^COMMIT;$', text, flags=re.M) is not None,
+                  'members table': 'CREATE TABLE public.members' in text,
+                  'books table': 'CREATE TABLE public.books' in text,
+                  'loans table': 'CREATE TABLE public.loans' in text,
+                  'book title width': 'title VARCHAR(200) NOT NULL' in text,
+                  'author width': 'author VARCHAR(100) NOT NULL' in text,
+                  'isbn required': 'isbn VARCHAR(20) NOT NULL' in text,
+                  'empty-state validation': 'v_member_count <> 0 OR v_book_count <> 0 OR v_loan_count <> 0' in text,
+              }
+              failed = [label for label, ok in checks.items() if not ok]
+              if failed:
+                  raise SystemExit(f'{name} mismatch: {failed}')
+          print('Chapter 05 schema safety OK')
+
+          seed_files = ['02_library_seed.sql', 'library_seed.sql']
+          for name in seed_files:
+              text = (code_root / name).read_text(encoding='utf-8')
+              checks = {
+                  'database guard': "current_database() <> 'ai_database_book'" in text,
+                  'read-only guard': "current_setting('transaction_read_only')" in text,
+                  'atomic begin': re.search(r'^BEGIN;$', text, flags=re.M) is not None,
+                  'atomic commit': re.search(r'^COMMIT;$', text, flags=re.M) is not None,
+                  'members=3': 'v_member_count <> 3' in text,
+                  'books=3': 'v_book_count <> 3' in text,
+                  'loans=4': 'v_loan_count <> 4' in text,
+                  'open=3': 'v_open_loan_count <> 3' in text,
+                  'member101=2': 'v_member_101_count <> 2' in text,
+                  'book201=2': 'v_book_201_count <> 2' in text,
+                  'member identity': 'RESTART WITH 104' in text,
+                  'book identity': 'RESTART WITH 204' in text,
+                  'loan identity': 'RESTART WITH 1005' in text,
+              }
+              failed = [label for label, ok in checks.items() if not ok]
+              if failed:
+                  raise SystemExit(f'{name} mismatch: {failed}')
+          print('Chapter 05 seed safety and sample state OK')
+
+          validation_files = ['03_library_validation.sql', 'library_validation.sql']
+          for name in validation_files:
+              text = (code_root / name).read_text(encoding='utf-8')
+              terms = [
+                  'v_member_count <> 3', 'v_book_count <> 3', 'v_loan_count <> 4',
+                  'v_open_loan_count <> 3', 'v_member_101_count <> 2',
+                  'v_book_201_count <> 2', 'v_orphan_member_count <> 0',
+                  'v_orphan_book_count <> 0', 'v_book_201_invalid_order <> 0',
+                  'Chapter 05 library model validation passed'
+              ]
+              missing = [term for term in terms if term not in text]
+              if missing:
+                  raise SystemExit(f'{name} validation terms missing: {missing}')
+          print('Chapter 05 relationship validation OK')
+
+          reset = (code_root / 'reset_library.sql').read_text(encoding='utf-8')
+          reset_terms = [
+              "current_database() <> 'ai_database_book'",
+              "current_setting('transaction_read_only')",
+              "to_regnamespace('public')",
+              'DROP TABLE IF EXISTS public.loans;',
+              'DROP TABLE IF EXISTS public.books;',
+              'DROP TABLE IF EXISTS public.members;'
+          ]
+          missing = [term for term in reset_terms if term not in reset]
+          if missing:
+              raise SystemExit(f'Chapter 05 reset safety missing: {missing}')
+          if not (reset.index('public.loans') < reset.index('public.books') < reset.index('public.members')):
+              raise SystemExit('Chapter 05 reset drop order is not child-to-parent')
+          print('Chapter 05 reset safety OK')
+
+          presentation = root / 'presentation/chapter05'
+          practice_plan = (presentation / 'chapter05_practice_lecture_plan.md').read_text(encoding='utf-8')
+          practice_titles = re.findall(r'^##\s+(\d+)\.\s+(.+)$', practice_plan, flags=re.M)
+          if len(practice_titles) != 16:
+              raise SystemExit(f'Expected 16 Chapter 05 practice plan sections, found {len(practice_titles)}')
+          practice_sections = re.split(r'(?=^##\s+\d+\.\s+)', practice_plan, flags=re.M)[1:]
+          for index, section in enumerate(practice_sections, start=1):
+              if '**화면 구성**' not in section or '**스크립트**' not in section:
+                  raise SystemExit(f'Chapter 05 practice plan section {index} missing screen or script content')
+          required_practice = [
+              '01_library_schema.sql', '02_library_seed.sql', '03_library_validation.sql',
+              'members: 3행', 'books: 3행', 'loans: 4행', '미반납: 3행',
+              '회원 101', '도서 201', 'title VARCHAR(200) NOT NULL',
+              'author VARCHAR(100) NOT NULL', 'isbn VARCHAR(20) NOT NULL'
+          ]
+          missing = [term for term in required_practice if term not in practice_plan]
+          if missing:
+              raise SystemExit(f'Chapter 05 practice plan alignment missing: {missing}')
+          stale = ['members: 2행', 'books: 2행', 'loans: 3행', 'title VARCHAR(100) NOT NULL', 'author VARCHAR(50) NOT NULL', 'isbn VARCHAR(30)']
+          present = [term for term in stale if term in practice_plan]
+          if present:
+              raise SystemExit(f'Chapter 05 practice plan stale terms remain: {present}')
+          print('Chapter 05 practice lecture plan OK: 16 sections')
+
+          theory_plan = (presentation / 'chapter05_theory_lecture_plan.md').read_text(encoding='utf-8')
+          theory_sections = re.split(r'(?=^##\s+\d+\.\s+)', theory_plan, flags=re.M)[1:]
+          if not theory_sections:
+              raise SystemExit('Chapter 05 theory plan has no numbered sections')
+          for index, section in enumerate(theory_sections, start=1):
+              if '**화면 구성**' not in section or '**스크립트**' not in section:
+                  raise SystemExit(f'Chapter 05 theory plan section {index} missing screen or script content')
+          print(f'Chapter 05 theory lecture plan OK: {len(theory_sections)} sections')
+
+          patch = (presentation / 'chapter05_content_patch.js').read_text(encoding='utf-8')
+          patch_terms = [
+              '대여 대상으로 관리하는 도서 한 건',
+              '01_library_schema.sql', '02_library_seed.sql', '03_library_validation.sql',
+              'title VARCHAR(200) NOT NULL', 'author VARCHAR(100) NOT NULL',
+              'isbn VARCHAR(20) NOT NULL', 'members: 3행', 'books: 3행', 'loans: 4행'
+          ]
+          missing = [term for term in patch_terms if term not in patch]
+          if missing:
+              raise SystemExit(f'Chapter 05 content patch terms missing: {missing}')
+
+          files_to_check = [
+              'chapter05_theory_slides.js', 'chapter05_practice_slides.js',
+              'chapter05_theory_presentation.html', 'chapter05_practice_presentation.html',
+              'chapter05_script.js'
+          ]
+          for name in files_to_check:
+              text = (presentation / name).read_text(encoding='utf-8')
+              if 'chapter05_content_patch.js' not in text:
+                  raise SystemExit(f'Chapter 05 content patch not loaded in {name}')
+          script_html = (presentation / 'chapter05_script.html').read_text(encoding='utf-8')
+          script = (presentation / 'chapter05_script.js').read_text(encoding='utf-8')
+          if '../common/tts_pronunciation.js' not in script_html:
+              raise SystemExit('Chapter 05 TTS normalizer is not loaded')
+          if '../common/script_content_enhancer.js' not in script_html:
+              raise SystemExit('Chapter 05 script content enhancer is not loaded')
+          if 'slide.l || slide.k' not in script:
+              raise SystemExit('Chapter 05 script metadata does not prefer human-readable label')
+          print('Chapter 05 presentation and script alignment OK')
+
+          image_root = root / 'images/chapter05'
+          names = [
+              'ch05_01_modeling_process',
+              'ch05_02_entity_attribute_classification',
+              'ch05_03_primary_foreign_key_relationship',
+              'ch05_04_one_to_many_relationship',
+              'ch05_05_many_to_many_bridge_table',
+              'ch05_06_library_erd_overview',
+              'ch05_07_erd_to_sql_flow',
+              'ch05_08_ai_erd_review_flow',
+          ]
+          missing = []
+          for stem in names:
+              for suffix in ['.mmd', '.svg']:
+                  if not (image_root / f'{stem}{suffix}').exists():
+                      missing.append(f'{stem}{suffix}')
+          if missing:
+              raise SystemExit(f'Chapter 05 diagram assets missing: {missing}')
+          print('Chapter 05 Mermaid/SVG set OK: 8 pairs')
+          PY
