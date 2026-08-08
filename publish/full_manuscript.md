@@ -6947,6 +6947,10 @@ AI가 제안한 인덱스를 어떻게 검증하는가?
 
 # Chapter 10. 실행 계획으로 인덱스 효과 검증하기
 
+> **검증 기준 버전**
+>
+> 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. **B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.
+
 ---
 
 ## 이 장에서 살펴볼 내용
@@ -6972,7 +6976,7 @@ Chapter 08에서는 `course_project` 데이터를 JOIN하고 집계했으며, Ch
 - `Seq Scan`, `Index Scan`, `Bitmap Heap Scan`
 - 선택도와 반환 행 수
 - `WHERE`, `JOIN`, `ORDER BY`, `LIMIT` 기반 후보 찾기
-- 복합 인덱스의 선두 컬럼, 컬럼 순서와 Skip Scan
+- 복합 인덱스의 선두 컬럼, 컬럼 순서와 PostgreSQL 18+ Skip Scan
 - `EXPLAIN`, `EXPLAIN ANALYZE`, `BUFFERS`
 - 예상 행 수와 실제 행 수 비교
 - 실험 데이터와 통계 조건 통제
@@ -7026,7 +7030,7 @@ performance_lab.enrollments
 학생별 신청 10건
 강의별 신청 50건
 동일 학생·강의 조합은 한 번만 생성
-신청 당시 강의 가격을 paid_amount에 저장
+신청 당시 강의 가격을 recorded_amount에 저장
 동일 학생·강의 활성 신청 중복 0건
 ```
 
@@ -7431,7 +7435,7 @@ SELECT
     s.name AS student_name,
     c.title AS course_title,
     e.status,
-    e.paid_amount
+    e.recorded_amount
 FROM performance_lab.enrollments AS e
 JOIN performance_lab.students AS s
     ON s.id = e.student_id
@@ -7446,12 +7450,12 @@ WHERE e.student_id = 5000;
 
 ---
 
-## 12. 복합 인덱스, 선두 컬럼과 Skip Scan
+## 12. 복합 인덱스, 선두 컬럼과 PostgreSQL 18+ Skip Scan
 
 강의별 특정 상태의 신청을 자주 조회한다고 가정합니다.
 
 ```sql
-SELECT id, student_id, course_id, status, paid_amount
+SELECT id, student_id, course_id, status, recorded_amount
 FROM performance_lab.enrollments
 WHERE course_id = 1500
   AND status = '수강중';
@@ -7476,7 +7480,7 @@ ON performance_lab.enrollments(course_id, status);
 | `course_id = 1500 AND status = '수강중'` | 두 컬럼 모두 조건에 사용 가능 |
 | `status = '수강중'` | 일반적으로 제한적이며 반환 비율도 높음 |
 
-선두 컬럼 조건이 없다고 인덱스가 절대 사용되지 않는 것은 아닙니다. PostgreSQL은 선두 컬럼의 고유값 수와 비용이 적절하면 **Skip Scan**을 선택할 수 있습니다. 다만 이 데이터에서는 `course_id` 고유값이 약 2,000개이고 `수강중` 행도 30,001건이므로 `Seq Scan`이 더 합리적일 가능성이 큽니다.
+선두 컬럼 조건이 없다고 인덱스가 절대 사용되지 않는 것은 아닙니다. PostgreSQL은 선두 컬럼의 고유값 수와 비용이 적절하면 **PostgreSQL 18+ Skip Scan**을 선택할 수 있습니다. 다만 이 데이터에서는 `course_id` 고유값이 약 2,000개이고 `수강중` 행도 30,001건이므로 `Seq Scan`이 더 합리적일 가능성이 큽니다.
 
 실제 선택은 실행 계획으로 확인합니다.
 
@@ -7705,7 +7709,7 @@ PostgreSQL performance_lab.enrollments는 100,005행입니다.
 인덱스 후보를 제안하되 다음을 포함해 주세요.
 1. 쿼리의 기준 행과 조건
 2. 기존 PK·UNIQUE·수동 인덱스와 중복 여부
-3. 컬럼 순서와 Skip Scan 가능성 근거
+3. 컬럼 순서와 PostgreSQL 18+ Skip Scan 가능성 근거
 4. 예상되는 읽기 이점
 5. INSERT·UPDATE·DELETE 비용
 6. EXPLAIN ANALYZE 전후 검증 SQL
@@ -7754,7 +7758,7 @@ EXPLAIN ANALYZE를 UPDATE·DELETE에 무심코 적용
 8. `EXPLAIN ANALYZE`가 쿼리를 실제 실행한다는 사실을 잊는다.
 9. 실행 계획만 보고 결과 행 동일성을 확인했다고 생각한다.
 10. 다른 SQL이나 다른 통계 상태를 전후에 비교한다.
-11. 복합 인덱스의 컬럼 순서와 Skip Scan 가능성을 단정적으로 해석한다.
+11. 복합 인덱스의 컬럼 순서와 PostgreSQL 18+ Skip Scan 가능성을 단정적으로 해석한다.
 12. 실행 시간 한 번만 비교한다.
 13. 읽기 성능만 보고 쓰기·저장 비용을 무시한다.
 14. 운영 환경에 일반 `CREATE INDEX`를 바로 적용한다.
@@ -7826,7 +7830,7 @@ EXPLAIN ANALYZE는 실제 실행하지만 일반 결과 행 대신 계획을 출
 ```text
 선두 컬럼 조건이 일반적으로 중요하다.
 후행 컬럼 단독 조건은 제한적일 수 있다.
-PostgreSQL은 데이터 분포와 비용에 따라 Skip Scan을 선택할 수 있으므로 실제 계획을 확인한다.
+PostgreSQL은 데이터 분포와 비용에 따라 PostgreSQL 18+ Skip Scan을 선택할 수 있으므로 실제 계획을 확인한다.
 ```
 
 ### 운영 인덱스 생성
@@ -7857,7 +7861,7 @@ idx_scan=0은 즉시 삭제 명령이 아니다.
 6. Seq Scan은 항상 나쁜 계획이 아니며 Index Scan도 항상 최선은 아니다.
 7. 기준과 사후 측정은 같은 데이터·통계·SQL을 사용한다.
 8. 실행 계획과 결과 행 동일성은 별도로 검증한다.
-9. 복합 인덱스는 선두 컬럼과 Skip Scan 가능성을 실행 계획으로 확인한다.
+9. 복합 인덱스는 선두 컬럼과 PostgreSQL 18+ Skip Scan 가능성을 실행 계획으로 확인한다.
 10. 인덱스는 조회를 줄이는 대신 저장 공간과 쓰기 비용을 증가시킨다.
 11. 운영 인덱스 생성은 잠금과 CONCURRENTLY를 검토한다.
 12. AI 추천은 실행 계획과 검증 결과가 있을 때만 적용 후보가 된다.
