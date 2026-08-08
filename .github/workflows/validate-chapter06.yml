@@ -185,7 +185,8 @@ jobs:
               'fk_loans_nf_member', 'fk_loans_nf_book',
               'chk_loans_nf_due_date', 'chk_loans_nf_returned_date',
               'uq_loans_nf_active_book', 'v_member_101_count <> 2',
-              'Chapter 06 integrity test baseline preserved'
+              'Chapter 06 integrity test baseline preserved',
+              'ISBN-BND-LOAN-001'
           ]:
               if term not in tests:
                   raise SystemExit(f'05 integrity test term missing: {term}')
@@ -234,7 +235,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1800,'경계값 테스트 도서','테스트 저자',2026,'ISBN-BOUNDARY-LOAN-001');"
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1800,'경계값 테스트 도서','테스트 저자',2026,'ISBN-BND-LOAN-001');"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.loans_nf (id,member_id,book_id,borrowed_at,due_at,returned_at) VALUES (1801,101,1800,DATE '2026-05-01',DATE '2026-05-01',DATE '2026-05-01');"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "DELETE FROM public.loans_nf WHERE id=1801; DELETE FROM public.books_nf WHERE id=1800;"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1802,'연도 미상 도서','익명',NULL,'ISBN-BOUNDARY-001'); DELETE FROM public.books_nf WHERE id=1802;"
