@@ -41,6 +41,9 @@ jobs:
           node --check presentation/chapter05/chapter05_navigation.js
           node --check presentation/chapter05/chapter05_player.js
           node --check presentation/chapter05/chapter05_script.js
+          node --check presentation/chapter06/chapter06_navigation.js
+          node --check presentation/chapter06/chapter06_player.js
+          node --check presentation/chapter06/chapter06_script.js
           node --check presentation/common/tts_pronunciation.js
 
       - name: Check Chapter 01 navigation coverage
@@ -113,6 +116,44 @@ jobs:
                   raise SystemExit(f'Chapter 05 {block} navigation mismatch: missing={missing}, extra={extra}')
               print(f'Chapter 05 {block} navigation coverage OK: {len(slide_keys)} / {expected} slides')
           PY
+
+      - name: Check Chapter 06 navigation coverage
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const root = 'presentation/chapter06';
+
+          function load(files) {
+            const context = { window: {}, console };
+            context.window.window = context.window;
+            vm.createContext(context);
+            for (const file of files) {
+              vm.runInContext(fs.readFileSync(`${root}/${file}`, 'utf8'), context, { filename: file });
+            }
+            vm.runInContext(fs.readFileSync(`${root}/chapter06_navigation.js`, 'utf8'), context, { filename: 'chapter06_navigation.js' });
+            return { slides: context.window.CH6_SLIDES || [], navigation: context.window.CH6Navigation };
+          }
+
+          const cases = [
+            ['theory', ['chapter06_theory_slides.js', 'chapter06_theory_patch.js'], 26],
+            ['practice', ['chapter06_practice_slides.js', 'chapter06_practice_patch.js'], 16],
+          ];
+
+          for (const [block, files, expected] of cases) {
+            const { slides, navigation } = load(files);
+            if (slides.length !== expected) throw new Error(`Expected ${expected} Chapter 06 ${block} slides, found ${slides.length}`);
+            if (!navigation) throw new Error('Chapter 06 navigation module did not load');
+            const missing = slides.map((slide, index) => ({ index, slide, key: navigation.planKey(slide, block) }))
+              .filter((entry) => !entry.key)
+              .map((entry) => `${entry.index + 1}:${entry.slide.t || entry.slide.l || entry.slide.k || '?'}`);
+            if (missing.length) throw new Error(`Chapter 06 ${block} missing navigation plans: ${missing.join(', ')}`);
+            const emptyNarration = slides.filter((slide) => !String(slide.s || '').trim()).length;
+            const emptyBody = slides.filter((slide) => !String(slide.h || '').trim()).length;
+            if (emptyNarration || emptyBody) throw new Error(`Chapter 06 ${block} empty content: narration=${emptyNarration}, body=${emptyBody}`);
+            console.log(`Chapter 06 ${block} navigation coverage OK: ${slides.length} / ${expected} slides`);
+          }
+          NODE
 
       - name: Normalize narration sources and script pages
         run: python scripts/normalize_presentation_tts_terms.py --apply
