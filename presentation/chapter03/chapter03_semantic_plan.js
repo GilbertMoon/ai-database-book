@@ -60,7 +60,7 @@
       'SETUP CHECK RUN': { sequence: ['item'] },
       'CHECK RESULT': { sequence: ['row'] },
       'VALIDATE RUN': { groups: [['codebox:*'], ['body:0']] },
-      'SAVE RECORD': { groups: [['code:0','code:1','code:2'], ['code:3','code:4','code:5'], ['code:6','code:7'], ['code:8','code:9']] },
+      'SAVE RECORD': { groups: [['code:0','code:1','code:2'], ['code:3','code:4','code:5'], ['code:6','code:7','code:8'], ['code:9','code:10']] },
       'SECRET CHECK': { sequence: ['item'] },
       'ERROR CONNECTION REFUSED': { sequence: ['card'] },
       'ERROR PASSWORD': { sequence: ['card'] },
