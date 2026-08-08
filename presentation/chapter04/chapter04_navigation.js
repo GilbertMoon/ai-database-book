@@ -29,7 +29,7 @@
 
   const splitSentences = (value) => {
     const raw = String(value || '').trim();
-    if (!raw) return ['핵심 내용을 설명합니다.'];
+    if (!raw) return [];
     const paragraphs = raw.split(/\n\s*\n/).map((part) => part.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const units = [];
     paragraphs.forEach((paragraph) => {
@@ -88,7 +88,6 @@
     .replace(/그레이드/g, 'grade')
     .replace(/크리에이티드 앳/g, 'created at')
     .replace(/타임스탬프 위드 타임존/g, 'timestamptz')
-    .replace(/티아이엠이에스티에이엠피티제트/g, 'timestamptz')
     .replace(/디폴트 커런트 타임스탬프/g, 'default current timestamp')
     .replace(/낫 널/g, 'not null')
     .replace(/유니크/g, 'unique')
@@ -382,7 +381,7 @@
   };
 
   const buildSteps = (slide) => {
-    if (!slide) return [{ text: '핵심 내용을 설명합니다.', focusKeys: [] }];
+    if (!slide) return [];
     if (slide.__chapter04Steps) return slide.__chapter04Steps;
 
     const sentences = splitSentences(slide.s);

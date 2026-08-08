@@ -42,7 +42,7 @@
   });
 
   const steps = (index = slideIndex) => navigation?.buildSteps(slides[index]) || [{
-    text: String(slides[index]?.s || '핵심 내용을 설명합니다.'),
+    text: String(slides[index]?.s || ''),
     focusKeys: []
   }];
   const maxStep = (index = slideIndex) => steps(index).length;
