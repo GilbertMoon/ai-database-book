@@ -1,11 +1,20 @@
 (() => {
+  'use strict';
+
   const CHANNEL = 'chapter07-presentation-sync';
+  const ASSET_VERSION = '20260808a';
   const app = document.getElementById('app');
   if (!app) return;
+
   const block = document.body?.dataset?.chapter07Block === 'practice' ? 'practice' : 'theory';
   const blockLabel = block === 'practice' ? '실습' : '이론';
+  const navigation = window.CH7Navigation;
   const icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>';
-  let slides = [], slideIndex = 0, stepIndex = 0, scriptWindow = null, booted = false;
+  let slides = [];
+  let slideIndex = 0;
+  let stepIndex = 0;
+  let scriptWindow = null;
+  let booted = false;
 
   function parseHash() {
     const raw = location.hash.slice(1);
@@ -16,69 +25,24 @@
     return { slideIndex: Math.max(0, (Number(slide) || 1) - 1), stepIndex: Math.max(0, Number(step) || 0) };
   }
 
-  function scriptSegments(slide) {
-    const paragraphs = String(slide?.s || '').trim().split(/\n\s*\n/).map(value => value.replace(/\s+/g, ' ').trim()).filter(Boolean);
-    if (paragraphs.length > 1) return paragraphs;
-    const sentences = (paragraphs[0]?.match(/[^.!?。]+[.!?。]?/g) || []).map(value => value.trim()).filter(Boolean);
-    if (sentences.length <= 1) return paragraphs.length ? paragraphs : ['핵심 내용을 설명합니다.'];
-    const size = Math.max(1, Math.ceil(sentences.length / 4));
-    const result = [];
-    for (let index = 0; index < sentences.length; index += size) result.push(sentences.slice(index, index + size).join(' '));
-    return result;
-  }
-
-  const maxStep = (index = slideIndex) => Number(slides[index]?.steps || scriptSegments(slides[index]).length || 1);
-
-  function focusTargets(root) {
-    const explicit = [...root.querySelectorAll('[data-focus-step]')];
-    if (explicit.length) return explicit;
-    const selectors = [
-      '.card', '.flow-step', '.road-step', '.path-node', '.relation-node', '.code-line',
-      '.bullet-list li', '.table-wrap tbody tr', '.quote', '.prompt-box', 'pre',
-      '.expect', '.note', '.callout', '.step-box', '.rule', '.decision', '.question',
-      '.test-case', '.success', '.failure', '.error', '.warning', '.result', '.scenario',
-      '.example', '.screen-text', '.pill', '.chip', 'article'
-    ];
-    let targets = [...new Set(selectors.flatMap(selector => [...root.querySelectorAll(selector)]))];
-    targets = targets.filter(element => !targets.some(other => other !== element && element.contains(other)));
-    if (!targets.length) targets = [...root.children].filter(element => !['H1', 'H2'].includes(element.tagName));
-    return targets;
-  }
-
-  function prepareFocus() {
-    const root = app.querySelector('.body');
-    if (!root) return;
-    const targets = focusTargets(root);
-    const total = Math.max(1, maxStep());
-    targets.forEach((element, index) => {
-      element.classList.add('focus-target');
-      if (!element.dataset.focusStep) {
-        const from = Math.floor(index * total / Math.max(1, targets.length)) + 1;
-        const to = Math.max(from, Math.floor((index + 1) * total / Math.max(1, targets.length)));
-        element.dataset.focusFrom = String(Math.min(total, from));
-        element.dataset.focusTo = String(Math.min(total, to));
-      }
-    });
-  }
+  const stepsFor = (index = slideIndex) => navigation
+    ? navigation.buildSteps(slides[index], index, block)
+    : [{ text: String(slides[index]?.s || ''), focusKeys: [] }];
+  const maxStep = (index = slideIndex) => Math.max(1, stepsFor(index).length);
 
   function applyFocus() {
     const root = app.querySelector('.body');
     if (!root) return;
-    root.querySelectorAll('[data-focus-step],[data-focus-from]').forEach(element => {
-      const exact = Number(element.dataset.focusStep || 0);
-      const from = Number(element.dataset.focusFrom || exact);
-      const to = Number(element.dataset.focusTo || exact);
-      const active = stepIndex > 0 && stepIndex >= from && stepIndex <= to;
-      element.classList.toggle('focus-active', active);
-      element.classList.toggle('focus-muted', stepIndex > 0 && !active);
-    });
+    if (navigation) navigation.applyFocus(root, slides[slideIndex], slideIndex, stepIndex, block);
     const state = document.getElementById('state');
     if (state) state.textContent = stepIndex === 0 ? '전체 보기' : `강조 ${stepIndex} / ${maxStep()}`;
   }
 
   function updateButtons() {
-    document.getElementById('previousButton')?.toggleAttribute('disabled', slideIndex === 0 && stepIndex === 0);
-    document.getElementById('nextButton')?.toggleAttribute('disabled', slideIndex === slides.length - 1 && stepIndex === maxStep());
+    const previousButton = document.getElementById('previousButton');
+    const nextButton = document.getElementById('nextButton');
+    if (previousButton) previousButton.disabled = slideIndex === 0 && stepIndex === 0;
+    if (nextButton) nextButton.disabled = slideIndex === slides.length - 1 && stepIndex === maxStep();
   }
 
   function render() {
@@ -87,8 +51,7 @@
     app.innerHTML = `<section class="slide"><div class="head"><span class="k">${slide.k || ''}</span><div class="head-actions"><span class="l">${slide.l || blockLabel}</span><span class="counter">${String(slideIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><button class="script-icon" id="scriptButton" type="button" title="발표 스크립트 열기" aria-label="현재 슬라이드 발표 스크립트 창 열기">${icon}</button></div></div><div class="body">${slide.h || ''}</div></section><a class="home" href="index.html">목차</a><div class="num">Chapter 07 · ${blockLabel}</div><div class="step-state" id="state" aria-live="polite"></div><nav class="ctrl"><button class="btn" id="previousButton" aria-label="이전 강조 또는 슬라이드">←</button><button class="btn" id="nextButton" aria-label="다음 강조 또는 슬라이드">→</button></nav><div class="track"><div class="bar" style="width:${((slideIndex + 1) / slides.length) * 100}%"></div></div>`;
     document.getElementById('previousButton').onclick = previous;
     document.getElementById('nextButton').onclick = next;
-    document.getElementById('scriptButton').onclick = event => { event.stopPropagation(); openScript(); };
-    prepareFocus();
+    document.getElementById('scriptButton').onclick = (event) => { event.stopPropagation(); openScript(); };
     applyFocus();
     updateButtons();
     history.replaceState(null, '', `#${block}/${slideIndex + 1}/${stepIndex}`);
@@ -97,8 +60,11 @@
 
   function sendStateToScript() {
     if (!scriptWindow || scriptWindow.closed) return;
-    try { scriptWindow.postMessage({ channel: CHANNEL, type: 'presentation-state', block, slideIndex, stepIndex }, '*'); }
-    catch (error) { try { scriptWindow.setScriptState?.(block, slideIndex, stepIndex); } catch (ignore) {} }
+    try {
+      scriptWindow.postMessage({ channel: CHANNEL, type: 'presentation-state', block, slideIndex, stepIndex }, '*');
+    } catch (error) {
+      try { scriptWindow.setScriptState?.(block, slideIndex, stepIndex); } catch (ignore) {}
+    }
   }
 
   function showState(newSlide, newStep = 0, { notifyChild = true } = {}) {
@@ -119,16 +85,28 @@
   }
 
   function openScript() {
-    const url = `chapter07_script.html?block=${block}#${block}/${slideIndex + 1}/${stepIndex}`;
-    if (scriptWindow && !scriptWindow.closed) { scriptWindow.focus(); sendStateToScript(); return; }
+    const url = `chapter07_script.html?block=${block}&v=${ASSET_VERSION}#${block}/${slideIndex + 1}/${stepIndex}`;
+    if (scriptWindow && !scriptWindow.closed) {
+      scriptWindow.focus();
+      sendStateToScript();
+      return;
+    }
     scriptWindow = window.open(url, 'chapter07Script', 'width=900,height=960,resizable=yes,scrollbars=yes');
-    if (scriptWindow) { scriptWindow.focus(); setTimeout(sendStateToScript, 250); setTimeout(sendStateToScript, 700); }
+    if (scriptWindow) {
+      scriptWindow.focus();
+      setTimeout(sendStateToScript, 250);
+      setTimeout(sendStateToScript, 700);
+    }
   }
 
   function boot() {
-    if (booted) return;
-    slides = window.CH7_SLIDES || [];
-    if (!slides.length) return;
+    if (booted || !window.CH7_SLIDES?.length) return;
+    slides = window.CH7_SLIDES;
+    if (navigation) {
+      navigation.prepareSlides(slides, block);
+      const issues = navigation.audit(slides, block);
+      if (issues.length) console.warn('[Chapter07] navigation audit', issues);
+    }
     booted = true;
     const initial = parseHash();
     slideIndex = Math.max(0, Math.min(slides.length - 1, initial.slideIndex));
@@ -143,7 +121,7 @@
   window.chapter07NextFromScript = next;
   window.chapter07PrevFromScript = previous;
 
-  addEventListener('message', event => {
+  addEventListener('message', (event) => {
     const data = event.data || {};
     if (data.channel !== CHANNEL) return;
     if (event.source && !event.source.closed) scriptWindow = event.source;
@@ -154,7 +132,7 @@
     if (data.type === 'script-ready') sendStateToScript();
   });
 
-  addEventListener('keydown', event => {
+  addEventListener('keydown', (event) => {
     if (!booted) return;
     if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); next(); }
     else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); previous(); }
@@ -164,7 +142,7 @@
     else if (event.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
 
-  app.addEventListener('click', event => {
+  app.addEventListener('click', (event) => {
     if (!booted || event.target.closest('button') || event.target.closest('a')) return;
     const rect = app.getBoundingClientRect();
     event.clientX - rect.left < rect.width * 0.32 ? previous() : next();
