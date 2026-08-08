@@ -138,7 +138,10 @@ jobs:
           missing = [term for term in reset_terms if term not in reset]
           if missing:
               raise SystemExit(f'Chapter 05 reset safety missing: {missing}')
-          if not (reset.index('public.loans') < reset.index('public.books') < reset.index('public.members')):
+          drop_loans = reset.index('DROP TABLE IF EXISTS public.loans;')
+          drop_books = reset.index('DROP TABLE IF EXISTS public.books;')
+          drop_members = reset.index('DROP TABLE IF EXISTS public.members;')
+          if not (drop_loans < drop_books < drop_members):
               raise SystemExit('Chapter 05 reset drop order is not child-to-parent')
           print('Chapter 05 reset safety OK')
 
