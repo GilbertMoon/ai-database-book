@@ -1,4 +1,6 @@
 (() => {
+  'use strict';
+
   const CHANNEL = 'chapter06-presentation-sync';
   const app = document.getElementById('app');
   if (!app) return;
@@ -7,7 +9,10 @@
   const blockLabel = block === 'practice' ? '실습' : '이론';
   const slides = window.CH6_SLIDES || [];
   const deckTitle = window.CH6_TITLE || `Chapter 06 ${blockLabel} 강의`;
+  const navigation = window.CH6Navigation;
   const icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>';
+
+  if (navigation) navigation.prepareSlides(slides, block);
 
   function parseHash() {
     const raw = location.hash.slice(1);
@@ -18,78 +23,29 @@
     return { slideIndex: Math.max(0, (Number(slide) || 1) - 1), stepIndex: Math.max(0, Number(step) || 0) };
   }
 
-  function scriptSegments(slide) {
-    const paragraphs = String(slide?.s || '').trim().split(/\n\s*\n/).map(value => value.replace(/\s+/g, ' ').trim()).filter(Boolean);
-    if (paragraphs.length > 1) return paragraphs;
-    const sentences = (paragraphs[0]?.match(/[^.!?。]+[.!?。]?/g) || []).map(value => value.trim()).filter(Boolean);
-    if (sentences.length <= 1) return paragraphs.length ? paragraphs : ['핵심 내용을 설명합니다.'];
-    const size = Math.max(1, Math.ceil(sentences.length / 4));
-    const result = [];
-    for (let index = 0; index < sentences.length; index += size) result.push(sentences.slice(index, index + size).join(' '));
-    return result;
-  }
+  const stepsFor = (index) => navigation
+    ? navigation.buildSteps(slides[index], index, block)
+    : [{ text: String(slides[index]?.s || ''), focusKeys: [] }];
+  const maxStep = (index) => Math.max(1, stepsFor(index).length);
 
   let { slideIndex, stepIndex } = parseHash();
   slideIndex = Math.max(0, Math.min(slides.length - 1, slideIndex));
-  let scriptWindow = null;
-
-  const maxStep = (index = slideIndex) => Number(slides[index]?.steps || scriptSegments(slides[index]).length || 1);
   stepIndex = Math.max(0, Math.min(maxStep(slideIndex), stepIndex));
-
-  function focusTargets(root) {
-    const explicit = [...root.querySelectorAll('[data-focus-step]')];
-    if (explicit.length) return explicit;
-    const selectors = [
-      '.card', '.flow-step', '.road-step', '.path-node', '.relation-node',
-      '.bullet-list li', '.table-wrap tbody tr', '.quote', '.prompt-box',
-      'pre', '.codebox', '.expect', '.note', '.callout', '.step-box',
-      '.constraint', '.rule', '.test-case', '.success', '.failure', '.error',
-      '.warning', '.result', '.normal-form', '.dependency', '.key-box',
-      '.checklist li', '.hierarchy > div', '.scenario', '.example',
-      '.pill', '.chip', 'article'
-    ];
-    let targets = [...new Set(selectors.flatMap(selector => [...root.querySelectorAll(selector)]))];
-    targets = targets.filter(element => !targets.some(other => other !== element && element.contains(other)));
-    if (!targets.length) targets = [...root.children].filter(element => !['H1', 'H2'].includes(element.tagName));
-    return targets;
-  }
-
-  function prepareFocus() {
-    const root = app.querySelector('.body');
-    if (!root) return;
-    const targets = focusTargets(root);
-    const total = Math.max(1, maxStep());
-    targets.forEach((element, index) => {
-      element.classList.add('focus-target');
-      if (!element.dataset.focusStep) {
-        const from = Math.floor(index * total / Math.max(1, targets.length)) + 1;
-        const to = Math.max(from, Math.floor((index + 1) * total / Math.max(1, targets.length)));
-        element.dataset.focusFrom = String(Math.min(total, from));
-        element.dataset.focusTo = String(Math.min(total, to));
-      }
-    });
-  }
+  let scriptWindow = null;
 
   function applyFocus() {
     const root = app.querySelector('.body');
     if (!root) return;
-    root.querySelectorAll('[data-focus-step],[data-focus-from]').forEach(element => {
-      const exact = Number(element.dataset.focusStep || 0);
-      const from = Number(element.dataset.focusFrom || exact);
-      const to = Number(element.dataset.focusTo || exact);
-      const active = stepIndex > 0 && stepIndex >= from && stepIndex <= to;
-      element.classList.toggle('focus-active', active);
-      element.classList.toggle('focus-muted', stepIndex > 0 && !active);
-    });
+    if (navigation) navigation.applyFocus(root, slides[slideIndex], slideIndex, stepIndex, block);
     const state = document.getElementById('state');
-    if (state) state.textContent = stepIndex === 0 ? '전체 보기' : `강조 ${stepIndex} / ${maxStep()}`;
+    if (state) state.textContent = stepIndex === 0 ? '전체 보기' : `강조 ${stepIndex} / ${maxStep(slideIndex)}`;
   }
 
   function updateButtons() {
     const previousButton = document.getElementById('previousButton');
     const nextButton = document.getElementById('nextButton');
     if (previousButton) previousButton.disabled = slideIndex === 0 && stepIndex === 0;
-    if (nextButton) nextButton.disabled = slideIndex === slides.length - 1 && stepIndex === maxStep();
+    if (nextButton) nextButton.disabled = slideIndex === slides.length - 1 && stepIndex === maxStep(slideIndex);
   }
 
   function render() {
@@ -98,8 +54,7 @@
     app.innerHTML = `<section class="slide"><div class="head"><span class="k">${slide.k || ''}</span><div class="head-actions"><span class="l">${slide.l || blockLabel}</span><span class="counter">${String(slideIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><button class="script-icon" id="scriptButton" type="button" title="발표 스크립트 열기" aria-label="현재 슬라이드 발표 스크립트 창 열기">${icon}</button></div></div><div class="body">${slide.h || ''}</div></section><a class="home" href="index.html">목차</a><div class="num">Chapter 06 · ${blockLabel}</div><div class="step-state" id="state" aria-live="polite"></div><nav class="ctrl"><button class="btn" id="previousButton" aria-label="이전 강조 또는 슬라이드">←</button><button class="btn" id="nextButton" aria-label="다음 강조 또는 슬라이드">→</button></nav><div class="track"><div class="bar" style="width:${((slideIndex + 1) / slides.length) * 100}%"></div></div>`;
     document.getElementById('previousButton').onclick = previous;
     document.getElementById('nextButton').onclick = next;
-    document.getElementById('scriptButton').onclick = event => { event.stopPropagation(); openScript(); };
-    prepareFocus();
+    document.getElementById('scriptButton').onclick = (event) => { event.stopPropagation(); openScript(); };
     applyFocus();
     updateButtons();
     history.replaceState(null, '', `#${block}/${slideIndex + 1}/${stepIndex}`);
@@ -123,7 +78,7 @@
   }
 
   function next() {
-    if (stepIndex < maxStep()) showState(slideIndex, stepIndex + 1);
+    if (stepIndex < maxStep(slideIndex)) showState(slideIndex, stepIndex + 1);
     else if (slideIndex < slides.length - 1) showState(slideIndex + 1, 0);
   }
 
@@ -154,7 +109,7 @@
   window.chapter06NextFromScript = next;
   window.chapter06PrevFromScript = previous;
 
-  addEventListener('message', event => {
+  addEventListener('message', (event) => {
     const data = event.data || {};
     if (data.channel !== CHANNEL) return;
     if (event.source && !event.source.closed) scriptWindow = event.source;
@@ -165,7 +120,7 @@
     if (data.type === 'script-ready') sendStateToScript();
   });
 
-  addEventListener('keydown', event => {
+  addEventListener('keydown', (event) => {
     if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); next(); }
     else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); previous(); }
     else if (event.key === 'Home') showState(0, 0);
@@ -174,7 +129,7 @@
     else if (event.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
 
-  app.addEventListener('click', event => {
+  app.addEventListener('click', (event) => {
     if (event.target.closest('button') || event.target.closest('a')) return;
     const rect = app.getBoundingClientRect();
     event.clientX - rect.left < rect.width * 0.32 ? previous() : next();
