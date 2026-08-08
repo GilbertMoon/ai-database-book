@@ -87,6 +87,23 @@ jobs:
           print('Chapter 04 update/delete safety OK')
 
           presentation = root / 'presentation/chapter04'
+          plans = [
+              ('theory', presentation / 'chapter04_theory_lecture_plan.md', 18),
+              ('practice', presentation / 'chapter04_practice_lecture_plan.md', 19),
+          ]
+          for label, path, expected in plans:
+              text = path.read_text(encoding='utf-8')
+              titles = re.findall(r'^##\s+(\d+)\.\s+(.+)$', text, flags=re.M)
+              if len(titles) != expected:
+                  raise SystemExit(f'Expected {expected} Chapter 04 {label} plan slides, found {len(titles)}')
+              sections = re.split(r'(?=^##\s+\d+\.\s+)', text, flags=re.M)[1:]
+              for index, section in enumerate(sections, start=1):
+                  if '**화면 구성**' not in section or '**발표 스크립트**' not in section:
+                      raise SystemExit(f'Chapter 04 {label} plan slide {index} is missing screen or script content')
+              if re.search(r'체크포인트\s*[ABC에이비씨]', text, flags=re.I):
+                  raise SystemExit(f'Chapter 04 {label} plan still uses checkpoint labels')
+              print(f'Chapter 04 {label} lecture plan OK: {expected} slides')
+
           patch = (presentation / 'chapter04_content_patch.js').read_text(encoding='utf-8')
           required_patch_terms = [
               '초기 데이터 상태', '수정 실습 후 상태', '삭제 실습 후 상태',
@@ -101,11 +118,15 @@ jobs:
 
           theory_loader = (presentation / 'chapter04_theory_slides.js').read_text(encoding='utf-8')
           practice_loader = (presentation / 'chapter04_practice_slides.js').read_text(encoding='utf-8')
+          theory_html = (presentation / 'chapter04_theory_presentation.html').read_text(encoding='utf-8')
+          practice_html = (presentation / 'chapter04_practice_presentation.html').read_text(encoding='utf-8')
           script = (presentation / 'chapter04_script.js').read_text(encoding='utf-8')
           script_html = (presentation / 'chapter04_script.html').read_text(encoding='utf-8')
           for name, text in [
               ('theory loader', theory_loader),
               ('practice loader', practice_loader),
+              ('theory presentation', theory_html),
+              ('practice presentation', practice_html),
               ('script runtime', script),
           ]:
               if 'chapter04_content_patch.js' not in text:
