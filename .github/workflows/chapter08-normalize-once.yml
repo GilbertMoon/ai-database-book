@@ -54,6 +54,10 @@ jobs:
           review.write_text(text, encoding='utf-8')
 
           image_targets = [
+              Path('images/chapter08/ch08_01_join_why_needed.mmd'),
+              Path('images/chapter08/ch08_01_join_why_needed.svg'),
+              Path('images/chapter08/ch08_03_multi_table_join_path.mmd'),
+              Path('images/chapter08/ch08_03_multi_table_join_path.svg'),
               Path('images/chapter08/ch08_06_course_revenue_summary.mmd'),
               Path('images/chapter08/ch08_06_course_revenue_summary.svg'),
               Path('images/chapter08/README.md'),
@@ -64,7 +68,6 @@ jobs:
               text = text.replace('결제금액', '기록 금액')
               path.write_text(text, encoding='utf-8')
 
-          # Chapter 08의 현재 스키마에 존재하지 않는 구용어가 남으면 실패합니다.
           scan_roots = [Path('book/chapter08'), Path('code/chapter08'), Path('presentation/chapter08'), Path('images/chapter08')]
           stale = []
           for root in scan_roots:
