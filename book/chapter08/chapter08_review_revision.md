@@ -96,7 +96,7 @@ active_enrollment_count = 신청 + 수강중
 자연어 표현을 다음 기준으로 정리했습니다.
 
 ```text
-paid_amount
+recorded_amount
 → 신청 당시 기록 금액
 
 전체·활성·취소 제외 기록 금액
@@ -112,12 +112,12 @@ paid_amount
 
 ## 5. AVG 표시 형식 보완
 
-PostgreSQL의 `AVG(INTEGER)`는 `numeric`을 반환하므로 DBeaver에서 소수점 이하 0이 길게 표시될 수 있습니다.
+Chapter 07의 `recorded_amount`는 `NUMERIC(12,0)`이며 PostgreSQL의 `AVG(recorded_amount)`는 `numeric`을 반환하므로 DBeaver에서 소수점 이하 0이 길게 표시될 수 있습니다.
 
 예제 SQL을 다음처럼 통일했습니다.
 
 ```sql
-ROUND(AVG(paid_amount), 2)
+ROUND(AVG(recorded_amount), 2)
 ```
 
 기대값은 전체 `118000.00`, 취소 제외 `110000.00`입니다.

@@ -67,7 +67,7 @@
   <text x="447.5" y="385" class="mono section pk">PK id</text>
   <text x="447.5" y="420" class="mono section fk">FK student_id</text>
   <text x="447.5" y="452" class="mono section fk">FK course_id</text>
-  <text x="447.5" y="480" class="mono body">status · paid_amount</text>
+  <text x="447.5" y="480" class="mono body">status · recorded_amount</text>
   <text x="447.5" y="505" class="mono body">enrolled_at</text>
 
   <rect x="640" y="315" width="220" height="180" class="card course"/>
@@ -116,7 +116,7 @@
   <rect x="35" y="725" width="260" height="116" class="card source"/>
   <text x="165" y="758" class="head">enrollments</text>
   <text x="165" y="789" class="mono body">enrollment_id · status</text>
-  <text x="165" y="816" class="mono body">paid_amount · enrolled_at</text>
+  <text x="165" y="816" class="mono body">recorded_amount · enrolled_at</text>
 
   <rect x="325" y="725" width="260" height="116" class="card source"/>
   <text x="455" y="758" class="head">students</text>

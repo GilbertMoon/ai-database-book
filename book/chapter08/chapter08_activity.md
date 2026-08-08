@@ -80,7 +80,7 @@ SHOW search_path;
 두 범위의 차이는 __________________________________________________.
 ```
 
-`paid_amount`를 실제 매출이라고 단정할 수 없는 이유:
+`recorded_amount`를 실제 매출이라고 단정할 수 없는 이유:
 
 ```text
 ________________________________________________________________________
@@ -169,7 +169,7 @@ ________________________________________________________________________
 
 ## 7. 다중 JOIN 결과 확인
 
-| enrollment_id | student_name | course_title | instructor_name | status | paid_amount |
+| enrollment_id | student_name | course_title | instructor_name | status | recorded_amount |
 | ---: | --- | --- | --- | --- | ---: |
 | 1001 |  |  |  |  |  |
 | 1002 |  |  |  |  |  |
@@ -256,10 +256,10 @@ ________________________________________________________________________
 | 함수 | 질문 | 기대 결과 | 실제 결과 |
 | --- | --- | ---: | ---: |
 | `COUNT(*)` | 전체 신청 이력 수 | 5 |  |
-| `SUM(paid_amount)` | 전체 기록 금액 | 590000 |  |
-| `ROUND(AVG(paid_amount), 2)` | 평균 기록 금액 | 118000.00 |  |
-| `MIN(paid_amount)` | 최소 기록 금액 | 100000 |  |
-| `MAX(paid_amount)` | 최대 기록 금액 | 150000 |  |
+| `SUM(recorded_amount)` | 전체 기록 금액 | 590000 |  |
+| `ROUND(AVG(recorded_amount), 2)` | 평균 기록 금액 | 118000.00 |  |
+| `MIN(recorded_amount)` | 최소 기록 금액 | 100000 |  |
+| `MAX(recorded_amount)` | 최대 기록 금액 | 150000 |  |
 
 활성 신청 기준:
 
@@ -663,7 +663,7 @@ ORDER BY c.id;
 ```sql
 SELECT
     COUNT(*) AS active_enrollment_count,
-    SUM(paid_amount) AS active_recorded_amount
+    SUM(recorded_amount) AS active_recorded_amount
 FROM course_project.enrollments
 WHERE status IN ('신청', '수강중');
 ```

@@ -23,7 +23,7 @@
 | `ch08_03_multi_table_join_path.svg` | 수강신청 현황을 만드는 다중 JOIN 경로 | 사용 |
 | `ch08_04_left_join_null_rows.svg` | LEFT JOIN은 왼쪽 행을 모두 유지한다 | 자산 유지, 본문 미사용 |
 | `ch08_05_group_by_aggregation_flow.svg` | GROUP BY로 상태별 행 묶기 | 자산 유지, 본문 미사용 |
-| `ch08_06_course_revenue_summary.svg` | 강의별 신청 건수와 결제금액 집계 | 자산 유지, 본문 미사용 |
+| `ch08_06_course_revenue_summary.svg` | 강의별 신청 건수와 기록 금액 집계 | 자산 유지, 본문 미사용 |
 | `ch08_07_where_group_having_order.svg` | 집계 쿼리의 논리적 처리 흐름 | 사용 |
 | `ch08_08_ai_join_sql_review_flow.svg` | AI 생성 JOIN·집계 SQL 검토 흐름 | 사용 |
 

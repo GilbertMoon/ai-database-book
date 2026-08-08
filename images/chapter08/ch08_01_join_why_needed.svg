@@ -27,7 +27,7 @@
   <text x="170" y="260" text-anchor="middle" class="text mono">enrollments</text>
   <text x="170" y="298" text-anchor="middle" class="text mono">student_id</text>
   <text x="170" y="330" text-anchor="middle" class="text mono">course_id</text>
-  <text x="170" y="368" text-anchor="middle" class="text">status · paid_amount</text>
+  <text x="170" y="368" text-anchor="middle" class="text">status · recorded_amount</text>
   <text x="170" y="394" text-anchor="middle" class="small">결과의 기준 행</text>
 
   <rect x="390" y="110" width="235" height="100" class="box lookup"/>
@@ -47,7 +47,7 @@
   <text x="1007.5" y="243" text-anchor="middle" class="label">수강신청 현황 한 행</text>
   <text x="1007.5" y="285" text-anchor="middle" class="text">학생 이름</text>
   <text x="1007.5" y="317" text-anchor="middle" class="text">강의 제목 · 강사 이름</text>
-  <text x="1007.5" y="355" text-anchor="middle" class="text">상태 · 결제금액</text>
+  <text x="1007.5" y="355" text-anchor="middle" class="text">상태 · 기록 금액</text>
   <text x="1007.5" y="395" text-anchor="middle" class="small">기준 행 = 수강신청 한 건</text>
 
   <!-- FK relationships -->
@@ -71,7 +71,7 @@
   <text x="710" y="485" text-anchor="middle" class="route-label">강사 이름</text>
 
   <path d="M170 410 V585 H1007.5 V425" class="result-line"/>
-  <text x="600" y="575" text-anchor="middle" class="route-label">enrollments의 status · paid_amount</text>
+  <text x="600" y="575" text-anchor="middle" class="route-label">enrollments의 status · recorded_amount</text>
 
   <rect x="100" y="615" width="1000" height="65" class="box note-box"/>
   <text x="600" y="643" text-anchor="middle" class="label">정규화는 사실을 나누어 저장하고, JOIN은 관계를 따라 필요한 결과를 만듭니다.</text>

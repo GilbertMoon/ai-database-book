@@ -4,7 +4,7 @@ flowchart TB
     subgraph PATH[논리적 PK·FK JOIN 관계 경로]
         direction LR
         S["students s<br/>PK id<br/>name"]
-        E["enrollments e<br/>PK id<br/>FK student_id<br/>FK course_id<br/>status · paid_amount · enrolled_at"]
+        E["enrollments e<br/>PK id<br/>FK student_id<br/>FK course_id<br/>status · recorded_amount · enrolled_at"]
         C["courses c<br/>PK id<br/>FK instructor_id<br/>title"]
         I["instructors i<br/>PK id<br/>name"]
 
@@ -15,7 +15,7 @@ flowchart TB
 
     subgraph COLS[SELECT 결과 컬럼의 출처]
         direction LR
-        CE["enrollments<br/>enrollment_id · status<br/>paid_amount · enrolled_at"]
+        CE["enrollments<br/>enrollment_id · status<br/>recorded_amount · enrolled_at"]
         CS["students<br/>student_name"]
         CC["courses<br/>course_title"]
         CI["instructors<br/>instructor_name"]

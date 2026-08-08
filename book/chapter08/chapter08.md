@@ -102,7 +102,7 @@ code/chapter07/reset_course_project.sql
 
 수강신청 상태는 다음과 같습니다.
 
-| enrollment_id | student_id | course_id | status | paid_amount |
+| enrollment_id | student_id | course_id | status | recorded_amount |
 | ---: | ---: | ---: | --- | ---: |
 | 1001 | 101 | 301 | 완료 | 100000 |
 | 1002 | 101 | 302 | 신청 | 120000 |
@@ -119,7 +119,7 @@ code/chapter07/reset_course_project.sql
 | 취소 제외 신청 이력 | 신청, 수강중, 완료 | 4 | 440000 |
 | 취소 신청 | 취소 | 1 | 150000 |
 
-`paid_amount`는 신청 당시 기록 금액입니다. 취소 후에도 기록이 남을 수 있으며 결제 성공, 환불과 매출 인식 정보가 없으므로 실제 회계 매출로 단정하지 않습니다.
+`recorded_amount`는 신청 당시 기록 금액입니다. 취소 후에도 기록이 남을 수 있으며 결제 성공, 환불과 매출 인식 정보가 없으므로 실제 회계 매출로 단정하지 않습니다.
 
 이 장의 SQL은 데이터를 변경하지 않는 조회 전용 파일로 구성합니다.
 
@@ -273,7 +273,7 @@ SELECT
     c.title AS course_title,
     i.name AS instructor_name,
     e.status,
-    e.paid_amount,
+    e.recorded_amount,
     e.enrolled_at
 FROM course_project.enrollments AS e
 JOIN course_project.students AS s
@@ -447,10 +447,10 @@ NOT EXISTS
 ```sql
 SELECT
     COUNT(*) AS enrollment_count,
-    SUM(paid_amount) AS total_recorded_amount,
-    ROUND(AVG(paid_amount), 2) AS avg_recorded_amount,
-    MIN(paid_amount) AS min_recorded_amount,
-    MAX(paid_amount) AS max_recorded_amount
+    SUM(recorded_amount) AS total_recorded_amount,
+    ROUND(AVG(recorded_amount), 2) AS avg_recorded_amount,
+    MIN(recorded_amount) AS min_recorded_amount,
+    MAX(recorded_amount) AS max_recorded_amount
 FROM course_project.enrollments;
 ```
 
@@ -462,15 +462,15 @@ FROM course_project.enrollments;
 | min_recorded_amount | 100000 |
 | max_recorded_amount | 150000 |
 
-PostgreSQL에서 정수 컬럼의 `AVG`는 `numeric`을 반환합니다. DBeaver 설정에 따라 소수점 이하 0이 길게 표시될 수 있으므로 예제에서는 `ROUND(..., 2)`로 표시 형식을 맞춥니다.
+`recorded_amount`는 `NUMERIC(12,0)`이며 PostgreSQL의 `AVG(recorded_amount)`는 `numeric`을 반환합니다. DBeaver 설정에 따라 소수점 이하 0이 길게 표시될 수 있으므로 예제에서는 `ROUND(..., 2)`로 표시 형식을 맞춥니다.
 
 활성 신청 기준을 확인합니다.
 
 ```sql
 SELECT
     COUNT(*) AS active_enrollment_count,
-    SUM(paid_amount) AS active_recorded_amount,
-    ROUND(AVG(paid_amount), 2) AS active_avg_recorded_amount
+    SUM(recorded_amount) AS active_recorded_amount,
+    ROUND(AVG(recorded_amount), 2) AS active_avg_recorded_amount
 FROM course_project.enrollments
 WHERE status IN ('신청', '수강중');
 ```
@@ -482,8 +482,8 @@ WHERE status IN ('신청', '수강중');
 ```sql
 SELECT
     COUNT(*) AS non_cancelled_count,
-    SUM(paid_amount) AS non_cancelled_recorded_amount,
-    ROUND(AVG(paid_amount), 2) AS non_cancelled_avg_recorded_amount
+    SUM(recorded_amount) AS non_cancelled_recorded_amount,
+    ROUND(AVG(recorded_amount), 2) AS non_cancelled_avg_recorded_amount
 FROM course_project.enrollments
 WHERE status <> '취소';
 ```
@@ -513,7 +513,7 @@ WHERE status <> '취소';
 SELECT
     status,
     COUNT(*) AS enrollment_count,
-    SUM(paid_amount) AS total_recorded_amount
+    SUM(recorded_amount) AS total_recorded_amount
 FROM course_project.enrollments
 GROUP BY status
 ORDER BY CASE status
@@ -619,10 +619,10 @@ SELECT
     COUNT(*) FILTER (
         WHERE status = '취소'
     ) AS cancelled_count,
-    SUM(paid_amount) FILTER (
+    SUM(recorded_amount) FILTER (
         WHERE status IN ('신청', '수강중')
     ) AS active_recorded_amount,
-    SUM(paid_amount) FILTER (
+    SUM(recorded_amount) FILTER (
         WHERE status <> '취소'
     ) AS non_cancelled_recorded_amount
 FROM course_project.enrollments;
@@ -637,7 +637,7 @@ FROM course_project.enrollments;
 `FILTER`는 집계 함수마다 다른 조건을 적용할 때 읽기 쉽습니다. 다른 DBMS와의 호환성이 중요하다면 `CASE` 식을 사용할 수 있습니다.
 
 ```sql
-SUM(CASE WHEN status = '취소' THEN 0 ELSE paid_amount END)
+SUM(CASE WHEN status = '취소' THEN 0 ELSE recorded_amount END)
 ```
 
 이 책의 기본 환경은 PostgreSQL이므로 `FILTER`를 우선 소개합니다.
@@ -654,7 +654,7 @@ SELECT
     c.title AS course_title,
     COUNT(e.id) AS non_cancelled_count,
     COUNT(DISTINCT e.student_id) AS student_count,
-    COALESCE(SUM(e.paid_amount), 0) AS non_cancelled_recorded_amount
+    COALESCE(SUM(e.recorded_amount), 0) AS non_cancelled_recorded_amount
 FROM course_project.courses AS c
 LEFT JOIN course_project.enrollments AS e
     ON c.id = e.course_id
@@ -675,7 +675,7 @@ ORDER BY c.id;
 COUNT(e.id)
 → 일치 행이 없으면 0
 
-SUM(e.paid_amount)
+SUM(e.recorded_amount)
 → 일치 값이 없으면 NULL
 
 COALESCE(SUM(...), 0)
@@ -821,7 +821,7 @@ FROM (
 ### 전체 기록 금액 검산
 
 ```sql
-SELECT SUM(paid_amount)
+SELECT SUM(recorded_amount)
 FROM course_project.enrollments;
 ```
 
@@ -832,7 +832,7 @@ SELECT SUM(total_recorded_amount)
 FROM (
     SELECT
         course_id,
-        SUM(paid_amount) AS total_recorded_amount
+        SUM(recorded_amount) AS total_recorded_amount
     FROM course_project.enrollments
     GROUP BY course_id
 ) AS course_summary;
@@ -845,7 +845,7 @@ FROM (
 ```sql
 SELECT
     COUNT(*) AS active_enrollment_count,
-    SUM(paid_amount) AS active_recorded_amount
+    SUM(recorded_amount) AS active_recorded_amount
 FROM course_project.enrollments
 WHERE status IN ('신청', '수강중');
 ```
@@ -857,7 +857,7 @@ WHERE status IN ('신청', '수강중');
 ```sql
 SELECT
     COUNT(*) AS non_cancelled_count,
-    SUM(paid_amount) AS non_cancelled_recorded_amount
+    SUM(recorded_amount) AS non_cancelled_recorded_amount
 FROM course_project.enrollments
 WHERE status <> '취소';
 ```
@@ -994,7 +994,7 @@ Chapter 07에서 활성 신청은 `신청`과 `수강중` 상태를 함께 의�
 9. 취소 제외 신청 이력과 활성 신청을 구분하지 않는다.
 10. 상태 정렬을 단순 문자열 순서에 맡긴다.
 11. 데이터 없음의 NULL을 모든 집계에서 0으로 바꾼다.
-12. 저장된 `paid_amount` 합계를 실제 매출로 표현한다.
+12. 저장된 `recorded_amount` 합계를 실제 매출로 표현한다.
 13. 그룹 결과를 원본 기준값과 대조하지 않는다.
 14. 별도 Chapter 08 데이터로 Chapter 07 프로젝트를 덮어쓴다.
 
@@ -1044,7 +1044,7 @@ Chapter 07에서 활성 신청은 `신청`과 `수강중` 상태를 함께 의�
 - 활성 신청은 `신청`·`수강중` 3건이고 취소 제외 신청 이력은 여기에 `완료`를 포함한 4건입니다.
 - `COALESCE`는 데이터 없음과 0을 같은 의미로 표시해도 되는 합계에 사용합니다. 평균이나 최솟값이 없음을 0으로 바꾸면 의미가 왜곡될 수 있습니다.
 - `WHERE`는 그룹화 전 행을, `HAVING`은 그룹화 후 집계 결과를 필터링합니다.
-- `paid_amount`만으로 결제 성공·환불·매출 인식을 알 수 없으므로 실제 매출을 계산할 수 없습니다.
+- `recorded_amount`만으로 결제 성공·환불·매출 인식을 알 수 없으므로 실제 매출을 계산할 수 없습니다.
 - 상태 업무 순서는 문자열 정렬 규칙과 다를 수 있으므로 `CASE`로 명시합니다.
 - 강의와 신청을 JOIN하면 강의 행이 신청 수만큼 반복되어 강의 가격이 과대 합산될 수 있습니다.
 
@@ -1081,7 +1081,7 @@ ORDER BY c.id;
 SELECT
     c.id,
     c.title,
-    COALESCE(SUM(e.paid_amount), 0) AS non_cancelled_recorded_amount
+    COALESCE(SUM(e.recorded_amount), 0) AS non_cancelled_recorded_amount
 FROM course_project.courses AS c
 LEFT JOIN course_project.enrollments AS e
     ON c.id = e.course_id
@@ -1141,7 +1141,7 @@ FROM (
 -- 8. 활성 신청 검산
 SELECT
     COUNT(*) AS active_enrollment_count,
-    SUM(paid_amount) AS active_recorded_amount
+    SUM(recorded_amount) AS active_recorded_amount
 FROM course_project.enrollments
 WHERE status IN ('신청', '수강중');
 ```
