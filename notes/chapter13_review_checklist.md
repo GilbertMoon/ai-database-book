@@ -6,387 +6,361 @@
 Chapter 13. AI와 실행 증거로 데이터베이스 설계 검증하기
 ```
 
-## 리뷰 목적
+## 리뷰 기준
 
-AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실제 PostgreSQL 메타데이터, 정상·경계값·반례, 업무 정합성, IDENTITY, 파일별 diff와 발표자료의 의미 단위 동기화까지 근거로 검토하고 승인 상태를 기록하는지 점검합니다.
+코드에 “구현되어 있다”와 실제 PostgreSQL에서 “통과했다”를 구분합니다. 아래 자동 실행 항목은 `Validate Chapter 13` Run 2, PostgreSQL 16에서 실제 확인했습니다.
 
-코드에 구현된 상태와 PostgreSQL·브라우저·출판물에서 실제 실행·렌더링한 상태는 구분합니다.
+```text
+Run ID: 31291233314
+Commit: 5fd926149d87f6f941b7015fedbdf1361beb0b20
+Conclusion: success
+```
 
 ---
 
 ## 1. Chapter 연속성과 격리
 
-| 점검 항목 | 상태 | 최종 반영 |
+| 점검 항목 | 기대 | 상태 |
 | --- | --- | --- |
-| course_project 보호 | 코드 반영 | 신청 5행 기준 확인, 변경 금지 |
-| transaction_lab 보호 | 코드 반영 | 변경 금지 |
-| performance_lab 보호 | 코드 반영 | 변경 금지 |
-| security_lab 보호 | 코드 반영 | 변경 금지 |
-| nosql_lab 보호 | 코드 반영 | 변경 금지 |
-| ai_review_lab 전용 | 코드 반영 | 6개 테이블 격리 |
-| 현재 DB 보호 | 코드 반영 | ai_database_book 아니면 중단 |
-| 구조 생성 원자성 | 코드 반영 | 한 트랜잭션 |
-| 초기화 보호 | 코드 반영 | 다른 DB에서 DROP 중단 |
-| SHOW search_path | 코드 반영 | SQL 실행 전 확인 |
+| 현재 DB | `ai_database_book` | 실제 통과 |
+| 잘못된 DB 실행 | 생성 전 실패 | 실제 통과 |
+| course_project | 변경 없음 | fingerprint 통과 |
+| Chapter 07·08 행 수 | 3/2/3/5 | 실제 통과 |
+| 상태 분포 | 신청2/수강중1/완료1/취소1 | 실제 통과 |
+| recorded_amount 타입 | `NUMERIC(12,0)` | 실제 통과 |
+| 전체 기록 금액 | 590000 | 실제 통과 |
+| 활성 신청 | 3 / 340000 | 실제 통과 |
+| 취소 제외 | 4 / 440000 | 실제 통과 |
+| 핵심 1001 | 완료 / 100000 | 실제 통과 |
+| 핵심 1004 | 취소 / 150000 | 실제 통과 |
+| 핵심 1005 | 신청 / 120000 | 실제 통과 |
+| 활성 신청 인덱스 | 존재 | 실제 통과 |
+| transaction_lab | 변경 없음 | sentinel 통과 |
+| performance_lab | 변경 없음 | sentinel 통과 |
+| security_lab | 변경 없음 | sentinel 통과 |
+| nosql_lab | Chapter 12 상태 보호 | fingerprint·sentinel 통과 |
+| ai_review_lab | Chapter 13 전용 | 실제 통과 |
 
 ---
 
-## 2. 역할·문맥·프롬프트
+## 2. Chapter 12 → 13 의미 연결
 
 | 점검 항목 | 상태 | 최종 반영 |
 | --- | --- | --- |
-| ChatGPT 역할 | 완료 | 요구사항 구조화·대안·프롬프트 초안 |
-| Codex 역할 | 완료 | 저장소 탐색·파일 수정·SQL·diff 지원 |
-| 사람 역할 | 완료 | 정책·데이터·권한·실행 결과·최종 승인 |
-| AI가 미확정 정책 자동 확정 금지 | 완료 | 최종 결정은 사람 |
-| AI 문맥 묶음 | 완료 | 목표·요구사항·결정·환경·범위·검증 기준 |
-| 수정 금지 범위 | 완료 | 다른 스키마·파일·권한 보호 |
-| 민감정보 마스킹 | 완료 | 실제 비밀·개인정보·카드번호 형태 금지 |
-| 완료 보고 형식 | 완료 | 변경 파일·이유·실행 결과·미실행·가정 |
+| `recorded_amount` 명칭 | 완료 | Chapter 07·08·12와 통일 |
+| `recorded_amount` 의미 | 완료 | 신청 시점 기록 금액 |
+| 결제 승인액으로 오해 방지 | 완료 | 명시 |
+| 환불 반영 순액으로 오해 방지 | 완료 | 명시 |
+| 회계 매출로 오해 방지 | 완료 | 명시 |
+| 기존 course_project 결제 원장 | 없음 유지 | Chapter 13에서 변경 안 함 |
+| Chapter 13 payments | 격리 시나리오 | `ai_review_lab`에만 존재 |
 
 ---
 
-## 3. 추적 ID와 정책
+## 3. AI 협업 흐름
 
-| 점검 항목 | 상태 | 최종 반영 |
+| 점검 항목 | 상태 |
+| --- | --- |
+| Chat: 빠른 질문·대화형 지원 | 반영 |
+| Work: 장시간 다단계 산출물 | 반영 |
+| Codex: 코드·테스트·명령·저장소 작업 | 반영 |
+| 제품 기능은 최신 공식 안내 재확인 | 반영 |
+| AI가 미확정 정책 자동 확정 금지 | 반영 |
+| 사람의 최종 승인 책임 | 반영 |
+| 문맥 묶음·프롬프트 계약 | 반영 |
+| 수정 금지 범위 | 반영 |
+| 실제 비밀·개인정보 입력 금지 | 반영 |
+
+---
+
+## 4. 추적 ID와 정책
+
+| 점검 항목 | 기대 | 상태 |
 | --- | --- | --- |
-| P13-R01~R09 | 완료 | 확인 요구사항 |
-| P13-D01~D08 | 완료 | 결정·범위·미확정 |
-| P13-T01~T30 | 완료 | 반례·정상 경계값 |
-| P13-V01~V08 | 완료 | 실행·검증 단계 |
-| 앞 장 활성 정책 유지 | 완료 | 신청·수강중 부분 UNIQUE |
-| 완료·취소 후 재신청 | 완료 | 허용 |
-| 전체 복합 UNIQUE 미사용 | 완료 | 이력 보호 |
-| 이메일 대소문자 | 완료 | 정확 문자열 비교, 별도 결정 |
-| 부분 환불 | 완료 | 현재 범위 밖 |
-| 상태 전이 | 완료 | 별도 서비스 정책 |
+| 요구사항 | P13-R01~R09 | 완료 |
+| 결정·범위 | P13-D01~D08 | 완료 |
+| 테스트 | P13-T01~T30 | 완료 |
+| 검증 단계 | P13-V01~V08 | 완료 |
+| 활성 신청 | 신청·수강중 조합당 1건 | 실제 통과 |
+| 완료·취소 뒤 재신청 | 허용 | 테스트 통과 |
+| 이메일 | 정확 문자열 UNIQUE | 테스트 통과 |
+| 이메일 대소문자 정규화 | 미확정 | T30에서 현재 정책 확인 |
+| 삭제 정책 | RESTRICT | T23·T24 통과 |
+| 부분 환불 | 범위 밖 | 명시 |
+| 상태 전이 | 별도 정책 | 명시 |
 
 ---
 
-## 4. ERD·역할·관계
+## 5. 나쁜 설계 기준선
 
-| 점검 항목 | 상태 | 최종 반영 |
-| --- | --- | --- |
-| students 역할 | 완료 | 학생 기본 정보 |
-| instructors 역할 | 완료 | 강사 기본 정보 |
-| courses 역할 | 완료 | 강의 현재 정보·기본 가격 |
-| enrollments 역할 | 완료 | 학생·강의 관계·신청 시점 기록 금액 |
-| payments 역할 | 완료 | 현재 결제 상태·외부 참조값 |
-| instructors→courses | 완료 | 1 : 0..N |
-| students→enrollments | 완료 | 1 : 0..N |
-| courses→enrollments | 완료 | 1 : 0..N |
-| enrollments→payments | 완료 | 1 : 0..1 단순 모델 |
-| 결제 원장 확장 조건 | 완료 | 이력·재결제·부분 환불 시 1:N 재설계 |
+| 검증 | 기대 | 상태 |
+| --- | ---: | --- |
+| bad_enrollments | 3 | 실제 통과 |
+| 같은 학생 email 반복 | 2행 | 실제 통과 |
+| 숫자가 아닌 price | 1행 | 실제 통과 |
+| `created_at='yesterday'` | 1행 | 실제 통과 |
+| payment_status=`done` | 1행 | 실제 통과 |
+| enrollment_status=`finished` | 1행 | 실제 통과 |
+| 실제 개인정보·카드번호 | 사용 안 함 | 가상값 확인 |
+| 다음 IDENTITY | 4 이상 | 실제 통과 |
 
 ---
 
-## 5. 생성·Seed·IDENTITY
+## 6. 좋은 구조 생성
+
+| 점검 항목 | 기대 | 상태 |
+| --- | ---: | --- |
+| 좋은 설계 테이블 | 5 | 실제 통과 |
+| ai_review_lab 전체 테이블 | 6 | 실제 통과 |
+| 좋은 설계 제약조건 | 29 | 실제 통과 |
+| FK | 4 | 실제 통과 |
+| 좋은 테이블 IDENTITY | 5 | 생성 COMMIT 전 통과 |
+| 전체 IDENTITY | 6 | metadata/final 통과 |
+| 금액 타입 | 3개 `NUMERIC(12,0)` | 실제 통과 |
+| 활성 부분 고유 인덱스 | 존재 | 실제 통과 |
+| 구조 생성 원자성 | 전체 또는 0 | 실제 경로 통과 |
+
+---
+
+## 7. Seed·기준 상태
 
 | 항목 | 기대 | 상태 |
 | --- | ---: | --- |
-| bad_enrollments | 3 | 코드 반영 |
-| students | 3 | 코드 반영 |
-| instructors | 2 | 코드 반영 |
-| courses | 3 | 코드 반영 |
-| enrollments | 4 | 코드 반영 |
-| payments | 4 | 코드 반영 |
-| JOIN | 4 | 코드 반영 |
-| bad IDENTITY | 4 이상 | 코드 반영 |
-| students IDENTITY | 104 이상 | 코드 반영 |
-| instructors IDENTITY | 203 이상 | 코드 반영 |
-| courses IDENTITY | 304 이상 | 코드 반영 |
-| enrollments IDENTITY | 1005 이상 | 코드 반영 |
-| payments IDENTITY | 9005 이상 | 코드 반영 |
-| Seed 재실행 차단 | true | 테이블 존재·0행 검사 |
-| Seed 원자성 | true | 트랜잭션·COMMIT 전 판정 |
-| ROLLBACK 번호 공백 설명 | true | 정합성 오류가 아님 |
+| students | 3 | 실제 통과 |
+| instructors | 2 | 실제 통과 |
+| courses | 3 | 실제 통과 |
+| enrollments | 4 | 실제 통과 |
+| payments | 4 | 실제 통과 |
+| 정상 JOIN | 4 | 실제 통과 |
+| recorded_amount 합계 | 470000 | 실제 통과 |
+| payment amount 합계 | 470000 | 실제 통과 |
+| 수강 상태 | 완료2/신청1/취소1/수강중0 | 실제 통과 |
+| 결제 상태 | 완료2/대기1/환불1/실패0 | 실제 통과 |
+| 1002 현재 가격 | 180000 | 실제 통과 |
+| 1002 신청 시점 기록 금액 | 150000 | 실제 통과 |
+| 결제 참조값 | `PAY-REVIEW-TEST-*` | 실제 통과 |
 
 ---
 
-## 6. 좋은 설계 정합성
+## 8. IDENTITY
 
-| 점검 항목 | 상태 | 최종 반영 |
-| --- | --- | --- |
-| 학생·강사 이메일 공백 CHECK | 완료 | 적용 |
-| 정확 문자열 이메일 UNIQUE | 완료 | 범위 명시 |
-| specialty·course_code·title 공백 CHECK | 완료 | 적용 |
-| payment_reference 공백 CHECK | 완료 | 적용 |
-| FK 방향 | 완료 | 정확한 4개 |
-| 삭제 RESTRICT | 완료 | CASCADE 미적용 |
-| 활성 부분 고유 인덱스 | 완료 | Chapter 07 연속성 |
-| 가격·신청 시점 기록 금액·결제 상태 기록 금액 분리 | 완료 | 시점 의미 유지 |
-| 결제 현재 상태 1건 | 완료 | 단순화 명시 |
-| paid_at·refunded_at | 완료 | 시각 의미 분리 |
-| 전액 환불 샘플 | 완료 | 부분 환불 범위 밖 |
-| 결제 없는 신청 | 완료 | 허용 |
-| 실제 카드번호 컬럼 없음 | 완료 | 다중 증거 검토 |
+| 테이블 | 다음 값 기대 | 상태 |
+| --- | ---: | --- |
+| bad_enrollments | > 3 | 실제 통과 |
+| students | > 103 | 실제 통과 |
+| instructors | > 202 | 실제 통과 |
+| courses | > 303 | 실제 통과 |
+| enrollments | > 1004 | 실제 통과 |
+| payments | > 9004 | 실제 통과 |
+
+명시적 ID 뒤 `RESTART WITH`를 사용하며 테스트 롤백으로 생기는 번호 공백은 정합성 오류로 보지 않습니다.
 
 ---
 
-## 7. 메타데이터 검증
+## 9. 메타데이터 검증
 
 | 검증 | 기대 | 상태 |
 | --- | ---: | --- |
-| 정확한 테이블 집합 | 6 | 자동 판정 코드 |
-| 좋은 설계 제약조건 | 29 | 자동 판정 코드 |
-| 정확한 FK 서명 | 4 | 자동 판정 코드 |
-| IDENTITY id | 6 | 자동 판정 코드 |
-| 활성 부분 고유 인덱스 | 존재 | 자동 판정 코드 |
-| 민감정보 전용 컬럼명 | 0 | 자동 판정 코드 |
-| FK 삭제 규칙 | RESTRICT/NO ACTION | 자동 판정 코드 |
+| 정확한 테이블 집합 | 6 | 실제 통과 |
+| 좋은 설계 constraints | 29 | 실제 통과 |
+| 정확한 FK 서명 | 4 | 실제 통과 |
+| FK 삭제 규칙 | RESTRICT/NO ACTION | 실제 통과 |
+| IDENTITY | 6 | 실제 통과 |
+| money type | 3 | 실제 통과 |
+| `recorded_amount` | 정확히 1 | 실제 통과 |
+| 이전 격리 금액 컬럼 | 없음 | 실제 통과 |
+| 활성 부분 고유 인덱스 | 정확한 정의 | 실제 통과 |
+| 원시 카드/비밀 전용 컬럼명 | 0 | 실제 통과 |
 
 ---
 
-## 8. 업무 정합성 검증
+## 10. 업무 정합성
 
 | 검증 | 기대 | 상태 |
 | --- | ---: | --- |
-| 정상 JOIN | 4 | 자동 판정 코드 |
-| 이메일 중복 | 0 | 자동 판정 코드 |
-| 필수 문자열 공백 | 0 | 자동 판정 코드 |
-| 신청 시점 기록 금액·결제 상태 기록 금액 불일치 | 0 | 자동 판정 코드 |
-| 결제·환불 시각 위반 | 0 | 자동 판정 코드 |
-| 고아 관계 | 0 | 자동 판정 코드 |
-| 활성 신청 중복 | 0 | 자동 판정 코드 |
-| 샘플 상태 조합 위반 | 0 | 자동 판정 코드 |
-| 가격 차이 | 정보용 1 | 자동 판정 코드 |
-| LEFT JOIN NULL | 보정 | `IS DISTINCT FROM` 적용 |
+| 이메일 중복 | 0 | 실제 통과 |
+| 필수 문자열 공백 | 0 | 실제 통과 |
+| recorded/payment amount 불일치 | 0 | 실제 통과 |
+| 결제·환불 시각 위반 | 0 | 실제 통과 |
+| 고아 학생·강의·결제 | 0 | 실제 통과 |
+| 활성 신청 중복 | 0 | 실제 통과 |
+| 샘플 상태 조합 위반 | 0 | 실제 통과 |
+| LEFT JOIN NULL 누락 | 없음 | `IS DISTINCT FROM` 적용 |
+| 현재가격 ↔ recorded 차이 | 1002 한 행 | 실제 통과 |
+
+workflow에서 9001을 `결제대기 / paid_at NULL`로 의도적으로 변경했을 때 DB CHECK는 허용하지만 `06_business_validation.sql`이 업무 상태 불일치를 탐지하는지 확인했고, 복원 후 재통과했습니다.
 
 ---
 
-## 9. 반례·정상 경계값
+## 11. 반례·정상 경계값
 
-| 점검 항목 | 기대 | 상태 |
+| 항목 | 기대 | 상태 |
 | --- | ---: | --- |
-| expected_failure | 24 | 코드 반영 |
-| expected_success | 6 | 코드 반영 |
-| 전체 | 27 | 자동 판정 코드 |
-| passed | 30 | 자동 판정 코드 |
-| unexpected | 0 | 자동 판정 코드 |
-| 기준 행 유지 | true | 자동 판정 코드 |
-| actual SQLSTATE | 기록 | 코드 반영 |
-| actual constraint | 기록 | 코드 반영 |
-| table·column diagnostics | 기록 | 코드 반영 |
+| expected_failure | 24 | 실제 통과 |
+| expected_success | 6 | 실제 통과 |
+| 전체 | 30 | 실제 통과 |
+| passed | 30 | 실제 통과 |
+| unexpected | 0 | 실제 통과 |
+| 기준 행 유지 | true | 실제 통과 |
+| actual SQLSTATE | 기록 | 실제 실행 |
+| actual constraint | 기록 | 실제 실행 |
+| table·column diagnostics | 기록 가능 시 | 실제 실행 |
 
-정상 경계값:
+주요 경계:
 
 ```text
-가격 0
-한 글자 이름·제목
-NULL description
-결제 없는 신청
-완료·취소 이력 후 재신청
-결제실패·금액 0·시각 NULL
+T23 참조 중인 instructor 삭제 → FK 실패
+T24 참조 중인 enrollment 삭제 → FK 실패
+T25 가격0·한 글자 문자열·NULL description → 성공
+T26 결제 없는 신청 → 성공
+T27 완료 이력 뒤 재신청 → 성공
+T28 취소 이력 뒤 재신청 → 성공
+T29 결제실패·0원·시각 NULL → 성공
+T30 대소문자 다른 학생 email → 현재 정확 문자열 정책에서는 성공
 ```
 
 ---
 
-## 10. 최종 08 검증
+## 12. 최종 08 완료 게이트
 
 | 점검 항목 | 상태 |
 | --- | --- |
-| Chapter 07 신청 5행 유지 | 코드 반영 |
-| 기준 행·JOIN | 코드 반영 |
-| 정확한 객체·제약·FK·IDENTITY | 코드 반영 |
-| 문자열·고아·활성 중복 | 코드 반영 |
-| 금액·시각·상태 조합 | 코드 반영 |
-| 가격 차이 1행 | 코드 반영 |
-| IDENTITY 다음 값 > 최대 ID | 코드 반영 |
-| 같은 세션 07 결과 재확인 | 코드 반영 |
-| 최종 통과 메시지 | 코드 반영 |
+| Chapter 07·08 canonical source | 실제 통과 |
+| 기준 행 3/3/2/3/4/4 | 실제 통과 |
+| 금액 470000/470000 | 실제 통과 |
+| JOIN 4 | 실제 통과 |
+| 정확한 객체·제약·FK·IDENTITY | 실제 통과 |
+| 문자열·고아·활성 중복 0 | 실제 통과 |
+| 금액·시각·상태 위반 0 | 실제 통과 |
+| 가격 차이 1002 한 행 | 실제 통과 |
+| 모든 IDENTITY next > max | 실제 통과 |
+| 같은 세션의 07 증거 | 실제 통과 |
+| tests 30/30 | 실제 통과 |
+| final notice | 실제 통과 |
+
+통과 메시지:
+
+```text
+Chapter 13 AI review lab validation passed: tests 30/30
+```
 
 ---
 
-## 11. 민감정보·파괴적 변경·diff
-
-| 점검 항목 | 상태 | 최종 반영 |
-| --- | --- | --- |
-| 카드번호·CVV 전용 컬럼 없음 | 완료 | 메타데이터 검사 |
-| payment_reference 의미 | 완료 | 외부 비민감 참조값 |
-| 가상 Seed 값 | 완료 | PAY-REVIEW-TEST-* |
-| 로그·프롬프트 민감값 금지 | 완료 | 본문·템플릿 |
-| 앱 데이터 흐름 검토 | 완료 | 보고서 항목 |
-| 컬럼명 검사 한계 | 완료 | 단독 증거로 사용 금지 |
-| DROP·TRUNCATE·무조건 DML | 완료 | 별도 위험 검토 |
-| ALTER·UNIQUE·CASCADE | 완료 | 데이터·정책·락 검토 |
-| 권한 GRANT·REVOKE | 완료 | 변경 범위 확인 |
-| Codex 최소 변경 | 완료 | 대상·금지 범위 지정 |
-| 파일별 diff 사람 검토 | 완료 | 승인 전 필수 |
-| 01→08 재실행 루프 | 완료 | 수정 후 재검증 |
-
----
-
-## 12. 보고서·프롬프트·워크북·README
+## 13. reset 안전성
 
 | 점검 항목 | 상태 |
 | --- | --- |
-| P13 ID 동기화 | 완료 |
-| 역할표 | 완료 |
-| 문맥 묶음·프롬프트 계약 | 완료 |
-| ERD·카디널리티 | 완료 |
-| IDENTITY 다음 값 | 완료 |
-| 활성 부분 고유 인덱스 | 완료 |
-| SQLSTATE·constraint name | 완료 |
-| 정상 경계값 | 완료 |
-| paid_at·refunded_at | 완료 |
-| 부분 환불 범위 | 완료 |
-| LEFT JOIN NULL | 완료 |
-| 08 최종 검증 | 완료 |
-| 민감정보 다중 증거 | 완료 |
+| 잘못된 DB 차단 | 코드·workflow 확인 |
+| 읽기 전용 차단 | 코드 반영 |
+| 명시적 자식→부모 DROP | 실제 통과 |
+| CASCADE 없음 | 정적 통과 |
+| 예상 밖 객체 보호 | keep_me 테스트 통과 |
+| 실패 시 앞선 DROP 전체 ROLLBACK | 실제 통과 |
+| 정상 reset 후 schema 제거 | 실제 통과 |
+| course_project 보존 | fingerprint 통과 |
+| nosql_lab 보존 | fingerprint 통과 |
+
+---
+
+## 14. 민감정보·결제 참조값
+
+| 점검 항목 | 상태 |
+| --- | --- |
+| 원시 카드번호·CVV 미저장 | 반영 |
+| 가상 payment_reference 사용 | 반영 |
+| payment_reference 자동 비민감 단정 금지 | 반영 |
+| 실제 보호 수준은 조직 정책 | 반영 |
+| 가상 Seed 값 | `PAY-REVIEW-TEST-*` |
+| 컬럼명 검사만으로 완전 증명하지 않음 | 반영 |
+| 로그·프롬프트·앱 흐름 함께 검토 | 반영 |
+
+---
+
+## 15. 프롬프트·보고서·워크북
+
+| 점검 항목 | 상태 |
+| --- | --- |
+| P13 ID | 동기화 완료 |
+| 요구사항/결정/미확정 분리 | 완료 |
+| 수정 대상·금지 범위 | 완료 |
+| 예상 diff | 완료 |
+| 실행 증거 | 완료 |
 | 미실행 항목 | 완료 |
-| 승인 네 상태 | 완료 |
-| 권장 해설 | 완료 |
+| 남은 가정 | 완료 |
+| 승인 4상태 | 완료 |
+| 24 failures / 6 successes | 동기화 완료 |
+| 30/30 | 동기화 완료 |
 
 ---
 
-## 13. SVG·시각 자료
-
-| 시각 자료 | 상태 |
-| --- | --- |
-| ch13_01 AI 설계 검증 전체 흐름 | 연결 완료 |
-| ch13_02 ChatGPT·Codex·사람 역할 | 연결 완료 |
-| ch13_03 프롬프트 구조 | 연결 완료 |
-| ch13_04 ERD 검토 체크포인트 | 연결 완료 |
-| ch13_05 나쁜·좋은 설계 비교 | 연결 완료 |
-| ch13_06 제약조건 검토 | 연결 완료 |
-| ch13_07 메타데이터 비교 | 연결 완료 |
-| ch13_08 Codex 수정·재검증 루프 | 연결 완료 |
-
-본문 표는 상세 기준, SVG는 흐름·구조를 담당하도록 중복을 최소화합니다.
-
----
-
-## 14. 이론·실습 발표자료
+## 16. 이미지·발표·TTS
 
 | 점검 항목 | 기대 | 상태 |
 | --- | ---: | --- |
-| 이론 장표 | 20 | 구성 완료 |
-| 실습 장표 | 20 | 구성 완료 |
-| 총 장표 | 40 | 구성 완료 |
-| 이론 제목 중복 | 0 | 자동 정적 검증 정의 |
-| 실습 제목 중복 | 0 | 자동 정적 검증 정의 |
-| navigation plan 제목 일치 | 20/20씩 | 자동 정적 검증 정의 |
-| 화면 구성 존재 | 전 장표 | 자동 정적 검증 정의 |
-| 발표 스크립트 존재 | 전 장표 | 자동 정적 검증 정의 |
-| 의미 단위 포커스 | 전 장표 | navigation plan 반영 |
-| 발표/스크립트 동기화 구조 | 동일 단계 | 공통 navigation 사용 |
+| Mermaid | 8 | 정적 통과 |
+| SVG | 8 | 정적 통과 |
+| stem 대응 | 8쌍 | 정적 통과 |
+| SVG role/img | 적용 | 정적 통과 |
+| SVG width=100% | 적용 | 정적 통과 |
+| SVG viewBox | 존재 | 정적 통과 |
+| SVG title/desc | 존재 | 정적 통과 |
+| 본문 SVG 참조 | 8 | 정적 통과 |
+| 이론 장표 | 20 | 정적 통과 |
+| 실습 장표 | 20 | 정적 통과 |
+| 화면 구성·스크립트 | 모든 장표 | 정적 통과 |
+| navigation 제목 1:1 | 20+20 | 정적 통과 |
+| Markdown fetch | `cache=no-store` | 정적 통과 |
+| shared TTS | 사용 | 정적 통과 |
+| script enhancer | 연결 | 정적 통과 |
+| local asset version | `20260809a` | 정적 통과 |
 
 ---
 
-## 15. 공통 TTS·스크립트
-
-| 점검 항목 | 상태 |
-| --- | --- |
-| 로컬 중복 TTS 테이블 제거 | 반영 |
-| `PresentationTTS.normalize` 사용 | 반영 |
-| Chapter 13 핵심 용어 공통 TTS 등록 | 반영 |
-| `script_content_enhancer.js` 로드 | 반영 |
-| 기존 긴 설명 유지 | 반영 방향 |
-| 짧은 단계 설명 보강 | 반영 방향 |
-| 주요 자산 캐시 `20260808a` | 반영 |
-| enhancer 캐시 `20260808e` | 반영 |
-
-핵심 TTS 용어:
+## 17. 자동 검증 결과
 
 ```text
-ALTER COLUMN TYPE / SET NOT NULL / IS DISTINCT FROM / NO ACTION
-P13-R / P13-D / P13-T / P13-V
-ai_review_lab / bad_enrollments
-recorded_amount / payment_reference / payment_status / paid_at / refunded_at
+Workflow: Validate Chapter 13
+Run: 2
+Run ID: 31291233314
+Commit: 5fd926149d87f6f941b7015fedbdf1361beb0b20
+PostgreSQL: 16
+Status: completed
+Conclusion: success
+```
+
+모든 주요 단계가 성공했습니다.
+
+```text
+정적 source alignment
+wrong DB guard
+Chapter 07·08 build
+Chapter 12 handoff build
+protected fingerprints
+upstream drift detection
+Chapter 13 01→08
+exact final state
+business drift detection
+protected schemas unchanged
+reset atomicity and isolation
 ```
 
 ---
 
-## 16. 자동 정적 검증·CI 정의
+## 18. 수동 확인만 남은 항목
 
-`.github/workflows/validate-chapter13-navigation.yml` 검증 범위:
-
-```text
-JavaScript 문법
-이론 20장·실습 20장
-장표 제목 중복
-강의안 제목↔navigation plan 제목
-화면 구성·발표 스크립트 존재
-공통 PresentationTTS 사용
-Chapter 13 TTS 용어
-HTML 자산 로드 순서
-SQL 01~08 파일 존재
-제약조건 29·FK 4·IDENTITY 6 기준
-P13-T01~T24·T23~T27
-30/30 판정 로직
-Chapter 07 5행 보존 로직
-08 최종 통과 메시지
-```
-
-CI 정의가 존재한다는 사실과 실제 Actions 실행 결과는 구분합니다.
-
----
-
-## 17. 단계별 파일
-
-| 파일 | 상태 |
-| --- | --- |
-| 01 보호·원자적 생성 | 완료 |
-| 02 나쁜 Seed·IDENTITY | 완료 |
-| 03 좋은 설계·활성 인덱스 | 완료 |
-| 04 정상 Seed·IDENTITY | 완료 |
-| 05 정확한 메타데이터 | 완료 |
-| 06 NULL 안전 업무 검증 | 완료 |
-| 07 반례·경계값 30개 | 완료 |
-| 08 최종 자동 판정 | 완료 |
-| 보고서 템플릿 | 완료 |
-| 프롬프트 템플릿 | 완료 |
-| reset | 완료 |
-| README·호환 진입점 | 완료 |
-| 이론 발표자료 | 완료 |
-| 실습 발표자료 | 완료 |
-| semantic navigation | 완료 |
-| 공통 TTS 연결 | 완료 |
-| 자동 정적 검증 정의 | 완료 |
-
----
-
-## 18. 장 간 연결
-
-| 점검 항목 | 상태 |
-| --- | --- |
-| Chapter 07 활성 신청 정책 | 완료 |
-| Chapter 10~12 보안·성능·복구 검토 흐름 | 완료 |
-| Chapter 14 SQL 분석·Python 확장 안내 | 완료 |
-| 기존 Vector DB·RAG 연결 제거 | 완료 |
-
----
-
-## 19. 남은 실제 검증
-
-다음은 코드·문서 반영과 별개로 실제 환경에서 확인해야 합니다.
+다음 항목은 자동 검증으로 통과했다고 표시하지 않습니다.
 
 ```text
-1. PostgreSQL에서 reset 후 01→08 순차 실행
-2. 05 metadata validation 실제 통과
-3. 06 business validation 실제 통과
-4. 07 반례·경계값 30/30·unexpected 0 실제 확인
-5. 08 Chapter 13 AI review lab validation passed 실제 확인
-6. 기준 행 수와 IDENTITY 다음 값 실제 확인
-7. Chapter 13 GitHub Actions 실행 결과 확인
-8. 이론·실습 HTML 브라우저 렌더링 확인
-9. 의미 단위 이전/다음 이동과 포커스 표시 확인
-10. 발표 화면·스크립트 창 동기화 확인
-11. TTS 발음과 스크립트 보강 결과 수동 확인
-12. SVG 8개 가독성과 본문 참조 확인
-13. GitHub·Word·PDF·eBook 최종 렌더링 확인
-```
-
----
-
-## 20. 최종 판정
-
-```text
-Chapter 13은 본문·구성안·워크북·SQL·보고서·프롬프트·README·SVG뿐 아니라
-이론/실습 발표자료, 의미 단위 내비게이션, 공통 TTS와 자동 정적 검증까지
-동일한 P13 기준으로 연결되도록 보완되었다.
-
-따라서 내용·구조·코드·발표자료 차원의 반영은 완료 상태로 본다.
-다만 PostgreSQL 실제 실행, GitHub Actions 실제 결과, 브라우저 및 Word·PDF·eBook 렌더링은
-직접 확인하기 전까지 통과로 표시하지 않는다.
+1. 이론 20장 브라우저 최종 시각 확인
+2. 실습 20장 브라우저 최종 시각 확인
+3. semantic/step highlight 실제 동작
+4. 스크립트 창 ↔ 장표 실제 동기화
+5. TTS 실제 청취·발음
+6. 모바일·프로젝터 가독성
+7. Mermaid CLI 재생성
+8. GitHub SVG 실제 시각 렌더링
+9. Word·PDF·eBook 최종 렌더링
+10. 최종 페이지 수
+11. 실제 조직의 개인정보·결제 참조값 보호 정책
+12. 운영 DB migration·lock·backup·rollback 검토
 ```
