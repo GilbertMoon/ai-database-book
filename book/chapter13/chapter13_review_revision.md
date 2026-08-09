@@ -223,7 +223,7 @@ enrollments 1 → 0..1 payments
 | students | 학생 기본 정보 |
 | instructors | 강사 기본 정보 |
 | courses | 강의 현재 정보와 기본 가격 |
-| enrollments | 학생·강의 관계와 신청 시점 신청 시점 기록 금액 |
+| enrollments | 학생·강의 관계와 신청 시점 기록 금액 |
 | payments | 현재 결제 상태와 외부 비민감 참조값 |
 
 `bad_enrollments`의 역할 혼합 문제와 좋은 설계의 분리를 `ch13_04`, `ch13_05` 다이어그램과 본문에 동기화했습니다.
@@ -297,7 +297,7 @@ payments.payment_reference
 
 ```text
 courses.price              현재 기본 가격
-enrollments.recorded_amount  신청 시점 신청 시점 기록 금액
+enrollments.recorded_amount  신청 시점 기록 금액
 payments.amount             현재 결제 상태의 금액
 ```
 

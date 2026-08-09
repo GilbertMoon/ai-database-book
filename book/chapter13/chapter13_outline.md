@@ -87,7 +87,7 @@ P13-R04 학생·강의 N:M 해소
 P13-R05 수강 상태 CHECK
 P13-R06 가격·금액 0 이상
 P13-R07 결제→수강신청 FK
-P13-R08 카드번호 미저장·외부 비민감 reference
+P13-R08 원시 카드정보 미저장·가상 외부 reference 사용
 P13-R09 활성 신청 학생·강의당 한 건
 ```
 
@@ -183,7 +183,7 @@ code/chapter13/
 | 04 | 정상 Seed·IDENTITY 조정·COMMIT 전 판정 |
 | 05 | 정확한 테이블·FK·제약·IDENTITY·인덱스 검증 |
 | 06 | NULL 안전 업무 정합성 검증 |
-| 07 | SQLSTATE·constraint name 반례 24개·경계값 5개 |
+| 07 | SQLSTATE·constraint name 반례 24개·경계값 6개 |
 | 08 | 최종 영구 상태·메타데이터·업무·IDENTITY 판정 |
 | 보고서 | 요구사항·정책·diff·실행 증거·승인 기록 |
 | 프롬프트 | 설계·수정·오류·마이그레이션·승인 요청 |
