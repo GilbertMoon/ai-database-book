@@ -43,9 +43,9 @@ VALUES
     (101, '김민지', '서울', '2026-01-05'),
     (102, '이준호', '경기', '2026-01-12'),
     (103, '박서연', '부산', '2026-02-02'),
-    (104, '최유진', '서울', '2026-02-15'),
+    (104, '최유진', '서울', '2026-02-10'),
     (105, '정우성', '대구', '2026-03-01'),
-    (106, '한지민', '경기', '2026-03-10'),
+    (106, '한지민', '경기', '2026-03-05'),
     (107, '윤서준', '부산', '2026-04-05'),
     (108, '강하늘', '서울', '2026-05-01');
 
@@ -128,6 +128,7 @@ ALTER TABLE analysis_lab.enrollments
 DO $$
 DECLARE
     active_duplicate_count BIGINT;
+    temporal_issue_count BIGINT;
 BEGIN
     IF (SELECT COUNT(*) FROM analysis_lab.students) <> 8
        OR (SELECT COUNT(*) FROM analysis_lab.instructors) <> 3
@@ -165,6 +166,26 @@ BEGIN
         RAISE EXCEPTION
             'Seed 중단: 활성 신청 중복 조합이 %건 있습니다.',
             active_duplicate_count;
+    END IF;
+
+    SELECT
+        (SELECT COUNT(*)
+         FROM analysis_lab.enrollments AS e
+         JOIN analysis_lab.students AS s ON s.id = e.student_id
+         WHERE e.enrolled_at < s.joined_at)
+      + (SELECT COUNT(*)
+         FROM analysis_lab.enrollments AS e
+         JOIN analysis_lab.courses AS c ON c.id = e.course_id
+         WHERE e.enrolled_at < c.opened_at)
+      + (SELECT COUNT(*)
+         FROM analysis_lab.enrollments
+         WHERE completed_at < enrolled_at)
+    INTO temporal_issue_count;
+
+    IF temporal_issue_count <> 0 THEN
+        RAISE EXCEPTION
+            'Seed 중단: 가입일·개설일·완료일 시간 관계 이상이 %건 있습니다.',
+            temporal_issue_count;
     END IF;
 END
 $$;
