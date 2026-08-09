@@ -34,9 +34,19 @@ SELECT datname, pg_get_userbyid(datdba) AS owner_name, datacl
 FROM pg_database
 WHERE datname = current_database();
 
+-- PUBLIC은 pg_roles의 실제 Role이 아니라 특별한 권한 대상입니다.
+-- aclexplode에서는 PUBLIC grantee가 OID 0으로 표현됩니다.
+-- datacl이 NULL이면 acldefault('d', datdba)로 데이터베이스 기본 ACL을 복원해 판정합니다.
 SELECT
-    has_database_privilege('PUBLIC', current_database(), 'CONNECT') AS public_can_connect,
-    has_database_privilege(current_user, current_database(), 'CONNECT') AS current_user_can_connect;
+    EXISTS (
+        SELECT 1
+        FROM aclexplode(COALESCE(d.datacl, acldefault('d', d.datdba))) AS acl
+        WHERE acl.grantee = 0
+          AND acl.privilege_type = 'CONNECT'
+    ) AS public_can_connect,
+    has_database_privilege(current_user, d.oid, 'CONNECT') AS current_user_can_connect
+FROM pg_database AS d
+WHERE d.datname = current_database();
 
 -- 직접 테이블·컬럼 권한
 SELECT grantee, table_name, privilege_type, is_grantable
