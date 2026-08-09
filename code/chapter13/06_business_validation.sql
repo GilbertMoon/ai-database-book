@@ -42,7 +42,11 @@ SELECT
     (SELECT COUNT(*) FROM ai_review_lab.enrollments)
         AS enrollments_expected_4,
     (SELECT COUNT(*) FROM ai_review_lab.payments)
-        AS payments_expected_4;
+        AS payments_expected_4,
+    (SELECT SUM(recorded_amount) FROM ai_review_lab.enrollments)
+        AS recorded_amount_expected_470000,
+    (SELECT SUM(amount) FROM ai_review_lab.payments)
+        AS payment_amount_expected_470000;
 
 SELECT
     e.id AS enrollment_id,
@@ -55,7 +59,7 @@ SELECT
     c.price AS current_course_price,
     i.name AS instructor_name,
     e.status AS enrollment_status,
-    e.agreed_amount,
+    e.recorded_amount,
     p.payment_status,
     p.amount AS payment_amount,
     p.paid_at,
@@ -108,16 +112,16 @@ SELECT id, payment_reference
 FROM ai_review_lab.payments
 WHERE char_length(trim(payment_reference)) = 0;
 
--- 신청 시점 합의 금액과 결제 기록 금액 불일치
+-- 신청 시점 기록 금액과 결제 상태 기록 금액 불일치
 -- P13-D06: 이 단순 샘플은 전액 결제·전액 환불만 사용합니다.
 SELECT
     e.id AS enrollment_id,
-    e.agreed_amount,
+    e.recorded_amount,
     p.amount AS payment_amount
 FROM ai_review_lab.enrollments AS e
 JOIN ai_review_lab.payments AS p
     ON p.enrollment_id = e.id
-WHERE e.agreed_amount <> p.amount;
+WHERE e.recorded_amount <> p.amount;
 
 -- 결제·환불 시각 조합 위반
 SELECT
@@ -195,17 +199,17 @@ WHERE
 
 -- ============================================================
 -- P13-V06-3. 정보용 차이: 기대 1행
--- 현재 강의 가격과 신청 시점 합의 금액 차이는 할인·가격 변경일 수 있습니다.
+-- 현재 강의 가격과 신청 시점 기록 금액 차이는 할인·가격 변경일 수 있습니다.
 -- ============================================================
 SELECT
     e.id AS enrollment_id,
     c.course_code,
     c.price AS current_course_price,
-    e.agreed_amount
+    e.recorded_amount
 FROM ai_review_lab.enrollments AS e
 JOIN ai_review_lab.courses AS c
     ON c.id = e.course_id
-WHERE c.price <> e.agreed_amount
+WHERE c.price <> e.recorded_amount
 ORDER BY e.id;
 
 -- ============================================================
@@ -228,6 +232,26 @@ BEGIN
         RAISE EXCEPTION
             '업무 검증 실패: 정상 JOIN은 4행이어야 합니다. 실제=%',
             joined_count;
+    END IF;
+
+    IF (SELECT COALESCE(SUM(recorded_amount), 0) FROM ai_review_lab.enrollments) <> 470000
+       OR (SELECT COALESCE(SUM(amount), 0) FROM ai_review_lab.payments) <> 470000 THEN
+        RAISE EXCEPTION
+            '업무 검증 실패: 신청 시점 기록 금액과 결제 상태 기록 금액 합계는 각각 470000이어야 합니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '완료') <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '신청') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '취소') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '수강중') <> 0 THEN
+        RAISE EXCEPTION '업무 검증 실패: 신청 상태 분포가 기준과 다릅니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제완료') <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제대기') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '환불') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제실패') <> 0 THEN
+        RAISE EXCEPTION '업무 검증 실패: 결제 상태 분포가 기준과 다릅니다.';
     END IF;
 
     IF EXISTS (
@@ -268,9 +292,9 @@ BEGIN
         SELECT 1
         FROM ai_review_lab.enrollments AS e
         JOIN ai_review_lab.payments AS p ON p.enrollment_id = e.id
-        WHERE e.agreed_amount <> p.amount
+        WHERE e.recorded_amount <> p.amount
     ) THEN
-        RAISE EXCEPTION '업무 검증 실패: 합의 금액과 결제 금액이 다릅니다.';
+        RAISE EXCEPTION '업무 검증 실패: 신청 시점 기록 금액과 결제 상태 기록 금액이 다릅니다.';
     END IF;
 
     IF EXISTS (
@@ -343,11 +367,19 @@ BEGIN
     INTO price_difference_count
     FROM ai_review_lab.enrollments AS e
     JOIN ai_review_lab.courses AS c ON c.id = e.course_id
-    WHERE c.price <> e.agreed_amount;
+    WHERE c.price <> e.recorded_amount;
 
-    IF price_difference_count <> 1 THEN
+    IF price_difference_count <> 1
+       OR NOT EXISTS (
+            SELECT 1
+            FROM ai_review_lab.enrollments AS e
+            JOIN ai_review_lab.courses AS c ON c.id = e.course_id
+            WHERE e.id = 1002
+              AND c.price = 180000
+              AND e.recorded_amount = 150000
+       ) THEN
         RAISE EXCEPTION
-            '업무 검증 실패: 정보용 가격 차이는 1행이어야 합니다. 실제=%',
+            '업무 검증 실패: 정보용 가격 차이는 1002 한 행이어야 합니다. 실제=%',
             price_difference_count;
     END IF;
 
