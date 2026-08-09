@@ -9,8 +9,24 @@ SHOW search_path;
 
 -- ============================================================
 -- 0. 실행 전 보호 조건
+-- Chapter 07·08에서 확정한 course_project 기준 상태를 정확히 확인합니다.
 -- ============================================================
 DO $$
+DECLARE
+    v_student_count BIGINT;
+    v_instructor_count BIGINT;
+    v_course_count BIGINT;
+    v_enrollment_count BIGINT;
+    v_requested_count BIGINT;
+    v_learning_count BIGINT;
+    v_completed_count BIGINT;
+    v_cancelled_count BIGINT;
+    v_total_amount NUMERIC;
+    v_active_count BIGINT;
+    v_active_amount NUMERIC;
+    v_non_cancelled_count BIGINT;
+    v_non_cancelled_amount NUMERIC;
+    v_active_duplicate_count BIGINT;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -18,20 +34,127 @@ BEGIN
             current_database();
     END IF;
 
+    IF current_setting('transaction_read_only')::BOOLEAN THEN
+        RAISE EXCEPTION
+            '실행 중단: 읽기 전용 연결에서는 nosql_lab을 만들 수 없습니다.';
+    END IF;
+
     IF to_regclass('course_project.students') IS NULL
        OR to_regclass('course_project.instructors') IS NULL
        OR to_regclass('course_project.courses') IS NULL
        OR to_regclass('course_project.enrollments') IS NULL THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07 course_project 핵심 테이블이 준비되지 않았습니다.';
+            '실행 중단: Chapter 07·08 course_project 핵심 테이블이 준비되지 않았습니다.';
     END IF;
 
-    IF (SELECT COUNT(*) FROM course_project.students) <> 3
-       OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
-       OR (SELECT COUNT(*) FROM course_project.courses) <> 3
-       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    ) THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07 기준 상태는 students 3, instructors 2, courses 3, enrollments 5여야 합니다.';
+            '실행 중단: course_project.enrollments.recorded_amount는 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'paid_amount'
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: 이전 금액 열이 남아 있습니다. Chapter 07·08의 recorded_amount 기준을 확인하세요.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_student_count FROM course_project.students;
+    SELECT COUNT(*) INTO v_instructor_count FROM course_project.instructors;
+    SELECT COUNT(*) INTO v_course_count FROM course_project.courses;
+    SELECT COUNT(*) INTO v_enrollment_count FROM course_project.enrollments;
+
+    SELECT
+        COUNT(*) FILTER (WHERE status = '신청'),
+        COUNT(*) FILTER (WHERE status = '수강중'),
+        COUNT(*) FILTER (WHERE status = '완료'),
+        COUNT(*) FILTER (WHERE status = '취소'),
+        COALESCE(SUM(recorded_amount), 0),
+        COUNT(*) FILTER (WHERE status IN ('신청', '수강중')),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')), 0),
+        COUNT(*) FILTER (WHERE status <> '취소'),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status <> '취소'), 0)
+    INTO
+        v_requested_count,
+        v_learning_count,
+        v_completed_count,
+        v_cancelled_count,
+        v_total_amount,
+        v_active_count,
+        v_active_amount,
+        v_non_cancelled_count,
+        v_non_cancelled_amount
+    FROM course_project.enrollments;
+
+    IF v_student_count <> 3
+       OR v_instructor_count <> 2
+       OR v_course_count <> 3
+       OR v_enrollment_count <> 5
+       OR v_requested_count <> 2
+       OR v_learning_count <> 1
+       OR v_completed_count <> 1
+       OR v_cancelled_count <> 1
+       OR v_total_amount <> 590000
+       OR v_active_count <> 3
+       OR v_active_amount <> 340000
+       OR v_non_cancelled_count <> 4
+       OR v_non_cancelled_amount <> 440000 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07·08 기준 상태가 아닙니다. rows=%/%/%/%, status=%/%/%/%, amount=%/%/%',
+            v_student_count, v_instructor_count, v_course_count, v_enrollment_count,
+            v_requested_count, v_learning_count, v_completed_count, v_cancelled_count,
+            v_total_amount, v_active_amount, v_non_cancelled_amount;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM course_project.enrollments
+        WHERE id = 1001 AND status = '완료' AND recorded_amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM course_project.enrollments
+        WHERE id = 1004 AND status = '취소' AND recorded_amount = 150000
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM course_project.enrollments
+        WHERE id = 1005 AND status = '신청' AND recorded_amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07 핵심 신청 1001·1004·1005의 상태 또는 기록 금액이 다릅니다.';
+    END IF;
+
+    IF to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: course_project 활성 신청 부분 고유 인덱스가 없습니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_active_duplicate_count
+    FROM (
+        SELECT student_id, course_id
+        FROM course_project.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated_active;
+
+    IF v_active_duplicate_count <> 0 THEN
+        RAISE EXCEPTION
+            '실행 중단: 활성 신청 중복이 %건 있습니다.',
+            v_active_duplicate_count;
     END IF;
 
     IF EXISTS (
@@ -176,10 +299,55 @@ CREATE TABLE nosql_lab.storage_choice_cases (
         CHECK (char_length(trim(reason)) > 0)
 );
 
+-- ============================================================
+-- 2. COMMIT 전 구조 자동 판정
+-- ============================================================
+DO $$
+DECLARE
+    v_table_count BIGINT;
+    v_constraint_count BIGINT;
+    v_not_null_count BIGINT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_table_count
+    FROM information_schema.tables
+    WHERE table_schema = 'nosql_lab'
+      AND table_type = 'BASE TABLE';
+
+    SELECT COUNT(*)
+    INTO v_constraint_count
+    FROM pg_constraint
+    WHERE connamespace = 'nosql_lab'::regnamespace;
+
+    SELECT COUNT(*)
+    INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'nosql_lab'
+      AND is_nullable = 'NO';
+
+    IF v_table_count <> 3
+       OR v_constraint_count <> 25
+       OR v_not_null_count <> 26 THEN
+        RAISE EXCEPTION
+            'Chapter 12 구조 검증 실패: tables=% constraints=% not_null=%',
+            v_table_count, v_constraint_count, v_not_null_count;
+    END IF;
+
+    IF to_regclass('nosql_lab.course_documents') IS NULL
+       OR to_regclass('nosql_lab.key_value_cache_examples') IS NULL
+       OR to_regclass('nosql_lab.storage_choice_cases') IS NULL THEN
+        RAISE EXCEPTION
+            'Chapter 12 구조 검증 실패: 핵심 테이블이 없습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 nosql lab schema validation passed';
+END
+$$;
+
 COMMIT;
 
 -- ============================================================
--- 2. 생성 결과 확인
+-- 3. 생성 결과 확인
 -- ============================================================
 SELECT
     table_schema,
