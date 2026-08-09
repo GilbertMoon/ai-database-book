@@ -20,7 +20,7 @@ BEGIN
         VALUES ('table','students'), ('table','instructors'), ('table','courses'), ('table','enrollments'),
                ('view','analysis_parameters'), ('view','enrollment_analysis_dataset')
     ), actual(kind, name) AS (
-        SELECT 'table', table_name FROM information_schema.tables WHERE table_schema = 'analysis_lab'
+        SELECT 'table', table_name FROM information_schema.tables WHERE table_schema = 'analysis_lab' AND table_type = 'BASE TABLE'
         UNION ALL
         SELECT 'view', table_name FROM information_schema.views WHERE table_schema = 'analysis_lab'
     )

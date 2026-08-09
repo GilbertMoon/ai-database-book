@@ -180,7 +180,7 @@ COMMIT;
 
 DO $$
 BEGIN
-    IF (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'analysis_lab') <> 4
+    IF (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'analysis_lab' AND table_type = 'BASE TABLE') <> 4
        OR (SELECT COUNT(*) FROM information_schema.views WHERE table_schema = 'analysis_lab') <> 1 THEN
         RAISE EXCEPTION 'Chapter 14 schema creation validation failed.';
     END IF;
@@ -194,6 +194,7 @@ SELECT
     table_name
 FROM information_schema.tables
 WHERE table_schema = 'analysis_lab'
+  AND table_type = 'BASE TABLE'
 ORDER BY table_name;
 
 SELECT

@@ -63,6 +63,7 @@ BEGIN
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'analysis_lab'
+          AND table_type = 'BASE TABLE'
     )
     SELECT COUNT(*)
     INTO mismatch_count
@@ -159,7 +160,7 @@ BEGIN
 
     IF constraint_count <> 20 THEN
         RAISE EXCEPTION
-            '검증 실패: analysis_lab 제약조건은 21개여야 하지만 %개입니다.',
+            '검증 실패: analysis_lab 제약조건은 20개여야 하지만 %개입니다.',
             constraint_count;
     END IF;
 
