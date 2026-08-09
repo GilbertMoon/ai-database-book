@@ -239,4 +239,8 @@ SELECT
     to_regclass('ai_review_lab.bad_enrollments') IS NOT NULL
         AS bad_design_table_created;
 
-RAISE NOTICE 'Chapter 13 bad design schema creation passed';
+DO $$
+BEGIN
+    RAISE NOTICE 'Chapter 13 bad design schema creation passed';
+END
+$$;
