@@ -4,6 +4,29 @@
   const base = window.CH4Navigation;
   if (!base) return;
 
+  const patchTheoryVisuals = () => {
+    const slides = window.CH4_SLIDES;
+    if (!Array.isArray(slides) || !slides.length) return;
+    if (String(window.CH4_TITLE || '').includes('실습')) return;
+
+    const setHtml = (key, html) => {
+      const slide = slides.find((item) => item?.k === key);
+      if (slide) slide.h = html;
+    };
+
+    setHtml('CRUD OVERVIEW', `<h2>CRUD는 서비스 기능과<br>SQL 명령으로 연결됩니다</h2><div class="table-wrap"><table><thead><tr><th>CRUD</th><th>SQL</th><th>서비스 기능 예시</th></tr></thead><tbody><tr><td>Create</td><td>INSERT</td><td>학생 등록</td></tr><tr><td>Read</td><td>SELECT</td><td>학생 목록 확인</td></tr><tr><td>Update</td><td>UPDATE</td><td>학생 정보 변경</td></tr><tr><td>Delete</td><td>DELETE</td><td>학생 정보 삭제</td></tr></tbody></table></div><p class="body-text">CRUD의 Create는 INSERT이며 CREATE TABLE과는 다른 개념입니다.</p>`);
+
+    setHtml('EXECUTION LOCATION', `<h2>SQL 실행 전에는<br>위치를 먼저 확인합니다</h2><pre>SELECT current_database();\nSELECT current_schema();\nSHOW search_path;</pre><p class="body-text">실습 SQL은 public.students처럼 Schema를 직접 적어 작업 대상을 명확하게 지정합니다.</p>`);
+
+    setHtml('IDENTITY', `<h2>IDENTITY 값은<br>빈틈없는 순번이 아닙니다</h2><div class="quote">id는 Row 식별자입니다.<br>현재 학생 수나 완벽한 순번이 아닙니다.</div><p class="body-text">입력 실패, 삭제, 취소 등으로 번호 공백이 생길 수 있습니다. 학생 수는 COUNT(*)로 확인합니다.</p>`);
+
+    setHtml('LIKE ILIKE', `<h2>LIKE와 ILIKE는<br>문자열 패턴 검색에 사용합니다</h2><div class="table-wrap"><table><thead><tr><th>패턴</th><th>의미</th></tr></thead><tbody><tr><td>'김%'</td><td>김으로 시작</td></tr><tr><td>'%민%'</td><td>중간에 민 포함</td></tr><tr><td>'%우'</td><td>우로 끝남</td></tr><tr><td>'김__'</td><td>김 뒤 정확히 두 글자</td></tr></tbody></table></div><p class="body-text">PostgreSQL에서는 ILIKE로 대소문자를 구분하지 않는 패턴 검색을 할 수 있습니다.</p>`);
+
+    setHtml('NULL', `<h2>NULL은 0이나 빈 문자열이 아닙니다</h2><div class="quote">NULL = 값이 없거나<br>아직 알려지지 않은 상태</div><div class="grid-2"><article class="card"><h3>잘못된 비교</h3><pre>WHERE major = NULL</pre></article><article class="card emphasis"><h3>올바른 확인</h3><pre>WHERE major IS NULL\nWHERE major IS NOT NULL</pre></article></div><p class="body-text">0, 빈 문자열, NULL은 서로 다른 상태입니다.</p>`);
+  };
+
+  patchTheoryVisuals();
+
   const THEORY_TTS_SCRIPTS = Object.freeze({
       'CHAPTER 04 · THEORY': `안녕하세요. 4장은 관계형 데이터베이스와 에스큐엘을 실제로 시작하는 장입니다. 이번 장부터 처음으로 테이블을 만들고, 데이터를 입력하고, 조회하고, 수정하고, 삭제합니다.
 
