@@ -18,6 +18,11 @@ BEGIN
             current_database();
     END IF;
 
+    IF current_setting('transaction_read_only')::BOOLEAN THEN
+        RAISE EXCEPTION
+            '실행 중단: 읽기 전용 연결에서는 Seed 데이터를 입력할 수 없습니다.';
+    END IF;
+
     IF to_regclass('nosql_lab.course_documents') IS NULL
        OR to_regclass('nosql_lab.key_value_cache_examples') IS NULL
        OR to_regclass('nosql_lab.storage_choice_cases') IS NULL THEN
@@ -36,6 +41,20 @@ BEGIN
        OR (SELECT COUNT(*) FROM course_project.instructors WHERE id IN (201, 202)) <> 2 THEN
         RAISE EXCEPTION
             '실행 중단: Chapter 07 기준 강의 301~303 또는 강사 201~202가 없습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07·08의 recorded_amount NUMERIC(12,0) 기준이 아닙니다.';
     END IF;
 END
 $$;
@@ -170,15 +189,15 @@ VALUES
 (
     '수강신청과 신청 당시 금액 기록',
     'source_of_truth',
-    '학생·강의·신청 당시 금액을 제약조건·트랜잭션·JOIN으로 처리',
+    '학생·강의·신청 당시 기록 금액을 제약조건·트랜잭션·JOIN으로 처리',
     'PostgreSQL RDBMS',
     'course_project.enrollments와 관련 원본 테이블',
     '강한 무결성과 다중 변경 원자성 필요',
     '원본 데이터베이스 내부 트랜잭션으로 처리',
-    'Chapter 11 백업·복원 절차로 원본 복구',
+    'Chapter 11에서 검증한 백업·복원 원칙으로 원본 복구',
     'PK·FK·CHECK·활성 신청 규칙과 트랜잭션 검증 통과',
     'adopted',
-    '현재 모델에는 별도 결제·환불 원장이 없고 paid_amount는 신청 당시 기록 금액입니다.'
+    'course_project.enrollments.recorded_amount NUMERIC(12,0)는 신청 시점에 신청 행에 기록한 금액이며 결제 승인액·환불 반영 순액·회계 매출이 아닙니다. 별도 결제·환불 원장은 현재 범위 밖입니다.'
 ),
 (
     '학생 로그인 세션',
@@ -251,9 +270,11 @@ VALUES
 -- ============================================================
 DO $$
 DECLARE
-    source_mismatch_count BIGINT;
-    invalid_document_count BIGINT;
-    blank_decision_count BIGINT;
+    v_source_mismatch_count BIGINT;
+    v_snapshot_mismatch_count BIGINT;
+    v_invalid_document_count BIGINT;
+    v_blank_decision_count BIGINT;
+    v_bad_cache_key_count BIGINT;
 BEGIN
     IF (SELECT COUNT(*) FROM nosql_lab.course_documents) <> 3
        OR (SELECT COUNT(*) FROM nosql_lab.key_value_cache_examples) <> 4
@@ -263,32 +284,53 @@ BEGIN
     END IF;
 
     SELECT COUNT(*)
-    INTO source_mismatch_count
+    INTO v_source_mismatch_count
     FROM nosql_lab.course_documents AS d
-    LEFT JOIN course_project.courses AS c
+    JOIN course_project.courses AS c
         ON c.id = d.source_course_id
-    WHERE c.id IS NULL
-       OR c.title <> d.title
-       OR c.level <> d.level;
+    WHERE d.course_code IS DISTINCT FROM 'COURSE-' || c.id
+       OR c.title IS DISTINCT FROM d.title
+       OR c.level IS DISTINCT FROM d.level;
 
-    IF source_mismatch_count <> 0 THEN
+    IF v_source_mismatch_count <> 0 THEN
         RAISE EXCEPTION
             '샘플 입력 중단: Chapter 07 원본과 다른 문서가 %건 있습니다.',
-            source_mismatch_count;
+            v_source_mismatch_count;
     END IF;
 
     SELECT COUNT(*)
-    INTO invalid_document_count
-    FROM nosql_lab.course_documents
-    WHERE jsonb_typeof(metadata -> 'tags') <> 'array'
-       OR jsonb_typeof(metadata -> 'options') <> 'object'
-       OR jsonb_typeof(metadata #> '{options,online}') <> 'boolean'
-       OR jsonb_typeof(metadata -> 'instructor_snapshot') <> 'object';
+    INTO v_snapshot_mismatch_count
+    FROM nosql_lab.course_documents AS d
+    JOIN course_project.courses AS c
+        ON c.id = d.source_course_id
+    JOIN course_project.instructors AS i
+        ON i.id = c.instructor_id
+    WHERE d.metadata #>> '{instructor_snapshot,source_instructor_id}' IS DISTINCT FROM i.id::TEXT
+       OR d.metadata #>> '{instructor_snapshot,name}' IS DISTINCT FROM i.name
+       OR d.metadata #>> '{instructor_snapshot,specialty}' IS DISTINCT FROM i.specialty
+       OR COALESCE(d.metadata #>> '{instructor_snapshot,copied_at}', '') = '';
 
-    IF invalid_document_count <> 0 THEN
+    IF v_snapshot_mismatch_count <> 0 THEN
         RAISE EXCEPTION
-            '샘플 입력 중단: JSONB 구조가 잘못된 문서가 %건 있습니다.',
-            invalid_document_count;
+            '샘플 입력 중단: instructor_snapshot 원본 대조 실패가 %건 있습니다.',
+            v_snapshot_mismatch_count;
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_invalid_document_count
+    FROM nosql_lab.course_documents
+    WHERE jsonb_typeof(metadata) IS DISTINCT FROM 'object'
+       OR jsonb_typeof(metadata -> 'tags') IS DISTINCT FROM 'array'
+       OR jsonb_typeof(metadata -> 'options') IS DISTINCT FROM 'object'
+       OR jsonb_typeof(metadata #> '{options,online}') IS DISTINCT FROM 'boolean'
+       OR jsonb_typeof(metadata #> '{options,certificate}') IS DISTINCT FROM 'boolean'
+       OR jsonb_typeof(metadata -> 'instructor_snapshot') IS DISTINCT FROM 'object'
+       OR document_version <> 1;
+
+    IF v_invalid_document_count <> 0 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: JSONB 구조 또는 문서 버전이 잘못된 문서가 %건 있습니다.',
+            v_invalid_document_count;
     END IF;
 
     IF (
@@ -300,13 +342,40 @@ BEGIN
         SELECT COUNT(*)
         FROM nosql_lab.key_value_cache_examples
         WHERE expired_at IS NOT NULL AND expired_at <= created_at
+    ) <> 1
+       OR (
+        SELECT COUNT(*)
+        FROM nosql_lab.key_value_cache_examples
+        WHERE expired_at IS NULL
     ) <> 1 THEN
         RAISE EXCEPTION
-            '샘플 입력 중단: Seed 기준 캐시는 전체 4, 유효 3, 만료 1이어야 합니다.';
+            '샘플 입력 중단: Seed 기준 캐시는 전체 4, 유효 3, 만료 1, 무만료 1이어야 합니다.';
     END IF;
 
     SELECT COUNT(*)
-    INTO blank_decision_count
+    INTO v_bad_cache_key_count
+    FROM nosql_lab.key_value_cache_examples
+    WHERE cache_key NOT IN (
+        'student:101:session',
+        'course:popular:v1:top3',
+        'feature:recommendation:v1',
+        'student:103:session'
+    );
+
+    IF v_bad_cache_key_count <> 0
+       OR NOT EXISTS (
+            SELECT 1
+            FROM nosql_lab.key_value_cache_examples
+            WHERE cache_key = 'course:popular:v1:top3'
+              AND source_name = 'course_project'
+              AND cache_value -> 'course_ids' = '[301, 302, 303]'::jsonb
+       ) THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: cache_key 집합 또는 인기 강의 원본 ID가 다릅니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_blank_decision_count
     FROM nosql_lab.storage_choice_cases
     WHERE char_length(trim(primary_query)) = 0
        OR char_length(trim(candidate_storage)) = 0
@@ -317,11 +386,30 @@ BEGIN
        OR char_length(trim(poc_success_criteria)) = 0
        OR char_length(trim(reason)) = 0;
 
-    IF blank_decision_count <> 0
-       OR (SELECT COUNT(DISTINCT system_role) FROM nosql_lab.storage_choice_cases) <> 6 THEN
+    IF v_blank_decision_count <> 0
+       OR (SELECT COUNT(DISTINCT system_role) FROM nosql_lab.storage_choice_cases) <> 6
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'adopted') <> 1
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'poc_planned') <> 2
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'candidate') <> 2
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'hold') <> 1
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'rejected') <> 0 THEN
         RAISE EXCEPTION
-            '샘플 입력 중단: 저장소 선택 근거 또는 시스템 역할 구성이 잘못되었습니다.';
+            '샘플 입력 중단: 저장소 선택 근거·역할 또는 결정 상태 구성이 잘못되었습니다.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.storage_choice_cases
+        WHERE system_role = 'source_of_truth'
+          AND decision_status = 'adopted'
+          AND candidate_storage = 'PostgreSQL RDBMS'
+          AND reason LIKE '%recorded_amount%'
+    ) THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: PostgreSQL 원본 사례의 recorded_amount 의미가 누락되었습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 nosql lab seed validation passed';
 END
 $$;
 
@@ -346,8 +434,9 @@ SELECT
     ) AS valid_at_seed_rows,
     COUNT(*) FILTER (
         WHERE expired_at IS NOT NULL AND expired_at <= created_at
-    ) AS expired_at_seed_rows
+    ) AS expired_at_seed_rows,
+    COUNT(*) FILTER (WHERE expired_at IS NULL) AS no_expiry_rows
 FROM nosql_lab.key_value_cache_examples;
 
--- 기대 결과: 3 / 4 / 6, Seed 기준 캐시 4 / 3 / 1
+-- 기대 결과: 3 / 4 / 6, Seed 기준 캐시 4 / 3 / 1, 무만료 1
 -- 자동 생성 ID는 업무 키로 사용하지 않으므로 번호 공백을 정합성 오류로 보지 않습니다.
