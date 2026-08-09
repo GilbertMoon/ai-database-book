@@ -85,6 +85,7 @@ VALUES
 ALTER TABLE ai_review_lab.bad_enrollments
     ALTER COLUMN id RESTART WITH 4;
 
+-- 나쁜 설계의 의도한 문제 자체가 재현되는지 COMMIT 전에 확인합니다.
 DO $$
 BEGIN
     IF (SELECT COUNT(*) FROM ai_review_lab.bad_enrollments) <> 3 THEN
@@ -99,6 +100,38 @@ BEGIN
     ) <> 2 THEN
         RAISE EXCEPTION
             '샘플 입력 중단: 의도한 학생 이메일 반복이 재현되지 않았습니다.';
+    END IF;
+
+    IF (
+        SELECT COUNT(*)
+        FROM ai_review_lab.bad_enrollments
+        WHERE course_price !~ '^[0-9]+$'
+    ) <> 1
+       OR (
+            SELECT COUNT(*)
+            FROM ai_review_lab.bad_enrollments
+            WHERE created_at = 'yesterday'
+       ) <> 1
+       OR (
+            SELECT COUNT(*)
+            FROM ai_review_lab.bad_enrollments
+            WHERE payment_status = 'done'
+       ) <> 1
+       OR (
+            SELECT COUNT(*)
+            FROM ai_review_lab.bad_enrollments
+            WHERE enrollment_status = 'finished'
+       ) <> 1 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 약한 타입·통제되지 않은 상태값 반례가 기대와 다릅니다.';
+    END IF;
+
+    IF (
+        SELECT COUNT(DISTINCT sensitive_value_plaintext)
+        FROM ai_review_lab.bad_enrollments
+    ) <> 2 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 평문 민감값 형태의 반복 문제가 재현되지 않았습니다.';
     END IF;
 END
 $$;
@@ -141,3 +174,9 @@ SELECT
 FROM ai_review_lab.bad_enrollments;
 
 -- 기대 결과: 3 / 1 / 3
+
+DO $$
+BEGIN
+    RAISE NOTICE 'Chapter 13 bad design seed passed';
+END
+$$;
