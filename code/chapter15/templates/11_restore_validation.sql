@@ -1,4 +1,5 @@
 -- Chapter 15. 별도 복원 DB 검증
+-- P15-V09: custom-format 백업을 별도 tutor_project_restore DB에 복원한 뒤 구조·데이터·owner·IDENTITY·분석 VIEW를 검증합니다.
 -- tutor_project_restore에서만 실행합니다.
 
 SELECT current_user AS current_user_name;
