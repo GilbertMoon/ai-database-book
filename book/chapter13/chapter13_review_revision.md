@@ -1,257 +1,271 @@
-# Chapter 13 전체 검토·수정 반영 기록
+# Chapter 13 전체 점검·반영 기록
 
-## 기준
-
-이 문서는 Chapter 13의 본문만이 아니라 구성안, 독자 워크북, SQL 실습, 프롬프트·보고서 템플릿, README, SVG, 발표자료, 발표 스크립트, 의미 단위 내비게이션, 공통 TTS와 자동 검증까지 한 기준으로 추적하기 위한 최종 반영 기록입니다.
-
-기존 검토 이력을 지우지 않고 실제 보정 내용을 누적하며, 코드에만 반영된 상태와 실제 실행·렌더링까지 확인된 상태를 구분합니다.
-
----
-
-## 대상 파일
-
-### 본문·구성·워크북·검토 문서
-
-```text
-book/chapter13/chapter13.md
-book/chapter13/chapter13_activity.md
-book/chapter13/chapter13_outline.md
-book/chapter13/chapter13_review_revision.md
-notes/chapter13_review_checklist.md
-README.md
-```
-
-### SQL·프롬프트·보고서
-
-```text
-code/chapter13/01_ai_review_lab_schema.sql
-code/chapter13/02_bad_design_seed.sql
-code/chapter13/03_good_design_schema.sql
-code/chapter13/04_good_design_seed.sql
-code/chapter13/05_metadata_validation.sql
-code/chapter13/06_business_validation.sql
-code/chapter13/07_negative_tests.sql
-code/chapter13/08_ai_review_lab_validation.sql
-code/chapter13/AI_REVIEW_REPORT_TEMPLATE.md
-code/chapter13/PROMPT_TEMPLATES.md
-code/chapter13/reset_ai_review_lab.sql
-code/chapter13/ai_db_design_review_practice.sql
-code/chapter13/README.md
-```
-
-### 이미지·다이어그램
-
-```text
-images/chapter13/ch13_01_ai_db_design_review_flow.*
-images/chapter13/ch13_02_chatgpt_codex_roles.*
-images/chapter13/ch13_03_good_prompt_structure.*
-images/chapter13/ch13_04_erd_review_checkpoints.*
-images/chapter13/ch13_05_bad_vs_good_design.*
-images/chapter13/ch13_06_constraints_review.*
-images/chapter13/ch13_07_information_schema_review.*
-images/chapter13/ch13_08_codex_error_fix_loop.*
-images/chapter13/README.md
-```
-
-### 발표·스크립트·내비게이션
-
-```text
-presentation/chapter13/chapter13_theory_lecture_plan.md
-presentation/chapter13/chapter13_practice_lecture_plan.md
-presentation/chapter13/chapter13_theory_presentation.html
-presentation/chapter13/chapter13_practice_presentation.html
-presentation/chapter13/chapter13_slides.js
-presentation/chapter13/chapter13_navigation.js
-presentation/chapter13/chapter13_player.js
-presentation/chapter13/chapter13_player.css
-presentation/chapter13/chapter13_script.html
-presentation/chapter13/chapter13_script.js
-presentation/chapter13/index.html
-presentation/common/tts_pronunciation.js
-presentation/common/script_content_enhancer.js
-.github/workflows/validate-chapter13-navigation.yml
-```
-
----
-
-## 최종 목표
-
-Chapter 13을 단순한 “AI가 DB 설계를 도와준다”는 설명 장이 아니라 다음 증거를 사용해 변경을 검토하고 사람이 승인하는 운영형 장으로 정리했습니다.
-
-```text
-확인된 요구사항·결정·미확정 정책
-→ AI 문맥 묶음·프롬프트 계약
-→ ERD·DDL·SQL 변경 후보
-→ 수정 범위·금지 범위 확인
-→ DB·스키마 보호
-→ 원자적 생성·Seed
-→ IDENTITY 조정
-→ 정확한 메타데이터
-→ 정상·경계값·반례
-→ NULL 안전 업무 정합성
-→ 민감정보·파괴적 변경·diff 검토
-→ 최종 자동 판정
-→ 사람 승인
-```
-
----
-
-## 1. 장의 역할과 핵심 메시지
-
-본문 제목은 다음으로 통일했습니다.
+## Chapter
 
 ```text
 Chapter 13. AI와 실행 증거로 데이터베이스 설계 검증하기
 ```
 
-핵심 메시지:
+## 전체 점검 범위
+
+Chapter 13을 본문 설명만이 아니라 다음 전체 흐름으로 다시 점검하고 실제 PostgreSQL 16에서 검증했습니다.
+
+```text
+Chapter 07·08 canonical source
+→ Chapter 12 nosql_lab handoff
+→ ai_review_lab 격리
+→ 나쁜 설계 기준선
+→ 좋은 구조·Seed
+→ 실제 PostgreSQL 메타데이터
+→ 업무 정합성
+→ 예상 실패 24 + 정상 경계값 6
+→ 30/30 실행 증거
+→ 최종 08 완료 게이트
+→ protected schema fingerprint 불변
+→ reset 원자성·격리
+→ 사람 승인용 diff·보고서
+```
+
+점검 대상:
+
+```text
+book/chapter13
+code/chapter13
+images/chapter13
+presentation/chapter13
+presentation/common/tts_pronunciation.js
+presentation/common/script_content_enhancer.js
+notes/chapter13_review_checklist.md
+.github/workflows/validate-chapter13-navigation.yml
+.github/workflows/validate-chapter13.yml
+```
+
+---
+
+## 1. 장의 핵심 메시지
+
+Chapter 13의 기준 문장을 다음처럼 유지했습니다.
 
 ```text
 AI 결과는 정답이 아니라 변경 후보다.
-설명의 자연스러움이 아니라 요구사항과 실행 증거를 추적할 수 있는지가 품질 기준이다.
+요구사항 추적, 실제 생성 구조, 정상·경계값·실패 테스트와 diff가 확인되어야 승인할 수 있다.
 ```
 
-본문·구성안·워크북에서 같은 흐름과 같은 용어를 사용하도록 동기화했습니다.
-
----
-
-## 2. ChatGPT·Codex·사람의 역할 구분
-
-역할을 제품의 절대 기능 구분이 아니라 안전한 작업 흐름으로 설명했습니다.
-
-| 참여자 | 활용하기 좋은 작업 | 최종 책임에서 제외할 작업 |
-| --- | --- | --- |
-| ChatGPT | 요구사항 구조화, 대안 비교, 검토 질문·프롬프트 초안 | 미확정 업무 정책 확정 |
-| Codex | 저장소 탐색, 대상 파일 수정, SQL·테스트 작성, diff·실행 지원 | 변경 자동 승인 |
-| 사람 | 요구사항·데이터·권한·운영 범위 확인, diff·실행 결과 검토 | 최종 책임을 AI에 이전 |
+따라서 “AI가 자연스러운 SQL을 만들었다”를 완료 기준으로 두지 않고 다음 연결을 확인합니다.
 
 ```text
-정책 확인 → AI 초안 → 격리 실행 → 증거 수집 → 사람 승인
+확인된 요구사항
+→ 설계 반영 위치
+→ 실제 PostgreSQL 객체
+→ 정상·경계·실패 실행 결과
+→ 업무 정합성
+→ 변경 diff
+→ 사람 승인
 ```
-
-이 역할표를 본문과 `ch13_02_chatgpt_codex_roles.svg`에 연결했습니다.
 
 ---
 
-## 3. AI 문맥 묶음과 프롬프트 계약
+## 2. ChatGPT·Work·Codex·사람 역할 최신화
 
-한 줄 질문 대신 다음 문맥을 제공하도록 정리했습니다.
+역할을 제품의 영구적인 기능 경계가 아니라 안전한 작업 흐름으로 설명했습니다.
+
+현재 공식 안내의 큰 흐름:
 
 ```text
-업무 목표
-확인 요구사항
-결정·단순화
-미확정 정책
-DB 환경
-현재 구조·대표 데이터
-수정 대상
-수정 금지 범위
-정상·경계값·반례 기준
-메타데이터·업무 검증 기준
-완료 보고 형식
+Chat  → 빠른 질문·검색·대화형 지원
+Work  → 더 길고 여러 단계인 작업과 완성된 산출물
+Codex → 코드 작성·디버깅·테스트·명령 실행·저장소 작업
+사람  → 정책·데이터·권한·위험·운영 반영의 최종 승인
 ```
 
-프롬프트에는 실제 개인정보, 비밀번호, API 키, 전체 접속 URL, 실제 카드번호 형태를 넣지 않도록 명시했습니다.
-
-`PROMPT_TEMPLATES.md`, 본문, 워크북의 표현을 같은 기준으로 맞추고 `ch13_03_good_prompt_structure.svg`로 시각화했습니다.
+제품 기능과 제공 범위는 바뀔 수 있으므로 교재에서도 최신 공식 안내를 다시 확인하도록 명시했습니다.
 
 ---
 
-## 4. 추적 ID 통일
+## 3. Chapter 07·08 canonical source를 강한 시작 게이트로 사용
+
+기존 01은 원본 존재 여부 또는 단순 행 수에 의존할 수 있었습니다. 최종 `01_ai_review_lab_schema.sql`은 다음 상태 전체가 맞을 때만 `ai_review_lab`을 생성합니다.
+
+```text
+students / instructors / courses / enrollments = 3 / 2 / 3 / 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+uq_course_enrollments_active 존재
+활성 신청 중복 = 0
+```
+
+잘못된 DB와 읽기 전용 연결도 생성 전에 차단합니다.
+
+전용 GitHub Actions에서는 `1005.recorded_amount`를 `120001`로 의도적으로 변경한 뒤 01이 실패하는지 확인하고, `120000`으로 복원한 뒤 Chapter 08 prerequisite gate가 다시 통과하는지 실제 검증했습니다.
+
+---
+
+## 4. `recorded_amount` 의미를 Chapter 07·08·12와 통일
+
+Chapter 13 격리 실습에서 사용하던 별도 금액 이름을 제거하고 다음으로 통일했습니다.
+
+```text
+course_project.enrollments.recorded_amount
+ai_review_lab.enrollments.recorded_amount
+타입 = NUMERIC(12,0)
+의미 = 신청 시점에 신청 행에 기록한 금액
+```
+
+이 금액은 다음과 구분합니다.
+
+```text
+courses.price   = 현재 기본 가격
+recorded_amount = 신청 시점 기록 금액
+payments.amount = ai_review_lab 가상 결제 상태에 기록한 금액
+```
+
+1002는 이 차이를 보여 주는 정보용 기준입니다.
+
+```text
+현재 강의 가격 = 180000
+신청 시점 기록 금액 = 150000
+```
+
+가격 차이는 할인·가격 변경일 수 있으므로 자동 오류로 취급하지 않고 정확히 한 행인지 검증합니다.
+
+---
+
+## 5. `payments`는 기존 프로젝트 확장이 아니라 격리 리뷰 시나리오
+
+Chapter 12에서는 현재 `course_project`에 별도 결제·환불 원장이 없다고 확정했습니다. 이 의미가 Chapter 13에서 바뀐 것처럼 읽히지 않도록 경계를 명확히 했습니다.
+
+```text
+course_project
+→ 기존 원본 유지
+→ 결제·환불 원장 추가 안 함
+
+ai_review_lab.payments
+→ AI 설계 검토 방법을 연습하기 위한 가상 격리 테이블
+→ Chapter 13 실습 범위에서만 사용
+```
+
+`payment_reference`도 “참조값이므로 자동으로 비민감”이라고 단정하지 않습니다.
+
+```text
+실습에서는 원시 카드번호·CVV 대신 가상 외부 참조값만 사용한다.
+실제 시스템의 payment_reference도 조직의 보안·보관 정책에 따라 보호 대상이 될 수 있다.
+```
+
+---
+
+## 6. 추적 ID와 확인된 정책
 
 ```text
 P13-R01~P13-R09  확인된 요구사항
 P13-D01~P13-D08  결정·단순화·미확정 정책
-P13-T01~P13-T30  반례·정상 경계값 테스트
+P13-T01~P13-T30  예상 실패·정상 경계값
 P13-V01~P13-V08  실행·검증 단계
 ```
 
-기존 R1·D1처럼 Chapter 범위가 보이지 않는 표기는 P13 기준으로 통일했습니다.
-
-앞 장에서 이미 확정한 정책은 Chapter 13에서 다시 미확정으로 되돌리지 않습니다.
-
----
-
-## 5. 요구사항·정책 기준선
-
-핵심 요구사항은 다음을 유지합니다.
+핵심 정책:
 
 ```text
-P13-R01 학생 이메일 공백 금지·정확 문자열 중복 금지
-P13-R02 강사 이메일 공백 금지·정확 문자열 중복 금지
+P13-R01 학생 email 공백 금지·정확 문자열 UNIQUE
+P13-R02 강사 email 공백 금지·정확 문자열 UNIQUE
 P13-R03 강의→강사 FK
 P13-R04 학생·강의 N:M 해소
-P13-R05 수강 상태 허용값 제한
-P13-R06 가격·금액 0 이상
-P13-R07 결제→수강신청 FK
-P13-R08 실제 카드번호 미저장
-P13-R09 활성 신청 학생·강의당 한 건
+P13-R05 수강 상태 CHECK
+P13-R06 금액 0 이상
+P13-R07 격리 결제→수강신청 FK
+P13-R08 원시 카드번호·CVV 미저장
+P13-R09 신청·수강중 활성 신청 학생·강의당 한 건
 ```
 
 결정·범위:
 
 ```text
-P13-D01 완료·취소 이력 뒤 재신청 허용
-P13-D02 현재 결제 상태 한 건 모델
-P13-D03 삭제 정책 RESTRICT
+P13-D01 완료·취소 뒤 재신청 허용
+P13-D02 현재 결제 상태 한 건 단순 모델
+P13-D03 삭제 RESTRICT
 P13-D04 개인정보 보관 기간은 조직 정책
 P13-D05 상태 전이 순서는 별도 정책
 P13-D06 전액 결제·전액 환불 샘플, 부분 환불 원장은 범위 밖
-P13-D07 이메일 대소문자는 정확 문자열 비교, 정규화 별도 결정
+P13-D07 이메일은 현재 정확 문자열 비교, 대소문자 정규화는 별도 결정
 P13-D08 결제 없는 신청 허용
 ```
 
 ---
 
-## 6. ERD·테이블 역할·카디널리티 검토
+## 7. 나쁜 설계 기준선을 실행 가능한 반례로 강화
 
-ERD는 “그럴듯한 그림”이 아니라 요구사항 기준으로 검토하도록 수정했습니다.
+`02_bad_design_seed.sql`은 단순 샘플 입력을 넘어 나쁜 설계의 문제가 실제로 재현되는지 COMMIT 전에 확인합니다.
 
 ```text
-instructors 1 → 0..N courses
-students 1 → 0..N enrollments
-courses 1 → 0..N enrollments
-enrollments 1 → 0..1 payments
+행 수 = 3
+같은 학생 이메일 반복 = 2행
+숫자가 아닌 가격 문자열 = 1행
+created_at='yesterday' = 1행
+통제되지 않은 payment_status='done' = 1행
+통제되지 않은 enrollment_status='finished' = 1행
+평문 민감값 형태 반복
 ```
 
-현재 `payments` 관계는 P13-D02의 단순 모델입니다. 결제 시도·재결제·부분 환불 전체 이력이 필요하면 1:N 원장 구조로 다시 설계해야 함을 명시했습니다.
-
-좋은 설계의 역할:
-
-| 테이블 | 주요 역할 |
-| --- | --- |
-| students | 학생 기본 정보 |
-| instructors | 강사 기본 정보 |
-| courses | 강의 현재 정보와 기본 가격 |
-| enrollments | 학생·강의 관계와 신청 시점 기록 금액 |
-| payments | 현재 결제 상태와 외부 비민감 참조값 |
-
-`bad_enrollments`의 역할 혼합 문제와 좋은 설계의 분리를 `ch13_04`, `ch13_05` 다이어그램과 본문에 동기화했습니다.
+실제 개인정보·카드번호는 사용하지 않고 `TEST-SENSITIVE-PLAINTEXT-*` 가상값만 사용합니다.
 
 ---
 
-## 7. DB·스키마 보호와 원자적 생성
+## 8. 좋은 구조를 COMMIT 전에 판정
 
-- 현재 DB가 `ai_database_book`이 아니면 생성·초기화 중단
-- Chapter 07 `course_project.enrollments = 5` 기준 확인
-- 기존 `ai_review_lab` 존재 시 생성 중단
-- `course_project`, `transaction_lab`, `performance_lab`, `security_lab`, `nosql_lab` 변경 금지
-- 스키마와 테이블을 한 트랜잭션에서 생성
-- reset은 자식→부모 순서로 `ai_review_lab`만 삭제
-- 각 SQL에서 `SHOW search_path` 확인
-- 자동 DROP을 기본 실행 경로에 넣지 않음
+`03_good_design_schema.sql`은 다섯 개 좋은 설계 테이블을 한 트랜잭션에서 생성하고 COMMIT 전에 실제 구조를 검사합니다.
 
-이 기준을 본문, 워크북, 01, reset, README에 맞췄습니다.
+```text
+students
+instructors
+courses
+enrollments
+payments
+```
+
+나쁜 설계 테이블까지 포함한 `ai_review_lab` 전체 기대 테이블은 6개입니다.
+
+좋은 구조 기준:
+
+```text
+좋은 설계 제약조건 = 29
+좋은 테이블 IDENTITY = 5
+FK = 4
+price / recorded_amount / payments.amount = NUMERIC(12,0)
+활성 신청 부분 고유 인덱스 존재
+```
+
+`05`와 최종 `08`에서는 나쁜 설계 IDENTITY까지 포함해 전체 IDENTITY 6개를 확인합니다.
 
 ---
 
-## 8. Seed 재실행·부분 입력 방지와 IDENTITY
+## 9. Seed 기준 상태를 금액·상태 분포까지 고정
 
-- 나쁜 설계 Seed는 대상 테이블 0행 확인
-- 좋은 설계 Seed는 다섯 테이블 존재·0행 확인
-- 각 Seed를 트랜잭션으로 실행
-- COMMIT 전 기준 행 수와 금액 관계 판정
-- 명시적 ID 입력 뒤 `RESTART WITH` 적용
+`04_good_design_seed.sql` 최종 기준:
+
+```text
+bad_enrollments = 3
+students = 3
+instructors = 2
+courses = 3
+enrollments = 4
+payments = 4
+정상 JOIN = 4
+
+recorded_amount 합계 = 470000
+payment amount 합계 = 470000
+
+수강 상태 = 완료 2 / 신청 1 / 취소 1 / 수강중 0
+결제 상태 = 결제완료 2 / 결제대기 1 / 환불 1 / 결제실패 0
+```
+
+결제 참조값은 `PAY-REVIEW-TEST-*` 가상값만 허용합니다.
+
+명시적 ID 입력 뒤 다음 IDENTITY 시작값도 조정합니다.
 
 ```text
 bad_enrollments → 4 이상
@@ -262,91 +276,44 @@ enrollments → 1005 이상
 payments → 9005 이상
 ```
 
-ROLLBACK 후 자동 번호 공백은 정합성 오류가 아니라는 설명까지 본문·워크북·README에 반영했습니다.
+---
+
+## 10. 메타데이터를 개수가 아니라 정확한 서명으로 검증
+
+`05_metadata_validation.sql` 기준:
+
+```text
+정확한 테이블 집합 6
+좋은 설계 제약조건 29
+정확한 FK 이름·출발 컬럼·대상 컬럼 4
+FK 삭제 규칙 RESTRICT/NO ACTION
+IDENTITY id 6
+금액 컬럼 3개 NUMERIC(12,0) NOT NULL
+활성 신청 부분 고유 인덱스 정의
+원시 카드정보·비밀 전용 컬럼명 0
+```
+
+신청 시점 금액 컬럼은 `recorded_amount` 하나만 있어야 하며 이전 격리 실습의 오래된 컬럼 이름이 존재하면 실패합니다.
 
 ---
 
-## 9. 활성 신청 정책과 문자열 무결성
+## 11. NULL 안전 업무 정합성 검증
 
-Chapter 07에서 확정한 정책을 유지합니다.
-
-```sql
-CREATE UNIQUE INDEX uq_ai_review_enrollments_active
-ON ai_review_lab.enrollments (student_id, course_id)
-WHERE status IN ('신청', '수강중');
-```
-
-전체 `(student_id, course_id) UNIQUE`는 사용하지 않습니다. 신청·수강중 중복만 차단하고 완료·취소 이력 뒤 재신청은 허용합니다.
-
-공백 방지 CHECK 적용 범위:
+`06_business_validation.sql`은 다음 이상이 모두 0행인지 자동 판정합니다.
 
 ```text
-students.name·email
-instructors.name·email·specialty
-courses.course_code·title
-payments.payment_reference
+학생·강사 이메일 중복
+필수 문자열 공백
+신청 시점 기록 금액·결제 상태 기록 금액 불일치
+결제·환불 시각 조합 위반
+고아 관계
+활성 신청 중복
+샘플 수강·결제 상태 조합 위반
 ```
 
-학생·강사 이메일은 정확히 같은 문자열만 중복 차단합니다. 대소문자 정규화 여부는 P13-D07로 남겼습니다.
+`LEFT JOIN` 결과의 NULL을 놓치지 않도록 `IS DISTINCT FROM`을 사용합니다.
 
----
-
-## 10. 가격·신청 시점 기록 금액·결제 상태 기록 금액과 결제·환불 시각
-
-세 금액의 시점을 분리했습니다.
-
-```text
-courses.price              현재 기본 가격
-enrollments.recorded_amount  신청 시점 기록 금액
-payments.amount             현재 결제 상태의 금액
-```
-
-현재 가격과 신청 시점 기록 금액 차이는 할인·가격 변경일 수 있으므로 정보용으로 다룹니다.
-
-결제 시각은 기존 단일 의미를 다음처럼 분리했습니다.
-
-```text
-paid_at      결제 완료 시각
-refunded_at  환불 완료 시각
-```
-
-```text
-결제대기·결제실패 → 두 시각 NULL
-결제완료 → paid_at만 존재
-환불 → paid_at·refunded_at 존재, refunded_at > paid_at
-```
-
-샘플은 전액 결제·전액 환불이며 부분 환불 원장은 범위 밖입니다.
-
----
-
-## 11. 정확한 메타데이터 자동 검증
-
-`05_metadata_validation.sql`은 단순 개수가 아니라 정확한 객체 구성을 판정하도록 보강했습니다.
-
-```text
-정확한 테이블 집합 6개
-좋은 설계 제약조건 29개
-정확한 FK 이름·출발 컬럼·대상 컬럼 4개
-삭제 규칙 RESTRICT/NO ACTION
-IDENTITY id 6개
-활성 신청 부분 고유 인덱스 존재
-민감정보 전용 컬럼 이름 0개
-```
-
-DDL 텍스트가 아니라 실제 PostgreSQL 메타데이터를 검증 근거로 사용합니다.
-
----
-
-## 12. LEFT JOIN NULL과 업무 정합성
-
-결제 누락을 놓칠 수 있는 다음 비교를 제거했습니다.
-
-```sql
-p.payment_status <> '결제완료'
-```
-
-필수 결제 누락까지 확인하도록 `IS DISTINCT FROM`을 사용합니다.
+샘플 상태 조합:
 
 ```text
 완료 → 결제완료 필수
@@ -355,161 +322,165 @@ p.payment_status <> '결제완료'
 수강중 → 결제 없음 허용, 있으면 결제완료
 ```
 
-`06_business_validation.sql`의 최종 판정 범위:
-
-```text
-기준 행·JOIN
-학생·강사 이메일 중복
-필수 문자열 공백
-신청 시점 기록 금액·결제 상태 기록 금액
-결제·환불 시각
-고아 관계
-활성 신청 중복
-샘플 상태 조합
-현재 가격·신청 시점 기록 금액 차이 정보용 1행
-```
+전용 workflow에서는 9001을 제약조건 자체는 만족하는 `결제대기 / paid_at NULL`로 의도적으로 바꾸고 `06`이 업무 상태 불일치를 탐지하는지 실제 확인한 뒤 원상 복구했습니다.
 
 ---
 
-## 13. 반례·정상 경계값 27개
+## 12. 반례·정상 경계값을 30개로 확대
 
-`07_negative_tests.sql`은 헬퍼 프로시저 기반으로 구성했습니다.
+최종 `07_negative_tests.sql`:
 
 ```text
-P13-T01~P13-T24 expected_failure
-P13-T25~P13-T30 expected_success
-전체 30 / 통과 30 / unexpected 0
+P13-T01~P13-T24 = expected_failure 24개
+P13-T25~P13-T30 = expected_success 6개
+전체 = 30
+passed = 30
+unexpected = 0
 ```
 
-`GET STACKED DIAGNOSTICS`로 다음 증거를 기록합니다.
+각 실패 테스트는 가능한 경우 다음 실제 진단을 기록합니다.
 
 ```text
 SQLSTATE
 constraint name
 table name
 column name
-오류 상세
+오류 detail
 ```
 
-정상 경계값은 가격 0, 한 글자 이름·제목, NULL description, 결제 없는 신청, 완료·취소 이력 뒤 재신청, 결제실패·금액 0·시각 NULL을 포함합니다.
+추가한 경계:
 
-오류 테스트만 수행해 제약조건이 정상 데이터를 과도하게 막는 문제를 놓치지 않도록 수정했습니다.
+```text
+P13-T23 참조 중인 instructor 201 삭제 → FK 실패
+P13-T24 참조 중인 enrollment 1001 삭제 → FK 실패
+P13-T30 'Kim.review@example.com' → 현재 정확 문자열 정책에서는 성공
+```
+
+정상 경계에는 가격 0, 한 글자 문자열, NULL description, 결제 없는 신청, 완료·취소 이력 뒤 재신청, 결제실패 0원·시각 NULL도 포함합니다.
+
+모든 테스트는 하위 트랜잭션에서 자동 롤백되어 기준 행 수를 보존합니다.
 
 ---
 
-## 14. 최종 자동 검증 08
+## 13. 08을 실제 완료 게이트로 강화
 
-`08_ai_review_lab_validation.sql`을 최종 영구 상태 판정 파일로 추가했습니다.
-
-검증 범위:
+`08_ai_review_lab_validation.sql`은 단순 상태 조회가 아니라 다음을 모두 만족해야 최종 통과합니다.
 
 ```text
-Chapter 07 신청 5행 유지
-기준 행 3/3/2/3/4/4
-정상 JOIN 4
-정확한 테이블·제약·FK·IDENTITY
-필수 문자열·고아 관계·활성 중복 0
-금액·시각·상태 조합 위반 0
-가격 차이 정보용 1행
+Chapter 07·08 canonical source 유지
+Chapter 13 기준 행 수 3/3/2/3/4/4
+recorded_amount = 470000
+payment amount = 470000
+정상 JOIN = 4
+정확한 테이블 집합
+제약조건 29 / FK 4 / IDENTITY 6
+금액 타입 3개
+활성 신청 부분 고유 인덱스
+필수 문자열·고아·활성 중복 = 0
+금액·시각·상태 위반 = 0
+1002 가격 차이 정확히 1행
 모든 IDENTITY 다음 값 > 현재 최대 ID
-같은 세션이면 07의 30/30 결과 재확인
+07의 임시 테스트 증거 존재
+30/30 / failure24 / success6 / unexpected0
 ```
 
-코드에 정의된 최종 통과 메시지:
+따라서 `07`과 `08`은 같은 PostgreSQL 세션에서 연속 실행해야 합니다.
+
+통과 메시지:
 
 ```text
-Chapter 13 AI review lab validation passed
+Chapter 13 AI review lab validation passed: tests 30/30
 ```
-
-실제 PostgreSQL 실행 전에는 이 메시지가 코드에 존재한다는 사실과 실제 실행 통과를 구분합니다.
 
 ---
 
-## 15. 민감정보 검증 증거 강화
+## 14. reset을 원자적·비파괴적으로 변경
 
-컬럼명 검사만으로 카드번호 미저장을 증명하지 않도록 수정했습니다.
+`reset_ai_review_lab.sql`은 `CASCADE`를 사용하지 않습니다.
 
 ```text
-카드번호·CVV·비밀번호 전용 컬럼 없음
-payment_reference는 외부 비민감 참조값으로 문서화
-PAY-REVIEW-TEST-* 형태의 가상 Seed 사용
-로그·프롬프트 민감 패턴 검토
-애플리케이션이 카드정보를 DB로 전달하지 않는 흐름 검토
+DB·읽기 전용 보호
+BEGIN
+payments
+→ enrollments
+→ courses
+→ instructors
+→ students
+→ bad_enrollments
+→ DROP SCHEMA ai_review_lab
+COMMIT
 ```
 
-가상 나쁜 설계 예제도 실제 카드번호 형태를 사용하지 않습니다.
+예상하지 못한 `ai_review_lab.keep_me`가 있으면 마지막 `DROP SCHEMA`가 실패하고 앞선 DROP도 전체 ROLLBACK됩니다.
+
+전용 workflow에서 실제로 확인했습니다.
+
+```text
+keep_me 생성
+→ reset 실패
+→ keep_me·bad_enrollments·students·payments 모두 그대로 존재
+→ keep_me만 수동 삭제
+→ 정상 reset
+→ ai_review_lab 미존재
+```
 
 ---
 
-## 16. 파괴적 변경과 Codex diff·재실행 루프
+## 15. 앞 장 스키마 격리를 실제 fingerprint로 확인
 
-별도 검토 대상으로 다음을 명시했습니다.
+전용 PostgreSQL 16 검증은 Chapter 07·08뿐 아니라 Chapter 12 `nosql_lab`까지 실제 생성합니다.
 
-```text
-DROP TABLE / DROP SCHEMA
-TRUNCATE
-조건 없는 UPDATE / DELETE
-ALTER COLUMN TYPE
-SET NOT NULL
-UNIQUE 추가
-ON DELETE CASCADE
-인덱스 삭제
-GRANT·REVOKE
-```
-
-Codex 작업 흐름:
+그 뒤 다음을 보호합니다.
 
 ```text
-1. 오류와 기대 결과 재현
-2. 개인정보·접속 정보 제거
-3. 수정 대상·금지 범위 지정
-4. 최소 변경 요청
-5. 파일별 diff 사람 검토
-6. 관련 없는 변경 제거
-7. 격리 스키마 재생성
-8. 01→08 재실행
-9. 실패 원인·프롬프트 수정
-10. 증거·남은 가정·승인 상태 기록
+course_project 데이터 fingerprint
+nosql_lab 핵심 데이터 fingerprint
+transaction_lab sentinel
+performance_lab sentinel
+security_lab sentinel
+nosql_lab sentinel
 ```
 
-이 흐름을 본문과 `ch13_08_codex_error_fix_loop.svg`에 연결했습니다.
+Chapter 13 전체 실행과 reset 후에도 모두 동일함을 확인했습니다.
 
 ---
 
-## 17. 보고서·프롬프트·워크북·README 동기화
+## 16. 프롬프트·보고서·워크북 동기화
 
-다음 항목을 공통 기준으로 맞췄습니다.
+다음 문서를 같은 P13 기준과 30개 테스트 기준으로 맞췄습니다.
 
 ```text
-P13 ID
-ChatGPT·Codex·사람 역할
-프롬프트 문맥 묶음
-ERD·카디널리티
-IDENTITY 다음 값
-활성 부분 고유 인덱스
-SQLSTATE·constraint name
-정상 경계값과 반례
-paid_at·refunded_at
-부분 환불 범위
-LEFT JOIN NULL
-08 최종 자동 검증
-민감정보 다중 증거
+PROMPT_TEMPLATES.md
+AI_REVIEW_REPORT_TEMPLATE.md
+chapter13_activity.md
+chapter13_outline.md
+code/chapter13/README.md
+notes/chapter13_review_checklist.md
+```
+
+AI 수정 요청에는 다음을 포함하도록 유지합니다.
+
+```text
+확인 요구사항
+결정·미확정 정책
+수정 대상
+수정 금지 범위
+예상 diff
+실행할 검증
 미실행 항목
-승인·조건부 승인·보류·거절
-Chapter 14 연결
+남은 가정
+승인 상태
 ```
-
-문서 내부에서 “추가 보강 불필요”처럼 실제 변경 이력과 충돌할 수 있는 상태 표현보다, 무엇이 보정되었고 무엇이 아직 실행 전인지 추적하도록 정리합니다.
 
 ---
 
-## 18. SVG·시각 자료 반영
+## 17. 이미지 8쌍 전체 정합성
 
-본문의 핵심 개념을 다음 8개 시각 자료와 연결했습니다.
+Chapter 13 이미지:
 
 ```text
 ch13_01 AI 기반 DB 설계 검증 전체 흐름
-ch13_02 ChatGPT·Codex·사람 역할
+ch13_02 ChatGPT·Codex·사람 협업
 ch13_03 좋은 프롬프트 구조
 ch13_04 ERD 검토 체크포인트
 ch13_05 나쁜 설계와 좋은 설계 비교
@@ -518,104 +489,145 @@ ch13_07 예상 설계와 실제 메타데이터 비교
 ch13_08 Codex 오류 수정·재검증 루프
 ```
 
-본문 표와 SVG가 같은 내용을 중복 설명하기보다, 표는 상세 기준·SVG는 흐름과 구조를 담당하도록 역할을 구분합니다.
+자동 정적 검증:
+
+```text
+Mermaid = 8
+SVG = 8
+stem 1:1 일치
+SVG XML parse
+role="img"
+width="100%"
+viewBox
+title
+desc
+본문에서 SVG 8개 모두 참조
+```
+
+`ch13_05`의 금액 필드도 `recorded_amount` 기준으로 동기화했습니다.
 
 ---
 
-## 19. 이론·실습 발표자료 전체 반영
+## 18. 이론·실습 발표자료와 런타임
 
-Chapter 13 발표자료는 이론과 실습을 각각 20장으로 구성합니다.
-
-```text
-이론 20장
-실습 20장
-총 40장
-```
-
-`chapter13_theory_lecture_plan.md`와 `chapter13_practice_lecture_plan.md`의 모든 장표에 화면 구성과 발표 스크립트가 존재하도록 기준을 맞췄습니다.
-
-`chapter13_navigation.js`는 장표 제목을 기준으로 이론·실습 각각 20장의 의미 단위 내비게이션 계획을 관리합니다.
+발표자료:
 
 ```text
-장표 제목 중복 금지
-강의안 제목과 navigation plan 제목 일치
-화면 구성과 발표 스크립트 동시 존재
-장표 내부 의미 단위에 맞춰 포커스 이동
-이론·실습 동일한 내비게이션 구조 사용
+이론 = 20장
+실습 = 20장
 ```
 
-발표 화면과 스크립트 화면이 같은 장표·단계를 기준으로 움직이도록 `chapter13_player.js`, `chapter13_script.js`, `chapter13_navigation.js`를 공통 기준으로 사용합니다.
+각 장표에 `화면 구성`과 `발표 스크립트`가 모두 있으며 `chapter13_navigation.js` 제목과 1:1 대응합니다.
+
+런타임 기준:
+
+```text
+chapter13_slides.js → Markdown fetch cache=no-store
+chapter13_script.js → shared PresentationTTS.normalize 사용
+chapter13_script.html → tts_pronunciation.js + script_content_enhancer.js
+player/script asset version = 20260809a
+```
+
+공통 TTS에는 P13 추적 ID, `recorded_amount`, `payment_reference`, `IS DISTINCT FROM`, `NO ACTION` 등 Chapter 13 핵심 용어가 포함되어 있습니다.
 
 ---
 
-## 20. 공통 TTS·발표 스크립트 보강
+## 19. 자동 검증 체계
 
-Chapter 13에서 로컬 TTS 규칙을 중복 관리하지 않고 공통 `presentation/common/tts_pronunciation.js`의 `PresentationTTS.normalize`를 사용하도록 통일했습니다.
-
-공통 발음 규칙에 Chapter 13 핵심 용어를 포함했습니다.
+### 정적 내비게이션 검증
 
 ```text
-ALTER COLUMN TYPE
-SET NOT NULL
-IS DISTINCT FROM
-NO ACTION
-P13-R / P13-D / P13-T / P13-V
-ai_review_lab
-bad_enrollments
-recorded_amount
-payment_reference
-payment_status
-paid_at
-refunded_at
+.github/workflows/validate-chapter13-navigation.yml
 ```
 
-최신 스크립트 화면에는 `script_content_enhancer.js`를 로드해 짧은 단계 설명을 보강하고, 기존 긴 설명은 유지하는 방향을 적용했습니다.
+확인:
 
-자산 캐시는 Chapter 13 주요 파일 `20260808a`, 스크립트 콘텐츠 보강 파일 `20260808e` 기준이 반영되어 있습니다.
+```text
+JavaScript 문법
+이론 20 / 실습 20
+강의안 제목 ↔ navigation 제목
+화면 구성·스크립트 존재
+공통 TTS·스크립트 enhancer
+제약조건 29 / FK 4 / IDENTITY 6
+24 expected failures / 6 expected successes
+30/30
+삭제 RESTRICT 경계
+이메일 대소문자 경계
+최종 통과 메시지
+```
+
+### PostgreSQL 16 전체 검증
+
+```text
+.github/workflows/validate-chapter13.yml
+```
+
+실제 흐름:
+
+```text
+정적 정합성
+→ PostgreSQL 16
+→ 잘못된 DB 보호
+→ Chapter 07 생성·검증
+→ Chapter 08 baseline
+→ Chapter 12 01→07 실제 실행
+→ protected fingerprint·sentinel
+→ upstream recorded_amount drift 실패 확인·복원
+→ Chapter 13 01→08 전체 실행
+→ exact final state
+→ business-state drift 실패 확인·복원
+→ protected fingerprint 불변
+→ keep_me reset 원자성
+→ 정상 reset
+```
 
 ---
 
-## 21. 자동 정적 검증·CI 기준
+## 20. 실제 PostgreSQL 16 검증 결과
 
-`.github/workflows/validate-chapter13-navigation.yml`에 다음 검증을 정의했습니다.
-
-```text
-Chapter 13 JavaScript 문법 검사
-이론 20장 / 실습 20장 확인
-장표 제목 중복 확인
-강의안 제목과 navigation plan 제목 일치 확인
-각 장표의 화면 구성·발표 스크립트 존재 확인
-로컬 중복 TTS 규칙 제거 확인
-공통 PresentationTTS 사용 확인
-Chapter 13 핵심 TTS 용어 존재 확인
-presentation HTML 자산 로드 순서 확인
-SQL 01~08 필수 파일 존재 확인
-제약조건 29·FK 4·IDENTITY 6 기준 확인
-P13-T01~T24 / T23~T27 존재 확인
-30/30 판정 로직 확인
-Chapter 07 기준 데이터 보존 로직 확인
-최종 통과 메시지 존재 확인
-```
-
-이 검증은 코드·문서·내비게이션의 정적 일관성을 확인하는 장치입니다. 실제 PostgreSQL에서 SQL을 실행해 결과를 확인하는 검증과 브라우저·Word·PDF·eBook 렌더링 검증은 별도입니다.
-
----
-
-## 22. Chapter 14 연결
-
-기존 Vector DB·RAG 중심 안내를 현재 목차 흐름에 맞게 수정했습니다.
+성공 실행:
 
 ```text
-SQL 분석 질문과 기준 행
-집계·윈도우 함수
-분석 결과 검산
-PostgreSQL·Python 연결
-pandas 기반 후속 분석
-SQL·Python 결과 교차 검증
-AI가 만든 분석 코드 검토
+Workflow: Validate Chapter 13
+Run: 2
+Run ID: 31291233314
+Commit: 5fd926149d87f6f941b7015fedbdf1361beb0b20
+Status: completed
+Conclusion: success
+PostgreSQL: 16
+Date: 2026-08-09 (Asia/Seoul)
 ```
 
-Chapter 13의 “AI 결과를 실행 증거로 검증한다”는 원칙이 Chapter 14의 SQL·Python 분석 결과 교차 검증으로 이어지도록 연결했습니다.
+통과한 주요 단계:
+
+```text
+wrong database guard
+Chapter 07·08 canonical build
+Chapter 12 handoff build
+protected fingerprints
+upstream drift detection
+Chapter 13 01→08
+30/30 tests
+exact final state
+business drift detection
+protected schemas unchanged
+reset atomicity and isolation
+```
+
+Chapter 13 exact final state:
+
+```text
+bad_enrollments = 3
+students = 3
+instructors = 2
+courses = 3
+enrollments = 4
+payments = 4
+recorded_amount = 470000
+payment amount = 470000
+enrollment states = 완료2 / 신청1 / 취소1 / 수강중0
+payment states = 결제완료2 / 결제대기1 / 환불1 / 결제실패0
+```
 
 ---
 
@@ -623,53 +635,47 @@ Chapter 13의 “AI 결과를 실행 증거로 검증한다”는 원칙이 Chap
 
 | 영역 | 상태 |
 | --- | --- |
-| 장의 역할·핵심 메시지 | 완료 |
-| ChatGPT·Codex·사람 역할 | 완료 |
-| 문맥 묶음·프롬프트 계약 | 완료 |
-| P13 추적 ID | 완료 |
-| 요구사항·정책 기준선 | 완료 |
-| ERD·카디널리티·역할표 | 완료 |
-| DB·스키마 보호 | 완료 |
-| Seed 재실행·원자성 | 완료 |
-| IDENTITY 조정 | 완료 |
-| 활성 신청 정책 | 완료 |
-| 문자열·이메일 범위 | 완료 |
-| 가격·결제·환불 의미 | 완료 |
-| 정확한 메타데이터 검증 코드 | 완료 |
-| LEFT JOIN NULL 보정 | 완료 |
-| 업무 정합성 검증 코드 | 완료 |
-| 반례·경계값 30개 | 완료 |
-| SQLSTATE·constraint name 증거 | 완료 |
-| 최종 08 검증 코드 | 완료 |
-| 민감정보 다중 증거 | 완료 |
-| 파괴적 변경·Codex 루프 | 완료 |
-| 보고서·프롬프트·워크북·README 동기화 | 완료 |
-| SVG ch13_01~08 연결 | 완료 |
-| 이론 발표자료 20장 | 완료 |
-| 실습 발표자료 20장 | 완료 |
-| 의미 단위 내비게이션 | 완료 |
-| 발표/스크립트 동기화 구조 | 완료 |
-| 공통 TTS | 완료 |
-| 스크립트 콘텐츠 보강 | 완료 |
-| Chapter 13 자동 정적 검증 정의 | 완료 |
-| Chapter 14 연결 | 완료 |
+| Chapter 07·08 시작 게이트 | PostgreSQL 16 통과 |
+| `recorded_amount` 의미 통일 | 완료 |
+| payments 격리 시나리오 경계 | 완료 |
+| Chat·Work·Codex 역할 최신화 | 완료 |
+| 나쁜 설계 반례 기준선 | PostgreSQL 16 통과 |
+| 좋은 구조 29 constraints | PostgreSQL 16 통과 |
+| Seed 3/3/2/3/4/4 | PostgreSQL 16 통과 |
+| 금액 470000/470000 | PostgreSQL 16 통과 |
+| 메타데이터 검증 | PostgreSQL 16 통과 |
+| 업무 정합성 검증 | PostgreSQL 16 통과 |
+| expected failure 24 | PostgreSQL 16 통과 |
+| expected success 6 | PostgreSQL 16 통과 |
+| 전체 테스트 30/30 | PostgreSQL 16 통과 |
+| 08 최종 완료 게이트 | PostgreSQL 16 통과 |
+| protected schema fingerprint | PostgreSQL 16 통과 |
+| reset 전체 ROLLBACK | PostgreSQL 16 통과 |
+| 프롬프트·보고서·워크북 | 동기화 완료 |
+| Mermaid/SVG 8쌍 | 정적 검증 통과 |
+| 이론 발표 20장 | 정적 검증 통과 |
+| 실습 발표 20장 | 정적 검증 통과 |
+| navigation 1:1 | 정적 검증 통과 |
+| asset version 20260809a | 정적 검증 통과 |
+| 공통 TTS·script enhancer 연결 | 정적 검증 통과 |
 
-## 남은 실제 확인
+## 남은 수동 확인
 
-다음 항목은 코드 반영과 실제 실행·출판 결과를 구분하기 위해 완료로 표시하지 않습니다.
+다음은 자동 검증으로 통과했다고 처리하지 않습니다.
 
 ```text
-1. PostgreSQL에서 reset 후 01→08 순차 실행
-2. 05 metadata validation 실제 통과 확인
-3. 06 business validation 실제 통과 확인
-4. 07 반례·경계값 30/30, unexpected 0 실제 확인
-5. 08 'Chapter 13 AI review lab validation passed' 실제 확인
-6. 기준 행 수와 모든 IDENTITY 다음 값 실제 확인
-7. Chapter 13 GitHub Actions 실행 결과 확인
-8. 이론·실습 발표 HTML 브라우저 렌더링과 단계 이동 확인
-9. 스크립트 창·TTS·포커스 동기화 수동 확인
-10. SVG 8개 가독성·본문 참조 확인
-11. Word·PDF·eBook 최종 렌더링 확인
+1. 이론 발표 20장 브라우저 최종 시각 확인
+2. 실습 발표 20장 브라우저 최종 시각 확인
+3. semantic/step highlight 실제 동작
+4. 발표자 스크립트 창 ↔ 장표 실제 동기화
+5. TTS 실제 청취·발음 확인
+6. 모바일·프로젝터 가독성
+7. Mermaid CLI 재생성 여부 확인
+8. GitHub SVG 실제 시각 렌더링
+9. Word·PDF·eBook 코드·표·SVG 최종 렌더링
+10. 최종 페이지 수
+11. 실제 조직의 개인정보·결제 참조값 보호 정책 확인
+12. 운영 DB 마이그레이션·락·백업·롤백 계획
 ```
 
 실제로 실행하거나 렌더링하지 않은 항목은 “통과”로 표시하지 않습니다.
