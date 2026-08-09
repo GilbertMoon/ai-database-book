@@ -58,7 +58,7 @@ Chapter 14. SQL 데이터 분석과 Python 확장
 | 물리 컬럼 | recorded_amount | 완료 |
 | 타입 | NUMERIC(12,0) | 실제 통과 |
 | 의미 | 신청 시점 기록 금액 | 완료 |
-| paid_amount 잔존 | 0 | 자동 정적 통과 |
+| 이전 금액 컬럼명 잔존 | 0 | 자동 정적 통과 |
 | 취소 후 금액 0 덮어쓰기 | 금지 | 실제 통과 |
 | 취소 1003 | 150000 | 실제 통과 |
 | 취소 1011 | 140000 | 실제 통과 |
@@ -134,7 +134,7 @@ Seed 검토 중 발견한 1005·1009의 가입일/신청일 역전은 검증기�
 | 2026-06 | 4 | 570000 | 실제 통과 |
 | 합계 | 24 | 3210000 | 실제 통과 |
 
-출판 본문·워크북·README·실습 강의안의 과거 값도 전용 publishing CI로 별도 확인합니다.
+출판 본문·워크북·README·실습 강의안의 값도 publishing CI로 별도 확인합니다.
 
 ---
 
@@ -172,33 +172,23 @@ Seed 검토 중 발견한 1005·1009의 가입일/신청일 역전은 검증기�
 
 ---
 
-## 10. 분석 VIEW
+## 10. 분석 VIEW와 완료 기간
 
 | 점검 항목 | 기대 | 상태 |
-| --- | --- | --- |
-| enrollment_analysis_dataset | 존재 | 실제 통과 |
-| 정확한 컬럼 수 | 17 | 실제 통과 |
-| 행 수 | 24 | 실제 통과 |
+| --- | ---: | --- |
+| 정확한 VIEW 컬럼 | 17 | 실제 통과 |
+| VIEW 행 수 | 24 | 실제 통과 |
 | enrollment_id 고유 | 24 | 실제 통과 |
 | recorded_amount 합계 | 3210000 | 실제 통과 |
-| 생성 트랜잭션 | BEGIN/COMMIT | 완료 |
-| COMMIT 전 완료 게이트 | 존재 | 실제 통과 |
-
----
-
-## 11. 완료 기간
-
-| 지표 | 기대 | 상태 |
-| --- | ---: | --- |
 | 완료 건수 | 12 | 실제 통과 |
-| 평균 | 25.00일 | 실제 통과 |
+| 평균 완료 기간 | 25.00일 | 실제 통과 |
 | 최소 | 18일 | 실제 통과 |
 | 최대 | 36일 | 실제 통과 |
-| Python completion_days 재계산 | DB 날짜 차이와 동일 | 실제 통과 |
+| completion_days 재계산 | DB 날짜 차이와 동일 | 실제 통과 |
 
 ---
 
-## 12. Python strict 검증
+## 11. Python strict 검증
 
 | 점검 항목 | 상태 |
 | --- | --- |
@@ -214,64 +204,43 @@ Seed 검토 중 발견한 1005·1009의 가입일/신청일 역전은 검증기�
 
 ---
 
-## 13. PostgreSQL 직접 경로
+## 12. PostgreSQL·CSV 교차 검증
 
 | 점검 항목 | 상태 |
 | --- | --- |
-| PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSFILE | 적용 |
-| 현재 DB ai_database_book | 실제 통과 |
-| transaction_read_only = on | 실제 통과 |
+| 읽기 전용 PostgreSQL 연결 | 실제 통과 |
 | REPEATABLE READ, READ ONLY | 실제 통과 |
 | SQL 상태별 ↔ pandas | assert_frame_equal 통과 |
 | SQL 월별 ↔ pandas | assert_frame_equal 통과 |
 | SQL 완료기간 ↔ pandas | assert_frame_equal 통과 |
 | 잘못된 Python DB 차단 | 실제 통과 |
-
----
-
-## 14. CSV + manifest 경로
-
-| 점검 항목 | 상태 |
-| --- | --- |
-| CSV export | 실제 통과 |
-| row_count 24 | 실제 통과 |
-| expected_recorded_amount_sum 3210000 예시 명시 | 완료 |
-| 분석 기간 manifest | 실제 통과 |
+| CSV export·manifest | 실제 통과 |
+| expected_recorded_amount_sum 3210000 예시 | 완료 |
 | SHA-256 | 실제 통과 |
 | 변조 CSV 탐지 | 실제 실패 확인 |
 | reference_metrics.json | 3210000 기준 |
-| CSV pandas 분석 | 실제 통과 |
-| CSV SQL 기준값 비교 | 실제 통과 |
+| CSV pandas ↔ SQL 기준값 | 실제 통과 |
 
 ---
 
-## 15. 시각화
+## 13. 시각화·reset
 
 | 점검 항목 | 상태 |
 | --- | --- |
-| matplotlib Agg 백엔드 | 실제 PNG 생성 통과 |
+| matplotlib Agg | 실제 PNG 생성 통과 |
 | PostgreSQL 경로 PNG | 생성 통과 |
 | CSV 경로 PNG | 생성 통과 |
-| 그래프가 검증을 대신하지 않음 | 명시 |
-| OS별 한글 글꼴 육안 확인 | 수동 확인 필요 |
-
----
-
-## 16. reset·격리
-
-| 점검 항목 | 상태 |
-| --- | --- |
-| CASCADE 미사용 | 자동 통과 |
-| 예상 객체만 삭제 | 실제 통과 |
+| OS별 한글 글꼴 육안 | 수동 확인 필요 |
+| reset CASCADE 미사용 | 자동 통과 |
 | 예상 밖 keep_me 존재 시 중단 | 실제 통과 |
 | 실패 후 24행 보존 | 실제 통과 |
-| 정상 reset 후 analysis_lab 제거 | 실제 통과 |
+| 정상 reset | 실제 통과 |
 | course_project fingerprint 유지 | 실제 통과 |
 | 다른 Chapter sentinel 유지 | 실제 통과 |
 
 ---
 
-## 17. 발표·TTS·시각 자료
+## 14. 발표·TTS·시각 자료
 
 | 점검 항목 | 상태 |
 | --- | --- |
@@ -283,48 +252,36 @@ Seed 검토 중 발견한 1005·1009의 가입일/신청일 역전은 검증기�
 | shared PresentationTTS.normalize | 자동 통과 |
 | script_content_enhancer | 자동 통과 |
 | Markdown cache=no-store | 자동 통과 |
-| Mermaid | 8 |
-| SVG | 8 |
-| SVG role/img/viewBox/title/desc | 자동 통과 |
+| Mermaid/SVG | 8/8 |
+| SVG 접근성 속성 | 자동 통과 |
 | 실제 브라우저 단계 이동 | 수동 확인 필요 |
 | 실제 TTS 청취 | 수동 확인 필요 |
 
 ---
 
-## 18. 자동 검증 기록
-
-전체 SQL·Python 실행:
+## 15. 자동 검증 기록
 
 ```text
-Workflow: Validate Chapter 14
-Run: 5
-Run ID: 31293106457
-Commit: 9084886fb6998c8356d9df1af55ae6c88db3b23d
-PostgreSQL: 16
-Conclusion: success
+Validate Chapter 14
+Run 5 / 31293106457
+Commit 9084886fb6998c8356d9df1af55ae6c88db3b23d
+PostgreSQL 16
+success
+
+Validate Chapter 14 navigation
+Run 10 / 31293106459
+success
+
+Validate Chapter 14 publishing evidence
+Run 2 / 31293074025
+success
 ```
 
-발표 정적/navigation:
-
-```text
-Workflow: Validate Chapter 14 navigation
-Run: 10
-Run ID: 31293106459
-Conclusion: success
-```
-
-출판 기준값:
-
-```text
-Workflow: Validate Chapter 14 publishing evidence
-Run: 2
-Run ID: 31293074025
-Conclusion: success
-```
+최종 리뷰 문서 반영 후 다시 실행되는 최신 comprehensive/publishing run을 definitive 결과로 별도 기록합니다.
 
 ---
 
-## 19. 남은 수동 확인
+## 16. 남은 수동 확인
 
 ```text
 1. 이론 20장 브라우저 최종 육안 렌더링
