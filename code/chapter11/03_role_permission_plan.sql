@@ -1,4 +1,5 @@
 -- Chapter 11. 역할·권한 계획
+-- 기준: PostgreSQL 16
 -- 주의: Role은 클러스터 전역 객체입니다.
 -- 관리자 권한이 있는 테스트 환경에서만 필요한 문장을 한 줄씩 선택 실행합니다.
 -- 실제 비밀번호는 이 파일이나 저장소에 기록하지 않습니다.
@@ -7,6 +8,7 @@ SELECT current_user;
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
+SELECT current_setting('server_version') AS postgresql_version;
 
 -- ============================================================
 -- 1. 실행 환경과 역할 이름 충돌 확인
@@ -23,9 +25,10 @@ WHERE rolname IN (
     'lab_role_security_owner',
     'lab_role_report_reader',
     'lab_role_enrollment_app',
+    'lab_role_backup_reader',
     'lab_readonly_user',
     'lab_enrollment_user',
-    'lab_role_backup_reader'
+    'lab_backup_user'
 )
 ORDER BY rolname;
 
@@ -44,19 +47,29 @@ WHERE datname = current_database();
 -- CREATE ROLE lab_role_backup_reader NOLOGIN;
 -- CREATE ROLE lab_readonly_user LOGIN;
 -- CREATE ROLE lab_enrollment_user LOGIN;
+-- CREATE ROLE lab_backup_user LOGIN;
 
 -- 실제 인증 정보는 별도 비밀 관리 절차에서 설정합니다.
 -- PASSWORD '...'를 이 파일에 작성하지 않습니다.
 
 -- ============================================================
--- 3. 역할 멤버십
+-- 3. PostgreSQL 16 역할 멤버십
 -- ============================================================
--- GRANT lab_role_report_reader TO lab_readonly_user;
--- GRANT lab_role_enrollment_app TO lab_enrollment_user;
+-- PostgreSQL 16에서는 멤버십마다 INHERIT·SET·ADMIN 옵션을 구분할 수 있습니다.
+-- 이 교재는 권한 역할을 자동 상속하면서 필요할 때 SET ROLE도 가능하도록
+-- INHERIT TRUE, SET TRUE를 명시해 실습 의도를 고정합니다.
+--
+-- GRANT lab_role_report_reader TO lab_readonly_user
+--     WITH INHERIT TRUE, SET TRUE;
+-- GRANT lab_role_enrollment_app TO lab_enrollment_user
+--     WITH INHERIT TRUE, SET TRUE;
+-- GRANT lab_role_backup_reader TO lab_backup_user
+--     WITH INHERIT TRUE, SET TRUE;
 
--- 멤버십이 있다는 사실과 권한을 즉시 사용할 수 있는지는 구분합니다.
--- 04_permission_checks.sql에서 pg_has_role(..., 'MEMBER')와
--- pg_has_role(..., 'USAGE')를 함께 확인합니다.
+-- 04_permission_checks.sql에서 다음을 함께 확인합니다.
+-- pg_has_role(..., 'MEMBER') : 멤버십 경로가 존재하는가?
+-- pg_has_role(..., 'USAGE')  : 현재 설정에서 권한을 즉시 사용할 수 있는가?
+-- pg_auth_members            : inherit_option / set_option / admin_option은 무엇인가?
 
 -- ============================================================
 -- 4. 데이터베이스 접속 권한
@@ -112,22 +125,33 @@ WHERE datname = current_database();
 
 -- 일반 자동 ID INSERT에는 별도 SELECT 권한이 필요하지 않습니다.
 -- 시퀀스 상태 직접 조회라는 업무 요구가 있을 때만 SELECT를 추가 검토합니다.
-
--- DELETE, TRUNCATE, 전체 UPDATE와 스키마 CREATE는 부여하지 않습니다.
+-- recorded_amount UPDATE·DELETE·TRUNCATE·schema CREATE는 부여하지 않습니다.
 
 -- ============================================================
--- 8. 스키마 백업 전용 읽기 역할 선택안
+-- 8. 스키마 백업 전용 읽기 역할
 -- ============================================================
--- pg_dump는 대상 객체를 읽을 수 있어야 합니다.
--- 실습 스키마만 백업한다면 전체 DB 읽기 역할보다 객체별 최소 권한을 우선합니다.
+-- pg_dump는 대상 테이블의 데이터를 읽을 수 있어야 합니다.
+-- IDENTITY 시퀀스 상태까지 완전하게 덤프하는 실습이므로 백업 역할에는
+-- 앱 역할과 달리 세 시퀀스의 SELECT를 명시적으로 부여합니다.
+--
 -- GRANT SELECT ON TABLE
 --     security_lab.students,
 --     security_lab.courses,
 --     security_lab.enrollments
 -- TO lab_role_backup_reader;
+--
+-- GRANT SELECT ON SEQUENCE
+--     security_lab.students_id_seq,
+--     security_lab.courses_id_seq,
+--     security_lab.enrollments_id_seq
+-- TO lab_role_backup_reader;
 
--- RLS가 적용된 테이블은 백업 결과가 역할과 정책에 따라 달라질 수 있습니다.
--- 이 실습 테이블에는 RLS를 적용하지 않지만 운영 환경에서는 반드시 확인합니다.
+-- RLS 주의:
+-- 일반적인 전체 논리 백업에서는 보이는 행만 조용히 덤프하는 것을 목표로 하지 않습니다.
+-- pg_dump는 기본적으로 row_security를 끄려 하며, 백업 역할이 정책을 우회할 수 없으면
+-- 오류로 중단될 수 있습니다. --enable-row-security는 역할에게 보이는 행만 덤프하려는
+-- 명시적 요구가 있을 때 별도로 검토합니다. 운영 전체 백업과 같은 의미로 사용하지 않습니다.
+-- 이 실습 security_lab에는 RLS를 적용하지 않습니다.
 
 -- ============================================================
 -- 9. 명시적 권한 회수 예시
@@ -179,12 +203,14 @@ WHERE datname = current_database();
 --
 -- REVOKE lab_role_report_reader FROM lab_readonly_user;
 -- REVOKE lab_role_enrollment_app FROM lab_enrollment_user;
+-- REVOKE lab_role_backup_reader FROM lab_backup_user;
 --
 -- REASSIGN OWNED BY lab_role_security_owner TO <successor_owner>;
 -- DROP OWNED BY lab_role_security_owner;
 --
 -- DROP ROLE lab_readonly_user;
 -- DROP ROLE lab_enrollment_user;
+-- DROP ROLE lab_backup_user;
 -- DROP ROLE lab_role_report_reader;
 -- DROP ROLE lab_role_enrollment_app;
 -- DROP ROLE lab_role_backup_reader;
