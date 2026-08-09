@@ -170,29 +170,37 @@ WHERE table_schema = 'security_lab'
 ORDER BY table_name, column_name, privilege_type;
 
 -- ============================================================
--- 7. 시퀀스와 소유자 확인
+-- 7. IDENTITY 시퀀스와 소유자 확인
+-- PostgreSQL 16에서 IDENTITY가 내부적으로 만든 시퀀스는
+-- information_schema.sequences에 나타나지 않을 수 있으므로,
+-- 실제 sequence relation은 pg_class(relkind='S')와 pg_sequence로 확인합니다.
 -- ============================================================
 SELECT
-    sequence_schema,
-    sequence_name,
-    data_type,
-    start_value,
-    increment
-FROM information_schema.sequences
-WHERE sequence_schema = 'security_lab'
-ORDER BY sequence_name;
-
-SELECT
-    n.nspname AS schema_name,
+    n.nspname AS sequence_schema,
     c.relname AS sequence_name,
+    format_type(s.seqtypid, NULL) AS data_type,
+    s.seqstart AS start_value,
+    s.seqincrement AS increment,
     pg_get_userbyid(c.relowner) AS owner_name,
     c.relacl
 FROM pg_class AS c
 JOIN pg_namespace AS n
     ON n.oid = c.relnamespace
+JOIN pg_sequence AS s
+    ON s.seqrelid = c.oid
 WHERE n.nspname = 'security_lab'
   AND c.relkind = 'S'
 ORDER BY c.relname;
+
+SELECT
+    table_name,
+    column_name,
+    is_identity,
+    identity_generation
+FROM information_schema.columns
+WHERE table_schema = 'security_lab'
+  AND column_name = 'id'
+ORDER BY table_name;
 
 -- ============================================================
 -- 8. RLS 상태 확인
