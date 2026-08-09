@@ -53,29 +53,40 @@ jobs:
           python -m compileall -q code/chapter15/templates/python
           python - <<'PY'
           from pathlib import Path
-          import re, xml.etree.ElementTree as ET
+          import re
+          import xml.etree.ElementTree as ET
 
-          root=Path('.')
-          chapter=(root/'book/chapter15/chapter15.md').read_text(encoding='utf-8')
-          activity=(root/'book/chapter15/chapter15_activity.md').read_text(encoding='utf-8')
-          outline=(root/'book/chapter15/chapter15_outline.md').read_text(encoding='utf-8')
-          guide=(root/'book/chapter15/chapter15_project_guide.md').read_text(encoding='utf-8')
-          review=(root/'book/chapter15/chapter15_review_revision.md').read_text(encoding='utf-8')
-          checklist=(root/'notes/chapter15_review_checklist.md').read_text(encoding='utf-8')
-          readme=(root/'code/chapter15/templates/README.md').read_text(encoding='utf-8')
+          root = Path('.')
+          chapter = (root/'book/chapter15/chapter15.md').read_text(encoding='utf-8')
+          docs = '\n'.join((root/'book/chapter15'/name).read_text(encoding='utf-8') for name in [
+              'chapter15.md','chapter15_activity.md','chapter15_outline.md','chapter15_project_guide.md'
+          ])
+          review = (root/'book/chapter15/chapter15_review_revision.md').read_text(encoding='utf-8')
+          checklist = (root/'notes/chapter15_review_checklist.md').read_text(encoding='utf-8')
+          readme = (root/'code/chapter15/templates/README.md').read_text(encoding='utf-8')
 
-          required_sql=[f'{i:02d}_' for i in range(1,12)]
-          sql_files=sorted((root/'code/chapter15/templates').glob('[0-9][0-9]_*.sql'))
-          names=[p.name for p in sql_files]
-          for prefix in required_sql:
-              if not any(n.startswith(prefix) for n in names):
+          sql_files = sorted((root/'code/chapter15/templates').glob('[0-9][0-9]_*.sql'))
+          names = [p.name for p in sql_files]
+          for i in range(1,12):
+              prefix=f'{i:02d}_'
+              if not any(name.startswith(prefix) for name in names):
                   raise SystemExit(f'missing Chapter 15 SQL prefix: {prefix}')
 
           for token in ['P15-R01','P15-R13','P15-Q01','P15-Q06','P15-V01','P15-V09']:
-              if token not in chapter+activity+outline+guide+readme:
+              if token not in docs + readme:
                   raise SystemExit(f'missing trace token: {token}')
 
-          if 'DATABASE_URL' in ''.join(p.read_text(encoding='utf-8') for p in (root/'code/chapter15/templates').rglob('*') if p.is_file()):
+          restore=(root/'code/chapter15/templates/11_restore_validation.sql').read_text(encoding='utf-8')
+          if 'P15-V09' not in restore or 'tutor_project_restore' not in restore:
+              raise SystemExit('11_restore_validation.sql is not explicitly traced to P15-V09')
+
+          text_suffixes={'.sql','.py','.md','.txt','.example'}
+          template_text='\n'.join(
+              p.read_text(encoding='utf-8')
+              for p in (root/'code/chapter15/templates').rglob('*')
+              if p.is_file() and (p.suffix.lower() in text_suffixes or p.name=='.env.example')
+          )
+          if 'DATABASE_URL' in template_text:
               raise SystemExit('DATABASE_URL must not be used in Chapter 15 templates')
 
           protected=['course_project','transaction_lab','performance_lab','security_lab','nosql_lab','ai_review_lab','analysis_lab']
@@ -88,62 +99,60 @@ jobs:
           theory=(root/'presentation/chapter15/chapter15_theory_lecture_plan.md').read_text(encoding='utf-8')
           practice=(root/'presentation/chapter15/chapter15_practice_lecture_plan.md').read_text(encoding='utf-8')
           for label,text in [('theory',theory),('practice',practice)]:
-              nums=[int(x) for x in re.findall(r'^##\s+(\d+)\.',text,re.M)]
+              nums=[int(x) for x in re.findall(r'^##\s+(\d+)\.', text, re.M)]
               if nums != list(range(1,21)):
                   raise SystemExit(f'{label} slide numbers are not 1..20: {nums}')
-              sections=re.split(r'^##\s+\d+\.',text,flags=re.M)[1:]
+              sections=re.split(r'^##\s+\d+\.', text, flags=re.M)[1:]
               if any('**화면 구성**' not in s or '**발표 스크립트**' not in s for s in sections):
                   raise SystemExit(f'{label} has a slide without screen/script blocks')
 
-          presentation_files=list((root/'presentation/chapter15').glob('*'))
-          pres_text='\n'.join(p.read_text(encoding='utf-8') for p in presentation_files if p.is_file())
+          pres_files=[p for p in (root/'presentation/chapter15').glob('*') if p.is_file() and p.suffix.lower() in {'.js','.html','.css','.md'}]
+          pres_text='\n'.join(p.read_text(encoding='utf-8') for p in pres_files)
           if 'PresentationTTS' not in pres_text or 'script_content_enhancer' not in pres_text:
               raise SystemExit('Chapter 15 presentation TTS/enhancer wiring missing')
+          if '20260808a' in pres_text or '20260809a' not in pres_text:
+              raise SystemExit('Chapter 15 presentation asset version must be 20260809a')
 
           mmd=sorted((root/'images/chapter15').glob('*.mmd'))
           svg=sorted((root/'images/chapter15').glob('*.svg'))
-          if len(mmd) != len(svg) or len(svg) < 8:
-              raise SystemExit(f'Chapter 15 image pair mismatch: mmd={len(mmd)}, svg={len(svg)}')
-          if {p.stem for p in mmd}!={p.stem for p in svg}:
-              raise SystemExit('Chapter 15 Mermaid/SVG stems differ')
+          if len(mmd)!=len(svg) or len(svg)<8 or {p.stem for p in mmd}!={p.stem for p in svg}:
+              raise SystemExit(f'Chapter 15 image pairs invalid: mmd={len(mmd)}, svg={len(svg)}')
           for p in svg:
               node=ET.parse(p).getroot()
               if node.attrib.get('role')!='img' or node.attrib.get('width')!='100%' or 'viewBox' not in node.attrib:
-                  raise SystemExit(f'{p} missing accessible responsive SVG metadata')
+                  raise SystemExit(f'{p} missing responsive accessibility metadata')
               tags=[x.tag.split('}')[-1] for x in list(node)]
-              if 'title' not in tags or 'desc' not in tags:
-                  raise SystemExit(f'{p} missing title/desc')
-              if p.name not in chapter:
-                  raise SystemExit(f'{p.name} not referenced by Chapter 15 body')
+              if 'title' not in tags or 'desc' not in tags or p.name not in chapter:
+                  raise SystemExit(f'{p} missing title/desc or body reference')
 
-          if 'CASCADE' in (root/'code/chapter15/templates/reset_tutor_project.sql').read_text(encoding='utf-8').upper():
+          reset=(root/'code/chapter15/templates/reset_tutor_project.sql').read_text(encoding='utf-8')
+          if 'CASCADE' in reset.upper():
               raise SystemExit('reset_tutor_project.sql must not use CASCADE')
-
           for token in ['실제 DB','Python','복원']:
               if token not in review+checklist:
                   raise SystemExit(f'review evidence missing: {token}')
 
-          print(f'Chapter 15 static checks passed: SQL={len(sql_files)}, images={len(svg)}, theory=20, practice=20')
+          print(f'Chapter 15 static checks passed: SQL={len(sql_files)}, images={len(svg)}, theory=20, practice=20, asset=20260809a')
           PY
 
       - name: Install Python dependencies
         run: python -m pip install -r code/chapter15/templates/python/requirements.txt
 
-      - name: Prepare PostgreSQL databases and protected sentinels
+      - name: Prepare database and protected sentinels
         shell: bash
         run: |
           set -euo pipefail
           printf 'localhost:5432:*:postgres:postgres\n' > "$PGPASSFILE"
           chmod 600 "$PGPASSFILE"
-          createdb -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" ai_database_book
+          createdb ai_database_book
           psql -X -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
-          CREATE SCHEMA course_project; CREATE TABLE course_project.keep_me(id int primary key, note text); INSERT INTO course_project.keep_me VALUES(1,'course');
-          CREATE SCHEMA transaction_lab; CREATE TABLE transaction_lab.keep_me(id int primary key, note text); INSERT INTO transaction_lab.keep_me VALUES(1,'transaction');
-          CREATE SCHEMA performance_lab; CREATE TABLE performance_lab.keep_me(id int primary key, note text); INSERT INTO performance_lab.keep_me VALUES(1,'performance');
-          CREATE SCHEMA security_lab; CREATE TABLE security_lab.keep_me(id int primary key, note text); INSERT INTO security_lab.keep_me VALUES(1,'security');
-          CREATE SCHEMA nosql_lab; CREATE TABLE nosql_lab.keep_me(id int primary key, note text); INSERT INTO nosql_lab.keep_me VALUES(1,'nosql');
-          CREATE SCHEMA ai_review_lab; CREATE TABLE ai_review_lab.keep_me(id int primary key, note text); INSERT INTO ai_review_lab.keep_me VALUES(1,'ai');
-          CREATE SCHEMA analysis_lab; CREATE TABLE analysis_lab.keep_me(id int primary key, note text); INSERT INTO analysis_lab.keep_me VALUES(1,'analysis');
+          CREATE SCHEMA course_project; CREATE TABLE course_project.keep_me(id int primary key); INSERT INTO course_project.keep_me VALUES(1);
+          CREATE SCHEMA transaction_lab; CREATE TABLE transaction_lab.keep_me(id int primary key); INSERT INTO transaction_lab.keep_me VALUES(1);
+          CREATE SCHEMA performance_lab; CREATE TABLE performance_lab.keep_me(id int primary key); INSERT INTO performance_lab.keep_me VALUES(1);
+          CREATE SCHEMA security_lab; CREATE TABLE security_lab.keep_me(id int primary key); INSERT INTO security_lab.keep_me VALUES(1);
+          CREATE SCHEMA nosql_lab; CREATE TABLE nosql_lab.keep_me(id int primary key); INSERT INTO nosql_lab.keep_me VALUES(1);
+          CREATE SCHEMA ai_review_lab; CREATE TABLE ai_review_lab.keep_me(id int primary key); INSERT INTO ai_review_lab.keep_me VALUES(1);
+          CREATE SCHEMA analysis_lab; CREATE TABLE analysis_lab.keep_me(id int primary key); INSERT INTO analysis_lab.keep_me VALUES(1);
           SQL
 
       - name: Verify wrong database guard
@@ -151,9 +160,7 @@ jobs:
         run: |
           set -euo pipefail
           if psql -X -v ON_ERROR_STOP=1 -d postgres -f code/chapter15/templates/01_schema.sql >/tmp/ch15-wrong-db.log 2>&1; then
-            cat /tmp/ch15-wrong-db.log
-            echo '01_schema.sql unexpectedly succeeded in postgres DB'
-            exit 1
+            echo '01_schema.sql unexpectedly succeeded in postgres'; exit 1
           fi
           grep -q 'ai_database_book' /tmp/ch15-wrong-db.log
 
@@ -194,9 +201,7 @@ jobs:
           python 02_pandas_analysis.py
           python 03_result_validation.py | tee /tmp/ch15-python.log
           grep -q 'Chapter 15 SQL and pandas cross-validation passed' /tmp/ch15-python.log
-          if PGDATABASE=postgres python 01_load_postgresql.py >/tmp/ch15-python-wrong-db.log 2>&1; then
-            echo 'Python wrong DB guard unexpectedly succeeded'; exit 1
-          fi
+          if PGDATABASE=postgres python 01_load_postgresql.py >/tmp/ch15-python-wrong-db.log 2>&1; then exit 1; fi
           grep -q 'ai_database_book' /tmp/ch15-python-wrong-db.log
 
       - name: Verify role allow and deny behavior
@@ -212,16 +217,12 @@ jobs:
           GRANT UPDATE(status, updated_at) ON tutor_project.questions TO tutor_project_app;
           GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA tutor_project TO tutor_project_app;
           GRANT SELECT ON tutor_project.question_analysis_dataset, tutor_project.student_question_summary, tutor_project.tutor_answer_summary, tutor_project.analysis_parameters TO tutor_project_report;
-          SET ROLE tutor_project_report;
-          SELECT count(*) FROM tutor_project.question_analysis_dataset;
-          RESET ROLE;
-          SET ROLE tutor_project_app;
-          SELECT count(*) FROM tutor_project.questions;
-          RESET ROLE;
+          SET ROLE tutor_project_report; SELECT count(*) FROM tutor_project.question_analysis_dataset; RESET ROLE;
+          SET ROLE tutor_project_app; SELECT count(*) FROM tutor_project.questions; RESET ROLE;
           SQL
-          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_report; INSERT INTO tutor_project.questions(student_id,question_code,title,body) VALUES(101,'CI-DENY-1','x','x');" >/tmp/ch15-role-report-deny.log 2>&1; then exit 1; fi
-          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_app; DELETE FROM tutor_project.questions WHERE id=303;" >/tmp/ch15-role-app-delete.log 2>&1; then exit 1; fi
-          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_app; CREATE TABLE tutor_project.nope(id int);" >/tmp/ch15-role-app-create.log 2>&1; then exit 1; fi
+          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_report; INSERT INTO tutor_project.questions(student_id,question_code,title,body) VALUES(101,'CI-DENY-1','x','x');" >/tmp/ch15-report-deny.log 2>&1; then exit 1; fi
+          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_app; DELETE FROM tutor_project.questions WHERE id=303;" >/tmp/ch15-app-delete.log 2>&1; then exit 1; fi
+          if psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c "SET ROLE tutor_project_app; CREATE TABLE tutor_project.nope(id int);" >/tmp/ch15-app-create.log 2>&1; then exit 1; fi
           psql -X -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
           BEGIN;
           SET ROLE tutor_project_app;
@@ -234,13 +235,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d ai_database_book -Fc --schema=tutor_project --no-owner --no-privileges -f /tmp/tutor_project.backup
+          pg_dump -d ai_database_book -Fc --schema=tutor_project --no-owner --no-privileges -f /tmp/tutor_project.backup
           test -s /tmp/tutor_project.backup
           sha256sum /tmp/tutor_project.backup | tee /tmp/tutor_project.backup.sha256
           pg_restore --list /tmp/tutor_project.backup > /tmp/tutor_project.list
           grep -q 'SCHEMA.*tutor_project' /tmp/tutor_project.list
-          createdb -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -O postgres -T template0 tutor_project_restore
-          pg_restore -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d tutor_project_restore --single-transaction --no-owner --no-privileges /tmp/tutor_project.backup
+          createdb -O postgres -T template0 tutor_project_restore
+          pg_restore -d tutor_project_restore --single-transaction --no-owner --no-privileges /tmp/tutor_project.backup
           psql -X -v ON_ERROR_STOP=1 -d tutor_project_restore -f code/chapter15/templates/11_restore_validation.sql 2>&1 | tee /tmp/ch15-restore.log
           grep -q 'Chapter 15 restore validation passed' /tmp/ch15-restore.log
 
@@ -257,5 +258,4 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d ai_database_book -c 'DROP TABLE tutor_project.keep_me;'
           psql -X -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter15/templates/reset_tutor_project.sql
           test "$(psql -X -At -d ai_database_book -c "SELECT to_regnamespace('tutor_project') IS NULL;")" = 't'
-          got=$(psql -X -At -d ai_database_book -c "SELECT count(*) FROM pg_namespace WHERE nspname IN ('course_project','transaction_lab','performance_lab','security_lab','nosql_lab','ai_review_lab','analysis_lab');")
-          test "$got" = '7'
+          test "$(psql -X -At -d ai_database_book -c "SELECT count(*) FROM pg_namespace WHERE nspname IN ('course_project','transaction_lab','performance_lab','security_lab','nosql_lab','ai_review_lab','analysis_lab');")" = '7'
