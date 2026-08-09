@@ -1,11 +1,14 @@
 -- Chapter 12. nosql_lab 초기화
 -- 주의: nosql_lab 스키마와 실습 데이터만 삭제합니다.
 -- course_project, transaction_lab, performance_lab, security_lab, public 객체는 변경하지 않습니다.
+-- CASCADE를 사용하지 않으므로 예상하지 못한 객체가 있으면 전체 초기화를 중단하고 ROLLBACK합니다.
 
 SELECT current_user;
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
+
+BEGIN;
 
 DO $$
 BEGIN
@@ -15,10 +18,28 @@ BEGIN
             current_database();
     END IF;
 
-    DROP TABLE IF EXISTS nosql_lab.storage_choice_cases;
-    DROP TABLE IF EXISTS nosql_lab.key_value_cache_examples;
-    DROP TABLE IF EXISTS nosql_lab.course_documents;
-    DROP SCHEMA IF EXISTS nosql_lab;
+    IF current_setting('transaction_read_only')::BOOLEAN THEN
+        RAISE EXCEPTION
+            '초기화 중단: 읽기 전용 연결에서는 nosql_lab을 삭제할 수 없습니다.';
+    END IF;
+END
+$$;
+
+DROP TABLE IF EXISTS nosql_lab.storage_choice_cases;
+DROP TABLE IF EXISTS nosql_lab.key_value_cache_examples;
+DROP TABLE IF EXISTS nosql_lab.course_documents;
+DROP SCHEMA IF EXISTS nosql_lab;
+
+COMMIT;
+
+DO $$
+BEGIN
+    IF to_regnamespace('nosql_lab') IS NOT NULL THEN
+        RAISE EXCEPTION
+            'Chapter 12 초기화 검증 실패: nosql_lab 스키마가 남아 있습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 nosql lab reset passed';
 END
 $$;
 
