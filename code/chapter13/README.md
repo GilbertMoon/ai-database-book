@@ -15,6 +15,8 @@ performance_lab: 변경하지 않음
 security_lab: 변경하지 않음
 nosql_lab: 변경하지 않음
 ai_review_lab: Chapter 13 실습 대상
+
+`ai_review_lab.payments`는 AI 설계 검토를 위한 가상 격리 시나리오입니다. `course_project`에는 결제·환불 원장을 추가하지 않으며, 원본 `course_project.enrollments.recorded_amount NUMERIC(12,0)`는 계속 신청 시점 기록 금액입니다.
 ```
 
 모든 SQL은 다음 위치 확인 형식을 사용합니다.
@@ -39,7 +41,7 @@ SHOW search_path;
 | `04_good_design_seed.sql` | 명시적 ID 정상 데이터 입력·IDENTITY 시작값 조정·COMMIT 전 판정 |
 | `05_metadata_validation.sql` | 정확한 테이블 집합·FK 서명·제약조건 29개·IDENTITY 6개·인덱스 자동 검증 |
 | `06_business_validation.sql` | NULL 안전 상태 조합, 고아 관계, 금액·시간·활성 중복과 가격 차이 검증 |
-| `07_negative_tests.sql` | SQLSTATE·constraint name을 기록하는 반례 22개와 정상 경계값 5개 자동 테스트 |
+| `07_negative_tests.sql` | SQLSTATE·constraint name을 기록하는 반례 24개와 정상 경계값 6개 자동 테스트 |
 | `08_ai_review_lab_validation.sql` | 기준 행·메타데이터·업무 정합성·IDENTITY·07 결과를 종합 판정 |
 | `AI_REVIEW_REPORT_TEMPLATE.md` | 요구사항·정책·diff·증거·승인 상태 기록 |
 | `PROMPT_TEMPLATES.md` | ERD·DDL·Codex 수정·마이그레이션·승인 검토 프롬프트 |
@@ -71,7 +73,7 @@ SHOW search_path;
 ```text
 P13-R01~P13-R09  확인된 요구사항
 P13-D01~P13-D08  결정·단순화·미확정 정책
-P13-T01~P13-T27  반례·정상 경계값 테스트
+P13-T01~P13-T30  반례·정상 경계값 테스트
 P13-V01~P13-V08  실행·검증 단계
 ```
 
@@ -83,7 +85,7 @@ P13-R02 강사 email: 공백 금지, 정확히 같은 문자열 UNIQUE
 P13-R03 강의는 강사 한 명을 FK로 참조
 P13-R04 학생·강의 N:M은 enrollments로 해소
 P13-R05 수강 상태 허용값 CHECK
-P13-R06 가격·합의 금액·결제 금액 0 이상
+P13-R06 가격·신청 시점 기록 금액·결제 상태 기록 금액 0 이상
 P13-R07 결제는 수강신청을 FK로 참조
 P13-R08 실제 카드번호를 저장하지 않고 외부 비민감 payment_reference만 저장
 P13-R09 신청·수강중 활성 신청은 학생·강의당 한 건
@@ -139,8 +141,8 @@ students·courses N:M
 courses.price
 → 현재 기본 가격
 
-enrollments.agreed_amount
-→ 신청 시점 합의 금액
+enrollments.recorded_amount
+→ 신청 시점 신청 시점 기록 금액
 
 payments.amount
 → 현재 결제 상태의 기록 금액
@@ -184,7 +186,7 @@ IDENTITY id 컬럼 6개
 ```text
 학생·강사 이메일 중복
 필수 문자열 공백
-합의 금액·결제 금액 불일치
+신청 시점 기록 금액·결제 상태 기록 금액 불일치
 결제·환불 시각 조합 위반
 고아 학생·강의·결제 참조
 활성 신청 중복
@@ -200,7 +202,7 @@ IDENTITY id 컬럼 6개
 수강중 → 결제 없음 허용, 있으면 결제완료
 ```
 
-현재 가격과 신청 시점 합의 금액 차이는 정보용 1행이며 자동 오류가 아닙니다.
+현재 가격과 신청 시점 신청 시점 기록 금액 차이는 정보용 1행이며 자동 오류가 아닙니다.
 
 ---
 
@@ -219,8 +221,8 @@ actual_result / detail
 기준:
 
 ```text
-P13-T01~P13-T22 expected_failure
-P13-T23~P13-T27 expected_success
+P13-T01~P13-T24 expected_failure
+P13-T25~P13-T30 expected_success
 전체 27
 통과 27
 unexpected 0
@@ -236,6 +238,8 @@ NULL description
 결제 없는 신청
 완료·취소 이력 후 재신청
 결제실패 + 금액 0 + 시각 NULL
+삭제 RESTRICT: 참조 중인 강사·신청 삭제 실패
+이메일 대소문자 변형: 현재 정확 문자열 정책에서는 성공
 ```
 
 오류만 테스트하면 지나치게 강한 제약조건이 정상 데이터를 막는 문제를 발견하기 어렵습니다.
@@ -257,7 +261,7 @@ Chapter 07 신청 5행 유지
 금액·시간·상태 조합 위반 0
 정보용 가격 차이 1행
 모든 IDENTITY 다음 값 > 현재 최대 ID
-같은 세션이면 07의 27/27 결과 재확인
+같은 세션이면 07의 30/30 결과 재확인
 ```
 
 통과 메시지:

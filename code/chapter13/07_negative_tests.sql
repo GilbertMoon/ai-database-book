@@ -163,7 +163,7 @@ END
 $$;
 
 -- ============================================================
--- P13-T01~P13-T22. 예상 실패 반례
+-- P13-T01~P13-T24. 예상 실패 반례
 -- ============================================================
 CALL pg_temp.expect_failure(
     1, 'P13-T01', 'duplicate_student_email',
@@ -228,7 +228,7 @@ CALL pg_temp.expect_failure(
 CALL pg_temp.expect_failure(
     9, 'P13-T09', 'missing_student_fk',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19001, 999999, 301, '신청', 100000, CURRENT_DATE)$$,
     '23503', 'fk_ai_review_enrollments_student'
 );
@@ -236,7 +236,7 @@ CALL pg_temp.expect_failure(
 CALL pg_temp.expect_failure(
     10, 'P13-T10', 'missing_course_fk',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19002, 101, 999999, '신청', 100000, CURRENT_DATE)$$,
     '23503', 'fk_ai_review_enrollments_course'
 );
@@ -244,15 +244,15 @@ CALL pg_temp.expect_failure(
 CALL pg_temp.expect_failure(
     11, 'P13-T11', 'invalid_enrollment_status',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19003, 102, 302, '결제완료', 150000, CURRENT_DATE)$$,
     '23514', 'chk_ai_review_enrollments_status'
 );
 
 CALL pg_temp.expect_failure(
-    12, 'P13-T12', 'negative_agreed_amount',
+    12, 'P13-T12', 'negative_recorded_amount',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19004, 102, 302, '신청', -1000, CURRENT_DATE)$$,
     '23514', 'chk_ai_review_enrollments_amount'
 );
@@ -260,7 +260,7 @@ CALL pg_temp.expect_failure(
 CALL pg_temp.expect_failure(
     13, 'P13-T13', 'duplicate_active_enrollment',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19005, 102, 301, '수강중', 100000, CURRENT_DATE)$$,
     '23505', 'uq_ai_review_enrollments_active'
 );
@@ -279,7 +279,7 @@ CALL pg_temp.expect_failure(
     15, 'P13-T15', 'negative_payment_amount',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19115, 101, 301, '완료', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -294,7 +294,7 @@ CALL pg_temp.expect_failure(
     16, 'P13-T16', 'invalid_payment_status',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19116, 101, 301, '완료', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -309,7 +309,7 @@ CALL pg_temp.expect_failure(
     17, 'P13-T17', 'completed_without_paid_at',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19117, 101, 301, '완료', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -324,7 +324,7 @@ CALL pg_temp.expect_failure(
     18, 'P13-T18', 'refund_without_refunded_at',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19118, 101, 301, '취소', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -339,7 +339,7 @@ CALL pg_temp.expect_failure(
     19, 'P13-T19', 'refund_before_payment',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19119, 101, 301, '취소', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -355,7 +355,7 @@ CALL pg_temp.expect_failure(
     20, 'P13-T20', 'blank_payment_reference',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19120, 101, 301, '완료', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -370,7 +370,7 @@ CALL pg_temp.expect_failure(
     21, 'P13-T21', 'duplicate_payment_reference',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19121, 101, 301, '완료', 100000, CURRENT_DATE)
           RETURNING id
       )
@@ -391,10 +391,25 @@ CALL pg_temp.expect_failure(
 );
 
 -- ============================================================
--- P13-T23~P13-T27. 정상 경계값
+-- P13-T23~P13-T24. 삭제 RESTRICT 반례
+-- ============================================================
+CALL pg_temp.expect_failure(
+    23, 'P13-T23', 'delete_referenced_instructor_restricted',
+    $$DELETE FROM ai_review_lab.instructors WHERE id = 201$$,
+    '23503', 'fk_ai_review_courses_instructor'
+);
+
+CALL pg_temp.expect_failure(
+    24, 'P13-T24', 'delete_referenced_enrollment_restricted',
+    $$DELETE FROM ai_review_lab.enrollments WHERE id = 1001$$,
+    '23503', 'fk_ai_review_payments_enrollment'
+);
+
+-- ============================================================
+-- P13-T25~P13-T30. 정상 경계값
 -- ============================================================
 CALL pg_temp.expect_success(
-    23, 'P13-T23', 'zero_price_one_character_and_null_description',
+    25, 'P13-T25', 'zero_price_one_character_and_null_description',
     $$WITH new_instructor AS (
           INSERT INTO ai_review_lab.instructors (id, name, email, specialty)
           VALUES (2991, '가', 'boundary-instructor@example.com', 'D')
@@ -407,31 +422,31 @@ CALL pg_temp.expect_success(
 );
 
 CALL pg_temp.expect_success(
-    24, 'P13-T24', 'application_without_payment',
+    26, 'P13-T26', 'application_without_payment',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19901, 103, 302, '신청', 0, CURRENT_DATE)$$
 );
 
 CALL pg_temp.expect_success(
-    25, 'P13-T25', 'reenroll_after_completed_history',
+    27, 'P13-T27', 'reenroll_after_completed_history',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19902, 101, 301, '신청', 100000, CURRENT_DATE)$$
 );
 
 CALL pg_temp.expect_success(
-    26, 'P13-T26', 'reenroll_after_cancelled_history',
+    28, 'P13-T28', 'reenroll_after_cancelled_history',
     $$INSERT INTO ai_review_lab.enrollments
-      (id, student_id, course_id, status, agreed_amount, enrolled_at)
+      (id, student_id, course_id, status, recorded_amount, enrolled_at)
       VALUES (19903, 103, 303, '신청', 120000, CURRENT_DATE)$$
 );
 
 CALL pg_temp.expect_success(
-    27, 'P13-T27', 'failed_zero_payment_with_null_timestamps',
+    29, 'P13-T29', 'failed_zero_payment_with_null_timestamps',
     $$WITH new_enrollment AS (
           INSERT INTO ai_review_lab.enrollments
-              (id, student_id, course_id, status, agreed_amount, enrolled_at)
+              (id, student_id, course_id, status, recorded_amount, enrolled_at)
           VALUES (19904, 102, 302, '신청', 0, CURRENT_DATE)
           RETURNING id
       )
@@ -439,6 +454,12 @@ CALL pg_temp.expect_success(
           (id, enrollment_id, amount, payment_status, paid_at, refunded_at, payment_reference)
       SELECT 9994, id, 0, '결제실패', NULL, NULL, 'BOUNDARY-FAILED-000'
       FROM new_enrollment$$
+);
+
+CALL pg_temp.expect_success(
+    30, 'P13-T30', 'case_variant_student_email_allowed',
+    $$INSERT INTO ai_review_lab.students (id, name, email, joined_at)
+      VALUES (19905, '대소문자학생', 'Kim.review@example.com', CURRENT_DATE)$$
 );
 
 -- ============================================================
@@ -461,13 +482,15 @@ FROM pg_temp.negative_test_results
 ORDER BY test_order;
 
 SELECT
-    COUNT(*) AS total_tests_expected_27,
+    COUNT(*) AS total_tests_expected_30,
     COUNT(*) FILTER (
         WHERE actual_result IN ('expected_failure', 'expected_success')
-    ) AS passed_tests_expected_27,
+    ) AS passed_tests_expected_30,
     COUNT(*) FILTER (
         WHERE actual_result LIKE 'unexpected%'
-    ) AS unexpected_tests_expected_0
+    ) AS unexpected_tests_expected_0,
+    COUNT(*) FILTER (WHERE expected_result = 'expected_failure') AS expected_failures_expected_24,
+    COUNT(*) FILTER (WHERE expected_result = 'expected_success') AS expected_successes_expected_6
 FROM pg_temp.negative_test_results;
 
 DO $$
@@ -475,6 +498,8 @@ DECLARE
     total_count INTEGER;
     pass_count INTEGER;
     unexpected_count INTEGER;
+    expected_failure_count INTEGER;
+    expected_success_count INTEGER;
 BEGIN
     SELECT
         COUNT(*),
@@ -483,18 +508,25 @@ BEGIN
         ),
         COUNT(*) FILTER (
             WHERE actual_result LIKE 'unexpected%'
-        )
-    INTO total_count, pass_count, unexpected_count
+        ),
+        COUNT(*) FILTER (WHERE expected_result = 'expected_failure'),
+        COUNT(*) FILTER (WHERE expected_result = 'expected_success')
+    INTO total_count, pass_count, unexpected_count,
+         expected_failure_count, expected_success_count
     FROM pg_temp.negative_test_results;
 
-    IF total_count <> 27
-       OR pass_count <> 27
-       OR unexpected_count <> 0 THEN
+    IF total_count <> 30
+       OR pass_count <> 30
+       OR unexpected_count <> 0
+       OR expected_failure_count <> 24
+       OR expected_success_count <> 6 THEN
         RAISE EXCEPTION
-            '반례 검증 실패: total %, passed %, unexpected %.',
+            '반례 검증 실패: total %, passed %, unexpected %, failure %, success %.',
             total_count,
             pass_count,
-            unexpected_count;
+            unexpected_count,
+            expected_failure_count,
+            expected_success_count;
     END IF;
 
     IF (SELECT COUNT(*) FROM ai_review_lab.students) <> 3
@@ -506,7 +538,7 @@ BEGIN
             '반례 검증 실패: 테스트 후 기준 행 수가 변경되었습니다.';
     END IF;
 
-    RAISE NOTICE 'Chapter 13 negative and boundary tests passed: 27/27';
+    RAISE NOTICE 'Chapter 13 negative and boundary tests passed: 30/30';
 END
 $$;
 

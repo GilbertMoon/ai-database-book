@@ -162,7 +162,7 @@ DB 환경
 ```text
 P13-R01~P13-R09  확인된 요구사항
 P13-D01~P13-D08  결정·단순화·미확정 정책
-P13-T01~P13-T27  반례·정상 경계값 테스트
+P13-T01~P13-T30  반례·정상 경계값 테스트
 P13-V01~P13-V08  실행·검증 단계
 ```
 
@@ -223,7 +223,7 @@ enrollments 1 → 0..1 payments
 | students | 학생 기본 정보 |
 | instructors | 강사 기본 정보 |
 | courses | 강의 현재 정보와 기본 가격 |
-| enrollments | 학생·강의 관계와 신청 시점 합의 금액 |
+| enrollments | 학생·강의 관계와 신청 시점 신청 시점 기록 금액 |
 | payments | 현재 결제 상태와 외부 비민감 참조값 |
 
 `bad_enrollments`의 역할 혼합 문제와 좋은 설계의 분리를 `ch13_04`, `ch13_05` 다이어그램과 본문에 동기화했습니다.
@@ -291,17 +291,17 @@ payments.payment_reference
 
 ---
 
-## 10. 가격·합의 금액·결제 금액과 결제·환불 시각
+## 10. 가격·신청 시점 기록 금액·결제 상태 기록 금액과 결제·환불 시각
 
 세 금액의 시점을 분리했습니다.
 
 ```text
 courses.price              현재 기본 가격
-enrollments.agreed_amount  신청 시점 합의 금액
+enrollments.recorded_amount  신청 시점 신청 시점 기록 금액
 payments.amount             현재 결제 상태의 금액
 ```
 
-현재 가격과 합의 금액 차이는 할인·가격 변경일 수 있으므로 정보용으로 다룹니다.
+현재 가격과 신청 시점 기록 금액 차이는 할인·가격 변경일 수 있으므로 정보용으로 다룹니다.
 
 결제 시각은 기존 단일 의미를 다음처럼 분리했습니다.
 
@@ -361,12 +361,12 @@ p.payment_status <> '결제완료'
 기준 행·JOIN
 학생·강사 이메일 중복
 필수 문자열 공백
-합의·결제 금액
+신청 시점 기록 금액·결제 상태 기록 금액
 결제·환불 시각
 고아 관계
 활성 신청 중복
 샘플 상태 조합
-현재 가격·합의 금액 차이 정보용 1행
+현재 가격·신청 시점 기록 금액 차이 정보용 1행
 ```
 
 ---
@@ -376,9 +376,9 @@ p.payment_status <> '결제완료'
 `07_negative_tests.sql`은 헬퍼 프로시저 기반으로 구성했습니다.
 
 ```text
-P13-T01~P13-T22 expected_failure
-P13-T23~P13-T27 expected_success
-전체 27 / 통과 27 / unexpected 0
+P13-T01~P13-T24 expected_failure
+P13-T25~P13-T30 expected_success
+전체 30 / 통과 30 / unexpected 0
 ```
 
 `GET STACKED DIAGNOSTICS`로 다음 증거를 기록합니다.
@@ -412,7 +412,7 @@ Chapter 07 신청 5행 유지
 금액·시각·상태 조합 위반 0
 가격 차이 정보용 1행
 모든 IDENTITY 다음 값 > 현재 최대 ID
-같은 세션이면 07의 27/27 결과 재확인
+같은 세션이면 07의 30/30 결과 재확인
 ```
 
 코드에 정의된 최종 통과 메시지:
@@ -562,7 +562,7 @@ NO ACTION
 P13-R / P13-D / P13-T / P13-V
 ai_review_lab
 bad_enrollments
-agreed_amount
+recorded_amount
 payment_reference
 payment_status
 paid_at
@@ -591,8 +591,8 @@ Chapter 13 핵심 TTS 용어 존재 확인
 presentation HTML 자산 로드 순서 확인
 SQL 01~08 필수 파일 존재 확인
 제약조건 29·FK 4·IDENTITY 6 기준 확인
-P13-T01~T22 / T23~T27 존재 확인
-27/27 판정 로직 확인
+P13-T01~T24 / T23~T27 존재 확인
+30/30 판정 로직 확인
 Chapter 07 기준 데이터 보존 로직 확인
 최종 통과 메시지 존재 확인
 ```
@@ -638,7 +638,7 @@ Chapter 13의 “AI 결과를 실행 증거로 검증한다”는 원칙이 Chap
 | 정확한 메타데이터 검증 코드 | 완료 |
 | LEFT JOIN NULL 보정 | 완료 |
 | 업무 정합성 검증 코드 | 완료 |
-| 반례·경계값 27개 | 완료 |
+| 반례·경계값 30개 | 완료 |
 | SQLSTATE·constraint name 증거 | 완료 |
 | 최종 08 검증 코드 | 완료 |
 | 민감정보 다중 증거 | 완료 |
@@ -662,7 +662,7 @@ Chapter 13의 “AI 결과를 실행 증거로 검증한다”는 원칙이 Chap
 1. PostgreSQL에서 reset 후 01→08 순차 실행
 2. 05 metadata validation 실제 통과 확인
 3. 06 business validation 실제 통과 확인
-4. 07 반례·경계값 27/27, unexpected 0 실제 확인
+4. 07 반례·경계값 30/30, unexpected 0 실제 확인
 5. 08 'Chapter 13 AI review lab validation passed' 실제 확인
 6. 기준 행 수와 모든 IDENTITY 다음 값 실제 확인
 7. Chapter 13 GitHub Actions 실행 결과 확인

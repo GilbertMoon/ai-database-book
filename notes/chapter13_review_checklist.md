@@ -52,7 +52,7 @@ AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실�
 | --- | --- | --- |
 | P13-R01~R09 | 완료 | 확인 요구사항 |
 | P13-D01~D08 | 완료 | 결정·범위·미확정 |
-| P13-T01~T27 | 완료 | 반례·정상 경계값 |
+| P13-T01~T30 | 완료 | 반례·정상 경계값 |
 | P13-V01~V08 | 완료 | 실행·검증 단계 |
 | 앞 장 활성 정책 유지 | 완료 | 신청·수강중 부분 UNIQUE |
 | 완료·취소 후 재신청 | 완료 | 허용 |
@@ -70,7 +70,7 @@ AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실�
 | students 역할 | 완료 | 학생 기본 정보 |
 | instructors 역할 | 완료 | 강사 기본 정보 |
 | courses 역할 | 완료 | 강의 현재 정보·기본 가격 |
-| enrollments 역할 | 완료 | 학생·강의 관계·합의 금액 |
+| enrollments 역할 | 완료 | 학생·강의 관계·신청 시점 기록 금액 |
 | payments 역할 | 완료 | 현재 결제 상태·외부 참조값 |
 | instructors→courses | 완료 | 1 : 0..N |
 | students→enrollments | 완료 | 1 : 0..N |
@@ -114,7 +114,7 @@ AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실�
 | FK 방향 | 완료 | 정확한 4개 |
 | 삭제 RESTRICT | 완료 | CASCADE 미적용 |
 | 활성 부분 고유 인덱스 | 완료 | Chapter 07 연속성 |
-| 가격·합의·결제 금액 분리 | 완료 | 시점 의미 유지 |
+| 가격·신청 시점 기록 금액·결제 상태 기록 금액 분리 | 완료 | 시점 의미 유지 |
 | 결제 현재 상태 1건 | 완료 | 단순화 명시 |
 | paid_at·refunded_at | 완료 | 시각 의미 분리 |
 | 전액 환불 샘플 | 완료 | 부분 환불 범위 밖 |
@@ -144,7 +144,7 @@ AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실�
 | 정상 JOIN | 4 | 자동 판정 코드 |
 | 이메일 중복 | 0 | 자동 판정 코드 |
 | 필수 문자열 공백 | 0 | 자동 판정 코드 |
-| 합의·결제 금액 불일치 | 0 | 자동 판정 코드 |
+| 신청 시점 기록 금액·결제 상태 기록 금액 불일치 | 0 | 자동 판정 코드 |
 | 결제·환불 시각 위반 | 0 | 자동 판정 코드 |
 | 고아 관계 | 0 | 자동 판정 코드 |
 | 활성 신청 중복 | 0 | 자동 판정 코드 |
@@ -158,10 +158,10 @@ AI가 만든 ERD·DDL·SQL과 저장소 변경을 P13 요구사항·결정, 실�
 
 | 점검 항목 | 기대 | 상태 |
 | --- | ---: | --- |
-| expected_failure | 22 | 코드 반영 |
-| expected_success | 5 | 코드 반영 |
+| expected_failure | 24 | 코드 반영 |
+| expected_success | 6 | 코드 반영 |
 | 전체 | 27 | 자동 판정 코드 |
-| passed | 27 | 자동 판정 코드 |
+| passed | 30 | 자동 판정 코드 |
 | unexpected | 0 | 자동 판정 코드 |
 | 기준 행 유지 | true | 자동 판정 코드 |
 | actual SQLSTATE | 기록 | 코드 반영 |
@@ -292,7 +292,7 @@ NULL description
 ALTER COLUMN TYPE / SET NOT NULL / IS DISTINCT FROM / NO ACTION
 P13-R / P13-D / P13-T / P13-V
 ai_review_lab / bad_enrollments
-agreed_amount / payment_reference / payment_status / paid_at / refunded_at
+recorded_amount / payment_reference / payment_status / paid_at / refunded_at
 ```
 
 ---
@@ -312,8 +312,8 @@ Chapter 13 TTS 용어
 HTML 자산 로드 순서
 SQL 01~08 파일 존재
 제약조건 29·FK 4·IDENTITY 6 기준
-P13-T01~T22·T23~T27
-27/27 판정 로직
+P13-T01~T24·T23~T27
+30/30 판정 로직
 Chapter 07 5행 보존 로직
 08 최종 통과 메시지
 ```
@@ -332,7 +332,7 @@ CI 정의가 존재한다는 사실과 실제 Actions 실행 결과는 구분합
 | 04 정상 Seed·IDENTITY | 완료 |
 | 05 정확한 메타데이터 | 완료 |
 | 06 NULL 안전 업무 검증 | 완료 |
-| 07 반례·경계값 27개 | 완료 |
+| 07 반례·경계값 30개 | 완료 |
 | 08 최종 자동 판정 | 완료 |
 | 보고서 템플릿 | 완료 |
 | 프롬프트 템플릿 | 완료 |
@@ -365,7 +365,7 @@ CI 정의가 존재한다는 사실과 실제 Actions 실행 결과는 구분합
 1. PostgreSQL에서 reset 후 01→08 순차 실행
 2. 05 metadata validation 실제 통과
 3. 06 business validation 실제 통과
-4. 07 반례·경계값 27/27·unexpected 0 실제 확인
+4. 07 반례·경계값 30/30·unexpected 0 실제 확인
 5. 08 Chapter 13 AI review lab validation passed 실제 확인
 6. 기준 행 수와 IDENTITY 다음 값 실제 확인
 7. Chapter 13 GitHub Actions 실행 결과 확인

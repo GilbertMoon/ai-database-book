@@ -82,7 +82,7 @@
   <text x="1040" y="367" text-anchor="middle" class="mono field">student_id FK</text>
   <text x="1040" y="390" text-anchor="middle" class="mono field">course_id FK</text>
   <text x="1040" y="413" text-anchor="middle" class="mono field">status CHECK</text>
-  <text x="1040" y="436" text-anchor="middle" class="mono field">agreed_amount CHECK</text>
+  <text x="1040" y="436" text-anchor="middle" class="mono field">recorded_amount CHECK</text>
 
   <rect x="950" y="500" width="180" height="105" class="box req"/>
   <text x="1040" y="526" text-anchor="middle" class="mono table-head">payments</text>

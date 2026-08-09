@@ -11,7 +11,7 @@ flowchart LR
     subgraph GOOD[역할별 분리와 관계 보장]
         direction TB
         INSTRUCTORS["instructors<br/>id PK<br/>email UNIQUE"] -->|1:N| COURSES["courses<br/>instructor_id FK<br/>course_code UNIQUE<br/>price CHECK"]
-        STUDENTS["students<br/>id PK<br/>email UNIQUE"] -->|1:N| ENROLLMENTS["enrollments<br/>student_id·course_id FK<br/>status CHECK<br/>agreed_amount CHECK"]
+        STUDENTS["students<br/>id PK<br/>email UNIQUE"] -->|1:N| ENROLLMENTS["enrollments<br/>student_id·course_id FK<br/>status CHECK<br/>recorded_amount CHECK"]
         COURSES -->|1:N| ENROLLMENTS
         ENROLLMENTS -->|1:0..1| PAYMENTS["payments<br/>enrollment_id FK<br/>payment_status CHECK<br/>payment_reference UNIQUE"]
     end

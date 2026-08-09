@@ -53,7 +53,7 @@ ai_review_lab.enrollments
 ai_review_lab.payments
 ```
 
-앞 장 스키마는 변경하지 않는다.
+앞 장 스키마는 변경하지 않는다. `payments`는 `ai_review_lab`의 가상 리뷰 시나리오일 뿐이며 `course_project`에 결제·환불 원장이 추가되는 것이 아니다. 기존 `course_project.enrollments.recorded_amount NUMERIC(12,0)`의 의미는 신청 시점 기록 금액으로 유지한다.
 
 ## 기준 데이터
 
@@ -73,7 +73,7 @@ ai_review_lab.payments
 ```text
 P13-R01~P13-R09  확인된 요구사항
 P13-D01~P13-D08  결정·단순화·미확정 정책
-P13-T01~P13-T27  반례·정상 경계값
+P13-T01~P13-T30  반례·정상 경계값
 P13-V01~P13-V08  실행·검증 단계
 ```
 
@@ -118,7 +118,7 @@ P13-D08 결제 없는 신청 허용
 - `GET STACKED DIAGNOSTICS`
 - information_schema·pg_constraint·pg_indexes
 - LEFT JOIN·NULL·`IS DISTINCT FROM`
-- 현재 가격·합의 금액·결제 금액
+- 현재 가격·신청 시점 기록 금액·결제 상태 기록 금액
 - paid_at·refunded_at
 - 민감정보 증거
 - 파괴적 마이그레이션
@@ -183,7 +183,7 @@ code/chapter13/
 | 04 | 정상 Seed·IDENTITY 조정·COMMIT 전 판정 |
 | 05 | 정확한 테이블·FK·제약·IDENTITY·인덱스 검증 |
 | 06 | NULL 안전 업무 정합성 검증 |
-| 07 | SQLSTATE·constraint name 반례 22개·경계값 5개 |
+| 07 | SQLSTATE·constraint name 반례 24개·경계값 5개 |
 | 08 | 최종 영구 상태·메타데이터·업무·IDENTITY 판정 |
 | 보고서 | 요구사항·정책·diff·실행 증거·승인 기록 |
 | 프롬프트 | 설계·수정·오류·마이그레이션·승인 요청 |
@@ -203,9 +203,9 @@ IDENTITY id 6
 ## 반례·경계값 기준
 
 ```text
-P13-T01~T22 expected_failure
-P13-T23~T27 expected_success
-전체 27 / 통과 27 / unexpected 0
+P13-T01~T24 expected_failure
+P13-T25~T30 expected_success
+전체 30 / 통과 30 / unexpected 0
 기준 행 수 유지
 ```
 
