@@ -26,7 +26,7 @@ BEGIN
        OR to_regclass('nosql_lab.key_value_cache_examples') IS NULL
        OR to_regclass('nosql_lab.storage_choice_cases') IS NULL THEN
         RAISE EXCEPTION
-            '검증 중단: Chapter 07 또는 Chapter 12 핵심 객체가 없습니다.';
+            '검증 중단: Chapter 07·08 또는 Chapter 12 핵심 객체가 없습니다.';
     END IF;
 END
 $$;
@@ -44,6 +44,17 @@ SELECT
     (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases) AS storage_choices;
 
 SELECT
+    COUNT(*) AS source_enrollment_count,
+    COALESCE(SUM(recorded_amount), 0) AS total_recorded_amount,
+    COUNT(*) FILTER (WHERE status IN ('신청', '수강중')) AS active_count,
+    COALESCE(SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')), 0)
+        AS active_recorded_amount,
+    COUNT(*) FILTER (WHERE status <> '취소') AS non_cancelled_count,
+    COALESCE(SUM(recorded_amount) FILTER (WHERE status <> '취소'), 0)
+        AS non_cancelled_recorded_amount
+FROM course_project.enrollments;
+
+SELECT
     COUNT(*) AS total_cache_rows,
     COUNT(*) FILTER (
         WHERE expired_at IS NULL OR expired_at > created_at
@@ -53,7 +64,8 @@ SELECT
     ) AS expired_at_seed_rows,
     COUNT(*) FILTER (
         WHERE expired_at IS NULL OR expired_at > CURRENT_TIMESTAMP
-    ) AS currently_valid_rows
+    ) AS currently_valid_rows,
+    COUNT(*) FILTER (WHERE expired_at IS NULL) AS no_expiry_rows
 FROM nosql_lab.key_value_cache_examples;
 
 SELECT
@@ -77,39 +89,164 @@ FROM nosql_lab.storage_choice_cases
 ORDER BY id;
 
 SELECT
-    indexname,
-    indexdef
-FROM pg_indexes
-WHERE schemaname = 'nosql_lab'
-  AND indexname IN (
+    idx.relname AS index_name,
+    am.amname AS access_method,
+    i.indisvalid,
+    i.indisready,
+    pg_get_expr(i.indexprs, i.indrelid) AS expression,
+    pg_get_indexdef(idx.oid) AS index_definition
+FROM pg_index AS i
+JOIN pg_class AS idx ON idx.oid = i.indexrelid
+JOIN pg_class AS tbl ON tbl.oid = i.indrelid
+JOIN pg_namespace AS n ON n.oid = tbl.relnamespace
+JOIN pg_am AS am ON am.oid = idx.relam
+WHERE n.nspname = 'nosql_lab'
+  AND idx.relname IN (
       'idx_nosql_course_documents_metadata_gin',
       'idx_nosql_course_documents_online'
   )
-ORDER BY indexname;
+ORDER BY idx.relname;
 
 -- ============================================================
 -- 2. 전체 자동 판정
 -- ============================================================
 DO $$
 DECLARE
-    source_mismatch_count BIGINT;
-    instructor_snapshot_mismatch_count BIGINT;
-    invalid_document_count BIGINT;
-    blank_decision_count BIGINT;
-    popular_cache_mismatch_count BIGINT;
-    metadata_index_definition TEXT;
-    online_index_definition TEXT;
+    v_requested_count BIGINT;
+    v_learning_count BIGINT;
+    v_completed_count BIGINT;
+    v_cancelled_count BIGINT;
+    v_total_amount NUMERIC;
+    v_active_count BIGINT;
+    v_active_amount NUMERIC;
+    v_non_cancelled_count BIGINT;
+    v_non_cancelled_amount NUMERIC;
+    v_active_duplicate_count BIGINT;
+    v_source_mismatch_count BIGINT;
+    v_instructor_snapshot_mismatch_count BIGINT;
+    v_invalid_document_count BIGINT;
+    v_blank_decision_count BIGINT;
+    v_popular_cache_mismatch_count BIGINT;
+    v_bad_cache_key_count BIGINT;
+    v_constraint_count BIGINT;
+    v_not_null_count BIGINT;
+    v_bad_index_state_count BIGINT;
+    v_metadata_index_method TEXT;
+    v_metadata_index_definition TEXT;
+    v_online_index_method TEXT;
+    v_online_index_expression TEXT;
 BEGIN
-    -- Chapter 07 기준 상태
+    -- --------------------------------------------------------
+    -- Chapter 07·08 canonical source state
+    -- --------------------------------------------------------
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    ) THEN
+        RAISE EXCEPTION
+            '검증 실패: course_project.enrollments.recorded_amount는 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'paid_amount'
+    ) THEN
+        RAISE EXCEPTION
+            '검증 실패: 이전 금액 열이 남아 있습니다.';
+    END IF;
+
     IF (SELECT COUNT(*) FROM course_project.students) <> 3
        OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
        OR (SELECT COUNT(*) FROM course_project.courses) <> 3
        OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
         RAISE EXCEPTION
-            '검증 실패: Chapter 07 기준 상태는 3/2/3/5여야 합니다.';
+            '검증 실패: Chapter 07·08 기준 행 수는 3/2/3/5여야 합니다.';
     END IF;
 
-    -- Chapter 12 기준 행 수
+    SELECT
+        COUNT(*) FILTER (WHERE status = '신청'),
+        COUNT(*) FILTER (WHERE status = '수강중'),
+        COUNT(*) FILTER (WHERE status = '완료'),
+        COUNT(*) FILTER (WHERE status = '취소'),
+        COALESCE(SUM(recorded_amount), 0),
+        COUNT(*) FILTER (WHERE status IN ('신청', '수강중')),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')), 0),
+        COUNT(*) FILTER (WHERE status <> '취소'),
+        COALESCE(SUM(recorded_amount) FILTER (WHERE status <> '취소'), 0)
+    INTO
+        v_requested_count,
+        v_learning_count,
+        v_completed_count,
+        v_cancelled_count,
+        v_total_amount,
+        v_active_count,
+        v_active_amount,
+        v_non_cancelled_count,
+        v_non_cancelled_amount
+    FROM course_project.enrollments;
+
+    IF v_requested_count <> 2
+       OR v_learning_count <> 1
+       OR v_completed_count <> 1
+       OR v_cancelled_count <> 1
+       OR v_total_amount <> 590000
+       OR v_active_count <> 3
+       OR v_active_amount <> 340000
+       OR v_non_cancelled_count <> 4
+       OR v_non_cancelled_amount <> 440000 THEN
+        RAISE EXCEPTION
+            '검증 실패: Chapter 07·08 상태·금액 기준이 다릅니다. status=%/%/%/%, amount=%/%/%',
+            v_requested_count, v_learning_count, v_completed_count, v_cancelled_count,
+            v_total_amount, v_active_amount, v_non_cancelled_amount;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1001 AND status = '완료' AND recorded_amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1004 AND status = '취소' AND recorded_amount = 150000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1005 AND status = '신청' AND recorded_amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '검증 실패: Chapter 07 핵심 신청 1001·1004·1005가 기준과 다릅니다.';
+    END IF;
+
+    IF to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
+        RAISE EXCEPTION
+            '검증 실패: course_project 활성 신청 부분 고유 인덱스가 없습니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_active_duplicate_count
+    FROM (
+        SELECT student_id, course_id
+        FROM course_project.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated_active;
+
+    IF v_active_duplicate_count <> 0 THEN
+        RAISE EXCEPTION
+            '검증 실패: course_project 활성 신청 중복이 %건 있습니다.',
+            v_active_duplicate_count;
+    END IF;
+
+    -- --------------------------------------------------------
+    -- Chapter 12 schema and row state
+    -- --------------------------------------------------------
     IF (SELECT COUNT(*) FROM nosql_lab.course_documents) <> 3
        OR (SELECT COUNT(*) FROM nosql_lab.key_value_cache_examples) <> 4
        OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases) <> 6 THEN
@@ -117,80 +254,121 @@ BEGIN
             '검증 실패: Chapter 12 기준 행 수는 3/4/6이어야 합니다.';
     END IF;
 
-    -- 원본 강의 301~303과 안정된 문서 컬럼 대조
     SELECT COUNT(*)
-    INTO source_mismatch_count
-    FROM nosql_lab.course_documents AS d
-    FULL JOIN course_project.courses AS c
-        ON c.id = d.source_course_id
-       AND c.id IN (301, 302, 303)
-    WHERE d.source_course_id IS NULL
-       OR c.id IS NULL
-       OR d.course_code <> 'COURSE-' || c.id
-       OR d.title <> c.title
-       OR d.level <> c.level;
+    INTO v_constraint_count
+    FROM pg_constraint
+    WHERE connamespace = 'nosql_lab'::regnamespace;
 
-    IF source_mismatch_count <> 0 THEN
+    SELECT COUNT(*)
+    INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'nosql_lab'
+      AND is_nullable = 'NO';
+
+    IF v_constraint_count <> 25 OR v_not_null_count <> 26 THEN
         RAISE EXCEPTION
-            '검증 실패: Chapter 07 원본과 불일치하는 강의 문서가 %건 있습니다.',
-            source_mismatch_count;
+            '검증 실패: nosql_lab 구조 기준은 constraints=25, not_null=26입니다. actual=%/%',
+            v_constraint_count, v_not_null_count;
     END IF;
 
-    -- 강사 스냅샷의 원본 ID·이름·전문분야 대조
+    -- --------------------------------------------------------
+    -- course document source mapping
+    -- --------------------------------------------------------
     SELECT COUNT(*)
-    INTO instructor_snapshot_mismatch_count
+    INTO v_source_mismatch_count
+    FROM nosql_lab.course_documents AS d
+    FULL JOIN (
+        SELECT *
+        FROM course_project.courses
+        WHERE id IN (301, 302, 303)
+    ) AS c
+        ON c.id = d.source_course_id
+    WHERE d.source_course_id IS NULL
+       OR c.id IS NULL
+       OR d.course_code IS DISTINCT FROM 'COURSE-' || c.id
+       OR d.title IS DISTINCT FROM c.title
+       OR d.level IS DISTINCT FROM c.level;
+
+    IF v_source_mismatch_count <> 0 THEN
+        RAISE EXCEPTION
+            '검증 실패: Chapter 07 원본과 불일치하는 강의 문서가 %건 있습니다.',
+            v_source_mismatch_count;
+    END IF;
+
+    -- 강사 스냅샷의 원본 ID·이름·전문분야를 NULL 누락까지 포함해 대조합니다.
+    SELECT COUNT(*)
+    INTO v_instructor_snapshot_mismatch_count
     FROM nosql_lab.course_documents AS d
     JOIN course_project.courses AS c
         ON c.id = d.source_course_id
     JOIN course_project.instructors AS i
         ON i.id = c.instructor_id
-    WHERE (d.metadata #>> '{instructor_snapshot,source_instructor_id}')::INTEGER <> i.id
-       OR d.metadata #>> '{instructor_snapshot,name}' <> i.name
-       OR d.metadata #>> '{instructor_snapshot,specialty}' <> i.specialty;
+    WHERE d.metadata #>> '{instructor_snapshot,source_instructor_id}'
+              IS DISTINCT FROM i.id::TEXT
+       OR d.metadata #>> '{instructor_snapshot,name}'
+              IS DISTINCT FROM i.name
+       OR d.metadata #>> '{instructor_snapshot,specialty}'
+              IS DISTINCT FROM i.specialty
+       OR COALESCE(d.metadata #>> '{instructor_snapshot,copied_at}', '') = '';
 
-    IF instructor_snapshot_mismatch_count <> 0 THEN
+    IF v_instructor_snapshot_mismatch_count <> 0 THEN
         RAISE EXCEPTION
-            '검증 실패: 원본과 다른 instructor_snapshot이 %건 있습니다.',
-            instructor_snapshot_mismatch_count;
+            '검증 실패: 원본과 다르거나 불완전한 instructor_snapshot이 %건 있습니다.',
+            v_instructor_snapshot_mismatch_count;
     END IF;
 
-    -- JSONB 핵심 구조
+    -- JSONB 핵심 구조와 문서 버전
     SELECT COUNT(*)
-    INTO invalid_document_count
+    INTO v_invalid_document_count
     FROM nosql_lab.course_documents
-    WHERE jsonb_typeof(metadata) <> 'object'
-       OR jsonb_typeof(metadata -> 'tags') <> 'array'
-       OR jsonb_typeof(metadata -> 'options') <> 'object'
-       OR jsonb_typeof(metadata #> '{options,online}') <> 'boolean'
-       OR jsonb_typeof(metadata #> '{options,certificate}') <> 'boolean'
-       OR jsonb_typeof(metadata -> 'instructor_snapshot') <> 'object'
+    WHERE jsonb_typeof(metadata) IS DISTINCT FROM 'object'
+       OR jsonb_typeof(metadata -> 'tags') IS DISTINCT FROM 'array'
+       OR jsonb_typeof(metadata -> 'options') IS DISTINCT FROM 'object'
+       OR jsonb_typeof(metadata #> '{options,online}') IS DISTINCT FROM 'boolean'
+       OR jsonb_typeof(metadata #> '{options,certificate}') IS DISTINCT FROM 'boolean'
+       OR jsonb_typeof(metadata -> 'instructor_snapshot') IS DISTINCT FROM 'object'
        OR document_version < 1
        OR updated_at < created_at;
 
-    IF invalid_document_count <> 0 THEN
+    IF v_invalid_document_count <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: JSONB 구조·버전·시각 규칙 위반 문서가 %건 있습니다.',
-            invalid_document_count;
+            v_invalid_document_count;
     END IF;
 
-    -- 03 파일의 ROLLBACK 후 기준값
     IF NOT EXISTS (
         SELECT 1
         FROM nosql_lab.course_documents
-        WHERE course_code = 'COURSE-301'
+        WHERE source_course_id = 301
+          AND course_code = 'COURSE-301'
           AND metadata #>> '{options,certificate}' = 'true'
+          AND metadata #>> '{options,online}' = 'true'
+          AND document_version = 1
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.course_documents
+        WHERE source_course_id = 302
+          AND course_code = 'COURSE-302'
+          AND metadata #>> '{options,certificate}' = 'false'
+          AND metadata #>> '{options,online}' = 'true'
+          AND document_version = 1
+    ) OR NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.course_documents
+        WHERE source_course_id = 303
+          AND course_code = 'COURSE-303'
+          AND metadata #>> '{options,certificate}' = 'true'
+          AND metadata #>> '{options,online}' = 'false'
           AND document_version = 1
     ) THEN
         RAISE EXCEPTION
-            '검증 실패: COURSE-301 문서가 certificate=true, version=1 기준으로 복구되지 않았습니다.';
+            '검증 실패: COURSE-301~303 옵션 또는 document_version 기준이 다릅니다.';
     END IF;
 
-    -- 재현 가능한 Seed 기준 캐시 4/3/1
+    -- --------------------------------------------------------
+    -- Reproducible cache baseline
+    -- --------------------------------------------------------
     IF (
-        SELECT COUNT(*)
-        FROM nosql_lab.key_value_cache_examples
-    ) <> 4
-       OR (
         SELECT COUNT(*)
         FROM nosql_lab.key_value_cache_examples
         WHERE expired_at IS NULL OR expired_at > created_at
@@ -199,31 +377,53 @@ BEGIN
         SELECT COUNT(*)
         FROM nosql_lab.key_value_cache_examples
         WHERE expired_at IS NOT NULL AND expired_at <= created_at
+    ) <> 1
+       OR (
+        SELECT COUNT(*)
+        FROM nosql_lab.key_value_cache_examples
+        WHERE expired_at IS NULL
     ) <> 1 THEN
         RAISE EXCEPTION
-            '검증 실패: Seed 기준 캐시는 전체 4, 유효 3, 만료 1이어야 합니다.';
+            '검증 실패: Seed 기준 캐시는 전체 4, 유효 3, 만료 1, 무만료 1이어야 합니다.';
     END IF;
 
-    -- 인기 강의 캐시가 실제 원본 course ID를 사용해야 함
     SELECT COUNT(*)
-    INTO popular_cache_mismatch_count
+    INTO v_bad_cache_key_count
+    FROM nosql_lab.key_value_cache_examples
+    WHERE cache_key NOT IN (
+        'student:101:session',
+        'course:popular:v1:top3',
+        'feature:recommendation:v1',
+        'student:103:session'
+    );
+
+    IF v_bad_cache_key_count <> 0
+       OR (SELECT COUNT(DISTINCT cache_key) FROM nosql_lab.key_value_cache_examples) <> 4 THEN
+        RAISE EXCEPTION
+            '검증 실패: 기준 cache_key 집합이 다릅니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_popular_cache_mismatch_count
     FROM nosql_lab.key_value_cache_examples
     WHERE cache_key = 'course:popular:v1:top3'
-      AND cache_value -> 'course_ids' <> '[301, 302, 303]'::jsonb;
+      AND (
+          source_name IS DISTINCT FROM 'course_project'
+          OR cache_value -> 'course_ids' IS DISTINCT FROM '[301, 302, 303]'::jsonb
+      );
 
-    IF popular_cache_mismatch_count <> 0
-       OR NOT EXISTS (
-            SELECT 1
-            FROM nosql_lab.key_value_cache_examples
-            WHERE cache_key = 'course:popular:v1:top3'
-       ) THEN
+    IF v_popular_cache_mismatch_count <> 0
+       OR (SELECT COUNT(*) FROM nosql_lab.key_value_cache_examples
+           WHERE cache_key = 'course:popular:v1:top3') <> 1 THEN
         RAISE EXCEPTION
-            '검증 실패: 인기 강의 캐시의 원본 course_ids가 301~303이 아닙니다.';
+            '검증 실패: 인기 강의 캐시의 원본 또는 course_ids가 기준과 다릅니다.';
     END IF;
 
-    -- 선택 근거·역할·결정 상태
+    -- --------------------------------------------------------
+    -- Storage decision record
+    -- --------------------------------------------------------
     SELECT COUNT(*)
-    INTO blank_decision_count
+    INTO v_blank_decision_count
     FROM nosql_lab.storage_choice_cases
     WHERE char_length(trim(primary_query)) = 0
        OR char_length(trim(candidate_storage)) = 0
@@ -234,31 +434,86 @@ BEGIN
        OR char_length(trim(poc_success_criteria)) = 0
        OR char_length(trim(reason)) = 0;
 
-    IF blank_decision_count <> 0
+    IF v_blank_decision_count <> 0
        OR (SELECT COUNT(DISTINCT system_role) FROM nosql_lab.storage_choice_cases) <> 6
        OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE system_role = 'source_of_truth') <> 1
-       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'adopted') <> 1 THEN
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'adopted') <> 1
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'poc_planned') <> 2
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'candidate') <> 2
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'hold') <> 1
+       OR (SELECT COUNT(*) FROM nosql_lab.storage_choice_cases WHERE decision_status = 'rejected') <> 0 THEN
         RAISE EXCEPTION
             '검증 실패: 저장소 선택 근거·역할·결정 상태가 기대와 다릅니다.';
     END IF;
 
-    -- 실험 인덱스 존재와 정의
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.storage_choice_cases
+        WHERE system_role = 'source_of_truth'
+          AND decision_status = 'adopted'
+          AND candidate_storage = 'PostgreSQL RDBMS'
+          AND reason LIKE '%recorded_amount%'
+    ) THEN
+        RAISE EXCEPTION
+            '검증 실패: PostgreSQL 원본 adopted 사례의 기록 금액 의미가 최신 기준과 다릅니다.';
+    END IF;
+
+    -- --------------------------------------------------------
+    -- Experimental JSONB indexes
+    -- --------------------------------------------------------
     IF to_regclass('nosql_lab.idx_nosql_course_documents_metadata_gin') IS NULL
        OR to_regclass('nosql_lab.idx_nosql_course_documents_online') IS NULL THEN
         RAISE EXCEPTION
             '검증 실패: JSONB 실험 인덱스 2개가 모두 존재해야 합니다.';
     END IF;
 
-    SELECT pg_get_indexdef(to_regclass('nosql_lab.idx_nosql_course_documents_metadata_gin'))
-    INTO metadata_index_definition;
+    SELECT
+        am.amname,
+        pg_get_indexdef(idx.oid)
+    INTO
+        v_metadata_index_method,
+        v_metadata_index_definition
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_class AS tbl ON tbl.oid = i.indrelid
+    JOIN pg_namespace AS n ON n.oid = tbl.relnamespace
+    JOIN pg_am AS am ON am.oid = idx.relam
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname = 'idx_nosql_course_documents_metadata_gin';
 
-    SELECT pg_get_indexdef(to_regclass('nosql_lab.idx_nosql_course_documents_online'))
-    INTO online_index_definition;
+    SELECT
+        am.amname,
+        pg_get_expr(i.indexprs, i.indrelid)
+    INTO
+        v_online_index_method,
+        v_online_index_expression
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_class AS tbl ON tbl.oid = i.indrelid
+    JOIN pg_namespace AS n ON n.oid = tbl.relnamespace
+    JOIN pg_am AS am ON am.oid = idx.relam
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname = 'idx_nosql_course_documents_online';
 
-    IF lower(metadata_index_definition) NOT LIKE '%using gin%metadata%'
-       OR online_index_definition NOT LIKE '%#>>%options%online%' THEN
+    SELECT COUNT(*)
+    INTO v_bad_index_state_count
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_namespace AS n ON n.oid = idx.relnamespace
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname IN (
+          'idx_nosql_course_documents_metadata_gin',
+          'idx_nosql_course_documents_online'
+      )
+      AND (NOT i.indisvalid OR NOT i.indisready);
+
+    IF v_metadata_index_method IS DISTINCT FROM 'gin'
+       OR lower(COALESCE(v_metadata_index_definition, '')) NOT LIKE '%using gin%metadata%'
+       OR v_online_index_method IS DISTINCT FROM 'btree'
+       OR COALESCE(v_online_index_expression, '') NOT LIKE '%#>>%options%online%'
+       OR v_bad_index_state_count <> 0 THEN
         RAISE EXCEPTION
-            '검증 실패: JSONB 인덱스 정의가 기대한 GIN·options.online 표현식과 다릅니다.';
+            '검증 실패: JSONB 인덱스 정의 또는 상태가 기준과 다릅니다.';
     END IF;
 
     RAISE NOTICE 'Chapter 12 nosql_lab validation passed';
