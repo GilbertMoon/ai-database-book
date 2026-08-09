@@ -4,6 +4,12 @@
 >
 > 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. **B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.
 
+**Chapter 07·08 시작 기준**
+
+`course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, 상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  
+`course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, 활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  
+기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
+
 
 ## 제목
 
@@ -37,7 +43,7 @@ Chapter 07~09의 데이터를 보호하면서 별도 `performance_lab` 스키마
 합성 데이터가 업무 규칙과 기대 분포를 만족하는가?
 기준·사후 측정의 데이터·통계·SQL이 같은가?
 조건이 전체 행 중 적은 행을 선택하는가?
-복합 인덱스 컬럼 순서와 PostgreSQL 18+ Skip Scan 가능성이 쿼리와 맞는가?
+복합 인덱스 PostgreSQL 16에서 컬럼 순서가 쿼리와 맞는가? PostgreSQL 18+에서는 Skip Scan으로 계획이 달라질 수 있는가?
 실행 계획과 결과 행이 모두 검증되었는가?
 계획·Buffers·실행 시간이 의미 있게 개선되는가?
 쓰기 비용·저장 공간·운영 잠금을 감수할 가치가 있는가?
@@ -55,7 +61,7 @@ performance_lab.enrollments
 앞 장 스키마:
 
 ```text
-course_project: 변경 금지, enrollments 5행 유지
+course_project: 변경 금지, 3/2/3/5와 상태 2/1/1/1, recorded_amount 590000/340000/440000 기준 유지
 transaction_lab: 변경 금지
 ```
 

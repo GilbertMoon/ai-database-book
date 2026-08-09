@@ -10,6 +10,12 @@
 >
 > 이 장의 자동 검증 기준은 **PostgreSQL 16**입니다. PostgreSQL 16의 다중 컬럼 B-tree에서는 선두 컬럼 제약이 없으면 후행 컬럼 조건만으로 탐색 범위를 줄이기 어렵습니다. **B-tree Skip Scan은 PostgreSQL 18에서 추가**되었으므로, PostgreSQL 18 이상에서는 동일 SQL의 계획이 달라질 수 있습니다. 실습 결과에는 서버 버전을 함께 기록합니다.
 
+**Chapter 07·08 시작 기준**
+
+`course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, 상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  
+`course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, 활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  
+기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
+
 ---
 
 ## 1. 이번 실습은 인덱스 효과를 증거로 확인합니다
