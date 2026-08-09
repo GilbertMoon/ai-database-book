@@ -115,10 +115,10 @@ jobs:
           metrics = json.loads(Path('code/chapter14/python/reference_metrics.json').read_text(encoding='utf-8'))
           checks = {
               'rows 8/3/5/24/24': '기준 행 수 8/3/5/24/24' in final,
-              'amount 2770000': '2770000' in final and metrics.get('recorded_amount_sum') == 2770000,
+              'amount 3210000': '3210000' in final and metrics.get('recorded_amount_sum') == 3210000,
               'canonical amount': 'recorded_amount' in final,
               'upstream baseline': all(v in final for v in ['590000','340000','440000']),
-              '21 constraints': 'constraint_count <> 21' in final,
+              '20 constraints': 'constraint_count <> 20' in final,
               '4 identity ids': 'identity_count <> 4' in final,
               'strict IDs': 'ID_COLUMNS' in validation_utils,
               'derived completion': 'completion_days가 completed_at - enrolled_at과 일치하지 않습니다.' in validation_utils,
@@ -130,5 +130,14 @@ jobs:
           if failed:
               raise SystemExit(f'Chapter 14 analysis evidence mismatch: {failed}')
 
-          print('Chapter 14 navigation/source alignment passed: theory=20 practice=20 version=20260809a')
+          expected_monthly = {
+              '2026-01-01': 350000, '2026-02-01': 520000,
+              '2026-03-01': 680000, '2026-04-01': 550000,
+              '2026-05-01': 540000, '2026-06-01': 570000,
+          }
+          actual_monthly = {row['enrollment_month']: row['recorded_amount_sum'] for row in metrics['monthly']}
+          if actual_monthly != expected_monthly or sum(actual_monthly.values()) != 3210000:
+              raise SystemExit(f'Chapter 14 reference monthly metrics mismatch: {actual_monthly}')
+
+          print('Chapter 14 navigation/source alignment passed: theory=20 practice=20 amount=3210000 version=20260809a')
           PY
