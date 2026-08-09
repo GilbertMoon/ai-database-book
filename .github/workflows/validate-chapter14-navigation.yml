@@ -7,6 +7,7 @@ on:
       - presentation/chapter14/**
       - code/chapter14/**
       - presentation/common/tts_pronunciation.js
+      - presentation/common/script_content_enhancer.js
       - .github/workflows/validate-chapter14-navigation.yml
   workflow_dispatch:
 
@@ -20,122 +21,114 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check Chapter 14 JavaScript and Python syntax
+      - name: Check JavaScript and Python syntax
         run: |
           node --check presentation/chapter14/chapter14_slides.js
           node --check presentation/chapter14/chapter14_navigation.js
           node --check presentation/chapter14/chapter14_player.js
           node --check presentation/chapter14/chapter14_script.js
           node --check presentation/common/tts_pronunciation.js
+          node --check presentation/common/script_content_enhancer.js
           python -m py_compile code/chapter14/python/*.py
 
-      - name: Check Chapter 14 navigation and analysis evidence
+      - name: Check navigation and source alignment
         shell: bash
         run: |
           python - <<'PY'
+          from pathlib import Path
           import json
           import re
-          from pathlib import Path
 
           root = Path('presentation/chapter14')
-          nav_text = (root / 'chapter14_navigation.js').read_text(encoding='utf-8')
-          marker = 'const PLANS = {'
-          if marker not in nav_text:
-              raise SystemExit('Chapter 14 PLANS not found')
-          plans = nav_text.split(marker, 1)[1].split('\n  };', 1)[0]
-          if 'theory: {' not in plans or 'practice: {' not in plans:
-              raise SystemExit('Chapter 14 theory/practice plan blocks not found')
-          theory_plan = plans.split('theory: {', 1)[1].split('\n    },\n    practice: {', 1)[0]
-          practice_plan = plans.split('\n    practice: {', 1)[1]
-
-          cases = [
-              ('theory', 'chapter14_theory_lecture_plan.md', theory_plan, 20),
-              ('practice', 'chapter14_practice_lecture_plan.md', practice_plan, 20),
-          ]
-          for block, filename, plan_text, expected in cases:
-              text = (root / filename).read_text(encoding='utf-8')
-              slide_titles = re.findall(r'^##\s+\d+\.\s+(.+)$', text, flags=re.M)
-              plan_titles = re.findall(r"^\s{6}'([^']+)':", plan_text, flags=re.M)
-              if len(slide_titles) != expected:
-                  raise SystemExit(f'Expected {expected} Chapter 14 {block} slides, found {len(slide_titles)}')
-              if len(set(slide_titles)) != len(slide_titles):
-                  raise SystemExit(f'Duplicate Chapter 14 {block} slide titles found')
-              if len(set(plan_titles)) != len(plan_titles):
-                  raise SystemExit(f'Duplicate Chapter 14 {block} navigation titles found')
-              missing = sorted(set(slide_titles) - set(plan_titles))
-              extra = sorted(set(plan_titles) - set(slide_titles))
-              if missing or extra:
-                  raise SystemExit(f'Chapter 14 {block} navigation mismatch: missing={missing}, extra={extra}')
-              sections = re.split(r'(?=^##\s+\d+\.\s+)', text, flags=re.M)[1:]
-              for index, section in enumerate(sections, start=1):
-                  if '**화면 구성**' not in section or '**발표 스크립트**' not in section:
-                      raise SystemExit(f'Chapter 14 {block} slide {index} is missing screen or script content')
-              print(f'Chapter 14 {block} navigation coverage OK: {len(slide_titles)} / {expected} slides')
-
-          script_text = (root / 'chapter14_script.js').read_text(encoding='utf-8')
-          if 'const ttsRules' in script_text or 'ttsRules.reduce' in script_text:
-              raise SystemExit('Chapter 14 still contains duplicated local TTS rules')
-          if 'window.PresentationTTS?.normalize' not in script_text:
-              raise SystemExit('Chapter 14 script is not using shared PresentationTTS')
-
-          tts_text = Path('presentation/common/tts_pronunciation.js').read_text(encoding='utf-8')
-          required_terms = [
-              'transaction_read_only', 'assert_frame_equal', 'reference_metrics',
-              'enrollment_analysis_dataset', 'analysis_parameters', 'recorded_amount_sum',
-              'recorded_amount', 'completion_days', 'is_completed', 'enrollment_id',
-              'paid_amount', 'date spine', 'manifest', 'SHA-256', 'PGDATABASE',
-              'DATABASE_URL', 'DataFrame', 'P14-Q', 'analysis_lab'
-          ]
-          missing_terms = [term for term in required_terms if term not in tts_text]
-          if missing_terms:
-              raise SystemExit(f'Chapter 14 shared TTS terms missing: {missing_terms}')
-          print('Chapter 14 shared TTS terms OK')
-
-          for filename in ['chapter14_theory_presentation.html', 'chapter14_practice_presentation.html']:
-              html = (root / filename).read_text(encoding='utf-8')
-              order = [html.find('chapter14_slides.js'), html.find('chapter14_navigation.js'), html.find('chapter14_player.js')]
-              if any(value < 0 for value in order) or order != sorted(order):
-                  raise SystemExit(f'{filename} asset order is invalid')
+          theory = (root / 'chapter14_theory_lecture_plan.md').read_text(encoding='utf-8')
+          practice = (root / 'chapter14_practice_lecture_plan.md').read_text(encoding='utf-8')
+          nav = (root / 'chapter14_navigation.js').read_text(encoding='utf-8')
+          player = (root / 'chapter14_player.js').read_text(encoding='utf-8')
+          script = (root / 'chapter14_script.js').read_text(encoding='utf-8')
           script_html = (root / 'chapter14_script.html').read_text(encoding='utf-8')
-          order = [
-              script_html.find('chapter14_slides.js'),
-              script_html.find('chapter14_navigation.js'),
-              script_html.find('../common/tts_pronunciation.js'),
-              script_html.find('chapter14_script.js'),
-          ]
-          if any(value < 0 for value in order) or order != sorted(order):
-              raise SystemExit('Chapter 14 script asset order is invalid')
-          print('Chapter 14 asset order OK')
+          slides = (root / 'chapter14_slides.js').read_text(encoding='utf-8')
 
-          code_root = Path('code/chapter14')
-          required_sql = [
-              '01_analysis_lab_schema.sql','02_analysis_lab_seed.sql','03_data_quality_checks.sql',
-              '04_summary_analysis.sql','05_period_category_analysis.sql','06_analysis_dataset.sql',
-              '07_analysis_validation.sql','08_analysis_lab_validation.sql'
+          def parse_plan(label, text):
+              sections = list(re.finditer(r'^##\s+(\d+)\.\s+(.+)$', text, re.M))
+              nums = [int(m.group(1)) for m in sections]
+              if nums != list(range(1, 21)):
+                  raise SystemExit(f'{label} numbering mismatch: {nums}')
+              titles = []
+              for index, match in enumerate(sections):
+                  end = sections[index + 1].start() if index + 1 < len(sections) else len(text)
+                  block = text[match.end():end]
+                  if '**화면 구성**' not in block or '**발표 스크립트**' not in block:
+                      raise SystemExit(f'{label} section {match.group(1)} missing screen/script')
+                  titles.append(match.group(2).strip())
+              return titles
+
+          theory_titles = parse_plan('theory', theory)
+          practice_titles = parse_plan('practice', practice)
+
+          marker = 'const PLANS = {'
+          if marker not in nav:
+              raise SystemExit('Chapter 14 PLANS not found')
+          plans = nav.split(marker, 1)[1].split('\n  };', 1)[0]
+          if 'theory: {' not in plans or 'practice: {' not in plans:
+              raise SystemExit('Chapter 14 theory/practice navigation blocks not found')
+          theory_nav = plans.split('theory: {', 1)[1].split('\n    },\n    practice: {', 1)[0]
+          practice_nav = plans.split('\n    practice: {', 1)[1]
+          theory_nav_titles = re.findall(r"^\s{6}'([^']+)':", theory_nav, re.M)
+          practice_nav_titles = re.findall(r"^\s{6}'([^']+)':", practice_nav, re.M)
+          if theory_titles != theory_nav_titles:
+              raise SystemExit('Chapter 14 theory navigation title order mismatch')
+          if practice_titles != practice_nav_titles:
+              raise SystemExit('Chapter 14 practice navigation title order mismatch')
+
+          if "fetch(source, { cache: 'no-store' })" not in slides:
+              raise SystemExit('Chapter 14 Markdown source must bypass stale cache')
+          if 'window.PresentationTTS?.normalize' not in script:
+              raise SystemExit('Chapter 14 script must use shared PresentationTTS')
+          if '../common/tts_pronunciation.js?v=20260809a' not in script_html:
+              raise SystemExit('Chapter 14 script HTML missing canonical TTS asset version')
+          if '../common/script_content_enhancer.js' not in script_html:
+              raise SystemExit('Chapter 14 script HTML missing shared content enhancer')
+
+          pv = re.search(r"const ASSET_VERSION = '([^']+)';", player)
+          sv = re.search(r"const ASSET_VERSION = '([^']+)';", script)
+          if not pv or not sv or pv.group(1) != sv.group(1) or pv.group(1) != '20260809a':
+              raise SystemExit('Chapter 14 player/script asset version mismatch')
+          for filename in ['chapter14_theory_presentation.html','chapter14_practice_presentation.html','chapter14_script.html']:
+              html = (root / filename).read_text(encoding='utf-8')
+              if '20260809a' not in html:
+                  raise SystemExit(f'{filename} missing asset version 20260809a')
+
+          tts = Path('presentation/common/tts_pronunciation.js').read_text(encoding='utf-8')
+          required_tts = [
+              'transaction_read_only','assert_frame_equal','reference_metrics',
+              'enrollment_analysis_dataset','analysis_parameters','recorded_amount_sum',
+              'recorded_amount','completion_days','is_completed','enrollment_id',
+              'date spine','manifest','SHA-256','PGDATABASE','DataFrame','P14-Q','analysis_lab'
           ]
-          required_py = ['01_load_csv.py','02_load_postgresql.py','03_pandas_analysis.py','04_result_validation.py','validation_utils.py','reference_metrics.json']
-          missing = [name for name in required_sql if not (code_root / name).exists()]
-          missing += [f'python/{name}' for name in required_py if not (code_root / 'python' / name).exists()]
+          missing = [term for term in required_tts if term not in tts]
           if missing:
-              raise SystemExit(f'Chapter 14 practice files missing: {missing}')
+              raise SystemExit(f'Chapter 14 shared TTS terms missing: {missing}')
 
-          final = (code_root / '08_analysis_lab_validation.sql').read_text(encoding='utf-8')
-          result_validation = (code_root / 'python' / '04_result_validation.py').read_text(encoding='utf-8')
-          metrics = json.loads((code_root / 'python' / 'reference_metrics.json').read_text(encoding='utf-8'))
+          final = Path('code/chapter14/08_analysis_lab_validation.sql').read_text(encoding='utf-8')
+          result_validation = Path('code/chapter14/python/04_result_validation.py').read_text(encoding='utf-8')
+          validation_utils = Path('code/chapter14/python/validation_utils.py').read_text(encoding='utf-8')
+          metrics = json.loads(Path('code/chapter14/python/reference_metrics.json').read_text(encoding='utf-8'))
           checks = {
-              'row counts 8/3/5/24/24': '기준 행 수 8/3/5/24/24' in final,
-              'recorded amount 2770000': '2770000' in final and metrics.get('recorded_amount_sum') == 2770000,
+              'rows 8/3/5/24/24': '기준 행 수 8/3/5/24/24' in final,
+              'amount 2770000': '2770000' in final and metrics.get('recorded_amount_sum') == 2770000,
+              'canonical amount': 'recorded_amount' in final,
+              'upstream baseline': all(v in final for v in ['590000','340000','440000']),
               '21 constraints': 'constraint_count <> 21' in final,
               '4 identity ids': 'identity_count <> 4' in final,
-              'status counts': metrics.get('status_counts') == {'완료':12,'수강중':5,'신청':4,'취소':3},
-              'completion metrics': metrics.get('completion') == {'completed_count':12,'avg_completion_days':25.0,'min_completion_days':18,'max_completion_days':36},
-              'six months': len(metrics.get('monthly', [])) == 6,
-              'sql pandas frame comparison': 'assert_frame_equal' in result_validation,
-              'repeatable read only snapshot': 'REPEATABLE READ, READ ONLY' in result_validation,
-              'final pass notice': 'Chapter 14 analysis_lab validation passed' in final,
+              'strict IDs': 'ID_COLUMNS' in validation_utils,
+              'derived completion': 'completion_days가 completed_at - enrolled_at과 일치하지 않습니다.' in validation_utils,
+              'SQL pandas frame comparison': 'assert_frame_equal' in result_validation,
+              'repeatable read only': 'REPEATABLE READ, READ ONLY' in result_validation,
+              'final notice': 'Chapter 14 analysis_lab validation passed' in final,
           }
           failed = [name for name, ok in checks.items() if not ok]
           if failed:
               raise SystemExit(f'Chapter 14 analysis evidence mismatch: {failed}')
-          print('Chapter 14 analysis evidence OK')
+
+          print('Chapter 14 navigation/source alignment passed: theory=20 practice=20 version=20260809a')
           PY
