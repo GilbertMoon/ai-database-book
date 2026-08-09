@@ -6,11 +6,14 @@ SELECT current_user AS current_user_name;
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
+SHOW transaction_read_only;
 
 -- ============================================================
--- P13-V01. 실행 위치와 기준 상태 보호
+-- P13-V01. 실행 위치와 Chapter 07·08 기준 상태 보호
 -- ============================================================
 DO $$
+DECLARE
+    recorded_amount_type_ok BOOLEAN;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -18,14 +21,116 @@ BEGIN
             current_database();
     END IF;
 
-    IF to_regclass('course_project.enrollments') IS NULL THEN
+    IF current_setting('transaction_read_only') = 'on' THEN
         RAISE EXCEPTION
-            '실행 중단: Chapter 07의 course_project.enrollments가 없습니다.';
+            '실행 중단: 현재 연결은 읽기 전용입니다. ai_review_lab을 생성할 수 없습니다.';
     END IF;
 
-    IF (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
+    IF to_regclass('course_project.students') IS NULL
+       OR to_regclass('course_project.instructors') IS NULL
+       OR to_regclass('course_project.courses') IS NULL
+       OR to_regclass('course_project.enrollments') IS NULL THEN
         RAISE EXCEPTION
-            '실행 중단: course_project.enrollments는 기준 5행이어야 합니다.';
+            '실행 중단: Chapter 07 course_project 핵심 테이블이 준비되지 않았습니다.';
+    END IF;
+
+    IF to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07 활성 신청 부분 고유 인덱스가 없습니다.';
+    END IF;
+
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    )
+    INTO recorded_amount_type_ok;
+
+    IF NOT recorded_amount_type_ok THEN
+        RAISE EXCEPTION
+            '실행 중단: course_project.enrollments.recorded_amount는 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'paid_amount'
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 기준에 없는 이전 금액 컬럼이 발견되었습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM course_project.students) <> 3
+       OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
+       OR (SELECT COUNT(*) FROM course_project.courses) <> 3
+       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07·08 기준 행 수는 3/2/3/5여야 합니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM course_project.enrollments WHERE status = '신청') <> 2
+       OR (SELECT COUNT(*) FROM course_project.enrollments WHERE status = '수강중') <> 1
+       OR (SELECT COUNT(*) FROM course_project.enrollments WHERE status = '완료') <> 1
+       OR (SELECT COUNT(*) FROM course_project.enrollments WHERE status = '취소') <> 1 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07·08 상태 분포는 신청2/수강중1/완료1/취소1이어야 합니다.';
+    END IF;
+
+    IF (SELECT COALESCE(SUM(recorded_amount), 0) FROM course_project.enrollments) <> 590000
+       OR (
+            SELECT COUNT(*)
+            FROM course_project.enrollments
+            WHERE status IN ('신청', '수강중')
+       ) <> 3
+       OR (
+            SELECT COALESCE(SUM(recorded_amount), 0)
+            FROM course_project.enrollments
+            WHERE status IN ('신청', '수강중')
+       ) <> 340000
+       OR (
+            SELECT COUNT(*)
+            FROM course_project.enrollments
+            WHERE status <> '취소'
+       ) <> 4
+       OR (
+            SELECT COALESCE(SUM(recorded_amount), 0)
+            FROM course_project.enrollments
+            WHERE status <> '취소'
+       ) <> 440000 THEN
+        RAISE EXCEPTION
+            '실행 중단: 기록 금액 기준은 전체590000/활성3·340000/취소제외4·440000이어야 합니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1001 AND status = '완료' AND recorded_amount = 100000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1004 AND status = '취소' AND recorded_amount = 150000
+    ) OR NOT EXISTS (
+        SELECT 1 FROM course_project.enrollments
+        WHERE id = 1005 AND status = '신청' AND recorded_amount = 120000
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: 핵심 신청 1001/1004/1005가 Chapter 07·08 기준과 다릅니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM course_project.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07·08 원본에 활성 신청 중복이 있습니다.';
     END IF;
 
     IF EXISTS (
@@ -70,6 +175,54 @@ CREATE TABLE ai_review_lab.bad_enrollments (
     created_at TEXT
 );
 
+-- 생성 결과도 COMMIT 전에 판정합니다.
+DO $$
+DECLARE
+    actual_tables TEXT[];
+    constraint_count INTEGER;
+    identity_count INTEGER;
+    column_count INTEGER;
+BEGIN
+    SELECT array_agg(table_name ORDER BY table_name)
+    INTO actual_tables
+    FROM information_schema.tables
+    WHERE table_schema = 'ai_review_lab';
+
+    IF actual_tables IS DISTINCT FROM ARRAY['bad_enrollments']::TEXT[] THEN
+        RAISE EXCEPTION
+            '구조 생성 중단: 생성 직후 테이블 집합이 다릅니다. 실제=%',
+            actual_tables;
+    END IF;
+
+    SELECT COUNT(*)
+    INTO column_count
+    FROM information_schema.columns
+    WHERE table_schema = 'ai_review_lab'
+      AND table_name = 'bad_enrollments';
+
+    SELECT COUNT(*)
+    INTO constraint_count
+    FROM pg_constraint
+    WHERE conrelid = 'ai_review_lab.bad_enrollments'::regclass;
+
+    SELECT COUNT(*)
+    INTO identity_count
+    FROM information_schema.columns
+    WHERE table_schema = 'ai_review_lab'
+      AND table_name = 'bad_enrollments'
+      AND column_name = 'id'
+      AND is_identity = 'YES';
+
+    IF column_count <> 10
+       OR constraint_count <> 1
+       OR identity_count <> 1 THEN
+        RAISE EXCEPTION
+            '구조 생성 중단: bad_enrollments 기준은 컬럼10/제약1/IDENTITY1입니다. 실제=%/%/%',
+            column_count, constraint_count, identity_count;
+    END IF;
+END
+$$;
+
 COMMIT;
 
 -- ============================================================
@@ -85,3 +238,5 @@ ORDER BY table_name;
 SELECT
     to_regclass('ai_review_lab.bad_enrollments') IS NOT NULL
         AS bad_design_table_created;
+
+RAISE NOTICE 'Chapter 13 bad design schema creation passed';
