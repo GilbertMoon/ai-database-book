@@ -120,6 +120,6 @@ WHERE schemaname = 'performance_lab'
 ORDER BY tablename, indexname;
 
 -- 운영 환경에서는 쓰기 잠금 영향, 생성 시간과 추가 공간을 검토합니다.
--- 필요하면 CREATE INDEX CONCURRENTLY를 고려할 수 있습니다.
+-- 필요하면 CONCURRENTLY 방식의 운영 인덱스 생성을 별도 절차로 고려할 수 있습니다.
 -- CONCURRENTLY는 트랜잭션 블록 안에서 실행할 수 없고,
 -- 실패한 동시 생성 작업 뒤에는 INVALID 인덱스가 남았는지 확인해야 합니다.
