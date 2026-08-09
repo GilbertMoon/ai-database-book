@@ -83,6 +83,8 @@ ORDER BY granted.rolname, member.rolname;
 
 -- ============================================================
 -- 4. 데이터베이스 ACL과 PUBLIC CONNECT 경로 확인
+-- PUBLIC은 실제 Role 이름이 아니라 모든 역할을 뜻하는 특수 그룹입니다.
+-- pg_database.datacl을 aclexplode()로 풀었을 때 grantee OID 0이 PUBLIC입니다.
 -- ============================================================
 SELECT
     datname,
@@ -91,14 +93,29 @@ SELECT
 FROM pg_database
 WHERE datname = current_database();
 
+WITH database_acl AS (
+    SELECT
+        d.datname,
+        x.grantee,
+        x.privilege_type
+    FROM pg_database AS d
+    CROSS JOIN LATERAL aclexplode(
+        COALESCE(d.datacl, acldefault('d', d.datdba))
+    ) AS x
+    WHERE d.datname = current_database()
+)
 SELECT
-    has_database_privilege('PUBLIC', current_database(), 'CONNECT')
-        AS public_can_connect,
+    EXISTS (
+        SELECT 1
+        FROM database_acl
+        WHERE grantee = 0
+          AND privilege_type = 'CONNECT'
+    ) AS public_can_connect,
     has_database_privilege(current_user, current_database(), 'CONNECT')
         AS current_user_can_connect;
 
--- has_database_privilege는 최종 유효 권한을 보여 줍니다.
--- datacl은 직접 GRANT와 PUBLIC 같은 권한 경로를 검토하는 근거입니다.
+-- has_database_privilege는 실제 Role의 최종 유효 권한을 보여 줍니다.
+-- PUBLIC의 DB 권한은 ACL의 grantee OID 0 경로로 확인합니다.
 
 -- ============================================================
 -- 5. 명시적 테이블·컬럼 권한
