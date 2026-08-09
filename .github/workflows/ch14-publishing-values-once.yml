@@ -1,0 +1,98 @@
+name: Normalize Chapter 14 publishing values once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch14-publishing-values-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Align published aggregate evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = []
+          files += list(Path('book/chapter14').glob('*.md'))
+          files += [Path('code/chapter14/README.md')]
+          files += list(Path('presentation/chapter14').glob('*.md'))
+          files += [Path('presentation/chapter14/chapter14_navigation.js')]
+          files += list(Path('images/chapter14').glob('*.md'))
+          files += list(Path('images/chapter14').glob('*.mmd'))
+          files += list(Path('images/chapter14').glob('*.svg'))
+          files += [Path('notes/chapter14_review_checklist.md')]
+
+          line_rules = [
+              ('2026-01', '200000', '350000'),
+              ('2026-01', '200,000', '350,000'),
+              ('2026-03', '540000', '680000'),
+              ('2026-03', '540,000', '680,000'),
+              ('2026-05', '390000', '540000'),
+              ('2026-05', '390,000', '540,000'),
+              ('파이썬 데이터 분석', '450000', '750000'),
+              ('파이썬 데이터 분석', '450,000', '750,000'),
+              ('데이터 시각화', '560000', '700000'),
+              ('데이터 시각화', '560,000', '700,000'),
+              ('Python', '450000', '750000'),
+              ('Python', '450,000', '750,000'),
+              ('Data Analysis', '560000', '700000'),
+              ('Data Analysis', '560,000', '700,000'),
+              ('서울', '910000', '1210000'),
+              ('서울', '910,000', '1,210,000'),
+              ('대구', '260000', '400000'),
+              ('대구', '260,000', '400,000'),
+          ]
+
+          for path in files:
+              if not path.exists():
+                  continue
+              lines = path.read_text(encoding='utf-8').splitlines(keepends=True)
+              out=[]
+              for line in lines:
+                  for marker, old, new in line_rules:
+                      if marker in line and old in line:
+                          line=line.replace(old,new)
+                  line=line.replace('취소인데 기록 금액이 0 아님', '취소 후 기록 금액이 0으로 덮어써진 행')
+                  line=line.replace('취소 건의 기준 기록 금액은 0이다', '취소 건의 신청 시점 기록 금액은 취소 후에도 유지된다')
+                  out.append(line)
+              path.write_text(''.join(out),encoding='utf-8')
+
+          # Core publishing files must show the current canonical figures.
+          core=[
+              Path('book/chapter14/chapter14.md'),
+              Path('book/chapter14/chapter14_activity.md'),
+              Path('code/chapter14/README.md'),
+              Path('presentation/chapter14/chapter14_practice_lecture_plan.md'),
+          ]
+          for path in core:
+              text=path.read_text(encoding='utf-8')
+              required=['3210000','recorded_amount']
+              # Accept comma-formatted totals in prose.
+              if '3210000' not in text and '3,210,000' not in text:
+                  raise SystemExit(f'{path} missing 3,210,000 total')
+              if 'recorded_amount' not in text:
+                  raise SystemExit(f'{path} missing recorded_amount')
+              for old_marker in [
+                  '2026-01 | 3 | 200000','2026-03 | 5 | 540000','2026-05 | 4 | 390000',
+                  '파이썬 데이터 분석 | 5 | 450000','데이터 시각화 | 5 | 560000',
+                  '서울 | 3 | 9 | 910000','대구 | 1 | 3 | 260000',
+              ]:
+                  if old_marker in text:
+                      raise SystemExit(f'{path} stale aggregate: {old_marker}')
+          PY
+      - name: Commit publishing value alignment
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add book/chapter14 code/chapter14/README.md presentation/chapter14 images/chapter14 notes/chapter14_review_checklist.md
+          git diff --cached --check
+          git commit -m "Align Chapter 14 published aggregate evidence"
+          git push
