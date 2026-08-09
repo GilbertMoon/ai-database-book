@@ -148,18 +148,36 @@ ORDER BY p.tablename, p.indexname;
 
 -- ============================================================
 -- 6. IDENTITY 시퀀스와 다음 자동값
+-- PostgreSQL 16에서 IDENTITY 내부 시퀀스는 information_schema.sequences에
+-- 나타나지 않을 수 있으므로 pg_class(relkind='S')와 pg_sequence로 확인합니다.
 -- 권한 동작 테스트를 백업 전에 실행했다면 번호 공백이 있을 수 있습니다.
 -- 다음 값이 현재 최대 ID보다 크면 정상입니다.
 -- ============================================================
 SELECT
-    sequence_schema,
-    sequence_name,
-    data_type,
-    start_value,
-    increment
-FROM information_schema.sequences
-WHERE sequence_schema = 'security_lab'
-ORDER BY sequence_name;
+    n.nspname AS sequence_schema,
+    c.relname AS sequence_name,
+    format_type(s.seqtypid, NULL) AS data_type,
+    s.seqstart AS start_value,
+    s.seqincrement AS increment,
+    pg_get_userbyid(c.relowner) AS owner_name
+FROM pg_class AS c
+JOIN pg_namespace AS n
+    ON n.oid = c.relnamespace
+JOIN pg_sequence AS s
+    ON s.seqrelid = c.oid
+WHERE n.nspname = 'security_lab'
+  AND c.relkind = 'S'
+ORDER BY c.relname;
+
+SELECT
+    table_name,
+    column_name,
+    is_identity,
+    identity_generation
+FROM information_schema.columns
+WHERE table_schema = 'security_lab'
+  AND column_name = 'id'
+ORDER BY table_name;
 
 SELECT
     'students' AS table_name,
@@ -243,6 +261,7 @@ DECLARE
     v_amount_mismatch BIGINT;
     v_constraint_count INTEGER;
     v_sequence_count INTEGER;
+    v_identity_count INTEGER;
     v_owner_count INTEGER;
     v_not_null_count INTEGER;
     v_requested_count BIGINT;
@@ -391,17 +410,28 @@ BEGIN
     END IF;
 
     SELECT COUNT(*) INTO v_sequence_count
-    FROM information_schema.sequences
-    WHERE sequence_schema = 'security_lab'
-      AND sequence_name IN (
+    FROM pg_class AS c
+    JOIN pg_namespace AS n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'security_lab'
+      AND c.relkind = 'S'
+      AND c.relname IN (
           'students_id_seq',
           'courses_id_seq',
           'enrollments_id_seq'
       );
 
-    IF v_sequence_count <> 3 THEN
+    SELECT COUNT(*) INTO v_identity_count
+    FROM information_schema.columns
+    WHERE table_schema = 'security_lab'
+      AND column_name = 'id'
+      AND table_name IN ('students', 'courses', 'enrollments')
+      AND is_identity = 'YES'
+      AND identity_generation = 'BY DEFAULT';
+
+    IF v_sequence_count <> 3 OR v_identity_count <> 3 THEN
         RAISE EXCEPTION
-            '복원 검증 실패: IDENTITY 시퀀스는 3개여야 합니다.';
+            '복원 검증 실패: IDENTITY 시퀀스/컬럼은 각각 3개여야 합니다. 실제 %/%.',
+            v_sequence_count, v_identity_count;
     END IF;
 
     SELECT CASE WHEN is_called THEN last_value + 1 ELSE last_value END
