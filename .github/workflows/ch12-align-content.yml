@@ -1,0 +1,229 @@
+name: Align Chapter 12 content
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch12-align-content.yml
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align Chapter 12 sources
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected text not found in {path}: {old[:100]!r}')
+              if text.count(old) != 1:
+                  raise SystemExit(f'Expected exactly one match in {path}, found {text.count(old)}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'book/chapter12/chapter12.md',
+              '- 결제 금액은 enrollments.paid_amount에 신청 당시 값으로 기록',
+              '- 신청 당시 기록 금액은 `enrollments.recorded_amount NUMERIC(12,0)`에 저장\n- `recorded_amount`는 결제 승인액·환불 반영 순액·회계 매출이 아님\n- 별도 결제·환불 원장은 현재 프로젝트 범위 밖'
+          )
+
+          replace_once(
+              'book/chapter12/chapter12.md',
+              '''현재 DB = ai_database_book
+course_project = students 3, instructors 2, courses 3, enrollments 5
+nosql_lab 미존재''',
+              '''현재 DB = ai_database_book
+course_project = students 3, instructors 2, courses 3, enrollments 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+활성 신청 부분 고유 인덱스 존재
+nosql_lab 미존재'''
+          )
+
+          replace_once(
+              'book/chapter12/chapter12_outline.md',
+              '''course_project
+- students 3
+- instructors 2
+- courses 3
+- enrollments 5
+
+nosql_lab''',
+              '''course_project
+- students 3
+- instructors 2
+- courses 3
+- enrollments 5
+- 상태: 신청 2 / 수강중 1 / 완료 1 / 취소 1
+- recorded_amount: NUMERIC(12,0)
+- 전체 기록 금액: 590000
+- 활성 신청: 3 / 340000
+- 취소 제외: 4 / 440000
+- 1001 완료/100000, 1004 취소/150000, 1005 신청/120000
+
+nosql_lab'''
+          )
+
+          replace_once(
+              'book/chapter12/chapter12_activity.md',
+              '| course_project enrollments | 5 |  |',
+              '''| course_project enrollments | 5 |  |
+| recorded_amount 타입 | `NUMERIC(12,0)` |  |
+| 전체 기록 금액 | 590000 |  |
+| 활성 신청 | 3건 / 340000 |  |
+| 취소 제외 | 4건 / 440000 |  |'''
+          )
+
+          replace_once(
+              'presentation/chapter12/chapter12_practice_lecture_plan.md',
+              '''현재 DB = ai_database_book
+course_project = 3 / 2 / 3 / 5
+nosql_lab = 생성 전 미존재''',
+              '''현재 DB = ai_database_book
+course_project = 3 / 2 / 3 / 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 = 590000 / 활성 = 3·340000 / 취소 제외 = 4·440000
+1001 완료·100000 / 1004 취소·150000 / 1005 신청·120000
+nosql_lab = 생성 전 미존재'''
+          )
+
+          replace_once(
+              'presentation/chapter12/chapter12_practice_lecture_plan.md',
+              '''Chapter 07 기준: 3 / 2 / 3 / 5
+Chapter 12 기준: 3 / 4 / 6
+Seed 캐시: 4 / 3 / 1
+adopted 사례: 1
+GIN·표현식 인덱스 정의 확인''',
+              '''Chapter 07·08 기준: 3 / 2 / 3 / 5, 상태 2 / 1 / 1 / 1
+recorded_amount = NUMERIC(12,0), 전체 590000
+활성 = 3 / 340000, 취소 제외 = 4 / 440000
+Chapter 12 기준: 3 / 4 / 6
+Seed 캐시: 4 / 3 / 1, 무만료 1
+COURSE-301 = certificate true / version 1
+결정 상태 = adopted 1 / poc_planned 2 / candidate 2 / hold 1
+GIN·표현식 인덱스 valid·ready 확인'''
+          )
+
+          replace_once(
+              'code/chapter12/README.md',
+              '''Chapter 07 원본 기준:
+
+```text
+students 3
+instructors 2
+courses 3
+enrollments 5
+```''',
+              '''Chapter 07·08 원본 기준:
+
+```text
+students 3
+instructors 2
+courses 3
+enrollments 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+```
+
+`recorded_amount`는 신청 시점에 신청 행에 기록한 금액입니다. 결제 승인액·환불 반영 순액·회계 매출을 뜻하지 않으며 별도 결제·환불 원장은 현재 프로젝트 범위 밖입니다.'''
+          )
+
+          replace_once(
+              'images/chapter12/README.md',
+              '''## 2차 재구성 실습 기준
+
+```text
+nosql_lab.course_documents 3''',
+              '''## 2차 재구성 실습 기준
+
+원본 기준:
+
+```text
+course_project = 3 / 2 / 3 / 5
+recorded_amount = NUMERIC(12,0)
+전체 = 590000
+활성 = 3 / 340000
+취소 제외 = 4 / 440000
+```
+
+실습 기준:
+
+```text
+nosql_lab.course_documents 3'''
+          )
+
+          # Review/checklist wording is also normalized now; detailed actual-run status is updated later.
+          review = Path('book/chapter12/chapter12_review_revision.md')
+          text = review.read_text(encoding='utf-8')
+          text = text.replace(
+              '`enrollments.paid_amount`는 신청 당시 기록 금액이며 별도 결제·환불 원장은 현재 프로젝트 범위 밖임을 명시했습니다.',
+              '`enrollments.recorded_amount NUMERIC(12,0)`는 신청 시점에 신청 행에 기록한 금액이며, 결제 승인액·환불 반영 순액·회계 매출이 아니고 별도 결제·환불 원장은 현재 프로젝트 범위 밖임을 명시했습니다.'
+          )
+          review.write_text(text, encoding='utf-8')
+
+          checklist = Path('notes/chapter12_review_checklist.md')
+          text = checklist.read_text(encoding='utf-8')
+          text = text.replace('| paid_amount 의미 | 통과 | 신청 당시 기록 금액 |', '| recorded_amount 타입·의미 | 통과 | `NUMERIC(12,0)`, 신청 시점 기록 금액 |')
+          checklist.write_text(text, encoding='utf-8')
+
+          # Bump Chapter 12 local cache-busting version. Keep common enhancer's independent version unchanged.
+          for filename in [
+              'presentation/chapter12/chapter12_player.js',
+              'presentation/chapter12/chapter12_script.js',
+              'presentation/chapter12/chapter12_theory_presentation.html',
+              'presentation/chapter12/chapter12_practice_presentation.html',
+              'presentation/chapter12/chapter12_script.html',
+          ]:
+              p = Path(filename)
+              text = p.read_text(encoding='utf-8')
+              text = text.replace('20260808a', '20260809a')
+              p.write_text(text, encoding='utf-8')
+
+          # Ensure stale source name is gone from Chapter 12 publication sources.
+          stale = 'paid' + '_amount'
+          for filename in [
+              'book/chapter12/chapter12.md',
+              'book/chapter12/chapter12_outline.md',
+              'book/chapter12/chapter12_activity.md',
+              'book/chapter12/chapter12_review_revision.md',
+              'notes/chapter12_review_checklist.md',
+              'presentation/chapter12/chapter12_theory_lecture_plan.md',
+              'presentation/chapter12/chapter12_practice_lecture_plan.md',
+              'code/chapter12/README.md',
+              'images/chapter12/README.md',
+          ]:
+              if stale in Path(filename).read_text(encoding='utf-8'):
+                  raise SystemExit(f'stale amount term remains in {filename}')
+          PY
+
+      - name: Commit aligned sources and remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/ch12-align-content.yml
+          git add book/chapter12 code/chapter12/README.md images/chapter12/README.md presentation/chapter12 notes/chapter12_review_checklist.md
+          git commit -m "Align Chapter 12 source semantics and presentation assets"
+          git push
