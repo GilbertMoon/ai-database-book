@@ -6,210 +6,309 @@
 Chapter 10. 실행 계획으로 인덱스 효과 검증하기
 ```
 
-## 리뷰 목적
+## 자동 검증 기준
 
-Chapter 10이 기존 프로젝트를 보호하면서 `performance_lab`에서 재현 가능한 대량 데이터를 만들고, 같은 데이터·통계·SQL의 인덱스 전후 계획과 결과 행을 비교해 적용·보류·제거를 판단하도록 구성되었는지 점검합니다.
+```text
+Workflow: Validate Chapter 10
+Run: 4
+Run ID: 31285494158
+Commit: 76dc98e36fae6b717a2910a2b277c0e94238235c
+Conclusion: success
+PostgreSQL: 16.14
+```
 
 ---
 
-## 1. Chapter 연속성과 격리
+## 1. Chapter 07·08 연속성과 격리
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
+| 점검 항목 | 상태 | 실제 확인 |
 | --- | --- | --- |
-| `course_project` 보호 | 통과 | 사전·최종 검증에서 5행 유지 확인 |
-| `transaction_lab` 보호 | 통과 | 참조·변경 없음 |
-| `performance_lab` 전용 | 통과 | 대량 데이터와 인덱스 실험 격리 |
-| 자동 DROP 제거 | 통과 | 생성 파일에 삭제 없음 |
-| 초기화 분리 | 통과 | DB 보호 구문이 있는 reset만 사용 |
-| Chapter 11 연결 | 통과 | 성능에서 보안·복구로 연결 |
+| `course_project` 행 수 | 통과 | 3 / 2 / 3 / 5 |
+| 상태 분포 | 통과 | 신청2 / 수강중1 / 완료1 / 취소1 |
+| 전체 기록 금액 | 통과 | 590000 |
+| 활성 신청 | 통과 | 3건 / 340000 |
+| 취소 제외 이력 | 통과 | 4건 / 440000 |
+| 기준 신청 | 통과 | 1001·1004·1005 상태·금액 일치 |
+| `recorded_amount` 타입 | 통과 | `NUMERIC(12,0)` |
+| 활성 신청 인덱스 | 통과 | `uq_course_enrollments_active` 존재 |
+| Chapter 10에서 project 변경 없음 | 통과 | SQL 정적 검사 + 전체 fingerprint 동일 |
+| `transaction_lab` 간섭 없음 | 통과 | Chapter 10 검증 시작 시 미존재 확인 |
+
+`course_project` fingerprint는 Chapter 10 실행 전·전체 실행 후·reset 후 모두 다음 값으로 유지되었습니다.
+
+```text
+cd1c890f3e9bb4a5816b5763c19fa646
+```
 
 ---
 
-## 2. 실행 위치와 상태 보호
+## 2. 금액 열과 버전 정합성
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
+| 점검 항목 | 상태 | 최종 반영 |
 | --- | --- | --- |
-| DB 확인 | 통과 | `ai_database_book` 아니면 예외 |
-| 스키마·검색 경로 | 통과 | 모든 파일에서 `current_schema()`·`SHOW search_path` |
-| 01 사전 상태 | 통과 | Chapter 07 기준 5행·lab 미존재 검사 |
-| 02 사전 상태 | 통과 | 빈 테이블·후보 인덱스 미존재 검사 |
-| 03 기준 계획 | 통과 | 후보 인덱스 0개 검사 |
-| 04 생성 | 통과 | 후보 인덱스 0개 검사 후 생성 |
-| 05 사후 계획 | 통과 | 후보 인덱스 3개 검사 |
-| 06 리뷰 | 통과 | 후보 인덱스 3개 검사 |
-| reset | 통과 | 올바른 DB에서만 lab 삭제 |
+| Chapter 10 금액 열 | 통과 | `recorded_amount`로 통일 |
+| 과거 열 이름 제거 | 통과 | 07의 음성 검사 외 학습·실행 소스 제거 |
+| 검증 기준 서버 | 통과 | PostgreSQL 16 명시 |
+| Skip Scan 버전 | 통과 | PostgreSQL 18에서 B-tree Skip Scan 추가로 수정 |
+| 서버 버전 기록 | 통과 | SQL·본문·강의안·발표 시작 화면 반영 |
 
 ---
 
-## 3. 데이터·업무 정합성
+## 3. `01_performance_lab_schema.sql`
 
-| 항목 | 기대 | 상태 |
-| --- | ---: | --- |
-| students | 10003 | 코드·검증 반영 |
-| instructors | 2 | 코드·검증 반영 |
-| courses | 2003 | 코드·검증 반영 |
-| enrollments | 100005 | 코드·검증 반영 |
-| 학생별 신청 | 10 | 생성식·검증 반영 |
-| 강의별 신청 | 50 | 생성식·검증 반영 |
-| 활성 학생·강의 중복 | 0 | 생성식·검증 반영 |
-| 이메일 번호와 학생 ID | 일치 | `performance5000` = ID 5000 |
-| recorded_amount | 강의 가격 | JOIN 생성 적용 |
+| 점검 항목 | 상태 | 실제 확인 |
+| --- | --- | --- |
+| 잘못된 DB 차단 | 통과 | `postgres` DB에서 실패, lab 미생성 |
+| 읽기 전용 차단 | 코드 반영 | `transaction_read_only` 검사 |
+| Chapter 07·08 전체 기준 게이트 | 통과 | 행·상태·금액·기준 신청 검사 |
+| `performance_lab` 기존 존재 차단 | 통과 | 재실행 시 실제 실패 |
+| 원자적 생성 | 통과 | `BEGIN` → 검사·CREATE → 검증 → `COMMIT` |
+| 핵심 테이블 | 통과 | 4개 생성 |
+| 생성 직후 행 | 통과 | 모두 0행 |
+| named constraints | 통과 | 15 |
+| NOT NULL | 통과 | 20 |
+| 자동 인덱스 | 통과 | 6 |
+| 후보 인덱스 | 통과 | 0 |
+| 금액 타입 | 통과 | price·recorded_amount = NUMERIC(12,0) |
+| 통과 메시지 | 통과 | `Chapter 10 performance lab schema validation passed` |
 
 ---
 
-## 4. IDENTITY 재현성
+## 4. `02_performance_lab_seed.sql`
 
-| 테이블 | 다음 값 | 상태 |
+| 검증 | 기대 | 실제 상태 |
 | --- | ---: | --- |
-| students | 11001 | 코드 반영 |
-| instructors | 203 | 코드 반영 |
-| courses | 3001 | 코드 반영 |
-| enrollments | 110001 | 코드 반영 |
+| students | 10003 | 통과 |
+| instructors | 2 | 통과 |
+| courses | 2003 | 통과 |
+| enrollments | 100005 | 통과 |
+| 신청 | 30002 | 통과 |
+| 수강중 | 30001 | 통과 |
+| 완료 | 20001 | 통과 |
+| 취소 | 20001 | 통과 |
+| 생성 학생별 신청 | 10 | 통과 |
+| 생성 강의별 신청 | 50 | 통과 |
+| 활성 학생·강의 중복 | 0 | 통과 |
+| `recorded_amount != course.price` | 0 | 통과 |
+| 후보 인덱스 | 0 | 통과 |
 
-명시적 ID가 IDENTITY 다음 값을 자동으로 이동시키지 않는다는 설명을 본문·워크북·README에 반영했습니다.
+IDENTITY 다음 값:
+
+```text
+students = 11001
+instructors = 203
+courses = 3001
+enrollments = 110001
+```
+
+`02`의 삽입·IDENTITY 조정·ANALYZE·검증은 하나의 트랜잭션으로 구성했습니다.
 
 ---
 
 ## 5. 기준 결과 행 수
 
-| SQL | 기대 행 수 | 상태 |
+| SQL | 기대 | PostgreSQL 16 실제 확인 |
 | --- | ---: | --- |
-| 이메일 검색 | 1 | 자동 검증 |
-| 제목 검색 | 1 | 자동 검증 |
-| student_id 5000 | 10 | 자동 검증 |
-| course_id 1500 | 50 | 자동 검증 |
-| course_id 1500 + 수강중 | 15 | 자동 검증 |
-| 전체 수강중 | 30001 | 자동 검증 |
+| 이메일 검색 | 1 | 통과 |
+| 제목 검색 | 1 | 통과 |
+| student_id 5000 | 10 | 통과 |
+| course_id 1500 | 50 | 통과 |
+| course_id 1500 + 수강중 | 15 | 통과 |
+| 전체 수강중 | 30001 | 통과 |
 
 ---
 
-## 6. 실행 계획 설명
+## 6. 기준·사후 측정 통제
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
+| 점검 항목 | 상태 | 실제 확인 |
 | --- | --- | --- |
-| EXPLAIN | 통과 | 예상 계획, 실제 실행 없음 |
-| EXPLAIN ANALYZE | 통과 | 실제 실행·실제 수치 |
-| SELECT 한정 | 통과 | 변경 SQL 실실행 방지 |
-| cost | 통과 | 상대 비용, 밀리초 아님 |
-| rows·actual rows | 통과 | 예상·실제 비교 |
-| loops | 통과 | 반복 작업량 |
-| Buffers | 통과 | 블록 읽기 비교 |
-| Filter·Index Cond | 통과 | 사후 조건·인덱스 탐색 구분 |
-| Sort | 통과 | ORDER BY·LIMIT 비교 |
-| 결과 행 검증 | 통과 | 실행 계획과 별도 07 파일 |
+| 02에서 ANALYZE | 통과 | 실제 실행 |
+| 04에서 ANALYZE 재실행 없음 | 통과 | 정적 검사 |
+| 03·05 SQL 동일 | 통과 | 8개 SELECT 완전 일치 자동 검사 |
+| 플래너 설정 | 통과 | seqscan/indexscan/bitmapscan 모두 on 검사 |
+| 후보 생성 전 | 통과 | 전체 인덱스 6 / 후보 0 |
+| 후보 생성 후 | 통과 | 전체 9 / 후보 3 |
+| 후보 valid/ready | 통과 | 3개 모두 확인 |
+| 03 실행 후 04 순서 | 통과 | Actions 실제 실행 순서로 검증 |
+
+`03`은 읽기 전용이므로 “학습자가 결과를 기록했음” 자체는 DB 상태로 증명하지 않습니다. 학습자는 결과를 기록하고, CI는 실행 순서를 보장합니다.
 
 ---
 
-## 7. 실험 통제
+## 7. PostgreSQL 16 실제 기준 계획
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
+| 조회 | 후보 전 실제 계획 | 상태 |
 | --- | --- | --- |
-| 데이터 생성 후 ANALYZE | 통과 | 02에서 한 번 실행 |
-| 인덱스 후 ANALYZE 제거 | 통과 | 04에서 재실행 없음 |
-| 동일 SQL | 통과 | 03·05 쿼리 일치 |
-| 동일 데이터 | 통과 | 후보 인덱스만 추가 |
-| 동일 테이블 통계 | 통과 | 기준·사후 공통 사용 |
-| 결과 동일성 | 통과 | 07 자동 판정 |
+| email 정확 일치 | UNIQUE Index Scan | 통과 |
+| title 정확 일치 | Seq Scan | 통과 |
+| student_id 5000 JOIN | enrollments Seq Scan | 통과 |
+| course_id 1500 | Seq Scan | 통과 |
+| course+status | Seq Scan | 통과 |
+| status 단독 | Seq Scan | 통과 |
+| ORDER BY title | Seq Scan + Sort | 통과 |
+| ORDER BY title LIMIT 20 | Seq Scan + top-N Sort | 통과 |
 
 ---
 
-## 8. 인덱스 판단 정확성
+## 8. PostgreSQL 16 실제 사후 계획
 
-| 점검 항목 | 상태 | 최종 반영 내용 |
+| 조회 | 후보 후 실제 계획 | 상태 |
 | --- | --- | --- |
-| PK·UNIQUE 자동 인덱스 | 통과 | email 중복 수동 인덱스 방지 |
-| FK 자식 컬럼 | 통과 | 자동 생성 없음·성능 목적 구분 |
-| Seq Scan | 통과 | 항상 나쁜 계획으로 설명하지 않음 |
-| Index Scan | 통과 | 항상 최선으로 설명하지 않음 |
-| Bitmap Scan | 통과 | 중간 선택도 설명 |
-| 선택도 | 통과 | 반환 비율과 판단 |
-| 복합 인덱스 | 통과 | `(course_id, status)` |
-| 선두 컬럼 | 통과 | 단독·복합 조건 비교 |
-| PostgreSQL 18+ Skip Scan | 통과 | 절대 규칙 대신 비용 기반 가능성 설명 |
-| ORDER BY·LIMIT | 통과 | 전체와 상위 20건 비교 |
-| 중복 인덱스 | 통과 | email·course_id 역할 중복 검토 |
+| title 정확 일치 | `idx_performance_courses_title` Index Scan | 통과 |
+| student_id 5000 | `idx_performance_enrollments_student_id` Index Scan | 통과 |
+| course_id 1500 | 복합 인덱스 Bitmap Index Scan | 통과 |
+| course+status | 복합 인덱스 Bitmap Index Scan | 통과 |
+| ORDER BY title | title 인덱스 Index Scan | 통과 |
+| ORDER BY title LIMIT 20 | Limit → title 인덱스 Index Scan | 통과 |
+| status 단독 | **Seq Scan 유지** | 통과 |
 
----
-
-## 9. 단계별 SQL
-
-| 파일 | 역할 | 상태 |
-| --- | --- | --- |
-| `01_performance_lab_schema.sql` | 보호 검사·전용 스키마 생성 | 완료 |
-| `02_performance_lab_seed.sql` | 일관된 대량 데이터·IDENTITY·ANALYZE | 완료 |
-| `03_baseline_explain.sql` | 인덱스 없는 기준 계획 | 완료 |
-| `04_create_candidate_indexes.sql` | 세 실험 후보 생성 | 완료 |
-| `05_after_index_explain.sql` | 동일 SQL 사후 계획 | 완료 |
-| `06_index_review.sql` | 정의·크기·사용 통계 | 완료 |
-| `07_result_validation.sql` | 결과·상태 자동 검증 | 완료 |
-| `reset_performance_lab.sql` | 보호 초기화 | 완료 |
-| `index_performance_practice.sql` | 안전한 호환 진입점 | 완료 |
-| `README.md` | 실행 순서·기준·운영 안내 | 완료 |
-
----
-
-## 10. 운영 환경 안내
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| 일반 CREATE INDEX | 통과 | 격리된 실습 스키마에서 사용 |
-| 쓰기 잠금 영향 | 통과 | 운영 적용 전 검토 |
-| CONCURRENTLY | 통과 | 동시 쓰기 영향 완화 후보 |
-| 트랜잭션 블록 제한 | 통과 | CONCURRENTLY 실행 불가 안내 |
-| 실패 후 INVALID | 통과 | 존재 여부 확인 안내 |
-
----
-
-## 11. 사용 통계 해석
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| idx_scan=0 즉시 삭제 금지 | 통과 | 기간·워크로드 확인 |
-| PK·UNIQUE 역할 | 통과 | 제약조건 유지에 직접 사용 |
-| FK 자식 인덱스 역할 | 통과 | 무결성 필수 아님·성능 목적 |
-| 단순 실행 횟수 해석 방지 | 통과 | 내부 탐색 방식에 따라 증가 가능 |
-
----
-
-## 12. 자기주도 학습 지원
-
-| 점검 항목 | 상태 | 최종 반영 내용 |
-| --- | --- | --- |
-| 워크북 기대값 | 통과 | 1·10·50·15·30001 반영 |
-| 결과 자동 검증 | 통과 | 07 파일 연결 |
-| PostgreSQL 18+ Skip Scan 활동 | 통과 | 개념·계획 기록 |
-| 운영 생성 비교 | 통과 | 일반·CONCURRENTLY 표 |
-| 권장 해설 | 통과 | 자동 인덱스·계획·통제·통계 해설 |
-| AI 검토 | 통과 | 결과 검증·잠금·PostgreSQL 18+ Skip Scan 포함 |
-
----
-
-## 13. 동기화 대상
-
-| 파일 | 상태 |
-| --- | --- |
-| `book/chapter10/chapter10.md` | 완료 |
-| `book/chapter10/chapter10_activity.md` | 완료 |
-| `book/chapter10/chapter10_outline.md` | 완료 |
-| `book/chapter10/chapter10_review_revision.md` | 완료 |
-| `code/chapter10/01~07` | 완료 |
-| `code/chapter10/reset_performance_lab.sql` | 완료 |
-| `code/chapter10/index_performance_practice.sql` | 완료 |
-| `code/chapter10/README.md` | 완료 |
-| 루트 `README.md` | 완료 |
-
-기존 SVG 8종은 인덱스 판단·스캔 경로·복합 인덱스·AI 검토라는 일반 메시지와 호환되어 변경하지 않았습니다.
-
----
-
-## 14. 최종 판정
+PostgreSQL 16 `status='수강중'` 실제 결과:
 
 ```text
-Chapter 10은 합성 데이터 정합성, IDENTITY, 상태 보호,
-통계 조건 통제, 결과 행 검증, PostgreSQL 18+ Skip Scan과 운영 잠금 안내를 보완했다.
-
-본문·워크북·SQL·구성안·코드 안내가 동일한 기준값과 실험 순서를 사용하므로
-최종 출판 전 내용 검수 완료 상태로 판정한다.
+Node Type = Seq Scan
+actual rows = 30001
+Rows Removed by Filter = 70004
 ```
 
-실제 PostgreSQL에서 `01→07`을 실행해 환경별 계획·Buffers·시간을 기록하는 작업은 별도 실행 검증 단계에서 수행합니다.
+따라서 PostgreSQL 16 설명과 PostgreSQL 18+ Skip Scan 설명을 분리한 현재 문서가 실제 동작과 일치합니다.
+
+---
+
+## 9. 대표 전후 실행 증거
+
+한 번의 Run 4 측정값이며 고정 성능 정답으로 사용하지 않습니다.
+
+| 조회 | 기준 | 사후 |
+| --- | ---: | ---: |
+| student_id 5000 JOIN | 약 9.590 ms | 약 0.073 ms |
+| course_id 1500 | 약 6.906 ms | 약 0.086 ms |
+| course+status | 약 6.679 ms | 약 0.039 ms |
+| status 단독 | 약 9.607 ms | 약 11.049 ms |
+| ORDER BY title LIMIT 20 | Seq+Sort | 약 0.021 ms / Index Scan |
+
+판단은 시간만이 아니라 결과 행·Plan Node·Index Cond·Filter·Buffers·반복 측정을 함께 사용하도록 반영했습니다.
+
+---
+
+## 10. 인덱스 리뷰
+
+| 점검 항목 | 상태 | 최종 반영 |
+| --- | --- | --- |
+| 전체 인덱스 | 통과 | 9 |
+| 실험 후보 | 통과 | 3 |
+| valid / ready | 통과 | 모두 정상 |
+| 정의·컬럼 순서 | 통과 | 자동 검사 |
+| 인덱스 크기 | 통과 | 실제 조회 |
+| 테이블/전체 인덱스 크기 | 통과 | 실제 조회 |
+| `stats_reset` | 통과 | 함께 표시 |
+| idx_scan 해석 | 통과 | 사용자 SQL 횟수와 1:1 아님 명시 |
+| idx_scan=0 즉시 삭제 금지 | 통과 | 기간·업무 역할 함께 검토 |
+| PK·UNIQUE 역할 | 통과 | 제약조건과 연결 |
+| FK 자식 인덱스 역할 | 통과 | 정확성 필수와 성능 목적 분리 |
+
+---
+
+## 11. 최종 정합성 판정
+
+| 검증 | 기대 | 상태 |
+| --- | ---: | --- |
+| lab 행 수 | 10003/2/2003/100005 | 실제 통과 |
+| 상태 분포 | 30002/30001/20001/20001 | 실제 통과 |
+| 기준 결과 | 1/1/10/50/15/30001 | 실제 통과 |
+| 활성 중복 | 0 | 실제 통과 |
+| 금액 불일치 | 0 | 실제 통과 |
+| 학생 분포 오류 | 0 | 실제 통과 |
+| 강의 분포 오류 | 0 | 실제 통과 |
+| 전체/후보 인덱스 | 9/3 | 실제 통과 |
+| invalid 후보 | 0 | 실제 통과 |
+| Chapter 07·08 보존 | 유지 | fingerprint 실제 통과 |
+
+최종 상태 문자열:
+
+```text
+10003:2:2003:100005:9:3
+```
+
+---
+
+## 12. 재실행·초기화 안전성
+
+| 점검 항목 | 상태 | 실제 확인 |
+| --- | --- | --- |
+| 01 재실행 차단 | 통과 | lab 기존 존재로 실패 |
+| 02 재실행 차단 | 통과 | lab 비어 있지 않아 실패 |
+| 04 재실행 차단 | 통과 | 후보 0 상태가 아니라 실패 |
+| reset DB 보호 | 통과 | 코드 검사 |
+| reset 트랜잭션 | 통과 | 실제 실행 |
+| performance_lab 삭제 | 통과 | 실제 미존재 확인 |
+| course_project 보존 | 통과 | fingerprint 동일 |
+| Chapter 08 검증 재실행 | 통과 | 00·03 다시 성공 |
+
+---
+
+## 13. 발표자료·TTS·이미지 정합성
+
+| 점검 항목 | 상태 |
+| --- | --- |
+| 이론 20개 절 | 자동 통과 |
+| 실습 20개 절 | 자동 통과 |
+| 각 절 화면 구성·스크립트 | 자동 통과 |
+| 내비게이션 제목 연결 | 자동 통과 |
+| JS 문법 | 자동 통과 |
+| 자산 버전 `20260809a` | 자동 통과 |
+| 공통 TTS normalization 연결 | 자동 통과 |
+| script content enhancer | 자동 통과 |
+| Mermaid 8개 | 자동 통과 |
+| SVG 8개 | 자동 통과 |
+| SVG 접근성 기본 속성 | 자동 통과 |
+
+---
+
+## 14. 자동 검증 과정
+
+| Run | 결과 | 의미 |
+| --- | --- | --- |
+| Run 1 | 실패 | 구성안의 실제 `recorded_amount` 연결 누락 발견·수정 |
+| Run 2 | 실패 | validator가 주석의 CONCURRENTLY 문구를 CREATE INDEX로 오인·수정 |
+| Run 3 | 실패 | SQL은 성공, psql NOTICE stderr 캡처 문제 수정 |
+| Run 4 | **성공** | 정적 + PostgreSQL 16 전체 경로 성공 |
+
+상세 기록:
+
+```text
+notes/chapter10_validation_result.md
+```
+
+---
+
+## 15. 수동 확인으로 남긴 항목
+
+아래 항목은 자동 검증 완료로 표시하지 않습니다.
+
+```text
+[ ] 브라우저 이론 20장 최종 시각 렌더링
+[ ] 브라우저 실습 20장 최종 시각 렌더링
+[ ] 단계별 강조 실제 화면 동작
+[ ] 발표자 스크립트 ↔ 장표 창 실제 동기화
+[ ] TTS 실제 음성 청취·발음
+[ ] 모바일·프로젝터 가독성
+[ ] Mermaid CLI 재생성
+[ ] GitHub SVG 실제 시각 렌더링
+[ ] Word·PDF·eBook 최종 출력
+```
+
+---
+
+## 최종 판정
+
+```text
+Chapter 10은 Chapter 07·08 기준 상태를 보호하면서
+100,005건 신청 데이터를 실제 PostgreSQL 16에서 생성하고,
+후보 인덱스 전후의 동일 SQL 실행 계획과 결과를 재현해 검증했다.
+
+특히 PostgreSQL 16의 status 단독 조건은 복합 인덱스 생성 뒤에도
+Seq Scan으로 유지됨을 실제 확인했고, Skip Scan은 PostgreSQL 18+로 분리했다.
+
+Validate Chapter 10 Run 4가 전체 성공했으므로
+자동화 가능한 내용·SQL 정합성 검수는 완료 상태로 판정한다.
+```
