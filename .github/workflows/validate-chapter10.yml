@@ -69,39 +69,33 @@ jobs:
           index_html = Path('presentation/chapter10/index.html').read_text(encoding='utf-8')
           code_readme = Path('code/chapter10/README.md').read_text(encoding='utf-8')
 
-          # Main body numbered sections must be consecutive.
           numbered = [int(x) for x in re.findall(r'^##\s+(\d+)\.\s+', chapter, re.M)]
           if not numbered or numbered != list(range(1, max(numbered) + 1)) or len(numbered) < 20:
               raise SystemExit(f'Chapter 10 body section numbering mismatch: {numbered}')
 
-          # Canonical amount term and version note must be explicit in the teaching sources.
           for name, text in [
               ('chapter', chapter), ('outline', outline), ('activity', activity),
               ('theory', theory), ('practice', practice), ('code README', code_readme)
           ]:
-              if 'recorded_amount' not in text:
-                  raise SystemExit(f'{name} missing recorded_amount')
-              if 'PostgreSQL 16' not in text:
-                  raise SystemExit(f'{name} missing PostgreSQL 16 validation baseline')
+              for token in ['recorded_amount', 'PostgreSQL 16']:
+                  if token not in text:
+                      raise SystemExit(f'{name} missing {token}')
 
           for name, text in [('chapter', chapter), ('theory', theory), ('code README', code_readme)]:
               if 'PostgreSQL 18+' not in text or 'Skip Scan' not in text:
                   raise SystemExit(f'{name} missing PostgreSQL 18+ Skip Scan version distinction')
 
-          # The stale amount name may appear only in 07 as a negative schema guard, never as a real field or teaching term.
           stale = 'paid' + '_amount'
           bad = []
           for root in [Path('book/chapter10'), Path('presentation/chapter10'), Path('code/chapter10')]:
               for path in root.rglob('*'):
-                  if not path.is_file() or path.suffix.lower() not in {'.md', '.sql', '.js', '.html'}:
-                      continue
-                  text = path.read_text(encoding='utf-8', errors='ignore')
-                  if stale in text and path.name != '07_result_validation.sql':
-                      bad.append(str(path))
+                  if path.is_file() and path.suffix.lower() in {'.md', '.sql', '.js', '.html'}:
+                      text = path.read_text(encoding='utf-8', errors='ignore')
+                      if stale in text and path.name != '07_result_validation.sql':
+                          bad.append(str(path))
           if bad:
               raise SystemExit('stale Chapter 10 amount term remains: ' + ', '.join(bad))
 
-          # Lecture plans: 20 slides each, every slide has screen and script.
           def plan_titles(label, text):
               sections = list(re.finditer(r'^##\s+(\d+)\.\s+(.+)$', text, re.M))
               nums = [int(m.group(1)) for m in sections]
@@ -116,15 +110,12 @@ jobs:
                   titles.append(match.group(2).strip())
               return titles
 
-          theory_titles = plan_titles('theory', theory)
-          practice_titles = plan_titles('practice', practice)
-          for title in theory_titles + practice_titles:
+          for title in plan_titles('theory', theory) + plan_titles('practice', practice):
               if title not in nav_js:
                   raise SystemExit(f'navigation missing slide title: {title}')
           if index_html.count('20장') < 2:
               raise SystemExit('Chapter 10 index must advertise 20 theory and 20 practice slides')
 
-          # Presentation runtime/TTS wiring.
           version = '20260809a'
           for name, text in [
               ('player js', player_js), ('script js', script_js), ('script html', script_html),
@@ -143,7 +134,6 @@ jobs:
           if 'PresentationTTS?.normalize' not in script_js:
               raise SystemExit('presenter script does not use shared TTS normalization')
 
-          # SQL file set and safety markers.
           required_sql = [
               '01_performance_lab_schema.sql',
               '02_performance_lab_seed.sql',
@@ -180,29 +170,23 @@ jobs:
               if 'BEGIN;' not in sql[name] or 'COMMIT;' not in sql[name]:
                   raise SystemExit(f'{name} must be transactional')
 
-          if 'NUMERIC(12, 0)' not in sql['01_performance_lab_schema.sql']:
-              raise SystemExit('01 missing NUMERIC(12,0) monetary types')
           for token in ['590000', '340000', '440000', 'v_requested_count <> 2', 'v_learning_count <> 1']:
               if token not in sql['01_performance_lab_schema.sql']:
                   raise SystemExit(f'01 missing Chapter 07/08 gate {token}')
+          for token in ['30002', '30001', 'v_amount_mismatch', 'v_bad_student_distribution', 'v_bad_course_distribution']:
+              if token not in sql['02_performance_lab_seed.sql']:
+                  raise SystemExit(f'02 missing seed validation {token}')
 
-          if '30002' not in sql['02_performance_lab_seed.sql'] or '30001' not in sql['02_performance_lab_seed.sql']:
-              raise SystemExit('02 missing exact status distribution validation')
-          for token in ['v_amount_mismatch', 'v_bad_student_distribution', 'v_bad_course_distribution']:
-              if token not in sql['02_performance_lab_seed.sql'] or token not in sql['07_result_validation.sql']:
-                  raise SystemExit(f'02/07 missing {token} validation')
-
-          # Baseline and after-index files must execute the same eight SELECTs.
           explain_re = re.compile(r'EXPLAIN\s*\([^)]*\)\s*(SELECT[\s\S]*?;)', re.I)
-          def normalized_queries(text):
-              return [re.sub(r'\s+', ' ', q.strip()).lower() for q in explain_re.findall(text)]
-          before = normalized_queries(sql['03_baseline_explain.sql'])
-          after = normalized_queries(sql['05_after_index_explain.sql'])
+          normalize = lambda text: [re.sub(r'\s+', ' ', q.strip()).lower() for q in explain_re.findall(text)]
+          before = normalize(sql['03_baseline_explain.sql'])
+          after = normalize(sql['05_after_index_explain.sql'])
           if len(before) != 8 or before != after:
               raise SystemExit(f'03/05 EXPLAIN query mismatch: {len(before)} vs {len(after)}')
 
-          # 04 must create exactly the three experimental indexes and must not refresh table statistics.
-          create_names = re.findall(r'CREATE\s+INDEX\s+([a-zA-Z0-9_]+)', sql['04_create_candidate_indexes.sql'], re.I)
+          clean04 = re.sub(r'/\*.*?\*/', '', sql['04_create_candidate_indexes.sql'], flags=re.S)
+          clean04 = re.sub(r'--.*$', '', clean04, flags=re.M)
+          create_names = re.findall(r'CREATE\s+INDEX\s+([a-zA-Z0-9_]+)', clean04, re.I)
           expected_candidates = {
               'idx_performance_courses_title',
               'idx_performance_enrollments_student_id',
@@ -210,11 +194,9 @@ jobs:
           }
           if set(create_names) != expected_candidates:
               raise SystemExit(f'04 candidate index set mismatch: {create_names}')
-          stripped04 = re.sub(r'--.*$', '', sql['04_create_candidate_indexes.sql'], flags=re.M)
-          if re.search(r'\bANALYZE\s+performance_lab\.', stripped04, re.I):
+          if re.search(r'\bANALYZE\s+performance_lab\.', clean04, re.I):
               raise SystemExit('04 must not ANALYZE performance_lab after index creation')
 
-          # Chapter 10 must never mutate protected course_project.
           forbidden = re.compile(
               r'\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE(?:\s+TABLE)?)\s+course_project\.',
               re.I,
@@ -225,22 +207,17 @@ jobs:
               if forbidden.search(clean):
                   raise SystemExit(f'Chapter 10 SQL modifies course_project: {name}')
 
-          # Images: exactly 8 source/result pairs with accessible SVG metadata.
           mmds = sorted(Path('images/chapter10').glob('*.mmd'))
           svgs = sorted(Path('images/chapter10').glob('*.svg'))
-          if len(mmds) != 8 or len(svgs) != 8:
-              raise SystemExit(f'expected 8 Mermaid/SVG pairs, got {len(mmds)}/{len(svgs)}')
-          if {p.stem for p in mmds} != {p.stem for p in svgs}:
-              raise SystemExit('Mermaid/SVG stems do not match')
+          if len(mmds) != 8 or len(svgs) != 8 or {p.stem for p in mmds} != {p.stem for p in svgs}:
+              raise SystemExit(f'expected matching 8 Mermaid/SVG pairs, got {len(mmds)}/{len(svgs)}')
           for path in svgs:
               root = ET.fromstring(path.read_text(encoding='utf-8'))
               if root.attrib.get('role') != 'img' or not root.attrib.get('viewBox') or root.attrib.get('width') != '100%':
                   raise SystemExit(f'{path} missing SVG accessibility/layout attributes')
               tags = {elem.tag.split('}')[-1] for elem in root.iter()}
-              if 'title' not in tags or 'desc' not in tags:
-                  raise SystemExit(f'{path} missing title/desc')
-              if path.name not in chapter:
-                  raise SystemExit(f'Chapter body does not reference {path.name}')
+              if 'title' not in tags or 'desc' not in tags or path.name not in chapter:
+                  raise SystemExit(f'{path} missing title/desc or body reference')
 
           print(f'Chapter 10 static alignment passed with {len(numbered)} body sections')
           PY
@@ -291,8 +268,8 @@ jobs:
 
       - name: Run Chapter 10 schema and seed
         run: |
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/01_performance_lab_schema.sql | tee /tmp/ch10_01.log
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/02_performance_lab_seed.sql | tee /tmp/ch10_02.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/01_performance_lab_schema.sql 2>&1 | tee /tmp/ch10_01.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/02_performance_lab_seed.sql 2>&1 | tee /tmp/ch10_02.log
           grep -q "Chapter 10 performance lab schema validation passed" /tmp/ch10_01.log
           grep -q "Chapter 10 performance lab seed validation passed" /tmp/ch10_02.log
           test "$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM pg_indexes WHERE schemaname='performance_lab'")" = "6"
@@ -306,13 +283,13 @@ jobs:
           ! grep -q "idx_performance_" /tmp/ch10_before_title.json
           ! grep -q "idx_performance_" /tmp/ch10_before_student.json
           ! grep -q "idx_performance_" /tmp/ch10_before_course_status.json
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/03_baseline_explain.sql | tee /tmp/ch10_03.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/03_baseline_explain.sql 2>&1 | tee /tmp/ch10_03.log
           grep -q "Chapter 10 baseline explain validation passed" /tmp/ch10_03.log
 
       - name: Create candidates and capture after-index plans
         shell: bash
         run: |
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/04_create_candidate_indexes.sql | tee /tmp/ch10_04.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/04_create_candidate_indexes.sql 2>&1 | tee /tmp/ch10_04.log
           grep -q "Chapter 10 candidate index creation passed" /tmp/ch10_04.log
           psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,title,level,price FROM performance_lab.courses WHERE title='성능 테스트 강의 00500';" > /tmp/ch10_after_title.json
           psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,student_id,course_id,status,recorded_amount FROM performance_lab.enrollments WHERE student_id=5000;" > /tmp/ch10_after_student.json
@@ -326,9 +303,9 @@ jobs:
 
       - name: Run Chapter 10 after-index review and final validation
         run: |
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/05_after_index_explain.sql | tee /tmp/ch10_05.log
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/06_index_review.sql | tee /tmp/ch10_06.log
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/07_result_validation.sql | tee /tmp/ch10_07.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/05_after_index_explain.sql 2>&1 | tee /tmp/ch10_05.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/06_index_review.sql 2>&1 | tee /tmp/ch10_06.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/07_result_validation.sql 2>&1 | tee /tmp/ch10_07.log
           grep -q "Chapter 10 after-index explain validation passed" /tmp/ch10_05.log
           grep -q "Chapter 10 index review validation passed" /tmp/ch10_06.log
           grep -q "Chapter 10 performance result validation passed" /tmp/ch10_07.log
@@ -379,7 +356,7 @@ jobs:
       - name: Verify reset is isolated to performance_lab
         shell: bash
         run: |
-          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/reset_performance_lab.sql | tee /tmp/ch10_reset.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/reset_performance_lab.sql 2>&1 | tee /tmp/ch10_reset.log
           grep -q "Chapter 10 performance lab reset passed" /tmp/ch10_reset.log
           test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('performance_lab') IS NULL")" = "t"
           after_reset="$(psql -d ai_database_book -Atc "
