@@ -1,0 +1,65 @@
+name: Fix Chapter 14 metadata classification once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch14-sql-metadata-fix-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch SQL metadata checks
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('code/chapter14/01_analysis_lab_schema.sql')
+          t = p.read_text(encoding='utf-8')
+          t = t.replace(
+              "(SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'analysis_lab') <> 4",
+              "(SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'analysis_lab' AND table_type = 'BASE TABLE') <> 4"
+          )
+          t = t.replace(
+              "FROM information_schema.tables\nWHERE table_schema = 'analysis_lab'\nORDER BY table_name;",
+              "FROM information_schema.tables\nWHERE table_schema = 'analysis_lab'\n  AND table_type = 'BASE TABLE'\nORDER BY table_name;"
+          )
+          p.write_text(t, encoding='utf-8')
+
+          p = Path('code/chapter14/08_analysis_lab_validation.sql')
+          t = p.read_text(encoding='utf-8')
+          t = t.replace(
+              "FROM information_schema.tables\n        WHERE table_schema = 'analysis_lab'",
+              "FROM information_schema.tables\n        WHERE table_schema = 'analysis_lab'\n          AND table_type = 'BASE TABLE'",
+              1
+          )
+          t = t.replace('analysis_lab 제약조건은 21개여야 하지만', 'analysis_lab 제약조건은 20개여야 하지만')
+          p.write_text(t, encoding='utf-8')
+
+          p = Path('code/chapter14/reset_analysis_lab.sql')
+          t = p.read_text(encoding='utf-8')
+          t = t.replace(
+              "SELECT 'table', table_name FROM information_schema.tables WHERE table_schema = 'analysis_lab'",
+              "SELECT 'table', table_name FROM information_schema.tables WHERE table_schema = 'analysis_lab' AND table_type = 'BASE TABLE'"
+          )
+          p.write_text(t, encoding='utf-8')
+
+          assert "table_type = 'BASE TABLE'" in Path('code/chapter14/01_analysis_lab_schema.sql').read_text(encoding='utf-8')
+          assert "table_type = 'BASE TABLE'" in Path('code/chapter14/08_analysis_lab_validation.sql').read_text(encoding='utf-8')
+          assert "table_type = 'BASE TABLE'" in Path('code/chapter14/reset_analysis_lab.sql').read_text(encoding='utf-8')
+          assert '제약조건은 21개' not in Path('code/chapter14/08_analysis_lab_validation.sql').read_text(encoding='utf-8')
+          PY
+      - name: Commit SQL metadata fixes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add code/chapter14/01_analysis_lab_schema.sql code/chapter14/08_analysis_lab_validation.sql code/chapter14/reset_analysis_lab.sql
+          git diff --cached --check
+          git commit -m "Fix Chapter 14 metadata table classification"
+          git push
