@@ -4,7 +4,7 @@
   "analysis_start_date": "2026-01-01",
   "analysis_end_date_exclusive": "2026-07-01",
   "row_count": 24,
-  "recorded_amount_sum": 2770000,
+  "recorded_amount_sum": 3210000,
   "status_counts": {
     "완료": 12,
     "수강중": 5,
@@ -15,7 +15,7 @@
     {
       "enrollment_month": "2026-01-01",
       "enrollment_count": 3,
-      "recorded_amount_sum": 200000
+      "recorded_amount_sum": 350000
     },
     {
       "enrollment_month": "2026-02-01",
@@ -25,7 +25,7 @@
     {
       "enrollment_month": "2026-03-01",
       "enrollment_count": 5,
-      "recorded_amount_sum": 540000
+      "recorded_amount_sum": 680000
     },
     {
       "enrollment_month": "2026-04-01",
@@ -35,7 +35,7 @@
     {
       "enrollment_month": "2026-05-01",
       "enrollment_count": 4,
-      "recorded_amount_sum": 390000
+      "recorded_amount_sum": 540000
     },
     {
       "enrollment_month": "2026-06-01",

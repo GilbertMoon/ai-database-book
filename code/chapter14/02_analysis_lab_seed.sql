@@ -83,7 +83,7 @@ INSERT INTO analysis_lab.enrollments (
 VALUES
     (1001, 101, 301, '2026-01-10', '완료',   100000, '2026-01-30'),
     (1002, 102, 301, '2026-01-18', '완료',   100000, '2026-02-05'),
-    (1003, 101, 303, '2026-01-25', '취소',        0, NULL),
+    (1003, 101, 303, '2026-01-25', '취소',   150000, NULL),
 
     (1004, 103, 301, '2026-02-05', '완료',   100000, '2026-02-28'),
     (1005, 104, 302, '2026-02-12', '수강중', 130000, NULL),
@@ -93,7 +93,7 @@ VALUES
     (1008, 105, 301, '2026-03-03', '완료',   100000, '2026-03-28'),
     (1009, 106, 302, '2026-03-08', '완료',   130000, '2026-04-05'),
     (1010, 104, 303, '2026-03-15', '완료',   150000, '2026-04-20'),
-    (1011, 105, 304, '2026-03-22', '취소',        0, NULL),
+    (1011, 105, 304, '2026-03-22', '취소',   140000, NULL),
     (1012, 101, 305, '2026-03-28', '수강중', 160000, NULL),
 
     (1013, 107, 301, '2026-04-08', '완료',   100000, '2026-05-01'),
@@ -103,7 +103,7 @@ VALUES
 
     (1017, 108, 301, '2026-05-03', '수강중', 100000, NULL),
     (1018, 104, 302, '2026-05-10', '완료',   130000, '2026-06-01'),
-    (1019, 108, 303, '2026-05-17', '취소',        0, NULL),
+    (1019, 108, 303, '2026-05-17', '취소',   150000, NULL),
     (1020, 105, 305, '2026-05-24', '완료',   160000, '2026-06-20'),
 
     (1021, 107, 302, '2026-06-02', '신청',   130000, NULL),
@@ -137,9 +137,9 @@ BEGIN
             'Seed 중단: 기준 행 수 8/3/5/24와 일치하지 않습니다.';
     END IF;
 
-    IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
+    IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 3210000 THEN
         RAISE EXCEPTION
-            'Seed 중단: 신청 시점 기록 금액 합계가 2,770,000이 아닙니다.';
+            'Seed 중단: 신청 시점 기록 금액 합계가 3,210,000이 아닙니다.';
     END IF;
 
     IF (
@@ -177,7 +177,7 @@ BEGIN
        OR (SELECT COUNT(*) FROM analysis_lab.instructors) <> 3
        OR (SELECT COUNT(*) FROM analysis_lab.courses) <> 5
        OR (SELECT COUNT(*) FROM analysis_lab.enrollments) <> 24
-       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
+       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 3210000 THEN
         RAISE EXCEPTION 'Chapter 14 seed post-commit validation failed.';
     END IF;
     RAISE NOTICE 'Chapter 14 analysis lab seed validation passed';
@@ -186,4 +186,4 @@ $$;
 
 -- 기대 행 수: students 8, instructors 3, courses 5, enrollments 24
 -- 상태별: 완료 12, 수강중 5, 신청 4, 취소 3
--- 신청 시점 기록 금액 합계: 2,770,000
+-- 신청 시점 기록 금액 합계: 3,210,000

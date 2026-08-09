@@ -17,7 +17,7 @@
   <text x="240" y="192" class="head">SQL 기준 결과</text>
   <text x="240" y="232" class="body">전체 행 수 24</text>
   <text x="240" y="262" class="body">상태별 12 · 5 · 4 · 3</text>
-  <text x="240" y="292" class="body">결제금액 2,770,000</text>
+  <text x="240" y="292" class="body">결제금액 3,210,000</text>
   <text x="240" y="320" class="small">독립 검산 쿼리</text>
 
   <rect x="810" y="150" width="300" height="190" class="card python"/>

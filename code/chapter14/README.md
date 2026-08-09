@@ -101,7 +101,7 @@ Chapter 14 analysis_lab validation passed
 
 ---
 
-> `analysis_lab`은 분석 학습용 합성 데이터입니다. `course_project`를 복제·확장한 운영 데이터가 아니며, `recorded_amount NUMERIC(12,0)`는 앞 장과 동일하게 신청 시점 기록 금액입니다.
+> `analysis_lab`은 분석 학습용 합성 데이터입니다. `course_project`를 복제·확장한 운영 데이터가 아니며, `recorded_amount NUMERIC(12,0)`는 앞 장과 동일하게 신청 시점 기록 금액입니다. 취소 후에도 이 역사값을 0으로 덮어쓰지 않습니다.
 
 ## 기준 데이터
 
@@ -113,7 +113,7 @@ Chapter 14 analysis_lab validation passed
 | enrollments | 24 |
 | enrollment_analysis_dataset | 24 |
 | 데이터셋 enrollment_id 중복 | 0 |
-| 신청 시점 기록 금액 합계 | 2,770,000 |
+| 신청 시점 기록 금액 합계 | 3,210,000 |
 
 상태별 기준:
 
@@ -218,7 +218,7 @@ PK·분석 VIEW 중복 0
 신청일 < 학생 가입일 0
 신청일 < 강의 개설일 0
 음수 기록 금액 0
-취소인데 기록 금액이 0이 아닌 행 0
+취소 후 기록 금액이 0으로 덮어써진 행 0
 분석 기간 밖 기준 데이터 0
 활성 신청 중복 0
 ```

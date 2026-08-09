@@ -152,12 +152,6 @@ CREATE TABLE analysis_lab.enrollments (
     CONSTRAINT chk_analysis_enrollments_recorded_amount
         CHECK (recorded_amount >= 0),
 
-    CONSTRAINT chk_analysis_enrollments_cancel_amount
-        CHECK (
-            (status = '취소' AND recorded_amount = 0)
-            OR
-            (status <> '취소' AND recorded_amount >= 0)
-        ),
 
     CONSTRAINT chk_analysis_enrollments_completion_state
         CHECK (

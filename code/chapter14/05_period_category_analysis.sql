@@ -40,11 +40,11 @@ LEFT JOIN monthly_actual AS a
 ORDER BY m.enrollment_month;
 
 -- 기대:
--- 2026-01 3 / 200000
+-- 2026-01 3 / 350000
 -- 2026-02 4 / 520000
--- 2026-03 5 / 540000
+-- 2026-03 5 / 680000
 -- 2026-04 4 / 550000
--- 2026-05 4 / 390000
+-- 2026-05 4 / 540000
 -- 2026-06 4 / 570000
 
 -- 이전 달과 비교: date spine이 있으므로 중간 월이 비어도 이전 달 의미가 유지됩니다.
@@ -138,8 +138,8 @@ ORDER BY enrollment_count DESC, c.category;
 
 -- 기대:
 -- Database 10 / 1120000
--- Python 5 / 450000
--- Data Analysis 5 / 560000
+-- Python 5 / 750000
+-- Data Analysis 5 / 700000
 -- AI 4 / 640000
 
 -- 범주별 현재 완료 상태 비중
@@ -228,4 +228,4 @@ WHERE e.enrolled_at >= p.start_date
   AND e.enrolled_at < p.end_date_exclusive
 GROUP BY p.start_date, p.end_date_exclusive;
 
--- 기대: 2026-01-01 / 2026-07-01 / 2026-01-10 / 2026-06-22 / 24 / 2770000
+-- 기대: 2026-01-01 / 2026-07-01 / 2026-01-10 / 2026-06-22 / 24 / 3210000

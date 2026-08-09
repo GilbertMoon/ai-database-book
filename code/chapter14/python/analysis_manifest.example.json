@@ -8,5 +8,6 @@
   "row_count": 24,
   "generated_at_utc": "replace_with_utc_timestamp",
   "csv_path": "replace_with_absolute_or_project_relative_path",
-  "sha256": "replace_with_csv_sha256"
+  "sha256": "replace_with_csv_sha256",
+  "amount_semantics": "recorded_amount = enrollment-time recorded amount; cancellation does not zero it"
 }

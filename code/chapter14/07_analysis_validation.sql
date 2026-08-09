@@ -62,11 +62,11 @@ WITH expected(
     expected_recorded_amount
 ) AS (
     VALUES
-        (DATE '2026-01-01', 3, 200000),
+        (DATE '2026-01-01', 3, 350000),
         (DATE '2026-02-01', 4, 520000),
-        (DATE '2026-03-01', 5, 540000),
+        (DATE '2026-03-01', 5, 680000),
         (DATE '2026-04-01', 4, 550000),
-        (DATE '2026-05-01', 4, 390000),
+        (DATE '2026-05-01', 4, 540000),
         (DATE '2026-06-01', 4, 570000)
 ),
 actual AS (
@@ -123,7 +123,7 @@ SELECT
     COUNT(*) = 24 AS dataset_row_count_passed,
     COUNT(DISTINCT enrollment_id) = 24
         AS distinct_enrollment_count_passed,
-    SUM(recorded_amount) = 2770000 AS recorded_amount_sum_passed,
+    SUM(recorded_amount) = 3210000 AS recorded_amount_sum_passed,
     COUNT(*) FILTER (WHERE is_completed) = 12
         AS completed_count_passed
 FROM analysis_lab.enrollment_analysis_dataset;
@@ -184,7 +184,7 @@ WITH quality_issues AS (
 
     UNION ALL
 
-    SELECT 'invalid_cancel_amount', COUNT(*)
+    SELECT 'cancel_amount_zeroed', COUNT(*)
     FROM analysis_lab.enrollments
     WHERE status = '취소'
       AND recorded_amount <> 0
@@ -238,7 +238,7 @@ WITH checks AS (
             AS enrollments_passed,
         (SELECT COUNT(*) FROM analysis_lab.enrollment_analysis_dataset) = 24
             AS dataset_passed,
-        (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) = 2770000
+        (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) = 3210000
             AS recorded_amount_passed,
         (
             SELECT COUNT(*)

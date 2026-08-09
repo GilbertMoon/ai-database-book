@@ -111,11 +111,11 @@ SELECT id, status, recorded_amount
 FROM analysis_lab.enrollments
 WHERE recorded_amount < 0;
 
--- P14-V02-12. 취소인데 기록 금액이 0이 아닌 행: 기대 0행
+-- P14-V02-12. 취소 후 기록 금액이 0으로 덮어써진 행: 기대 0행
 SELECT id, status, recorded_amount
 FROM analysis_lab.enrollments
 WHERE status = '취소'
-  AND recorded_amount <> 0;
+  AND recorded_amount = 0;
 
 -- P14-V02-13. 허용되지 않은 상태: 기대 0행
 SELECT id, status
@@ -154,4 +154,4 @@ FROM analysis_lab.enrollments;
 -- distinct_enrollment_count 24
 -- completed_at_null_count 12
 -- completed_count 12
--- recorded_amount_sum 2770000
+-- recorded_amount_sum 3210000

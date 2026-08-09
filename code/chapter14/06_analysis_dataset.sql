@@ -67,7 +67,7 @@ DO $$
 BEGIN
     IF (SELECT COUNT(*) FROM analysis_lab.enrollment_analysis_dataset) <> 24
        OR (SELECT COUNT(DISTINCT enrollment_id) FROM analysis_lab.enrollment_analysis_dataset) <> 24
-       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 2770000 THEN
+       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 3210000 THEN
         RAISE EXCEPTION 'Chapter 14 analysis dataset validation failed before COMMIT.';
     END IF;
 END

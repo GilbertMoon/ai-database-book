@@ -119,9 +119,9 @@ BEGIN
             '검증 실패: 기준 행 수 8/3/5/24/24와 일치하지 않습니다.';
     END IF;
 
-    IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 2770000 THEN
+    IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 3210000 THEN
         RAISE EXCEPTION
-            '검증 실패: 신청 시점 기록 금액 합계는 2,770,000이어야 합니다.';
+            '검증 실패: 신청 시점 기록 금액 합계는 3,210,000이어야 합니다.';
     END IF;
 
     -- 분석 데이터셋의 정확한 컬럼 집합 17개
@@ -151,13 +151,13 @@ BEGIN
             '검증 실패: 분석 데이터셋 컬럼 집합이 예상과 다릅니다.';
     END IF;
 
-    -- 21개 PK·FK·UNIQUE·CHECK 제약조건과 4개 IDENTITY
+    -- 20개 PK·FK·UNIQUE·CHECK 제약조건과 4개 IDENTITY
     SELECT COUNT(*)
     INTO constraint_count
     FROM pg_constraint
     WHERE connamespace = 'analysis_lab'::regnamespace;
 
-    IF constraint_count <> 21 THEN
+    IF constraint_count <> 20 THEN
         RAISE EXCEPTION
             '검증 실패: analysis_lab 제약조건은 21개여야 하지만 %개입니다.',
             constraint_count;
@@ -217,11 +217,11 @@ BEGIN
     -- 월별 기준값과 기록 금액
     WITH expected(month_value, expected_count, expected_amount) AS (
         VALUES
-            (DATE '2026-01-01', 3, 200000),
+            (DATE '2026-01-01', 3, 350000),
             (DATE '2026-02-01', 4, 520000),
-            (DATE '2026-03-01', 5, 540000),
+            (DATE '2026-03-01', 5, 680000),
             (DATE '2026-04-01', 4, 550000),
-            (DATE '2026-05-01', 4, 390000),
+            (DATE '2026-05-01', 4, 540000),
             (DATE '2026-06-01', 4, 570000)
     ),
     actual AS (
@@ -328,7 +328,7 @@ BEGIN
       + (SELECT COUNT(*)
          FROM analysis_lab.enrollments
          WHERE recorded_amount < 0
-            OR (status = '취소' AND recorded_amount <> 0))
+            OR (status = '취소' AND recorded_amount = 0))
       + (SELECT COUNT(*)
          FROM analysis_lab.enrollments AS e
          CROSS JOIN analysis_lab.analysis_parameters AS p
@@ -367,6 +367,6 @@ BEGIN
             '검증 실패: IDENTITY 다음 값이 기존 최대 ID보다 크지 않습니다.';
     END IF;
 
-    RAISE NOTICE 'Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 2770000';
+    RAISE NOTICE 'Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 3210000';
 END
 $$;

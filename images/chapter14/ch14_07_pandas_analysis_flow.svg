@@ -50,7 +50,7 @@
 
   <rect x="420" y="410" width="360" height="110" class="card verify"/>
   <text x="600" y="447" class="head">SQL 기준값과 비교</text>
-  <text x="600" y="480" class="body">전체 24 · 상태 12·5·4·3 · 금액 2,770,000</text>
+  <text x="600" y="480" class="body">전체 24 · 상태 12·5·4·3 · 금액 3,210,000</text>
   <text x="600" y="505" class="body">완료 평균 25일</text>
 
   <path d="M515 295 V375 H540 V410" class="line"/>
