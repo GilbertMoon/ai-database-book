@@ -337,6 +337,10 @@
       ].filter((step) => step.text);
     }
 
+    if (['STEP 03', 'STEP 05', 'STEP 06', 'STEP 07'].includes(key) && executableKeys.length) {
+      return [{ text: sentences.join(' '), focusKeys: executableKeys }].filter((step) => step.text);
+    }
+
     if (key === 'STEP 30' && cardKeys.length >= 2) {
       return [
         { text: sentences.slice(0, 2).join(' '), focusKeys: [cardKeys[0]] },

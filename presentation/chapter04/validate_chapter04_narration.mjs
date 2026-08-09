@@ -32,6 +32,7 @@ const sources = [
   'chapter04_script.js'
 ];
 const sourceText = sources.map(readHere).join('\n');
+assert(!readHere('chapter04_script.html').includes('script_content_enhancer.js'), 'Chapter 04 script must not load the generic content enhancer');
 
 assert(theory.length === 24, `expected 24 theory slides, got ${theory.length}`);
 assert(practice.length === 38, `expected 38 practice slides, got ${practice.length}`);
@@ -52,6 +53,12 @@ assert(step02?.h.includes('01_create_students.sql'), 'STEP 02 must start with nu
 assert(step02?.h.includes('verify_students.sql'), 'STEP 02 must include state verification');
 assert(step02?.h.includes('basic_crud.sql: 기존 링크용 통합 참고'), 'STEP 02 must identify basic_crud.sql as reference only');
 assert(!step02?.h.includes('basic_crud.sql을 엽니다'), 'STEP 02 must not open basic_crud.sql as the default path');
+const step03 = practice.find((slide) => slide.k === 'STEP 03');
+assert(step03?.s.includes('공일 생성 파일 전체를 실행합니다'), 'STEP 03 must execute the complete protected create file');
+for (const key of ['STEP 05', 'STEP 06', 'STEP 07']) {
+  const slide = practice.find((item) => item.k === key);
+  assert(slide?.h.includes('02_insert_students.sql'), `${key} must be identified as part of 02_insert_students.sql`);
+}
 
 const expectedStates = {
   'CHECKPOINT A': ['초기 데이터 상태', '여섯 명', '삼 학년', '널'],
