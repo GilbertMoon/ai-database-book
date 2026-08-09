@@ -64,7 +64,7 @@ Chapter 12가 NoSQL 유형을 단순 소개하지 않고, 시스템 역할·대�
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
 | 현재 원본 테이블 | 통과 | students·instructors·courses·enrollments |
-| paid_amount 의미 | 통과 | 신청 당시 기록 금액 |
+| recorded_amount 타입·의미 | 통과 | `NUMERIC(12,0)`, 신청 시점 기록 금액 |
 | 별도 결제·환불 원장 | 통과 | 현재 범위 밖 명시 |
 | AI 프롬프트 | 통과 | 존재하지 않는 payments 제거 |
 | 선택 사례 이름 | 통과 | 수강신청·신청 당시 금액 기록 |

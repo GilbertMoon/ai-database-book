@@ -68,14 +68,24 @@ SHOW search_path;
 | `nosql_lab.key_value_cache_examples` | 4 |
 | `nosql_lab.storage_choice_cases` | 6 |
 
-Chapter 07 원본 기준:
+Chapter 07·08 원본 기준:
 
 ```text
 students 3
 instructors 2
 courses 3
 enrollments 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
 ```
+
+`recorded_amount`는 신청 시점에 신청 행에 기록한 금액입니다. 결제 승인액·환불 반영 순액·회계 매출을 뜻하지 않으며 별도 결제·환불 원장은 현재 프로젝트 범위 밖입니다.
 
 강의 문서 매핑:
 

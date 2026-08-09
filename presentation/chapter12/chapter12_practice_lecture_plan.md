@@ -46,6 +46,10 @@ SHOW search_path;
 ```text
 현재 DB = ai_database_book
 course_project = 3 / 2 / 3 / 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 = 590000 / 활성 = 3·340000 / 취소 제외 = 4·440000
+1001 완료·100000 / 1004 취소·150000 / 1005 신청·120000
 nosql_lab = 생성 전 미존재
 ```
 
@@ -420,11 +424,14 @@ ON nosql_lab.course_documents ((metadata #>> '{options,online}'));
 기대값:
 
 ```text
-Chapter 07 기준: 3 / 2 / 3 / 5
+Chapter 07·08 기준: 3 / 2 / 3 / 5, 상태 2 / 1 / 1 / 1
+recorded_amount = NUMERIC(12,0), 전체 590000
+활성 = 3 / 340000, 취소 제외 = 4 / 440000
 Chapter 12 기준: 3 / 4 / 6
-Seed 캐시: 4 / 3 / 1
-adopted 사례: 1
-GIN·표현식 인덱스 정의 확인
+Seed 캐시: 4 / 3 / 1, 무만료 1
+COURSE-301 = certificate true / version 1
+결정 상태 = adopted 1 / poc_planned 2 / candidate 2 / hold 1
+GIN·표현식 인덱스 valid·ready 확인
 ```
 
 통과 메시지:

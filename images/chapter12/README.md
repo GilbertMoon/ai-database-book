@@ -33,6 +33,18 @@
 
 ## 2차 재구성 실습 기준
 
+원본 기준:
+
+```text
+course_project = 3 / 2 / 3 / 5
+recorded_amount = NUMERIC(12,0)
+전체 = 590000
+활성 = 3 / 340000
+취소 제외 = 4 / 440000
+```
+
+실습 기준:
+
 ```text
 nosql_lab.course_documents 3
 nosql_lab.key_value_cache_examples 4

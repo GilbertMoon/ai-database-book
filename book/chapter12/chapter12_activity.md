@@ -44,6 +44,10 @@ SHOW search_path;
 | course_project instructors | 2 |  |
 | course_project courses | 3 |  |
 | course_project enrollments | 5 |  |
+| recorded_amount 타입 | `NUMERIC(12,0)` |  |
+| 전체 기록 금액 | 590000 |  |
+| 활성 신청 | 3건 / 340000 |  |
+| 취소 제외 | 4건 / 440000 |  |
 | nosql_lab 생성 전 | 미존재 |  |
 
 | 스키마 | Chapter 12 처리 | 확인 |

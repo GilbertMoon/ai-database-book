@@ -84,7 +84,7 @@ courses
 enrollments
 ```
 
-`enrollments.paid_amount`는 신청 당시 기록 금액이며 별도 결제·환불 원장은 현재 프로젝트 범위 밖임을 명시했습니다.
+`enrollments.recorded_amount NUMERIC(12,0)`는 신청 시점에 신청 행에 기록한 금액이며, 결제 승인액·환불 반영 순액·회계 매출이 아니고 별도 결제·환불 원장은 현재 프로젝트 범위 밖임을 명시했습니다.
 
 ---
 

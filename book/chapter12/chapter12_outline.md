@@ -63,6 +63,12 @@ course_project
 - instructors 2
 - courses 3
 - enrollments 5
+- 상태: 신청 2 / 수강중 1 / 완료 1 / 취소 1
+- recorded_amount: NUMERIC(12,0)
+- 전체 기록 금액: 590000
+- 활성 신청: 3 / 340000
+- 취소 제외: 4 / 440000
+- 1001 완료/100000, 1004 취소/150000, 1005 신청/120000
 
 nosql_lab
 - course_documents 3
