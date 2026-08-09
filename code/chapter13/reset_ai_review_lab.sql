@@ -1,11 +1,13 @@
 -- Chapter 13. ai_review_lab 초기화
--- 주의: ai_review_lab 스키마와 실습 데이터만 삭제합니다.
+-- 주의: ai_review_lab의 알려진 Chapter 13 객체만 삭제합니다.
 -- 기존 프로젝트·앞 장 스키마·Role은 변경하지 않습니다.
+-- 예상하지 못한 객체가 남아 있으면 DROP SCHEMA가 실패하고 전체 초기화를 ROLLBACK합니다.
 
 SELECT current_user;
 SELECT current_database();
 SELECT current_schema();
 SHOW search_path;
+SHOW transaction_read_only;
 
 DO $$
 BEGIN
@@ -15,13 +17,37 @@ BEGIN
             current_database();
     END IF;
 
-    DROP TABLE IF EXISTS ai_review_lab.payments;
-    DROP TABLE IF EXISTS ai_review_lab.enrollments;
-    DROP TABLE IF EXISTS ai_review_lab.courses;
-    DROP TABLE IF EXISTS ai_review_lab.instructors;
-    DROP TABLE IF EXISTS ai_review_lab.students;
-    DROP TABLE IF EXISTS ai_review_lab.bad_enrollments;
-    DROP SCHEMA IF EXISTS ai_review_lab;
+    IF current_setting('transaction_read_only') = 'on' THEN
+        RAISE EXCEPTION
+            '초기화 중단: 현재 연결은 읽기 전용입니다.';
+    END IF;
+END
+$$;
+
+BEGIN;
+
+-- 자식 → 부모 순서로 Chapter 13이 알고 있는 객체만 삭제합니다.
+DROP TABLE IF EXISTS ai_review_lab.payments;
+DROP TABLE IF EXISTS ai_review_lab.enrollments;
+DROP TABLE IF EXISTS ai_review_lab.courses;
+DROP TABLE IF EXISTS ai_review_lab.instructors;
+DROP TABLE IF EXISTS ai_review_lab.students;
+DROP TABLE IF EXISTS ai_review_lab.bad_enrollments;
+
+-- CASCADE를 사용하지 않습니다.
+-- keep_me 같은 예상 밖 객체가 있으면 여기서 실패하여 위 DROP도 모두 취소됩니다.
+DROP SCHEMA IF EXISTS ai_review_lab;
+
+COMMIT;
+
+DO $$
+BEGIN
+    IF to_regnamespace('ai_review_lab') IS NOT NULL THEN
+        RAISE EXCEPTION
+            '초기화 검증 실패: ai_review_lab 스키마가 남아 있습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 13 ai_review_lab reset passed';
 END
 $$;
 
