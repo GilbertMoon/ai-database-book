@@ -53,7 +53,7 @@ Chapter 10 SQL은 `course_project`를 읽기·참조만 하고 변경하지 않�
 
 ## 2. 금액 열 이름을 `recorded_amount`로 통일
 
-기존 Chapter 10 일부 원고와 코드에는 이전 이름인 `paid_amount`가 남아 있었습니다.
+기존 Chapter 10 일부 원고와 코드에 **이전 금액 열 이름**이 남아 있었습니다.
 
 Chapter 07·08의 최종 스키마와 동일하게 다음 이름으로 원본 자체를 정리했습니다.
 
