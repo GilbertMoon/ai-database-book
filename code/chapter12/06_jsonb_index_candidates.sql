@@ -18,6 +18,11 @@ BEGIN
             current_database();
     END IF;
 
+    IF current_setting('transaction_read_only')::BOOLEAN THEN
+        RAISE EXCEPTION
+            '실행 중단: 읽기 전용 연결에서는 인덱스를 만들 수 없습니다.';
+    END IF;
+
     IF to_regclass('nosql_lab.course_documents') IS NULL
        OR (SELECT COUNT(*) FROM nosql_lab.course_documents) <> 3 THEN
         RAISE EXCEPTION
@@ -31,6 +36,10 @@ BEGIN
     END IF;
 END
 $$;
+
+-- 두 인덱스는 하나의 실험 단위입니다.
+-- 두 번째 생성 또는 정의 검증이 실패하면 첫 번째 생성도 함께 취소합니다.
+BEGIN;
 
 -- ============================================================
 -- 1. JSONB 전체 포함 검색 후보
@@ -49,7 +58,74 @@ CREATE INDEX idx_nosql_course_documents_online
 ON nosql_lab.course_documents ((metadata #>> '{options,online}'));
 
 -- ============================================================
--- 3. 생성된 정의 확인
+-- 3. COMMIT 전 인덱스 정의 자동 판정
+-- ============================================================
+DO $$
+DECLARE
+    v_gin_method TEXT;
+    v_gin_definition TEXT;
+    v_online_method TEXT;
+    v_online_expression TEXT;
+    v_bad_state_count BIGINT;
+BEGIN
+    SELECT
+        am.amname,
+        pg_get_indexdef(idx.oid)
+    INTO
+        v_gin_method,
+        v_gin_definition
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_class AS tbl ON tbl.oid = i.indrelid
+    JOIN pg_namespace AS n ON n.oid = tbl.relnamespace
+    JOIN pg_am AS am ON am.oid = idx.relam
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname = 'idx_nosql_course_documents_metadata_gin';
+
+    SELECT
+        am.amname,
+        pg_get_expr(i.indexprs, i.indrelid)
+    INTO
+        v_online_method,
+        v_online_expression
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_class AS tbl ON tbl.oid = i.indrelid
+    JOIN pg_namespace AS n ON n.oid = tbl.relnamespace
+    JOIN pg_am AS am ON am.oid = idx.relam
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname = 'idx_nosql_course_documents_online';
+
+    SELECT COUNT(*)
+    INTO v_bad_state_count
+    FROM pg_index AS i
+    JOIN pg_class AS idx ON idx.oid = i.indexrelid
+    JOIN pg_namespace AS n ON n.oid = idx.relnamespace
+    WHERE n.nspname = 'nosql_lab'
+      AND idx.relname IN (
+          'idx_nosql_course_documents_metadata_gin',
+          'idx_nosql_course_documents_online'
+      )
+      AND (NOT i.indisvalid OR NOT i.indisready);
+
+    IF v_gin_method IS DISTINCT FROM 'gin'
+       OR lower(COALESCE(v_gin_definition, '')) NOT LIKE '%using gin%metadata%'
+       OR v_online_method IS DISTINCT FROM 'btree'
+       OR COALESCE(v_online_expression, '') NOT LIKE '%#>>%options%online%'
+       OR v_bad_state_count <> 0 THEN
+        RAISE EXCEPTION
+            'Chapter 12 인덱스 정의 검증 실패: gin_method=% online_method=% bad_state=%',
+            v_gin_method, v_online_method, v_bad_state_count;
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 JSONB index candidate validation passed';
+END
+$$;
+
+COMMIT;
+
+-- ============================================================
+-- 4. 생성된 정의 확인
 -- ============================================================
 SELECT
     schemaname,
@@ -65,11 +141,13 @@ WHERE schemaname = 'nosql_lab'
 ORDER BY indexname;
 
 -- ============================================================
--- 4. 인덱스 방식과 표현식 확인
+-- 5. 인덱스 방식과 표현식 확인
 -- ============================================================
 SELECT
     idx.relname AS index_name,
     am.amname AS access_method,
+    i.indisvalid,
+    i.indisready,
     pg_get_expr(i.indexprs, i.indrelid) AS expression,
     pg_get_indexdef(idx.oid) AS index_definition
 FROM pg_index AS i
@@ -90,7 +168,7 @@ WHERE n.nspname = 'nosql_lab'
 ORDER BY idx.relname;
 
 -- ============================================================
--- 5. 포함 검색 실행 계획
+-- 6. 포함 검색 실행 계획
 -- ============================================================
 EXPLAIN
 SELECT source_course_id, course_code, title
@@ -98,7 +176,7 @@ FROM nosql_lab.course_documents
 WHERE metadata @> '{"tags": ["PostgreSQL"]}'::jsonb;
 
 -- ============================================================
--- 6. 특정 경로 텍스트 조건 실행 계획
+-- 7. 특정 경로 텍스트 조건 실행 계획
 -- ============================================================
 EXPLAIN
 SELECT source_course_id, course_code, title
