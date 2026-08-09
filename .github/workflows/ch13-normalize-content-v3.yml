@@ -1,0 +1,256 @@
+name: Normalize Chapter 13 content v3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch13-normalize-content-v3.yml
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize Chapter 13 sources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('code/chapter13/07_negative_tests.sql')
+          t = p.read_text(encoding='utf-8').replace('agreed_amount', 'recorded_amount')
+          t = t.replace("'negative_agreed_amount'", "'negative_recorded_amount'")
+
+          old_heading = '-- P13-T23~P13-T27. 정상 경계값'
+          fail_block = "\n".join([
+              '-- P13-T23~P13-T24. 삭제 RESTRICT 반례',
+              '-- ============================================================',
+              "CALL pg_temp.expect_failure(",
+              "    23, 'P13-T23', 'delete_referenced_instructor_restricted',",
+              "    $$DELETE FROM ai_review_lab.instructors WHERE id = 201$$,",
+              "    '23503', 'fk_ai_review_courses_instructor'",
+              ');',
+              '',
+              'CALL pg_temp.expect_failure(',
+              "    24, 'P13-T24', 'delete_referenced_enrollment_restricted',",
+              '    $$DELETE FROM ai_review_lab.enrollments WHERE id = 1001$$,',
+              "    '23503', 'fk_ai_review_payments_enrollment'",
+              ');',
+              '',
+              '-- ============================================================',
+              '-- P13-T25~P13-T30. 정상 경계값',
+          ])
+          if old_heading not in t:
+              raise SystemExit('07 old success heading not found')
+          t = t.replace(old_heading, fail_block, 1)
+
+          renumbers = [
+              ("23, 'P13-T23', 'zero_price_one_character_and_null_description'", "25, 'P13-T25', 'zero_price_one_character_and_null_description'"),
+              ("24, 'P13-T24', 'application_without_payment'", "26, 'P13-T26', 'application_without_payment'"),
+              ("25, 'P13-T25', 'reenroll_after_completed_history'", "27, 'P13-T27', 'reenroll_after_completed_history'"),
+              ("26, 'P13-T26', 'reenroll_after_cancelled_history'", "28, 'P13-T28', 'reenroll_after_cancelled_history'"),
+              ("27, 'P13-T27', 'failed_zero_payment_with_null_timestamps'", "29, 'P13-T29', 'failed_zero_payment_with_null_timestamps'"),
+          ]
+          for old, new in renumbers:
+              if old not in t:
+                  raise SystemExit(f'07 renumber marker missing: {old}')
+              t = t.replace(old, new, 1)
+
+          last_end = "      FROM new_enrollment$$\n);\n\n-- ============================================================\n-- 결과와 전체 자동 판정"
+          t30 = "\n".join([
+              '      FROM new_enrollment$$',
+              ');',
+              '',
+              'CALL pg_temp.expect_success(',
+              "    30, 'P13-T30', 'case_variant_student_email_allowed',",
+              '    $$INSERT INTO ai_review_lab.students (id, name, email, joined_at)',
+              "      VALUES (19905, '대소문자학생', 'Kim.review@example.com', CURRENT_DATE)$$",
+              ');',
+              '',
+              '-- ============================================================',
+              '-- 결과와 전체 자동 판정',
+          ])
+          if last_end not in t:
+              raise SystemExit('07 final success insertion marker missing')
+          t = t.replace(last_end, t30, 1)
+
+          t = t.replace('-- P13-T01~P13-T22. 예상 실패 반례', '-- P13-T01~P13-T24. 예상 실패 반례')
+          t = t.replace('total_tests_expected_27', 'total_tests_expected_30')
+          t = t.replace('passed_tests_expected_27', 'passed_tests_expected_30')
+          t = t.replace('total_count <> 27', 'total_count <> 30')
+          t = t.replace('pass_count <> 27', 'pass_count <> 30')
+          t = t.replace('Chapter 13 negative and boundary tests passed: 27/27', 'Chapter 13 negative and boundary tests passed: 30/30')
+
+          decl = '    total_count INTEGER;\n    pass_count INTEGER;\n    unexpected_count INTEGER;'
+          if decl not in t:
+              raise SystemExit('07 declaration marker missing')
+          t = t.replace(decl, decl + '\n    expected_failure_count INTEGER;\n    expected_success_count INTEGER;', 1)
+
+          old = "\n".join([
+              '        COUNT(*),',
+              '        COUNT(*) FILTER (',
+              "            WHERE actual_result IN ('expected_failure', 'expected_success')",
+              '        ),',
+              '        COUNT(*) FILTER (',
+              "            WHERE actual_result LIKE 'unexpected%'",
+              '        )',
+              '    INTO total_count, pass_count, unexpected_count',
+              '    FROM pg_temp.negative_test_results;',
+          ])
+          new = "\n".join([
+              '        COUNT(*),',
+              '        COUNT(*) FILTER (',
+              "            WHERE actual_result IN ('expected_failure', 'expected_success')",
+              '        ),',
+              '        COUNT(*) FILTER (',
+              "            WHERE actual_result LIKE 'unexpected%'",
+              '        ),',
+              "        COUNT(*) FILTER (WHERE expected_result = 'expected_failure'),",
+              "        COUNT(*) FILTER (WHERE expected_result = 'expected_success')",
+              '    INTO total_count, pass_count, unexpected_count,',
+              '         expected_failure_count, expected_success_count',
+              '    FROM pg_temp.negative_test_results;',
+          ])
+          if old not in t:
+              raise SystemExit('07 final summary query marker missing')
+          t = t.replace(old, new, 1)
+
+          old = "\n".join([
+              '    IF total_count <> 30',
+              '       OR pass_count <> 30',
+              '       OR unexpected_count <> 0 THEN',
+              '        RAISE EXCEPTION',
+              "            '반례 검증 실패: total %, passed %, unexpected %.',",
+              '            total_count,',
+              '            pass_count,',
+              '            unexpected_count;',
+              '    END IF;',
+          ])
+          new = "\n".join([
+              '    IF total_count <> 30',
+              '       OR pass_count <> 30',
+              '       OR unexpected_count <> 0',
+              '       OR expected_failure_count <> 24',
+              '       OR expected_success_count <> 6 THEN',
+              '        RAISE EXCEPTION',
+              "            '반례 검증 실패: total %, passed %, unexpected %, failure %, success %.',",
+              '            total_count,',
+              '            pass_count,',
+              '            unexpected_count,',
+              '            expected_failure_count,',
+              '            expected_success_count;',
+              '    END IF;',
+          ])
+          if old not in t:
+              raise SystemExit('07 pass condition marker missing')
+          t = t.replace(old, new, 1)
+
+          old = "\n".join([
+              '    COUNT(*) FILTER (',
+              "        WHERE actual_result LIKE 'unexpected%'",
+              '    ) AS unexpected_tests_expected_0',
+              'FROM pg_temp.negative_test_results;',
+          ])
+          new = "\n".join([
+              '    COUNT(*) FILTER (',
+              "        WHERE actual_result LIKE 'unexpected%'",
+              '    ) AS unexpected_tests_expected_0,',
+              "    COUNT(*) FILTER (WHERE expected_result = 'expected_failure') AS expected_failures_expected_24,",
+              "    COUNT(*) FILTER (WHERE expected_result = 'expected_success') AS expected_successes_expected_6",
+              'FROM pg_temp.negative_test_results;',
+          ])
+          if old not in t:
+              raise SystemExit('07 visible summary marker missing')
+          t = t.replace(old, new, 1)
+          p.write_text(t, encoding='utf-8')
+
+          files = list(Path('book/chapter13').glob('*.md')) + list(Path('code/chapter13').glob('*.md')) + list(Path('images/chapter13').glob('*.*')) + list(Path('presentation/chapter13').glob('*.md')) + [Path('presentation/chapter13/chapter13_navigation.js'), Path('notes/chapter13_review_checklist.md')]
+          replacements = [
+              ('agreed_amount', 'recorded_amount'),
+              ('현재 가격·합의 금액·결제 금액', '현재 가격·신청 시점 기록 금액·결제 상태 기록 금액'),
+              ('현재 가격·합의 금액', '현재 가격·신청 시점 기록 금액'),
+              ('합의·결제 금액', '신청 시점 기록 금액·결제 상태 기록 금액'),
+              ('합의 금액·결제 금액', '신청 시점 기록 금액·결제 상태 기록 금액'),
+              ('합의 금액', '신청 시점 기록 금액'),
+              ('P13-T01~P13-T27', 'P13-T01~P13-T30'),
+              ('P13-T01~T27', 'P13-T01~T30'),
+              ('P13-T01~P13-T22', 'P13-T01~P13-T24'),
+              ('P13-T01~T22', 'P13-T01~T24'),
+              ('P13-T23~P13-T27', 'P13-T25~P13-T30'),
+              ('P13-T23~T27', 'P13-T25~T30'),
+              ('반례 22개', '반례 24개'),
+              ('정상 경계값 5개', '정상 경계값 6개'),
+              ('반례·경계값 27개', '반례·경계값 30개'),
+              ('전체 27 / 통과 27 / unexpected 0', '전체 30 / 통과 30 / unexpected 0'),
+              ('전체 27개, 통과 27개', '전체 30개, 통과 30개'),
+              ('전체 27개', '전체 30개'),
+              ('27/27', '30/30'),
+              ('| 전체 테스트 | 27 |', '| 전체 테스트 | 30 |'),
+              ('| expected_failure | 22 |', '| expected_failure | 24 |'),
+              ('| expected_success | 5 |', '| expected_success | 6 |'),
+              ('| passed | 27 |', '| passed | 30 |'),
+          ]
+          for path in files:
+              if not path.is_file():
+                  continue
+              try:
+                  s = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for old, new in replacements:
+                  s = s.replace(old, new)
+              path.write_text(s, encoding='utf-8')
+
+          def add_after(path, marker, addition):
+              p = Path(path)
+              s = p.read_text(encoding='utf-8')
+              if addition.strip() in s:
+                  return
+              if marker not in s:
+                  raise SystemExit(f'insertion marker missing in {path}: {marker[:60]}')
+              p.write_text(s.replace(marker, marker + addition, 1), encoding='utf-8')
+
+          add_after('book/chapter13/chapter13.md', 'P13-R09는 Chapter 07에서 이미 확정한 정책을 유지합니다.', '\n\n> **격리 시나리오 주의**\n> Chapter 13의 `payments`는 `ai_review_lab`에서 AI 설계 검토 방법을 연습하기 위해 추가한 가상 테이블입니다. `course_project`에 결제·환불 원장이 생겼다는 뜻이 아닙니다. 기존 프로젝트의 `enrollments.recorded_amount NUMERIC(12,0)`는 계속 신청 시점 기록 금액이며 결제 승인액·환불 반영 순액·회계 매출이 아닙니다.')
+          add_after('book/chapter13/chapter13.md', 'ChatGPT와 Codex의 지원 기능과 사용 환경은 바뀔 수 있으며 서로 겹치는 기능도 있습니다. 이 장의 구분은 제품의 절대 기능 경계가 아니라 데이터베이스 작업을 안전하게 진행하기 위한 권장 흐름입니다.', ' 현재 공식 안내의 큰 흐름은 Chat은 빠른 질의·대화, Work는 장시간 다단계 산출물, Codex는 코드 작성·디버깅·테스트·명령 실행·저장소 작업에 초점을 둔다는 것입니다. 실제 사용 시 최신 공식 안내를 다시 확인합니다.')
+          add_after('book/chapter13/chapter13_outline.md', '앞 장 스키마는 변경하지 않는다.', ' `payments`는 `ai_review_lab`의 가상 리뷰 시나리오일 뿐이며 `course_project`에 결제·환불 원장이 추가되는 것이 아니다. 기존 `course_project.enrollments.recorded_amount NUMERIC(12,0)`의 의미는 신청 시점 기록 금액으로 유지한다.')
+          add_after('code/chapter13/README.md', 'ai_review_lab: Chapter 13 실습 대상', '\n\n`ai_review_lab.payments`는 AI 설계 검토를 위한 가상 격리 시나리오입니다. `course_project`에는 결제·환불 원장을 추가하지 않으며, 원본 `course_project.enrollments.recorded_amount NUMERIC(12,0)`는 계속 신청 시점 기록 금액입니다.')
+          add_after('presentation/chapter13/chapter13_practice_lecture_plan.md', '실습은 `ai_review_lab`에서만 진행합니다. 앞 장의 스키마는 변경하지 않습니다.', ' 특히 `payments`는 이 격리 리뷰 시나리오 안에서만 사용하는 가상 테이블이며, 기존 `course_project`에 결제·환불 원장을 추가하는 것이 아닙니다.')
+          add_after('presentation/chapter13/chapter13_theory_lecture_plan.md', '하지만 업무 정책을 확정하고, 위험한 변경을 승인하고, 운영 반영을 결정하는 주체는 사람입니다.', ' 현재 공식 안내의 큰 흐름은 Chat은 빠른 질의·대화, Work는 장시간 다단계 산출물, Codex는 코드·테스트·명령·저장소 작업에 초점을 둡니다. 기능과 사용 환경은 바뀔 수 있으므로 실제 사용 시 최신 공식 안내를 다시 확인합니다.')
+
+          for path in ['code/chapter13/README.md', 'book/chapter13/chapter13_activity.md', 'notes/chapter13_review_checklist.md']:
+              p = Path(path)
+              s = p.read_text(encoding='utf-8')
+              marker = '결제실패 + 금액 0 + 시각 NULL'
+              addition = '\n삭제 RESTRICT: 참조 중인 강사·신청 삭제 실패\n이메일 대소문자 변형: 현재 정확 문자열 정책에서는 성공'
+              if marker in s and '삭제 RESTRICT: 참조 중인 강사·신청 삭제 실패' not in s:
+                  s = s.replace(marker, marker + addition, 1)
+              p.write_text(s, encoding='utf-8')
+
+          for filename in ['presentation/chapter13/chapter13_player.js', 'presentation/chapter13/chapter13_script.js', 'presentation/chapter13/chapter13_theory_presentation.html', 'presentation/chapter13/chapter13_practice_presentation.html', 'presentation/chapter13/chapter13_script.html']:
+              p = Path(filename)
+              p.write_text(p.read_text(encoding='utf-8').replace('20260808a', '20260809a'), encoding='utf-8')
+
+          stale = [str(path) for path in files if path.is_file() and 'agreed_amount' in path.read_text(encoding='utf-8', errors='ignore')]
+          if stale:
+              raise SystemExit(f'stale agreed_amount remains: {stale}')
+          t = Path('code/chapter13/07_negative_tests.sql').read_text(encoding='utf-8')
+          required = ["P13-T23', 'delete_referenced_instructor_restricted'", "P13-T24', 'delete_referenced_enrollment_restricted'", "P13-T30', 'case_variant_student_email_allowed'", 'expected_failure_count <> 24', 'expected_success_count <> 6', 'Chapter 13 negative and boundary tests passed: 30/30']
+          missing = [x for x in required if x not in t]
+          if missing:
+              raise SystemExit(f'07 final markers missing: {missing}')
+          PY
+
+      - name: Commit aligned sources and remove temporary workflows
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/ch13-normalize-content-v3.yml .github/workflows/ch13-normalize-content-v2.yml .github/workflows/ch13-normalize-content.yml
+          git add book/chapter13 code/chapter13 images/chapter13 presentation/chapter13 notes/chapter13_review_checklist.md
+          git commit -m "Align Chapter 13 tests, semantics, and presentation sources"
+          git push
