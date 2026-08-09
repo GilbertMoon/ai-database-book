@@ -101,16 +101,18 @@ INSERT INTO ai_review_lab.enrollments (
     student_id,
     course_id,
     status,
-    agreed_amount,
+    recorded_amount,
     enrolled_at
 )
 VALUES
     (1001, 101, 301, '완료', 100000, '2026-07-01'),
-    -- 현재 강의 가격은 180000원이지만 신청 당시 150000원으로 합의했습니다.
+    -- 현재 강의 가격은 180000원이지만 신청 시점 기록 금액은 150000원입니다.
     (1002, 101, 302, '완료', 150000, '2026-07-02'),
     (1003, 102, 301, '신청', 100000, '2026-07-02'),
     (1004, 103, 303, '취소', 120000, '2026-07-03');
 
+-- payments는 ai_review_lab의 격리 리뷰 시나리오입니다.
+-- amount는 실제 결제 상태에 기록된 금액이며 enrollment의 신청 시점 기록 금액과 구분합니다.
 INSERT INTO ai_review_lab.payments (
     id,
     enrollment_id,
@@ -182,15 +184,58 @@ BEGIN
             '샘플 입력 중단: 기준 행 수가 예상과 다릅니다.';
     END IF;
 
+    IF (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '완료') <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '신청') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '취소') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.enrollments WHERE status = '수강중') <> 0 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 신청 상태 분포는 완료2/신청1/취소1/수강중0이어야 합니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제완료') <> 2
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제대기') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '환불') <> 1
+       OR (SELECT COUNT(*) FROM ai_review_lab.payments WHERE payment_status = '결제실패') <> 0 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 결제 상태 분포는 결제완료2/결제대기1/환불1/결제실패0이어야 합니다.';
+    END IF;
+
+    IF (SELECT COALESCE(SUM(recorded_amount), 0) FROM ai_review_lab.enrollments) <> 470000
+       OR (SELECT COALESCE(SUM(amount), 0) FROM ai_review_lab.payments) <> 470000 THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 신청 시점 기록 금액과 결제 상태 기록 금액 합계는 각각 470000이어야 합니다.';
+    END IF;
+
     IF EXISTS (
         SELECT 1
         FROM ai_review_lab.enrollments AS e
         JOIN ai_review_lab.payments AS p
             ON p.enrollment_id = e.id
-        WHERE e.agreed_amount <> p.amount
+        WHERE e.recorded_amount <> p.amount
     ) THEN
         RAISE EXCEPTION
-            '샘플 입력 중단: 신청 합의 금액과 결제 기록 금액이 다릅니다.';
+            '샘플 입력 중단: 신청 시점 기록 금액과 결제 상태 기록 금액이 다릅니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM ai_review_lab.enrollments AS e
+        JOIN ai_review_lab.courses AS c ON c.id = e.course_id
+        WHERE e.id = 1002
+          AND c.price = 180000
+          AND e.recorded_amount = 150000
+    ) THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 현재 가격과 신청 시점 기록 금액 차이 예제가 준비되지 않았습니다.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM ai_review_lab.payments
+        WHERE payment_reference NOT LIKE 'PAY-REVIEW-TEST-%'
+    ) THEN
+        RAISE EXCEPTION
+            '샘플 입력 중단: 결제 참조값은 가상 테스트 값만 사용해야 합니다.';
     END IF;
 END
 $$;
@@ -202,6 +247,14 @@ SELECT
     (SELECT COUNT(*) FROM ai_review_lab.instructors) AS instructor_count,
     (SELECT COUNT(*) FROM ai_review_lab.courses) AS course_count,
     (SELECT COUNT(*) FROM ai_review_lab.enrollments) AS enrollment_count,
-    (SELECT COUNT(*) FROM ai_review_lab.payments) AS payment_count;
+    (SELECT COUNT(*) FROM ai_review_lab.payments) AS payment_count,
+    (SELECT SUM(recorded_amount) FROM ai_review_lab.enrollments) AS recorded_amount_total,
+    (SELECT SUM(amount) FROM ai_review_lab.payments) AS payment_amount_total;
 
--- 기대 결과: 3 / 2 / 3 / 4 / 4
+-- 기대 결과: 3 / 2 / 3 / 4 / 4 / 470000 / 470000
+
+DO $$
+BEGIN
+    RAISE NOTICE 'Chapter 13 good design seed passed';
+END
+$$;
