@@ -31,25 +31,25 @@ jobs:
               Path('code/chapter10/README.md'),
           ]
 
-          baseline = """
-> **Chapter 07·08 시작 기준**
->
-> `course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, 상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  
-> `course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, 활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  
-> 기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
-""".strip()
+          baseline = (
+              "\n\n**Chapter 07·08 시작 기준**\n\n"
+              "`course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, "
+              "상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  \n"
+              "`course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, "
+              "활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  \n"
+              "기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 "
+              "`uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다."
+          )
 
           for path in targets:
               text = path.read_text(encoding='utf-8')
               if 'Chapter 07·08 시작 기준' not in text:
-                  # Put the canonical baseline after the validation-version note when present,
-                  # otherwise directly below the first heading.
                   anchor = '실습 결과에는 서버 버전을 함께 기록합니다.'
                   if anchor in text:
-                      text = text.replace(anchor, anchor + '\n>\n' + '\n'.join(line[2:] if line.startswith('> ') else line for line in baseline.splitlines()), 1)
+                      text = text.replace(anchor, anchor + baseline, 1)
                   else:
                       first_nl = text.find('\n')
-                      text = text[:first_nl+1] + '\n' + baseline + '\n' + text[first_nl+1:]
+                      text = text[:first_nl+1] + baseline + '\n' + text[first_nl+1:]
 
               text = text.replace(
                   'PostgreSQL은 데이터 분포와 비용에 따라 PostgreSQL 18+ Skip Scan을 선택할 수',
@@ -69,47 +69,48 @@ jobs:
               )
               path.write_text(text, encoding='utf-8')
 
-          # Add concrete safety/measurement notes to the code README once.
           readme = Path('code/chapter10/README.md')
           text = readme.read_text(encoding='utf-8')
           marker = '## 파일 목록'
-          addition = """
-## 자동 검증 기준 상태
-
-```text
-01 완료: performance_lab 4개 테이블 / 0행 / 자동 인덱스 6개
-02 완료: 10003 / 2 / 2003 / 100005, 후보 인덱스 0개
-03: 후보 인덱스 없는 기준 실행 계획 8개 기록
-04 완료: 자동 6 + 후보 3 = 전체 인덱스 9개
-05: 03과 동일한 8개 SQL 재측정
-06: 인덱스 정의·valid/ready·크기·사용 통계 검토
-07: 결과 행·분포·금액·인덱스·Chapter 07·08 보존 자동 판정
-```
-
-`03_baseline_explain.sql`은 읽기 전용이므로 데이터베이스 상태만으로 사용자가 기준 계획을 실제 기록했는지 판정할 수 없습니다. 따라서 **학습자는 03 결과를 기록하고**, 저장소 자동 검증은 실제 실행 순서를 `03 → 04`로 고정합니다.
-
-실행 시간은 캐시, JIT, 장비 부하의 영향을 받습니다. 한 번의 시간 숫자만으로 결론을 내리지 않고 **결과 행 동일성, 계획 노드, Index Cond, Buffers와 반복 측정**을 함께 봅니다.
-
-"""
+          addition = (
+              "## 자동 검증 기준 상태\n\n"
+              "```text\n"
+              "01 완료: performance_lab 4개 테이블 / 0행 / 자동 인덱스 6개\n"
+              "02 완료: 10003 / 2 / 2003 / 100005, 후보 인덱스 0개\n"
+              "03: 후보 인덱스 없는 기준 실행 계획 8개 기록\n"
+              "04 완료: 자동 6 + 후보 3 = 전체 인덱스 9개\n"
+              "05: 03과 동일한 8개 SQL 재측정\n"
+              "06: 인덱스 정의·valid/ready·크기·사용 통계 검토\n"
+              "07: 결과 행·분포·금액·인덱스·Chapter 07·08 보존 자동 판정\n"
+              "```\n\n"
+              "`03_baseline_explain.sql`은 읽기 전용이므로 데이터베이스 상태만으로 사용자가 기준 계획을 실제 기록했는지 판정할 수 없습니다. "
+              "따라서 **학습자는 03 결과를 기록하고**, 저장소 자동 검증은 실제 실행 순서를 `03 → 04`로 고정합니다.\n\n"
+              "실행 시간은 캐시, JIT, 장비 부하의 영향을 받습니다. 한 번의 시간 숫자만으로 결론을 내리지 않고 "
+              "**결과 행 동일성, 계획 노드, Index Cond, Buffers와 반복 측정**을 함께 봅니다.\n\n"
+          )
           if marker in text and '## 자동 검증 기준 상태' not in text:
               text = text.replace(marker, addition + marker, 1)
           readme.write_text(text, encoding='utf-8')
 
-          # Make the workbook prerequisite table explicit.
           activity = Path('book/chapter10/chapter10_activity.md')
           text = activity.read_text(encoding='utf-8')
           old = "| `course_project.enrollments` | 5 |  |"
-          new = """| `course_project` 행 수 | `3 / 2 / 3 / 5` |  |
-| 상태별 건수 | `신청2 / 수강중1 / 완료1 / 취소1` |  |
-| `recorded_amount` 타입 | `NUMERIC(12,0)` |  |
-| 전체 기록 금액 | `590000` |  |
-| 활성 신청 | `3건 / 340000` |  |
-| 취소 제외 이력 | `4건 / 440000` |  |"""
+          new = (
+              "| `course_project` 행 수 | `3 / 2 / 3 / 5` |  |\n"
+              "| 상태별 건수 | `신청2 / 수강중1 / 완료1 / 취소1` |  |\n"
+              "| `recorded_amount` 타입 | `NUMERIC(12,0)` |  |\n"
+              "| 전체 기록 금액 | `590000` |  |\n"
+              "| 활성 신청 | `3건 / 340000` |  |\n"
+              "| 취소 제외 이력 | `4건 / 440000` |  |"
+          )
           if old in text:
               text = text.replace(old, new, 1)
+          text = text.replace(
+              '선두 컬럼이 없는데도 PostgreSQL 18 이상에서 Skip Scan을 선택할 수 있는 조건:',
+              'PostgreSQL 16에서 status 단독 조건이 불리한 이유와 PostgreSQL 18+에서 Skip Scan으로 달라질 수 있는 점:'
+          )
           activity.write_text(text, encoding='utf-8')
 
-          # Make the outline's protected-state block concrete.
           outline = Path('book/chapter10/chapter10_outline.md')
           text = outline.read_text(encoding='utf-8')
           text = text.replace(
