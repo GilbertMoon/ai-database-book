@@ -35,6 +35,28 @@ SELECT
     to_regclass('nosql_lab.idx_nosql_course_documents_online')
         AS online_expression_index;
 
+-- Chapter 07·08 canonical source state
+-- recorded_amount는 신청 시점에 신청 행에 기록한 금액이며
+-- 결제 승인액·환불 반영 순액·회계 매출을 뜻하지 않습니다.
+SELECT
+    COUNT(*) AS enrollment_count,
+    COUNT(*) FILTER (WHERE status = '신청') AS requested_count,
+    COUNT(*) FILTER (WHERE status = '수강중') AS learning_count,
+    COUNT(*) FILTER (WHERE status = '완료') AS completed_count,
+    COUNT(*) FILTER (WHERE status = '취소') AS cancelled_count,
+    COALESCE(SUM(recorded_amount), 0) AS total_recorded_amount,
+    COUNT(*) FILTER (WHERE status IN ('신청', '수강중')) AS active_count,
+    COALESCE(SUM(recorded_amount) FILTER (WHERE status IN ('신청', '수강중')), 0)
+        AS active_recorded_amount,
+    COUNT(*) FILTER (WHERE status <> '취소') AS non_cancelled_count,
+    COALESCE(SUM(recorded_amount) FILTER (WHERE status <> '취소'), 0)
+        AS non_cancelled_recorded_amount
+FROM course_project.enrollments;
+
+-- canonical 기대값:
+-- rows=5 / status=2·1·1·1 / total=590000 / active=3·340000 / non-cancelled=4·440000
+-- course_project.enrollments.recorded_amount = NUMERIC(12,0)
+
 -- nosql_lab 테이블 목록
 SELECT
     table_schema,
