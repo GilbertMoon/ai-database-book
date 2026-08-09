@@ -7,6 +7,7 @@ on:
       - presentation/chapter13/**
       - code/chapter13/**
       - presentation/common/tts_pronunciation.js
+      - presentation/common/script_content_enhancer.js
       - .github/workflows/validate-chapter13-navigation.yml
   workflow_dispatch:
 
@@ -27,6 +28,7 @@ jobs:
           node --check presentation/chapter13/chapter13_player.js
           node --check presentation/chapter13/chapter13_script.js
           node --check presentation/common/tts_pronunciation.js
+          node --check presentation/common/script_content_enhancer.js
 
       - name: Check Chapter 13 navigation and lab evidence
         shell: bash
@@ -82,12 +84,11 @@ jobs:
           required_terms = [
               'ALTER COLUMN TYPE', 'SET NOT NULL', 'IS DISTINCT FROM', 'NO ACTION',
               'P13-R', 'P13-D', 'P13-T', 'P13-V', 'ai_review_lab', 'bad_enrollments',
-              'agreed_amount', 'payment_reference', 'payment_status', 'paid_at', 'refunded_at'
+              'recorded_amount', 'payment_reference', 'payment_status', 'paid_at', 'refunded_at'
           ]
           missing_terms = [term for term in required_terms if term not in tts_text]
           if missing_terms:
               raise SystemExit(f'Chapter 13 shared TTS terms missing: {missing_terms}')
-          print('Chapter 13 shared TTS terms OK')
 
           for filename in ['chapter13_theory_presentation.html', 'chapter13_practice_presentation.html']:
               html = (root / filename).read_text(encoding='utf-8')
@@ -101,11 +102,11 @@ jobs:
               script_html.find('chapter13_slides.js'),
               script_html.find('chapter13_navigation.js'),
               script_html.find('../common/tts_pronunciation.js'),
+              script_html.find('../common/script_content_enhancer.js'),
               script_html.find('chapter13_script.js'),
           ]
           if any(value < 0 for value in order) or order != sorted(order):
               raise SystemExit('Chapter 13 script asset order is invalid')
-          print('Chapter 13 asset order OK')
 
           code_root = Path('code/chapter13')
           required_files = [
@@ -118,22 +119,26 @@ jobs:
           if missing_files:
               raise SystemExit(f'Chapter 13 practice SQL files missing: {missing_files}')
 
+          schema = (code_root / '03_good_design_schema.sql').read_text(encoding='utf-8')
           metadata = (code_root / '05_metadata_validation.sql').read_text(encoding='utf-8')
           negative = (code_root / '07_negative_tests.sql').read_text(encoding='utf-8')
           final = (code_root / '08_ai_review_lab_validation.sql').read_text(encoding='utf-8')
           evidence_checks = {
+              'canonical amount': 'recorded_amount NUMERIC(12,0)' in schema,
               '29 constraints': 'good_constraint_count <> 29' in metadata and 'good_constraint_count <> 29' in final,
               '4 foreign keys': 'fk_signature_count <> 4' in metadata and 'fk_count <> 4' in final,
               '6 identity ids': 'identity_count <> 6' in metadata and 'identity_count <> 6' in final,
-              '22 negative tests': 'P13-T01~P13-T22' in negative,
-              '5 boundary tests': 'P13-T23~P13-T27' in negative,
-              '27 of 27': 'total_count <> 27' in negative and 'pass_count <> 27' in negative,
+              '24 negative tests': 'P13-T01~P13-T24' in negative,
+              '6 boundary tests': 'P13-T25~P13-T30' in negative,
+              '30 of 30': 'total_count <> 30' in negative and 'pass_count <> 30' in negative,
+              'delete restrict tests': 'delete_referenced_instructor_restricted' in negative and 'delete_referenced_enrollment_restricted' in negative,
+              'case variant test': 'case_variant_student_email_allowed' in negative,
               'final row counts': '기준 행 수 3/3/2/3/4/4' in final,
               'chapter07 source preserved': 'course_project.enrollments) <> 5' in final,
-              'final pass notice': 'Chapter 13 AI review lab validation passed' in final,
+              'final pass notice': 'Chapter 13 AI review lab validation passed: tests 30/30' in final,
           }
           failed = [name for name, ok in evidence_checks.items() if not ok]
           if failed:
               raise SystemExit(f'Chapter 13 lab evidence mismatch: {failed}')
-          print('Chapter 13 lab evidence OK')
+          print('Chapter 13 navigation and lab evidence OK')
           PY
