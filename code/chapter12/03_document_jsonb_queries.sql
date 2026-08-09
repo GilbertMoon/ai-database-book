@@ -19,6 +19,20 @@ BEGIN
         RAISE EXCEPTION
             '실행 중단: nosql_lab.course_documents 기준 3행이 준비되지 않았습니다.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.course_documents
+        WHERE source_course_id = 301
+          AND course_code = 'COURSE-301'
+          AND title = '데이터베이스 입문'
+          AND level = 'basic'
+          AND metadata #>> '{options,certificate}' = 'true'
+          AND document_version = 1
+    ) THEN
+        RAISE EXCEPTION
+            '실행 중단: COURSE-301 문서의 낙관적 잠금 기준값이 다릅니다.';
+    END IF;
 END
 $$;
 
@@ -156,6 +170,20 @@ BEGIN
             '문서 수정 중단: 예상 버전 또는 options 경로가 다릅니다. 갱신 행 수=%',
             updated_count;
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.course_documents
+        WHERE course_code = 'COURSE-301'
+          AND metadata #>> '{options,certificate}' = 'false'
+          AND document_version = 2
+          AND updated_at >= created_at
+    ) THEN
+        RAISE EXCEPTION
+            '문서 수정 검증 실패: certificate=false, document_version=2 상태가 아닙니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 optimistic document update passed inside transaction';
 END
 $$;
 
@@ -179,6 +207,28 @@ FROM nosql_lab.course_documents
 WHERE course_code = 'COURSE-301';
 
 -- 기대: certificate=true, document_version=1
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM nosql_lab.course_documents
+        WHERE course_code = 'COURSE-301'
+          AND metadata #>> '{options,certificate}' = 'true'
+          AND document_version = 1
+    ) THEN
+        RAISE EXCEPTION
+            'Chapter 12 문서 실습 실패: ROLLBACK 후 기준 상태가 복구되지 않았습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM nosql_lab.course_documents) <> 3 THEN
+        RAISE EXCEPTION
+            'Chapter 12 문서 실습 실패: 기준 행 수가 변경되었습니다.';
+    END IF;
+
+    RAISE NOTICE 'Chapter 12 document JSONB practice passed';
+END
+$$;
 
 -- ============================================================
 -- 8. 검증 책임 경계
