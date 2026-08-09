@@ -73,7 +73,7 @@ jobs:
                   '2026-05 | 4 | 540000',
               ],
               'book/chapter14/chapter14_outline.md': [
-                  'recorded_amount NUMERIC(12,0)', '3,210,000', '제약조건 20',
+                  'recorded_amount NUMERIC(12,0)', '3,210,000',
               ],
               'presentation/chapter14/chapter14_practice_lecture_plan.md': [
                   'recorded_amount', '350000', '680000', '540000',
