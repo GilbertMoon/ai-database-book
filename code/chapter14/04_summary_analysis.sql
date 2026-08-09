@@ -1,6 +1,6 @@
 -- Chapter 14. 기본 요약 분석
 -- 목적: P14-Q01·Q03·Q04 질문을 같은 분석 기간과 행 단위로 집계합니다.
--- paid_amount는 결제 완료나 회계 매출이 아니라 신청 당시 기록 금액입니다.
+-- recorded_amount는 결제 완료나 회계 매출이 아니라 신청 시점 기록 금액입니다.
 
 SELECT current_database();
 SELECT current_schema();
@@ -23,7 +23,7 @@ ORDER BY enrollment_count DESC, status;
 
 -- 기대: 완료 12, 수강중 5, 신청 4, 취소 3
 
--- P14-M03. 전체 신청 중 현재 완료 상태의 비중
+-- P14-Q01 보조 지표. 전체 신청 중 현재 완료 상태의 비중
 -- 실제 완료율은 관찰 기간이 충분한 코호트와 분모 정책이 별도로 필요합니다.
 WITH filtered_enrollments AS (
     SELECT e.*
@@ -43,7 +43,7 @@ FROM filtered_enrollments
 GROUP BY status
 ORDER BY enrollment_count DESC, status;
 
--- P14-Q03. 강의별 신청 건수와 신청 당시 기록 금액
+-- P14-Q03. 강의별 신청 건수와 신청 시점 기록 금액
 WITH filtered_enrollments AS (
     SELECT e.*
     FROM analysis_lab.enrollments AS e
@@ -55,7 +55,7 @@ SELECT
     c.id AS course_id,
     c.title,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum
 FROM analysis_lab.courses AS c
 LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
@@ -82,7 +82,7 @@ SELECT
     i.name AS instructor_name,
     COUNT(DISTINCT c.id) AS course_count,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum
 FROM analysis_lab.instructors AS i
 LEFT JOIN analysis_lab.courses AS c
     ON c.instructor_id = i.id
@@ -103,7 +103,7 @@ SELECT
     s.region,
     COUNT(DISTINCT s.id) AS student_count,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum,
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum,
     ROUND(
         COUNT(e.id)::numeric / NULLIF(COUNT(DISTINCT s.id), 0),
         2
@@ -133,7 +133,7 @@ SELECT
     s.name,
     s.region,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum
 FROM analysis_lab.students AS s
 LEFT JOIN filtered_enrollments AS e
     ON e.student_id = s.id

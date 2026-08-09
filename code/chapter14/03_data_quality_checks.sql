@@ -106,16 +106,16 @@ JOIN analysis_lab.courses AS c
     ON c.id = e.course_id
 WHERE e.enrolled_at < c.opened_at;
 
--- P14-V02-11. 음수 신청 당시 기록 금액: 기대 0행
-SELECT id, status, paid_amount
+-- P14-V02-11. 음수 신청 시점 기록 금액: 기대 0행
+SELECT id, status, recorded_amount
 FROM analysis_lab.enrollments
-WHERE paid_amount < 0;
+WHERE recorded_amount < 0;
 
 -- P14-V02-12. 취소인데 기록 금액이 0이 아닌 행: 기대 0행
-SELECT id, status, paid_amount
+SELECT id, status, recorded_amount
 FROM analysis_lab.enrollments
 WHERE status = '취소'
-  AND paid_amount <> 0;
+  AND recorded_amount <> 0;
 
 -- P14-V02-13. 허용되지 않은 상태: 기대 0행
 SELECT id, status
@@ -146,7 +146,7 @@ SELECT
     COUNT(DISTINCT id) AS distinct_enrollment_count,
     COUNT(*) FILTER (WHERE completed_at IS NULL) AS completed_at_null_count,
     COUNT(*) FILTER (WHERE status = '완료') AS completed_count,
-    SUM(paid_amount) AS recorded_amount_sum
+    SUM(recorded_amount) AS recorded_amount_sum
 FROM analysis_lab.enrollments;
 
 -- 기대:

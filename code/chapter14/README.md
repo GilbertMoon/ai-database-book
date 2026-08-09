@@ -34,7 +34,7 @@ SHOW search_path;
 
 ```text
 P14-Q01 상태별 수강신청 건수
-P14-Q02 월별 신청 수와 신청 당시 기록 금액
+P14-Q02 월별 신청 수와 신청 시점 기록 금액
 P14-Q03 강의별 신청 건수
 P14-Q04 지역별 학생·신청 건수
 P14-Q05 완료된 신청의 완료 기간
@@ -49,7 +49,7 @@ end_date_exclusive = 2026-07-01
 기간 표현 = [2026-01-01, 2026-07-01)
 ```
 
-`paid_amount`는 물리 컬럼 이름이지만 의미는 **신청 당시 기록 금액**입니다. 결제 성공·환불·회계 매출을 의미하지 않습니다. 분석 VIEW에서는 `recorded_amount`로 제공합니다.
+`recorded_amount`는 물리 컬럼 이름이지만 의미는 **신청 시점 기록 금액**입니다. 결제 성공·환불·회계 매출을 의미하지 않습니다. 분석 VIEW에서는 `recorded_amount`로 제공합니다.
 
 ---
 
@@ -101,6 +101,8 @@ Chapter 14 analysis_lab validation passed
 
 ---
 
+> `analysis_lab`은 분석 학습용 합성 데이터입니다. `course_project`를 복제·확장한 운영 데이터가 아니며, `recorded_amount NUMERIC(12,0)`는 앞 장과 동일하게 신청 시점 기록 금액입니다.
+
 ## 기준 데이터
 
 | 항목 | 기대값 |
@@ -111,7 +113,7 @@ Chapter 14 analysis_lab validation passed
 | enrollments | 24 |
 | enrollment_analysis_dataset | 24 |
 | 데이터셋 enrollment_id 중복 | 0 |
-| 신청 당시 기록 금액 합계 | 2,770,000 |
+| 신청 시점 기록 금액 합계 | 2,770,000 |
 
 상태별 기준:
 

@@ -35,6 +35,26 @@ BEGIN
             '검증 실패: analysis_lab 핵심 테이블 또는 VIEW가 없습니다.';
     END IF;
 
+    -- Chapter 07·08 protected source continuity
+    IF (SELECT COUNT(*) FROM course_project.students) <> 3
+       OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
+       OR (SELECT COUNT(*) FROM course_project.courses) <> 3
+       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments) <> 590000
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments WHERE status IN ('신청','수강중')) <> 340000
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments WHERE status <> '취소') <> 440000 THEN
+        RAISE EXCEPTION '검증 실패: Chapter 07·08 protected source 기준 상태가 변경되었습니다.';
+    END IF;
+
+    IF (SELECT COUNT(*) FROM information_schema.columns
+        WHERE table_schema = 'analysis_lab'
+          AND ((table_name = 'courses' AND column_name = 'price')
+            OR (table_name = 'enrollments' AND column_name = 'recorded_amount'))
+          AND data_type = 'numeric'
+          AND numeric_precision = 12 AND numeric_scale = 0) <> 2 THEN
+        RAISE EXCEPTION '검증 실패: analysis_lab 가격·기록 금액 타입은 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
     -- 정확한 테이블 집합 4개
     WITH expected(name) AS (
         VALUES ('students'), ('instructors'), ('courses'), ('enrollments')
@@ -101,7 +121,7 @@ BEGIN
 
     IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 2770000 THEN
         RAISE EXCEPTION
-            '검증 실패: 신청 당시 기록 금액 합계는 2,770,000이어야 합니다.';
+            '검증 실패: 신청 시점 기록 금액 합계는 2,770,000이어야 합니다.';
     END IF;
 
     -- 분석 데이터셋의 정확한 컬럼 집합 17개
@@ -307,8 +327,8 @@ BEGIN
          WHERE e.enrolled_at < c.opened_at)
       + (SELECT COUNT(*)
          FROM analysis_lab.enrollments
-         WHERE paid_amount < 0
-            OR (status = '취소' AND paid_amount <> 0))
+         WHERE recorded_amount < 0
+            OR (status = '취소' AND recorded_amount <> 0))
       + (SELECT COUNT(*)
          FROM analysis_lab.enrollments AS e
          CROSS JOIN analysis_lab.analysis_parameters AS p
@@ -347,6 +367,6 @@ BEGIN
             '검증 실패: IDENTITY 다음 값이 기존 최대 ID보다 크지 않습니다.';
     END IF;
 
-    RAISE NOTICE 'Chapter 14 analysis_lab validation passed';
+    RAISE NOTICE 'Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 2770000';
 END
 $$;

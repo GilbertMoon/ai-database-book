@@ -54,7 +54,7 @@ def main() -> None:
     print("\n[검증 결과]")
     print(f"행 수: {len(df)}")
     print(f"고유 enrollment_id: {df['enrollment_id'].nunique()}")
-    print(f"신청 당시 기록 금액 합계: {int(df['recorded_amount'].sum()):,}")
+    print(f"신청 시점 기록 금액 합계: {int(df['recorded_amount'].sum()):,}")
 
     if args.export_csv is not None:
         export_path = args.export_csv.resolve()

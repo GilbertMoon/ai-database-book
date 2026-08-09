@@ -50,7 +50,7 @@ def main() -> None:
     print("\n[기본 검증]")
     print(f"행 수: {len(df)}")
     print(f"고유 enrollment_id: {df['enrollment_id'].nunique()}")
-    print(f"신청 당시 기록 금액 합계: {int(df['recorded_amount'].sum()):,}")
+    print(f"신청 시점 기록 금액 합계: {int(df['recorded_amount'].sum()):,}")
 
     if args.manifest.exists():
         manifest = load_and_validate_manifest(args.manifest, args.csv)

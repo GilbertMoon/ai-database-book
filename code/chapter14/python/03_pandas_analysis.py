@@ -187,10 +187,10 @@ def main() -> None:
     print("\n[상태별 신청 건수]")
     print(status_summary.to_string(index=False))
 
-    print("\n[월별 신청 건수와 신청 당시 기록 금액]")
+    print("\n[월별 신청 건수와 신청 시점 기록 금액]")
     print(monthly_summary.to_string(index=False))
 
-    print("\n[강의별 신청 건수와 신청 당시 기록 금액]")
+    print("\n[강의별 신청 건수와 신청 시점 기록 금액]")
     print(course_summary.to_string(index=False))
 
     print("\n[강의별 상태 피벗]")

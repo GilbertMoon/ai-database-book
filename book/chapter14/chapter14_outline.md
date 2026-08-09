@@ -32,7 +32,7 @@ Chapter 14는 앞 장까지 학습한 PostgreSQL·SQL·JOIN·집계·검증 능�
 
 ```text
 P14-Q01 상태별 수강신청 건수
-P14-Q02 월별 신청 수와 신청 당시 기록 금액
+P14-Q02 월별 신청 수와 신청 시점 기록 금액
 P14-Q03 강의별 신청 건수
 P14-Q04 지역별 학생·신청 건수
 P14-Q05 완료된 신청의 완료 기간
@@ -44,7 +44,7 @@ P14-Q05 완료된 신청의 완료 기간
 분석 기간 = [2026-01-01, 2026-07-01)
 날짜 기준 = enrolled_at
 행 단위 = 수강신청 1건
-paid_amount 의미 = 신청 당시 기록 금액
+recorded_amount 의미 = 신청 시점 기록 금액
 분석 VIEW 금액 컬럼 = recorded_amount
 월별 분석 = date spine으로 1~6월 유지
 현재 완료 상태 비중 ≠ 코호트 완료율
@@ -72,6 +72,10 @@ nosql_lab
 ai_review_lab
 public
 ```
+
+## 격리 분석 시나리오
+
+`analysis_lab`은 분석 연습을 위한 합성 기준 데이터이며 `course_project`를 변경·복제한 운영 데이터가 아니다. 금액 의미는 `recorded_amount NUMERIC(12,0)` = 신청 시점 기록 금액으로 이어 간다.
 
 ## 기준 데이터
 

@@ -106,13 +106,13 @@ Seed 데이터가 현재 1월부터 6월까지만 있어도 기간 조건은 생
 
 ---
 
-## 5. `paid_amount`는 실제 매출이 아니라 기록 금액입니다
+## 5. `recorded_amount`는 실제 매출이 아니라 기록 금액입니다
 
 **화면 구성**
 
 ```text
-paid_amount
-→ 신청 당시 기록 금액
+recorded_amount
+→ 신청 시점 기록 금액
 → 결제 성공 여부 아님
 → 환불 완료 여부 아님
 → 회계 매출 아님
@@ -121,12 +121,12 @@ paid_amount
 분석 별칭:
 
 ```sql
-SUM(paid_amount) AS recorded_amount_sum
+SUM(recorded_amount) AS recorded_amount_sum
 ```
 
 **발표 스크립트**
 
-이 장의 `paid_amount`라는 컬럼 이름은 초보자에게 오해를 줄 수 있습니다.
+이 장의 `recorded_amount`라는 컬럼 이름은 초보자에게 오해를 줄 수 있습니다.
 
 여기서는 실제 결제 완료 매출이 아니라 신청 당시 기록된 금액으로 해석합니다. 신청이나 수강중 상태에도 양수 금액이 있을 수 있고, 취소는 기준 데이터에서 0으로 기록됩니다.
 
@@ -504,7 +504,7 @@ CSV + manifest + reference_metrics.json
 
 ```text
 질문·기간·행 단위를 먼저 정한다.
-paid_amount를 매출로 해석하지 않는다.
+recorded_amount를 매출로 해석하지 않는다.
 COUNT는 세는 단위에 맞게 선택한다.
 date spine으로 없는 월을 유지한다.
 Python은 SQL 기준 데이터셋을 확장한다.

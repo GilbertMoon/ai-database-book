@@ -11,6 +11,11 @@ SHOW search_path;
 -- P14-V01. 실행 위치와 기존 객체 보호
 -- ============================================================
 DO $$
+DECLARE
+    status_requested BIGINT;
+    status_learning BIGINT;
+    status_completed BIGINT;
+    status_cancelled BIGINT;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -18,9 +23,48 @@ BEGIN
             current_database();
     END IF;
 
+    IF to_regclass('course_project.students') IS NULL
+       OR to_regclass('course_project.instructors') IS NULL
+       OR to_regclass('course_project.courses') IS NULL
+       OR to_regclass('course_project.enrollments') IS NULL THEN
+        RAISE EXCEPTION '실행 중단: Chapter 07·08 course_project 기준 상태가 없습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12 AND numeric_scale = 0
+    ) THEN
+        RAISE EXCEPTION '실행 중단: course_project.enrollments.recorded_amount는 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    SELECT COUNT(*) FILTER (WHERE status = '신청'),
+           COUNT(*) FILTER (WHERE status = '수강중'),
+           COUNT(*) FILTER (WHERE status = '완료'),
+           COUNT(*) FILTER (WHERE status = '취소')
+    INTO status_requested, status_learning, status_completed, status_cancelled
+    FROM course_project.enrollments;
+
+    IF (SELECT COUNT(*) FROM course_project.students) <> 3
+       OR (SELECT COUNT(*) FROM course_project.instructors) <> 2
+       OR (SELECT COUNT(*) FROM course_project.courses) <> 3
+       OR (SELECT COUNT(*) FROM course_project.enrollments) <> 5
+       OR status_requested <> 2 OR status_learning <> 1
+       OR status_completed <> 1 OR status_cancelled <> 1
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments) <> 590000
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments WHERE status IN ('신청','수강중')) <> 340000
+       OR (SELECT SUM(recorded_amount) FROM course_project.enrollments WHERE status <> '취소') <> 440000
+       OR NOT EXISTS (SELECT 1 FROM course_project.enrollments WHERE id = 1001 AND status = '완료' AND recorded_amount = 100000)
+       OR NOT EXISTS (SELECT 1 FROM course_project.enrollments WHERE id = 1004 AND status = '취소' AND recorded_amount = 150000)
+       OR NOT EXISTS (SELECT 1 FROM course_project.enrollments WHERE id = 1005 AND status = '신청' AND recorded_amount = 120000) THEN
+        RAISE EXCEPTION '실행 중단: Chapter 07·08 course_project canonical 기준 상태와 다릅니다.';
+    END IF;
+
     IF to_regnamespace('analysis_lab') IS NOT NULL THEN
-        RAISE EXCEPTION
-            '실행 중단: analysis_lab이 이미 존재합니다. 보존 여부를 확인한 뒤 reset_analysis_lab.sql 사용을 검토하세요.';
+        RAISE EXCEPTION '실행 중단: analysis_lab이 이미 존재합니다. 보존 여부를 확인한 뒤 reset_analysis_lab.sql 사용을 검토하세요.';
     END IF;
 END
 $$;
@@ -61,7 +105,7 @@ CREATE TABLE analysis_lab.courses (
     title VARCHAR(120) NOT NULL,
     category VARCHAR(30) NOT NULL,
     level VARCHAR(20) NOT NULL,
-    price INTEGER NOT NULL,
+    price NUMERIC(12,0) NOT NULL,
     opened_at DATE NOT NULL,
 
     CONSTRAINT fk_analysis_courses_instructor
@@ -85,7 +129,7 @@ CREATE TABLE analysis_lab.enrollments (
     course_id INTEGER NOT NULL,
     enrolled_at DATE NOT NULL,
     status VARCHAR(20) NOT NULL,
-    paid_amount INTEGER NOT NULL,
+    recorded_amount NUMERIC(12,0) NOT NULL,
     completed_at DATE,
 
     CONSTRAINT fk_analysis_enrollments_student
@@ -105,14 +149,14 @@ CREATE TABLE analysis_lab.enrollments (
     CONSTRAINT chk_analysis_enrollments_status
         CHECK (status IN ('신청', '수강중', '완료', '취소')),
 
-    CONSTRAINT chk_analysis_enrollments_paid_amount
-        CHECK (paid_amount >= 0),
+    CONSTRAINT chk_analysis_enrollments_recorded_amount
+        CHECK (recorded_amount >= 0),
 
     CONSTRAINT chk_analysis_enrollments_cancel_amount
         CHECK (
-            (status = '취소' AND paid_amount = 0)
+            (status = '취소' AND recorded_amount = 0)
             OR
-            (status <> '취소' AND paid_amount >= 0)
+            (status <> '취소' AND recorded_amount >= 0)
         ),
 
     CONSTRAINT chk_analysis_enrollments_completion_state
@@ -139,6 +183,16 @@ SELECT
     DATE '2026-07-01' AS end_date_exclusive;
 
 COMMIT;
+
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'analysis_lab') <> 4
+       OR (SELECT COUNT(*) FROM information_schema.views WHERE table_schema = 'analysis_lab') <> 1 THEN
+        RAISE EXCEPTION 'Chapter 14 schema creation validation failed.';
+    END IF;
+    RAISE NOTICE 'Chapter 14 analysis lab schema validation passed';
+END
+$$;
 
 -- 생성 결과 확인
 SELECT

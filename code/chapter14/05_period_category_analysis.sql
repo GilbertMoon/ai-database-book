@@ -1,6 +1,6 @@
 -- Chapter 14. 기간별·범주별 분석
 -- 목적: P14-Q02·Q05 질문을 고정 기간과 재현 가능한 월 기준표로 분석합니다.
--- paid_amount는 신청 당시 기록 금액입니다.
+-- recorded_amount는 신청 시점 기록 금액입니다.
 
 SELECT current_database();
 SELECT current_schema();
@@ -23,7 +23,7 @@ monthly_actual AS (
     SELECT
         DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
         COUNT(*) AS enrollment_count,
-        SUM(e.paid_amount) AS recorded_amount_sum
+        SUM(e.recorded_amount) AS recorded_amount_sum
     FROM analysis_lab.enrollments AS e
     CROSS JOIN parameters AS p
     WHERE e.enrolled_at >= p.start_date
@@ -64,7 +64,7 @@ monthly_actual AS (
     SELECT
         DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
         COUNT(*) AS enrollment_count,
-        SUM(e.paid_amount) AS recorded_amount_sum
+        SUM(e.recorded_amount) AS recorded_amount_sum
     FROM analysis_lab.enrollments AS e
     CROSS JOIN parameters AS p
     WHERE e.enrolled_at >= p.start_date
@@ -128,8 +128,8 @@ WITH filtered_enrollments AS (
 SELECT
     c.category,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum,
-    ROUND(AVG(e.paid_amount), 2) AS avg_recorded_amount
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum,
+    ROUND(AVG(e.recorded_amount), 2) AS avg_recorded_amount
 FROM analysis_lab.courses AS c
 LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
@@ -221,7 +221,7 @@ SELECT
     MIN(e.enrolled_at) AS min_enrolled_at,
     MAX(e.enrolled_at) AS max_enrolled_at,
     COUNT(*) AS enrollment_count,
-    SUM(e.paid_amount) AS recorded_amount_sum
+    SUM(e.recorded_amount) AS recorded_amount_sum
 FROM analysis_lab.enrollments AS e
 CROSS JOIN analysis_lab.analysis_parameters AS p
 WHERE e.enrolled_at >= p.start_date

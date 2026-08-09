@@ -73,7 +73,7 @@ actual AS (
     SELECT
         DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
         COUNT(*)::integer AS actual_count,
-        SUM(e.paid_amount)::integer AS actual_recorded_amount
+        SUM(e.recorded_amount)::integer AS actual_recorded_amount
     FROM analysis_lab.enrollments AS e
     CROSS JOIN analysis_lab.analysis_parameters AS p
     WHERE e.enrolled_at >= p.start_date
@@ -187,7 +187,7 @@ WITH quality_issues AS (
     SELECT 'invalid_cancel_amount', COUNT(*)
     FROM analysis_lab.enrollments
     WHERE status = '취소'
-      AND paid_amount <> 0
+      AND recorded_amount <> 0
 
     UNION ALL
 

@@ -66,7 +66,7 @@ Python
 
 ```text
 P14-Q01 상태별 수강신청 건수는 얼마인가?
-P14-Q02 월별 신청 건수와 신청 당시 기록 금액은 얼마인가?
+P14-Q02 월별 신청 건수와 신청 시점 기록 금액은 얼마인가?
 P14-Q03 강의별 신청 건수는 얼마인가?
 P14-Q04 지역별 학생 수와 신청 건수는 어떻게 다른가?
 P14-Q05 완료된 신청의 완료 기간은 얼마인가?
@@ -90,7 +90,7 @@ P14-Q05 완료된 신청의 완료 기간은 얼마인가?
 기간: [2026-01-01, 2026-07-01)
 날짜 기준: enrollments.enrolled_at
 행 단위: 수강신청 1건
-금액 의미: 신청 당시 기록 금액
+금액 의미: 신청 시점 기록 금액
 취소: 기준 데이터에서 기록 금액 0
 ```
 
@@ -105,15 +105,15 @@ WHERE enrolled_at >= DATE '2026-01-01'
 
 ---
 
-## 2. `paid_amount`의 의미를 먼저 확정한다
+## 2. `recorded_amount`의 의미를 먼저 확정한다
 
-이 장의 물리 컬럼 이름은 `paid_amount`이지만 별도 결제 상태·환불 원장이 없습니다. `신청`과 `수강중` 상태에도 양수 금액이 존재합니다.
+이 장의 물리 컬럼 이름은 `recorded_amount`이지만 별도 결제 상태·환불 원장이 없습니다. `신청`과 `수강중` 상태에도 양수 금액이 존재합니다.
 
 따라서 이 값을 실제 결제 완료 금액이나 회계 매출로 해석하면 안 됩니다.
 
 ```text
-paid_amount
-→ 신청 당시 기록 금액
+recorded_amount
+→ 신청 시점 기록 금액
 → 결제 성공 여부를 의미하지 않음
 → 환불 완료 여부를 의미하지 않음
 → 회계 매출을 의미하지 않음
@@ -122,7 +122,7 @@ paid_amount
 SQL 집계 별칭은 의미가 드러나도록 사용합니다.
 
 ```sql
-SUM(paid_amount) AS recorded_amount_sum
+SUM(recorded_amount) AS recorded_amount_sum
 ```
 
 분석 VIEW와 Python에서는 `recorded_amount`라는 이름으로 제공합니다.
@@ -184,6 +184,9 @@ nosql_lab: 변경 금지
 ai_review_lab: 변경 금지
 analysis_lab: Chapter 14 실습 대상
 ```
+
+> **격리 분석 시나리오 주의**
+> `analysis_lab`의 8명·3명·5개·24건 데이터는 SQL·Python 분석을 학습하기 위해 만든 합성 기준 데이터입니다. `course_project`의 행을 확장하거나 복제한 운영 데이터가 아니며, 기존 `course_project.enrollments.recorded_amount NUMERIC(12,0)`의 의미를 그대로 이어 받아 신청 시점 기록 금액으로 사용합니다.
 
 실습 객체:
 
@@ -356,7 +359,7 @@ Seed에 현재 1~6월 데이터만 있다는 이유로 기간 조건을 생략�
 
 월별 기준:
 
-| 월 | 신청 건수 | 신청 당시 기록 금액 |
+| 월 | 신청 건수 | 신청 시점 기록 금액 |
 | --- | ---: | ---: |
 | 2026-01 | 3 | 200000 |
 | 2026-02 | 4 | 520000 |
@@ -497,7 +500,7 @@ SELECT
     c.id AS course_id,
     c.title,
     COUNT(e.id) AS enrollment_count,
-    COALESCE(SUM(e.paid_amount), 0) AS recorded_amount_sum
+    COALESCE(SUM(e.recorded_amount), 0) AS recorded_amount_sum
 FROM analysis_lab.courses AS c
 LEFT JOIN filtered_enrollments AS e
     ON e.course_id = c.id
@@ -983,7 +986,7 @@ reference_metrics.json: 버전 관리된 SQL 기준 결과
 
 ```text
 3월 신청 건수가 5건으로 가장 많다.
-6월 신청 당시 기록 금액 합계가 570,000으로 가장 크다.
+6월 신청 시점 기록 금액 합계가 570,000으로 가장 크다.
 완료 상태가 12건으로 전체 24건의 절반이다.
 ```
 
@@ -1068,7 +1071,7 @@ manifest와 파일 해시를 확인하는가?
 ## 29. 자주 하는 실수
 
 1. 분석 질문 없이 SQL부터 작성한다.
-2. `paid_amount`를 실제 결제 완료 매출로 해석한다.
+2. `recorded_amount`를 실제 결제 완료 매출로 해석한다.
 3. Seed가 1~6월뿐이라는 이유로 기간 조건을 생략한다.
 4. 데이터가 없는 월을 결과에서 없앤다.
 5. `LEFT JOIN` 뒤 신청 수에 `COUNT(*)`를 사용한다.
@@ -1088,7 +1091,7 @@ manifest와 파일 해시를 확인하는가?
 ## 30. 스스로 확인하기
 
 1. 분석 질문에 기간과 행 단위가 필요한 이유는 무엇인가요?
-2. `paid_amount`를 실제 매출로 볼 수 없는 이유는 무엇인가요?
+2. `recorded_amount`를 실제 매출로 볼 수 없는 이유는 무엇인가요?
 3. 반개방 날짜 구간을 사용하는 이유는 무엇인가요?
 4. 데이터가 없는 월을 date spine으로 유지해야 하는 이유는 무엇인가요?
 5. `COUNT(*)`, `COUNT(e.id)`, `COUNT(DISTINCT s.id)`의 차이는 무엇인가요?
@@ -1121,7 +1124,7 @@ date spine은 데이터가 없는 기간도 0건으로 유지한다.
 ```
 
 ```text
-paid_amount는 신청 당시 기록 금액이다.
+recorded_amount는 신청 시점 기록 금액이다.
 결제 성공·환불·매출 분석에는 별도 결제 원장이 필요하다.
 ```
 
@@ -1146,7 +1149,7 @@ manifest는 CSV의 출처·기간·생성 시점·행 수·해시를 기록해
 
 ```text
 1. 분석은 질문·기간·행 단위·지표 정의에서 시작한다.
-2. paid_amount는 신청 당시 기록 금액이며 실제 매출이 아니다.
+2. recorded_amount는 신청 시점 기록 금액이며 실제 매출이 아니다.
 3. SQL·VIEW·Python은 같은 반개방 기간을 사용한다.
 4. date spine으로 데이터가 없는 월을 유지한다.
 5. COUNT 계열 함수는 세는 대상의 단위에 맞게 선택한다.

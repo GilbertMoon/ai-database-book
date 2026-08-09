@@ -47,6 +47,7 @@ EXPECTED_COLUMNS = [
     "is_completed",
 ]
 DATE_COLUMNS = ["enrolled_at", "enrollment_month", "completed_at"]
+ID_COLUMNS = ["enrollment_id", "student_id", "course_id", "instructor_id"]
 ALLOWED_STATUSES = {"신청", "수강중", "완료", "취소"}
 
 
@@ -170,6 +171,12 @@ def validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if duplicated_ids:
         raise ValueError(f"중복 enrollment_id가 있습니다: {duplicated_ids}")
 
+    for column in ID_COLUMNS:
+        values = pd.to_numeric(normalized[column], errors="raise")
+        if values.isna().any() or ((values % 1) != 0).any():
+            raise ValueError(f"{column}은 NULL 없는 정수여야 합니다.")
+        normalized[column] = values.astype("int64")
+
     for column in DATE_COLUMNS:
         normalized[column] = pd.to_datetime(
             normalized[column],
@@ -180,6 +187,11 @@ def validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         normalized["recorded_amount"],
         errors="raise",
     )
+    if normalized["recorded_amount"].isna().any():
+        raise ValueError("recorded_amount에 NULL이 있습니다.")
+    if ((normalized["recorded_amount"] % 1) != 0).any():
+        raise ValueError("recorded_amount는 정수 단위 금액이어야 합니다.")
+    normalized["recorded_amount"] = normalized["recorded_amount"].astype("int64")
     normalized["completion_days"] = pd.to_numeric(
         normalized["completion_days"],
         errors="raise",
@@ -188,8 +200,6 @@ def validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         normalized["is_completed"]
     )
 
-    if normalized["recorded_amount"].isna().any():
-        raise ValueError("recorded_amount에 NULL이 있습니다.")
     if (normalized["recorded_amount"] < 0).any():
         raise ValueError("recorded_amount에 음수가 있습니다.")
 
@@ -211,6 +221,11 @@ def validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("완료가 아닌데 completion_days가 존재하는 행이 있습니다.")
     if (normalized.loc[expected_completed, "completion_days"] < 0).any():
         raise ValueError("completion_days에 음수가 있습니다.")
+
+    actual_completion_days = (normalized.loc[expected_completed, "completed_at"] - normalized.loc[expected_completed, "enrolled_at"]).dt.days.astype(float)
+    stored_completion_days = normalized.loc[expected_completed, "completion_days"].astype(float)
+    if not stored_completion_days.equals(actual_completion_days):
+        raise ValueError("completion_days가 completed_at - enrolled_at과 일치하지 않습니다.")
 
     outside_period = (
         (normalized["enrolled_at"] < ANALYSIS_START_DATE)

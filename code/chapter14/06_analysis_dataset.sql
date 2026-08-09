@@ -27,6 +27,8 @@ BEGIN
 END
 $$;
 
+BEGIN;
+
 CREATE VIEW analysis_lab.enrollment_analysis_dataset AS
 SELECT
     e.id AS enrollment_id,
@@ -42,7 +44,7 @@ SELECT
     e.enrolled_at,
     DATE_TRUNC('month', e.enrolled_at)::date AS enrollment_month,
     e.status,
-    e.paid_amount AS recorded_amount,
+    e.recorded_amount AS recorded_amount,
     e.completed_at,
     CASE
         WHEN e.completed_at IS NOT NULL
@@ -60,6 +62,19 @@ JOIN analysis_lab.instructors AS i
 CROSS JOIN analysis_lab.analysis_parameters AS p
 WHERE e.enrolled_at >= p.start_date
   AND e.enrolled_at < p.end_date_exclusive;
+
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM analysis_lab.enrollment_analysis_dataset) <> 24
+       OR (SELECT COUNT(DISTINCT enrollment_id) FROM analysis_lab.enrollment_analysis_dataset) <> 24
+       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollment_analysis_dataset) <> 2770000 THEN
+        RAISE EXCEPTION 'Chapter 14 analysis dataset validation failed before COMMIT.';
+    END IF;
+END
+$$;
+
+COMMIT;
+DO $$ BEGIN RAISE NOTICE 'Chapter 14 analysis dataset validation passed'; END $$;
 
 -- 1. 전체 데이터셋
 SELECT *

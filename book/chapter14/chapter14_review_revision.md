@@ -26,8 +26,8 @@ Chapter 14를 단순한 SQL 집계와 pandas 소개가 아니라 다음 흐름�
 기존의 “결제금액” 표현을 다음 기준으로 통일했습니다.
 
 ```text
-paid_amount 물리 컬럼
-→ 신청 당시 기록 금액
+recorded_amount 물리 컬럼
+→ 신청 시점 기록 금액
 → 결제 성공·환불·회계 매출을 의미하지 않음
 ```
 
@@ -193,7 +193,7 @@ analysis_lab.enrollment_analysis_dataset
 
 ```text
 분석 기간 실제 적용
-paid_amount → recorded_amount 별칭
+recorded_amount → recorded_amount 별칭
 instructor_id·instructor_name 포함
 정확한 17개 컬럼
 한 행 = enrollment_id 1건

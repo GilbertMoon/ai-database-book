@@ -8,7 +8,7 @@
       'SQL과 Python은 역할이 다릅니다': [['row:*']],
       '분석 질문에는 기준이 필요합니다': [['body-0','code-0'], ['body-1','code-1']],
       '분석 기간은 반개방 구간으로 고정합니다': [['code-0'], ['code-1']],
-      '`paid_amount`는 실제 매출이 아니라 기록 금액입니다': [['code-0'], ['body-0','code-1']],
+      '`recorded_amount`는 실제 매출이 아니라 기록 금액입니다': [['code-0'], ['body-0','code-1']],
       'Chapter 14는 `analysis_lab`만 사용합니다': [['code-0'], ['body-0','code-1']],
       '기준 데이터와 검산값을 먼저 봅니다': [['code-0'], ['body-0','code-1']],
       '분석 전에 데이터 품질을 확인합니다': [['body-0','code:*']],
@@ -59,7 +59,7 @@
   const normalize = (value) => String(value ?? '').toLowerCase()
     .replace(/analysis_lab/g,'분석 랩').replace(/analysis_parameters/g,'분석 파라미터')
     .replace(/enrollment_analysis_dataset/g,'수강신청 분석 데이터셋')
-    .replace(/paid_amount/g,'기록 금액').replace(/recorded_amount_sum/g,'기록 금액 합계')
+    .replace(/recorded_amount/g,'기록 금액').replace(/recorded_amount_sum/g,'기록 금액 합계')
     .replace(/recorded_amount/g,'기록 금액').replace(/completion_days/g,'완료 기간')
     .replace(/is_completed/g,'완료 여부').replace(/enrollment_id/g,'수강신청 아이디')
     .replace(/date spine/g,'월 기준표').replace(/manifest/g,'매니페스트')

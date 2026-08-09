@@ -77,7 +77,7 @@ INSERT INTO analysis_lab.enrollments (
     course_id,
     enrolled_at,
     status,
-    paid_amount,
+    recorded_amount,
     completed_at
 )
 VALUES
@@ -137,9 +137,9 @@ BEGIN
             'Seed 중단: 기준 행 수 8/3/5/24와 일치하지 않습니다.';
     END IF;
 
-    IF (SELECT SUM(paid_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
+    IF (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
         RAISE EXCEPTION
-            'Seed 중단: 신청 당시 기록 금액 합계가 2,770,000이 아닙니다.';
+            'Seed 중단: 신청 시점 기록 금액 합계가 2,770,000이 아닙니다.';
     END IF;
 
     IF (
@@ -171,6 +171,19 @@ $$;
 
 COMMIT;
 
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM analysis_lab.students) <> 8
+       OR (SELECT COUNT(*) FROM analysis_lab.instructors) <> 3
+       OR (SELECT COUNT(*) FROM analysis_lab.courses) <> 5
+       OR (SELECT COUNT(*) FROM analysis_lab.enrollments) <> 24
+       OR (SELECT SUM(recorded_amount) FROM analysis_lab.enrollments) <> 2770000 THEN
+        RAISE EXCEPTION 'Chapter 14 seed post-commit validation failed.';
+    END IF;
+    RAISE NOTICE 'Chapter 14 analysis lab seed validation passed';
+END
+$$;
+
 -- 기대 행 수: students 8, instructors 3, courses 5, enrollments 24
 -- 상태별: 완료 12, 수강중 5, 신청 4, 취소 3
--- 신청 당시 기록 금액 합계: 2,770,000
+-- 신청 시점 기록 금액 합계: 2,770,000
