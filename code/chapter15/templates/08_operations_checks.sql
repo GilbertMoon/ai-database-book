@@ -1,6 +1,7 @@
 -- Chapter 15. 운영 준비 상태 읽기 전용 점검
 -- P15-V06: PUBLIC·직접 GRANT·소유권·유효 권한·비밀 데이터 경로를 구분합니다.
 -- Role·GRANT·백업·복원은 자동 실행하지 않습니다.
+-- 이 파일은 09_analysis_dataset.sql보다 먼저 실행되므로 분석 VIEW 권한은 존재할 때만 조회합니다.
 
 SELECT current_user AS current_user_name;
 SELECT session_user AS session_user_name;
@@ -72,14 +73,23 @@ WHERE table_schema = 'tutor_project'
   AND grantee = 'PUBLIC'
 ORDER BY table_name, column_name, privilege_type;
 
--- 현재 사용자의 최종 유효 권한
+-- 현재 사용자의 최종 유효 권한.
+-- question_analysis_dataset은 09에서 생성되므로 08 시점에는 NULL이 정상입니다.
 SELECT
     has_schema_privilege(current_user, 'tutor_project', 'USAGE') AS can_use_schema,
     has_schema_privilege(current_user, 'tutor_project', 'CREATE') AS can_create_in_schema,
     has_table_privilege(current_user, 'tutor_project.questions', 'SELECT') AS can_select_questions,
     has_table_privilege(current_user, 'tutor_project.questions', 'INSERT') AS can_insert_questions,
     has_table_privilege(current_user, 'tutor_project.questions', 'DELETE') AS can_delete_questions,
-    has_table_privilege(current_user, 'tutor_project.question_analysis_dataset', 'SELECT') AS can_select_analysis_view;
+    to_regclass('tutor_project.question_analysis_dataset') IS NOT NULL AS analysis_view_exists,
+    CASE
+        WHEN to_regclass('tutor_project.question_analysis_dataset') IS NULL THEN NULL
+        ELSE has_table_privilege(
+            current_user,
+            to_regclass('tutor_project.question_analysis_dataset'),
+            'SELECT'
+        )
+    END AS can_select_analysis_view;
 
 -- IDENTITY 시퀀스 권한
 SELECT
