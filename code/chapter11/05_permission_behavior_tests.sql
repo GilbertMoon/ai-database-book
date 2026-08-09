@@ -28,6 +28,13 @@ BEGIN
         RAISE EXCEPTION
             '실행 중단: 실습 로그인 역할이 없습니다. 03 파일의 역할 계획을 먼저 적용하세요.';
     END IF;
+
+    IF (SELECT COUNT(*) FROM security_lab.students) <> 3
+       OR (SELECT COUNT(*) FROM security_lab.courses) <> 3
+       OR (SELECT COUNT(*) FROM security_lab.enrollments) <> 3
+       OR (SELECT COALESCE(SUM(recorded_amount), 0) FROM security_lab.enrollments) <> 310000 THEN
+        RAISE EXCEPTION '실행 중단: security_lab 기준 데이터가 아닙니다.';
+    END IF;
 END
 $$;
 
@@ -46,7 +53,7 @@ SELECT id, title, level, price
 FROM security_lab.courses
 ORDER BY id;
 
-SELECT id, student_id, course_id, status
+SELECT id, student_id, course_id, status, recorded_amount
 FROM security_lab.enrollments
 ORDER BY id;
 
@@ -62,7 +69,7 @@ ROLLBACK;
 -- SAVEPOINT before_denied_action;
 --
 -- INSERT INTO security_lab.enrollments (
---     student_id, course_id, status, paid_amount, enrolled_at
+--     student_id, course_id, status, recorded_amount, enrolled_at
 -- ) VALUES (
 --     102, 201, '신청', 100000, CURRENT_DATE
 -- ); -- permission denied가 발생해야 정상
@@ -94,7 +101,7 @@ INSERT INTO security_lab.enrollments (
     student_id,
     course_id,
     status,
-    paid_amount,
+    recorded_amount,
     enrolled_at
 )
 VALUES (
@@ -104,7 +111,7 @@ VALUES (
     100000,
     CURRENT_DATE
 )
-RETURNING id, student_id, course_id, status;
+RETURNING id, student_id, course_id, status, recorded_amount;
 
 UPDATE security_lab.enrollments
 SET status = '완료'
@@ -127,8 +134,8 @@ ROLLBACK;
 -- SAVEPOINT before_denied_action;
 --
 -- UPDATE security_lab.enrollments
--- SET paid_amount = 0
--- WHERE id = 1001; -- paid_amount UPDATE 권한 오류가 발생해야 정상
+-- SET recorded_amount = 0
+-- WHERE id = 1001; -- recorded_amount UPDATE 권한 오류가 발생해야 정상
 --
 -- ROLLBACK TO SAVEPOINT before_denied_action;
 -- ROLLBACK;
@@ -138,19 +145,40 @@ ROLLBACK;
 -- CREATE TABLE security_lab.denied_table (id INTEGER);
 
 -- ============================================================
--- 5. 기준 데이터 보존 확인
--- 기대 결과: 3 / 3 / 3
+-- 5. 기준 데이터 보존 자동 확인
+-- 시퀀스 번호는 증가했을 수 있지만 행 데이터는 3 / 3 / 3, 총액 310000이어야 합니다.
 -- ============================================================
-SELECT COUNT(*) AS student_count
-FROM security_lab.students;
+DO $$
+DECLARE
+    v_duplicate_active BIGINT;
+BEGIN
+    SELECT COUNT(*) INTO v_duplicate_active
+    FROM (
+        SELECT student_id, course_id
+        FROM security_lab.enrollments
+        WHERE status IN ('신청', '수강중')
+        GROUP BY student_id, course_id
+        HAVING COUNT(*) > 1
+    ) AS duplicated;
 
-SELECT COUNT(*) AS course_count
-FROM security_lab.courses;
+    IF (SELECT COUNT(*) FROM security_lab.students) <> 3
+       OR (SELECT COUNT(*) FROM security_lab.courses) <> 3
+       OR (SELECT COUNT(*) FROM security_lab.enrollments) <> 3
+       OR (SELECT COALESCE(SUM(recorded_amount), 0) FROM security_lab.enrollments) <> 310000
+       OR v_duplicate_active <> 0 THEN
+        RAISE EXCEPTION '권한 동작 테스트 후 기준 데이터가 변경되었습니다.';
+    END IF;
 
-SELECT COUNT(*) AS enrollment_count
-FROM security_lab.enrollments;
+    RAISE NOTICE 'Chapter 11 permission behavior baseline preserved';
+END
+$$;
+
+SELECT COUNT(*) AS student_count FROM security_lab.students;
+SELECT COUNT(*) AS course_count FROM security_lab.courses;
+SELECT COUNT(*) AS enrollment_count FROM security_lab.enrollments;
+SELECT SUM(recorded_amount) AS total_recorded_amount FROM security_lab.enrollments;
 
 -- 권한 테스트 결과는 다음과 같이 기록합니다.
 -- 읽기 계정: SELECT 성공, INSERT·UPDATE·DELETE 실패
 -- 앱 계정: SELECT·INSERT·status UPDATE 성공,
---           paid_amount UPDATE·DELETE·schema CREATE 실패
+--           recorded_amount UPDATE·DELETE·schema CREATE 실패
