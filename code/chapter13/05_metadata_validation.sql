@@ -45,6 +45,8 @@ SELECT
     column_name,
     data_type,
     character_maximum_length,
+    numeric_precision,
+    numeric_scale,
     is_nullable,
     is_identity,
     identity_generation,
@@ -111,7 +113,8 @@ ORDER BY tablename, indexname;
 -- ============================================================
 -- P13-R08 보안 증거
 -- 컬럼명 검사만으로 카드정보 미저장을 완전히 증명할 수는 없습니다.
--- 전용 민감 컬럼 부재와 payment_reference 의미·샘플·앱 흐름을 함께 검토합니다.
+-- 전용 카드정보 컬럼 부재와 payment_reference 의미·Seed·로그·앱 흐름을 함께 검토합니다.
+-- payment_reference도 실제 시스템에서는 조직 정책에 따라 보호 대상이 될 수 있습니다.
 -- ============================================================
 SELECT
     table_name,
@@ -145,6 +148,9 @@ DECLARE
     fk_signature_count INTEGER;
     good_constraint_count INTEGER;
     identity_count INTEGER;
+    money_type_count INTEGER;
+    recorded_amount_count INTEGER;
+    active_index_definition TEXT;
 BEGIN
     SELECT array_agg(table_name ORDER BY table_name)
     INTO actual_tables
@@ -241,9 +247,59 @@ BEGIN
             identity_count;
     END IF;
 
+    SELECT COUNT(*)
+    INTO money_type_count
+    FROM information_schema.columns
+    WHERE table_schema = 'ai_review_lab'
+      AND (
+          (table_name = 'courses' AND column_name = 'price')
+          OR (table_name = 'enrollments' AND column_name = 'recorded_amount')
+          OR (table_name = 'payments' AND column_name = 'amount')
+      )
+      AND data_type = 'numeric'
+      AND numeric_precision = 12
+      AND numeric_scale = 0
+      AND is_nullable = 'NO';
+
+    IF money_type_count <> 3 THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: price/recorded_amount/payment amount는 모두 NUMERIC(12,0) NOT NULL이어야 합니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO recorded_amount_count
+    FROM information_schema.columns
+    WHERE table_schema = 'ai_review_lab'
+      AND table_name = 'enrollments'
+      AND column_name = 'recorded_amount';
+
+    IF recorded_amount_count <> 1
+       OR EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'ai_review_lab'
+              AND table_name = 'enrollments'
+              AND column_name = 'agreed_amount'
+       ) THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 신청 시점 금액 컬럼은 recorded_amount 하나여야 합니다.';
+    END IF;
+
     IF to_regclass('ai_review_lab.uq_ai_review_enrollments_active') IS NULL THEN
         RAISE EXCEPTION
             '메타데이터 검증 실패: 활성 신청 부분 고유 인덱스가 없습니다.';
+    END IF;
+
+    SELECT pg_get_indexdef('ai_review_lab.uq_ai_review_enrollments_active'::regclass)
+    INTO active_index_definition;
+
+    IF active_index_definition NOT LIKE '%student_id, course_id%'
+       OR active_index_definition NOT LIKE '%WHERE%'
+       OR active_index_definition NOT LIKE '%신청%'
+       OR active_index_definition NOT LIKE '%수강중%' THEN
+        RAISE EXCEPTION
+            '메타데이터 검증 실패: 활성 신청 부분 고유 인덱스 정의가 기대와 다릅니다. 실제=%',
+            active_index_definition;
     END IF;
 
     IF EXISTS (
@@ -254,7 +310,7 @@ BEGIN
           AND lower(column_name) SIMILAR TO '%(card|password|secret|token|pan|cvv)%'
     ) THEN
         RAISE EXCEPTION
-            '메타데이터 검증 실패: 민감정보 전용 컬럼 이름이 발견되었습니다.';
+            '메타데이터 검증 실패: 카드정보·비밀 전용 컬럼 이름이 발견되었습니다.';
     END IF;
 
     RAISE NOTICE 'Chapter 13 metadata validation passed';
