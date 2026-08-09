@@ -187,7 +187,7 @@ WITH quality_issues AS (
     SELECT 'cancel_amount_zeroed', COUNT(*)
     FROM analysis_lab.enrollments
     WHERE status = '취소'
-      AND recorded_amount <> 0
+      AND recorded_amount = 0
 
     UNION ALL
 
