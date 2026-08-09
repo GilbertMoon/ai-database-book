@@ -9700,7 +9700,9 @@ AI 요청 예:
 
 현재 PostgreSQL 원본:
 - students, instructors, courses, enrollments
-- 결제 금액은 enrollments.paid_amount에 신청 당시 값으로 기록
+- 신청 당시 기록 금액은 `enrollments.recorded_amount NUMERIC(12,0)`에 저장
+- `recorded_amount`는 결제 승인액·환불 반영 순액·회계 매출이 아님
+- 별도 결제·환불 원장은 현재 프로젝트 범위 밖
 - 별도 결제·환불 원장은 현재 프로젝트 범위 밖
 
 검토 데이터:
@@ -9755,6 +9757,15 @@ JSON을 저장하므로 무조건 Document DB
 ```text
 현재 DB = ai_database_book
 course_project = students 3, instructors 2, courses 3, enrollments 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+활성 신청 부분 고유 인덱스 존재
 nosql_lab 미존재
 ```
 
