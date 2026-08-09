@@ -1,0 +1,41 @@
+name: Fix Chapter 10 Validator Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chapter10-fix-validator-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture psql notices in Chapter 10 validator logs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/validate-chapter10.yml')
+          text = path.read_text(encoding='utf-8')
+          original = text
+          text = text.replace(' | tee /tmp/ch10_', ' 2>&1 | tee /tmp/ch10_')
+          if text == original:
+              raise SystemExit('no Chapter 10 tee pipelines updated')
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit validator fix and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/chapter10-fix-validator-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/validate-chapter10.yml .github/workflows/chapter10-fix-validator-once.yml
+          git commit -m 'Capture Chapter 10 psql notices in validation'
+          git push origin HEAD:main
