@@ -31,33 +31,25 @@ $$;
 -- ============================================================
 -- 1. 스키마·테이블과 행 수
 -- ============================================================
-SELECT
-    table_schema,
-    table_name
+SELECT table_schema, table_name
 FROM information_schema.tables
 WHERE table_schema = 'security_lab'
 ORDER BY table_name;
 
-SELECT COUNT(*) AS student_count
-FROM security_lab.students;
-
-SELECT COUNT(*) AS course_count
-FROM security_lab.courses;
-
-SELECT COUNT(*) AS enrollment_count
-FROM security_lab.enrollments;
+SELECT COUNT(*) AS student_count FROM security_lab.students;
+SELECT COUNT(*) AS course_count FROM security_lab.courses;
+SELECT COUNT(*) AS enrollment_count FROM security_lab.enrollments;
 
 SELECT COUNT(*) AS joined_row_count
 FROM security_lab.enrollments AS e
-JOIN security_lab.students AS s
-    ON s.id = e.student_id
-JOIN security_lab.courses AS c
-    ON c.id = e.course_id;
+JOIN security_lab.students AS s ON s.id = e.student_id
+JOIN security_lab.courses AS c ON c.id = e.course_id;
 
 -- 기대: 3 / 3 / 3 / 3
 
 -- ============================================================
--- 2. 복원 데이터 상세
+-- 2. 복원 데이터 상세와 상태·금액
+-- recorded_amount는 신청 시점에 신청 행에 기록한 금액입니다.
 -- ============================================================
 SELECT
     e.id AS enrollment_id,
@@ -66,14 +58,28 @@ SELECT
     c.id AS course_id,
     c.title AS course_title,
     e.status,
-    e.paid_amount,
+    e.recorded_amount,
     e.enrolled_at
 FROM security_lab.enrollments AS e
-JOIN security_lab.students AS s
-    ON s.id = e.student_id
-JOIN security_lab.courses AS c
-    ON c.id = e.course_id
+JOIN security_lab.students AS s ON s.id = e.student_id
+JOIN security_lab.courses AS c ON c.id = e.course_id
 ORDER BY e.id;
+
+SELECT
+    status,
+    COUNT(*) AS enrollment_count,
+    SUM(recorded_amount) AS recorded_amount
+FROM security_lab.enrollments
+GROUP BY status
+ORDER BY CASE status
+    WHEN '신청' THEN 1
+    WHEN '수강중' THEN 2
+    WHEN '완료' THEN 3
+    WHEN '취소' THEN 4
+    ELSE 5
+END;
+
+-- 기대: 신청1 / 수강중1 / 완료1 / 취소0 / 총 recorded_amount 310000
 
 -- ============================================================
 -- 3. 고아 관계와 활성 신청 중복
@@ -81,20 +87,15 @@ ORDER BY e.id;
 -- ============================================================
 SELECT e.*
 FROM security_lab.enrollments AS e
-LEFT JOIN security_lab.students AS s
-    ON s.id = e.student_id
+LEFT JOIN security_lab.students AS s ON s.id = e.student_id
 WHERE s.id IS NULL;
 
 SELECT e.*
 FROM security_lab.enrollments AS e
-LEFT JOIN security_lab.courses AS c
-    ON c.id = e.course_id
+LEFT JOIN security_lab.courses AS c ON c.id = e.course_id
 WHERE c.id IS NULL;
 
-SELECT
-    student_id,
-    course_id,
-    COUNT(*) AS active_count
+SELECT student_id, course_id, COUNT(*) AS active_count
 FROM security_lab.enrollments
 WHERE status IN ('신청', '수강중')
 GROUP BY student_id, course_id
@@ -108,6 +109,8 @@ SELECT
     ordinal_position,
     column_name,
     data_type,
+    numeric_precision,
+    numeric_scale,
     is_nullable,
     is_identity,
     identity_generation,
@@ -129,13 +132,19 @@ WHERE connamespace = 'security_lab'::regnamespace
 ORDER BY conrelid::regclass::text, contype, conname;
 
 SELECT
-    schemaname,
-    tablename,
-    indexname,
-    indexdef
-FROM pg_indexes
-WHERE schemaname = 'security_lab'
-ORDER BY tablename, indexname;
+    p.schemaname,
+    p.tablename,
+    p.indexname,
+    i.indisunique,
+    i.indisvalid,
+    i.indisready,
+    p.indexdef
+FROM pg_indexes AS p
+JOIN pg_class AS c ON c.relname = p.indexname
+JOIN pg_namespace AS n ON n.oid = c.relnamespace AND n.nspname = p.schemaname
+JOIN pg_index AS i ON i.indexrelid = c.oid
+WHERE p.schemaname = 'security_lab'
+ORDER BY p.tablename, p.indexname;
 
 -- ============================================================
 -- 6. IDENTITY 시퀀스와 다음 자동값
@@ -177,7 +186,9 @@ SELECT
 FROM security_lab.enrollments_id_seq;
 
 -- ============================================================
--- 7. --no-owner 복원 직후 소유권
+-- 7. --no-owner 복원 직후 소유권과 ACL
+-- custom archive에는 원본 owner·ACL 정보가 들어 있을 수 있지만,
+-- 검증 복원에서는 pg_restore --no-owner --no-privileges로 적용을 생략합니다.
 -- 복원 역할이 schema·table·sequence의 owner여야 합니다.
 -- ============================================================
 SELECT
@@ -194,14 +205,12 @@ SELECT
     pg_get_userbyid(c.relowner) AS owner_name,
     c.relacl
 FROM pg_class AS c
-JOIN pg_namespace AS n
-    ON n.oid = c.relnamespace
+JOIN pg_namespace AS n ON n.oid = c.relnamespace
 WHERE n.nspname = 'security_lab'
   AND c.relkind IN ('r', 'S')
 ORDER BY c.relkind, c.relname;
 
--- --no-privileges를 사용했다면 원본 ACL은 복원되지 않습니다.
--- 복원 역할의 Default Privileges가 별도로 적용될 수 있으므로 실제 ACL을 조회합니다.
+-- 복원 역할의 Default Privileges가 객체 생성 시 적용될 수 있으므로 실제 ACL을 조회합니다.
 
 -- ============================================================
 -- 8. 값 규칙 위반 행
@@ -221,22 +230,29 @@ WHERE char_length(trim(title)) = 0
 SELECT *
 FROM security_lab.enrollments
 WHERE status NOT IN ('신청', '수강중', '완료', '취소')
-   OR paid_amount < 0;
+   OR recorded_amount < 0;
 
 -- ============================================================
 -- 9. 전체 자동 판정
 -- ============================================================
 DO $$
 DECLARE
-    orphan_student_count BIGINT;
-    orphan_course_count BIGINT;
-    duplicate_active_count BIGINT;
-    expected_constraint_count INTEGER;
-    expected_sequence_count INTEGER;
-    expected_owner_count INTEGER;
-    students_next BIGINT;
-    courses_next BIGINT;
-    enrollments_next BIGINT;
+    v_orphan_student_count BIGINT;
+    v_orphan_course_count BIGINT;
+    v_duplicate_active_count BIGINT;
+    v_amount_mismatch BIGINT;
+    v_constraint_count INTEGER;
+    v_sequence_count INTEGER;
+    v_owner_count INTEGER;
+    v_not_null_count INTEGER;
+    v_requested_count BIGINT;
+    v_learning_count BIGINT;
+    v_completed_count BIGINT;
+    v_cancelled_count BIGINT;
+    v_total_amount NUMERIC;
+    v_students_next BIGINT;
+    v_courses_next BIGINT;
+    v_enrollments_next BIGINT;
 BEGIN
     IF (SELECT COUNT(*) FROM security_lab.students) <> 3
        OR (SELECT COUNT(*) FROM security_lab.courses) <> 3
@@ -253,17 +269,70 @@ BEGIN
         RAISE EXCEPTION '복원 검증 실패: JOIN 결과는 3행이어야 합니다.';
     END IF;
 
-    SELECT COUNT(*) INTO orphan_student_count
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'security_lab'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    ) OR EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'security_lab'
+          AND table_name = 'enrollments'
+          AND column_name = 'paid_amount'
+    ) THEN
+        RAISE EXCEPTION '복원 검증 실패: recorded_amount NUMERIC(12,0) 구조가 아닙니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'security_lab'
+      AND table_name IN ('students', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_not_null_count <> 14 THEN
+        RAISE EXCEPTION '복원 검증 실패: NOT NULL 컬럼은 14개여야 합니다. 실제 %.', v_not_null_count;
+    END IF;
+
+    SELECT
+        COUNT(*) FILTER (WHERE status = '신청'),
+        COUNT(*) FILTER (WHERE status = '수강중'),
+        COUNT(*) FILTER (WHERE status = '완료'),
+        COUNT(*) FILTER (WHERE status = '취소'),
+        COALESCE(SUM(recorded_amount), 0)
+    INTO
+        v_requested_count,
+        v_learning_count,
+        v_completed_count,
+        v_cancelled_count,
+        v_total_amount
+    FROM security_lab.enrollments;
+
+    IF v_requested_count <> 1
+       OR v_learning_count <> 1
+       OR v_completed_count <> 1
+       OR v_cancelled_count <> 0
+       OR v_total_amount <> 310000 THEN
+        RAISE EXCEPTION
+            '복원 검증 실패: status=%/%/%/%, total=%.',
+            v_requested_count, v_learning_count, v_completed_count, v_cancelled_count, v_total_amount;
+    END IF;
+
+    SELECT COUNT(*) INTO v_orphan_student_count
     FROM security_lab.enrollments AS e
     LEFT JOIN security_lab.students AS s ON s.id = e.student_id
     WHERE s.id IS NULL;
 
-    SELECT COUNT(*) INTO orphan_course_count
+    SELECT COUNT(*) INTO v_orphan_course_count
     FROM security_lab.enrollments AS e
     LEFT JOIN security_lab.courses AS c ON c.id = e.course_id
     WHERE c.id IS NULL;
 
-    SELECT COUNT(*) INTO duplicate_active_count
+    SELECT COUNT(*) INTO v_duplicate_active_count
     FROM (
         SELECT student_id, course_id
         FROM security_lab.enrollments
@@ -272,17 +341,21 @@ BEGIN
         HAVING COUNT(*) > 1
     ) AS duplicated_active_pairs;
 
-    IF orphan_student_count <> 0
-       OR orphan_course_count <> 0
-       OR duplicate_active_count <> 0 THEN
+    SELECT COUNT(*) INTO v_amount_mismatch
+    FROM security_lab.enrollments AS e
+    JOIN security_lab.courses AS c ON c.id = e.course_id
+    WHERE e.recorded_amount <> c.price;
+
+    IF v_orphan_student_count <> 0
+       OR v_orphan_course_count <> 0
+       OR v_duplicate_active_count <> 0
+       OR v_amount_mismatch <> 0 THEN
         RAISE EXCEPTION
-            '복원 검증 실패: 고아 student %, 고아 course %, 활성 중복 %.',
-            orphan_student_count,
-            orphan_course_count,
-            duplicate_active_count;
+            '복원 검증 실패: orphan student %, orphan course %, active duplicate %, amount mismatch %.',
+            v_orphan_student_count, v_orphan_course_count, v_duplicate_active_count, v_amount_mismatch;
     END IF;
 
-    SELECT COUNT(*) INTO expected_constraint_count
+    SELECT COUNT(*) INTO v_constraint_count
     FROM pg_constraint
     WHERE connamespace = 'security_lab'::regnamespace
       AND conname IN (
@@ -298,16 +371,26 @@ BEGIN
           'fk_security_enrollments_student',
           'fk_security_enrollments_course',
           'chk_security_enrollments_status',
-          'chk_security_enrollments_amount'
+          'chk_security_enrollments_recorded_amount'
       );
 
-    IF expected_constraint_count <> 13
-       OR to_regclass('security_lab.uq_security_enrollments_active') IS NULL THEN
+    IF v_constraint_count <> 13
+       OR NOT EXISTS (
+            SELECT 1
+            FROM pg_index AS i
+            JOIN pg_class AS c ON c.oid = i.indexrelid
+            JOIN pg_namespace AS n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'security_lab'
+              AND c.relname = 'uq_security_enrollments_active'
+              AND i.indisunique
+              AND i.indisvalid
+              AND i.indisready
+       ) THEN
         RAISE EXCEPTION
             '복원 검증 실패: 제약조건 또는 활성 신청 인덱스가 누락되었습니다.';
     END IF;
 
-    SELECT COUNT(*) INTO expected_sequence_count
+    SELECT COUNT(*) INTO v_sequence_count
     FROM information_schema.sequences
     WHERE sequence_schema = 'security_lab'
       AND sequence_name IN (
@@ -316,38 +399,33 @@ BEGIN
           'enrollments_id_seq'
       );
 
-    IF expected_sequence_count <> 3 THEN
+    IF v_sequence_count <> 3 THEN
         RAISE EXCEPTION
             '복원 검증 실패: IDENTITY 시퀀스는 3개여야 합니다.';
     END IF;
 
     SELECT CASE WHEN is_called THEN last_value + 1 ELSE last_value END
-    INTO students_next
-    FROM security_lab.students_id_seq;
-
+    INTO v_students_next FROM security_lab.students_id_seq;
     SELECT CASE WHEN is_called THEN last_value + 1 ELSE last_value END
-    INTO courses_next
-    FROM security_lab.courses_id_seq;
-
+    INTO v_courses_next FROM security_lab.courses_id_seq;
     SELECT CASE WHEN is_called THEN last_value + 1 ELSE last_value END
-    INTO enrollments_next
-    FROM security_lab.enrollments_id_seq;
+    INTO v_enrollments_next FROM security_lab.enrollments_id_seq;
 
-    IF students_next <= (SELECT MAX(id) FROM security_lab.students)
-       OR courses_next <= (SELECT MAX(id) FROM security_lab.courses)
-       OR enrollments_next <= (SELECT MAX(id) FROM security_lab.enrollments) THEN
+    IF v_students_next <= (SELECT MAX(id) FROM security_lab.students)
+       OR v_courses_next <= (SELECT MAX(id) FROM security_lab.courses)
+       OR v_enrollments_next <= (SELECT MAX(id) FROM security_lab.enrollments) THEN
         RAISE EXCEPTION
             '복원 검증 실패: IDENTITY 다음 값이 기존 최대 ID보다 크지 않습니다.';
     END IF;
 
-    SELECT COUNT(*) INTO expected_owner_count
+    SELECT COUNT(*) INTO v_owner_count
     FROM pg_class AS c
     JOIN pg_namespace AS n ON n.oid = c.relnamespace
     WHERE n.nspname = 'security_lab'
       AND c.relkind IN ('r', 'S')
       AND pg_get_userbyid(c.relowner) = current_user;
 
-    IF expected_owner_count <> 6
+    IF v_owner_count <> 6
        OR (
             SELECT pg_get_userbyid(nspowner)
             FROM pg_namespace
