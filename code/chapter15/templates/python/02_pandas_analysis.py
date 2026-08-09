@@ -6,6 +6,21 @@ import pandas as pd
 
 from validation_utils import load_snapshot_frames, read_only_snapshot
 
+ANALYSIS_TIMEZONE = "Asia/Seoul"
+
+
+def _to_analysis_timezone(value: object) -> pd.Timestamp:
+    """Return a timezone-aware timestamp interpreted in the Chapter 15 business timezone."""
+    timestamp = pd.Timestamp(pd.to_datetime(value, errors="raise"))
+    if timestamp.tzinfo is None:
+        return timestamp.tz_localize(ANALYSIS_TIMEZONE)
+    return timestamp.tz_convert(ANALYSIS_TIMEZONE)
+
+
+def _month_start(timestamp: pd.Timestamp) -> pd.Timestamp:
+    """Return a timezone-naive first day used by the SQL DATE question_month column."""
+    return pd.Timestamp(year=timestamp.year, month=timestamp.month, day=1)
+
 
 def build_summaries(frames: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """Build status, month, student, tutor and response summaries."""
@@ -31,15 +46,26 @@ def build_summaries(frames: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
             material_count=("material_count", "sum"),
         )
     )
-    start_at = pd.to_datetime(parameters.loc[0, "start_at"], errors="raise")
-    end_at = pd.to_datetime(parameters.loc[0, "end_at_exclusive"], errors="raise")
+
+    # PostgreSQL의 timestamptz는 드라이버에서 UTC로 전달될 수 있습니다.
+    # 월 경계를 UTC에서 먼저 제거하면 2026-01-01 00:00+09가
+    # 2025-12-31 15:00+00로 보이면서 12월이 잘못 생성될 수 있습니다.
+    # SQL과 같은 업무 시간대(Asia/Seoul)로 먼저 변환한 뒤 월 시작일을 만듭니다.
+    start_at = _to_analysis_timezone(parameters.loc[0, "start_at"])
+    end_at = _to_analysis_timezone(parameters.loc[0, "end_at_exclusive"])
+    start_month = _month_start(start_at)
+    end_month_exclusive = _month_start(end_at)
+
+    if end_at <= start_at:
+        raise ValueError("분석 종료 시각은 시작 시각보다 뒤여야 합니다.")
+    if end_month_exclusive <= start_month:
+        raise ValueError("분석 기간에는 최소 한 개의 월이 포함되어야 합니다.")
+
     months = pd.DataFrame(
         {
             "question_month": pd.date_range(
-                start=start_at.tz_localize(None).to_period("M").start_time,
-                end=(end_at.tz_localize(None) - pd.offsets.MonthBegin(1))
-                .to_period("M")
-                .start_time,
+                start=start_month,
+                end=end_month_exclusive - pd.offsets.MonthBegin(1),
                 freq="MS",
             )
         }
