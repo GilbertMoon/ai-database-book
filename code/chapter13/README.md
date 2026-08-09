@@ -15,8 +15,19 @@ performance_lab: 변경하지 않음
 security_lab: 변경하지 않음
 nosql_lab: 변경하지 않음
 ai_review_lab: Chapter 13 실습 대상
+```
 
-`ai_review_lab.payments`는 AI 설계 검토를 위한 가상 격리 시나리오입니다. `course_project`에는 결제·환불 원장을 추가하지 않으며, 원본 `course_project.enrollments.recorded_amount NUMERIC(12,0)`는 계속 신청 시점 기록 금액입니다.
+`ai_review_lab.payments`는 AI 설계 검토를 위한 **가상 격리 시나리오**입니다. `course_project`에는 결제·환불 원장을 추가하지 않습니다.
+
+기존 원본의 의미도 유지합니다.
+
+```text
+course_project.enrollments.recorded_amount
+타입 = NUMERIC(12,0)
+의미 = 신청 시점에 신청 행에 기록한 금액
+결제 승인액 아님
+환불 반영 순액 아님
+회계 매출 아님
 ```
 
 모든 SQL은 다음 위치 확인 형식을 사용합니다.
@@ -31,21 +42,43 @@ SHOW search_path;
 
 ---
 
+## Chapter 07·08 시작 기준
+
+Chapter 13의 `01_ai_review_lab_schema.sql`은 단순히 원본 테이블이 존재하는지만 확인하지 않습니다. 다음 canonical state 전체가 유지될 때만 격리 스키마를 생성합니다.
+
+```text
+students / instructors / courses / enrollments = 3 / 2 / 3 / 5
+상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
+recorded_amount = NUMERIC(12,0)
+전체 기록 금액 = 590000
+활성 신청 = 3 / 340000
+취소 제외 = 4 / 440000
+1001 = 완료 / 100000
+1004 = 취소 / 150000
+1005 = 신청 / 120000
+활성 신청 부분 고유 인덱스 존재
+활성 신청 중복 = 0
+```
+
+Chapter 12의 `nosql_lab`도 Chapter 13 검증에서는 보호 대상입니다. 전용 자동 검증은 Chapter 12 기준 상태를 실제 생성한 뒤 Chapter 13 실행 전·후 fingerprint가 같은지 확인합니다.
+
+---
+
 ## 파일 목록
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_ai_review_lab_schema.sql` | DB·Chapter 07 기준 상태를 확인하고 스키마와 나쁜 설계 테이블을 한 트랜잭션에서 생성 |
-| `02_bad_design_seed.sql` | 재실행을 차단하고 나쁜 데이터 3행 입력·IDENTITY 4 조정 |
-| `03_good_design_schema.sql` | P13 요구사항, 활성 신청 부분 고유 인덱스와 결제·환불 시각 규칙을 반영한 좋은 설계 |
-| `04_good_design_seed.sql` | 명시적 ID 정상 데이터 입력·IDENTITY 시작값 조정·COMMIT 전 판정 |
-| `05_metadata_validation.sql` | 정확한 테이블 집합·FK 서명·제약조건 29개·IDENTITY 6개·인덱스 자동 검증 |
+| `01_ai_review_lab_schema.sql` | DB·Chapter 07·08 canonical state를 확인하고 스키마와 나쁜 설계 테이블을 한 트랜잭션에서 생성 |
+| `02_bad_design_seed.sql` | 재실행을 차단하고 나쁜 데이터 3행 입력·반복/약한 타입 반례·IDENTITY 4 조정 |
+| `03_good_design_schema.sql` | P13 요구사항, `recorded_amount`, 활성 신청 부분 고유 인덱스와 가상 결제·환불 시각 규칙을 반영한 좋은 설계 |
+| `04_good_design_seed.sql` | 명시적 ID 정상 데이터 입력·IDENTITY 시작값 조정·금액/상태 분포 COMMIT 전 판정 |
+| `05_metadata_validation.sql` | 정확한 테이블 집합·FK 서명·제약조건 29개·IDENTITY 6개·금액 타입·인덱스 자동 검증 |
 | `06_business_validation.sql` | NULL 안전 상태 조합, 고아 관계, 금액·시간·활성 중복과 가격 차이 검증 |
-| `07_negative_tests.sql` | SQLSTATE·constraint name을 기록하는 반례 24개와 정상 경계값 6개 자동 테스트 |
-| `08_ai_review_lab_validation.sql` | 기준 행·메타데이터·업무 정합성·IDENTITY·07 결과를 종합 판정 |
+| `07_negative_tests.sql` | SQLSTATE·constraint name을 기록하는 예상 실패 24개와 정상 경계값 6개 자동 테스트 |
+| `08_ai_review_lab_validation.sql` | 기준 행·메타데이터·업무 정합성·IDENTITY·07의 30/30 결과를 종합 판정 |
 | `AI_REVIEW_REPORT_TEMPLATE.md` | 요구사항·정책·diff·증거·승인 상태 기록 |
 | `PROMPT_TEMPLATES.md` | ERD·DDL·Codex 수정·마이그레이션·승인 검토 프롬프트 |
-| `reset_ai_review_lab.sql` | DB 보호 구문 안에서 `ai_review_lab`만 초기화 |
+| `reset_ai_review_lab.sql` | 예상 밖 객체를 보호하는 원자적 `ai_review_lab` 초기화 |
 | `ai_db_design_review_practice.sql` | 읽기 전용 호환 안내·상태 확인 |
 
 ---
@@ -64,6 +97,8 @@ SHOW search_path;
 → AI_REVIEW_REPORT_TEMPLATE.md 기록
 ```
 
+`07`과 `08`은 `pg_temp.negative_test_results`를 실행 증거로 사용하므로 **같은 PostgreSQL 세션에서 연속 실행**해야 합니다.
+
 처음부터 다시 시작할 때만 `reset_ai_review_lab.sql`을 사용합니다.
 
 ---
@@ -73,7 +108,7 @@ SHOW search_path;
 ```text
 P13-R01~P13-R09  확인된 요구사항
 P13-D01~P13-D08  결정·단순화·미확정 정책
-P13-T01~P13-T30  반례·정상 경계값 테스트
+P13-T01~P13-T30  예상 실패·정상 경계값 테스트
 P13-V01~P13-V08  실행·검증 단계
 ```
 
@@ -86,10 +121,12 @@ P13-R03 강의는 강사 한 명을 FK로 참조
 P13-R04 학생·강의 N:M은 enrollments로 해소
 P13-R05 수강 상태 허용값 CHECK
 P13-R06 가격·신청 시점 기록 금액·결제 상태 기록 금액 0 이상
-P13-R07 결제는 수강신청을 FK로 참조
-P13-R08 실제 카드번호를 저장하지 않고 외부 비민감 payment_reference만 저장
+P13-R07 격리 시나리오의 결제는 수강신청을 FK로 참조
+P13-R08 원시 카드번호·CVV를 저장하지 않고 가상 payment_reference 사용
 P13-R09 신청·수강중 활성 신청은 학생·강의당 한 건
 ```
+
+실제 서비스의 `payment_reference`도 조직의 보안·보관 정책에 따라 보호 대상이 될 수 있습니다. “참조값이므로 자동으로 비민감하다”고 가정하지 않습니다.
 
 ### 결정·범위
 
@@ -119,6 +156,20 @@ P13-D08 신청 상태는 결제 행 없이 존재할 수 있음
 | 정상 JOIN | 4 | - | - |
 | FK | 4 | - | - |
 
+격리 실습의 기준 합계와 상태 분포:
+
+```text
+ai_review_lab.enrollments.recorded_amount 합계 = 470000
+ai_review_lab.payments.amount 합계 = 470000
+
+수강 상태 = 완료 2 / 신청 1 / 취소 1 / 수강중 0
+결제 상태 = 결제완료 2 / 결제대기 1 / 환불 1 / 결제실패 0
+
+1002
+현재 강의 가격 = 180000
+신청 시점 기록 금액 = 150000
+```
+
 명시적 ID 입력은 IDENTITY 내부 시퀀스를 자동으로 이동시키지 않으므로 Seed 파일에서 `RESTART WITH`를 적용합니다. 반례 테스트는 명시적 테스트 ID를 사용하며 모두 하위 트랜잭션에서 자동 취소됩니다.
 
 ---
@@ -142,10 +193,10 @@ courses.price
 → 현재 기본 가격
 
 enrollments.recorded_amount
-→ 신청 시점 신청 시점 기록 금액
+→ 신청 시점에 신청 행에 기록한 금액
 
 payments.amount
-→ 현재 결제 상태의 기록 금액
+→ ai_review_lab 가상 결제 상태에 기록한 금액
 
 paid_at / refunded_at
 → 결제 시각과 환불 시각을 분리
@@ -159,7 +210,7 @@ paid_at / refunded_at
 환불               → paid_at·refunded_at NOT NULL, refunded_at >= paid_at
 ```
 
-`payment_reference`는 카드번호가 아니라 외부 결제 시스템이 발급한 비민감 가상 참조값입니다. 컬럼명 검사만으로 민감정보 부재를 완전히 증명하지 않으며 Seed·로그·애플리케이션 흐름도 함께 검토합니다.
+`payment_reference`는 원시 카드번호·CVV가 아니라 이 실습에서 사용하는 가상 외부 결제 참조값입니다. 실제 시스템의 참조값은 조직 정책에 따라 보호 대상이 될 수 있습니다. 컬럼명 검사만으로 민감정보 부재를 완전히 증명할 수 없으므로 Seed·로그·애플리케이션 흐름도 함께 검토합니다.
 
 ---
 
@@ -173,8 +224,9 @@ paid_at / refunded_at
 정확한 FK 이름·출발 컬럼·대상 컬럼 4개
 ON DELETE RESTRICT 또는 NO ACTION
 IDENTITY id 컬럼 6개
+price / recorded_amount / payment amount = NUMERIC(12,0) NOT NULL
 활성 신청 부분 고유 인덱스
-민감정보 전용 컬럼 이름 0개
+원시 카드정보·비밀 전용 컬럼 이름 0개
 ```
 
 ---
@@ -202,7 +254,7 @@ IDENTITY id 컬럼 6개
 수강중 → 결제 없음 허용, 있으면 결제완료
 ```
 
-현재 가격과 신청 시점 신청 시점 기록 금액 차이는 정보용 1행이며 자동 오류가 아닙니다.
+현재 가격과 신청 시점 기록 금액 차이는 정보용 1행이며 자동 오류가 아닙니다.
 
 ---
 
@@ -221,12 +273,20 @@ actual_result / detail
 기준:
 
 ```text
-P13-T01~P13-T24 expected_failure
-P13-T25~P13-T30 expected_success
-전체 27
-통과 27
+P13-T01~P13-T24 = expected_failure 24
+P13-T25~P13-T30 = expected_success 6
+전체 30
+통과 30
 unexpected 0
 기준 행 수 유지
+```
+
+추가로 삭제 정책과 현재 이메일 비교 정책도 실제 경계 테스트에 포함합니다.
+
+```text
+P13-T23 참조 중인 강사 삭제 → FK 실패
+P13-T24 참조 중인 신청 삭제 → FK 실패
+P13-T30 Kim.review@example.com → 현재 정확 문자열 정책에서는 성공
 ```
 
 정상 경계값에는 다음이 포함됩니다.
@@ -238,8 +298,7 @@ NULL description
 결제 없는 신청
 완료·취소 이력 후 재신청
 결제실패 + 금액 0 + 시각 NULL
-삭제 RESTRICT: 참조 중인 강사·신청 삭제 실패
-이메일 대소문자 변형: 현재 정확 문자열 정책에서는 성공
+이메일 대소문자 변형
 ```
 
 오류만 테스트하면 지나치게 강한 제약조건이 정상 데이터를 막는 문제를 발견하기 어렵습니다.
@@ -251,24 +310,47 @@ NULL description
 `08_ai_review_lab_validation.sql`은 다음을 다시 판정합니다.
 
 ```text
-Chapter 07 신청 5행 유지
-기준 행 수 3/3/2/3/4/4
-정상 JOIN 4
+Chapter 07·08 canonical state 3/2/3/5 + 590000/340000/440000 유지
+Chapter 13 기준 행 수 3/3/2/3/4/4
+recorded_amount 합계 = 470000
+payment amount 합계 = 470000
+정상 JOIN = 4
 정확한 테이블 집합
-제약조건 29·FK 4·IDENTITY 6
+제약조건 29 / FK 4 / IDENTITY 6
+금액 컬럼 3개 = NUMERIC(12,0) NOT NULL
 활성 신청 부분 고유 인덱스
-필수 문자열·고아 관계·활성 중복 0
-금액·시간·상태 조합 위반 0
-정보용 가격 차이 1행
+필수 문자열·고아 관계·활성 중복 = 0
+금액·시간·상태 조합 위반 = 0
+정보용 가격 차이 = 1002 한 행
 모든 IDENTITY 다음 값 > 현재 최대 ID
-같은 세션이면 07의 30/30 결과 재확인
+07과 같은 세션의 테스트 = 30/30
+expected_failure = 24
+expected_success = 6
+unexpected = 0
 ```
 
 통과 메시지:
 
 ```text
-Chapter 13 AI review lab validation passed
+Chapter 13 AI review lab validation passed: tests 30/30
 ```
+
+---
+
+## reset 안전성
+
+`reset_ai_review_lab.sql`은 다음 원칙을 사용합니다.
+
+```text
+현재 DB·읽기 전용 상태 확인
+BEGIN
+알려진 테이블을 자식 → 부모 순으로 명시적 DROP
+CASCADE 사용 안 함
+DROP SCHEMA
+COMMIT
+```
+
+`ai_review_lab.keep_me`처럼 예상하지 못한 객체가 있으면 `DROP SCHEMA`가 실패하며 앞선 DROP도 전체 ROLLBACK됩니다. 따라서 사용자가 의도하지 않은 객체를 조용히 삭제하지 않습니다.
 
 ---
 
