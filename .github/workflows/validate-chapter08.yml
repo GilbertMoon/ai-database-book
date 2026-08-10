@@ -7,6 +7,7 @@ on:
       - 'code/chapter08/**'
       - 'images/chapter08/**'
       - 'presentation/chapter08/**'
+      - 'presentation/common/script_content_enhancer.js'
       - 'notes/chapter08_review_checklist.md'
       - '.github/workflows/validate-chapter08.yml'
   workflow_dispatch:
@@ -66,6 +67,7 @@ jobs:
           index_html = Path('presentation/chapter08/index.html').read_text(encoding='utf-8')
           code_readme = Path('code/chapter08/README.md').read_text(encoding='utf-8')
           image_readme = Path('images/chapter08/README.md').read_text(encoding='utf-8')
+          enhancer = Path('presentation/common/script_content_enhancer.js').read_text(encoding='utf-8')
 
           numbered = re.findall(r'^##\s+(\d+)\.\s+', chapter, re.M)
           if numbered != [str(i) for i in range(1, 24)]:
@@ -75,6 +77,11 @@ jobs:
               for token in ['recorded_amount', '590000', '340000', '440000']:
                   if token not in text:
                       raise SystemExit(f'{name} missing {token}')
+
+          for name, text in [('chapter', chapter), ('activity', activity), ('theory', theory), ('practice', practice), ('code README', code_readme)]:
+              for token in ['440000', '220000']:
+                  if token not in text:
+                      raise SystemExit(f'{name} missing over-aggregation evidence {token}')
 
           roots = [Path('book/chapter08'), Path('code/chapter08'), Path('presentation/chapter08'), Path('images/chapter08')]
           stale = []
@@ -105,7 +112,7 @@ jobs:
           if index_html.count('20장') < 2:
               raise SystemExit('Chapter 08 index must advertise 20 theory and 20 practice slides')
 
-          version = '20260809a'
+          version = '20260810a'
           for name, text in [('script', script_html), ('theory html', theory_html), ('practice html', practice_html)]:
               if version not in text:
                   raise SystemExit(f'{name} missing asset version {version}')
@@ -118,6 +125,10 @@ jobs:
               raise SystemExit('shared TTS normalization is not loaded')
           if '../common/script_content_enhancer.js' not in script_html:
               raise SystemExit('shared script content enhancer is not loaded')
+          if 'data-script-content-enhancer="off"' not in script_html:
+              raise SystemExit('Chapter 08 authored narration must disable automatic expansion')
+          if "dataset?.scriptContentEnhancer === 'off'" not in enhancer:
+              raise SystemExit('shared enhancer does not honor the Chapter 08 opt-out')
           if 'PresentationTTS?.normalize' not in script_js:
               raise SystemExit('Chapter 08 presenter does not use shared TTS normalization')
 
@@ -143,6 +154,8 @@ jobs:
               'v_learning_count <> 1',
               'v_active_count <> 3',
               'v_non_cancelled_count <> 4',
+              'v_named_constraint_count <> 15',
+              'v_not_null_count <> 20',
               'Chapter 08 prerequisite check passed',
           ]:
               if token not in check_sql:
@@ -153,6 +166,9 @@ jobs:
               'v_course303_joined_rows <> 1',
               'v_course303_count <> 0',
               'v_instructor201_courses <> 2',
+              'v_having_course_count <> 2',
+              'v_instructor201_wrong_price_sum <> 440000',
+              'v_instructor201_correct_price_sum <> 220000',
               'Chapter 08 join and aggregation validation passed',
           ]:
               if token not in validation_sql:
@@ -284,6 +300,10 @@ jobs:
         run: |
           RESULT=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) || ':' || SUM(recorded_amount) || ':' || COUNT(*) FILTER (WHERE status IN ('신청','수강중')) || ':' || SUM(recorded_amount) FILTER (WHERE status IN ('신청','수강중')) || ':' || COUNT(*) FILTER (WHERE status <> '취소') || ':' || SUM(recorded_amount) FILTER (WHERE status <> '취소') FROM course_project.enrollments;")
           test "$RESULT" = "5:590000:3:340000:4:440000"
+          OVERAGG=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT (SELECT SUM(c.price) FROM course_project.courses c JOIN course_project.enrollments e ON c.id=e.course_id WHERE c.instructor_id=201) || ':' || (SELECT SUM(price) FROM course_project.courses WHERE instructor_id=201);")
+          test "$OVERAGG" = "440000:220000"
+          HAVING_COUNT=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) FROM (SELECT c.id FROM course_project.courses c JOIN course_project.enrollments e ON c.id=e.course_id WHERE e.status <> '취소' GROUP BY c.id HAVING COUNT(e.id) >= 2) q;")
+          test "$HAVING_COUNT" = "2"
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/00_check_course_project.sql > /tmp/ch8_final_00.log 2>&1
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter08/03_join_aggregation_validation.sql > /tmp/ch8_final_03.log 2>&1
           grep -q "Chapter 08 prerequisite check passed" /tmp/ch8_final_00.log
