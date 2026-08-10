@@ -129,6 +129,8 @@ GROUP BY i.id, i.name
 ORDER BY i.id;
 
 -- 10. 여러 JOIN에서 강의 가격을 잘못 합산하는 예
+-- 기준 데이터에서 강사 201은 잘못된 합계 440000, 실제 강의 가격 합계 220000입니다.
+-- 강사 202는 신청이 한 건뿐이라 두 값이 우연히 150000으로 같지만, 쿼리 기준이 올바르다는 뜻은 아닙니다.
 SELECT
     i.id AS instructor_id,
     i.name AS instructor_name,

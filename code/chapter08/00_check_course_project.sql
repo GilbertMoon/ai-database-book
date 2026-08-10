@@ -27,6 +27,8 @@ DECLARE
     v_orphan_course_count bigint;
     v_orphan_instructor_count bigint;
     v_active_duplicate_count bigint;
+    v_named_constraint_count bigint;
+    v_not_null_count bigint;
     v_status_1001 text;
     v_amount_1001 numeric;
     v_status_1004 text;
@@ -61,6 +63,45 @@ BEGIN
     ) THEN
         RAISE EXCEPTION
             '실행 중단: enrollments.recorded_amount NUMERIC(12,0) 열이 없습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_named_constraint_count <> 15 OR v_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07 구조 기준과 다릅니다. named_constraints=%, not_null_columns=%',
+            v_named_constraint_count,
+            v_not_null_count;
     END IF;
 
     SELECT COUNT(*) INTO v_student_count

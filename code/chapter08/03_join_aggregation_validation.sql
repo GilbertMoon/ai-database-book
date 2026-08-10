@@ -44,6 +44,11 @@ DECLARE
     v_instructor202_courses bigint;
     v_instructor202_enrollments bigint;
     v_instructor202_non_cancelled bigint;
+    v_having_course_count bigint;
+    v_instructor201_wrong_price_sum numeric;
+    v_instructor201_correct_price_sum numeric;
+    v_instructor202_wrong_price_sum numeric;
+    v_instructor202_correct_price_sum numeric;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -238,6 +243,34 @@ BEGIN
     WHERE i.id = 202
     GROUP BY i.id;
 
+    SELECT COUNT(*) INTO v_having_course_count
+    FROM (
+        SELECT c.id
+        FROM course_project.courses AS c
+        JOIN course_project.enrollments AS e ON c.id = e.course_id
+        WHERE e.status <> '취소'
+        GROUP BY c.id
+        HAVING COUNT(e.id) >= 2
+    ) AS having_courses;
+
+    SELECT COALESCE(SUM(c.price), 0) INTO v_instructor201_wrong_price_sum
+    FROM course_project.instructors AS i
+    JOIN course_project.courses AS c ON i.id = c.instructor_id
+    JOIN course_project.enrollments AS e ON c.id = e.course_id
+    WHERE i.id = 201;
+
+    SELECT COALESCE(SUM(price), 0) INTO v_instructor201_correct_price_sum
+    FROM course_project.courses WHERE instructor_id = 201;
+
+    SELECT COALESCE(SUM(c.price), 0) INTO v_instructor202_wrong_price_sum
+    FROM course_project.instructors AS i
+    JOIN course_project.courses AS c ON i.id = c.instructor_id
+    JOIN course_project.enrollments AS e ON c.id = e.course_id
+    WHERE i.id = 202;
+
+    SELECT COALESCE(SUM(price), 0) INTO v_instructor202_correct_price_sum
+    FROM course_project.courses WHERE instructor_id = 202;
+
     IF v_detail_count <> 5
        OR v_grouped_count <> 5
        OR v_detail_total <> 590000
@@ -312,6 +345,20 @@ BEGIN
             v_instructor202_courses,
             v_instructor202_enrollments,
             v_instructor202_non_cancelled;
+    END IF;
+
+    IF v_having_course_count <> 2
+       OR v_instructor201_wrong_price_sum <> 440000
+       OR v_instructor201_correct_price_sum <> 220000
+       OR v_instructor202_wrong_price_sum <> 150000
+       OR v_instructor202_correct_price_sum <> 150000 THEN
+        RAISE EXCEPTION
+            'Chapter 08 HAVING/과대 집계 검증 실패: having=%, i201_wrong/correct=%/%, i202_wrong/correct=%/%',
+            v_having_course_count,
+            v_instructor201_wrong_price_sum,
+            v_instructor201_correct_price_sum,
+            v_instructor202_wrong_price_sum,
+            v_instructor202_correct_price_sum;
     END IF;
 
     RAISE NOTICE 'Chapter 08 join and aggregation validation passed';

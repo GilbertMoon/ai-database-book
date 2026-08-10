@@ -61,6 +61,7 @@ current_database = ai_database_book
 students / instructors / courses / enrollments 존재
 uq_course_enrollments_active 존재
 recorded_amount = NUMERIC(12,0)
+Chapter 07 명명 제약조건 = 15 / NOT NULL 열 = 20
 행 수 = 3 / 2 / 3 / 5
 상태 = 신청 2 / 수강중 1 / 완료 1 / 취소 1
 전체 = 5 / 590000 / 평균 118000.00
@@ -202,6 +203,9 @@ WHERE 조건 학생 수 = 2
 강의 303 = LEFT JOIN 결과 1행 / 실제 신청 0 / 고유 학생 0 / 0원
 강사 201 = 강의 2 / 신청 4 / 취소 제외 4
 강사 202 = 강의 1 / 신청 1 / 취소 제외 0
+HAVING 취소 제외 2건 이상 강의 = 2개
+강사 201 가격: 신청 JOIN 뒤 잘못된 합계 440000 / 강의 수준 올바른 합계 220000
+강사 202 가격: 두 방식 모두 150000(우연히 같음)
 ```
 
 통과 메시지:

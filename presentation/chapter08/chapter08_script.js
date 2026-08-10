@@ -2,7 +2,7 @@
   'use strict';
 
   const CHANNEL = 'chapter08-presentation-sync';
-  const ASSET_VERSION = '20260809a';
+  const ASSET_VERSION = '20260810a';
   const card = document.getElementById('card');
   const navigation = window.CH8Navigation;
   let block = document.body.dataset.chapter08Block === 'practice' ? 'practice' : 'theory';
