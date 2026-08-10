@@ -278,4 +278,26 @@ PostgreSQL: 16
 - [x] 대표 NOT NULL 실패 예제 추가
 - [x] 부분 고유 인덱스와 UNIQUE 제약조건 구분
 - [x] Chapter 07 자동 스크립트 보강 비활성화
-- [ ] 최신 PostgreSQL 16 전체 경로 재검증 결과 확인
+- [x] 최신 PostgreSQL 16 전체 경로 재검증 성공 — publication smoke Run 2 / Run ID 31375936249
+
+
+---
+
+## 최종 출판 PostgreSQL 재검증 (2026-08-10)
+
+- [x] 데이터베이스 `CREATE` 권한 없는 역할에서 01 실행 거부 및 스키마 미생성 확인
+- [x] 01 → 02 → 03 → 04 → 05 → 06 전체 경로 PostgreSQL 16 실행 성공
+- [x] 신청 1005 `recorded_amount = 120000` 및 강의 302 현재 `price = 120000` 확인
+- [x] 명명 제약조건 15개·NOT NULL 열 20개·부분 고유 인덱스 확인
+- [x] 학생 이름 `NULL` 입력이 NOT NULL 위반으로 실제 거부됨
+- [x] Chapter 08 `00_check_course_project.sql` 인계 게이트 통과
+- [x] Chapter 07 스크립트 자동 문장 보강 비활성화 정적 확인
+
+```text
+Workflow: Chapter 07 publication SQL smoke once
+Run: 2
+Run ID: 31375936249
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```

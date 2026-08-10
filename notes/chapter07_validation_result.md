@@ -308,3 +308,38 @@ Run 4 성공으로 저장소 내용과 PostgreSQL 실행 의미는 검증했다.
 또한 Chapter 08 본문 일부의 과거 금액 열 표기는 Chapter 08 전체 점검에서 별도로 정리한다. Chapter 07에서 사용하는 Chapter 08 실행 전 게이트 SQL은 현재 구조와 실제 실행이 모두 검증됐다.
 
 실제 확인하지 않은 항목은 “통과”로 표시하지 않는다.
+
+
+---
+
+## 2026-08-10 최종 출판 재검증
+
+Chapter 07 최종 출판 보완 뒤 PostgreSQL 16에서 별도 smoke test를 실행했다.
+
+```text
+Workflow: Chapter 07 publication SQL smoke once
+Run: 2
+Run ID: 31375936249
+Commit: f07ab8ae1771c3054e9d247cd1b1cc685e8a3d94
+Status: completed
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+PostgreSQL: 16
+```
+
+최종 확인 범위:
+
+```text
+DB CREATE 권한 없는 역할에서 01 실행 거부 + course_project 미생성
+01 → 02 → 03 → 04 → 05 → 06 전체 경로 성공
+03 신규 신청 1005 = course 302의 현재 price를 recorded_amount로 캡처
+1005 recorded_amount = 120000 / course 302 price = 120000
+명명 제약조건 = 15
+NOT NULL 열 = 20
+부분 고유 인덱스 uq_course_enrollments_active 존재
+학생 이름 NULL 입력 = NOT NULL 위반
+Chapter 08 prerequisite check passed
+Chapter 07 authored narration 자동 확장 비활성화 확인
+```
+
+첫 smoke run에서 발견된 `06_course_project_optional_tests.sql`의 선언부 범위 오류도 수정한 뒤 전체 경로를 다시 실행해 최종 성공을 확인했다.
