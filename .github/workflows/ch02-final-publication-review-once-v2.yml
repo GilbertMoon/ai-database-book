@@ -1,0 +1,80 @@
+name: Retry Chapter 02 final publication review once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch02-final-publication-review-once-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Reuse corrected Chapter 02 patch program
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          workflow = Path('.github/workflows/ch02-final-publication-review-once.yml')
+          raw = workflow.read_text(encoding='utf-8')
+          marker = "python - <<'PY'\n"
+          if marker not in raw:
+              raise SystemExit('embedded patch program marker not found')
+          block = raw.split(marker, 1)[1].split('\n          PY', 1)[0]
+          block = textwrap.dedent(block)
+
+          old = "'- 기준 데이터: 업무 판단의 근거가 되는 데이터\\n- 파생 데이터: 기준 데이터를 계산해 만든 결과\\n- AI 결과: 모델과 입력·지시에 따라 생성된 결과'"
+          new = "'> - 기준 데이터: 업무 판단의 근거가 되는 데이터\\n> - 파생 데이터: 기준 데이터를 계산해 만든 결과\\n> - AI 결과: 모델과 입력·지시에 따라 생성된 결과'"
+          if old not in block:
+              raise SystemExit('source-of-truth old patch literal not found')
+          block = block.replace(old, new, 1)
+
+          old = "'- 기준 데이터: 특정 업무 판단에서 공식 기준으로 삼는 데이터\\n- 파생 데이터: 기준 데이터를 계산해 만든 결과\\n- AI 결과: 모델과 입력·지시에 따라 생성된 결과'"
+          new = "'> - 기준 데이터: 특정 업무 판단에서 공식 기준으로 삼는 데이터\\n> - 파생 데이터: 기준 데이터를 계산해 만든 결과\\n> - AI 결과: 모델과 입력·지시에 따라 생성된 결과'"
+          if old not in block:
+              raise SystemExit('source-of-truth new patch literal not found')
+          block = block.replace(old, new, 1)
+
+          exec(compile(block, '<chapter02-final-review>', 'exec'), {})
+
+          # The reused program removes the v1 workflow. Remove this retry workflow too.
+          Path('.github/workflows/ch02-final-publication-review-once-v2.yml').unlink()
+          PY
+
+      - name: Validate Chapter 02 publication refinements
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq '외래키(Foreign Key, FK)는 다른 테이블 또는 같은 테이블의 **참조 대상 키와 연결되는 하나 이상의 열**입니다.' book/chapter02/chapter02.md
+          grep -Fq '`NOT NULL`은 NULL을 막는 규칙이며 빈 문자열 자체를 막는 규칙은 아닙니다.' book/chapter02/chapter02.md
+          grep -Fq '[Chapter 02 독자 워크북](chapter02_activity.md)' book/chapter02/chapter02.md
+          grep -Fq '분석용 VIEW의 생성과 활용은 Chapter 14에서 다룬다.' book/chapter02/chapter02_outline.md
+          grep -Fq 'Materialized View | 이 책의 필수 학습 범위에서 상세히 다루지 않음' book/chapter02/chapter02_outline.md
+          grep -Fq '특정 업무 판단에서 공식 기준으로 삼는 데이터' book/chapter02/chapter02.md
+          ! grep -Fq '일반 VIEW의 생성과 사용은 Chapter 08' book/chapter02/chapter02_outline.md
+          ! grep -Fq '더 많은 활동은 `book/chapter02/chapter02_activity.md`' book/chapter02/chapter02.md
+          test ! -e .github/workflows/ch02-final-publication-review-once.yml
+          test ! -e .github/workflows/ch02-final-publication-review-once-v2.yml
+
+      - name: Commit Chapter 02 publication refinements
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Refine Chapter 02 final publication content"
+          git push origin main
