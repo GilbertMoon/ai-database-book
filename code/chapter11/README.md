@@ -29,6 +29,9 @@ recorded_amount NUMERIC(12,0)
 1001 완료 / 100000
 1004 취소 / 150000
 1005 신청 / 120000
+uq_course_enrollments_active 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
+현재 역할의 ai_database_book CREATE 권한 확인
 ```
 
 모든 SQL은 다음 위치 확인 형식을 사용합니다.
@@ -45,7 +48,7 @@ SHOW search_path;
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_security_lab_schema.sql` | Chapter 07·08 전체 기준을 검사하고 스키마·테이블·부분 고유 인덱스를 한 트랜잭션에서 생성·검증 |
+| `01_security_lab_schema.sql` | Chapter 07·08 전체 기준·구조 계약·DB CREATE 권한을 검사하고 스키마·테이블·부분 고유 인덱스를 한 트랜잭션에서 생성·검증 |
 | `02_security_lab_seed.sql` | 3/3/3 샘플, 상태 분포, 총 310000, IDENTITY와 무결성 자동 검증 |
 | `03_role_permission_plan.sql` | PostgreSQL 16 membership, Role·GRANT·REVOKE·Default Privileges·백업 역할·소유권·정리 계획 |
 | `04_permission_checks.sql` | PUBLIC·ACL·membership 옵션·RLS·시퀀스·유효 권한 확인 |
@@ -185,72 +188,13 @@ students_id_seq·courses_id_seq·enrollments_id_seq SELECT
 INSERT·UPDATE·DELETE·schema CREATE 불허
 ```
 
-앱 역할과 달리 백업 역할은 IDENTITY 시퀀스의 현재 상태 보존이 목적이므로 sequence `SELECT`를 명시적으로 검토합니다.
+백업 역할의 시퀀스 `SELECT`는 IDENTITY 상태를 포함한 논리 백업 검증을 위한 권한입니다.
 
 ---
 
-## PUBLIC·membership·유효 권한
+## 비밀번호와 password file
 
-```text
-has_*_privilege
-→ 최종적으로 사용할 수 있는 유효 권한
-
-pg_database.datacl·pg_namespace.nspacl·객체 ACL
-→ 직접 GRANT와 PUBLIC 같은 권한 경로
-
-information_schema.table_privileges / column_privileges
-→ PUBLIC 테이블·컬럼 권한
-
-pg_has_role MEMBER / USAGE
-→ 멤버십 존재 / 즉시 사용할 수 있는 권한
-
-pg_auth_members
-→ PostgreSQL 16 membership의 INHERIT·SET·ADMIN 옵션
-```
-
-`role_table_grants`만으로 PUBLIC 권한까지 확인했다고 생각하지 않습니다.
-
----
-
-## 권한 동작 테스트
-
-`05_permission_behavior_tests.sql`은 다음 결과를 목표로 합니다.
-
-```text
-읽기 계정
-- SELECT 성공
-- INSERT·UPDATE·DELETE 실패
-
-앱 계정
-- SELECT 성공
-- ID 생략 INSERT 성공
-- status UPDATE 성공
-- recorded_amount UPDATE·DELETE·schema CREATE 실패
-```
-
-허용 테스트는 마지막에 `ROLLBACK`합니다. 실패 문장은 기본 주석 상태이며 한 문장씩 선택합니다.
-
-```text
-테스트 뒤 students / courses / enrollments = 3 / 3 / 3
-총 recorded_amount = 310000
-활성 중복 = 0
-```
-
-IDENTITY 번호는 실패·ROLLBACK 후에도 공백이 생길 수 있으므로 연속 번호를 정합성 기준으로 사용하지 않습니다.
-
----
-
-## RLS 확인
-
-`04_permission_checks.sql`은 `security_lab`의 `relrowsecurity`와 `relforcerowsecurity`를 조회합니다. 교재 실습에서는 모두 `false`여야 합니다.
-
-일반적인 전체 논리 백업에서는 `pg_dump`가 RLS를 끄고 모든 행을 읽으려 하며, 백업 역할이 정책을 우회하지 못하면 오류가 날 수 있습니다. `--enable-row-security`는 역할에게 보이는 행만 의도적으로 덤프할 때 별도 검토하며 전체 백업과 같은 의미로 사용하지 않습니다.
-
----
-
-## 자격 증명과 저장소 보호
-
-루트 `.env.example`에는 다음 변수 이름만 둡니다.
+루트 `.env.example`에는 실제 비밀번호를 두지 않고 `PGPASSFILE` 경로만 설정합니다.
 
 ```text
 PGHOST=
@@ -260,31 +204,28 @@ PGUSER=
 PGPASSFILE=
 ```
 
-실제 libpq password file은 저장소 밖에 두고 OS 접근 권한을 제한합니다. `.gitignore`는 `.env`, password file, 백업·덤프와 압축 SQL 파일을 제외합니다.
+`PGPASSWORD`를 저장소나 장기 실행 환경에 보관하지 않습니다. 실제 password file은 저장소 밖에 둡니다.
 
-노출이 발생하면 Git 기록에서 파일을 지우는 것보다 먼저 자격 증명을 폐기·회전합니다.
+Unix 계열에서는 password file을 그룹·다른 사용자가 읽지 못하도록 **`chmod 0600` 수준**으로 제한합니다. 권한이 더 느슨하면 libpq가 파일을 무시할 수 있습니다. Windows는 별도의 password file 권한 검사를 하지 않으므로 사용자 프로필 또는 접근이 제한된 보호 경로를 사용합니다.
 
 ---
 
-## 백업 전 확인
+## 백업·복원 핵심 원칙
 
 ```text
-- pg_dump·pg_restore·psql 버전
-- 원본·복원 서버 버전
-- 백업 로그인 역할과 권한 역할
-- membership INHERIT·SET 상태
-- DB CONNECT·schema USAGE·테이블 SELECT·시퀀스 SELECT
-- RLS 적용 여부
-- 전체 백업과 --enable-row-security 가시 행 백업 구분
-- security_lab의 외부 FK·타입·함수·트리거·확장·Large Object·외부 테이블 의존성
-- 출력 경로와 암호화·보관 정책
+백업 전 서버·pg_dump·pg_restore·psql 버전 기록
+백업 Role과 최소 권한 확인
+RLS 적용 여부 확인
+스키마 외부 의존성 확인
+custom archive 생성
+pg_restore --list로 archive 내용 확인
+SHA-256 기록
+원본이 아닌 별도 DB에 복원
+구조·데이터·소유권 검증
+Role·GRANT 재적용 후 실제 허용·차단 동작 검증
 ```
 
-현재 `security_lab`은 외부 스키마 의존성 없이 단독 복원할 수 있도록 구성했습니다.
-
----
-
-## custom archive 백업
+custom archive 생성 예:
 
 ```bash
 pg_dump \
@@ -295,37 +236,7 @@ pg_dump \
   -f <backup-dir>/security_lab.backup
 ```
 
-custom archive에는 원본 owner·ACL 메타데이터를 보존할 수 있습니다. **archive 형식의 `pg_dump --no-owner`로 소유권이 제거된다고 설명하지 않습니다.** 실제 검증 복원에서 원본 owner 적용을 생략하려면 `pg_restore --no-owner`를 사용합니다.
-
-아카이브 목록:
-
-```bash
-pg_restore --list <backup-dir>/security_lab.backup
-```
-
-확인 대상:
-
-```text
-security_lab
-3 tables
-3 IDENTITY sequences + sequence set
-13 named constraints
-uq_security_enrollments_active
-ACL entries
-예상 밖 외부 객체 없음
-```
-
----
-
-## 별도 DB와 원자적 복원
-
-```bash
-createdb \
-  -U <admin_user> \
-  -O <restore_user> \
-  -T template0 \
-  ai_database_book_restore
-```
+custom archive에는 원본 owner·ACL 메타데이터가 포함될 수 있습니다. 테스트 복원에서는 적용 여부를 복원 단계에서 제어합니다.
 
 ```bash
 pg_restore \
@@ -337,102 +248,45 @@ pg_restore \
   <backup-dir>/security_lab.backup
 ```
 
-```text
---single-transaction → 작은 실습의 부분 복원 위험 감소
---no-owner           → archive 원본 owner 적용 생략
---no-privileges      → archive 원본 ACL 적용 생략
-```
-
-Plain SQL은 `psql -X -1 -v ON_ERROR_STOP=1`로 실행합니다.
-
-대규모 운영 복원에서는 긴 트랜잭션, 잠금, WAL, 디스크 공간과 자원 사용을 별도로 검토합니다.
+`--no-owner`는 archive의 원본 소유권 설정을 적용하지 않고, `--no-privileges`는 GRANT·REVOKE 복원을 생략합니다. 이 옵션을 사용했다고 권한 검증이 끝난 것은 아니므로 복원 DB의 실제 owner·ACL을 확인합니다.
 
 ---
 
-## 복원 검증 2단계
+## RLS 주의
 
-### 1단계: `06_restore_validation.sql`
+이 실습의 `security_lab`은 RLS를 사용하지 않습니다.
+
+일반적인 전체 논리 백업에서는 `pg_dump`가 row security를 끄고 전체 데이터를 읽으려 합니다. 백업 역할이 정책을 우회할 수 없으면 실패할 수 있습니다. `--enable-row-security`는 **역할에게 보이는 행만 의도적으로 백업**하려는 경우에만 별도로 검토하며 운영 전체 백업과 같은 의미로 사용하지 않습니다.
+
+---
+
+## 복원 검증 기준
+
+`06_restore_validation.sql`의 핵심 기준:
 
 ```text
-DB = ai_database_book_restore
-students·courses·enrollments = 3/3/3
+복원 DB = ai_database_book_restore
+students / courses / enrollments = 3 / 3 / 3
 JOIN = 3
 상태 = 신청1 / 수강중1 / 완료1 / 취소0
 총 recorded_amount = 310000
 recorded_amount = NUMERIC(12,0)
-amount-course.price 불일치 = 0
-고아 FK·활성 중복 = 0
+고아 FK = 0
+활성 중복 = 0
 NOT NULL = 14
-13개 명시 제약조건 유지
-부분 고유 인덱스 valid/ready
-IDENTITY 시퀀스 3개
-다음 자동값 > 최대 ID
+명시 제약조건 = 13
+부분 고유 인덱스 valid / ready
+IDENTITY 시퀀스 = 3
+다음 자동 ID > 기존 최대 ID
 schema·table·sequence owner = 복원 역할
 ```
 
-### 2단계: 권한 재적용 후
-
-```text
-03 역할 계획 검토
-→ 04 PUBLIC·ACL·membership·RLS·유효 권한
-→ 05 실제 허용·차단 동작
-→ 백업 역할의 table/sequence 읽기 권한 확인
-```
+원본 ACL을 생략한 테스트 복원 뒤에는 역할·권한 정책을 다시 적용하고 `04_permission_checks.sql`과 실제 허용·차단 테스트를 수행합니다.
 
 ---
 
-## 전역 객체와 역할 정리
+## 초기화
 
-`pg_dumpall --globals-only`에는 Role뿐 아니라 Tablespace 같은 전역 객체가 포함될 수 있습니다. 역할 암호 정보가 필요하지 않다면 `--no-role-passwords`를 검토합니다.
+`reset_security_lab.sql`은 `security_lab`만 제거합니다. 예상하지 않은 객체가 있으면 자동 삭제하지 않고 중단하며, `CASCADE`를 기본으로 사용하지 않습니다.
 
-소유 역할은 객체를 소유한 상태에서 바로 삭제할 수 없습니다.
-
-```text
-REASSIGN OWNED
-→ DROP OWNED 검토
-→ 관련된 각 데이터베이스에서 의존성 확인
-→ membership 회수
-→ DROP ROLE
-```
-
-`DROP OWNED ... CASCADE`는 기본 정리 명령으로 사용하지 않습니다.
-
----
-
-## reset 안전성
-
-`reset_security_lab.sql`은 `BEGIN/COMMIT`으로 전체 초기화를 묶고 `CASCADE`를 사용하지 않습니다.
-
-```text
-정상 상태
-→ known table 3개 삭제
-→ security_lab 삭제
-→ course_project 5행 유지
-
-예상하지 못한 security_lab 객체 존재
-→ DROP SCHEMA 실패
-→ 앞의 table DROP도 전체 ROLLBACK
-→ 예상 객체 자동 삭제 안 함
-```
-
-Role은 reset이 자동 삭제하지 않습니다.
-
----
-
-## 안전 원칙
-
-```text
-- 생성·초기화·복원 검증 파일은 현재 DB를 실제로 검사합니다.
-- 01은 Chapter 07·08 전체 기준을 검사합니다.
-- Role과 권한 변경은 기본 주석 상태로 제공합니다.
-- PostgreSQL 16 membership 옵션을 확인합니다.
-- PUBLIC 권한과 직접 GRANT를 구분합니다.
-- 실제 비밀번호·접속 URL·백업·password file을 저장소에 기록하지 않습니다.
-- 백업 파일 목록·해시만으로 복구 가능하다고 판단하지 않습니다.
-- RLS 전체 백업과 visible-row dump를 구분합니다.
-- custom archive owner·ACL 메타데이터와 restore 적용 옵션을 구분합니다.
-- 원본 DB가 아닌 별도 DB에서 원자적으로 복원합니다.
-- 구조·데이터 검증과 권한 재적용 검증을 분리합니다.
-- reset은 CASCADE 없이 예상 범위만 삭제합니다.
-- 복구 결과와 RPO·RTO를 Runbook에 기록합니다.
-```
+Role은 클러스터 전역 객체이므로 reset 파일에서 자동 삭제하지 않습니다.
