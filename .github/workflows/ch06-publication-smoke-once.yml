@@ -1,0 +1,80 @@
+name: Chapter 06 publication SQL smoke once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ch06-publication-smoke-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Create test database
+        run: psql -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE ai_database_book;"
+      - name: Run numbered path
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/reset_normalization.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/01_normalization_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/02_normalization_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/03_normalization_compare.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/04_add_integrity_rules.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/05_integrity_tests.sql
+      - name: Verify ISBN requiredness and uniqueness
+        shell: bash
+        run: |
+          set -euo pipefail
+          expect_fail() {
+            local expected="$1"
+            local sql="$2"
+            set +e
+            output=$(psql -d ai_database_book -v ON_ERROR_STOP=1 -c "$sql" 2>&1)
+            status=$?
+            set -e
+            echo "$output"
+            test "$status" -ne 0
+            echo "$output" | grep -F "$expected" >/dev/null
+          }
+          expect_fail "not-null constraint" "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1912,'ISBN 없음','테스트',2026,NULL);"
+          expect_fail "uq_books_nf_isbn" "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1903,'중복 ISBN','테스트',2026,'ISBN-001');"
+          test "$(psql -d ai_database_book -Atc \"SELECT COUNT(*) FROM pg_attribute WHERE attrelid='public.books_nf'::regclass AND attname='isbn' AND attnotnull;\")" = "1"
+      - name: Verify partial unique index and foreign keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -d ai_database_book -Atc \"SELECT COUNT(*) FROM pg_constraint WHERE conrelid='public.loans_nf'::regclass AND contype='f';\")" = "2"
+          test "$(psql -d ai_database_book -Atc \"SELECT to_regclass('public.uq_loans_nf_active_book') IS NOT NULL;\")" = "t"
+      - name: Run compatibility path
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/reset_normalization.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/normalization_schema.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/normalization_seed.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/normalization_practice.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/04_add_integrity_rules.sql
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/integrity_tests.sql
