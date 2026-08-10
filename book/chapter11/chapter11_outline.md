@@ -49,7 +49,9 @@ course_project.enrollments.recorded_amount = NUMERIC(12,0)
 1001 = 완료 / 100000
 1004 = 취소 / 150000
 1005 = 신청 / 120000
-uq_course_enrollments_active 존재
+uq_course_enrollments_active
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
+현재 역할의 ai_database_book CREATE 권한 확인 존재
 ```
 
 `transaction_lab`·`performance_lab`은 존재 여부를 Chapter 11의 필수 전제로 삼지 않으며, 존재하면 변경하지 않는다.
@@ -431,3 +433,10 @@ Chapter 07·08 기준 생성
 ## 다음 장 연결
 
 Chapter 12에서는 관계형 DB와 NoSQL을 조회 패턴, 일관성, 확장성과 운영 책임 관점에서 비교한다. 저장소가 달라져도 접근 통제, 비밀 보호와 복구 검증은 함께 설계한다.
+
+
+## 최종 출판 보안 보완
+
+- `PGPASSWORD` 장기 사용을 피하고 `PGPASSFILE` 기반 password file을 사용한다.
+- Unix 계열 password file은 `chmod 0600` 수준으로 제한하고, Windows는 접근이 제한된 보호 경로를 사용한다.
+- Chapter 07 구조 계약 15/20과 DB CREATE 권한을 `security_lab` 생성 전에 확인한다.

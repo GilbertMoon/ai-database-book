@@ -98,6 +98,7 @@ course_project.enrollments.recorded_amount = NUMERIC(12,0)
 1004 = 취소 / 150000
 1005 = 신청 / 120000
 uq_course_enrollments_active 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
 ```
 
 별도의 실습 스키마를 사용합니다.
@@ -293,6 +294,8 @@ recorded_amount = NUMERIC(12,0)
 전체 590000 / 활성 340000 / 취소 제외 440000
 1001·1004·1005 기준 상태 일치
 활성 신청 부분 고유 인덱스 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
+현재 역할이 ai_database_book에 CREATE 권한 보유
 security_lab 미존재
 ```
 
@@ -570,7 +573,9 @@ PGUSER=
 PGPASSFILE=
 ```
 
-`PGPASSWORD`를 저장소 예제에 두지 않습니다. 실제 libpq password file은 저장소 밖에 두고 OS 접근 권한을 제한합니다. Windows에서는 사용자 프로필의 PostgreSQL 암호 파일 위치나 별도의 보호 경로를 사용합니다.
+`PGPASSWORD`를 저장소 예제에 두지 않습니다. PostgreSQL 16 공식 문서도 일부 운영체제에서 프로세스 환경 변수가 다른 사용자에게 보일 수 있어 `PGPASSWORD` 사용을 권장하지 않습니다. 대신 실제 libpq password file은 저장소 밖에 두고 `PGPASSFILE`로 위치를 지정합니다.
+
+Unix 계열에서는 password file이 그룹·다른 사용자에게 읽히지 않도록 `chmod 0600` 수준으로 제한해야 하며, 권한이 느슨하면 libpq가 파일을 무시합니다. Windows는 별도 파일 권한 검사를 하지 않으므로 사용자 프로필의 PostgreSQL 암호 파일 위치나 접근이 제한된 보호 경로에 저장합니다.
 
 비밀 정보가 노출되면 Git 기록에서 파일만 삭제하지 않습니다. 먼저 비밀번호·토큰을 폐기하거나 회전하고, 로그·복제본·캐시와 배포 환경의 노출 범위를 확인합니다.
 
@@ -659,6 +664,7 @@ SHOW server_version;
 
 ```text
 pg_dump 주요 버전이 원본 서버보다 오래되면 중단한다.
+복원에는 가능하면 백업 생성에 사용한 것과 같은 주요 버전의 pg_restore를 사용한다.
 복원 서버가 원본보다 오래된 주요 버전이면 호환성을 별도로 검토한다.
 확장 기능과 외부 모듈 버전도 확인한다.
 ```

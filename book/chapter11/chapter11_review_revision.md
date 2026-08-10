@@ -503,3 +503,15 @@ Chapter 11은 단순한 GRANT와 pg_dump 명령 소개가 아니라,
 PostgreSQL 16에서 최소 권한의 실제 허용·차단 결과와
 custom archive의 별도 DB 복원 가능성을 증명하는 운영 장으로 보완되었다.
 ```
+
+
+---
+
+## 2026-08-10 최종 출판 보완
+
+- Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개를 Chapter 11 시작 게이트에 추가
+- `security_lab` 생성 전 현재 역할의 `ai_database_book` CREATE 권한 검사 추가
+- `PGPASSWORD` 장기 사용을 피하고 `PGPASSFILE` 기반 password file 사용 원칙을 구체화
+- Unix password file `chmod 0600` 및 Windows 보호 경로 차이를 명시
+- 작성된 Chapter 11 발표 스크립트의 일반 자동 확장 비활성화
+- PostgreSQL 16 실제 권한·백업·별도 DB 복원 경로를 재검증 대상으로 지정

@@ -63,3 +63,6 @@ ORDER BY rolname;
 
 -- 실제 비밀번호·전체 접속 URL·백업 파일은 저장소에 기록하지 않습니다.
 -- libpq password file 경로는 PGPASSFILE로 지정할 수 있으며 실제 파일은 저장소 밖에 둡니다.
+
+-- Unix 계열 password file은 그룹·다른 사용자 접근을 막도록 chmod 0600 수준으로 제한합니다.
+-- Windows는 별도 권한 검사를 하지 않으므로 접근이 제한된 사용자 경로를 사용합니다.
