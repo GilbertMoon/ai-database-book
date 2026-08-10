@@ -63,13 +63,16 @@ jobs:
           }
           expect_fail "not-null constraint" "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1912,'ISBN 없음','테스트',2026,NULL);"
           expect_fail "uq_books_nf_isbn" "INSERT INTO public.books_nf (id,title,author,published_year,isbn) VALUES (1903,'중복 ISBN','테스트',2026,'ISBN-001');"
-          test "$(psql -d ai_database_book -Atc \"SELECT COUNT(*) FROM pg_attribute WHERE attrelid='public.books_nf'::regclass AND attname='isbn' AND attnotnull;\")" = "1"
+          not_null_count=$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM pg_attribute WHERE attrelid='public.books_nf'::regclass AND attname='isbn' AND attnotnull;")
+          test "$not_null_count" = "1"
       - name: Verify partial unique index and foreign keys
         shell: bash
         run: |
           set -euo pipefail
-          test "$(psql -d ai_database_book -Atc \"SELECT COUNT(*) FROM pg_constraint WHERE conrelid='public.loans_nf'::regclass AND contype='f';\")" = "2"
-          test "$(psql -d ai_database_book -Atc \"SELECT to_regclass('public.uq_loans_nf_active_book') IS NOT NULL;\")" = "t"
+          fk_count=$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM pg_constraint WHERE conrelid='public.loans_nf'::regclass AND contype='f';")
+          active_index=$(psql -d ai_database_book -Atc "SELECT to_regclass('public.uq_loans_nf_active_book') IS NOT NULL;")
+          test "$fk_count" = "2"
+          test "$active_index" = "t"
       - name: Run compatibility path
         run: |
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter06/reset_normalization.sql
