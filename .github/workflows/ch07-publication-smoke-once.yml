@@ -108,3 +108,5 @@ jobs:
           grep -F 'data-script-content-enhancer="off"' presentation/chapter07/chapter07_script.html >/dev/null
           grep -F "dataset?.scriptContentEnhancer === 'off'" presentation/common/script_content_enhancer.js >/dev/null
           ! grep -F '.replace(/paid_amount' presentation/chapter07/chapter07_slides.js >/dev/null
+
+# retry after fixing optional-test declaration scope
