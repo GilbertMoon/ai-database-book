@@ -34,6 +34,7 @@ jobs:
               Path('presentation/chapter14/chapter14_theory_lecture_plan.md'),
               Path('presentation/chapter14/chapter14_practice_lecture_plan.md'),
               Path('presentation/chapter14/chapter14_navigation.js'),
+              Path('images/chapter14/README.md'),
               Path('notes/chapter14_review_checklist.md'),
           ]
           texts = {str(p): p.read_text(encoding='utf-8') for p in paths}
@@ -50,6 +51,9 @@ jobs:
               '취소인데 기록 금액이 0 아님',
               '취소 건의 기준 기록 금액은 0이다',
               '제약조건 21개',
+              '| 제약조건 | 21개 |',
+              '취소는 기준 데이터에서 0으로 기록됩니다',
+              '결제금액 합계 3,210,000',
           ]
           for name, text in texts.items():
               hits = [token for token in stale if token in text]
@@ -61,22 +65,32 @@ jobs:
                   'recorded_amount', 'NUMERIC(12,0)', '3,210,000',
                   '350000', '680000', '540000',
                   '0으로 덮어쓰지 않습니다', '합성 기준 데이터',
+                  'Chapter 07 명명 제약조건 15개', 'Chapter 07 NOT NULL 열 20개',
+                  'expected_recorded_amount_sum', 'amount_semantics',
               ],
               'book/chapter14/chapter14_activity.md': [
                   'recorded_amount', '350000', '680000', '540000',
                   '750000', '700000', '1210000', '400000',
                   '취소 건의 신청 시점 기록 금액은 취소 후에도 유지된다',
+                  '| 제약조건 | 20개 |', '기대 기록 금액 합계', '기록 금액 의미',
               ],
               'code/chapter14/README.md': [
                   'recorded_amount NUMERIC(12,0)', '3,210,000',
                   '2026-01 | 3 | 350000', '2026-03 | 5 | 680000',
-                  '2026-05 | 4 | 540000',
+                  '2026-05 | 4 | 540000', '기대 기록 금액', '최소권한 분석 계정',
               ],
               'book/chapter14/chapter14_outline.md': [
                   'recorded_amount NUMERIC(12,0)', '3,210,000',
+                  '공통 분석 기간 상수', '분석 계정 최소권한',
+              ],
+              'presentation/chapter14/chapter14_theory_lecture_plan.md': [
+                  '취소 상태가 되어도 신청 시점 기록 금액은 그대로 유지합니다',
               ],
               'presentation/chapter14/chapter14_practice_lecture_plan.md': [
                   'recorded_amount', '350000', '680000', '540000',
+              ],
+              'images/chapter14/README.md': [
+                  '신청 시점 기록 금액 합계 3,210,000', '같은 스냅샷의 실제 SQL 결과',
               ],
               'notes/chapter14_review_checklist.md': [
                   'recorded_amount', '3210000', 'PK·FK·CHECK·UNIQUE | 20개',
@@ -88,5 +102,5 @@ jobs:
                   if needle not in text:
                       raise SystemExit(f'{name} missing current Chapter 14 evidence: {needle}')
 
-          print('Chapter 14 publishing evidence passed: amount=3210000, monthly=350/520/680/550/540/570k')
+          print('Chapter 14 publishing evidence passed: amount=3210000, constraints=20, stale cancellation wording absent')
           PY
