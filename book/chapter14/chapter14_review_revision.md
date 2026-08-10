@@ -642,4 +642,4 @@ publishing CI가 Markdown 표 형태의 21개와 stale 취소 문장을 놓치�
 
 `transaction_read_only=on`은 분석 안전장치로 유지하되, 실제 환경에서는 최소권한 분석 계정과 함께 사용해야 한다는 경계도 본문·README·워크북에 명시했습니다.
 
-최종 PostgreSQL 16·Python·CSV·발표 정적 재검증 결과는 성공 Run 확인 후 검증 기록에 별도로 남깁니다.
+최종 재검증은 PostgreSQL 16에서 성공했습니다. Run ID `31403974074`, 검증 workflow commit `806483b82ed7d388c91c764a102de04f96d71668`, 콘텐츠 commit `bd1172d53fcfe2bc4abba0550c94b0ceeadbb095`이며 상세 실행 증거는 `notes/chapter14_validation_result.md`에 기록했습니다.

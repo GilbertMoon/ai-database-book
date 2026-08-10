@@ -321,4 +321,13 @@ PostgreSQL/CSV Python 교차 검증 재실행
 SHA-256 변조·wrong DB·reset 격리 재확인
 ```
 
-실제 Run ID와 결론은 재검증 완료 후 definitive 결과로 기록합니다.
+최종 재검증 결과:
+
+```text
+Workflow: Chapter 14 definitive final validation once
+Run ID: 31403974074
+Validation commit: 806483b82ed7d388c91c764a102de04f96d71668
+Content commit: bd1172d53fcfe2bc4abba0550c94b0ceeadbb095
+PostgreSQL: 16
+Conclusion: success
+```
