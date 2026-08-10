@@ -27,6 +27,8 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 
 ## 전체 목차 및 진행 현황
 
+Overview. 이 책을 시작하기 전에
+
 | Chapter | 제목 | 상태 |
 | --- | --- | --- |
 | Chapter 01 | AI 시대에 데이터베이스를 왜 배워야 하는가 | 최종 출판 내용 검수 완료 |
@@ -50,6 +52,9 @@ ChatGPT와 Codex는 설계와 SQL 초안을 빠르게 만드는 도구로 활용
 ## 원고 구조
 
 ```text
+book/overview/overview.md
+    최종 출판본 앞부분의 책 안내·로드맵
+
 book/chapterXX/chapterXX.md
     Chapter별 본문 원고
 
@@ -63,7 +68,7 @@ images/chapterXX/
     본문 도식과 설명 이미지
 
 publish/full_manuscript.md
-    Chapter 01~15 최신 본문을 병합한 통합 원고
+    Overview와 Chapter 01~15 최신 본문을 병합한 통합 원고
 ```
 
 통합 원고는 [`scripts/merge_chapters.py`](scripts/merge_chapters.py)로 생성합니다. Chapter 본문 또는 병합 스크립트가 `main`에 반영되면 GitHub Actions가 [`publish/full_manuscript.md`](publish/full_manuscript.md)를 자동으로 갱신합니다.
@@ -74,6 +79,7 @@ publish/full_manuscript.md
 
 | 항목 | 상태 |
 | --- | --- |
+| Overview 출판용 Front Matter 최종 보완 | 완료 |
 | 저장소와 집필 구조 구성 | 완료 |
 | Chapter 01~15 본문 작성 | 완료 |
 | 강의안 표현을 eBook 문체로 1차 수정 | 완료 |
@@ -123,5 +129,5 @@ publish/full_manuscript.md
 - Python은 SQL 분석을 확장하는 도구로 사용하고 데이터베이스를 중심에 둔다.
 - AI가 생성한 설계와 SQL은 초안으로 취급하고 사람이 검토한다.
 - 비밀번호, 접속 URL, API 키와 실제 개인정보는 저장소에 기록하지 않는다.
-- Chapter별 원고를 기준으로 통합 원고를 자동 생성한다.
+- Overview와 Chapter별 원고를 기준으로 통합 원고를 자동 생성한다.
 ```

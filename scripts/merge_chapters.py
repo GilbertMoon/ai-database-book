@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = ROOT / "book"
 PUBLISH_DIR = ROOT / "publish"
 OUTPUT_FILE = PUBLISH_DIR / "full_manuscript.md"
+OVERVIEW_FILE = BOOK_DIR / "overview" / "overview.md"
 
 CHAPTER_COUNT = 15
 
@@ -37,6 +38,13 @@ def read_chapter(chapter_no: int) -> str:
     return normalize_paths(content, chapter_name)
 
 
+def read_overview() -> str:
+    if not OVERVIEW_FILE.exists():
+        raise FileNotFoundError(f"Missing overview file: {OVERVIEW_FILE}")
+
+    return OVERVIEW_FILE.read_text(encoding="utf-8").strip()
+
+
 def chapter_title(content: str, chapter_no: int) -> str:
     for line in content.splitlines():
         if line.startswith("# "):
@@ -47,14 +55,19 @@ def chapter_title(content: str, chapter_no: int) -> str:
 def main() -> None:
     PUBLISH_DIR.mkdir(exist_ok=True)
 
+    overview = read_overview()
     chapters = [read_chapter(no) for no in range(1, CHAPTER_COUNT + 1)]
 
     parts = [
         "# AI 시대의 데이터베이스 입문",
         "",
-        "> 이 파일은 1~15장 최신 원고를 기준으로 scripts/merge_chapters.py가 자동 생성한 통합본입니다.",
+        "> 이 파일은 Overview와 Chapter 01~15 최신 원고를 기준으로 scripts/merge_chapters.py가 자동 생성한 통합본입니다.",
         "",
         "<!-- 이 파일을 직접 수정하지 말고 각 chapter 원고를 수정한 뒤 병합 스크립트를 실행하세요. -->",
+        "",
+        overview,
+        "",
+        "---",
         "",
         "## 목차",
         "",
