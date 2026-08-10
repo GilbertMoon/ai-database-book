@@ -45,8 +45,8 @@
 | DBMS | 데이터베이스를 관리하고 SQL을 실행하는 소프트웨어 | PostgreSQL |
 | 클라이언트 | DBMS에 명령을 보내고 결과를 보여 주는 도구나 프로그램 | DBeaver, `psql`, 웹 애플리케이션 |
 | 스키마 | 데이터베이스 안의 객체를 이름으로 구분하는 공간 | `public` |
-| 기본키 | 자신의 테이블에서 각 행을 고유하게 구분하는 열 조합 | `students.id` |
-| 외래키 | 다른 행을 참조하는 열 조합 | `enrollments.student_id` |
+| 기본키 | 자신의 테이블에서 각 행을 고유하게 구분하는 열 또는 열 조합 | `students.id` |
+| 외래키 | 참조 대상 키와 연결되는 열 또는 열 조합 | `enrollments.student_id` |
 
 ---
 
@@ -394,7 +394,7 @@ N:M 관계를 어떤 연결 테이블로 표현할 수 있는가?
 Create → INSERT
 Read   → SELECT
 Update → UPDATE
-Delete → DELETE 또는 상태·삭제 시각 변경
+Delete → DELETE 또는 정책에 따른 UPDATE
 ```
 
 다음 문장을 자신의 말로 설명해 보세요.
@@ -536,10 +536,10 @@ PostgreSQL
 → 자신의 테이블에서 행을 고유하게 구분
 
 외래키
-→ 다른 행을 참조
+→ 참조 대상 키와 연결
 ```
 
-외래키 값은 1:N 관계에서 반복될 수 있으며, 별도의 `NOT NULL`과 `UNIQUE` 규칙이 있는지에 따라 NULL과 중복 허용 여부가 달라집니다.
+외래키 값은 1:N 관계에서 반복될 수 있으며, 별도의 `NOT NULL`과 `UNIQUE` 규칙이 있는지에 따라 NULL과 중복 허용 여부가 달라집니다. 실제로 존재하지 않는 참조를 DBMS가 막으려면 `FOREIGN KEY` 제약조건이 설정되어 있어야 합니다.
 
 ### AI 구조 검토
 
