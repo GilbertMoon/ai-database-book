@@ -35,6 +35,9 @@ Conclusion: success
 | 핵심 1004 | 취소 / 150000 | 실제 통과 |
 | 핵심 1005 | 신청 / 120000 | 실제 통과 |
 | 활성 신청 인덱스 | 존재 | 실제 통과 |
+| Chapter 07 명명 제약조건 | 15 | 최종 재검증 대상 |
+| Chapter 07 NOT NULL 열 | 20 | 최종 재검증 대상 |
+| 현재 역할 DB CREATE 권한 | 생성 전 확인 | 최종 재검증 대상 |
 | transaction_lab | 변경 없음 | sentinel 통과 |
 | performance_lab | 변경 없음 | sentinel 통과 |
 | security_lab | 변경 없음 | sentinel 통과 |
@@ -62,6 +65,7 @@ Conclusion: success
 | 점검 항목 | 상태 |
 | --- | --- |
 | Chat: 빠른 질문·대화형 지원 | 반영 |
+| Work: 긴 다단계 작업·완성 산출물 | 반영 |
 | Work: 장시간 다단계 산출물 | 반영 |
 | Codex: 코드·테스트·명령·저장소 작업 | 반영 |
 | 제품 기능은 최신 공식 안내 재확인 | 반영 |
@@ -364,3 +368,24 @@ reset atomicity and isolation
 11. 실제 조직의 개인정보·결제 참조값 보호 정책
 12. 운영 DB migration·lock·backup·rollback 검토
 ```
+
+
+---
+
+## 20. 2026-08-10 최종 출판 재검증 항목
+
+```text
+OpenAI 공식 안내 기준 Chat / Work / Codex 역할 최신화
+Chapter 07 구조 계약 15 / 20 인계 확인
+DB CREATE 권한 없는 역할에서 01이 DDL 전에 실패하는지 확인
+권한 실패 뒤 ai_review_lab이 생성되지 않았는지 확인
+08에서 Chapter 07 구조·recorded_amount·활성 신청 정책 재확인
+워크북 24 실패 + 6 성공 = 30 정합성
+T30 대소문자 이메일 정상 경계값 문서 동기화
+이미지 README 30개 테스트 기준 동기화
+발표자 스크립트 generic enhancer 비활성화
+PostgreSQL 16 전체 01→08 재실행
+protected schema fingerprint·reset 원자성 재확인
+```
+
+실제 Run ID와 최종 결과는 재검증 완료 후 갱신합니다.

@@ -130,6 +130,8 @@ DECLARE
     temp_unexpected INTEGER;
     temp_failure_count INTEGER;
     temp_success_count INTEGER;
+    v_project_named_constraint_count BIGINT;
+    v_project_not_null_count BIGINT;
 BEGIN
     -- Chapter 07·08 canonical source 보호
     IF (SELECT COUNT(*) FROM course_project.students) <> 3
@@ -173,6 +175,79 @@ BEGIN
     ) THEN
         RAISE EXCEPTION
             '최종 검증 실패: Chapter 07·08 핵심 신청 1001/1004/1005가 변경되었습니다.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'recorded_amount'
+          AND data_type = 'numeric'
+          AND numeric_precision = 12
+          AND numeric_scale = 0
+    ) OR EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name = 'enrollments'
+          AND column_name = 'paid_amount'
+    ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07·08 recorded_amount 구조가 기준과 다릅니다.';
+    END IF;
+
+    IF to_regclass('course_project.uq_course_enrollments_active') IS NULL
+       OR EXISTS (
+            SELECT 1
+            FROM course_project.enrollments
+            WHERE status IN ('신청', '수강중')
+            GROUP BY student_id, course_id
+            HAVING COUNT(*) > 1
+       ) THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07 활성 신청 정책이 기준과 다릅니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_project_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*)
+    INTO v_project_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_project_named_constraint_count <> 15
+       OR v_project_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07 구조 기준과 다릅니다. named_constraints=%, not_null_columns=%',
+            v_project_named_constraint_count, v_project_not_null_count;
     END IF;
 
     -- Chapter 13 기준 행·합계·상태

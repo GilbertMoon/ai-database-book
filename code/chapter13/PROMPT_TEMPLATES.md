@@ -65,6 +65,8 @@
 - DB ai_database_book
 - ai_review_lab 전용
 - Chapter 07 enrollments 5행 유지
+- Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
+- 01 생성 단계에서 현재 역할의 DB CREATE 권한 확인
 - bad_enrollments 3행
 - students 3행
 - instructors 2행

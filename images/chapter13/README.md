@@ -10,7 +10,7 @@
 - AI 결과는 정답이 아니라 검토 대상 초안으로 표현한다.
 - 확인 요구사항·미확정 정책·AI 가정을 구분한다.
 - 요구사항에서 실제 메타데이터·정상·반례·업무 검증으로 연결한다.
-- ChatGPT·Codex의 역할은 절대적 기능 경계가 아니라 권장 흐름으로 표현한다.
+- ChatGPT Chat·Work·Codex의 역할은 절대적 기능 경계가 아니라 권장 흐름으로 표현한다.
 - Codex 변경 후 파일별 diff와 사람의 승인 단계를 포함한다.
 - 상세 SQL·표·제품 UI는 본문과 코드 파일에 둔다.
 - title, desc, role="img", aria-labelledby, width="100%", viewBox를 유지한다.
@@ -42,7 +42,9 @@ ai_review_lab.enrollments 4
 ai_review_lab.payments 4
 정상 JOIN 4
 FK 4
-반례 17
+예상 실패 24
+정상 경계값 6
+전체 30 / 통과 30
 unexpected 0
 ```
 

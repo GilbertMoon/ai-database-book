@@ -33,6 +33,8 @@ AI가 사용한 요구사항은 실제로 확인된 규칙인가?
 앞 장에서 확정한 활성 신청 정책을 유지했는가?
 미확정 정책을 전체 UNIQUE·CASCADE·NOT NULL로 고정하지 않았는가?
 생성·Seed·초기화가 잘못된 DB에서 차단되는가?
+Chapter 07 명명 제약조건 15개와 NOT NULL 열 20개가 유지되는가?
+현재 역할에 ai_database_book CREATE 권한이 있는지 DDL 전에 확인하는가?
 명시적 ID 뒤 IDENTITY 다음 값이 조정되었는가?
 DDL과 실제 PostgreSQL 메타데이터가 정확히 일치하는가?
 LEFT JOIN의 NULL을 놓치지 않는가?
@@ -67,6 +69,8 @@ ai_review_lab.payments
 | payments | 4 | 9001~9004 | 9005 이상 |
 | JOIN | 4 | - | - |
 | FK | 4 | - | - |
+| Chapter 07 명명 제약조건 | 15 | - | - |
+| Chapter 07 NOT NULL 열 | 20 | - | - |
 
 ## 추적 ID
 
@@ -107,6 +111,7 @@ P13-D08 결제 없는 신청 허용
 ## 핵심 개념
 
 - AI 결과 검토
+- ChatGPT Chat·Work·Codex 역할과 제공 범위 변화 가능성
 - 요구사항·결정·미확정 정책
 - 프롬프트 계약
 - ERD·카디널리티
@@ -213,6 +218,7 @@ P13-T25~T30 expected_success
 
 - 기존 스키마를 삭제·변경하지 않는다.
 - 생성·Seed·초기화 파일은 현재 DB와 상태를 실제 검사한다.
+- 생성 전 Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개와 현재 역할의 DB CREATE 권한을 확인한다.
 - 구조·Seed는 트랜잭션으로 처리한다.
 - 명시적 ID 뒤 IDENTITY 시작값을 조정한다.
 - 전체 UNIQUE 대신 확정된 활성 상태 부분 고유 인덱스를 사용한다.
