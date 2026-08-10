@@ -3039,7 +3039,7 @@ Chapter 04에서는 이미 정해진 `students` 테이블을 만들고 SQL을 �
 - 기본키와 업무상 고유값 후보를 구분한다.
 - 관계를 양방향 문장으로 작성한다.
 - 카디널리티와 선택성을 판단한다.
-- N:M 관계를 사건 테이블로 변환한다.
+- N:M 관계를 연결 테이블로 풀고, 사건 속성을 가진 연결 엔터티를 설명한다.
 - ERD와 작은 샘플 시나리오로 요구사항 반영 여부를 확인한다.
 
 > **학습 표시**
@@ -3476,7 +3476,8 @@ ERD가 보기 좋더라도 이 문장을 설명할 수 없으면 설계가 충�
 | R-06 | 대여 날짜 저장 | 확정 | `loans` 날짜 열 | 날짜 값 조회 |
 | R-07 | 미반납 상태 허용 | 확정 | `returned_at` NULL 허용 | 미반납 3건 조회 |
 | Q-01 | 이메일은 고유한가? | 미확정 | 제약조건 보류 | 정책 확인 필요 |
-| A-01 | `books` 한 행을 한 대여 대상으로 취급 | 가정 | 모델 범위 | 복본 미구분 명시 |
+| Q-02 | ISBN은 항상 존재하며 고유한가? | 미확정 | `isbn` NULL 허용·UNIQUE 보류 | 정책 확인 필요 |
+| A-01 | `books` 한 행을 간소화된 대여 대상 도서 항목으로 취급 | 가정 | 모델 범위 | 복본 미구분 명시 |
 | O-01 | 여러 저자 모델 | 범위 제외 | 미반영 | 후속 확장 과제 |
 
 상태는 다음 네 가지로 통일합니다.
@@ -3559,12 +3560,10 @@ public.members
 
 권장 실행 파일은 다음과 같습니다.
 
-```text
-[`01_library_schema.sql`](../code/chapter05/01_library_schema.sql)
-[`02_library_seed.sql`](../code/chapter05/02_library_seed.sql)
-[`03_library_validation.sql`](../code/chapter05/03_library_validation.sql)
-[`reset_library.sql`](../code/chapter05/reset_library.sql)
-```
+- [`01_library_schema.sql`](../code/chapter05/01_library_schema.sql)
+- [`02_library_seed.sql`](../code/chapter05/02_library_seed.sql)
+- [`03_library_validation.sql`](../code/chapter05/03_library_validation.sql)
+- [`reset_library.sql`](../code/chapter05/reset_library.sql)
 
 ### 심화 학습: 고정 ID와 IDENTITY
 
