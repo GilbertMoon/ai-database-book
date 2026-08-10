@@ -66,7 +66,7 @@ members 한 행
 → 회원 한 명
 
 books 한 행
-→ 이 장에서 대여 대상으로 관리하는 도서 한 건
+→ 이 장에서 대여 대상으로 취급하는 간소화된 도서 항목 한 건
 
 loans 한 행
 → 특정 회원이 특정 도서를 대여한 사건 한 건
@@ -75,7 +75,7 @@ loans 한 행
 이 장에서는 다음을 단순화합니다.
 
 ```text
-동일 ISBN의 실제 복본 구분
+동일 ISBN의 실제 복본(copy) 구분
 한 도서의 여러 저자
 회원 최대 대여 권수
 연체 정책
@@ -83,7 +83,7 @@ loans 한 행
 동시 활성 대여 차단
 ```
 
-이메일과 ISBN의 고유성은 미확정이므로 `UNIQUE`를 적용하지 않습니다. 날짜 선후 관계와 동시 활성 대여 제약은 Chapter 06에서 보완합니다.
+이메일과 ISBN의 고유성은 미확정이므로 `UNIQUE`를 적용하지 않습니다. ISBN이 없는 도서를 허용할지도 미확정이므로 Chapter 05의 `isbn`은 `NULL`을 허용합니다. 날짜 선후 관계와 동시 활성 대여 제약은 Chapter 06에서 보완합니다.
 
 ---
 
@@ -102,7 +102,7 @@ CREATE TABLE public.books (
     title VARCHAR(200) NOT NULL,
     author VARCHAR(100) NOT NULL,
     published_year INTEGER,
-    isbn VARCHAR(20) NOT NULL
+    isbn VARCHAR(20)
 );
 
 CREATE TABLE public.loans (
@@ -162,6 +162,7 @@ loans: 1001, 1002, 1003, 1004
 현재 DB = ai_database_book
 읽기 전용 연결 아님
 public 스키마 존재
+public 스키마 USAGE·CREATE 권한
 세 테이블이 존재하지 않음
 BEGIN으로 생성 작업 시작
 members → books → loans 생성
@@ -201,6 +202,8 @@ loans = 4
 회원 참조 고아 행 = 0
 도서 참조 고아 행 = 0
 도서 201 시간 순서 오류 = 0
+books.isbn NULL 허용 = YES
+loans 외래키 = 2개
 ```
 
 검증이 통과하면 다음 메시지가 표시됩니다.
