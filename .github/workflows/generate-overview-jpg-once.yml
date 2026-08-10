@@ -1,0 +1,56 @@
+name: Generate overview publication JPG assets once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/generate-overview-jpg-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install fonts and Pillow
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          python -m pip install --upgrade pillow
+      - name: Generate overview JPG files
+        run: python scripts/generate_overview_jpg.py
+      - name: Validate generated assets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          expected={
+              'images/overview/overview_learning_roadmap.jpg': (1600,920),
+              'images/overview/overview_book_structure.jpg': (1600,1220),
+              'images/overview/overview_study_flow.jpg': (1600,930),
+          }
+          for path,size in expected.items():
+              p=Path(path)
+              if not p.exists() or p.stat().st_size < 50000:
+                  raise SystemExit(f'invalid generated asset: {path}')
+              with Image.open(p) as im:
+                  if im.size != size or im.format != 'JPEG':
+                      raise SystemExit(f'unexpected image metadata: {path} {im.size} {im.format}')
+          html=Path('book/overview/overview.html').read_text(encoding='utf-8')
+          for path in expected:
+              name=Path(path).name
+              if name not in html:
+                  raise SystemExit(f'overview HTML does not reference {name}')
+          print('Overview publication JPG validation passed')
+          PY
+      - name: Commit generated JPG files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add images/overview/*.jpg
+          git commit -m 'Generate overview publication JPG assets'
+          git push
