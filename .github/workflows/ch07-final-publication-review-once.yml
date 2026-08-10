@@ -19,10 +19,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Fix Chapter 07 patch preflight
+        run: python scripts/ch07_fix_patch_once.py
       - name: Apply Chapter 07 publication review
         run: python scripts/ch07_final_publication_review_once.py
-      - name: Remove one-off patch script
-        run: rm -f scripts/ch07_final_publication_review_once.py
+      - name: Remove one-off patch scripts
+        run: |
+          rm -f scripts/ch07_fix_patch_once.py
+          rm -f scripts/ch07_final_publication_review_once.py
       - name: Commit reviewed Chapter 07
         run: |
           git config user.name 'github-actions[bot]'
