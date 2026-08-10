@@ -1,0 +1,282 @@
+name: Chapter 10 final publication validation once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ch10-final-validation-once.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Static final-publication checks
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          chapter = Path('book/chapter10/chapter10.md').read_text(encoding='utf-8')
+          outline = Path('book/chapter10/chapter10_outline.md').read_text(encoding='utf-8')
+          activity = Path('book/chapter10/chapter10_activity.md').read_text(encoding='utf-8')
+          readme = Path('code/chapter10/README.md').read_text(encoding='utf-8')
+          schema = Path('code/chapter10/01_performance_lab_schema.sql').read_text(encoding='utf-8')
+          final_sql = Path('code/chapter10/07_result_validation.sql').read_text(encoding='utf-8')
+          before = Path('code/chapter10/03_baseline_explain.sql').read_text(encoding='utf-8')
+          after = Path('code/chapter10/05_after_index_explain.sql').read_text(encoding='utf-8')
+          script_html = Path('presentation/chapter10/chapter10_script.html').read_text(encoding='utf-8')
+
+          for token in ['약 0.010%', '약 0.050%', '약 0.015%', '약 30.0%']:
+              if token not in chapter:
+                  raise SystemExit(f'chapter missing selectivity token: {token}')
+          for text, label in [(outline, 'outline'), (activity, 'activity'), (readme, 'README')]:
+              for token in ['0.010%', '0.050%', '0.015%', '30.0%']:
+                  if token not in text:
+                      raise SystemExit(f'{label} missing selectivity token: {token}')
+
+          if schema.find('DO $$') > schema.find('BEGIN;'):
+              raise SystemExit('01 preflight must run before the explicit DDL transaction')
+          for token in [
+              "has_database_privilege(current_user, current_database(), 'CREATE')",
+              'v_named_constraint_count <> 15',
+              'v_not_null_count <> 20',
+          ]:
+              if token not in schema:
+                  raise SystemExit(f'01 missing final preflight token: {token}')
+          for token in ['v_project_named_constraint_count <> 15', 'v_project_not_null_count <> 20']:
+              if token not in final_sql:
+                  raise SystemExit(f'07 missing inherited structure validation: {token}')
+
+          for text, label in [(before, '03'), (after, '05')]:
+              for token in ['SHOW enable_seqscan;', 'SHOW enable_indexscan;', 'SHOW enable_bitmapscan;']:
+                  if token not in text:
+                      raise SystemExit(f'{label} missing planner setting check: {token}')
+          for path in Path('code/chapter10').glob('*.sql'):
+              sql = path.read_text(encoding='utf-8').lower()
+              if 'set enable_seqscan = off' in sql or 'set enable_indexscan = off' in sql or 'set enable_bitmapscan = off' in sql:
+                  raise SystemExit(f'forced planner scan setting found in {path}')
+
+          if 'data-script-content-enhancer="off"' not in script_html:
+              raise SystemExit('Chapter 10 authored presenter script must disable generic expansion')
+          if '20260809a' not in script_html or '20260810a' in script_html:
+              raise SystemExit('Chapter 10 validated presentation asset version mismatch')
+
+          if 'PostgreSQL PostgreSQL 18+' in readme:
+              raise SystemExit('duplicate PostgreSQL wording remains in code README')
+
+          print('Chapter 10 final static publication checks passed')
+          PY
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create canonical database
+        run: |
+          psql -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE ai_database_book;"
+          test "$(psql -d postgres -Atc "SELECT current_setting('server_version_num')::int / 10000")" = "16"
+
+      - name: Build Chapter 07 baseline and verify Chapter 08
+        run: |
+          for file in \
+            code/chapter07/01_course_project_schema.sql \
+            code/chapter07/02_course_project_seed.sql \
+            code/chapter07/03_course_project_changes.sql \
+            code/chapter07/04_course_project_validation.sql
+          do
+            psql -v ON_ERROR_STOP=1 -d ai_database_book -f "$file"
+          done
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/03_join_aggregation_validation.sql
+
+      - name: Verify inherited Chapter 07 structure contract
+        shell: bash
+        run: |
+          STRUCTURE=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT
+            (SELECT COUNT(*)
+             FROM pg_constraint
+             WHERE conrelid IN (
+               'course_project.students'::regclass,
+               'course_project.instructors'::regclass,
+               'course_project.courses'::regclass,
+               'course_project.enrollments'::regclass
+             )
+             AND conname IN (
+               'uq_course_students_email',
+               'chk_course_students_name_not_blank',
+               'chk_course_students_email_not_blank',
+               'uq_course_instructors_email',
+               'chk_course_instructors_name_not_blank',
+               'chk_course_instructors_email_not_blank',
+               'chk_course_instructors_specialty_not_blank',
+               'fk_course_courses_instructor',
+               'chk_course_courses_title_not_blank',
+               'chk_course_courses_level',
+               'chk_course_courses_price',
+               'fk_course_enrollments_student',
+               'fk_course_enrollments_course',
+               'chk_course_enrollments_status',
+               'chk_course_enrollments_recorded_amount'
+             )) || ':' ||
+            (SELECT COUNT(*)
+             FROM information_schema.columns
+             WHERE table_schema='course_project'
+               AND table_name IN ('students','instructors','courses','enrollments')
+               AND is_nullable='NO');
+          SQL
+          )
+          echo "Chapter 07 structure contract: $STRUCTURE"
+          test "$STRUCTURE" = "15:20"
+
+      - name: Verify CREATE privilege protection before schema creation
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
+          CREATE ROLE ch10_no_create LOGIN PASSWORD 'chapter10-test';
+          GRANT CONNECT ON DATABASE ai_database_book TO ch10_no_create;
+          REVOKE CREATE ON DATABASE ai_database_book FROM ch10_no_create;
+          GRANT USAGE ON SCHEMA course_project TO ch10_no_create;
+          GRANT SELECT ON ALL TABLES IN SCHEMA course_project TO ch10_no_create;
+          SQL
+
+          set +e
+          PGUSER=ch10_no_create PGPASSWORD=chapter10-test psql -h localhost -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter10/01_performance_lab_schema.sql > /tmp/ch10_no_create.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/ch10_no_create.log
+          test "$status" -ne 0
+          grep -q "CREATE 권한" /tmp/ch10_no_create.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('performance_lab') IS NULL")" = "t"
+
+      - name: Capture protected project fingerprint
+        shell: bash
+        run: |
+          PROJECT_BEFORE=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          echo "PROJECT_BEFORE=$PROJECT_BEFORE" >> "$GITHUB_ENV"
+          echo "Protected project fingerprint: $PROJECT_BEFORE"
+
+      - name: Run schema, seed and verify selectivity counts
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/01_performance_lab_schema.sql 2>&1 | tee /tmp/ch10_01_final.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/02_performance_lab_seed.sql 2>&1 | tee /tmp/ch10_02_final.log
+          grep -q "Chapter 10 performance lab schema validation passed" /tmp/ch10_01_final.log
+          grep -q "Chapter 10 performance lab seed validation passed" /tmp/ch10_02_final.log
+
+          COUNTS=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT
+            (SELECT COUNT(*) FROM performance_lab.enrollments WHERE student_id=5000) || ':' ||
+            (SELECT COUNT(*) FROM performance_lab.enrollments WHERE course_id=1500) || ':' ||
+            (SELECT COUNT(*) FROM performance_lab.enrollments WHERE course_id=1500 AND status='수강중') || ':' ||
+            (SELECT COUNT(*) FROM performance_lab.enrollments WHERE status='수강중') || ':' ||
+            (SELECT COUNT(*) FROM performance_lab.enrollments);
+          SQL
+          )
+          echo "Selectivity counts: $COUNTS"
+          test "$COUNTS" = "10:50:15:30001:100005"
+
+      - name: Run baseline with normal planner settings
+        run: |
+          test "$(psql -d ai_database_book -Atc "SHOW enable_seqscan")" = "on"
+          test "$(psql -d ai_database_book -Atc "SHOW enable_indexscan")" = "on"
+          test "$(psql -d ai_database_book -Atc "SHOW enable_bitmapscan")" = "on"
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/03_baseline_explain.sql 2>&1 | tee /tmp/ch10_03_final.log
+          grep -q "Chapter 10 baseline explain validation passed" /tmp/ch10_03_final.log
+
+      - name: Create candidates and verify PostgreSQL 16 planner choices
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/04_create_candidate_indexes.sql 2>&1 | tee /tmp/ch10_04_final.log
+          grep -q "Chapter 10 candidate index creation passed" /tmp/ch10_04_final.log
+
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,title,level,price FROM performance_lab.courses WHERE title='성능 테스트 강의 00500';" > /tmp/ch10_title_plan.json
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,student_id,course_id,status,recorded_amount FROM performance_lab.enrollments WHERE student_id=5000;" > /tmp/ch10_student_plan.json
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,student_id,course_id,status,recorded_amount FROM performance_lab.enrollments WHERE course_id=1500;" > /tmp/ch10_course_plan.json
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,student_id,course_id,status,recorded_amount FROM performance_lab.enrollments WHERE course_id=1500 AND status='수강중';" > /tmp/ch10_course_status_plan.json
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,student_id,course_id,status FROM performance_lab.enrollments WHERE status='수강중';" > /tmp/ch10_status_plan.json
+          psql -d ai_database_book -Atc "EXPLAIN (FORMAT JSON) SELECT id,title,level,price FROM performance_lab.courses ORDER BY title LIMIT 20;" > /tmp/ch10_limit_plan.json
+
+          grep -q "idx_performance_courses_title" /tmp/ch10_title_plan.json
+          grep -q "idx_performance_enrollments_student_id" /tmp/ch10_student_plan.json
+          grep -q "idx_performance_enrollments_course_status" /tmp/ch10_course_plan.json
+          grep -q "idx_performance_enrollments_course_status" /tmp/ch10_course_status_plan.json
+          grep -q '"Node Type": "Seq Scan"' /tmp/ch10_status_plan.json
+          ! grep -q "idx_performance_enrollments_course_status" /tmp/ch10_status_plan.json
+          grep -q "idx_performance_courses_title" /tmp/ch10_limit_plan.json
+
+          echo "PostgreSQL 16 status-only plan:"
+          cat /tmp/ch10_status_plan.json
+
+      - name: Run after-index measurement, review and final validation
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/05_after_index_explain.sql 2>&1 | tee /tmp/ch10_05_final.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/06_index_review.sql 2>&1 | tee /tmp/ch10_06_final.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/07_result_validation.sql 2>&1 | tee /tmp/ch10_07_final.log
+          grep -q "Chapter 10 after-index explain validation passed" /tmp/ch10_05_final.log
+          grep -q "Chapter 10 index review validation passed" /tmp/ch10_06_final.log
+          grep -q "Chapter 10 performance result validation passed" /tmp/ch10_07_final.log
+
+      - name: Verify protected project and isolated reset
+        shell: bash
+        run: |
+          PROJECT_AFTER=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          test "$PROJECT_BEFORE" = "$PROJECT_AFTER"
+
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter10/reset_performance_lab.sql 2>&1 | tee /tmp/ch10_reset_final.log
+          grep -q "Chapter 10 performance lab reset passed" /tmp/ch10_reset_final.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('performance_lab') IS NULL")" = "t"
+
+          PROJECT_AFTER_RESET=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          test "$PROJECT_BEFORE" = "$PROJECT_AFTER_RESET"
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/03_join_aggregation_validation.sql
