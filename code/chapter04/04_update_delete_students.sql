@@ -35,6 +35,24 @@ BEGIN
             '변경 중단: public.students가 없습니다.';
     END IF;
 
+    IF NOT has_table_privilege(current_user, 'public.students', 'SELECT') THEN
+        RAISE EXCEPTION
+            '변경 중단: 사용자 %에게 public.students SELECT 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_table_privilege(current_user, 'public.students', 'UPDATE') THEN
+        RAISE EXCEPTION
+            '변경 중단: 사용자 %에게 public.students UPDATE 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_table_privilege(current_user, 'public.students', 'DELETE') THEN
+        RAISE EXCEPTION
+            '변경 중단: 사용자 %에게 public.students DELETE 권한이 없습니다.',
+            current_user;
+    END IF;
+
     SELECT COUNT(*) INTO v_count
     FROM public.students;
 

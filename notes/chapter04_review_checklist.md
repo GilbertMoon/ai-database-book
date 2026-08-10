@@ -70,6 +70,7 @@ Chapter 04가 SQL을 처음 배우는 독자에게 첫 테이블과 기본 CRUD�
 | 타입 범주 보강 | 완료 | `BIGINT`, `NUMERIC`, `TEXT`, `BOOLEAN`, `DATE` |
 | 금액 타입 | 완료 | 정확성이 중요하면 `NUMERIC` 우선 검토 |
 | 제약조건 | 완료 | PK, NOT NULL, UNIQUE, DEFAULT |
+| `NOT NULL` 의미 | 완료 | 열 생략 금지가 아니라 최종 `NULL` 저장 금지로 정정 |
 | 형 변환 | 완료 | `CAST()`·PostgreSQL `::` 선택 학습 |
 | 추가 타입 | 완료 | `UUID`, `JSONB` 미리보기 |
 | 업무 규칙 확장 | 완료 | Chapter 06으로 이동 |
@@ -82,9 +83,10 @@ Chapter 04가 SQL을 처음 배우는 독자에게 첫 테이블과 기본 CRUD�
 | --- | --- | --- |
 | 내부 식별자 | 완료 | 학생 수·학번과 구분 |
 | 번호 공백 | 완료 | 정상 가능성 설명 |
-| `CURRENT_TIMESTAMP` | 완료 | 기본 등록 시각 |
-| 트랜잭션 시각 | 완료 | 심화 설명 |
-| 최신 정렬 | 완료 | `created_at`, `id` 보조 기준 |
+| `TIMESTAMPTZ` | 완료 | 절대 시점 저장·세션 `TimeZone` 기준 표시 |
+| `CURRENT_TIMESTAMP` | 완료 | 트랜잭션 시작 시각 |
+| 트랜잭션 시각 | 완료 | `02_insert_students.sql`의 여러 행이 같은 시각일 수 있음 |
+| 정렬 동률 | 완료 | `id`는 동률 해소용이며 실제 시간 대체값이 아님 |
 
 ---
 
@@ -172,6 +174,8 @@ Chapter 04가 SQL을 처음 배우는 독자에게 첫 테이블과 기본 CRUD�
 | --- | --- |
 | current DB = ai_database_book | 코드 반영 |
 | public 스키마 존재 | 코드 반영 |
+| public USAGE 권한 | 코드 반영 |
+| public CREATE 권한 | 코드 반영 |
 | 읽기 전용 연결 차단 | 코드 반영 |
 | `public.students` 생성 | 코드 반영 |
 | information_schema 구조 확인 | 코드 반영 |
@@ -186,6 +190,7 @@ Chapter 04가 SQL을 처음 배우는 독자에게 첫 테이블과 기본 CRUD�
 | public 스키마 검사 | 코드 반영 |
 | 읽기 전용 연결 차단 | 코드 반영 |
 | students 존재 검사 | 코드 반영 |
+| SELECT·INSERT 권한 | 코드 반영 |
 | 시작 행 수 0 검사 | 코드 반영 |
 | 명시적 `BEGIN` | 코드 반영 |
 | 세 INSERT 트랜잭션 묶음 | 코드 반영 |
@@ -209,6 +214,7 @@ Chapter 04가 SQL을 처음 배우는 독자에게 첫 테이블과 기본 CRUD�
 | 초기 학생 수 | 코드 반영 | 6 |
 | 초기 이준호 학년 | 코드 반영 | 3 |
 | 초기 박서연 | 코드 반영 | 1행 |
+| SELECT·UPDATE·DELETE 권한 | 코드 반영 | 실제 변경 전에 명시적으로 확인 |
 | 변경 전 SELECT | 완료 | 동일 WHERE로 대상 확인 |
 | `RETURNING` | 완료 | 실제 변경·삭제 행 확인 |
 | 변경 후 SELECT | 완료 | 상태 재확인 |

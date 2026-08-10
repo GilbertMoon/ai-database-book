@@ -697,3 +697,24 @@ Chapter 04의 “예상 → 실행 → 결과 검증” 습관이 이후 JOIN, �
 ```
 
 실제로 실행하거나 렌더링하지 않은 항목은 검토 보고서에서 “통과”로 표시하지 않습니다.
+
+## 최종 출판 정확성 보완
+
+최종 PDF 제작 전 기술 정확성과 Chapter 03·04 코드 일치를 다시 점검해 다음 내용을 보완했습니다.
+
+```text
+NOT NULL = 열 생략 금지라는 오해 제거
+TIMESTAMPTZ의 절대 시점 저장·세션 TimeZone 표시 의미 보완
+CURRENT_TIMESTAMP = 트랜잭션 시작 시각으로 명확화
+02_insert_students.sql의 6행이 같은 created_at을 가질 수 있음을 명시
+id는 최신 시각의 대체값이 아니라 동률 해소 기준으로 제한
+public USAGE·CREATE 권한을 01_create_students.sql에서 재확인
+02 입력 전 SELECT·INSERT 권한 확인
+04 변경 전 SELECT·UPDATE·DELETE 권한 확인
+LIKE 표의 %우 예제를 03_select_students.sql에도 추가
+verify_students.sql에서 ai_database_book 연결을 재확인
+실제 서비스의 삭제 정책과 SQL DELETE 실습을 구분
+워크북의 grade = '3'을 “문법 오류”가 아니라 권장 타입 표현 관점으로 정리
+```
+
+`basic_crud.sql`은 보호 로직이 일부 생략된 통합 참고 파일임을 더 분명하게 표시하고, 초보자의 기본 경로는 계속 번호 SQL 파일로 유지합니다.

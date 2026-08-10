@@ -77,13 +77,14 @@ CREATE TABLE public.students (
 
 ```text
 id
-→ 내부 식별자이며 학생 수나 학번이 아님
+→ 내부 식별자이며 학생 수·학번·실제 생성 시각의 대체값이 아님
 
 major, grade
 → 값을 생략하면 NULL 가능
 
 created_at
-→ 값을 생략하면 기본 시각 값 저장
+→ 값을 생략하면 CURRENT_TIMESTAMP 사용
+→ 같은 트랜잭션의 여러 행은 같은 시각일 수 있음
 ```
 
 학년 범위, 전공 표준화, 이메일 업무 규칙은 Chapter 06에서 보완합니다.
@@ -133,6 +134,7 @@ created_at
 public 스키마 존재
 읽기 전용 연결이 아님
 public.students 존재
+public.students SELECT·INSERT 권한
 현재 행 수 = 0
 ```
 
@@ -181,7 +183,7 @@ PostgreSQL의 :: 형 변환
 
 ## 안전한 변경 순서
 
-`04_update_delete_students.sql`은 현재 데이터베이스와 쓰기 가능 상태, 초기 데이터 상태를 먼저 확인합니다.
+`04_update_delete_students.sql`은 현재 데이터베이스와 읽기 전용 상태, `public.students`의 SELECT·UPDATE·DELETE 권한, 초기 데이터 상태를 먼저 확인합니다.
 
 ```text
 SELECT로 대상 확인
@@ -253,7 +255,7 @@ public 스키마 존재
 → 04_update_delete_students.sql
 ```
 
-`basic_crud.sql`은 기본 실습 파일이 아니라 통합 참고 파일로 표시합니다. 데이터 상태도 `체크포인트 A/B/C`가 아니라 `초기 데이터 상태`, `수정 실습 후 상태`, `삭제 실습 후 상태`로 표현합니다.
+`basic_crud.sql`은 기본 실습 파일이 아니라 통합 참고 파일로 표시합니다. 번호 파일의 시작 상태·권한 보호 로직을 일부 생략하므로 초보자는 번호 파일을 우선 사용합니다. 데이터 상태도 `체크포인트 A/B/C`가 아니라 `초기 데이터 상태`, `수정 실습 후 상태`, `삭제 실습 후 상태`로 표현합니다.
 
 ---
 
@@ -272,3 +274,17 @@ public 스키마 존재
 - Auto-commit과 영향받은 행 수를 확인한다.
 - 자동 생성 id를 학생 수나 학번으로 사용하지 않는다.
 ```
+
+## 생성 파일 권한 확인
+
+`01_create_students.sql`은 `public.students`를 만들기 전에 다음을 확인합니다.
+
+```text
+현재 데이터베이스 = ai_database_book
+public 스키마 존재
+public USAGE 권한
+public CREATE 권한
+읽기 전용 연결이 아님
+```
+
+`transaction_read_only = off`만으로 객체 생성 권한이 보장되는 것은 아니므로 스키마 권한을 별도로 확인합니다.

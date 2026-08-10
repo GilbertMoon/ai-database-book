@@ -21,6 +21,18 @@ BEGIN
             '생성 중단: public 스키마가 존재하지 않습니다.';
     END IF;
 
+    IF NOT has_schema_privilege(current_user, 'public', 'USAGE') THEN
+        RAISE EXCEPTION
+            '생성 중단: 사용자 %에게 public 스키마 USAGE 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_schema_privilege(current_user, 'public', 'CREATE') THEN
+        RAISE EXCEPTION
+            '생성 중단: 사용자 %에게 public 스키마 CREATE 권한이 없습니다.',
+            current_user;
+    END IF;
+
     IF current_setting('transaction_read_only')::boolean THEN
         RAISE EXCEPTION
             '생성 중단: 현재 연결이 읽기 전용입니다.';

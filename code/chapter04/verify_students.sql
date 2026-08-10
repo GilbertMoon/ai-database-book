@@ -11,6 +11,12 @@ SELECT to_regclass('public.students') AS students_table;
 
 DO $$
 BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '상태 확인 중단: 현재 데이터베이스는 %입니다. ai_database_book 연결을 선택하세요.',
+            current_database();
+    END IF;
+
     IF to_regclass('public.students') IS NULL THEN
         RAISE EXCEPTION
             '상태 확인 중단: public.students가 없습니다. 01_create_students.sql을 실행하세요.';

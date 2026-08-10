@@ -3,6 +3,7 @@
 -- 완료 상태: 샘플 학생 6명
 -- 반복 실행: 시작 상태가 아니면 중단합니다.
 -- 안전성: 세 INSERT를 한 트랜잭션으로 묶어 중간 실패 시 부분 입력을 남기지 않습니다.
+-- 시간 주의: CURRENT_TIMESTAMP는 트랜잭션 시작 시각이므로 이 파일에서 입력한 6명의 created_at은 같을 수 있습니다.
 
 SELECT current_database();
 SELECT current_user;
@@ -34,6 +35,18 @@ BEGIN
     IF to_regclass('public.students') IS NULL THEN
         RAISE EXCEPTION
             '입력 중단: public.students가 없습니다. 01_create_students.sql을 먼저 실행하세요.';
+    END IF;
+
+    IF NOT has_table_privilege(current_user, 'public.students', 'SELECT') THEN
+        RAISE EXCEPTION
+            '입력 중단: 사용자 %에게 public.students SELECT 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_table_privilege(current_user, 'public.students', 'INSERT') THEN
+        RAISE EXCEPTION
+            '입력 중단: 사용자 %에게 public.students INSERT 권한이 없습니다.',
+            current_user;
     END IF;
 
     SELECT COUNT(*) INTO v_count

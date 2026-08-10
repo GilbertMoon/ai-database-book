@@ -117,7 +117,8 @@ AI가 만든 SQL의 예상 영향 범위를 어떻게 검토하는가?
 ### 심화 학습
 
 - IDENTITY 번호 공백
-- `CURRENT_TIMESTAMP`와 트랜잭션 시각
+- `TIMESTAMPTZ` 저장·표시 의미와 `CURRENT_TIMESTAMP`의 트랜잭션 시각
+- `id`를 시간 대체값으로 사용하지 않는 동률 정렬 원칙
 - `NULL`의 3값 논리
 - `TIMESTAMP`와 `TIMESTAMPTZ` 확장
 - 시퀀스 내부 동작
@@ -228,6 +229,8 @@ code/chapter04/
 
 - `current_schema() = public`을 절대 완료 조건으로 사용하지 않는다.
 - 주요 테이블은 `public.students`처럼 스키마를 명시한다.
+- Chapter 03의 권장 로컬 경로와 맞춰 `public`의 `USAGE`·`CREATE` 권한을 생성 전 확인한다.
+- `NOT NULL`은 “열 생략 금지”가 아니라 최종 저장값의 `NULL` 금지로 설명한다.
 - SQL 기본 작성 규칙을 한 절에 모아 설명한다.
 - 데이터 타입은 대표 범주와 사용 목적을 중심으로 소개한다.
 - 금액은 `NUMERIC`을 우선 검토한다는 원칙을 제시한다.
@@ -236,7 +239,7 @@ code/chapter04/
 - IDENTITY와 시간의 내부 동작은 심화 박스로 이동한다.
 - `DISTINCT`가 원본 데이터를 변경하지 않는 조회 기능임을 설명한다.
 - `ORDER BY` 없는 결과 순서를 가정하지 않는다.
-- `LIMIT`에는 안정적인 정렬 기준을 함께 사용한다.
+- `LIMIT`에는 안정적인 정렬 기준을 함께 사용한다. `id`는 동률 해소용이며 실제 시간의 대체값으로 설명하지 않는다.
 - UPDATE와 DELETE는 `SELECT → 변경 → 영향 행 확인 → SELECT` 흐름으로 설명한다.
 - Auto-commit 경고를 각 절에서 반복하지 않고 공통 실행 원칙으로 제시한다.
 - 종합 실습의 본문 반복은 제거하고 워크북과 번호 SQL 파일로 연결한다.
@@ -247,7 +250,7 @@ code/chapter04/
 | 내용 | 이동 장 |
 | --- | --- |
 | 학년 범위와 복잡한 제약조건 | Chapter 06 |
-| 정규화와 이메일 업무 규칙 | Chapter 06 |
+| 정규화, 이메일 업무 규칙과 삭제 정책 | Chapter 06 |
 | 집계 함수 | Chapter 08 |
 | 트랜잭션과 ROLLBACK | Chapter 09 |
 | JSONB와 비정형 확장 | Chapter 12 |

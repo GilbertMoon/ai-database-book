@@ -65,6 +65,11 @@ ORDER BY id ASC;
 
 SELECT id, name
 FROM public.students
+WHERE name LIKE '%우'
+ORDER BY id ASC;
+
+SELECT id, name
+FROM public.students
 WHERE name LIKE '김__'
 ORDER BY id ASC;
 
