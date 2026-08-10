@@ -1,0 +1,350 @@
+name: Chapter 11 final publication validation once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ch11-final-validation-once.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Static final-publication checks
+        shell: bash
+        run: |
+          node --check presentation/chapter11/chapter11_slides.js
+          node --check presentation/chapter11/chapter11_navigation.js
+          node --check presentation/chapter11/chapter11_player.js
+          node --check presentation/chapter11/chapter11_script.js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          chapter = Path('book/chapter11/chapter11.md').read_text(encoding='utf-8')
+          outline = Path('book/chapter11/chapter11_outline.md').read_text(encoding='utf-8')
+          activity = Path('book/chapter11/chapter11_activity.md').read_text(encoding='utf-8')
+          schema = Path('code/chapter11/01_security_lab_schema.sql').read_text(encoding='utf-8')
+          readme = Path('code/chapter11/README.md').read_text(encoding='utf-8')
+          runbook = Path('code/chapter11/BACKUP_RESTORE_RUNBOOK.md').read_text(encoding='utf-8')
+          theory = Path('presentation/chapter11/chapter11_theory_lecture_plan.md').read_text(encoding='utf-8')
+          practice = Path('presentation/chapter11/chapter11_practice_lecture_plan.md').read_text(encoding='utf-8')
+          script_html = Path('presentation/chapter11/chapter11_script.html').read_text(encoding='utf-8')
+
+          numbered = [int(x) for x in re.findall(r'^##\s+(\d+)\.\s+', chapter, re.M)]
+          if numbered != list(range(1, 29)):
+              raise SystemExit(f'Chapter 11 body section numbering mismatch: {numbered}')
+
+          for token in ['명명 제약조건 15개', 'NOT NULL 열 20개', 'chmod 0600', 'PGPASSFILE']:
+              if token not in chapter:
+                  raise SystemExit(f'chapter missing final-publication token: {token}')
+
+          for token in [
+              "has_database_privilege(current_user, current_database(), 'CREATE')",
+              'v_project_named_constraint_count <> 15',
+              'v_project_not_null_count <> 20',
+          ]:
+              if token not in schema:
+                  raise SystemExit(f'01 missing final preflight token: {token}')
+
+          if schema.find('DO $$') > schema.find('BEGIN;'):
+              raise SystemExit('01 preflight must run before explicit DDL transaction')
+
+          for name, source in [('README', readme), ('runbook', runbook)]:
+              if 'chmod 0600' not in source or 'PGPASSFILE' not in source:
+                  raise SystemExit(f'{name} missing password-file guidance')
+
+          if 'data-script-content-enhancer="off"' not in script_html:
+              raise SystemExit('Chapter 11 authored presenter script must disable generic expansion')
+
+          for label, source in [('outline', outline), ('activity', activity), ('theory', theory), ('practice', practice)]:
+              if 'PostgreSQL 16' not in source:
+                  raise SystemExit(f'{label} missing PostgreSQL 16 baseline')
+
+          print('Chapter 11 final static publication checks passed')
+          PY
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          test "$(pg_dump --version | awk '{print $3}' | cut -d. -f1)" = "16"
+
+      - name: Create canonical database
+        run: |
+          psql -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE ai_database_book;"
+          test "$(psql -d postgres -Atc "SELECT current_setting('server_version_num')::int / 10000")" = "16"
+
+      - name: Build Chapter 07 baseline and verify Chapter 08
+        run: |
+          for file in \
+            code/chapter07/01_course_project_schema.sql \
+            code/chapter07/02_course_project_seed.sql \
+            code/chapter07/03_course_project_changes.sql \
+            code/chapter07/04_course_project_validation.sql
+          do
+            psql -v ON_ERROR_STOP=1 -d ai_database_book -f "$file"
+          done
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/03_join_aggregation_validation.sql
+
+      - name: Verify inherited Chapter 07 structure contract
+        shell: bash
+        run: |
+          STRUCTURE=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT
+            (SELECT COUNT(*)
+             FROM pg_constraint
+             WHERE conrelid IN (
+               'course_project.students'::regclass,
+               'course_project.instructors'::regclass,
+               'course_project.courses'::regclass,
+               'course_project.enrollments'::regclass
+             )
+             AND conname IN (
+               'uq_course_students_email',
+               'chk_course_students_name_not_blank',
+               'chk_course_students_email_not_blank',
+               'uq_course_instructors_email',
+               'chk_course_instructors_name_not_blank',
+               'chk_course_instructors_email_not_blank',
+               'chk_course_instructors_specialty_not_blank',
+               'fk_course_courses_instructor',
+               'chk_course_courses_title_not_blank',
+               'chk_course_courses_level',
+               'chk_course_courses_price',
+               'fk_course_enrollments_student',
+               'fk_course_enrollments_course',
+               'chk_course_enrollments_status',
+               'chk_course_enrollments_recorded_amount'
+             )) || ':' ||
+            (SELECT COUNT(*)
+             FROM information_schema.columns
+             WHERE table_schema='course_project'
+               AND table_name IN ('students','instructors','courses','enrollments')
+               AND is_nullable='NO');
+          SQL
+          )
+          echo "Chapter 07 structure contract: $STRUCTURE"
+          test "$STRUCTURE" = "15:20"
+
+      - name: Verify CREATE privilege protection before security_lab creation
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
+          CREATE ROLE ch11_no_create LOGIN PASSWORD 'chapter11-test';
+          GRANT CONNECT ON DATABASE ai_database_book TO ch11_no_create;
+          REVOKE CREATE ON DATABASE ai_database_book FROM ch11_no_create;
+          GRANT USAGE ON SCHEMA course_project TO ch11_no_create;
+          GRANT SELECT ON ALL TABLES IN SCHEMA course_project TO ch11_no_create;
+          SQL
+
+          set +e
+          PGUSER=ch11_no_create PGPASSWORD=chapter11-test psql -h localhost -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter11/01_security_lab_schema.sql > /tmp/ch11_no_create.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/ch11_no_create.log
+          test "$status" -ne 0
+          grep -q "CREATE 권한" /tmp/ch11_no_create.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('security_lab') IS NULL")" = "t"
+
+      - name: Capture protected project fingerprint
+        shell: bash
+        run: |
+          PROJECT_BEFORE=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          echo "PROJECT_BEFORE=$PROJECT_BEFORE" >> "$GITHUB_ENV"
+          echo "Protected project fingerprint: $PROJECT_BEFORE"
+
+      - name: Build security lab
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter11/01_security_lab_schema.sql 2>&1 | tee /tmp/ch11_01.log
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter11/02_security_lab_seed.sql 2>&1 | tee /tmp/ch11_02.log
+          grep -q "Chapter 11 security lab schema validation passed" /tmp/ch11_01.log
+          grep -q "Chapter 11 security lab seed validation passed" /tmp/ch11_02.log
+          test "$(psql -d ai_database_book -Atc "SELECT (SELECT count(*) FROM security_lab.students)||':'||(SELECT count(*) FROM security_lab.courses)||':'||(SELECT count(*) FROM security_lab.enrollments)||':'||(SELECT coalesce(sum(recorded_amount),0) FROM security_lab.enrollments)")" = "3:3:3:310000"
+
+      - name: Apply least-privilege role model
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
+          CREATE ROLE lab_role_security_owner NOLOGIN;
+          CREATE ROLE lab_role_report_reader NOLOGIN;
+          CREATE ROLE lab_role_enrollment_app NOLOGIN;
+          CREATE ROLE lab_role_backup_reader NOLOGIN;
+          CREATE ROLE lab_readonly_user LOGIN PASSWORD 'readonly-test';
+          CREATE ROLE lab_enrollment_user LOGIN PASSWORD 'app-test';
+          CREATE ROLE lab_backup_user LOGIN PASSWORD 'backup-test';
+
+          GRANT lab_role_report_reader TO lab_readonly_user WITH INHERIT TRUE, SET TRUE;
+          GRANT lab_role_enrollment_app TO lab_enrollment_user WITH INHERIT TRUE, SET TRUE;
+          GRANT lab_role_backup_reader TO lab_backup_user WITH INHERIT TRUE, SET TRUE;
+
+          GRANT CONNECT ON DATABASE ai_database_book
+          TO lab_role_report_reader, lab_role_enrollment_app, lab_role_backup_reader;
+
+          GRANT USAGE ON SCHEMA security_lab
+          TO lab_role_report_reader, lab_role_enrollment_app, lab_role_backup_reader;
+
+          GRANT SELECT ON TABLE
+              security_lab.students,
+              security_lab.courses,
+              security_lab.enrollments
+          TO lab_role_report_reader, lab_role_enrollment_app, lab_role_backup_reader;
+
+          GRANT INSERT ON TABLE security_lab.enrollments
+          TO lab_role_enrollment_app;
+
+          GRANT UPDATE (status) ON TABLE security_lab.enrollments
+          TO lab_role_enrollment_app;
+
+          GRANT USAGE ON SEQUENCE security_lab.enrollments_id_seq
+          TO lab_role_enrollment_app;
+
+          GRANT SELECT ON SEQUENCE
+              security_lab.students_id_seq,
+              security_lab.courses_id_seq,
+              security_lab.enrollments_id_seq
+          TO lab_role_backup_reader;
+          SQL
+
+      - name: Verify actual allow and deny behavior
+        shell: bash
+        run: |
+          PGPASSWORD=readonly-test psql -h localhost -U lab_readonly_user -d ai_database_book -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM security_lab.enrollments;"
+
+          set +e
+          PGPASSWORD=readonly-test psql -h localhost -U lab_readonly_user -d ai_database_book -v ON_ERROR_STOP=1 -c "INSERT INTO security_lab.enrollments(student_id,course_id,status,recorded_amount,enrolled_at) VALUES(101,202,'신청',120000,CURRENT_DATE);" > /tmp/ch11_readonly_deny.log 2>&1
+          readonly_status=$?
+          set -e
+          test "$readonly_status" -ne 0
+          grep -qi "permission denied" /tmp/ch11_readonly_deny.log
+
+          PGPASSWORD=app-test psql -h localhost -U lab_enrollment_user -d ai_database_book -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+          INSERT INTO security_lab.enrollments(student_id,course_id,status,recorded_amount,enrolled_at)
+          VALUES(101,202,'신청',120000,CURRENT_DATE);
+          UPDATE security_lab.enrollments SET status='수강중' WHERE id=1002;
+          ROLLBACK;
+          SQL
+
+          set +e
+          PGPASSWORD=app-test psql -h localhost -U lab_enrollment_user -d ai_database_book -v ON_ERROR_STOP=1 -c "UPDATE security_lab.enrollments SET recorded_amount=0 WHERE id=1001;" > /tmp/ch11_app_amount_deny.log 2>&1
+          app_amount_status=$?
+          PGPASSWORD=app-test psql -h localhost -U lab_enrollment_user -d ai_database_book -v ON_ERROR_STOP=1 -c "DELETE FROM security_lab.enrollments WHERE id=1001;" > /tmp/ch11_app_delete_deny.log 2>&1
+          app_delete_status=$?
+          set -e
+          test "$app_amount_status" -ne 0
+          test "$app_delete_status" -ne 0
+          grep -qi "permission denied" /tmp/ch11_app_amount_deny.log
+          grep -qi "permission denied" /tmp/ch11_app_delete_deny.log
+
+          PGPASSWORD=backup-test psql -h localhost -U lab_backup_user -d ai_database_book -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM security_lab.students; SELECT last_value FROM security_lab.enrollments_id_seq;"
+          set +e
+          PGPASSWORD=backup-test psql -h localhost -U lab_backup_user -d ai_database_book -v ON_ERROR_STOP=1 -c "DELETE FROM security_lab.enrollments WHERE id=1001;" > /tmp/ch11_backup_deny.log 2>&1
+          backup_status=$?
+          set -e
+          test "$backup_status" -ne 0
+          grep -qi "permission denied" /tmp/ch11_backup_deny.log
+
+          test "$(psql -d ai_database_book -Atc "SELECT (SELECT count(*) FROM security_lab.students)||':'||(SELECT count(*) FROM security_lab.courses)||':'||(SELECT count(*) FROM security_lab.enrollments)||':'||(SELECT coalesce(sum(recorded_amount),0) FROM security_lab.enrollments)")" = "3:3:3:310000"
+
+      - name: Create protected password file and custom archive
+        shell: bash
+        run: |
+          mkdir -p /tmp/ch11-final
+          cat > /tmp/ch11-final/pgpass <<'EOF'
+          localhost:5432:ai_database_book:lab_backup_user:backup-test
+          localhost:5432:ai_database_book_restore:lab_restore_user:restore-test
+          EOF
+          chmod 0600 /tmp/ch11-final/pgpass
+          test "$(stat -c '%a' /tmp/ch11-final/pgpass)" = "600"
+          export PGPASSFILE=/tmp/ch11-final/pgpass
+
+          pg_dump -h localhost -U lab_backup_user -d ai_database_book -Fc --schema=security_lab -f /tmp/ch11-final/security_lab.backup
+          test -s /tmp/ch11-final/security_lab.backup
+          pg_restore --list /tmp/ch11-final/security_lab.backup > /tmp/ch11-final/archive.list
+          grep -q "SCHEMA.*security_lab" /tmp/ch11-final/archive.list
+          grep -q "TABLE.*security_lab students" /tmp/ch11-final/archive.list
+          grep -q "TABLE.*security_lab courses" /tmp/ch11-final/archive.list
+          grep -q "TABLE.*security_lab enrollments" /tmp/ch11-final/archive.list
+          grep -q "SEQUENCE.*security_lab students_id_seq" /tmp/ch11-final/archive.list
+          grep -q "SEQUENCE.*security_lab courses_id_seq" /tmp/ch11-final/archive.list
+          grep -q "SEQUENCE.*security_lab enrollments_id_seq" /tmp/ch11-final/archive.list
+          grep -q "INDEX.*security_lab uq_security_enrollments_active" /tmp/ch11-final/archive.list
+          sha256sum /tmp/ch11-final/security_lab.backup | tee /tmp/ch11-final/security_lab.sha256
+
+      - name: Restore archive to isolated database and validate
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d postgres <<'SQL'
+          CREATE ROLE lab_restore_user LOGIN PASSWORD 'restore-test';
+          CREATE DATABASE ai_database_book_restore OWNER lab_restore_user TEMPLATE template0;
+          SQL
+
+          export PGPASSFILE=/tmp/ch11-final/pgpass
+          pg_restore -h localhost -U lab_restore_user -d ai_database_book_restore --single-transaction --no-owner --no-privileges /tmp/ch11-final/security_lab.backup
+          PGPASSWORD=restore-test psql -h localhost -U lab_restore_user -d ai_database_book_restore -v ON_ERROR_STOP=1 -f code/chapter11/06_restore_validation.sql 2>&1 | tee /tmp/ch11_06.log
+          grep -q "Chapter 11 restore structure and data validation passed" /tmp/ch11_06.log
+          test "$(PGPASSWORD=restore-test psql -h localhost -U lab_restore_user -d ai_database_book_restore -Atc "SELECT to_regnamespace('course_project') IS NULL")" = "t"
+
+      - name: Verify original project preservation and isolated reset
+        shell: bash
+        run: |
+          PROJECT_AFTER=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          test "$PROJECT_BEFORE" = "$PROJECT_AFTER"
+
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter11/reset_security_lab.sql 2>&1 | tee /tmp/ch11_reset.log
+          grep -q "Chapter 11 security lab reset passed" /tmp/ch11_reset.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('security_lab') IS NULL")" = "t"
+
+          PROJECT_AFTER_RESET=$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT md5(
+            (SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students AS s) ||
+            (SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors AS i) ||
+            (SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses AS c) ||
+            (SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments AS e)
+          );
+          SQL
+          )
+          test "$PROJECT_BEFORE" = "$PROJECT_AFTER_RESET"
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/03_join_aggregation_validation.sql
