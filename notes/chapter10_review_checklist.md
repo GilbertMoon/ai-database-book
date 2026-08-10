@@ -312,3 +312,37 @@ Seq Scan으로 유지됨을 실제 확인했고, Skip Scan은 PostgreSQL 18+로 
 Validate Chapter 10 Run 4가 전체 성공했으므로
 자동화 가능한 내용·SQL 정합성 검수는 완료 상태로 판정한다.
 ```
+
+---
+
+## 16. 2026-08-10 최종 출판 보완 및 재검증
+
+- [x] Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개를 Chapter 10 시작·최종 게이트에서 확인
+- [x] 현재 역할의 `ai_database_book` CREATE 권한을 `performance_lab` 생성 전에 확인
+- [x] 사전 조건 검사를 명시적 DDL 트랜잭션 시작 전에 수행
+- [x] CREATE 권한 없는 역할에서 `performance_lab` 생성이 차단되고 객체가 남지 않음을 PostgreSQL 16에서 확인
+- [x] 선택도 기준을 10/50/15/30001행과 약 0.010%/0.050%/0.015%/30.0%로 본문·워크북·발표자료에 연결
+- [x] 선택도는 인덱스 선택의 단서이지 단독 정답이 아님을 명시
+- [x] `enable_seqscan`, `enable_indexscan`, `enable_bitmapscan`을 모두 `on`으로 유지해 전후 계획 비교
+- [x] `SET enable_seqscan = off` 같은 강제 설정을 최종 성능 증거로 사용하지 않도록 명시
+- [x] PostgreSQL 16에서 title/student/course/course+status 후보 인덱스 실제 선택 확인
+- [x] PostgreSQL 16 `status='수강중'` 단독 조건은 Seq Scan 유지 확인
+- [x] `ORDER BY title LIMIT 20`에서 title 인덱스 선택 확인
+- [x] Chapter 10 작성 발표 스크립트 자동 확장 비활성화
+- [x] 기존 검증 자산 버전 `20260809a` 유지
+- [x] `course_project` fingerprint 실행 전후·reset 후 동일
+- [x] `performance_lab` reset 뒤 Chapter 08 사전·집계 게이트 재통과
+
+### 최종 자동 검증 기록
+
+```text
+Workflow: Chapter 10 final publication validation once
+Run: 1
+Run ID: 31382892778
+Validation commit: 5cc10f3fb23ae093f6cd3b4ae2c58de7ba9bb295
+Content commit: 98f6a9461bdbdcd7c92d867d2b3062982d14e615
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```
+
