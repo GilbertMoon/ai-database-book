@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview · AI 시대의 데이터베이스 입문</title>
+<style>
+:root{
+  --ink:#17212b;--muted:#5e6b78;--navy:#15304a;--blue:#2f6fed;--blue-soft:#eaf1ff;
+  --teal:#168c8c;--teal-soft:#e9f7f6;--green:#2f855a;--green-soft:#eaf7ef;
+  --orange:#b56a14;--orange-soft:#fff4e6;--line:#d8e0e8;--paper:#fff;--canvas:#eef3f8;
+}
+*{box-sizing:border-box}
+html{font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:var(--canvas);line-height:1.72}
+body{margin:0}
+main{width:min(980px,calc(100% - 32px));margin:32px auto 80px;background:var(--paper);box-shadow:0 18px 55px rgba(21,48,74,.10)}
+.page{padding:72px 78px}
+.hero{min-height:620px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,#f9fbfd 0%,#eef4fb 60%,#f4f8fb 100%);border-bottom:1px solid var(--line)}
+.eyebrow{font-size:14px;letter-spacing:.14em;font-weight:800;color:var(--blue);text-transform:uppercase;margin-bottom:18px}
+h1{font-size:52px;line-height:1.18;letter-spacing:-.045em;margin:0;color:var(--navy)}
+.hero h2{font-size:28px;line-height:1.4;letter-spacing:-.025em;margin:18px 0 0;color:var(--ink);font-weight:700}
+.lead{font-size:21px;line-height:1.8;margin:40px 0 0;max-width:760px;color:#334254}
+.tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:38px}
+.tag{border:1px solid #c9d7e6;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;color:#35516d;background:#fff}
+blockquote{margin:40px 0 0;padding:22px 26px;border-left:4px solid var(--blue);background:#f7faff;font-size:18px;color:#26384a}
+section{margin-top:66px}
+section:first-child{margin-top:0}
+h2.section-title{font-size:31px;line-height:1.35;letter-spacing:-.035em;margin:0 0 18px;color:var(--navy)}
+h3{font-size:22px;line-height:1.45;margin:32px 0 10px;color:var(--navy);letter-spacing:-.02em}
+p{margin:0 0 16px}
+strong{color:#122f4c}
+.rule{height:1px;background:var(--line);margin:54px 0}
+.note{border:1px solid var(--line);border-radius:18px;padding:22px 24px;background:#fbfcfe}
+.note-title{font-weight:800;color:var(--navy);margin-bottom:8px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.card{border:1px solid var(--line);border-radius:20px;padding:24px;background:#fff;break-inside:avoid}
+.card-num{font-weight:900;font-size:14px;color:var(--blue);letter-spacing:.08em}
+.card h3{margin:8px 0 8px;font-size:21px}
+.card p{font-size:15.5px;color:#3f4d5c;margin:0}
+.principles{counter-reset:item;display:grid;gap:12px;margin-top:22px}
+.principle{display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;padding:16px 18px;border-radius:16px;background:#f7f9fc}
+.principle::before{counter-increment:item;content:counter(item);width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
+.figure{margin:34px 0 10px;break-inside:avoid}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:20px;background:#f7f9fc}
+figcaption{margin-top:10px;text-align:center;color:var(--muted);font-size:13.5px}
+.stage{border:1px solid var(--line);border-radius:20px;padding:22px 24px;margin:18px 0;break-inside:avoid}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+.stage-label{font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--blue)}
+.stage h3{margin:0;font-size:21px}
+.stage ul{margin:12px 0 0;padding-left:21px}
+.stage li{margin:6px 0}
+.chapter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+.chapter{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;break-inside:avoid}
+.chapter b{display:block;color:var(--blue);font-size:13px;margin-bottom:5px}
+.chapter span{font-size:14px;line-height:1.5;font-weight:700;color:#243344}
+table{width:100%;border-collapse:collapse;margin:22px 0 8px;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:13px 12px;text-align:left;vertical-align:top}
+th{background:#f6f8fb;color:var(--navy);font-weight:800}
+.tool-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.tool{padding:16px 18px;border:1px solid var(--line);border-radius:16px}
+.tool b{display:block;color:var(--navy);margin-bottom:4px}
+.tool span{font-size:14px;color:var(--muted)}
+.flow-box{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;border-radius:18px;padding:22px 24px;background:var(--navy);color:#fff;font-weight:800;text-align:center;letter-spacing:-.01em;margin:26px 0}
+.footer-cta{margin-top:70px;padding:34px;border-radius:22px;background:#f1f6fd;border:1px solid #d7e3f2;text-align:center}
+.footer-cta b{display:block;font-size:22px;margin-bottom:8px;color:var(--navy)}
+.small{font-size:13.5px;color:var(--muted)}
+@media(max-width:760px){
+  main{width:100%;margin:0;box-shadow:none}.page{padding:44px 24px}.hero{min-height:auto;padding-top:70px;padding-bottom:70px}
+  h1{font-size:39px}.hero h2{font-size:23px}.lead{font-size:18px}.cards,.tool-list{grid-template-columns:1fr}.chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media print{
+  @page{size:A4;margin:15mm 14mm 16mm}
+  html,body{background:#fff}.page{padding:0}main{width:auto;margin:0;box-shadow:none}
+  .hero{min-height:245mm;border:0;break-after:page;background:#fff}
+  section{margin-top:12mm}.rule{margin:10mm 0}.figure,.card,.stage,.chapter,.note,.tool,table{break-inside:avoid}
+  a{color:inherit;text-decoration:none}.chapter-grid{grid-template-columns:repeat(3,1fr)}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<main>
+  <header class="page hero">
+    <div class="eyebrow">Overview · Before You Begin</div>
+    <h1>AI 시대의 데이터베이스 입문</h1>
+    <h2>ChatGPT와 Codex로 배우는 PostgreSQL, SQL, 데이터 설계와 분석</h2>
+    <p class="lead">AI가 SQL을 만들어 주는데도 데이터베이스를 배워야 할까요? 이 책은 이 질문에서 시작합니다. <strong>AI가 초안을 만들고, 사람은 데이터의 의미와 실행 결과를 검증합니다.</strong></p>
+    <div class="tag-row"><span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">ERD·데이터 모델링</span><span class="tag">트랜잭션·인덱스</span><span class="tag">보안·복구</span><span class="tag">AI 검증</span></div>
+    <blockquote>목표는 SQL 문법을 외우는 데 그치지 않고, 현실의 정보를 구조화하고 결과가 실제 질문과 일치하는지 판단하는 힘을 기르는 것입니다.</blockquote>
+  </header>
+
+  <div class="page">
+    <section>
+      <h2 class="section-title">이 책은 누구를 위한 책인가</h2>
+      <p>이 책은 데이터베이스를 처음 배우는 일반 독자와 예비 개발자를 위한 실습형 입문서입니다. 데이터 분석이나 AI 활용을 위해 SQL과 데이터 구조를 이해하려는 독자도 대상으로 합니다.</p>
+      <p>SQL 경험이 없어도 시작할 수 있으며, 프로그래밍 경험이 없어도 Chapter 01~04를 순서대로 읽을 수 있습니다. 이후 장에서는 PostgreSQL 실습이 이어지므로 예제를 직접 실행하고 결과를 확인하며 학습하는 것을 권장합니다.</p>
+      <div class="cards">
+        <article class="card"><div class="card-num">READER 01</div><h3>데이터베이스 초보자</h3><p>테이블, 키, 관계, SQL을 처음부터 차근차근 이해하고 싶은 독자</p></article>
+        <article class="card"><div class="card-num">READER 02</div><h3>개발 입문자</h3><p>서비스 요구사항을 실제 데이터 구조와 PostgreSQL 구현으로 연결하고 싶은 독자</p></article>
+        <article class="card"><div class="card-num">READER 03</div><h3>데이터 분석 학습자</h3><p>SQL 집계와 데이터 구조를 이해하고 Python·pandas 분석까지 확장하고 싶은 독자</p></article>
+        <article class="card"><div class="card-num">READER 04</div><h3>AI 활용 학습자</h3><p>ChatGPT와 Codex가 만든 설계·SQL을 검증할 수 있는 기준을 갖추고 싶은 독자</p></article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">AI 시대에 데이터베이스를 배우는 방법</h2>
+      <p>AI는 요구사항 초안을 정리하고 테이블과 관계 후보를 제안하며, SQL·DDL 초안과 테스트 SQL 후보를 빠르게 만들 수 있습니다. 오류 메시지를 설명하거나 코드와 저장소 수정을 지원하는 일에도 유용합니다.</p>
+      <p>하지만 업무 규칙, 한 행의 의미, 키와 관계, NULL의 의미와 삭제 정책은 사람이 최종 판단해야 합니다. 개인정보와 권한, SQL 결과의 정확성, 운영 환경에서 변경 SQL을 실행해도 되는지도 실제 데이터와 실행 맥락을 바탕으로 결정해야 합니다.</p>
+      <div class="note"><div class="note-title">AI 활용 원칙</div><div class="principles"><div class="principle">AI가 만든 설계와 SQL은 <strong>초안</strong>으로 봅니다.</div><div class="principle">변경 SQL은 실행 대상과 예상 결과를 <strong>먼저 확인</strong>합니다.</div><div class="principle">최종 판단은 실제 데이터와 <strong>실행 결과</strong>를 근거로 합니다.</div></div></div>
+    </section>
+
+    <section>
+      <h2 class="section-title">이 책에서 기르는 네 가지 능력</h2>
+      <div class="cards">
+        <article class="card"><div class="card-num">01</div><h3>데이터 구조화</h3><p>현실의 사용자, 주문, 강의, 질문 같은 정보를 테이블과 관계로 표현합니다.</p></article>
+        <article class="card"><div class="card-num">02</div><h3>정확한 SQL</h3><p>SQL이 실행되는지를 넘어 결과가 실제 업무 질문과 일치하는지 검증합니다.</p></article>
+        <article class="card"><div class="card-num">03</div><h3>안정적인 운영</h3><p>트랜잭션, 인덱스, 권한, 백업과 복구로 데이터의 정확성과 안전성을 지킵니다.</p></article>
+        <article class="card"><div class="card-num">04</div><h3>AI 결과 검증</h3><p>AI가 만든 ERD, DDL과 SQL을 그대로 신뢰하지 않고 테스트와 실행 결과로 검토합니다.</p></article>
+      </div>
+      <div class="flow-box">업무 질문 → 요구사항 → 데이터 모델·ERD → 테이블·SQL → 검증·운영 → 분석·AI 활용</div>
+    </section>
+
+    <section>
+      <h2 class="section-title">전체 학습 로드맵</h2>
+      <p>15개 Chapter는 네 단계로 진행됩니다. 앞 단계에서 만든 구조와 실행 증거가 뒤 단계의 실습 기준으로 이어지도록 구성했습니다.</p>
+      <figure class="figure"><img src="../../images/overview/overview_learning_roadmap.jpg" alt="Chapter 01부터 15까지 네 단계로 구성한 전체 학습 로드맵"><figcaption>그림 O-1. 전체 학습 로드맵</figcaption></figure>
+
+      <article class="stage"><div class="stage-head"><div><div class="stage-label">STAGE 1 · CHAPTER 01–04</div><h3>데이터베이스 기초</h3></div></div><ul><li>AI 시대에 데이터베이스를 왜 배워야 하는가</li><li>데이터와 DBMS의 기본 개념</li><li>PostgreSQL과 DBeaver로 실습 환경 만들기</li><li>관계형 데이터베이스와 SQL 시작하기</li></ul></article>
+      <article class="stage"><div class="stage-head"><div><div class="stage-label">STAGE 2 · CHAPTER 05–07</div><h3>좋은 데이터 구조 만들기</h3></div></div><ul><li>요구사항에서 데이터 모델과 ERD 만들기</li><li>정규화와 데이터 무결성으로 좋은 테이블 만들기</li><li>실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기</li></ul></article>
+      <article class="stage"><div class="stage-head"><div><div class="stage-label">STAGE 3 · CHAPTER 08–12</div><h3>조회와 안정적인 운영</h3></div></div><ul><li>JOIN과 집계로 서비스 질문에 답하기</li><li>트랜잭션으로 데이터 정합성 지키기</li><li>실행 계획으로 인덱스 효과 검증하기</li><li>데이터베이스를 안전하게 지키고 복구하는 방법</li><li>조회 패턴으로 RDBMS와 NoSQL 선택하기</li></ul></article>
+      <article class="stage"><div class="stage-head"><div><div class="stage-label">STAGE 4 · CHAPTER 13–15</div><h3>AI와 분석으로 확장</h3></div></div><ul><li>AI와 실행 증거로 데이터베이스 설계 검증하기</li><li>SQL 데이터 분석과 Python 확장</li><li>데이터베이스 종합 프로젝트</li></ul></article>
+    </section>
+
+    <section>
+      <h2 class="section-title">15개 Chapter를 한눈에 보기</h2>
+      <figure class="figure"><img src="../../images/overview/overview_book_structure.jpg" alt="15개 Chapter를 네 단계로 묶은 책 전체 구조"><figcaption>그림 O-2. 15개 Chapter 구조</figcaption></figure>
+      <div class="chapter-grid">
+        <div class="chapter"><b>CHAPTER 01</b><span>AI 시대에 데이터베이스를 왜 배워야 하는가</span></div><div class="chapter"><b>CHAPTER 02</b><span>데이터와 DBMS의 기본 개념</span></div><div class="chapter"><b>CHAPTER 03</b><span>PostgreSQL과 DBeaver로 실습 환경 만들기</span></div>
+        <div class="chapter"><b>CHAPTER 04</b><span>관계형 데이터베이스와 SQL 시작하기</span></div><div class="chapter"><b>CHAPTER 05</b><span>요구사항에서 데이터 모델과 ERD 만들기</span></div><div class="chapter"><b>CHAPTER 06</b><span>정규화와 데이터 무결성으로 좋은 테이블 만들기</span></div>
+        <div class="chapter"><b>CHAPTER 07</b><span>실전 프로젝트 1: 온라인 강의 수강신청 DB 완성하기</span></div><div class="chapter"><b>CHAPTER 08</b><span>JOIN과 집계로 서비스 질문에 답하기</span></div><div class="chapter"><b>CHAPTER 09</b><span>트랜잭션으로 데이터 정합성 지키기</span></div>
+        <div class="chapter"><b>CHAPTER 10</b><span>실행 계획으로 인덱스 효과 검증하기</span></div><div class="chapter"><b>CHAPTER 11</b><span>데이터베이스를 안전하게 지키고 복구하는 방법</span></div><div class="chapter"><b>CHAPTER 12</b><span>조회 패턴으로 RDBMS와 NoSQL 선택하기</span></div>
+        <div class="chapter"><b>CHAPTER 13</b><span>AI와 실행 증거로 데이터베이스 설계 검증하기</span></div><div class="chapter"><b>CHAPTER 14</b><span>SQL 데이터 분석과 Python 확장</span></div><div class="chapter"><b>CHAPTER 15</b><span>데이터베이스 종합 프로젝트</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">프로젝트 학습 흐름</h2>
+      <p>Chapter 07에서 첫 데이터베이스를 직접 완성하고, Chapter 13에서 AI가 만든 결과를 실행 증거로 검증한 뒤, Chapter 15의 종합 프로젝트에서 전체 내용을 통합합니다.</p>
+      <div class="cards">
+        <article class="card"><div class="card-num">CHAPTER 07</div><h3>첫 프로젝트</h3><p>온라인 강의 수강신청 DB에서 요구사항, ERD, 정규화, 무결성, PostgreSQL 구현과 자동 검증을 연결합니다.</p></article>
+        <article class="card"><div class="card-num">CHAPTER 13</div><h3>AI 검증</h3><p>정상·경계·실패 테스트와 메타데이터, diff를 근거로 AI 설계·DDL·SQL 초안을 사람이 승인합니다.</p></article>
+        <article class="card"><div class="card-num">CHAPTER 15</div><h3>종합 프로젝트</h3><p>AI 튜터링 질문 관리 서비스에 설계·트랜잭션·성능·권한·복원·SQL·pandas 분석을 통합합니다.</p></article>
+        <article class="card"><div class="card-num">DONE</div><h3>재현 가능한 완료</h3><p>프로젝트 완료는 파일이 존재하는 상태가 아니라, 다른 사람이 같은 순서로 실행해 같은 결과를 확인할 수 있는 상태입니다.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">이 책을 읽고 실습하는 방법</h2>
+      <figure class="figure"><img src="../../images/overview/overview_study_flow.jpg" alt="읽기, 예상, 실행, 검증, AI 활용, 기록을 반복하는 학습 흐름"><figcaption>그림 O-3. 학습·실습 검증 흐름</figcaption></figure>
+      <table><thead><tr><th>표시</th><th>의미</th></tr></thead><tbody><tr><td><strong>핵심 학습</strong></td><td>처음 배우는 독자가 우선 이해하고 직접 확인할 내용</td></tr><tr><td><strong>선택 학습</strong></td><td>필요하거나 관심이 있을 때 추가로 살펴볼 내용</td></tr><tr><td><strong>심화 학습</strong></td><td>운영·성능·보안 등 실무 확장을 위한 내용</td></tr></tbody></table>
+      <p class="small">처음 읽는 독자는 핵심 학습을 중심으로 Chapter 01부터 순서대로 진행하는 것을 권장합니다. 선택·심화 학습을 모두 완료하지 않아도 다음 장으로 진행할 수 있습니다.</p>
+    </section>
+
+    <section>
+      <h2 class="section-title">실습에 사용하는 도구</h2>
+      <div class="tool-list"><div class="tool"><b>PostgreSQL</b><span>관계형 데이터베이스와 SQL 실습</span></div><div class="tool"><b>DBeaver</b><span>SQL 작성·실행과 결과 확인</span></div><div class="tool"><b>Python · pandas</b><span>Chapter 14~15의 데이터 분석 확장</span></div><div class="tool"><b>GitHub</b><span>SQL·Python 코드와 실습 자료 확인</span></div><div class="tool"><b>ChatGPT</b><span>요구사항 정리·설계 대안·SQL 검토 지원</span></div><div class="tool"><b>Codex</b><span>코드·SQL·저장소 작업과 테스트 지원</span></div></div>
+      <div class="note" style="margin-top:20px"><div class="note-title">도구보다 중요한 것</div><p style="margin:0">AI 도구의 세부 기능과 화면은 바뀔 수 있습니다. 이 책에서는 특정 버튼이나 기능보다 <strong>AI가 만든 결과를 사람이 검증하는 작업 방식</strong>을 중심으로 설명합니다.</p></div>
+    </section>
+
+    <section>
+      <h2 class="section-title">이 책의 실습 원칙</h2>
+      <div class="principles"><div class="principle">실행 위치와 대상 데이터베이스를 확인합니다.</div><div class="principle">SQL을 읽고 예상 결과를 먼저 생각합니다.</div><div class="principle">변경 SQL은 대상 행을 먼저 SELECT로 확인합니다.</div><div class="principle">실행 후 행 수와 실제 값을 다시 확인합니다.</div><div class="principle">AI가 만든 결과도 같은 기준으로 검증합니다.</div></div>
+      <div class="footer-cta"><b>이제 Chapter 01을 시작합니다.</b><span>AI 시대에도 데이터베이스를 이해하고 검증할 수 있어야 하는 이유부터 살펴보겠습니다.</span></div>
+    </section>
+  </div>
+</main>
+</body>
+</html>
