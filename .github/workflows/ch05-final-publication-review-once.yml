@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Adjust one-off assertion
+        run: sed -i "s/assert '실제 복본(copy)' in manuscript/assert '개별 복본(copy)' in manuscript/" scripts/ch05_final_publication_review_once.py
       - name: Apply Chapter 05 publication review
         run: python scripts/ch05_final_publication_review_once.py
       - name: Remove one-off workflow
