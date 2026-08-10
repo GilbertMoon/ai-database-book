@@ -289,3 +289,35 @@ PostgreSQL 16의 실제 권한·custom archive·별도 DB 복원 검증과 일�
 자동화 가능한 핵심 기술 검증은 완료되었고,
 남은 항목은 브라우저·TTS·출판 렌더링 중심의 수동 제작 검수다.
 ```
+
+
+---
+
+## 16. 2026-08-10 최종 출판 보완 및 재검증
+
+- [x] Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개를 Chapter 11 시작 게이트에서 확인
+- [x] 현재 역할의 `ai_database_book` CREATE 권한을 `security_lab` 생성 전에 확인
+- [x] CREATE 권한 없는 역할에서 `security_lab` 생성이 차단되고 객체가 남지 않음을 PostgreSQL 16에서 확인
+- [x] 본문·구성안·워크북·코드 README·Runbook의 `PGPASSFILE` 안내 정합성 확인
+- [x] Unix password file `chmod 0600` 기준을 문서와 실제 검증에 반영
+- [x] 최소 권한 역할의 허용·차단 동작 재검증
+- [x] custom archive 생성 및 `pg_restore --list` 항목 확인
+- [x] SHA-256 생성 확인
+- [x] 별도 복원 DB에 `--single-transaction --no-owner --no-privileges` 복원 성공
+- [x] `06_restore_validation.sql` 구조·데이터·IDENTITY·소유권 검증 성공
+- [x] 원본 `course_project` fingerprint 실행 전후·reset 후 동일
+- [x] `security_lab` reset 뒤 Chapter 08 사전·집계 게이트 재통과
+- [x] Chapter 11 작성 발표 스크립트 자동 확장 비활성화
+
+### 최종 자동 검증 기록
+
+```text
+Workflow: Chapter 11 final publication validation v2 once
+Run: 1
+Run ID: 31387035835
+Validation commit: f65dc2e90ffcdbd7883ade11a225eae16222a33a
+Content commit: 8c3fc44ccd5d752f13e867e80497bac255f79415
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```
