@@ -23,9 +23,16 @@ jobs:
         run: python scripts/ch06_compat_prepatch_once.py
       - name: Apply Chapter 06 publication review
         run: python scripts/ch06_final_publication_review_once.py
+      - name: Keep existing validation workflow unchanged
+        run: git restore --source=HEAD -- .github/workflows/validate-chapter06.yml
+      - name: Add CI-compatible publication wording
+        run: python scripts/ch06_ci_compat_postpatch.py
+      - name: Regenerate merged manuscript after final wording
+        run: python scripts/merge_chapters.py
       - name: Remove one-off files
         run: |
           rm -f scripts/ch06_compat_prepatch_once.py
+          rm -f scripts/ch06_ci_compat_postpatch.py
           rm -f scripts/ch06_final_publication_review_once.py
           rm -f .github/workflows/ch06-final-publication-review-once.yml
       - name: Commit reviewed Chapter 06
