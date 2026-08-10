@@ -224,3 +224,33 @@ PostgreSQL 16에서 재현·검증된 상태다.
 ```
 
 자동 검증과 별개로 브라우저 최종 렌더링, 단계별 강조 실제 조작, TTS 청취, 모바일·프로젝터·Word·PDF·eBook 출력은 수동 제작 검수 범위로 남깁니다.
+
+
+---
+
+## 15. 2026-08-10 최종 출판 보완 및 재검증
+
+- [x] Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개를 Chapter 09 시작·최종 게이트에서 확인
+- [x] 현재 역할의 `ai_database_book` CREATE 권한을 스키마 생성 전에 확인
+- [x] 사전 조건 검사를 DDL 트랜잭션 시작 전에 수행
+- [x] 권한 없는 역할에서 `transaction_lab` 생성이 차단되고 객체가 남지 않음을 PostgreSQL 16에서 확인
+- [x] `FOR UPDATE`와 조건부 `UPDATE ... RETURNING` 자체의 행 잠금 역할을 정확히 구분
+- [x] 취소 성공 행을 좌석 복구 CTE의 입력으로 연결
+- [x] 동일 취소 재시도에서 취소 0행 / 좌석 복구 0행 확인
+- [x] 다른 활성 신청이 남아 있는 course 301에서도 같은 취소를 두 번 실행해 좌석이 한 번만 복구됨을 실제 확인
+- [x] Chapter 09 작성 발표 스크립트 자동 확장 비활성화
+- [x] 발표 자산 버전 `20260810a` 동기화
+- [x] 주 실습 01→06 / SAVEPOINT / Lock timeout / reset 전체 재검증
+- [x] `course_project` 전체 fingerprint 실행 전후·reset 후 동일
+
+### 최종 자동 검증 기록
+
+```text
+Workflow: Validate Chapter 09
+Run: 5
+Run ID: 31381404542
+Commit: bd0095c51f7c0382796ba3a75a4bce4fdde44290
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```

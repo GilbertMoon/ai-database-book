@@ -324,3 +324,49 @@ TTS 실제 음성 청취
 SVG 실제 화면·인쇄 가독성
 Word·PDF·eBook 표·코드·SVG 최종 렌더링
 ```
+
+
+---
+
+## 2026-08-10 최종 출판 재검증
+
+Chapter 09 최종 출판 보완 뒤 PostgreSQL 16에서 전용 검증 워크플로를 다시 실행했다.
+
+```text
+Workflow: Validate Chapter 09
+Run: 5
+Run ID: 31381404542
+Commit: bd0095c51f7c0382796ba3a75a4bce4fdde44290
+Status: completed
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+PostgreSQL: 16
+```
+
+최종 확인 범위:
+
+```text
+Chapter 07 기준 상태 실제 생성 성공
+Chapter 08 사전·집계 게이트 재통과
+Chapter 07 명명 제약조건 = 15 / NOT NULL 열 = 20 인계 확인
+잘못된 데이터베이스에서 Chapter 09 시작 차단
+DB CREATE 권한이 없는 역할에서 transaction_lab 생성 차단
+권한 차단 뒤 transaction_lab 미생성 확인
+01 → 02 → 03 → 04 → 05 → 06 주 실습 전체 성공
+주 실습 최종 상태 = inventory/enrollment/payment 3/2/2
+좌석 301/302/303 = 1/0/1
+course_project 전체 fingerprint 불변
+01·02 재실행 보호 성공
+취소 성공 행에만 좌석 복구 연결
+동일 취소 재시도 시 좌석 이중 복구 없음
+08 선택 실습의 반복 취소/복구 = 0행 / 0행
+SAVEPOINT 중복 활성 신청 오류 복구 성공
+두 세션 FOR UPDATE lock timeout과 복구 성공
+reset은 transaction_lab만 제거하고 course_project fingerprint 유지
+Chapter 09 작성 발표 스크립트 자동 확장 비활성화
+발표 자산 버전 = 20260810a
+```
+
+특히 취소 실습은 상태 변경과 좌석 복구를 독립 UPDATE로 두지 않고, `UPDATE ... RETURNING`으로 실제 취소된 행을 다음 좌석 복구 CTE의 입력으로 전달하도록 바꾸었다. 따라서 이미 취소된 신청을 다시 처리하면 취소 행이 0건이고 좌석 복구도 0건이 되어 좌석이 두 번 증가하지 않는다.
+
+또한 `SELECT ... FOR UPDATE`는 모든 UPDATE 앞에 필수인 문법으로 설명하지 않는다. 조건부 `UPDATE ... RETURNING` 자체도 수정 대상 행에 필요한 잠금을 획득하며, 선행 `FOR UPDATE`는 잠근 상태를 읽고 여러 후속 판단을 이어가거나 두 세션 대기를 관찰할 때 특히 유용하다는 기준으로 정리했다.
