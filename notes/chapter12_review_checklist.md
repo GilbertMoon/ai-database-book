@@ -389,3 +389,21 @@ wrong DB
 Chapter 12의 PostgreSQL JSONB 기반 선택 기준 실습은 실제 PostgreSQL 16에서 통과했습니다.
 별도 NoSQL 제품의 성능·분산·트랜잭션 특성은 제품별 PoC 없이 단정하지 않습니다.
 ```
+
+---
+
+## 20. 2026-08-10 최종 출판 정밀 검수
+
+- [x] Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개를 Chapter 12 시작·최종 게이트에 추가
+- [x] 현재 역할의 `ai_database_book` CREATE 권한을 `nosql_lab` DDL 전에 확인
+- [x] Chapter 11 `security_lab` 존재를 Chapter 12 시작 조건으로 요구하지 않음
+- [x] Key-Value의 핵심을 정확 키 조회로 정리하고 TTL을 선택 정책으로 구분
+- [x] expiration과 eviction을 별도 동작으로 설명
+- [x] Document DB 트랜잭션 보장을 제품·배포 구성별 확인하도록 정리
+- [x] MongoDB 단일 문서 원자성·다중 문서 트랜잭션은 제품 사례로만 제시
+- [x] Cassandra partition key·clustering column 설명을 공식 CQL 의미와 정렬
+- [x] PostgreSQL `jsonb_ops` / `jsonb_path_ops` 지원 연산자 범위를 정밀화
+- [x] 본문·구성안·워크북·코드 README·이론/실습 발표자료 정합성 반영
+- [x] Chapter 12 작성 발표 스크립트 자동 확장 비활성화
+
+최종 PostgreSQL 16 재검증 결과는 `notes/chapter12_validation_result.md`에 별도로 기록합니다.

@@ -27,6 +27,8 @@ DECLARE
     v_non_cancelled_count BIGINT;
     v_non_cancelled_amount NUMERIC;
     v_active_duplicate_count BIGINT;
+    v_project_named_constraint_count BIGINT;
+    v_project_not_null_count BIGINT;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -155,6 +157,50 @@ BEGIN
         RAISE EXCEPTION
             '실행 중단: 활성 신청 중복이 %건 있습니다.',
             v_active_duplicate_count;
+    END IF;
+
+    IF NOT has_database_privilege(current_user, current_database(), 'CREATE') THEN
+        RAISE EXCEPTION
+            '실행 중단: 현재 역할 %에는 데이터베이스 %의 CREATE 권한이 없습니다.',
+            current_user, current_database();
+    END IF;
+
+    SELECT COUNT(*) INTO v_project_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_project_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_project_named_constraint_count <> 15 OR v_project_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07 구조 기준과 다릅니다. named_constraints=%, not_null_columns=%',
+            v_project_named_constraint_count, v_project_not_null_count;
     END IF;
 
     IF EXISTS (

@@ -1,6 +1,7 @@
 -- Chapter 12. Key-Value 캐시 개념 시뮬레이션
 -- 실행 전 01, 02 파일을 실행합니다.
 -- 이 테이블은 실제 Key-Value DB의 TTL·복제·메모리 정책을 구현하지 않습니다.
+-- 실제 제품에서 expiration(TTL 만료)과 eviction(메모리 정책에 따른 제거)은 서로 다른 동작일 수 있습니다.
 
 SELECT current_database();
 SELECT current_schema();

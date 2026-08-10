@@ -470,3 +470,27 @@ Chapter 12는 NoSQL 제품을 나열하는 장이 아니라,
 PostgreSQL 16 실습 경로는 실제 자동 실행으로 검증되었고,
 별도 NoSQL 제품 성능·분산 특성은 이 장에서 추측하지 않는다.
 ```
+
+---
+
+## 17. 2026-08-10 최종 출판 정밀 검수 추가 반영
+
+최종 출판 직전 Chapter 11에서 강화한 실행 안전성 기준과 PostgreSQL·MongoDB·Redis·Cassandra 공식 문서를 다시 대조했습니다.
+
+추가 반영:
+
+```text
+Chapter 07 구조 계약 = 명명 제약조건 15 / NOT NULL 열 20
+nosql_lab 생성 전 현재 역할 DB CREATE 권한 확인
+Key-Value의 핵심을 정확 키 조회로 설명하고 TTL을 선택 정책으로 구분
+TTL expiration과 메모리 압박 eviction 구분
+Document DB의 원자성·트랜잭션 보장을 제품·배포 구성별 확인으로 명시
+MongoDB 단일 문서 원자성 / 다중 문서 트랜잭션 사례를 제품 예시로 한정
+Cassandra partition key / clustering column 설명을 CQL 의미에 맞게 정밀화
+PostgreSQL jsonb_ops / jsonb_path_ops 지원 연산자 범위 정밀화
+PostgreSQL 16 자동 검증 기준 명시
+Chapter 11 security_lab 존재를 Chapter 12 시작 조건으로 만들지 않음
+작성된 발표자 스크립트의 generic content enhancer 비활성화
+```
+
+별도 NoSQL 제품의 성능·분산·장애 특성은 여전히 이 장의 PostgreSQL 실습만으로 검증되었다고 주장하지 않습니다.

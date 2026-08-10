@@ -108,6 +108,8 @@ NoSQL은 자동으로 무한 확장된다.
 
 한 서비스에서 여러 저장소를 목적별로 사용하는 방식을 흔히 polyglot persistence라고 부릅니다. 저장소 수가 늘어날수록 동기화·보안·백업·장애 대응 범위도 늘어납니다.
 
+위 표는 데이터베이스 계열별 **절대 보장 목록**이 아닙니다. 같은 Document·Key-Value·Wide-Column 계열 안에서도 트랜잭션, 일관성, 인덱스, 분산 동작은 제품과 배포 구성에 따라 달라질 수 있습니다. 따라서 실제 선택에서는 제품 공식 문서와 작은 PoC로 보장 범위를 다시 확인합니다.
+
 ---
 
 ## 3. 저장소보다 먼저 시스템 역할을 정한다
@@ -190,6 +192,8 @@ TTL이 없는 키도 허용하는가?
 오래된 값을 얼마 동안 허용하는가?
 ```
 
+Key-Value 모델의 중심은 **키를 기준으로 값을 찾는 접근 방식**이며 TTL은 선택 가능한 정책 중 하나입니다. 예를 들어 Redis에서 key expiration은 지정한 시간이 지나 키를 만료시키는 기능이고, eviction은 메모리 한도에 도달했을 때 설정한 정책으로 키를 제거하는 동작입니다. 둘은 같은 개념이 아니므로 “TTL이 곧 eviction”이라고 설명하지 않습니다.
+
 ### 실습 모델의 범위
 
 `nosql_lab.key_value_cache_examples`는 PostgreSQL 일반 테이블입니다.
@@ -255,6 +259,8 @@ expired_at IS NULL OR expired_at > CURRENT_TIMESTAMP
 ```
 
 유연한 스키마는 규칙이 없다는 뜻이 아닙니다. 필드 이름, 타입, 필수 여부, 문서 버전과 마이그레이션 정책을 관리해야 합니다.
+
+문서 단위 원자성도 Document DB 전체의 공통 보장으로 외우지 않습니다. 예를 들어 MongoDB는 단일 문서 쓰기를 원자적으로 처리하고, replica set·sharded cluster에서는 여러 문서를 묶는 트랜잭션도 지원합니다. 다른 Document DB의 지원 범위와 비용은 다를 수 있으므로 제품·배포 구성별로 확인합니다.
 
 ---
 
@@ -342,7 +348,7 @@ instructor_snapshot
 | row data | event_id, event_type, course_id, position_seconds |
 | target query | 특정 학생·날짜의 시간 범위 조회 |
 
-여기서 partition key와 clustering key는 Cassandra 계열을 중심으로 한 개념 예시입니다. 제품마다 키 구조, 정렬, 보조 인덱스와 트랜잭션 범위가 다릅니다.
+여기서 partition key와 clustering key는 Cassandra 계열을 중심으로 한 개념 예시입니다. Apache Cassandra CQL에서는 partition key가 같은 값을 가진 행을 하나의 파티션으로 묶고, clustering column이 그 파티션 안의 행 정렬을 정의합니다. 그래서 먼저 목표 조회를 정하고 그 조회에 맞춰 키를 설계합니다. 제품마다 키 구조, 정렬, 보조 인덱스와 트랜잭션 범위는 다를 수 있습니다.
 
 확인 항목:
 
@@ -459,7 +465,7 @@ nosql_lab.storage_choice_cases
 reset_nosql_lab.sql
 ```
 
-이 실습은 전용 NoSQL 제품의 분산 처리·성능·TTL·복제·장애 동작을 구현하지 않습니다.
+이 실습은 전용 NoSQL 제품의 분산 처리·성능·TTL·복제·장애 동작을 구현하지 않습니다. 교재의 SQL 자동 검증 기준은 **PostgreSQL 16**이며, 전용 NoSQL 제품의 기능 보장은 각 제품 공식 문서와 별도 PoC에서 확인합니다.
 
 ---
 
@@ -553,7 +559,7 @@ ON nosql_lab.course_documents ((metadata #>> '{options,online}'));
 
 `CREATE INDEX IF NOT EXISTS`는 같은 이름의 기존 인덱스 정의가 올바른지 보장하지 않습니다. `06_jsonb_index_candidates.sql`은 인덱스 미존재를 확인한 뒤 생성하고 `pg_indexes`와 카탈로그에서 정의를 검증합니다.
 
-기본 `jsonb_ops`는 다양한 연산을 지원합니다. `jsonb_path_ops`는 포함·JSON path 중심 후보지만 키 존재 `?` 연산은 지원하지 않습니다. 실제 질의에 따라 선택합니다.
+기본 `jsonb_ops`는 `?`, `?|`, `?&`, `@>`, `@?`, `@@` 등 다양한 연산을 지원합니다. `jsonb_path_ops`는 `@>`, `@?`, `@@`를 지원하지만 키 존재 계열 `?`, `?|`, `?&`는 지원하지 않습니다. 실제 질의 형태에 따라 선택합니다.
 
 표본이 3행뿐이므로 인덱스가 있어도 PostgreSQL이 `Seq Scan`을 선택할 수 있습니다. 이 실습의 목적은 성능 향상 증명이 아니라 **질의 형태와 인덱스 구조의 대응**을 확인하는 것입니다.
 
@@ -693,8 +699,12 @@ recorded_amount = NUMERIC(12,0)
 1004 = 취소 / 150000
 1005 = 신청 / 120000
 활성 신청 부분 고유 인덱스 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개 유지
+현재 역할에 ai_database_book CREATE 권한 존재
 nosql_lab 미존재
 ```
+
+Chapter 12는 `security_lab`의 존재를 시작 조건으로 요구하지 않습니다. 앞 장 실습이 남아 있다면 변경하지 않고, 없어도 Chapter 07·08의 canonical `course_project`만 맞으면 시작할 수 있습니다.
 
 스키마와 테이블은 하나의 트랜잭션에서 생성합니다.
 
@@ -705,7 +715,7 @@ nosql_lab 미존재
 `07_nosql_lab_validation.sql`은 다음을 자동 판정합니다.
 
 ```text
-Chapter 07 기준 3/2/3/5
+Chapter 07 기준 3/2/3/5 + 명명 제약조건 15개 + NOT NULL 열 20개
 Chapter 12 기준 3/4/6
 강의 301~303 원본 매핑
 강사 스냅샷 원본 대조

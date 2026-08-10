@@ -32,7 +32,7 @@ SHOW search_path;
 
 | 파일 | 설명 |
 | --- | --- |
-| `01_nosql_lab_schema.sql` | DB·Chapter 07 상태를 검사하고 문서·캐시·의사결정 테이블을 한 트랜잭션에서 생성 |
+| `01_nosql_lab_schema.sql` | DB·Chapter 07 상태·15개 명명 제약조건·20개 NOT NULL·DB CREATE 권한을 검사하고 문서·캐시·의사결정 테이블을 한 트랜잭션에서 생성 |
 | `02_nosql_lab_seed.sql` | Chapter 07 원본과 맞춘 문서 3건, 캐시 4건, 선택 사례 6건 입력·자동 검증 |
 | `03_document_jsonb_queries.sql` | 안정 컬럼·JSONB 조회, 원본 대조, `document_version` 낙관적 잠금과 ROLLBACK |
 | `04_key_value_cache_queries.sql` | Seed 기준 TTL과 실제 현재 상태, 정확 키·미스·무만료 키 시뮬레이션 |
@@ -83,7 +83,11 @@ recorded_amount = NUMERIC(12,0)
 1001 = 완료 / 100000
 1004 = 취소 / 150000
 1005 = 신청 / 120000
+Chapter 07 명명 제약조건 = 15
+Chapter 07 NOT NULL 열 = 20
 ```
+
+`01_nosql_lab_schema.sql`은 `nosql_lab` DDL 전에 현재 역할이 `ai_database_book`에 `CREATE` 권한을 갖는지도 확인합니다.
 
 `recorded_amount`는 신청 시점에 신청 행에 기록한 금액입니다. 결제 승인액·환불 반영 순액·회계 매출을 뜻하지 않으며 별도 결제·환불 원장은 현재 프로젝트 범위 밖입니다.
 
@@ -187,7 +191,7 @@ expired_at IS NULL OR expired_at > created_at
 expired_at IS NULL OR expired_at > CURRENT_TIMESTAMP
 ```
 
-`expired_at IS NULL`은 만료 정책이 없는 키입니다. PostgreSQL 테이블은 자동 TTL 삭제를 구현하지 않습니다.
+`expired_at IS NULL`은 만료 정책이 없는 키입니다. PostgreSQL 테이블은 자동 TTL 삭제를 구현하지 않습니다. 실제 Key-Value 제품에서도 TTL 기반 expiration과 메모리 압박에 따른 eviction은 구분해서 확인합니다. 예를 들어 Redis에서는 `EXPIRE`로 만료 시간을 지정하는 동작과 메모리 한도에서 eviction policy가 키를 제거하는 동작이 별개입니다.
 
 ---
 
@@ -250,7 +254,7 @@ metadata #>> '{options,online}' = 'true'
 
 `CREATE INDEX IF NOT EXISTS`는 같은 이름의 기존 인덱스 정의가 올바른지 보장하지 않으므로 사용하지 않습니다. `06` 파일은 인덱스 미존재를 검사한 뒤 생성하고 정의를 조회합니다.
 
-기본 `jsonb_ops`는 다양한 연산을 지원합니다. `jsonb_path_ops`는 포함·JSON path 중심 후보지만 키 존재 `?` 연산은 지원하지 않으므로 실제 질의에 맞게 선택합니다.
+기본 `jsonb_ops`는 `?`, `?|`, `?&`, `@>`, `@?`, `@@` 등 다양한 연산을 지원합니다. `jsonb_path_ops`는 `@>`, `@?`, `@@`를 지원하지만 `?`, `?|`, `?&`는 지원하지 않으므로 실제 질의에 맞게 선택합니다.
 
 표본이 3행뿐이므로 인덱스가 있어도 `Seq Scan`이 합리적일 수 있습니다.
 
@@ -267,7 +271,7 @@ metadata #>> '{options,online}' = 'true'
 `07_nosql_lab_validation.sql`은 다음을 판정합니다.
 
 ```text
-Chapter 07 기준 3/2/3/5 유지
+Chapter 07 기준 3/2/3/5 + 명명 제약조건 15 + NOT NULL 20 유지
 Chapter 12 기준 3/4/6
 강의 301~303 원본 매핑
 강사 instructor_snapshot 원본 대조

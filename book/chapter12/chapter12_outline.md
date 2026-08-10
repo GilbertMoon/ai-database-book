@@ -33,6 +33,8 @@ Chapter 12는 NoSQL 제품을 나열하는 장이 아니라 데이터의 시스�
 RDBMS와 JSONB로 먼저 해결할 수 있는가?
 파생 저장소를 원본에서 다시 만들 수 있는가?
 Seed 기준 상태와 실제 현재 상태를 구분했는가?
+TTL 기반 expiration과 메모리 압박에 따른 eviction을 구분했는가?
+제품·배포 구성별 트랜잭션과 일관성 보장을 공식 문서에서 확인했는가?
 문서 스냅샷의 원본 식별자가 있는가?
 후보 저장소와 최종 채택 상태를 구분했는가?
 운영·보안·백업·복구 담당과 비용이 준비되어 있는가?
@@ -69,6 +71,7 @@ course_project
 - 활성 신청: 3 / 340000
 - 취소 제외: 4 / 440000
 - 1001 완료/100000, 1004 취소/150000, 1005 신청/120000
+- Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개
 
 nosql_lab
 - course_documents 3
@@ -144,6 +147,8 @@ instructor_snapshot
 - GIN·표현식 B-tree
 - `jsonb_ops`·`jsonb_path_ops`
 - Seed 기준 TTL·현재 TTL
+- expiration과 eviction 구분
+- 제품·배포 구성별 트랜잭션·일관성 보장 확인
 - 후보 저장소·결정 상태
 - PoC
 - 운영·복구 비용
@@ -263,12 +268,13 @@ metadata #>> '{options,online}' = 'true'
 → 표현식 B-tree
 ```
 
-`CREATE INDEX IF NOT EXISTS`는 정의 동일성을 보장하지 않으므로 사용하지 않는다. 작은 표본의 Seq Scan은 오류로 판단하지 않는다.
+`CREATE INDEX IF NOT EXISTS`는 정의 동일성을 보장하지 않으므로 사용하지 않는다. 기본 `jsonb_ops`와 `jsonb_path_ops`가 지원하는 연산자 범위도 실제 질의 형태에 맞춰 구분한다. 작은 표본의 Seq Scan은 오류로 판단하지 않는다.
 
 ## 안전성 원칙
 
 - 기존 스키마를 삭제·변경하지 않는다.
 - 생성·Seed·초기화 파일은 현재 DB와 기준 상태를 실제 검사한다.
+- 생성 전 Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개와 현재 역할의 DB CREATE 권한을 확인한다.
 - 스키마·테이블과 샘플 데이터는 각각 하나의 트랜잭션으로 처리한다.
 - 모든 객체에 `nosql_lab`을 명시한다.
 - 기준 문서 수정은 버전 조건과 ROLLBACK을 사용한다.
