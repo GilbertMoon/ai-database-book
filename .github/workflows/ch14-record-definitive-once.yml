@@ -1,0 +1,33 @@
+name: Record Chapter 14 definitive validation once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ch14-record-definitive-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Record definitive validation
+        run: python scripts/ch14_record_definitive_once.py
+      - name: Remove one-off record script
+        run: rm -f scripts/ch14_record_definitive_once.py
+      - name: Commit validation record
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add notes/chapter14_validation_result.md notes/chapter14_review_checklist.md book/chapter14/chapter14_review_revision.md
+          git add -u scripts/ch14_record_definitive_once.py
+          git commit -m 'Record Chapter 14 final publication validation'
+          git push
