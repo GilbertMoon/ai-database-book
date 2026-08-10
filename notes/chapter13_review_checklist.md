@@ -388,4 +388,30 @@ PostgreSQL 16 전체 01→08 재실행
 protected schema fingerprint·reset 원자성 재확인
 ```
 
-실제 Run ID와 최종 결과는 재검증 완료 후 갱신합니다.
+최종 재검증 결과:
+
+```text
+Workflow: Chapter 13 definitive final validation once
+Run: 1
+Run ID: 31393533155
+Validation workflow commit: acb30219313559cd45d71dad07e584518d691bdb
+Content commit: 114c681775fffc583848c28b65d026a8cf14e485
+PostgreSQL: 16
+Status: completed
+Conclusion: success
+```
+
+추가 항목까지 모두 실제 통과했습니다.
+
+```text
+Chapter 07 구조 계약 15 / 20
+DB CREATE 권한 사전 차단 및 DDL 미실행
+Chapter 13 01→08
+negative/boundary 30/30
+exact final state
+business drift 탐지·복원
+protected fingerprints·sentinels 유지
+unexpected-object reset ROLLBACK
+정상 reset
+reset 후 Chapter 08 gate
+```
