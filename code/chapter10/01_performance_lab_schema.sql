@@ -9,8 +9,7 @@ SELECT current_schema();
 SHOW search_path;
 SHOW server_version;
 
-BEGIN;
-
+-- 잘못된 환경에서는 DDL 트랜잭션을 열기 전에 중단합니다.
 DO $$
 DECLARE
     v_requested_count bigint;
@@ -22,6 +21,8 @@ DECLARE
     v_active_amount numeric(20,0);
     v_non_cancelled_count bigint;
     v_non_cancelled_amount numeric(20,0);
+    v_named_constraint_count bigint;
+    v_not_null_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -118,12 +119,58 @@ BEGIN
             '스키마 생성 중단: Chapter 07 활성 신청 부분 고유 인덱스가 없습니다.';
     END IF;
 
+    IF NOT has_database_privilege(current_user, current_database(), 'CREATE') THEN
+        RAISE EXCEPTION
+            '스키마 생성 중단: 현재 역할 %에는 데이터베이스 %의 CREATE 권한이 없습니다.',
+            current_user, current_database();
+    END IF;
+
+    SELECT COUNT(*) INTO v_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_named_constraint_count <> 15 OR v_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '스키마 생성 중단: Chapter 07 구조 기준과 다릅니다. named_constraints=%, not_null_columns=%',
+            v_named_constraint_count, v_not_null_count;
+    END IF;
+
     IF to_regnamespace('performance_lab') IS NOT NULL THEN
         RAISE EXCEPTION
             '스키마 생성 중단: performance_lab 스키마가 이미 존재합니다. 현재 실험을 검토하거나 reset_performance_lab.sql을 사용하세요.';
     END IF;
 END
 $$;
+
+BEGIN;
 
 CREATE SCHEMA performance_lab;
 

@@ -10,7 +10,7 @@
 
 `course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, 상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  
 `course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, 활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  
-기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
+기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. 또한 Chapter 07의 **명명 제약조건 15개와 `NOT NULL` 열 20개**가 유지되어야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
 
 이 폴더는 기존 프로젝트를 변경하지 않고 `performance_lab`에서 대량 데이터를 생성해 같은 SQL의 인덱스 전후 실행 계획을 비교하는 SQL 파일을 관리합니다.
 
@@ -18,7 +18,7 @@
 
 ## 실행 전 조건
 
-Chapter 07의 `course_project.enrollments`가 기준 5행 상태여야 합니다. Chapter 10은 해당 데이터를 읽기만 하며 변경하지 않습니다.
+Chapter 07의 `course_project.enrollments`가 기준 5행 상태여야 합니다. 명명 제약조건 15개와 `NOT NULL` 열 20개도 유지되어야 하며, `01_performance_lab_schema.sql`을 실행하는 역할에는 `ai_database_book`의 `CREATE` 권한이 필요합니다. Chapter 10은 `course_project`를 읽기만 하며 변경하지 않습니다.
 
 ```text
 course_project: 변경하지 않음
@@ -52,7 +52,7 @@ SHOW search_path;
 
 `03_baseline_explain.sql`은 읽기 전용이므로 데이터베이스 상태만으로 사용자가 기준 계획을 실제 기록했는지 판정할 수 없습니다. 따라서 **학습자는 03 결과를 기록하고**, 저장소 자동 검증은 실제 실행 순서를 `03 → 04`로 고정합니다.
 
-실행 시간은 캐시, JIT, 장비 부하의 영향을 받습니다. 한 번의 시간 숫자만으로 결론을 내리지 않고 **결과 행 동일성, 계획 노드, Index Cond, Buffers와 반복 측정**을 함께 봅니다.
+실행 시간은 캐시, JIT, 장비 부하의 영향을 받습니다. 한 번의 시간 숫자만으로 결론을 내리지 않고 **결과 행 동일성, 계획 노드, Index Cond, Buffers와 반복 측정**을 함께 봅니다. `enable_seqscan`, `enable_indexscan`, `enable_bitmapscan`은 모두 `on`으로 유지하며, 특정 계획을 강제한 결과를 최종 성능 증거로 사용하지 않습니다.
 
 ## 파일 목록
 
@@ -123,6 +123,17 @@ course_id = 1500            → 50행
 course_id=1500 + 수강중     → 15행
 전체 수강중                 → 30001행
 ```
+
+`enrollments` 100,005행 기준 대략적인 반환 비율:
+
+```text
+student_id = 5000                 ≈ 0.010%
+course_id = 1500                  ≈ 0.050%
+course_id = 1500 + 수강중         ≈ 0.015%
+status = 수강중                   ≈ 30.0%
+```
+
+이 비율은 후보 판단의 단서이며 인덱스 사용을 보장하지 않습니다. 실제 실행 계획과 Buffers를 함께 확인합니다.
 
 PC 성능이 낮아 생성 건수를 임의로 줄이면 이 기대값과 자동 검증을 함께 수정해야 합니다. 행 수가 너무 적으면 PostgreSQL이 합리적으로 `Seq Scan`을 선택해 차이가 작게 보일 수 있습니다.
 
@@ -212,7 +223,7 @@ course_id + status
 
 status 단독
 → 일반적으로 제한적
-→ 데이터 분포와 비용에 따라 PostgreSQL PostgreSQL 18+에서의 Skip Scan 가능성 존재
+→ 데이터 분포와 비용에 따라 PostgreSQL 18+에서의 Skip Scan 가능성 존재
 ```
 
 실제 사용 여부는 `Index Cond`와 계획 노드로 확인합니다.

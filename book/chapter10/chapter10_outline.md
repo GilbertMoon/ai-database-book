@@ -8,7 +8,7 @@
 
 `course_project`의 `students / instructors / courses / enrollments = 3 / 2 / 3 / 5`, 상태는 `신청 2 / 수강중 1 / 완료 1 / 취소 1`이어야 합니다.  
 `course_project.enrollments.recorded_amount`는 `NUMERIC(12,0)`이며, 전체 기록 금액은 `590000`, 활성 신청은 `3건 / 340000`, 취소 제외 이력은 `4건 / 440000`입니다.  
-기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
+기준 신청은 `1001 = 완료 / 100000`, `1004 = 취소 / 150000`, `1005 = 신청 / 120000`이고 `uq_course_enrollments_active`가 존재해야 합니다. 또한 Chapter 07의 **명명 제약조건 15개와 `NOT NULL` 열 20개**가 유지되어야 합니다. Chapter 10은 이 상태를 읽기만 하고 변경하지 않습니다.
 
 
 ## 제목
@@ -94,6 +94,17 @@ course_id = 1500             50행
 course_id 1500 + 수강중       15행
 전체 수강중                 30001행
 ```
+
+선택도 기준:
+
+```text
+student_id = 5000                  10 / 100005 ≈ 0.010%
+course_id = 1500                   50 / 100005 ≈ 0.050%
+course_id = 1500 + 수강중          15 / 100005 ≈ 0.015%
+status = 수강중                 30001 / 100005 ≈ 30.0%
+```
+
+낮은 반환 비율은 인덱스 후보 판단의 단서이지 단독 정답이 아니다. 실제 계획·Buffers·정렬·쓰기 비용을 함께 본다.
 
 ## IDENTITY 시작값
 
@@ -205,7 +216,7 @@ idx_performance_enrollments_course_status
 07에서 결과 행과 상태 검증
 ```
 
-인덱스 전후 사이에는 데이터, SQL과 테이블 통계를 변경하지 않는다.
+인덱스 전후 사이에는 데이터, SQL과 테이블 통계를 변경하지 않는다. `enable_seqscan`, `enable_indexscan`, `enable_bitmapscan`도 모두 기본값 `on`으로 유지하며, 특정 계획을 강제하는 설정은 최종 효과 증거로 사용하지 않는다.
 
 ## 운영 인덱스 생성 범위
 

@@ -62,6 +62,8 @@ DECLARE
     v_index_count bigint;
     v_candidate_count bigint;
     v_invalid_count bigint;
+    v_project_named_constraint_count bigint;
+    v_project_not_null_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -76,6 +78,44 @@ BEGIN
        OR to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
         RAISE EXCEPTION
             '최종 검증 실패: Chapter 07 course_project 기준 객체가 없습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_project_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_project_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_project_named_constraint_count <> 15 OR v_project_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07 구조 기준이 변경되었습니다. named_constraints=%, not_null_columns=%',
+            v_project_named_constraint_count, v_project_not_null_count;
     END IF;
 
     IF (SELECT COUNT(*) FROM course_project.students) <> 3
