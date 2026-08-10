@@ -19,6 +19,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Align Cassandra presentation source for deterministic patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('presentation/chapter12/chapter12_theory_lecture_plan.md')
+          text = path.read_text(encoding='utf-8')
+          marker = '새로운 조회 패턴이 생기면 기존 구조 하나로 해결되지 않을 수 있습니다. 별도 파생 테이블이나 파이프라인이 필요할 수 있다는 점을 고려해야 합니다.'
+          bridge = '이 용어는 Cassandra 계열 중심 예시입니다. 다른 제품에 그대로 적용되는 공식이라고 생각하면 안 됩니다.'
+          if bridge not in text:
+              if text.count(marker) != 1:
+                  raise SystemExit('Cassandra presentation marker mismatch')
+              text = text.replace(marker, marker + '\n\n' + bridge, 1)
+              path.write_text(text, encoding='utf-8')
+          PY
       - name: Apply Chapter 12 publication review
         run: python scripts/ch12_final_publication_review_once.py
       - name: Remove one-off patch script
