@@ -1,4 +1,4 @@
-name: Apply Chapter 11 final publication review once
+name: Record Chapter 11 final validation once
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  apply:
+  record:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,13 +19,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply Chapter 11 publication review
-        run: python scripts/ch11_final_publication_review_once.py
-      - name: Keep permanent validation workflow unchanged in this push
-        run: git checkout origin/main -- .github/workflows/validate-chapter11.yml
-      - name: Remove one-off patch script
-        run: rm -f scripts/ch11_final_publication_review_once.py
-      - name: Commit reviewed Chapter 11
+      - name: Record Chapter 11 final validation
+        run: python scripts/ch11_record_final_validation_once.py
+      - name: Regenerate full manuscript
+        run: |
+          python scripts/merge_chapters.py
+          python -m py_compile scripts/merge_chapters.py
+      - name: Remove one-off record script
+        run: rm -f scripts/ch11_record_final_validation_once.py
+      - name: Commit validation record and manuscript
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -34,5 +36,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Refine Chapter 11 final publication content'
+          git commit -m 'Record Chapter 11 final validation'
           git push
