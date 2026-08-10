@@ -1,4 +1,4 @@
-name: Apply Chapter 08 final publication review once
+name: Record Chapter 08 final validation once
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  apply:
+  record:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,11 +19,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply Chapter 08 publication review
-        run: python scripts/ch08_final_publication_review_once_v2.py
-      - name: Remove one-off patch scripts
-        run: rm -f scripts/ch08_final_publication_review_once.py scripts/ch08_final_publication_review_once_v2.py
-      - name: Commit reviewed Chapter 08
+      - name: Record Chapter 08 validation
+        run: python scripts/ch08_finalize_validation_once.py
+      - name: Remove one-off record script
+        run: rm -f scripts/ch08_finalize_validation_once.py
+      - name: Commit Chapter 08 validation record
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -32,5 +32,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Refine Chapter 08 final publication content'
+          git commit -m 'Record Chapter 08 final validation'
           git push
