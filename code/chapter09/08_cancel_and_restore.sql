@@ -55,17 +55,52 @@ FROM transaction_lab.course_inventory
 WHERE course_id = 301
 FOR UPDATE;
 
-UPDATE transaction_lab.enrollments
-SET status = '취소'
-WHERE id = 9001
-  AND status = '수강중'
-RETURNING id, student_id, course_id, status;
+-- 상태 변경에 성공한 신청 행만 좌석 복구의 입력으로 사용합니다.
+-- 같은 취소가 재시도되면 cancelled가 0행이므로 좌석도 다시 증가하지 않습니다.
+WITH cancelled AS (
+    UPDATE transaction_lab.enrollments
+    SET status = '취소'
+    WHERE id = 9001
+      AND status = '수강중'
+    RETURNING id, student_id, course_id, status
+),
+restored AS (
+    UPDATE transaction_lab.course_inventory AS ci
+    SET remaining_seats = ci.remaining_seats + 1
+    FROM cancelled AS e
+    WHERE ci.course_id = e.course_id
+      AND ci.remaining_seats < ci.capacity
+    RETURNING ci.course_id, ci.capacity, ci.remaining_seats
+)
+SELECT
+    e.id AS enrollment_id,
+    e.status,
+    r.course_id,
+    r.capacity,
+    r.remaining_seats
+FROM cancelled AS e
+JOIN restored AS r
+    ON r.course_id = e.course_id;
 
-UPDATE transaction_lab.course_inventory
-SET remaining_seats = remaining_seats + 1
-WHERE course_id = 301
-  AND remaining_seats < capacity
-RETURNING course_id, capacity, remaining_seats;
+-- 동일 취소를 한 번 더 시도해도 상태 변경과 좌석 복구는 모두 0행입니다.
+WITH cancelled AS (
+    UPDATE transaction_lab.enrollments
+    SET status = '취소'
+    WHERE id = 9001
+      AND status = '수강중'
+    RETURNING course_id
+),
+restored AS (
+    UPDATE transaction_lab.course_inventory AS ci
+    SET remaining_seats = ci.remaining_seats + 1
+    FROM cancelled AS e
+    WHERE ci.course_id = e.course_id
+      AND ci.remaining_seats < ci.capacity
+    RETURNING ci.course_id
+)
+SELECT
+    (SELECT COUNT(*) FROM cancelled) AS repeated_cancel_count,
+    (SELECT COUNT(*) FROM restored) AS repeated_restore_count;
 
 -- payment 9901은 신청 당시 결제 기록으로 남아 있습니다.
 -- 실제 환불 업무에는 refund 상태·금액·승인 ID와 별도 보상 처리가 필요합니다.

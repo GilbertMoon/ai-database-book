@@ -28,6 +28,8 @@ students / instructors / courses / enrollments = 3 / 2 / 3 / 5
 1005 = 신청 / 120000
 recorded_amount = NUMERIC(12,0)
 uq_course_enrollments_active 존재
+Chapter 07 명명 제약조건 = 15 / NOT NULL 열 = 20
+현재 역할의 ai_database_book CREATE 권한
 강의 301/302/303 가격 = 100000/120000/150000
 ```
 
@@ -150,7 +152,7 @@ course_project.enrollments = 5
 → COMMIT
 ```
 
-`SELECT ... FOR UPDATE`는 행을 잠그고 최신 상태를 관찰하는 역할입니다. 실제 좌석 확보 성공은 `UPDATE ... WHERE remaining_seats > 0`의 결과와 `RETURNING`으로 판단합니다.
+`SELECT ... FOR UPDATE`는 행을 잠근 상태로 읽고 여러 후속 판단을 이어갈 때 유용합니다. `UPDATE ... WHERE ... RETURNING` 자체도 수정 대상 행에 필요한 잠금을 획득하므로 선행 `FOR UPDATE`가 항상 필수인 것은 아닙니다. 실제 좌석 확보 성공은 `UPDATE ... WHERE remaining_seats > 0`의 결과와 `RETURNING`으로 판단합니다.
 
 좌석 확보가 0행이면 SQL 오류가 아니라 업무상 좌석 부족이며 후속 신청·결제도 0건이어야 합니다.
 
@@ -198,15 +200,17 @@ SET LOCAL lock_timeout = '5s';
 
 ## 취소와 좌석 복구
 
-`08_cancel_and_restore.sql`은 다음을 같은 트랜잭션에서 실행합니다.
+`08_cancel_and_restore.sql`은 취소 UPDATE의 `RETURNING` 결과를 좌석 복구 CTE에 연결합니다.
 
 ```text
-9001 수강중 → 취소
-course 301 remaining 1 → 2
+9001 수강중 → 취소 성공 1행
+→ 성공 행의 course_id만 좌석 복구에 전달
+→ course 301 remaining 1 → 2
+→ 동일 취소 재시도 = 취소 0행 / 좌석 복구 0행
 payment 9901 기록 유지
 ```
 
-선택 실습이므로 마지막에 ROLLBACK하고, 자동 게이트가 9001·9901·좌석이 주 실습 기준으로 정확히 돌아왔는지 확인합니다.
+따라서 이미 취소된 신청을 다시 처리해도 좌석을 두 번 늘리지 않습니다. 선택 실습이므로 마지막에 ROLLBACK하고, 자동 게이트가 9001·9901·좌석이 주 실습 기준으로 정확히 돌아왔는지 확인합니다.
 
 ## 초기화
 

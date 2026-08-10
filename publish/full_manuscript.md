@@ -6393,23 +6393,29 @@ recorded_amount = NUMERIC(12,0)
 취소 제외 신청 이력 = 4 / 440000
 신청 1001·1004·1005의 상태와 기록 금액 일치
 course_project.uq_course_enrollments_active 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개
+현재 역할에 ai_database_book CREATE 권한 존재
 transaction_lab 스키마가 아직 없음
 ```
 
-스키마와 세 테이블 생성은 하나의 트랜잭션 안에서 실행합니다.
+사전 조건은 DDL 트랜잭션을 열기 전에 검사합니다. 잘못된 데이터베이스, Chapter 07 구조 드리프트, 권한 부족이나 기존 `transaction_lab`이 발견되면 스키마 생성을 시작하지 않습니다.
+
+스키마와 세 테이블 생성 자체는 하나의 트랜잭션 안에서 실행합니다.
 
 ```sql
+-- 사전 조건 검사
+
 BEGIN;
 
--- 사전 조건 검사
 -- CREATE SCHEMA
 -- CREATE TABLE
 -- CREATE INDEX
+-- 생성 결과 검증
 
 COMMIT;
 ```
 
-중간의 `CREATE TABLE`이 실패하면 전체 생성 단위가 확정되지 않으므로 일부 객체만 남는 위험을 줄일 수 있습니다.
+중간의 `CREATE TABLE`이나 생성 결과 검증이 실패하면 DDL 트랜잭션을 `ROLLBACK`으로 정리한 뒤 원인을 수정합니다. PostgreSQL에서는 이 장에서 사용하는 `CREATE SCHEMA`, `CREATE TABLE`, `CREATE INDEX` 같은 DDL도 트랜잭션 경계 안에서 함께 취소할 수 있습니다.
 
 ---
 
@@ -6561,7 +6567,7 @@ FOR UPDATE OF ci;
 
 ```text
 SELECT ... FOR UPDATE
-→ 대상 행 잠금과 현재 상태 관찰
+→ 대상 행을 잠근 상태로 읽고 후속 판단 준비
 
 UPDATE ... WHERE remaining_seats > 0
 → 좌석이 실제로 남아 있을 때만 변경
@@ -6569,6 +6575,8 @@ UPDATE ... WHERE remaining_seats > 0
 RETURNING·영향 행 수
 → 좌석 확보 성공 여부 확인
 ```
+
+`UPDATE ... WHERE ... RETURNING` 자체도 수정 대상 행에 필요한 행 잠금을 획득하므로, 단일 조건부 변경만 필요한 경우 선행 `SELECT ... FOR UPDATE`가 항상 필수인 것은 아닙니다. 이 장에서는 좌석 행을 잠근 상태로 먼저 관찰한 뒤 여러 후속 판단을 이어 가는 흐름과 두 세션 대기를 명확히 학습하기 위해 `FOR UPDATE`를 명시합니다.
 
 ### 9.2 조건부 변경과 연결 INSERT
 
@@ -6772,24 +6780,29 @@ Chapter 09 main transaction validation passed
 + remaining_seats 1 증가
 ```
 
-`08_cancel_and_restore.sql`은 신청 9001을 임시로 취소하고 강의 301 좌석을 1개 복구합니다.
+`08_cancel_and_restore.sql`은 신청 9001을 임시로 취소하고 강의 301 좌석을 1개 복구합니다. 중요한 점은 두 UPDATE를 단순히 나란히 실행하는 것이 아니라, **취소에 실제로 성공한 행만 좌석 복구의 입력으로 연결한다**는 것입니다.
 
 ```sql
 BEGIN;
 
-UPDATE transaction_lab.enrollments
-SET status = '취소'
-WHERE id = 9001
-  AND status = '수강중';
-
-UPDATE transaction_lab.course_inventory
-SET remaining_seats = remaining_seats + 1
-WHERE course_id = 301
-  AND remaining_seats < capacity;
+WITH cancelled AS (
+    UPDATE transaction_lab.enrollments
+    SET status = '취소'
+    WHERE id = 9001
+      AND status = '수강중'
+    RETURNING course_id
+)
+UPDATE transaction_lab.course_inventory AS ci
+SET remaining_seats = ci.remaining_seats + 1
+FROM cancelled AS e
+WHERE ci.course_id = e.course_id
+  AND ci.remaining_seats < ci.capacity;
 
 -- 검증
 ROLLBACK;
 ```
+
+같은 취소를 다시 실행하면 첫 UPDATE가 0행이므로 `cancelled`도 비고 좌석 복구 UPDATE도 0행입니다. 이렇게 상태 전이의 성공 결과에 후속 변경을 연결하면 재시도나 동시 실행에서 좌석이 두 번 복구되는 위험을 줄일 수 있습니다. 이것은 외부 시스템 전체의 멱등성을 완성한다는 뜻은 아니며, 실제 서비스에서는 별도의 요청 ID나 멱등성 키도 함께 설계합니다.
 
 선택 실습은 주 실습의 최종 상태를 보존하기 위해 기본적으로 ROLLBACK합니다.
 
@@ -6954,7 +6967,7 @@ AI SQL은 정상 경로뿐 아니라 실패·복구·재실행 경로까지 검�
 6. 기존 `course_project`를 실습용으로 변경한다.
 7. ROLLBACK이 IDENTITY 시퀀스 번호도 되돌린다고 생각한다.
 8. 명시적 ID를 입력하고 IDENTITY 다음 값도 자동으로 이동한다고 생각한다.
-9. 취소 상태만 바꾸고 좌석을 복구하지 않는다.
+9. 취소 UPDATE의 성공 여부와 무관하게 좌석을 별도로 복구해 중복 취소에서 좌석이 두 번 늘어날 수 있게 한다.
 10. Lock 대기를 Deadlock이라고 부른다.
 11. 외부 API를 기다리며 트랜잭션을 오래 유지한다.
 12. 성공 파일을 기준 상태 확인 없이 반복 실행한다.
@@ -7032,9 +7045,9 @@ AI SQL은 정상 경로뿐 아니라 실패·복구·재실행 경로까지 검�
 5. 데이터 변경 CTE와 RETURNING으로 후속 변경을 성공 결과에 연결할 수 있다.
 6. ROLLBACK은 행 변경을 취소하지만 IDENTITY 자동 번호까지 회수하지 않는다.
 7. SQL 오류 후에는 ROLLBACK 또는 SAVEPOINT 복구가 필요하다.
-8. FOR UPDATE와 조건부 UPDATE의 역할을 구분한다.
+8. FOR UPDATE가 항상 필수인 것은 아니며, 잠근 상태의 선행 읽기가 필요한 경우와 조건부 UPDATE 자체의 잠금을 구분한다.
 9. 동시성 결과는 격리 수준과 잠금에 영향을 받는다.
-10. 취소와 좌석 복구도 하나의 트랜잭션으로 처리한다.
+10. 취소 성공 결과에 좌석 복구를 연결해 재시도에서도 한 번만 복구되게 한다.
 11. AI SQL은 정상·실패·복구·재실행 경로를 모두 검토한다.
 ```
 

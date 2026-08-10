@@ -152,6 +152,43 @@ BEGIN
             '최종 검증 실패: Chapter 07 기준 행 수 3/2/3/5가 유지되지 않았습니다.';
     END IF;
 
+    IF (
+        SELECT COUNT(*)
+        FROM pg_constraint
+        WHERE conrelid IN (
+            'course_project.students'::regclass,
+            'course_project.instructors'::regclass,
+            'course_project.courses'::regclass,
+            'course_project.enrollments'::regclass
+        )
+          AND conname IN (
+            'uq_course_students_email',
+            'chk_course_students_name_not_blank',
+            'chk_course_students_email_not_blank',
+            'uq_course_instructors_email',
+            'chk_course_instructors_name_not_blank',
+            'chk_course_instructors_email_not_blank',
+            'chk_course_instructors_specialty_not_blank',
+            'fk_course_courses_instructor',
+            'chk_course_courses_title_not_blank',
+            'chk_course_courses_level',
+            'chk_course_courses_price',
+            'fk_course_enrollments_student',
+            'fk_course_enrollments_course',
+            'chk_course_enrollments_status',
+            'chk_course_enrollments_recorded_amount'
+          )
+    ) <> 15 OR (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE table_schema = 'course_project'
+          AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+          AND is_nullable = 'NO'
+    ) <> 20 THEN
+        RAISE EXCEPTION
+            '최종 검증 실패: Chapter 07 구조 기준 15개 명명 제약조건 / 20개 NOT NULL 열이 유지되지 않았습니다.';
+    END IF;
+
     SELECT
         COUNT(*) FILTER (WHERE status = '신청'),
         COUNT(*) FILTER (WHERE status = '수강중'),

@@ -31,7 +31,7 @@ Chapter 07·08의 `course_project` 데이터를 보호하면서 별도 `transact
 어떤 변경들이 하나의 업무 단위인가?
 제약조건과 트랜잭션은 무엇을 각각 보장하는가?
 좌석 UPDATE가 실제로 1행을 변경했는가?
-FOR UPDATE와 조건부 UPDATE의 역할은 어떻게 다른가?
+FOR UPDATE와 조건부 UPDATE의 역할은 어떻게 다르며, FOR UPDATE가 항상 필요한가?
 신청과 결제가 정확히 연결되었는가?
 FK와 UNIQUE가 보장하지 못하는 최소 한 건 규칙은 무엇인가?
 0행 반환과 SQL 오류는 어떻게 다른가?
@@ -47,14 +47,14 @@ ROLLBACK은 IDENTITY 자동 번호도 되돌리는가?
 - ACID의 기본 의미와 대표적인 오해를 설명할 수 있다.
 - 제약조건·고유 인덱스·트랜잭션·업무 검증의 역할을 구분할 수 있다.
 - 사전 조건 검사로 잘못된 실행 위치와 재실행을 차단할 수 있다.
-- `SELECT ... FOR UPDATE`와 조건부 UPDATE의 역할을 구분할 수 있다.
+- `SELECT ... FOR UPDATE`와 조건부 UPDATE의 역할을 구분하고 선행 잠금 조회가 필요한 경우를 설명할 수 있다.
 - 데이터 변경 CTE와 `RETURNING`으로 후속 변경을 성공 결과에 연결할 수 있다.
 - COMMIT 전 자동 판정 구문을 사용할 수 있다.
 - UPDATE 0행과 SQL 오류를 구분할 수 있다.
 - 명시적 ID와 IDENTITY 자동 번호의 ROLLBACK 차이를 설명할 수 있다.
 - `SAVEPOINT`, `ROLLBACK TO SAVEPOINT`의 기본 역할을 설명할 수 있다.
 - 동일 학생·강의의 중복 활성 신청을 차단할 수 있다.
-- 취소와 좌석 복구를 같은 트랜잭션으로 처리할 수 있다.
+- 취소 성공 결과에 좌석 복구를 연결해 중복 취소의 이중 복구를 막을 수 있다.
 - READ COMMITTED 기준 Lock 대기와 Deadlock을 구분할 수 있다.
 - 외부 결제와 DB 트랜잭션의 경계를 검토할 수 있다.
 - AI가 만든 트랜잭션 SQL의 정상·실패·복구·재실행 경로를 검토할 수 있다.
@@ -113,6 +113,8 @@ recorded_amount = NUMERIC(12,0)
 취소 제외 = 4 / 440000
 1001 완료 / 100000, 1004 취소 / 150000, 1005 신청 / 120000
 uq_course_enrollments_active 존재
+Chapter 07 명명 제약조건 15개 / NOT NULL 열 20개
+현재 역할의 ai_database_book CREATE 권한
 transaction_lab 미생성 상태
 ```
 
@@ -257,7 +259,8 @@ code/chapter09/
 - 좌석 UPDATE 0행이면 후속 신청·결제를 만들지 않는다.
 - SQL 오류 후 `ROLLBACK` 또는 SAVEPOINT 복구를 수행한다.
 - 명시적 ID와 IDENTITY 자동값을 구분한다.
-- 취소와 좌석 복구를 같은 트랜잭션으로 처리한다.
+- 취소 UPDATE가 성공한 행에만 좌석 복구를 연결한다.
+- 동일 취소 재시도에서 상태 변경·좌석 복구가 모두 0행인지 확인한다.
 - 동시성 실습은 두 세션에서 선택 실행하고 timeout 후 ROLLBACK한다.
 - Deadlock 유발 SQL은 자동 실행하지 않는다.
 - 초기화는 현재 DB를 검증한 뒤 `transaction_lab`만 삭제한다.
