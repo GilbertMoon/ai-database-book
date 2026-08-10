@@ -21,6 +21,8 @@ jobs:
           python-version: '3.12'
       - name: Apply Chapter 11 publication review
         run: python scripts/ch11_final_publication_review_once.py
+      - name: Keep permanent validation workflow unchanged in this push
+        run: git checkout origin/main -- .github/workflows/validate-chapter11.yml
       - name: Remove one-off patch script
         run: rm -f scripts/ch11_final_publication_review_once.py
       - name: Commit reviewed Chapter 11
