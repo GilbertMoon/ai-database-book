@@ -8,6 +8,9 @@ SELECT current_schema();
 SHOW search_path;
 
 DO $$
+DECLARE
+    v_named_constraint_count bigint;
+    v_not_null_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION '선택 테스트 중단: ai_database_book에 연결하세요.';
@@ -116,8 +119,6 @@ $$;
 
 DO $$
 DECLARE
-    v_named_constraint_count bigint;
-    v_not_null_count bigint;
     v_total numeric;
     v_non_cancelled numeric;
 BEGIN
