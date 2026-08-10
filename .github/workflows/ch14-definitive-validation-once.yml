@@ -1,0 +1,225 @@
+name: Chapter 14 definitive final validation once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ch14-definitive-validation-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Final publication static checks
+        shell: bash
+        run: |
+          python -m py_compile code/chapter14/python/*.py scripts/merge_chapters.py
+          node --check presentation/chapter14/chapter14_slides.js
+          node --check presentation/chapter14/chapter14_navigation.js
+          node --check presentation/chapter14/chapter14_player.js
+          node --check presentation/chapter14/chapter14_script.js
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+          chapter=Path('book/chapter14/chapter14.md').read_text(encoding='utf-8')
+          activity=Path('book/chapter14/chapter14_activity.md').read_text(encoding='utf-8')
+          theory=Path('presentation/chapter14/chapter14_theory_lecture_plan.md').read_text(encoding='utf-8')
+          image=Path('images/chapter14/README.md').read_text(encoding='utf-8')
+          script_html=Path('presentation/chapter14/chapter14_script.html').read_text(encoding='utf-8')
+          vu=Path('code/chapter14/python/validation_utils.py').read_text(encoding='utf-8')
+          p3=Path('code/chapter14/python/03_pandas_analysis.py').read_text(encoding='utf-8')
+          p4=Path('code/chapter14/python/04_result_validation.py').read_text(encoding='utf-8')
+          s1=Path('code/chapter14/01_analysis_lab_schema.sql').read_text(encoding='utf-8')
+          s8=Path('code/chapter14/08_analysis_lab_validation.sql').read_text(encoding='utf-8')
+          manuscript=Path('publish/full_manuscript.md').read_text(encoding='utf-8')
+          assert [int(x) for x in re.findall(r'^##\s+(\d+)\.\s+',chapter,re.M)] == list(range(1,33))
+          assert '| 제약조건 | 20개 |' in activity and '| 제약조건 | 21개 |' not in activity
+          assert '취소는 기준 데이터에서 0으로 기록됩니다' not in theory
+          assert '신청 시점 기록 금액 합계 3,210,000' in image
+          assert '결제금액 합계 3,210,000' not in image
+          assert 'data-script-content-enhancer="off"' in script_html
+          for token in ['EXPECTED_RECORDED_AMOUNT_SUM = 3210000','AMOUNT_SEMANTICS','expected_recorded_amount_sum','amount_semantics']:
+              assert token in vu, token
+          for text in (p3,p4):
+              assert 'ANALYSIS_START_DATE' in text and 'ANALYSIS_END_DATE_EXCLUSIVE' in text and 'inclusive="left"' in text
+              assert '"2026-06-01"' not in text
+          for token in ["has_database_privilege(current_user, current_database(), 'CREATE')",'project_named_constraint_count <> 15','project_not_null_count <> 20','uq_course_enrollments_active']:
+              assert token in s1, token
+          for token in ['project_named_constraint_count <> 15','project_not_null_count <> 20','uq_course_enrollments_active']:
+              assert token in s8, token
+          assert 'Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 3210000' in chapter
+          assert 'Chapter 14. SQL 데이터 분석과 Python 확장' in manuscript
+          print('Chapter 14 final publication static checks passed')
+          PY
+
+      - name: Install PostgreSQL client and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          python -m pip install -r code/chapter14/python/requirements.txt
+          psql --version
+
+      - name: Create test database and verify wrong DB guard
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE ai_database_book;"
+          test "$(psql -d postgres -Atc "SELECT current_setting('server_version_num')::int/10000")" = "16"
+          set +e
+          psql -v ON_ERROR_STOP=1 -d postgres -f code/chapter14/01_analysis_lab_schema.sql >/tmp/ch14_wrong_db.log 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q ai_database_book /tmp/ch14_wrong_db.log
+
+      - name: Build Chapter 07 and Chapter 08 canonical source
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter07/01_course_project_schema.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter07/02_course_project_seed.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter07/03_course_project_changes.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter07/04_course_project_validation.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/03_join_aggregation_validation.sql
+
+      - name: Verify inherited structure and preflight guards
+        shell: bash
+        run: |
+          structure="$(psql -d ai_database_book -Atc "SELECT (SELECT COUNT(*) FROM pg_constraint WHERE conrelid IN ('course_project.students'::regclass,'course_project.instructors'::regclass,'course_project.courses'::regclass,'course_project.enrollments'::regclass) AND conname IN ('uq_course_students_email','chk_course_students_name_not_blank','chk_course_students_email_not_blank','uq_course_instructors_email','chk_course_instructors_name_not_blank','chk_course_instructors_email_not_blank','chk_course_instructors_specialty_not_blank','fk_course_courses_instructor','chk_course_courses_title_not_blank','chk_course_courses_level','chk_course_courses_price','fk_course_enrollments_student','fk_course_enrollments_course','chk_course_enrollments_status','chk_course_enrollments_recorded_amount'))||':'||(SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='course_project' AND table_name IN ('students','instructors','courses','enrollments') AND is_nullable='NO');")"
+          echo "Chapter 07 structure contract: $structure"
+          test "$structure" = '15:20'
+
+          psql -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
+          CREATE ROLE ch14_no_create LOGIN PASSWORD 'chapter14-test';
+          GRANT CONNECT ON DATABASE ai_database_book TO ch14_no_create;
+          REVOKE CREATE ON DATABASE ai_database_book FROM ch14_no_create;
+          SQL
+          set +e
+          PGUSER=ch14_no_create PGPASSWORD=chapter14-test psql -h localhost -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter14/01_analysis_lab_schema.sql >/tmp/ch14_no_create.log 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q 'CREATE 권한' /tmp/ch14_no_create.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('analysis_lab') IS NULL")" = t
+
+          set +e
+          psql -v ON_ERROR_STOP=1 -d ai_database_book > /tmp/ch14_readonly.log 2>&1 <<'SQL'
+          BEGIN TRANSACTION READ ONLY;
+          \i code/chapter14/01_analysis_lab_schema.sql
+          SQL
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q '읽기 전용' /tmp/ch14_readonly.log
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('analysis_lab') IS NULL")" = t
+
+      - name: Capture protected state
+        shell: bash
+        run: |
+          psql -d ai_database_book -Atc "SELECT md5((SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students s)||(SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors i)||(SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses c)||(SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments e));" >/tmp/ch14_fp.txt
+          psql -v ON_ERROR_STOP=1 -d ai_database_book <<'SQL'
+          CREATE SCHEMA transaction_lab; CREATE TABLE transaction_lab.keep_me(id int PRIMARY KEY); INSERT INTO transaction_lab.keep_me VALUES(1);
+          CREATE SCHEMA performance_lab; CREATE TABLE performance_lab.keep_me(id int PRIMARY KEY); INSERT INTO performance_lab.keep_me VALUES(1);
+          CREATE SCHEMA security_lab; CREATE TABLE security_lab.keep_me(id int PRIMARY KEY); INSERT INTO security_lab.keep_me VALUES(1);
+          CREATE SCHEMA nosql_lab; CREATE TABLE nosql_lab.keep_me(id int PRIMARY KEY); INSERT INTO nosql_lab.keep_me VALUES(1);
+          CREATE SCHEMA ai_review_lab; CREATE TABLE ai_review_lab.keep_me(id int PRIMARY KEY); INSERT INTO ai_review_lab.keep_me VALUES(1);
+          SQL
+
+      - name: Run Chapter 14 SQL 01 through 08
+        run: |
+          for f in 01_analysis_lab_schema.sql 02_analysis_lab_seed.sql 03_data_quality_checks.sql 04_summary_analysis.sql 05_period_category_analysis.sql 06_analysis_dataset.sql 07_analysis_validation.sql 08_analysis_lab_validation.sql; do
+            psql -v ON_ERROR_STOP=1 -d ai_database_book -f "code/chapter14/$f"
+          done
+
+      - name: Verify exact SQL state and drift detection
+        shell: bash
+        run: |
+          test "$(psql -d ai_database_book -Atc "SELECT (SELECT COUNT(*) FROM analysis_lab.students)||':'||(SELECT COUNT(*) FROM analysis_lab.instructors)||':'||(SELECT COUNT(*) FROM analysis_lab.courses)||':'||(SELECT COUNT(*) FROM analysis_lab.enrollments)||':'||(SELECT COUNT(*) FROM analysis_lab.enrollment_analysis_dataset)||':'||(SELECT SUM(recorded_amount) FROM analysis_lab.enrollments)")" = '8:3:5:24:24:3210000'
+          test "$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM pg_constraint WHERE connamespace='analysis_lab'::regnamespace")" = '20'
+          test "$(psql -d ai_database_book -Atc "SELECT COUNT(*)||':'||ROUND(AVG(completion_days),2)||':'||MIN(completion_days)||':'||MAX(completion_days) FROM analysis_lab.enrollment_analysis_dataset WHERE is_completed")" = '12:25.00:18:36'
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -c "UPDATE analysis_lab.enrollments SET recorded_amount=recorded_amount+1 WHERE id=1001;"
+          set +e
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter14/08_analysis_lab_validation.sql >/tmp/ch14_drift.log 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -c "UPDATE analysis_lab.enrollments SET recorded_amount=recorded_amount-1 WHERE id=1001;"
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter14/08_analysis_lab_validation.sql
+
+      - name: Run PostgreSQL and CSV Python cross-validation
+        shell: bash
+        env:
+          PGDATABASE: ai_database_book
+          PGPASSFILE: /tmp/ch14.pgpass
+        run: |
+          printf 'localhost:5432:ai_database_book:postgres:postgres\n' >/tmp/ch14.pgpass
+          chmod 600 /tmp/ch14.pgpass
+          python code/chapter14/python/02_load_postgresql.py --export-csv /tmp/ch14.csv --manifest /tmp/ch14.manifest.json
+          python - <<'PY'
+          import json
+          m=json.load(open('/tmp/ch14.manifest.json',encoding='utf-8'))
+          assert m['row_count']==24
+          assert m['expected_recorded_amount_sum']==3210000
+          assert m['amount_semantics']=='recorded_amount = enrollment-time recorded amount; cancellation does not zero it'
+          assert m['transaction_read_only']=='on'
+          print('manifest contract passed')
+          PY
+          python code/chapter14/python/01_load_csv.py --csv /tmp/ch14.csv --manifest /tmp/ch14.manifest.json --require-manifest
+          python code/chapter14/python/03_pandas_analysis.py --source postgresql --chart /tmp/ch14_pg.png
+          python code/chapter14/python/04_result_validation.py --source postgresql
+          python code/chapter14/python/03_pandas_analysis.py --source csv --csv /tmp/ch14.csv --chart /tmp/ch14_csv.png
+          python code/chapter14/python/04_result_validation.py --source csv --csv /tmp/ch14.csv --manifest /tmp/ch14.manifest.json --reference code/chapter14/python/reference_metrics.json
+          test -s /tmp/ch14_pg.png && test -s /tmp/ch14_csv.png
+          python - <<'PY'
+          import pandas as pd
+          d=pd.read_csv('/tmp/ch14.csv'); d.loc[0,'recorded_amount']=int(d.loc[0,'recorded_amount'])+1; d.to_csv('/tmp/ch14_bad.csv',index=False)
+          PY
+          set +e
+          python code/chapter14/python/01_load_csv.py --csv /tmp/ch14_bad.csv --manifest /tmp/ch14.manifest.json --require-manifest >/tmp/ch14_sha.log 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q 'SHA-256' /tmp/ch14_sha.log
+
+      - name: Verify reset atomicity and protected state
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -c "CREATE TABLE analysis_lab.keep_me(id int PRIMARY KEY); INSERT INTO analysis_lab.keep_me VALUES(1);"
+          set +e
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter14/reset_analysis_lab.sql >/tmp/ch14_reset_guard.log 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q '예상 밖' /tmp/ch14_reset_guard.log
+          test "$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM analysis_lab.enrollments")" = 24
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -c "DROP TABLE analysis_lab.keep_me;"
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter14/reset_analysis_lab.sql
+          test "$(psql -d ai_database_book -Atc "SELECT to_regnamespace('analysis_lab') IS NULL")" = t
+          psql -d ai_database_book -Atc "SELECT md5((SELECT jsonb_agg(to_jsonb(s) ORDER BY id)::text FROM course_project.students s)||(SELECT jsonb_agg(to_jsonb(i) ORDER BY id)::text FROM course_project.instructors i)||(SELECT jsonb_agg(to_jsonb(c) ORDER BY id)::text FROM course_project.courses c)||(SELECT jsonb_agg(to_jsonb(e) ORDER BY id)::text FROM course_project.enrollments e));" >/tmp/ch14_fp_after.txt
+          cmp /tmp/ch14_fp.txt /tmp/ch14_fp_after.txt
+          for s in transaction_lab performance_lab security_lab nosql_lab ai_review_lab; do test "$(psql -d ai_database_book -Atc "SELECT COUNT(*) FROM ${s}.keep_me")" = 1; done
+          psql -v ON_ERROR_STOP=1 -d ai_database_book -f code/chapter08/00_check_course_project.sql
+          echo 'Chapter 14 definitive PostgreSQL 16 and Python validation passed'
