@@ -4,7 +4,7 @@
 
 이 문서는 Chapter 01 본문과 독자용 보조 자료에서 사용하는 도식의 목적, 파일명과 현재 사용 상태를 관리합니다.
 
-Chapter 01은 데이터베이스를 처음 접하는 독자를 대상으로 하므로 장식용 이미지보다 **저장 방식 선택, AI 결과 검증과 책 전체 학습 흐름**을 중심으로 구성합니다.
+Chapter 01은 데이터베이스를 처음 접하는 독자를 대상으로 하므로 장식용 이미지보다 **저장 방식 선택과 AI 결과 검증**을 중심으로 구성합니다. 책 전체 학습 흐름은 Overview에서 설명합니다.
 
 ---
 
@@ -23,13 +23,12 @@ SVG와 같은 이름의 Mermaid 원본을 함께 관리한다.
 
 ## 최종 본문 사용 도식
 
-현재 `book/chapter01/chapter01.md`에서 사용하는 도식은 세 개입니다.
+현재 `book/chapter01/chapter01.md`에서 사용하는 도식은 두 개입니다.
 
 | 본문 그림 | 파일명 | 도식 제목 | 본문 위치 | 핵심 목적 |
 | --- | --- | --- | --- | --- |
 | 그림 1-1 | `ch01_01_storage_options.svg` | 데이터 특성에 따른 저장 방식 선택 흐름 | 파일·스프레드시트·DBMS 중심 관리 | 관계·동시성·정확성·복구를 기준으로 선택 |
-| 그림 1-2 | `ch01_04_ai_result_verification_cycle.svg` | AI 생성 결과 검증 사이클 | AI와 사람의 역할 | 요구사항·실행·비교·수정·기록 흐름 |
-| 그림 1-3 | `ch01_03_ai_db_learning_flow.svg` | AI 시대의 데이터베이스 작업 흐름 | 책 전체 학습 흐름 | 개념부터 프로젝트까지의 검증 중심 학습 |
+| 그림 1-2 | `ch01_04_ai_result_verification_cycle.svg` | AI 생성 결과 검증 사이클 | AI가 도울 수 있는 일과 사람의 검증 | 요구사항·실행·비교·수정·기록 흐름 |
 
 파일 번호와 본문 그림 번호가 다른 경우에는 **본문에 실제 등장하는 순서**를 그림 번호 기준으로 사용합니다.
 
@@ -42,6 +41,7 @@ SVG와 같은 이름의 Mermaid 원본을 함께 관리한다.
 | 파일명 | 기존 목적 | 현재 상태 |
 | --- | --- | --- |
 | `ch01_02_db_need_decision_flow.svg` | 데이터베이스 필요 여부 판단 | 그림 1-1과 내용 중복으로 미사용 보관 |
+| `ch01_03_ai_db_learning_flow.svg` | AI 시대의 데이터베이스 작업 흐름 | Overview의 책 전체 학습 안내와 중복되어 Chapter 01 본문 미사용 보관 |
 | `ch01_05_online_course_data_relationship.svg` | 온라인 강의 관계 | Chapter 05·07의 구체적 설계 도식과 중복 가능해 미사용 보관 |
 | `ch01_06_storage_choice_matrix.svg` | 저장 방식 선택·확장 | 본문 표·그림 1-1과 중복으로 미사용 보관 |
 
@@ -73,9 +73,9 @@ AI는 초안을 빠르게 만들지만,
 
 ---
 
-## 그림 1-3 책 전체 흐름 구성
+## 보관 도식: 책 전체 학습 흐름
 
-`ch01_03_ai_db_learning_flow.svg`는 도구 이름을 단순 나열하지 않고 다음 작업을 중심으로 구성합니다.
+`ch01_03_ai_db_learning_flow.svg`는 최종 Chapter 01 본문에서는 사용하지 않지만 자산으로 보관합니다. 도식은 도구 이름을 단순 나열하지 않고 다음 작업을 중심으로 구성합니다.
 
 ```text
 요구사항 확인
@@ -96,7 +96,7 @@ AI는 초안을 빠르게 만들지만,
 | --- | --- | --- |
 | `ch01_01_storage_options.mmd` | `ch01_01_storage_options.svg` | 사용 |
 | `ch01_02_db_need_decision_flow.mmd` | `ch01_02_db_need_decision_flow.svg` | 미사용 보관 |
-| `ch01_03_ai_db_learning_flow.mmd` | `ch01_03_ai_db_learning_flow.svg` | 사용 |
+| `ch01_03_ai_db_learning_flow.mmd` | `ch01_03_ai_db_learning_flow.svg` | 미사용 보관 |
 | `ch01_04_ai_result_verification_cycle.mmd` | `ch01_04_ai_result_verification_cycle.svg` | 사용 |
 | `ch01_05_online_course_data_relationship.mmd` | `ch01_05_online_course_data_relationship.svg` | 미사용 보관 |
 | `ch01_06_storage_choice_matrix.mmd` | `ch01_06_storage_choice_matrix.svg` | 미사용 보관 |
@@ -113,5 +113,5 @@ AI보다 사람의 판단·실행·검증이 중심에 있는가?
 상자·텍스트·배지·연결선이 겹치지 않는가?
 전자책 화면에서 축소해도 읽을 수 있는가?
 SVG와 Mermaid 원본이 같은 논리를 표현하는가?
-GitHub·Word·PDF·eBook에서 그림 1-1~1-3이 정상 표시되는가?
+GitHub·Word·PDF·eBook에서 그림 1-1~1-2가 정상 표시되는가?
 ```
