@@ -117,7 +117,7 @@ members_nf 한 행
 = 회원 한 명
 
 books_nf 한 행
-= 이 장에서 대여 대상으로 관리하는 도서 한 건
+= 이 장에서 대여 대상으로 취급하는 간소화된 도서 항목 한 건
 
 loans_nf 한 행
 = 특정 회원이 특정 도서를 대여한 사건 한 건
@@ -148,7 +148,7 @@ course_id → course_name
 (student_id, course_id) → grade
 ```
 
-단일 열 후보키만 있는 경우 부분 종속은 발생하지 않는다.
+모든 후보키가 단일 열인 경우 부분 종속은 발생하지 않는다.
 
 ### 3NF
 
@@ -161,7 +161,7 @@ course_id → course_name
 | ID | 확정 규칙 | 구현 |
 | --- | --- | --- |
 | C-01 | 정확히 같은 이메일 문자열 중복 금지 | `UNIQUE (email)` |
-| C-02 | 같은 ISBN 문자열 중복 금지 | `UNIQUE (isbn)` |
+| C-02 | ISBN 필수·같은 ISBN 문자열 중복 금지 | `NOT NULL` + `UNIQUE (isbn)` |
 | C-03 | 회원 이름·도서 제목 공백 문자열 금지 | `CHECK` |
 | C-04 | `due_at >= borrowed_at` | `CHECK` |
 | C-05 | `returned_at IS NULL OR returned_at >= borrowed_at` | `CHECK` |
@@ -676,3 +676,18 @@ Word·PDF·eBook SVG 최종 가독성
 ```
 
 실제 확인하지 않은 항목은 “통과”로 표시하지 않는다.
+
+
+---
+
+## 최종 출판 검수 추가 반영 (2026-08-10)
+
+- Chapter 05에서 `isbn`의 필수 여부를 미확정으로 둔 흐름과 연결해 C-02를 **ISBN 필수 + 동일 문자열 중복 금지**로 명확히 했다.
+- `NOT NULL`을 “값 생략 금지”가 아니라 최종 저장값의 `NULL` 금지로 바로잡고 `DEFAULT`와의 관계를 보완했다.
+- PostgreSQL 기본 `UNIQUE`의 NULL 처리와 `NULLS NOT DISTINCT` 선택지를 구분했다.
+- 1NF·2NF·3NF 설명을 반복 그룹·부분 종속·전이 종속 기준으로 정밀화했다.
+- `CHECK`는 교차 행 검증 용도로 사용하지 않는다는 PostgreSQL 기준을 명시하고, C-08 부분 고유 인덱스를 별도 인덱스 객체로 설명했다.
+- `RESTRICT`와 `NO ACTION`의 지연 가능성 차이를 보완했다.
+- 01 생성 SQL에 `public`의 `USAGE`·`CREATE` 권한 검사를 추가했다.
+- 05 테스트에 C-02 ISBN `NOT NULL` 실패 사례와 NOT NULL 10열 시작 상태 검증을 추가했다.
+- 실습 파일 링크와 Chapter 06 독자 워크북 링크를 출판용 Markdown 링크로 정리했다.

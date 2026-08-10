@@ -66,6 +66,7 @@ reset_normalization.sql
 6. 번호 파일과 호환 파일을 중복 실행하지 않는다.
 7. 오류 테스트는 한 번에 하나씩 실행한다.
 8. 오류 후 기준 데이터가 유지되는지 확인한다.
+9. 01에서 테이블을 생성한 사용자와 같은 PostgreSQL 역할로 02~05를 실행한다.
 ```
 
 현재 스키마는 환경에 따라 `public`이 아닐 수 있습니다. 주요 객체는 `public.members_nf`처럼 스키마를 명시하므로 `current_schema() = public`을 실행 조건으로 강제하지 않습니다.
@@ -78,7 +79,7 @@ reset_normalization.sql
 | --- | --- |
 | `library_records_raw` | 대여 사건과 회원·도서 현재 사실이 섞인 한 건 |
 | `members_nf` | 회원 한 명 |
-| `books_nf` | 이 장에서 대여 대상으로 관리하는 도서 한 건 |
+| `books_nf` | 이 장에서 대여 대상으로 취급하는 간소화된 도서 항목 한 건 |
 | `loans_nf` | 특정 회원이 특정 도서를 대여한 사건 한 건 |
 
 `books_nf`는 제목·판본·실제 복본을 완전히 분리한 운영 모델이 아닙니다. 동일 ISBN 복본과 여러 저자는 이번 장의 범위 밖입니다.
@@ -175,7 +176,7 @@ JOIN은 정규화 후에도 원래 업무 결과를 재구성할 수 있는지 �
 | ID | 규칙 | 구현 |
 | --- | --- | --- |
 | C-01 | 정확히 같은 이메일 문자열 중복 금지 | `UNIQUE (email)` |
-| C-02 | 같은 ISBN 문자열 중복 금지 | `UNIQUE (isbn)` |
+| C-02 | ISBN 필수·같은 문자열 중복 금지 | `NOT NULL` + `UNIQUE (isbn)` |
 | C-03 | 공백 이름·제목 금지 | `CHECK` |
 | C-04 | 반납예정일은 대여일 이상 | `CHECK` |
 | C-05 | 실제반납일은 `NULL` 또는 대여일 이상 | `CHECK` |
@@ -193,6 +194,7 @@ JOIN은 정규화 후에도 원래 업무 결과를 재구성할 수 있는지 �
 
 ```text
 현재 DB·쓰기 가능 여부 확인
+→ Chapter 05에서 확정된 필수값과 Chapter 06의 새 정책을 기존 데이터에서 검사
 → 정확한 대상 테이블의 기존 규칙 존재 여부 확인
 → NULL·중복·공백·날짜·고아 참조·활성 중복 검사
 → ALTER COLUMN SET NOT NULL
@@ -238,6 +240,7 @@ published_year = NULL
 
 ```text
 NOT NULL 위반
+ISBN NULL 위반
 이메일·ISBN UNIQUE 위반
 공백 이름·제목 CHECK 위반
 존재하지 않는 회원 FOREIGN KEY 위반

@@ -163,7 +163,7 @@ ALTER TABLE public.members_nf
     ADD CONSTRAINT chk_members_nf_name_not_blank
         CHECK (char_length(trim(name)) > 0);
 
--- C-02·C-03: 도서 필수값·ISBN 고유성·공백 제목 금지
+-- Chapter 05 기존 필수값 + C-02·C-03: 도서 제목·저자 필수, ISBN 필수·고유, 공백 제목 금지
 ALTER TABLE public.books_nf
     ALTER COLUMN title SET NOT NULL,
     ALTER COLUMN author SET NOT NULL,

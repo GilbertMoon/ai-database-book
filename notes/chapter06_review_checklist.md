@@ -44,7 +44,7 @@ members_nf
 → 회원 한 명
 
 books_nf
-→ 이 장에서 대여 대상으로 관리하는 도서 한 건
+→ 이 장에서 대여 대상으로 취급하는 간소화된 도서 항목 한 건
 
 loans_nf
 → 특정 회원이 특정 도서를 대여한 사건 한 건
@@ -73,7 +73,7 @@ loans_nf
 | 규칙 | 구현 | 상태 |
 | --- | --- | --- |
 | C-01 동일 이메일 문자열 중복 금지 | `UNIQUE (email)` | PostgreSQL 실제 검증 |
-| C-02 동일 ISBN 문자열 중복 금지 | `UNIQUE (isbn)` | PostgreSQL 실제 검증 |
+| C-02 ISBN 필수·동일 문자열 중복 금지 | `NOT NULL` + `UNIQUE (isbn)` | PostgreSQL 검증 대상 |
 | C-03 공백 이름·제목 금지 | `CHECK` | PostgreSQL 실제 검증 |
 | C-04 `due_at >= borrowed_at` | `CHECK` | PostgreSQL 실제 검증 |
 | C-05 `returned_at IS NULL OR returned_at >= borrowed_at` | `CHECK` | PostgreSQL 실제 검증 |
@@ -119,6 +119,7 @@ BCNF·4NF·5NF 상세
 
 - [x] 현재 DB가 `ai_database_book`인지 검사
 - [x] `public` 스키마 존재 검사
+- [x] `public` 스키마 `USAGE`·`CREATE` 권한 검사
 - [x] 읽기 전용 연결 검사
 - [x] Chapter 06 네 테이블 미존재 검사
 - [x] `BEGIN`·`COMMIT`으로 네 `CREATE TABLE`을 묶음
@@ -231,6 +232,7 @@ loans 3
 - [x] NOT NULL
 - [x] 이메일 UNIQUE
 - [x] ISBN UNIQUE
+- [ ] ISBN NOT NULL — 최종 출판 검수에서 추가, 최신 CI 재검증 대상
 - [x] 공백 회원 CHECK
 - [x] 공백 도서 CHECK
 - [x] 존재하지 않는 회원 FK
@@ -416,3 +418,18 @@ notes/chapter06_validation_result.md
 - [ ] 최종 편집 분량 23~26페이지 여부
 
 실제 확인하지 않은 항목은 “통과”로 표시하지 않는다.
+
+
+---
+
+## 19. 2026-08-10 최종 출판 보완
+
+- [x] Chapter 05의 ISBN NULL 허용 상태와 Chapter 06 정책 확정 흐름 연결
+- [x] C-02를 ISBN `NOT NULL` + `UNIQUE`로 문서·SQL 테스트에 일치시킴
+- [x] `NOT NULL`/`DEFAULT` 설명 교정
+- [x] PostgreSQL 기본 `UNIQUE` NULL 동작과 `NULLS NOT DISTINCT` 구분
+- [x] 1NF·2NF·3NF 표현 정밀화
+- [x] `CHECK`의 교차 행 검증 한계와 부분 고유 인덱스 역할 구분
+- [x] `RESTRICT`와 `NO ACTION` 차이 보완
+- [x] 생성 SQL의 `public USAGE/CREATE` 권한 검사 추가
+- [ ] ISBN NULL 실패 테스트의 최신 PostgreSQL CI 실행 결과 확인

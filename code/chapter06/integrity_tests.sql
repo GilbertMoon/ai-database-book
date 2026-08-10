@@ -12,6 +12,7 @@ SHOW search_path;
 DO $$
 DECLARE
     v_constraint_count bigint;
+    v_not_null_count bigint;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -40,11 +41,22 @@ BEGIN
                'chk_loans_nf_returned_date'
            ));
 
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM pg_attribute
+    WHERE (attrelid = 'public.members_nf'::regclass
+           AND attname IN ('name', 'email', 'joined_at') AND attnotnull)
+       OR (attrelid = 'public.books_nf'::regclass
+           AND attname IN ('title', 'author', 'isbn') AND attnotnull)
+       OR (attrelid = 'public.loans_nf'::regclass
+           AND attname IN ('member_id', 'book_id', 'borrowed_at', 'due_at') AND attnotnull);
+
     IF v_constraint_count <> 8
+       OR v_not_null_count <> 10
        OR to_regclass('public.uq_loans_nf_active_book') IS NULL THEN
         RAISE EXCEPTION
-            '테스트 중단: 04_add_integrity_rules.sql 적용 상태가 아닙니다. constraints=%, active_index=%',
+            '테스트 중단: 04_add_integrity_rules.sql 적용 상태가 아닙니다. constraints=%, not_null_columns=%, active_index=%',
             v_constraint_count,
+            v_not_null_count,
             to_regclass('public.uq_loans_nf_active_book');
     END IF;
 END
@@ -83,7 +95,13 @@ SELECT COUNT(*) AS open_loan_count_before FROM public.loans_nf WHERE returned_at
 -- INSERT INTO public.members_nf (id, name, email, joined_at)
 -- VALUES (1902, '중복 이메일 회원', 'junho@example.com', DATE '2026-03-20');
 
--- 오류 테스트 3: C-02 ISBN UNIQUE / uq_books_nf_isbn
+-- 오류 테스트 3A: C-02 ISBN NOT NULL 위반
+-- 기대: null value in column "isbn" ... violates not-null constraint
+-- INSERT INTO public.books_nf (id, title, author, published_year, isbn)
+-- VALUES (1912, 'ISBN 없음 도서', '테스트 저자', 2026, NULL);
+
+-- 오류 테스트 3B: C-02 ISBN UNIQUE 위반
+-- 기대 제약조건: uq_books_nf_isbn
 -- INSERT INTO public.books_nf (id, title, author, published_year, isbn)
 -- VALUES (1903, '중복 ISBN 도서', '테스트 저자', 2026, 'ISBN-001');
 
