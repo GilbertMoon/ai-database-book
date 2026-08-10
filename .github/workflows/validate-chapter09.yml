@@ -79,6 +79,11 @@ jobs:
                   if token not in text:
                       raise SystemExit(f'{name} missing {token}')
 
+          for name, text in [('chapter', chapter), ('outline', outline), ('activity', activity), ('theory', theory), ('practice', practice), ('readme', code_readme)]:
+              for token in ['15', '20']:
+                  if token not in text:
+                      raise SystemExit(f'{name} missing Chapter 07 structure contract token {token}')
+
           stale_term = 'paid' + '_amount'
           roots = [Path('book/chapter09'), Path('code/chapter09'), Path('presentation/chapter09'), Path('images/chapter09')]
           stale = []
@@ -111,7 +116,7 @@ jobs:
           if index_html.count('20장') < 2:
               raise SystemExit('Chapter 09 index must advertise 20 theory and 20 practice slides')
 
-          version = '20260809a'
+          version = '20260810a'
           for name, text in [
               ('player js', player_js), ('script js', script_js), ('script html', script_html),
               ('theory html', theory_html), ('practice html', practice_html), ('index html', index_html),
@@ -131,6 +136,8 @@ jobs:
               raise SystemExit('shared TTS normalization is not loaded')
           if '../common/script_content_enhancer.js' not in script_html:
               raise SystemExit('shared script content enhancer is not loaded')
+          if 'data-script-content-enhancer="off"' not in script_html:
+              raise SystemExit('Chapter 09 authored narration must disable automatic content expansion')
           if 'PresentationTTS?.normalize' not in script_js:
               raise SystemExit('Chapter 09 presenter does not use shared TTS normalization')
 
@@ -157,6 +164,9 @@ jobs:
               "current_database() <> 'ai_database_book'",
               "numeric_precision = 12",
               "numeric_scale = 0",
+              "has_database_privilege(current_user, current_database(), 'CREATE')",
+              'v_named_constraint_count <> 15',
+              'v_not_null_count <> 20',
               "v_requested_count <> 2",
               "v_learning_count <> 1",
               "v_completed_count <> 1",
@@ -168,6 +178,28 @@ jobs:
           ]:
               if token not in sql['01_transaction_lab_schema.sql']:
                   raise SystemExit(f'01 prerequisite/schema gate missing {token}')
+
+          precheck_pos = sql['01_transaction_lab_schema.sql'].find('DO $$')
+          ddl_begin_pos = sql['01_transaction_lab_schema.sql'].find('BEGIN;', precheck_pos)
+          create_schema_pos = sql['01_transaction_lab_schema.sql'].find('CREATE SCHEMA transaction_lab;')
+          if not (precheck_pos >= 0 and ddl_begin_pos > precheck_pos and create_schema_pos > ddl_begin_pos):
+              raise SystemExit('01 must run prerequisite DO before opening the DDL transaction')
+
+          for token in [
+              '15개 명명 제약조건 / 20개 NOT NULL',
+              'Chapter 09 main transaction validation passed',
+          ]:
+              if token not in sql['06_transaction_validation.sql']:
+                  raise SystemExit(f'06 final gate missing {token}')
+
+          for token in [
+              'WITH cancelled AS',
+              'FROM cancelled AS e',
+              'repeated_cancel_count',
+              'repeated_restore_count',
+          ]:
+              if token not in sql['08_cancel_and_restore.sql']:
+                  raise SystemExit(f'08 cancellation retry safety missing {token}')
 
           expected_messages = {
               '02_transaction_lab_seed.sql': 'Chapter 09 transaction lab seed validation passed',
@@ -185,7 +217,7 @@ jobs:
           for token in ['SAVEPOINT before_duplicate_enrollment', 'ROLLBACK TO SAVEPOINT before_duplicate_enrollment', 'uq_transaction_enrollments_active']:
               if token not in sql['09_error_and_savepoint.sql']:
                   raise SystemExit(f'09 savepoint practice missing {token}')
-          for token in ['SHOW transaction_isolation', "lock_timeout = '5s'", 'FOR UPDATE']:
+          for token in ['SHOW transaction_isolation', "lock_timeout = '5s'", 'FOR UPDATE', 'UPDATE ... RETURNING 자체도']:
               if token not in sql['07_concurrency_two_sessions.sql']:
                   raise SystemExit(f'07 concurrency practice missing {token}')
 
@@ -204,7 +236,7 @@ jobs:
           if 'DROP SCHEMA IF EXISTS transaction_lab;' not in sql['reset_transaction_lab.sql']:
               raise SystemExit('reset does not remove transaction_lab')
 
-          for token in ['590000', '340000', '440000', '03_commit_transaction.sql', '06_transaction_validation.sql', 'validate-chapter09.yml']:
+          for token in ['590000', '340000', '440000', '15', '20', 'CREATE 권한', '03_commit_transaction.sql', '06_transaction_validation.sql', 'validate-chapter09.yml']:
               if token not in code_readme:
                   raise SystemExit(f'code README missing {token}')
           if 'recorded_amount' not in image_readme:
@@ -278,6 +310,25 @@ jobs:
           grep -q "Chapter 08 prerequisite check passed" /tmp/ch9_ch8_00.log
           grep -q "Chapter 08 join and aggregation validation passed" /tmp/ch9_ch8_03.log
 
+      - name: Verify CREATE privilege protection
+        shell: bash
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE ch9_no_create NOLOGIN;
+          GRANT USAGE ON SCHEMA course_project TO ch9_no_create;
+          GRANT SELECT ON ALL TABLES IN SCHEMA course_project TO ch9_no_create;
+          SQL
+          if psql -d ai_database_book -v ON_ERROR_STOP=1 \
+            -c "SET ROLE ch9_no_create;" \
+            -f code/chapter09/01_transaction_lab_schema.sql > /tmp/ch9_no_create.log 2>&1; then
+            cat /tmp/ch9_no_create.log
+            echo "01 unexpectedly passed without database CREATE privilege"
+            exit 1
+          fi
+          cat /tmp/ch9_no_create.log
+          grep -q "CREATE 권한" /tmp/ch9_no_create.log
+          test "$(psql -d ai_database_book -At -v ON_ERROR_STOP=1 -c "SELECT to_regnamespace('transaction_lab') IS NULL;")" = "t"
+
       - name: Capture protected project fingerprint
         shell: bash
         run: |
@@ -349,11 +400,72 @@ jobs:
           fi
           grep -q "비어 있지 않습니다" /tmp/ch9_rerun_02.log
 
+      - name: Verify cancellation retry restores one seat only
+        shell: bash
+        run: |
+          psql -d ai_database_book -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+
+          UPDATE transaction_lab.course_inventory
+          SET remaining_seats = remaining_seats - 1
+          WHERE course_id = 301 AND remaining_seats > 0;
+
+          INSERT INTO transaction_lab.enrollments (
+              id, student_id, course_id, enrolled_at, status, recorded_amount
+          ) VALUES (
+              9003, 102, 301, CURRENT_TIMESTAMP, '수강중', 100000
+          );
+          INSERT INTO transaction_lab.payments (
+              id, enrollment_id, amount, paid_at
+          ) VALUES (
+              9903, 9003, 100000, CURRENT_TIMESTAMP
+          );
+
+          WITH cancelled AS (
+              UPDATE transaction_lab.enrollments
+              SET status = '취소'
+              WHERE id = 9001 AND status = '수강중'
+              RETURNING course_id
+          )
+          UPDATE transaction_lab.course_inventory AS ci
+          SET remaining_seats = ci.remaining_seats + 1
+          FROM cancelled AS e
+          WHERE ci.course_id = e.course_id
+            AND ci.remaining_seats < ci.capacity;
+
+          WITH cancelled AS (
+              UPDATE transaction_lab.enrollments
+              SET status = '취소'
+              WHERE id = 9001 AND status = '수강중'
+              RETURNING course_id
+          )
+          UPDATE transaction_lab.course_inventory AS ci
+          SET remaining_seats = ci.remaining_seats + 1
+          FROM cancelled AS e
+          WHERE ci.course_id = e.course_id
+            AND ci.remaining_seats < ci.capacity;
+
+          DO $$
+          BEGIN
+              IF (SELECT remaining_seats FROM transaction_lab.course_inventory WHERE course_id = 301) <> 1
+                 OR (SELECT COUNT(*) FROM transaction_lab.enrollments WHERE course_id = 301 AND status = '수강중') <> 1
+                 OR (SELECT status FROM transaction_lab.enrollments WHERE id = 9001) <> '취소' THEN
+                  RAISE EXCEPTION '취소 재시도 안전성 검증 실패';
+              END IF;
+          END
+          $$;
+
+          ROLLBACK;
+          SQL
+          psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter09/06_transaction_validation.sql > /tmp/ch9_after_cancel_retry.log 2>&1
+          grep -q "Chapter 09 main transaction validation passed" /tmp/ch9_after_cancel_retry.log
+
       - name: Verify cancel and seat restore rollback
         shell: bash
         run: |
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter09/08_cancel_and_restore.sql 2>&1 | tee /tmp/ch9_cancel.log
           grep -q "Chapter 09 cancel rollback validation passed" /tmp/ch9_cancel.log
+          grep -Eq "repeated_cancel_count|0" /tmp/ch9_cancel.log
           psql -d ai_database_book -v ON_ERROR_STOP=1 -f code/chapter09/06_transaction_validation.sql > /tmp/ch9_after_cancel.log 2>&1
           grep -q "Chapter 09 main transaction validation passed" /tmp/ch9_after_cancel.log
 
