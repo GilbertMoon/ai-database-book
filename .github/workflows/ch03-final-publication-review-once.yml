@@ -1,0 +1,44 @@
+name: Apply Chapter 03 final publication review once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ch03-final-publication-review-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply Chapter 03 publication refinements
+        run: python scripts/ch03_final_publication_review_once.py
+      - name: Commit Chapter 03 publication refinements
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/ch03_final_publication_review_once.py
+          rm -f .github/workflows/ch03-final-publication-review-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add book/chapter03/chapter03.md \
+                  book/chapter03/chapter03_activity.md \
+                  book/chapter03/chapter03_outline.md \
+                  book/chapter03/chapter03_review_revision.md \
+                  notes/chapter03_review_checklist.md \
+                  code/chapter03/setup_check.sql \
+                  code/chapter03/setup_validate_local.sql \
+                  code/chapter03/README.md \
+                  publish/full_manuscript.md \
+                  scripts/ch03_final_publication_review_once.py \
+                  .github/workflows/ch03-final-publication-review-once.yml
+          git commit -m "Refine Chapter 03 final publication content"
+          git push
