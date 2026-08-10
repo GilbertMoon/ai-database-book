@@ -407,3 +407,17 @@ Chapter 12의 PostgreSQL JSONB 기반 선택 기준 실습은 실제 PostgreSQL 
 - [x] Chapter 12 작성 발표 스크립트 자동 확장 비활성화
 
 최종 PostgreSQL 16 재검증 결과는 `notes/chapter12_validation_result.md`에 별도로 기록합니다.
+
+
+### 최종 자동 검증 기록
+
+```text
+Workflow: Chapter 12 final publication validation v2 once
+Run: 1
+Run ID: 31390439293
+Validation commit: 96ce73e3a03593ae0c604dc9637fdf241fe1bc03
+Content commit: b5c868b36cb71d5957ff05c392bca771d35f57b5
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```
