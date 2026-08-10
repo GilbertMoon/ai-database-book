@@ -364,6 +364,7 @@ code/chapter03/setup_validate_local.sql
 | 현재 사용자의 CONNECT 권한 |  |
 | `public` 스키마 존재 |  |
 | `public` USAGE 권한 |  |
+| `public` CREATE 권한 |  |
 | 읽기 전용 상태 아님 |  |
 | SQL 계산 정상 |  |
 
@@ -403,6 +404,7 @@ ________________________________________________________________________
 | Password authentication failed |  |  |
 | Database does not exist |  |  |
 | Permission denied to create database |  |  |
+| Permission denied for schema public |  |  |
 | Cannot run inside a transaction block |  |  |
 | 데이터베이스나 테이블이 보이지 않음 |  |  |
 | SSL 또는 Host 오류 |  |  |

@@ -238,7 +238,7 @@ Stack Builder는 추가 도구와 드라이버를 설치하는 도구이며 이 
 
 대표적인 설치 방식은 다음과 같습니다.
 
-- 공식 설치 프로그램
+- PostgreSQL 다운로드 페이지에서 안내하는 설치 프로그램
 - Postgres.app
 - Homebrew
 
@@ -309,7 +309,7 @@ postgres 데이터베이스
 → 설치할 때 일반적으로 생성되는 기본 데이터베이스
 ```
 
-Test Connection이 성공하면 서버, 네트워크, 인증과 지정한 데이터베이스 접속이 가능하다는 뜻입니다. 하지만 다른 데이터베이스의 존재, 쓰기 권한과 스키마 사용 권한까지 모두 확인한 것은 아닙니다.
+Test Connection이 성공하면 서버, 네트워크, 인증과 지정한 데이터베이스 접속이 가능하다는 뜻입니다. 하지만 다른 데이터베이스의 존재나 실제 변경 권한, `public` 스키마의 `USAGE`·`CREATE` 권한까지 모두 확인한 것은 아닙니다.
 
 ### 연결 이름 권장 예시
 
@@ -462,7 +462,7 @@ SHOW search_path;
 | --- | --- |
 | `current_database()` | 현재 연결된 데이터베이스 |
 | `current_user` | 현재 접속한 PostgreSQL 역할 |
-| `current_schema()` | 검색 경로에서 현재 사용할 스키마 |
+| `current_schema()` | `search_path`에서 실제로 사용할 수 있는 첫 번째 스키마 |
 | `SHOW search_path` | 스키마 이름을 생략했을 때 객체를 찾는 순서 |
 
 현재 스키마는 환경과 검색 경로에 따라 `public`이 아닐 수 있습니다. Chapter 04에서는 대상을 명확히 하기 위해 `public.students`처럼 스키마 이름을 함께 사용합니다.
@@ -474,7 +474,7 @@ SHOW transaction_read_only;
 SHOW TimeZone;
 ```
 
-- `transaction_read_only = off`: 현재 세션에서 일반적인 변경 작업이 가능한 상태
+- `transaction_read_only = off`: 현재 트랜잭션이 읽기 전용으로 강제되지 않은 상태. 실제 변경 가능 여부는 데이터베이스·스키마·객체 권한에 따라 달라질 수 있음
 - `TimeZone`: 날짜와 시각을 해석하고 표시할 때 사용하는 세션 시간대
 
 이 장에서는 값을 확인하는 데 집중합니다. 읽기 전용 연결과 시간대 설정의 운영 원리는 후속 장에서 확장합니다.
@@ -518,11 +518,7 @@ Chapter 09 전까지는 변경 SQL을 한 문장 또는 확인한 선택 영역 
 
 ### 12.1 `setup_check.sql`
 
-경로:
-
-```text
-code/chapter03/setup_check.sql
-```
+파일: [`setup_check.sql`](../../code/chapter03/setup_check.sql)
 
 이 파일은 환경 정보를 독자가 직접 읽고 확인하기 위한 조회문을 포함합니다.
 
@@ -545,11 +541,7 @@ TimeZone
 
 ### 12.2 `setup_validate_local.sql`
 
-경로:
-
-```text
-code/chapter03/setup_validate_local.sql
-```
+파일: [`setup_validate_local.sql`](../../code/chapter03/setup_validate_local.sql)
 
 이 파일은 권장 로컬 환경에서 다음 조건을 자동으로 확인합니다.
 
@@ -557,10 +549,14 @@ code/chapter03/setup_validate_local.sql
 PostgreSQL 15 이상
 현재 데이터베이스 = ai_database_book
 현재 사용자의 CONNECT 권한
-public 스키마 존재와 USAGE 권한
+public 스키마 존재
+public 스키마 USAGE 권한
+public 스키마 CREATE 권한
 읽기 전용 상태가 아님
 기본 SQL 계산 정상
 ```
+
+`USAGE`는 스키마 안의 객체를 참조할 때 필요한 권한이고, `CREATE`는 그 스키마에 새 객체를 만들 때 필요한 권한입니다. Chapter 04에서 `public.students`를 생성하려면 권장 로컬 경로에서 두 권한을 모두 확인하는 편이 안전합니다.
 
 모두 통과하면 다음 메시지가 표시됩니다.
 
@@ -601,7 +597,8 @@ SQL 문제
 | Connection refused | 서버 서비스, Host, Port, 방화벽 |
 | Password authentication failed | Username과 Password |
 | Database does not exist | Database 값과 생성 여부 |
-| Permission denied to create database | 접속 사용자와 생성 권한 |
+| Permission denied to create database | 접속 사용자와 데이터베이스 생성 권한 |
+| Permission denied for schema public | 현재 사용자와 `public` 스키마의 `CREATE` 권한 |
 | Cannot run inside a transaction block | 실행 범위, 열린 트랜잭션과 Auto-commit |
 | 데이터베이스나 테이블이 보이지 않음 | 현재 Database, Schema, 필터와 새로고침 |
 | SSL 또는 Host 오류 | SSL 설정, DNS와 네트워크 |

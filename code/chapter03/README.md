@@ -26,7 +26,7 @@ DBeaver에서 다음 대상을 선택합니다.
 실습 대상 스키마: public
 ```
 
-`current_schema()`가 항상 `public`이어야 하는 것은 아닙니다. 현재 스키마와 `search_path`는 `setup_check.sql`에서 확인하고, `public`의 존재와 사용 권한은 검증 파일에서 별도로 판정합니다.
+`current_schema()`가 항상 `public`이어야 하는 것은 아닙니다. 현재 스키마와 `search_path`는 `setup_check.sql`에서 확인하고, `public`의 존재와 `USAGE`·`CREATE` 권한은 검증 파일에서 별도로 판정합니다.
 
 ---
 
@@ -44,7 +44,7 @@ DBeaver에서 다음 대상을 선택합니다.
 통과 메시지:
 
 ```text
-Chapter 03 local environment validation passed
+Chapter 03 recommended local environment validation passed
 ```
 
 ---
@@ -62,7 +62,7 @@ Chapter 03 local environment validation passed
 | `TimeZone` | 현재 세션 시간대 확인 |
 | `CURRENT_TIMESTAMP` | 날짜·시간 값 반환 확인 |
 | `1 + 1` | `2` |
-| 요약 결과 | DB·public·USAGE·읽기 전용 상태를 한 행으로 확인 |
+| 요약 결과 | DB·public·USAGE·CREATE·읽기 전용 상태를 한 행으로 확인 |
 
 ---
 
@@ -74,6 +74,7 @@ current_database() = ai_database_book
 현재 사용자의 CONNECT 권한
 public 스키마 존재
 현재 사용자의 public USAGE 권한
+현재 사용자의 public CREATE 권한
 transaction_read_only = off
 SQL 계산 결과 정상
 ```

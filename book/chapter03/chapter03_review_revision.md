@@ -283,3 +283,23 @@ Chapter 03은 다음 질문에 답하는 장으로 정리되었다.
 PostgreSQL 서버를 준비하고 DBeaver로 작업용 데이터베이스에 연결한 뒤,
 현재 환경을 확인하고 안전하게 SQL을 실행할 수 있는가?
 ```
+
+---
+
+## 최종 출판 검수 추가 반영
+
+최종 PDF 제작 전 Chapter 04의 실제 테이블 생성 조건과 다시 교차 검토해 다음을 보완했다.
+
+```text
+DBeaver Test Connection 성공과 실제 객체 생성 권한을 구분
+current_schema()를 search_path의 첫 사용 가능 스키마로 정확히 표현
+transaction_read_only = off와 실제 쓰기 권한을 구분
+public USAGE뿐 아니라 CREATE 권한도 로컬 자동 확인에 추가
+setup_check.sql 한 행 요약에 public CREATE 상태 추가
+permission denied for schema public 오류 점검 추가
+본문의 Chapter 03 SQL 파일 경로를 독자용 링크로 변경
+code/chapter03/README.md의 통과 메시지를 실제 SQL과 일치시킴
+```
+
+`setup_validate_local.sql`은 이제 Chapter 04에서 `CREATE TABLE public.students`를 실행할 권장 로컬 환경인지 판단할 때 `public`의 `USAGE`와 `CREATE`를 모두 확인한다. `transaction_read_only = off`만으로 실제 변경 권한이 보장되는 것은 아니라는 점도 본문에 명시했다.
+

@@ -94,7 +94,7 @@ Chapter 03이 일반 독자가 자신의 환경에 맞는 PostgreSQL 경로를 �
 | Username | 통과 | 로그인할 PostgreSQL 역할로 설명 |
 | Password | 통과 | 인증 정보로 설명, 기록 금지 |
 | `postgres` 구분 | 통과 | 사용자와 데이터베이스 이름 구분 |
-| Test Connection 한계 | 통과 | 쓰기·스키마 권한까지 보장하지 않음 |
+| Test Connection 한계 | 통과 | 실제 변경 권한과 `public`의 `USAGE`·`CREATE`까지 보장하지 않음 |
 
 ---
 
@@ -122,7 +122,7 @@ Chapter 03이 일반 독자가 자신의 환경에 맞는 PostgreSQL 경로를 �
 | 검색 경로 | 통과 | `SHOW search_path` 사용 |
 | `public` 절대화 방지 | 통과 | 현재 스키마가 다를 수 있음을 설명 |
 | 스키마 한정 | 통과 | Chapter 04에서 `public.students` 사용 |
-| 읽기 전용·시간대 | 통과 | 참고 확인 항목으로 축소 |
+| 읽기 전용·시간대 | 통과 | `off`가 객체 생성 권한까지 보장하지 않음을 명시하고 시간대는 참고 항목으로 유지 |
 
 ---
 
@@ -144,7 +144,7 @@ Chapter 03이 일반 독자가 자신의 환경에 맞는 PostgreSQL 경로를 �
 | 점검 항목 | 상태 | 최종 반영 내용 |
 | --- | --- | --- |
 | `setup_check.sql` | 통과 | 환경 정보를 사람이 읽고 확인 |
-| `setup_validate_local.sql` | 통과 | 권장 로컬 환경 주요 조건 자동 확인 |
+| `setup_validate_local.sql` | 통과 | 권장 로컬 환경에서 `public`의 `USAGE`·`CREATE`를 포함한 주요 조건 자동 확인 |
 | 데이터 변경 없음 | 통과 | 두 파일 모두 업무 데이터 미변경 |
 | 통과 표현 | 통과 | `recommended local environment` 용어 사용 |
 | 관리형 환경 | 통과 | 무리한 권한 변경으로 통과시키지 않음 |
@@ -158,6 +158,7 @@ Chapter 03이 일반 독자가 자신의 환경에 맞는 PostgreSQL 경로를 �
 | --- | --- | --- |
 | 오류 원문 | 통과 | 생략하지 않고 확인 |
 | 연결값 | 통과 | Host·Port·Database·Username 점검 |
+| 스키마 생성 권한 | 통과 | `permission denied for schema public` 발생 시 `public`의 `CREATE` 권한 확인 |
 | 단계 분류 | 통과 | 설치·서버·연결·SQL 문제 분류 |
 | 한 번에 한 변경 | 통과 | 여러 설정 동시 변경 방지 |
 | 동일 작업 재실행 | 통과 | 실제 해결 여부 검증 |

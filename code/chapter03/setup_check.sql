@@ -1,5 +1,5 @@
 -- Chapter 03. PostgreSQL 실습 환경 정보 조회
--- 목적: 서버, 데이터베이스, 스키마, 검색 경로, 사용자, 읽기 전용 상태와 시간대를 확인합니다.
+-- 목적: 서버, 데이터베이스, 스키마, 검색 경로, 사용자, public 사용·생성 권한, 읽기 전용 상태와 시간대를 확인합니다.
 -- 이 파일은 데이터를 변경하지 않는 조회문만 포함하므로 여러 번 안전하게 실행할 수 있습니다.
 -- 권장 로컬 환경의 주요 조건을 자동으로 확인하려면 setup_validate_local.sql을 실행합니다.
 
@@ -49,4 +49,8 @@ SELECT
         WHEN to_regnamespace('public') IS NULL THEN false
         ELSE has_schema_privilege(current_user, 'public', 'USAGE')
     END AS public_schema_usage_ok,
+    CASE
+        WHEN to_regnamespace('public') IS NULL THEN false
+        ELSE has_schema_privilege(current_user, 'public', 'CREATE')
+    END AS public_schema_create_ok,
     1 + 1 = 2 AS sql_execution_ok;

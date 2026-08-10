@@ -15,7 +15,11 @@ SELECT
     CASE
         WHEN to_regnamespace('public') IS NULL THEN false
         ELSE has_schema_privilege(current_user, 'public', 'USAGE')
-    END AS public_schema_usage_ok;
+    END AS public_schema_usage_ok,
+    CASE
+        WHEN to_regnamespace('public') IS NULL THEN false
+        ELSE has_schema_privilege(current_user, 'public', 'CREATE')
+    END AS public_schema_create_ok;
 
 DO $$
 DECLARE
@@ -52,6 +56,12 @@ BEGIN
     IF NOT has_schema_privilege(current_user, 'public', 'USAGE') THEN
         RAISE EXCEPTION
             '환경 확인 중단: 사용자 %에게 public 스키마 USAGE 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_schema_privilege(current_user, 'public', 'CREATE') THEN
+        RAISE EXCEPTION
+            '환경 확인 중단: 사용자 %에게 public 스키마 CREATE 권한이 없습니다. Chapter 04에서 public.students를 만들 수 있는 연결을 선택하세요.',
             current_user;
     END IF;
 
