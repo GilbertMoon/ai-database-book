@@ -285,7 +285,8 @@ ch14_08_analysis_result_validation.svg
 - reset은 올바른 DB에서 명시적 객체만 삭제한다.
 - 분석 기간을 SQL·VIEW·Python에 동일 적용한다.
 - 원본 변경 SQL을 Python에서 실행하지 않는다.
-- PostgreSQL 연결은 읽기 전용으로 설정한다.
+- PostgreSQL 연결은 읽기 전용으로 설정하되, 읽기 전용 상태만 보안 경계로 보지 않고 분석 계정 최소권한과 함께 사용한다.
+- Python 월 기준표는 `validation_utils.py`의 공통 분석 기간 상수에서 생성한다.
 - 비밀번호·전체 접속 URL·password file을 저장소에 기록하지 않는다.
 - CSV·manifest·그래프 생성물은 저장소에서 제외한다.
 - 잘못된 데이터는 coerce·drop으로 숨기지 않는다.

@@ -11,6 +11,8 @@ from pandas.testing import assert_frame_equal
 from sqlalchemy import text
 
 from validation_utils import (
+    ANALYSIS_END_DATE_EXCLUSIVE,
+    ANALYSIS_START_DATE,
     DEFAULT_CSV_PATH,
     DEFAULT_MANIFEST_PATH,
     DEFAULT_REFERENCE_PATH,
@@ -137,9 +139,10 @@ def build_pandas_monthly(df: pd.DataFrame) -> pd.DataFrame:
     months = pd.DataFrame(
         {
             "enrollment_month": pd.date_range(
-                "2026-01-01",
-                "2026-06-01",
+                ANALYSIS_START_DATE,
+                ANALYSIS_END_DATE_EXCLUSIVE,
                 freq="MS",
+                inclusive="left",
             )
         }
     )

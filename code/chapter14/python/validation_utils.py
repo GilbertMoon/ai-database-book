@@ -26,6 +26,10 @@ SOURCE_VIEW = "analysis_lab.enrollment_analysis_dataset"
 ANALYSIS_START_DATE = pd.Timestamp("2026-01-01")
 ANALYSIS_END_DATE_EXCLUSIVE = pd.Timestamp("2026-07-01")
 EXPECTED_ROWS = 24
+EXPECTED_RECORDED_AMOUNT_SUM = 3210000
+AMOUNT_SEMANTICS = (
+    "recorded_amount = enrollment-time recorded amount; cancellation does not zero it"
+)
 
 EXPECTED_COLUMNS = [
     "enrollment_id",
@@ -280,9 +284,11 @@ def write_manifest(
             ANALYSIS_END_DATE_EXCLUSIVE.date().isoformat()
         ),
         "row_count": row_count,
+        "expected_recorded_amount_sum": EXPECTED_RECORDED_AMOUNT_SUM,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "csv_path": str(csv_path.resolve()),
         "sha256": file_sha256(csv_path),
+        "amount_semantics": AMOUNT_SEMANTICS,
     }
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(
@@ -311,6 +317,8 @@ def load_and_validate_manifest(
             ANALYSIS_END_DATE_EXCLUSIVE.date().isoformat()
         ),
         "row_count": EXPECTED_ROWS,
+        "expected_recorded_amount_sum": EXPECTED_RECORDED_AMOUNT_SUM,
+        "amount_semantics": AMOUNT_SEMANTICS,
     }
     for key, expected in expected_pairs.items():
         if manifest.get(key) != expected:

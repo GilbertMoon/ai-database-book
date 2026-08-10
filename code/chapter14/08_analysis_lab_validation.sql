@@ -18,6 +18,8 @@ DECLARE
     instructors_next BIGINT;
     courses_next BIGINT;
     enrollments_next BIGINT;
+    project_named_constraint_count INTEGER;
+    project_not_null_count INTEGER;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -53,6 +55,47 @@ BEGIN
           AND data_type = 'numeric'
           AND numeric_precision = 12 AND numeric_scale = 0) <> 2 THEN
         RAISE EXCEPTION '검증 실패: analysis_lab 가격·기록 금액 타입은 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    -- Chapter 07 구조 계약을 최종 게이트에서도 다시 확인합니다.
+    SELECT COUNT(*)
+    INTO project_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email','chk_course_students_name_not_blank','chk_course_students_email_not_blank',
+        'uq_course_instructors_email','chk_course_instructors_name_not_blank','chk_course_instructors_email_not_blank','chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor','chk_course_courses_title_not_blank','chk_course_courses_level','chk_course_courses_price',
+        'fk_course_enrollments_student','fk_course_enrollments_course','chk_course_enrollments_status','chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*)
+    INTO project_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students','instructors','courses','enrollments')
+      AND is_nullable = 'NO';
+
+    IF project_named_constraint_count <> 15 OR project_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '검증 실패: Chapter 07 구조 계약은 명명 제약조건 15개 / NOT NULL 열 20개여야 하지만 현재 % / %입니다.',
+            project_named_constraint_count, project_not_null_count;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes
+        WHERE schemaname = 'course_project'
+          AND indexname = 'uq_course_enrollments_active'
+          AND indexdef ILIKE 'CREATE UNIQUE INDEX%'
+          AND indexdef ILIKE '%student_id%course_id%'
+          AND indexdef ILIKE '%WHERE%status%신청%수강중%'
+    ) THEN
+        RAISE EXCEPTION '검증 실패: Chapter 07 활성 신청 부분 고유 인덱스 정의가 다릅니다.';
     END IF;
 
     -- 정확한 테이블 집합 4개

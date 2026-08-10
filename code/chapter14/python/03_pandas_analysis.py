@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from validation_utils import (
+    ANALYSIS_END_DATE_EXCLUSIVE,
+    ANALYSIS_START_DATE,
     DEFAULT_CSV_PATH,
     create_read_only_engine,
     load_csv_dataset,
@@ -76,9 +78,10 @@ def build_monthly_summary(df: pd.DataFrame) -> pd.DataFrame:
     months = pd.DataFrame(
         {
             "enrollment_month": pd.date_range(
-                "2026-01-01",
-                "2026-06-01",
+                ANALYSIS_START_DATE,
+                ANALYSIS_END_DATE_EXCLUSIVE,
                 freq="MS",
+                inclusive="left",
             )
         }
     )

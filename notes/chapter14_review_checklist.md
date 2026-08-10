@@ -298,3 +298,27 @@ success
 ```
 
 자동 실행하지 않은 항목은 통과로 표시하지 않습니다.
+
+
+---
+
+## 17. 2026-08-11 최종 출판 재검수 항목
+
+```text
+워크북 제약조건 20개 동기화
+이론 발표 stale 취소 금액 0 설명 제거
+이미지 README 금액 의미 동기화
+DB CREATE 권한 없는 역할에서 01이 DDL 전에 실패
+Chapter 07 명명 제약조건 15 / NOT NULL 20 / 활성 신청 인덱스 인계 확인
+08 최종 게이트에서 Chapter 07 구조 계약 재확인
+Python 월 date spine 공통 기간 상수 사용
+manifest expected_recorded_amount_sum=3210000 실제 생성·검증
+manifest amount_semantics 실제 생성·검증
+완성 스크립트 generic enhancer 비활성화
+publishing CI stale Markdown 표·문장 검출 강화
+PostgreSQL 16 SQL 01→08 재실행
+PostgreSQL/CSV Python 교차 검증 재실행
+SHA-256 변조·wrong DB·reset 격리 재확인
+```
+
+실제 Run ID와 결론은 재검증 완료 후 definitive 결과로 기록합니다.

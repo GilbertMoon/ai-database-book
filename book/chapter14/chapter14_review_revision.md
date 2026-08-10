@@ -617,3 +617,29 @@ reset 예상 밖 객체 차단
 ```
 
 실제로 실행하거나 렌더링하지 않은 항목은 “통과”로 표시하지 않습니다.
+
+
+---
+
+## 18. 2026-08-11 최종 출판 재검수 보완
+
+Chapter 13 최종 기준과 Chapter 15 인계까지 다시 대조해 다음 출판 불일치를 보완했습니다.
+
+```text
+워크북의 오래된 제약조건 21개 → 실제 20개로 수정
+이론 발표의 오래된 “취소 금액 0” 문장 제거
+이미지 README의 “결제금액” → 신청 시점 기록 금액으로 수정
+01 시작 전에 read-only·DB CREATE 권한 확인
+Chapter 07 구조 계약 명명 제약조건 15 / NOT NULL 20 / 활성 신청 인덱스 확인
+08 최종 게이트에서도 같은 Chapter 07 구조 계약 재확인
+Python 월 date spine의 1~6월 하드코딩 제거 → 공통 기간 상수 사용
+자동 생성 manifest에 expected_recorded_amount_sum·amount_semantics 실제 기록
+manifest 검증에서도 두 필드 확인
+최종 NOTICE 문구를 실제 08 출력과 동기화
+완성된 발표 스크립트의 generic enhancer 비활성화
+publishing CI가 Markdown 표 형태의 21개와 stale 취소 문장을 놓치지 않도록 강화
+```
+
+`transaction_read_only=on`은 분석 안전장치로 유지하되, 실제 환경에서는 최소권한 분석 계정과 함께 사용해야 한다는 경계도 본문·README·워크북에 명시했습니다.
+
+최종 PostgreSQL 16·Python·CSV·발표 정적 재검증 결과는 성공 Run 확인 후 검증 기록에 별도로 남깁니다.

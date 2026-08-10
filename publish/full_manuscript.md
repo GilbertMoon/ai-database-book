@@ -11144,6 +11144,12 @@ SHOW search_path;
 
 ```text
 현재 DB = ai_database_book
+현재 트랜잭션이 읽기 전용이 아님
+현재 역할의 DB CREATE 권한
+Chapter 07 명명 제약조건 15개
+Chapter 07 NOT NULL 열 20개
+Chapter 07 활성 신청 부분 고유 인덱스
+course_project canonical 기준 상태
 analysis_lab 미존재
 ```
 
@@ -11583,7 +11589,7 @@ IDENTITY 다음 값 > 기존 최대 ID
 통과 메시지:
 
 ```text
-Chapter 14 analysis_lab validation passed
+Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 3210000
 ```
 
 단순 boolean 조회와 달리 하나라도 다르면 예외를 발생시킵니다.
@@ -11625,8 +11631,10 @@ manifest에는 다음 정보를 기록합니다.
   "analysis_start_date": "2026-01-01",
   "analysis_end_date_exclusive": "2026-07-01",
   "row_count": 24,
+  "expected_recorded_amount_sum": 3210000,
   "generated_at_utc": "...",
-  "sha256": "..."
+  "sha256": "...",
+  "amount_semantics": "recorded_amount = enrollment-time recorded amount; cancellation does not zero it"
 }
 ```
 
@@ -11702,6 +11710,8 @@ transaction_read_only = on
 
 SQLAlchemy의 `URL.create()`를 사용해 사용자·호스트·DB를 구성하고, 비밀번호는 libpq password file에 맡깁니다. 코드·노트북·화면 캡처에 전체 접속 URL과 비밀번호를 남기지 않습니다.
 
+`transaction_read_only = on`은 분석 트랜잭션의 일반적인 비임시 테이블 변경을 막는 안전장치입니다. 다만 이것만으로 최소권한 보안 설계가 완성되는 것은 아니므로, 실제 환경에서는 분석 전용 계정에 필요한 `CONNECT`·`USAGE`·`SELECT`만 부여하고 코드에서도 변경 SQL을 허용하지 않는 방식을 함께 사용합니다.
+
 ![PostgreSQL 데이터를 Python과 pandas로 읽기](../images/chapter14/ch14_06_postgresql_python_connection.svg)
 
 그림 14-6 PostgreSQL 데이터를 Python과 pandas로 읽기
@@ -11765,7 +11775,7 @@ monthly_summary = (
 )
 ```
 
-Python에서도 1~6월 기준표를 만들어 데이터가 없는 월을 0건으로 유지합니다.
+Python에서도 `validation_utils.py`의 공통 분석 시작일·종료일을 사용해 월 기준표를 만들고 데이터가 없는 월을 0건으로 유지합니다. SQL 기간과 별도로 `2026-06-01` 같은 마지막 월을 다시 하드코딩하지 않습니다.
 
 피벗:
 

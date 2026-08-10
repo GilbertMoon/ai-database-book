@@ -16,11 +16,23 @@ DECLARE
     status_learning BIGINT;
     status_completed BIGINT;
     status_cancelled BIGINT;
+    project_named_constraint_count INTEGER;
+    project_not_null_count INTEGER;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
             '실행 중단: 현재 데이터베이스는 %입니다. ai_database_book에 연결하세요.',
             current_database();
+    END IF;
+
+    IF current_setting('transaction_read_only')::boolean THEN
+        RAISE EXCEPTION '실행 중단: 현재 트랜잭션이 읽기 전용입니다. analysis_lab 생성이 가능한 연결을 사용하세요.';
+    END IF;
+
+    IF NOT has_database_privilege(current_user, current_database(), 'CREATE') THEN
+        RAISE EXCEPTION
+            '실행 중단: 사용자 %에게 데이터베이스 %의 CREATE 권한이 없습니다.',
+            current_user, current_database();
     END IF;
 
     IF to_regclass('course_project.students') IS NULL
@@ -39,6 +51,46 @@ BEGIN
           AND numeric_precision = 12 AND numeric_scale = 0
     ) THEN
         RAISE EXCEPTION '실행 중단: course_project.enrollments.recorded_amount는 NUMERIC(12,0)이어야 합니다.';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO project_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email','chk_course_students_name_not_blank','chk_course_students_email_not_blank',
+        'uq_course_instructors_email','chk_course_instructors_name_not_blank','chk_course_instructors_email_not_blank','chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor','chk_course_courses_title_not_blank','chk_course_courses_level','chk_course_courses_price',
+        'fk_course_enrollments_student','fk_course_enrollments_course','chk_course_enrollments_status','chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*)
+    INTO project_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students','instructors','courses','enrollments')
+      AND is_nullable = 'NO';
+
+    IF project_named_constraint_count <> 15 OR project_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '실행 중단: Chapter 07 구조 계약은 명명 제약조건 15개 / NOT NULL 열 20개여야 하지만 현재 % / %입니다.',
+            project_named_constraint_count, project_not_null_count;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes
+        WHERE schemaname = 'course_project'
+          AND indexname = 'uq_course_enrollments_active'
+          AND indexdef ILIKE 'CREATE UNIQUE INDEX%'
+          AND indexdef ILIKE '%student_id%course_id%'
+          AND indexdef ILIKE '%WHERE%status%신청%수강중%'
+    ) THEN
+        RAISE EXCEPTION '실행 중단: Chapter 07 활성 신청 부분 고유 인덱스 정의가 다릅니다.';
     END IF;
 
     SELECT COUNT(*) FILTER (WHERE status = '신청'),

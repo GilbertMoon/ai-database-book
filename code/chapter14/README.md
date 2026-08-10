@@ -94,7 +94,7 @@ end_date_exclusive = 2026-07-01
 최종 통과 메시지:
 
 ```text
-Chapter 14 analysis_lab validation passed
+Chapter 14 analysis_lab validation passed: rows 8/3/5/24/24, amount 3210000
 ```
 
 실패하면 기대값을 바꾸지 않고 DB·기간·Seed·JOIN·품질 검사를 확인합니다.
@@ -287,6 +287,7 @@ PGPASSFILE=
 현재 DB = ai_database_book
 분석 VIEW 존재
 transaction_read_only = on
+분석 계정은 실제 환경에서 CONNECT·USAGE·SELECT 중심 최소권한
 정확한 컬럼과 24행
 ```
 
@@ -340,7 +341,7 @@ CSV 최종 검증은 다음 세 증거를 함께 사용합니다.
 
 ```text
 CSV 데이터셋
-CSV manifest: DB·VIEW·기간·생성 시점·행 수·SHA-256
+CSV manifest: DB·VIEW·기간·생성 시점·행 수·기대 기록 금액·금액 의미·SHA-256
 reference_metrics.json: SQL 기준값
 ```
 
@@ -387,7 +388,8 @@ SQL·pandas 표와 합계를 먼저 확인한 뒤 해석을 돕는 용도로 사
 - 생성·Seed·reset 파일은 현재 DB를 실제 검사한다.
 - 분석 기간은 SQL·VIEW·Python에서 같은 반개방 구간을 사용한다.
 - 원본 테이블 변경 SQL을 Python에서 실행하지 않는다.
-- PostgreSQL 연결은 읽기 전용으로 설정한다.
+- PostgreSQL 연결은 읽기 전용으로 설정하고 실제 환경에서는 최소권한 분석 계정과 함께 사용한다.
+- Python 월 date spine은 공통 분석 기간 상수에서 생성한다.
 - 비밀번호·전체 접속 URL·password file을 코드에 기록하지 않는다.
 - CSV와 그래프는 저장소에서 제외한다.
 - Python에서 dropna·drop_duplicates·errors='coerce'로 오류를 숨기지 않는다.
