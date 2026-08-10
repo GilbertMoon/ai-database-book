@@ -10,6 +10,8 @@ SHOW search_path;
 
 DO $$
 DECLARE
+    v_named_constraint_count bigint;
+    v_not_null_count bigint;
     v_rows text;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
@@ -22,6 +24,44 @@ BEGIN
        OR to_regclass('course_project.enrollments') IS NULL
        OR to_regclass('course_project.uq_course_enrollments_active') IS NULL THEN
         RAISE EXCEPTION '테스트 중단: Chapter 07 프로젝트 객체가 모두 존재하지 않습니다.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_named_constraint_count
+    FROM pg_constraint
+    WHERE conrelid IN (
+        'course_project.students'::regclass,
+        'course_project.instructors'::regclass,
+        'course_project.courses'::regclass,
+        'course_project.enrollments'::regclass
+    )
+      AND conname IN (
+        'uq_course_students_email',
+        'chk_course_students_name_not_blank',
+        'chk_course_students_email_not_blank',
+        'uq_course_instructors_email',
+        'chk_course_instructors_name_not_blank',
+        'chk_course_instructors_email_not_blank',
+        'chk_course_instructors_specialty_not_blank',
+        'fk_course_courses_instructor',
+        'chk_course_courses_title_not_blank',
+        'chk_course_courses_level',
+        'chk_course_courses_price',
+        'fk_course_enrollments_student',
+        'fk_course_enrollments_course',
+        'chk_course_enrollments_status',
+        'chk_course_enrollments_recorded_amount'
+      );
+
+    SELECT COUNT(*) INTO v_not_null_count
+    FROM information_schema.columns
+    WHERE table_schema = 'course_project'
+      AND table_name IN ('students', 'instructors', 'courses', 'enrollments')
+      AND is_nullable = 'NO';
+
+    IF v_named_constraint_count <> 15 OR v_not_null_count <> 20 THEN
+        RAISE EXCEPTION
+            '테스트 중단: 구조 기준이 다릅니다. named_constraints=%, not_null_columns=%',
+            v_named_constraint_count, v_not_null_count;
     END IF;
 
     SELECT
@@ -45,6 +85,10 @@ $$;
 -- VALUES (1802,103,1801,'2026-05-02','신청',0);
 -- DELETE FROM course_project.enrollments WHERE id=1802;
 -- DELETE FROM course_project.courses WHERE id=1801;
+
+-- 오류 0. 학생 이름 NULL → NOT NULL
+-- INSERT INTO course_project.students (id,name,email,joined_at)
+-- VALUES (1900,NULL,'null-name@example.com',DATE '2026-03-20');
 
 -- 오류 1. 학생 이메일 중복 → uq_course_students_email
 -- INSERT INTO course_project.students (id,name,email,joined_at)

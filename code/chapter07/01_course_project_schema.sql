@@ -18,6 +18,13 @@ BEGIN
             current_database();
     END IF;
 
+    IF NOT has_database_privilege(current_user, current_database(), 'CREATE') THEN
+        RAISE EXCEPTION
+            '스키마 생성 중단: 사용자 %에게 데이터베이스 %의 CREATE 권한이 없습니다.',
+            current_user,
+            current_database();
+    END IF;
+
     IF current_setting('transaction_read_only')::boolean THEN
         RAISE EXCEPTION
             '스키마 생성 중단: 현재 연결이 읽기 전용입니다.';

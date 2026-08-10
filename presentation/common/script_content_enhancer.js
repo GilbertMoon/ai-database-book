@@ -169,6 +169,7 @@
   };
 
   const apply = (root = document) => {
+    if (document.body?.dataset?.scriptContentEnhancer === 'off') return;
     root.querySelectorAll?.('#card, .card').forEach(enhanceCard);
     const direct = root.matches?.('#card, .card') ? root : null;
     if (direct) enhanceCard(direct);
@@ -186,6 +187,7 @@
 
   const observer = new MutationObserver(schedule);
   const start = () => {
+    if (document.body?.dataset?.scriptContentEnhancer === 'off') return;
     apply(document);
     observer.observe(document.body, { childList: true, subtree: true });
   };

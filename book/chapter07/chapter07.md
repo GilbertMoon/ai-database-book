@@ -185,8 +185,8 @@ SHOW search_path;
 
 | ID | 결정 | 구현 |
 | --- | --- | --- |
-| `P07-D01` | 무료 강의와 무료 신청 금액은 0 | `NOT NULL`, `CHECK >= 0` |
-| `P07-D02` | 신청 시 금액을 `recorded_amount`에 보존 | `NUMERIC(12, 0)` |
+| `P07-D01` | 무료 금액은 `0`으로 표현하고 `NULL`·음수는 허용하지 않음 | `NOT NULL`, `CHECK >= 0` |
+| `P07-D02` | 할인 기능이 없는 현재 범위에서는 신청 생성 시 `courses.price`를 `recorded_amount`에 복사해 보존 | `INSERT ... SELECT` + `NUMERIC(12, 0)` |
 | `P07-D03` | 진행 중 중복 신청 금지 | 부분 고유 인덱스 |
 | `P07-D04` | 상태 변경 전에 예상 이전 상태 확인 | 조건부 `UPDATE` |
 | `P07-D05` | 학생과 강사는 별도 역할 | 별도 테이블 |
@@ -276,7 +276,19 @@ enrollments.recorded_amount
 → 해당 신청이 만들어질 때 신청 행에 기록한 금액
 ```
 
-두 값이 같아도 의미와 시점이 다릅니다. 강의 가격이 나중에 바뀌어도 과거 신청의 `recorded_amount`는 자동으로 바뀌지 않습니다.
+두 값이 같아도 의미와 시점이 다릅니다. 이번 프로젝트에는 쿠폰·할인 기능이 없으므로 **신청을 생성하는 순간의 `courses.price`를 `recorded_amount`에 복사**합니다. 강의 가격이 나중에 바뀌어도 과거 신청의 `recorded_amount`는 자동으로 바뀌지 않습니다.
+
+```sql
+INSERT INTO course_project.enrollments (
+    id, student_id, course_id, enrolled_at, status, recorded_amount
+)
+SELECT
+    1005, 102, c.id, DATE '2026-04-07', '신청', c.price
+FROM course_project.courses AS c
+WHERE c.id = 302;
+```
+
+이 복사는 `CHECK`나 외래키가 자동으로 수행하는 기능이 아닙니다. 현재 프로젝트에서는 신청 생성 SQL이 값을 복사하고, 이후 검증 SQL이 기대 금액을 확인합니다. 다른 행·다른 테이블의 현재 값을 `CHECK`로 계속 비교해 과거 기록을 강제로 맞추는 방식은 사용하지 않습니다.
 
 `recorded_amount`는 실제 결제 승인 금액을 뜻하지 않습니다. 결제·환불을 관리하려면 다음과 같은 별도 구조가 필요합니다.
 
@@ -328,7 +340,7 @@ ON course_project.enrollments (student_id, course_id)
 WHERE status IN ('신청', '수강중');
 ```
 
-완료·취소 이력은 여러 건 존재할 수 있지만 현재 진행 중인 신청은 학생·강의 조합당 최대 한 건만 허용합니다.
+완료·취소 이력은 여러 건 존재할 수 있지만 현재 진행 중인 신청은 학생·강의 조합당 최대 한 건만 허용합니다. `uq_course_enrollments_active`는 `UNIQUE` 제약조건이 아니라 조건을 만족하는 행에만 적용되는 **부분 고유 인덱스 객체**입니다.
 
 ---
 
@@ -337,7 +349,7 @@ WHERE status IN ('신청', '수강중');
 `01_course_project_schema.sql`은 다음 작업을 하나의 트랜잭션으로 수행합니다.
 
 ```text
-현재 DB·쓰기 가능 상태·기존 스키마 확인
+현재 DB·DB의 `CREATE` 권한·쓰기 가능 상태·기존 스키마 확인
 → course_project 스키마 생성
 → 부모 테이블 생성
 → 자식 테이블 생성
@@ -418,7 +430,7 @@ WHERE id = 1001
 RETURNING id, status, recorded_amount;
 ```
 
-예상 상태와 실제 상태가 다르면 전체 변경을 완료하지 않습니다.
+예상 상태와 실제 상태가 다르면 전체 변경을 완료하지 않습니다. 조건부 `UPDATE`는 이 파일에서 실행하는 변경을 보호하는 방식이며, 모든 가능한 상태 전이를 데이터베이스 전체에서 강제하는 규칙은 아닙니다. 마지막 자동 검증까지 통과하지 못하면 같은 트랜잭션의 변경을 완료 상태로 보지 않습니다.
 
 ### 상태값과 상태 전이
 
@@ -491,6 +503,7 @@ Chapter 07 course project validation passed
 ### 실패해야 하는 오류
 
 ```text
+대표 `NOT NULL` 위반
 학생 이메일 중복
 허용되지 않은 난이도
 음수 recorded_amount
@@ -566,6 +579,8 @@ AI 제안과 사람의 최종 결정
 | 탈퇴·익명화 | 소프트 삭제, 개인정보 대체 정책 |
 
 새 기능은 바로 열을 추가하지 않고 다음 순서로 검토합니다.
+
+[Chapter 07 독자 프로젝트 워크북](chapter07_activity.md)에는 실행 결과와 설계 판단을 직접 기록할 수 있는 체크 항목이 있습니다.
 
 ```text
 새 요구사항

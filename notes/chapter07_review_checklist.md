@@ -264,3 +264,18 @@ PostgreSQL: 16
 - [ ] GitHub SVG 실제 렌더링
 - [ ] Word·PDF·eBook 최종 렌더링
 - [ ] 최종 편집 분량 24~27페이지 확인
+
+
+---
+
+## 최종 출판 보완 (2026-08-10)
+
+- [x] P07-D01 무료 금액의 0 / NULL / 음수 의미 구분
+- [x] P07-D02 신규 신청 시 `courses.price` → `recorded_amount` 복사 흐름 명시
+- [x] 교차 테이블 CHECK로 과거 금액을 강제하지 않는 이유 설명
+- [x] 01의 데이터베이스 CREATE 권한 사전 검사
+- [x] 05·06 시작 시 제약조건 15·NOT NULL 20 구조 재확인
+- [x] 대표 NOT NULL 실패 예제 추가
+- [x] 부분 고유 인덱스와 UNIQUE 제약조건 구분
+- [x] Chapter 07 자동 스크립트 보강 비활성화
+- [ ] 최신 PostgreSQL 16 전체 경로 재검증 결과 확인

@@ -21,6 +21,7 @@ DECLARE
     v_status_1004 text;
     v_count_1005 bigint;
     v_active_102_302 bigint;
+    v_course_302_price numeric;
 BEGIN
     IF current_database() <> 'ai_database_book' THEN
         RAISE EXCEPTION
@@ -67,6 +68,10 @@ BEGIN
       AND course_id = 302
       AND status IN ('신청', '수강중');
 
+    SELECT price INTO v_course_302_price
+    FROM course_project.courses
+    WHERE id = 302;
+
     IF v_student_count <> 3
        OR v_instructor_count <> 2
        OR v_course_count <> 3
@@ -75,9 +80,10 @@ BEGIN
        OR v_status_1001 IS DISTINCT FROM '수강중'
        OR v_status_1004 IS DISTINCT FROM '신청'
        OR v_count_1005 <> 0
-       OR v_active_102_302 <> 0 THEN
+       OR v_active_102_302 <> 0
+       OR v_course_302_price IS DISTINCT FROM 120000::numeric THEN
         RAISE EXCEPTION
-            '변경 시작 상태 불일치: rows=%/%/%/%, total=%, status1001=%, status1004=%, id1005=%, active102_302=%',
+            '변경 시작 상태 불일치: rows=%/%/%/%, total=%, status1001=%, status1004=%, id1005=%, active102_302=%, course302_price=%',
             v_student_count,
             v_instructor_count,
             v_course_count,
@@ -86,7 +92,8 @@ BEGIN
             v_status_1001,
             v_status_1004,
             v_count_1005,
-            v_active_102_302;
+            v_active_102_302,
+            v_course_302_price;
     END IF;
 END
 $$;
@@ -99,14 +106,15 @@ INSERT INTO course_project.enrollments (
     status,
     recorded_amount
 )
-VALUES (
+SELECT
     1005,
     102,
-    302,
-    '2026-04-07',
+    c.id,
+    DATE '2026-04-07',
     '신청',
-    120000
-)
+    c.price
+FROM course_project.courses AS c
+WHERE c.id = 302
 RETURNING id, student_id, course_id, status, recorded_amount;
 
 UPDATE course_project.enrollments

@@ -58,6 +58,7 @@ reset_course_project.sql
 5. 생성·입력·변경·초기화 작업은 트랜잭션으로 묶는다.
 6. 오류 테스트는 하나의 구간만 실행한다.
 7. 완료 후 04 검증 파일을 다시 실행한다.
+8. 01에서 스키마를 생성한 역할과 같은 PostgreSQL 역할로 02~06·reset을 실행한다.
 ```
 
 `01`, `02`, `03`은 시작 상태와 완료 상태를 자동으로 검사합니다. 중간 문장에서 오류가 발생하면 전체 작업이 `COMMIT`되지 않도록 구성합니다.
@@ -72,14 +73,14 @@ course_project.enrollments.recorded_amount
 → 신청 시점에 신청 행에 기록한 금액
 ```
 
-두 열은 `NUMERIC(12,0)`을 사용합니다. `recorded_amount`는 실제 결제 승인액이나 환불 후 순수 금액, 회계 매출이 아닙니다. 실제 결제·환불 이력은 현재 프로젝트 범위 밖입니다.
+두 열은 `NUMERIC(12,0)`을 사용합니다. 현재 범위에는 할인·쿠폰이 없으므로 신규 신청은 해당 시점의 `courses.price`를 조회해 `recorded_amount`로 복사합니다. 이 복사는 `CHECK`가 자동 수행하는 것이 아니라 신청 생성 SQL의 책임이며, 과거 행은 이후 가격 변경과 분리해 보존합니다. `recorded_amount`는 실제 결제 승인액이나 환불 후 순수 금액, 회계 매출이 아닙니다. 실제 결제·환불 이력은 현재 프로젝트 범위 밖입니다.
 
 ## 핵심 프로젝트 결정
 
 | ID | 결정 | 구현 |
 | --- | --- | --- |
-| P07-D01 | 무료 금액은 0 | NOT NULL·CHECK |
-| P07-D02 | 신청 시 금액 보존 | recorded_amount |
+| P07-D01 | 무료 금액은 0, NULL·음수 금지 | NOT NULL·CHECK |
+| P07-D02 | 신청 생성 시 현재 가격 복사·보존 | INSERT ... SELECT → recorded_amount |
 | P07-D03 | 진행 중 중복 신청 금지 | 부분 고유 인덱스 |
 | P07-D04 | 예상 이전 상태 확인 | 사전 검사·조건부 UPDATE |
 | P07-D05 | 학생·강사 별도 역할 | 별도 테이블 |
@@ -96,6 +97,7 @@ WHERE status IN ('신청', '수강중');
 ### 01 구조 생성 완료
 
 ```text
+현재 역할에 ai_database_book의 CREATE 권한 존재
 course_project 존재
 네 테이블 존재
 명명 제약조건 15개
@@ -181,6 +183,7 @@ Chapter 07 course project validation passed
 
 ```text
 성공: price=0, recorded_amount=0, description=NULL
+실패: 대표 NOT NULL 위반
 실패: 학생·강사 이메일 중복
 실패: 존재하지 않는 강사·학생·강의 참조
 실패: 잘못된 난이도·신청 상태
