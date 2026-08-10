@@ -167,4 +167,17 @@ Chapter 08. JOIN과 집계로 서비스 질문에 답하기
 - [x] 강사 202의 우연한 150000 일치가 잘못된 쿼리를 정당화하지 않음을 설명
 - [x] 본문·워크북·이론·실습·README 숫자 기준 동기화
 - [x] Chapter 08 작성 스크립트 자동 확장 비활성화
-- [ ] 최신 PostgreSQL 16 전체 경로 재검증 결과 확인
+- [x] 최신 PostgreSQL 16 전체 경로 재검증 결과 확인 — Validate Chapter 08 Run 6 / 31378288930 성공
+
+
+### 최종 자동 검증 기록
+
+```text
+Workflow: Validate Chapter 08
+Run: 6
+Run ID: 31378288930
+Commit: 9dddfe224847e360a546a6a9e9c50e2ad9b447a4
+PostgreSQL: 16
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+```

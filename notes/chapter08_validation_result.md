@@ -255,3 +255,45 @@ TTS 실제 음성 청취
 SVG의 실제 화면·인쇄 가독성
 Word·PDF·eBook 표·코드·SVG 최종 렌더링
 ```
+
+
+---
+
+## 2026-08-10 최종 출판 재검증
+
+Chapter 08 최종 출판 보완 뒤 PostgreSQL 16에서 기존 전용 검증 워크플로를 다시 실행했다.
+
+```text
+Workflow: Validate Chapter 08
+Run: 6
+Run ID: 31378288930
+Commit: 9dddfe224847e360a546a6a9e9c50e2ad9b447a4
+Status: completed
+Conclusion: success
+Date: 2026-08-10 (Asia/Seoul)
+PostgreSQL: 16
+```
+
+최종 확인 범위:
+
+```text
+Chapter 07 기준 상태 실제 생성 성공
+Chapter 07 명명 제약조건 = 15 / NOT NULL 열 = 20 인계 확인
+Chapter 08 00 → 01 → 02 → 03 → 호환 조회를 READ ONLY 트랜잭션에서 실행
+실행 전후 course_project 데이터 불변
+잘못된 데이터베이스에서 00 사전 게이트 차단
+기준 상태 변경 시 00 차단
+recorded_amount 변경 시 03 차단
+전체 신청 = 5 / recorded_amount 590000
+활성 신청 = 3 / recorded_amount 340000
+취소 제외 = 4 / recorded_amount 440000
+HAVING 취소 제외 신청 2건 이상 강의 = 2개
+강사 201 신청 JOIN 뒤 잘못된 SUM(c.price) = 440000
+강사 201 강의 수준 올바른 가격 합계 = 220000
+강사 202 두 방식 = 150000 / 150000 (우연한 일치)
+Chapter 08 authored narration 자동 확장 비활성화 정적 확인
+Chapter 08 prerequisite check passed
+Chapter 08 join and aggregation validation passed
+```
+
+과대 집계 예제는 이제 본문 설명에만 존재하지 않고 `03_join_aggregation_validation.sql`과 GitHub Actions에서 실제 숫자로 검증한다. 강사 202처럼 잘못된 방식과 올바른 방식의 결과가 우연히 같은 경우도 있기 때문에, 결과 숫자 하나가 맞는지만 보지 않고 합산 기준 행을 확인해야 한다.
