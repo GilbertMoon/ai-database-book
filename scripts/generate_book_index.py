@@ -35,7 +35,7 @@ def chapter_card(number: int) -> str:
     action = (
         f'<a href="{html_rel}">Chapter {number:02d} 열기</a>'
         if html_path.exists()
-        else '<span class="small">Markdown 원고 검수 완료 · HTML 제작 대기</span>'
+        else '<span class="small">Markdown 원고 있음 · HTML 제작 대기</span>'
     )
     return f'''<article class="chapter">
   <b>CHAPTER {number:02d} · {status}</b>
@@ -101,7 +101,7 @@ def build_index() -> str:
     <article class="card">
       <div class="card-num">PUBLICATION STATUS</div>
       <h3>출판 HTML {len(available)} / {total}</h3>
-      <p>원고 Markdown은 전체 15개 Chapter를 유지하고, 출판 HTML은 검수가 끝난 장부터 순차적으로 활성화합니다.</p>
+      <p>원고 Markdown은 전체 15개 Chapter를 유지하고, 출판 HTML은 준비가 끝난 장부터 순차적으로 활성화합니다.</p>
     </article>
   </div>
   <div class="note">
