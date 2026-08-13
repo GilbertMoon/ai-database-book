@@ -20,7 +20,7 @@ jobs:
       - name: Generate book index
         run: python scripts/generate_book_index.py
 
-      - name: Validate publication styles
+      - name: Validate publication styles and links
         run: python scripts/validate_publication_styles.py
 
       - name: Validate book index links and status
@@ -42,15 +42,13 @@ jobs:
               'STAGE 4 · CHAPTER 13–15',
               'chapter01/chapter01.html',
               'chapter02/chapter02.html',
+              'Markdown 원고 있음 · HTML 제작 대기',
               '../assets/css/book.css',
               '../assets/css/print.css',
           ]
           for token in required:
               if token not in text:
                   raise SystemExit(f'missing book index token: {token}')
-
-          if 'chapter03/chapter03.html' in text:
-              raise SystemExit('Chapter 03 should not be linked before its publication HTML exists')
 
           if text.count('출판 HTML 준비 중') != 13:
               raise SystemExit('unexpected pending Chapter count')
