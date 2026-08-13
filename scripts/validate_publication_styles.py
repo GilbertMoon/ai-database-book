@@ -11,11 +11,20 @@ PRINT_CSS = ROOT / "assets" / "css" / "print.css"
 
 def publication_html_files() -> list[Path]:
     files: list[Path] = []
+    index = ROOT / "book" / "index.html"
+    if index.exists():
+        files.append(index)
     overview = ROOT / "book" / "overview" / "overview.html"
     if overview.exists():
         files.append(overview)
     files.extend(sorted((ROOT / "book").glob("chapter*/chapter*.html")))
     return files
+
+
+def expected_css_prefix(path: Path) -> str:
+    if path == ROOT / "book" / "index.html":
+        return "../assets/css/"
+    return "../../assets/css/"
 
 
 def validate() -> list[str]:
@@ -35,14 +44,15 @@ def validate() -> list[str]:
     for path in files:
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(ROOT)
+        prefix = expected_css_prefix(path)
 
         if re.search(r"<style(?:\s[^>]*)?>", text, flags=re.I):
             errors.append(f"inline <style> is not allowed: {rel}")
 
-        if '../../assets/css/book.css' not in text:
+        if f'{prefix}book.css' not in text:
             errors.append(f"book.css link missing: {rel}")
 
-        if '../../assets/css/print.css' not in text:
+        if f'{prefix}print.css' not in text:
             errors.append(f"print.css link missing: {rel}")
 
         if '<html lang="ko">' not in text and "<html lang='ko'>" not in text:
@@ -50,6 +60,16 @@ def validate() -> list[str]:
 
         if '<meta name="viewport"' not in text and "<meta name='viewport'" not in text:
             errors.append(f"viewport metadata missing: {rel}")
+
+    index = ROOT / "book" / "index.html"
+    if index.exists():
+        text = index.read_text(encoding="utf-8")
+        if 'overview/overview.html' not in text:
+            errors.append("book/index.html does not link Overview")
+        for number in range(1, 16):
+            token = f"CHAPTER {number:02d}"
+            if token not in text:
+                errors.append(f"book/index.html missing {token}")
 
     return errors
 
