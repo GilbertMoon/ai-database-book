@@ -4,79 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Overview · AI 시대의 데이터베이스 입문</title>
-<style>
-:root{
-  --ink:#17212b;--muted:#5e6b78;--navy:#15304a;--blue:#2f6fed;--blue-soft:#eaf1ff;
-  --teal:#168c8c;--teal-soft:#e9f7f6;--green:#2f855a;--green-soft:#eaf7ef;
-  --orange:#b56a14;--orange-soft:#fff4e6;--line:#d8e0e8;--paper:#fff;--canvas:#eef3f8;
-}
-*{box-sizing:border-box}
-html{font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:var(--canvas);line-height:1.72}
-body{margin:0}
-main{width:min(980px,calc(100% - 32px));margin:32px auto 80px;background:var(--paper);box-shadow:0 18px 55px rgba(21,48,74,.10)}
-.page{padding:72px 78px}
-.hero{min-height:620px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,#f9fbfd 0%,#eef4fb 60%,#f4f8fb 100%);border-bottom:1px solid var(--line)}
-.eyebrow{font-size:14px;letter-spacing:.14em;font-weight:800;color:var(--blue);text-transform:uppercase;margin-bottom:18px}
-h1{font-size:52px;line-height:1.18;letter-spacing:-.045em;margin:0;color:var(--navy)}
-.hero h2{font-size:28px;line-height:1.4;letter-spacing:-.025em;margin:18px 0 0;color:var(--ink);font-weight:700}
-.lead{font-size:21px;line-height:1.8;margin:40px 0 0;max-width:760px;color:#334254}
-.tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:38px}
-.tag{border:1px solid #c9d7e6;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;color:#35516d;background:#fff}
-blockquote{margin:40px 0 0;padding:22px 26px;border-left:4px solid var(--blue);background:#f7faff;font-size:18px;color:#26384a}
-section{margin-top:66px}
-section:first-child{margin-top:0}
-h2.section-title{font-size:31px;line-height:1.35;letter-spacing:-.035em;margin:0 0 18px;color:var(--navy)}
-h3{font-size:22px;line-height:1.45;margin:32px 0 10px;color:var(--navy);letter-spacing:-.02em}
-p{margin:0 0 16px}
-strong{color:#122f4c}
-.rule{height:1px;background:var(--line);margin:54px 0}
-.note{border:1px solid var(--line);border-radius:18px;padding:22px 24px;background:#fbfcfe}
-.note-title{font-weight:800;color:var(--navy);margin-bottom:8px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
-.card{border:1px solid var(--line);border-radius:20px;padding:24px;background:#fff;break-inside:avoid}
-.card-num{font-weight:900;font-size:14px;color:var(--blue);letter-spacing:.08em}
-.card h3{margin:8px 0 8px;font-size:21px}
-.card p{font-size:15.5px;color:#3f4d5c;margin:0}
-.principles{counter-reset:item;display:grid;gap:12px;margin-top:22px}
-.principle{display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;padding:16px 18px;border-radius:16px;background:#f7f9fc}
-.principle::before{counter-increment:item;content:counter(item);width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
-.figure{margin:34px 0 10px;break-inside:avoid}
-.figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:20px;background:#f7f9fc}
-figcaption{margin-top:10px;text-align:center;color:var(--muted);font-size:13.5px}
-.stage{border:1px solid var(--line);border-radius:20px;padding:22px 24px;margin:18px 0;break-inside:avoid}
-.stage-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
-.stage-label{font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--blue)}
-.stage h3{margin:0;font-size:21px}
-.stage ul{margin:12px 0 0;padding-left:21px}
-.stage li{margin:6px 0}
-.chapter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
-.chapter{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;break-inside:avoid}
-.chapter b{display:block;color:var(--blue);font-size:13px;margin-bottom:5px}
-.chapter span{font-size:14px;line-height:1.5;font-weight:700;color:#243344}
-table{width:100%;border-collapse:collapse;margin:22px 0 8px;font-size:15px}
-th,td{border-bottom:1px solid var(--line);padding:13px 12px;text-align:left;vertical-align:top}
-th{background:#f6f8fb;color:var(--navy);font-weight:800}
-.tool-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
-.tool{padding:16px 18px;border:1px solid var(--line);border-radius:16px}
-.tool b{display:block;color:var(--navy);margin-bottom:4px}
-.tool span{font-size:14px;color:var(--muted)}
-.flow-box{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;border-radius:18px;padding:22px 24px;background:var(--navy);color:#fff;font-weight:800;text-align:center;letter-spacing:-.01em;margin:26px 0}
-.footer-cta{margin-top:70px;padding:34px;border-radius:22px;background:#f1f6fd;border:1px solid #d7e3f2;text-align:center}
-.footer-cta b{display:block;font-size:22px;margin-bottom:8px;color:var(--navy)}
-.small{font-size:13.5px;color:var(--muted)}
-@media(max-width:760px){
-  main{width:100%;margin:0;box-shadow:none}.page{padding:44px 24px}.hero{min-height:auto;padding-top:70px;padding-bottom:70px}
-  h1{font-size:39px}.hero h2{font-size:23px}.lead{font-size:18px}.cards,.tool-list{grid-template-columns:1fr}.chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media print{
-  @page{size:A4;margin:15mm 14mm 16mm}
-  html,body{background:#fff}.page{padding:0}main{width:auto;margin:0;box-shadow:none}
-  .hero{min-height:245mm;border:0;break-after:page;background:#fff}
-  section{margin-top:12mm}.rule{margin:10mm 0}.figure,.card,.stage,.chapter,.note,.tool,table{break-inside:avoid}
-  a{color:inherit;text-decoration:none}.chapter-grid{grid-template-columns:repeat(3,1fr)}
-  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-}
-</style>
+<link rel="stylesheet" href="../../assets/css/book.css">
+<link rel="stylesheet" href="../../assets/css/print.css" media="print">
 </head>
 <body>
 <main>
