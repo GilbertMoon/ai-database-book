@@ -1,0 +1,70 @@
+name: Generate publication book index once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/generate-book-index-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate book index
+        run: python scripts/generate_book_index.py
+
+      - name: Validate publication styles
+        run: python scripts/validate_publication_styles.py
+
+      - name: Validate book index links and status
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('book/index.html')
+          text = path.read_text(encoding='utf-8')
+
+          required = [
+              'AI 시대의 데이터베이스 입문',
+              '출판용 HTML 목차',
+              'Overview 열기',
+              'Chapter HTML 2/15',
+              'STAGE 1 · CHAPTER 01–04',
+              'STAGE 2 · CHAPTER 05–07',
+              'STAGE 3 · CHAPTER 08–12',
+              'STAGE 4 · CHAPTER 13–15',
+              'chapter01/chapter01.html',
+              'chapter02/chapter02.html',
+              '../assets/css/book.css',
+              '../assets/css/print.css',
+          ]
+          for token in required:
+              if token not in text:
+                  raise SystemExit(f'missing book index token: {token}')
+
+          if 'chapter03/chapter03.html' in text:
+              raise SystemExit('Chapter 03 should not be linked before its publication HTML exists')
+
+          if text.count('출판 HTML 준비 중') != 13:
+              raise SystemExit('unexpected pending Chapter count')
+
+          if '<style' in text.lower():
+              raise SystemExit('book/index.html must not contain inline styles')
+
+          print('Publication book index validation passed')
+          PY
+
+      - name: Commit book index
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add book/index.html
+          git commit -m 'Generate publication book index'
+          git push
