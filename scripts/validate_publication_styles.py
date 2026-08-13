@@ -66,10 +66,18 @@ def validate() -> list[str]:
         text = index.read_text(encoding="utf-8")
         if 'overview/overview.html' not in text:
             errors.append("book/index.html does not link Overview")
+
         for number in range(1, 16):
             token = f"CHAPTER {number:02d}"
             if token not in text:
                 errors.append(f"book/index.html missing {token}")
+
+            rel_link = f"chapter{number:02d}/chapter{number:02d}.html"
+            html_path = ROOT / "book" / rel_link
+            if html_path.exists() and rel_link not in text:
+                errors.append(f"book/index.html missing generated Chapter link: {rel_link}")
+            if not html_path.exists() and rel_link in text:
+                errors.append(f"book/index.html links missing Chapter HTML: {rel_link}")
 
     return errors
 
