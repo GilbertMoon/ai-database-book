@@ -1,0 +1,52 @@
+name: Validate book index once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-book-index-once.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate book index
+        run: python scripts/generate_book_index.py
+      - name: Ensure generated index is committed
+        run: git diff --exit-code -- book/index.html
+      - name: Validate publication styles and index links
+        run: python scripts/validate_publication_styles.py
+      - name: Validate local index targets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          index_path = root / 'book' / 'index.html'
+          html = index_path.read_text(encoding='utf-8')
+
+          hrefs = re.findall(r'href="([^"]+)"', html)
+          local = [href for href in hrefs if not href.startswith(('http://', 'https://', '#', 'mailto:'))]
+          for href in local:
+              target = (index_path.parent / href).resolve()
+              if not target.exists():
+                  raise SystemExit(f'broken local href: {href}')
+
+          ready = sum(
+              (root / 'book' / f'chapter{i:02d}' / f'chapter{i:02d}.html').exists()
+              for i in range(1, 16)
+          )
+          token = f'Chapter HTML {ready}/15'
+          if token not in html:
+              raise SystemExit(f'publication count is stale: expected {token}')
+
+          if html.count('출판 HTML 준비 완료') != ready:
+              raise SystemExit('ready-card count does not match actual Chapter HTML count')
+
+          if html.count('<article class="chapter">') != 15:
+              raise SystemExit('book index must contain exactly 15 chapter cards')
+
+          print(f'Book index validation passed: Overview + 15 chapters, ready HTML {ready}/15')
+          PY
