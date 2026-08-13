@@ -1,0 +1,134 @@
+name: Migrate shared publication CSS once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/migrate-shared-publication-css-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Migrate publication HTML and generators to shared CSS
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          links = (
+              '<link rel="stylesheet" href="../../assets/css/book.css">\n'
+              '<link rel="stylesheet" href="../../assets/css/print.css" media="print">'
+          )
+
+          html_paths = [
+              root / 'book/overview/overview.html',
+              root / 'book/chapter01/chapter01.html',
+              root / 'book/chapter02/chapter02.html',
+          ]
+
+          for path in html_paths:
+              text = path.read_text(encoding='utf-8')
+              updated, count = re.subn(r'<style>.*?</style>', links, text, count=1, flags=re.S)
+              if count != 1:
+                  raise SystemExit(f'expected one inline style block in {path}, got {count}')
+              path.write_text(updated, encoding='utf-8')
+
+          ch1 = root / 'scripts/generate_chapter01_publication.py'
+          text = ch1.read_text(encoding='utf-8')
+          text, count = re.subn(r'CSS = r""".*?"""\n\n', '', text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('failed to remove Chapter 01 CSS constant')
+          old = '<style>{CSS}</style>'
+          new = '<link rel="stylesheet" href="../../assets/css/book.css">\n<link rel="stylesheet" href="../../assets/css/print.css" media="print">'
+          if old not in text:
+              raise SystemExit('Chapter 01 generator inline style marker missing')
+          text = text.replace(old, new, 1)
+          ch1.write_text(text, encoding='utf-8')
+
+          ch2 = root / 'scripts/generate_chapter02_publication.py'
+          text = ch2.read_text(encoding='utf-8')
+          text, count = re.subn(r"CSS = r'''.*?'''\n\n", '', text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('failed to remove Chapter 02 CSS constant')
+          if old not in text:
+              raise SystemExit('Chapter 02 generator inline style marker missing')
+          text = text.replace(old, new, 1)
+          ch2.write_text(text, encoding='utf-8')
+
+          print('Shared publication CSS migration completed')
+          PY
+
+      - name: Install publication generator dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2
+          python -m pip install --upgrade markdown cairosvg pillow
+
+      - name: Regenerate Chapter 01 and 02 HTML
+        run: |
+          python scripts/generate_chapter01_publication.py
+          python scripts/generate_chapter02_publication.py
+
+      - name: Validate shared CSS system
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          screen = Path('assets/css/book.css')
+          printed = Path('assets/css/print.css')
+          if not screen.exists() or screen.stat().st_size < 5000:
+              raise SystemExit('book.css missing or unexpectedly small')
+          if not printed.exists() or printed.stat().st_size < 1000:
+              raise SystemExit('print.css missing or unexpectedly small')
+
+          required_screen = [':root', '.hero', '.content > h2', 'pre {', 'table {', '.cards', '.chapter-grid', '@media (max-width: 760px)']
+          required_print = ['@media print', '@page', 'size: A4', 'break-after: page', 'print-color-adjust']
+          screen_text = screen.read_text(encoding='utf-8')
+          print_text = printed.read_text(encoding='utf-8')
+          for token in required_screen:
+              if token not in screen_text:
+                  raise SystemExit(f'book.css missing: {token}')
+          for token in required_print:
+              if token not in print_text:
+                  raise SystemExit(f'print.css missing: {token}')
+
+          html_paths = [
+              Path('book/overview/overview.html'),
+              Path('book/chapter01/chapter01.html'),
+              Path('book/chapter02/chapter02.html'),
+          ]
+          for path in html_paths:
+              text = path.read_text(encoding='utf-8')
+              if '<style>' in text or '</style>' in text:
+                  raise SystemExit(f'inline style remains in {path}')
+              if '../../assets/css/book.css' not in text:
+                  raise SystemExit(f'book.css link missing in {path}')
+              if '../../assets/css/print.css' not in text:
+                  raise SystemExit(f'print.css link missing in {path}')
+
+          for path in [Path('scripts/generate_chapter01_publication.py'), Path('scripts/generate_chapter02_publication.py')]:
+              text = path.read_text(encoding='utf-8')
+              if 'CSS = ' in text or '<style>{CSS}</style>' in text:
+                  raise SystemExit(f'embedded CSS remains in generator {path}')
+              if '../../assets/css/book.css' not in text or '../../assets/css/print.css' not in text:
+                  raise SystemExit(f'shared CSS links missing in generator {path}')
+
+          print('Shared publication CSS validation passed')
+          PY
+
+      - name: Commit shared CSS migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add book/overview/overview.html book/chapter01/chapter01.html book/chapter02/chapter02.html scripts/generate_chapter01_publication.py scripts/generate_chapter02_publication.py
+          git commit -m 'Migrate publication HTML to shared CSS'
+          git push
