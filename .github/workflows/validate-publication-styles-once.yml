@@ -1,0 +1,15 @@
+name: Validate publication styles once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-publication-styles-once.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shared publication CSS usage
+        run: python scripts/validate_publication_styles.py
