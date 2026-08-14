@@ -48,8 +48,8 @@ def validate_chapter(chapter: int) -> list[str]:
             errors.append(f"Chapter {chapter:02d}: missing AI/practice section {practice_no}")
 
     summary_patterns = [
-        r"^#{{1,2}}\s+오늘의 핵심 정리\s*$",
-        r"^#{{1,2}}\s+전체 과정 핵심 정리\s*$",
+        r"^#{1,2}\s+오늘의 핵심 정리\s*$",
+        r"^#{1,2}\s+전체 과정 핵심 정리\s*$",
     ]
     if not has_any(text, summary_patterns):
         errors.append(f"Chapter {chapter:02d}: missing summary section")
