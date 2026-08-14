@@ -1,0 +1,29 @@
+name: Validate Naver Blog Markdown
+
+on:
+  push:
+    paths:
+      - 'blog/**/chapter*_naver.md'
+      - 'scripts/validate_naver_blog_md.py'
+      - '.github/workflows/validate-naver-blog.yml'
+  pull_request:
+    paths:
+      - 'blog/**/chapter*_naver.md'
+      - 'scripts/validate_naver_blog_md.py'
+      - '.github/workflows/validate-naver-blog.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Chapter 01-15 Naver Markdown
+        run: python scripts/validate_naver_blog_md.py
