@@ -1,0 +1,113 @@
+name: Build full book PDF
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'book/**/*.html'
+      - 'book/chapter*/chapter*.md'
+      - 'assets/css/*.css'
+      - 'images/**/*.jpg'
+      - 'scripts/build_full_book_html.py'
+      - 'scripts/build_book_pdf.py'
+      - 'scripts/validate_book_pdf.py'
+      - 'scripts/validate_publication_styles.py'
+      - 'scripts/validate_book_index.py'
+      - 'scripts/validate_full_book_source.py'
+      - '.github/workflows/build-full-book-pdf.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Korean fonts and PDF tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk poppler-utils
+
+      - name: Install PDF build dependencies
+        run: |
+          python -m pip install --upgrade playwright pypdf
+          python -m playwright install --with-deps chromium
+
+      - name: Validate publication source
+        run: |
+          python scripts/validate_publication_styles.py
+          python scripts/validate_book_index.py
+          python scripts/validate_full_book_source.py
+
+      - name: Build full book HTML
+        run: python scripts/build_full_book_html.py
+
+      - name: Build A4 PDF with Chromium
+        run: python scripts/build_book_pdf.py
+
+      - name: Validate PDF structure
+        run: python scripts/validate_book_pdf.py
+
+      - name: Render PDF QA samples
+        shell: bash
+        run: |
+          pages=$(python - <<'PY'
+          from pypdf import PdfReader
+          print(len(PdfReader('publish/ai_database_book.pdf').pages))
+          PY
+          )
+          middle=$(( (pages + 1) / 2 ))
+          mkdir -p publish/pdf_qa_renders
+          for page in 1 "$middle" "$pages"; do
+            prefix="publish/pdf_qa_renders/page-${page}"
+            pdftoppm -f "$page" -l "$page" -singlefile -png -r 120 publish/ai_database_book.pdf "$prefix"
+            test -s "${prefix}.png"
+          done
+          echo "Rendered QA pages: 1, ${middle}, ${pages}"
+
+      - name: Upload PDF build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-database-book-pdf
+          path: |
+            publish/ai_database_book.html
+            publish/ai_database_book.pdf
+            publish/book_pdf_qa_report.txt
+            publish/pdf_qa_renders/*.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit generated publication files
+        shell: bash
+        run: |
+          pdf_size=$(stat -c%s publish/ai_database_book.pdf)
+          if [ "$pdf_size" -ge 95000000 ]; then
+            echo "PDF is too large for a normal GitHub commit (${pdf_size} bytes). It remains available as a workflow artifact."
+            git_add_pdf="false"
+          else
+            git_add_pdf="true"
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add publish/ai_database_book.html publish/book_pdf_qa_report.txt
+          if [ "$git_add_pdf" = "true" ]; then
+            git add publish/ai_database_book.pdf
+          fi
+
+          if git diff --cached --quiet; then
+            echo 'Generated PDF publication files are unchanged.'
+            exit 0
+          fi
+          git commit -m 'Build full book publication PDF'
+          git push
