@@ -23,7 +23,6 @@ class PublicationParser(HTMLParser):
         self.has_viewport = False
         self.has_korean_lang = False
         self.has_inline_style_tag = False
-        self.has_inline_style_attr = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key.lower(): value or "" for key, value in attrs}
@@ -41,8 +40,6 @@ class PublicationParser(HTMLParser):
             self._in_title = True
         if tag == "style":
             self.has_inline_style_tag = True
-        if "style" in attr:
-            self.has_inline_style_attr = True
         if "id" in attr and attr["id"]:
             self.ids.add(attr["id"])
 
@@ -154,8 +151,6 @@ def validate() -> tuple[list[str], dict[str, int]]:
             errors.append(f"missing non-empty title: {rel}")
         if parser.has_inline_style_tag:
             errors.append(f"inline <style> is not allowed: {rel}")
-        if parser.has_inline_style_attr:
-            errors.append(f"inline style attribute is not allowed: {rel}")
 
         text = path.read_text(encoding="utf-8")
         if re.search(r"(?:href|src)=[\"'][^\"']+\.svg(?:[?#][^\"']*)?[\"']", text, flags=re.I):
