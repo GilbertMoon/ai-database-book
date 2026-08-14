@@ -1,0 +1,53 @@
+name: Generate class blog Markdown
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'book/**/*.md'
+      - 'scripts/generate_class_blog_md.py'
+      - '.github/workflows/generate-class-blog-md.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate class blog Markdown
+        run: python scripts/generate_class_blog_md.py
+
+      - name: Validate generated files
+        shell: bash
+        run: |
+          test -f blog/index.md
+          for n in $(seq -w 1 15); do
+            test -s "blog/chapter${n}/chapter${n}.md"
+          done
+          count=$(find blog -type f -name '*.md' | wc -l)
+          echo "Generated Markdown files: ${count}"
+          test "${count}" -ge 16
+
+      - name: Commit generated blog Markdown
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add blog
+          if git diff --cached --quiet; then
+            echo 'Class blog Markdown files are unchanged.'
+            exit 0
+          fi
+          git commit -m 'Generate class blog Markdown'
+          git push
