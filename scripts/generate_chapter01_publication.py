@@ -6,7 +6,7 @@ import re
 
 import markdown
 from PIL import Image
-import cairosvg
+from publication_svg_utils import svg2png
 
 ROOT = Path(__file__).resolve().parents[1]
 MD_PATH = ROOT / "book" / "chapter01" / "chapter01.md"
@@ -25,7 +25,7 @@ def convert_svg_to_jpg(svg_name: str, jpg_name: str) -> None:
     if not svg_path.exists():
         raise FileNotFoundError(svg_path)
 
-    png_bytes = cairosvg.svg2png(url=str(svg_path), output_width=1600)
+    png_bytes = svg2png(url=str(svg_path), output_width=1600)
     with Image.open(BytesIO(png_bytes)) as source:
         source = source.convert("RGBA")
         background = Image.new("RGBA", source.size, "white")

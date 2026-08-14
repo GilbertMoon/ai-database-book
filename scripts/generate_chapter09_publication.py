@@ -4,7 +4,7 @@ import io
 import re
 from pathlib import Path
 
-import cairosvg
+from publication_svg_utils import svg2png
 import markdown
 from PIL import Image
 
@@ -24,7 +24,7 @@ def render_svg_to_jpg(svg_name: str) -> Path:
     svg_path = IMAGE_DIR / svg_name
     if not svg_path.exists():
         raise FileNotFoundError(svg_path)
-    png_bytes = cairosvg.svg2png(url=str(svg_path), output_width=1600)
+    png_bytes = svg2png(url=str(svg_path), output_width=1600)
     with Image.open(io.BytesIO(png_bytes)) as image:
         rgb = Image.new("RGB", image.size, "white")
         if image.mode == "RGBA":
