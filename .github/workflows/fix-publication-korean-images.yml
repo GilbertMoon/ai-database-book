@@ -8,6 +8,7 @@ on:
     paths:
       - 'scripts/publication_svg_utils.py'
       - 'scripts/migrate_publication_svg_pipeline.py'
+      - 'scripts/generate_overview_jpg.py'
       - '.github/workflows/fix-publication-korean-images.yml'
 
 permissions:
