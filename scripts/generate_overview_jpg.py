@@ -154,7 +154,8 @@ def structure():
 
     y = 235
     for gi, (label, accent, soft, chapters) in enumerate(groups):
-        group_h = 205 if len(chapters) <= 4 else 250
+        # Keep all four stages fully visible and leave breathing room above the summary strip.
+        group_h = 195 if len(chapters) <= 4 else 225
         rounded(d, (90, y, 1510, y + group_h), 28, PAPER, LINE, 2)
         rounded(d, (115, y + 25, 360, y + 70), 18, soft, None, 0)
         text(d, (140, y + 35), label, 20, accent, True)
@@ -169,10 +170,11 @@ def structure():
             rounded(d, (cx, cy, cx + card_w, cy + 85), 18, soft, None, 0)
             text(d, (cx + 18, cy + 18), num, 22, accent, True)
             multiline(d, (cx + 60, cy + 17, cx + card_w - 14, cy + 72), title_v, 18, DARK, True, 4)
-        y += group_h + 26
+        y += group_h + 20
 
-    rounded(d, (90, 1110, 1510, 1170), 18, NAVY, None, 0)
-    text(d, (800, 1140), "Chapter 07 → Chapter 13 → Chapter 15 : 프로젝트를 만들고, 검증하고, 통합한다", 23, "#FFFFFF", True, anchor="mm")
+    # A thinner summary strip keeps the visual focus on the four stage groups.
+    rounded(d, (90, 1125, 1510, 1167), 15, NAVY, None, 0)
+    text(d, (800, 1146), "Chapter 07 → Chapter 13 → Chapter 15 : 프로젝트를 만들고, 검증하고, 통합한다", 20, "#FFFFFF", True, anchor="mm")
     save(img, "overview_book_structure.jpg")
 
 
