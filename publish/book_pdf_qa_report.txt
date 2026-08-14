@@ -1,7 +1,7 @@
 Book PDF QA passed
 Book PDF QA
 PDF: publish/ai_database_book.pdf
-Size: 19,878,632 bytes
+Size: 19,875,546 bytes
 Pages: 332
 Page size: A4 portrait
 Sample text layer chars: 1535
