@@ -1,14 +1,8 @@
-Full book Source QA failed:
-- inline style attribute is not allowed: book/overview/overview.html
-- inline style attribute is not allowed: book/chapter01/chapter01.html
-- inline style attribute is not allowed: book/chapter02/chapter02.html
-- inline style attribute is not allowed: book/chapter06/chapter06.html
-- inline style attribute is not allowed: book/chapter07/chapter07.html
-- inline style attribute is not allowed: book/chapter08/chapter08.html
-- inline style attribute is not allowed: book/chapter09/chapter09.html
-- inline style attribute is not allowed: book/chapter10/chapter10.html
-- inline style attribute is not allowed: book/chapter12/chapter12.html
-- inline style attribute is not allowed: book/chapter13/chapter13.html
-- inline style attribute is not allowed: book/chapter14/chapter14.html
-- inline style attribute is not allowed: book/chapter15/chapter15.html
-Errors: 12
+Full book Source QA passed
+Publication HTML: 17 files (index + overview + 15 chapters)
+Local references checked: 174
+External references skipped: 2
+Image references checked: 106
+JPG references: 106
+SVG references remaining: 0
+Publication status: Chapter HTML 15/15
