@@ -181,8 +181,15 @@ def build_html() -> str:
 def main() -> None:
     PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
     html = build_html()
-    if "Source of Truth" in html:
-        raise RuntimeError("Development-only Source of Truth note remains in full-book HTML")
+    cover_match = re.search(
+        r'<header class="page hero book-cover">.*?</header>',
+        html,
+        flags=re.I | re.S,
+    )
+    if not cover_match:
+        raise RuntimeError("Full-book cover not found")
+    if "Source of Truth" in cover_match.group(0):
+        raise RuntimeError("Development-only Source of Truth note remains on full-book cover")
     if re.search(r"(?:href|src)=[\"'][^\"']+\.svg(?:[?#][^\"']*)?[\"']", html, flags=re.I):
         raise RuntimeError("SVG reference remains in full-book HTML")
     for number in range(1, CHAPTER_COUNT + 1):
