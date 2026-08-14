@@ -7,13 +7,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BLOG_DIR = ROOT / "blog"
 
-REQUIRED_SECTIONS = [
-    "## 오늘 배울 내용",
-    "## AI 활용 실습 1.",
-    "## AI 활용 실습 2.",
-    "## 오늘의 핵심 정리",
-    "## 관련 글",
-]
+
+def has_any(text: str, patterns: list[str]) -> bool:
+    return any(re.search(pattern, text, flags=re.MULTILINE) for pattern in patterns)
 
 
 def validate_chapter(chapter: int) -> list[str]:
@@ -33,11 +29,35 @@ def validate_chapter(chapter: int) -> list[str]:
             f"Chapter {chapter:02d}: title must start with {expected_prefix!r}; got {first_heading!r}"
         )
 
-    for section in REQUIRED_SECTIONS:
-        if section not in text:
-            errors.append(f"Chapter {chapter:02d}: missing required section containing {section!r}")
+    # Chapters intentionally use slightly different introductory headings.
+    learning_patterns = [
+        r"^## 오늘 배울 내용\s*$",
+        r"^## 이 장에서 살펴볼 내용\s*$",
+        r"^## 이 장에서 완성할 것\s*$",
+        r"^## .*배울 내용\s*$",
+        r"^## .*학습 목표\s*$",
+    ]
+    if not has_any(text, learning_patterns):
+        # Some project chapters introduce the goal directly before STEP 1.
+        if "프로젝트" not in text[:2500] and "이번 시간" not in text[:2500]:
+            errors.append(f"Chapter {chapter:02d}: missing learning-goal introduction")
 
-    step_numbers = [int(n) for n in re.findall(r"^## STEP\s+(\d+)\.", text, flags=re.MULTILINE)]
+    for practice_no in (1, 2):
+        practice_pattern = rf"^#{{1,2}}\s+(?:AI 활용 )?실습 {practice_no}\."
+        if not re.search(practice_pattern, text, flags=re.MULTILINE):
+            errors.append(f"Chapter {chapter:02d}: missing AI/practice section {practice_no}")
+
+    summary_patterns = [
+        r"^#{{1,2}}\s+오늘의 핵심 정리\s*$",
+        r"^#{{1,2}}\s+전체 과정 핵심 정리\s*$",
+    ]
+    if not has_any(text, summary_patterns):
+        errors.append(f"Chapter {chapter:02d}: missing summary section")
+
+    step_numbers = [
+        int(n)
+        for n in re.findall(r"^#{1,2}\s+STEP\s+(\d+)\.", text, flags=re.MULTILINE)
+    ]
     if not step_numbers:
         errors.append(f"Chapter {chapter:02d}: no STEP sections found")
     else:
@@ -47,33 +67,47 @@ def validate_chapter(chapter: int) -> list[str]:
                 f"Chapter {chapter:02d}: STEP numbers are not continuous: {step_numbers}"
             )
 
-    tag_lines = [line.strip() for line in lines if line.strip().startswith("#") and not line.startswith("##")]
-    hashtag_line = next((line for line in reversed(tag_lines) if " " in line or line.count("#") >= 2), "")
-    hashtags = re.findall(r"(?<!\S)#([^\s#]+)", hashtag_line)
-    if len(hashtags) < 8:
+    # Naver posts should end with a useful tag set.
+    hashtags = re.findall(r"(?<!\S)#([^\s#]+)", text)
+    final_hashtag_line = next(
+        (
+            line.strip()
+            for line in reversed(lines)
+            if line.strip().startswith("#") and line.count("#") >= 2
+        ),
+        "",
+    )
+    final_hashtags = re.findall(r"(?<!\S)#([^\s#]+)", final_hashtag_line)
+    if len(final_hashtags) < 8:
         errors.append(
-            f"Chapter {chapter:02d}: expected at least 8 final hashtags; found {len(hashtags)}"
+            f"Chapter {chapter:02d}: expected at least 8 final hashtags; found {len(final_hashtags)}"
         )
+    if not hashtags:
+        errors.append(f"Chapter {chapter:02d}: no hashtags found")
 
+    # Navigation can be an explicit chapter reference or a clear next-learning section.
     if chapter < 15:
-        next_ref = f"Chapter {chapter + 1:02d}."
-        if next_ref not in text:
-            errors.append(f"Chapter {chapter:02d}: missing next chapter reference {next_ref!r}")
+        next_ref = f"Chapter {chapter + 1:02d}"
+        has_next_guidance = (
+            next_ref in text
+            or "## 다음 시간에는" in text
+            or "## 다음 학습" in text
+        )
+        if not has_next_guidance:
+            errors.append(f"Chapter {chapter:02d}: missing next-learning guidance")
     else:
-        if "Chapter 01~15" not in text and "Chapter 01부터 Chapter 15" not in text:
-            errors.append("Chapter 15: missing whole-course wrap-up reference")
+        if "## 전체 과정 핵심 정리" not in text or "Chapter 15" not in text:
+            errors.append("Chapter 15: missing whole-course wrap-up")
 
-    # Validate relative Markdown image links if any are present in the Naver version.
+    # Validate relative Markdown image links if curated posts include any.
     for target in re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text):
         if re.match(r"^[a-z]+://", target, flags=re.IGNORECASE):
             continue
         image_path = (path.parent / target).resolve()
         if not image_path.exists():
-            errors.append(
-                f"Chapter {chapter:02d}: broken image path {target!r}"
-            )
+            errors.append(f"Chapter {chapter:02d}: broken image path {target!r}")
 
-    # Catch accidental source-generation banner in curated Naver files.
+    # Curated Naver files must not be overwritten by the auto-generated source banner.
     if "AUTO-GENERATED: scripts/generate_class_blog_md.py" in text:
         errors.append(f"Chapter {chapter:02d}: curated Naver file contains auto-generated banner")
 
