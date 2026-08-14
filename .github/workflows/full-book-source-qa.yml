@@ -1,0 +1,40 @@
+name: Full book Source QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'book/**/*.html'
+      - 'book/chapter*/chapter*.md'
+      - 'assets/css/*.css'
+      - 'images/**/*.jpg'
+      - 'scripts/validate_publication_styles.py'
+      - 'scripts/validate_book_index.py'
+      - 'scripts/validate_full_book_source.py'
+      - '.github/workflows/full-book-source-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate publication styles
+        run: python scripts/validate_publication_styles.py
+
+      - name: Validate publication index
+        run: python scripts/validate_book_index.py
+
+      - name: Validate full book Source QA
+        run: python scripts/validate_full_book_source.py
