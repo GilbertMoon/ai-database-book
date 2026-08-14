@@ -31,6 +31,26 @@
     break-after: page;
   }
 
+  .book-cover {
+    break-before: auto;
+  }
+
+  .book-toc {
+    break-after: page;
+  }
+
+  .book-toc > .stage-label:first-of-type {
+    margin-top: 12mm;
+  }
+
+  .book-unit {
+    break-before: page;
+  }
+
+  .book-unit > .hero {
+    break-before: auto;
+  }
+
   section {
     margin-top: 12mm;
   }
