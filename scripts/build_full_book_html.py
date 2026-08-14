@@ -156,7 +156,6 @@ def build_html() -> str:
   <h2>ChatGPT와 Codex로 배우는 PostgreSQL, SQL, 데이터 설계와 분석</h2>
   <p class="hero-lead">Overview부터 Chapter 15까지의 출판용 HTML을 하나의 A4 인쇄본으로 연결한 통합본입니다. <strong>요구사항과 데이터 모델링에서 시작해 SQL, 트랜잭션, 인덱스, 보안·복구, AI 검증과 Python 분석까지</strong> 한 흐름으로 이어집니다.</p>
   <div class="tag-row"><span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">ERD·정규화</span><span class="tag">트랜잭션·인덱스</span><span class="tag">보안·복구</span><span class="tag">AI·Python</span></div>
-  <div class="hero-question">Source of Truth: book/overview/overview.html + book/chapter01~15/chapterXX.html</div>
 </header>'''
 
     return f'''<!doctype html>
@@ -182,6 +181,8 @@ def build_html() -> str:
 def main() -> None:
     PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
     html = build_html()
+    if "Source of Truth" in html:
+        raise RuntimeError("Development-only Source of Truth note remains in full-book HTML")
     if re.search(r"(?:href|src)=[\"'][^\"']+\.svg(?:[?#][^\"']*)?[\"']", html, flags=re.I):
         raise RuntimeError("SVG reference remains in full-book HTML")
     for number in range(1, CHAPTER_COUNT + 1):
