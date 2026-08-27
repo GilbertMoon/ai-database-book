@@ -1,9 +1,0 @@
-flowchart LR
-    A[Atomicity<br/>모두 반영 또는 모두 취소]
-    B[Consistency<br/>정해진 규칙을 만족]
-    C[Isolation<br/>동시 작업의 간섭 제어]
-    D[Durability<br/>COMMIT 결과 유지]
-    A --> E[신청·결제·좌석 변경을 안전한 업무 단위로 처리]
-    B --> E
-    C --> E
-    D --> E

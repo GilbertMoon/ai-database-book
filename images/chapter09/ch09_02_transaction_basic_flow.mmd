@@ -1,7 +1,0 @@
-flowchart LR
-    A[변경 전 SELECT] --> B[BEGIN]
-    B --> C[여러 변경 SQL]
-    C --> D[COMMIT 전 SELECT 검증]
-    D --> E{예상 결과와 일치하는가?}
-    E -- 예 --> F[COMMIT · 변경 확정]
-    E -- 아니요 --> G[ROLLBACK · 변경 취소]

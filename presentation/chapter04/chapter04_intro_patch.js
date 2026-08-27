@@ -1,9 +1,0 @@
-(() => {
-  if (!Array.isArray(window.CH4_SLIDES)) return;
-  const set = (key, value) => {
-    const index = window.CH4_SLIDES.findIndex((slide) => slide?.k === key);
-    if (index >= 0) window.CH4_SLIDES[index] = value;
-  };
-  set('WHERE WE ARE', {k:'CHAPTER GOALS',l:'학습 목표',h:`<h2>이번 장을 마치면<br>할 수 있는 일</h2><ul class="bullet-list"><li>현재 Database와 Schema를 확인할 수 있습니다.</li><li>Table을 만들고 Column의 Type과 규칙을 설명할 수 있습니다.</li><li>데이터를 입력·조회·수정·삭제할 수 있습니다.</li><li>NULL·조건·정렬을 사용해 필요한 데이터를 조회할 수 있습니다.</li><li>예상 결과와 실제 결과를 비교할 수 있습니다.</li></ul>`,s:`4장의 목표는 첫 테이블을 직접 만들고 기본 데이터 처리를 안전하게 실행하는 것입니다. 실행 위치를 확인하고, 테이블과 열의 구조를 읽으며, 데이터를 입력하고 조회하고 수정하고 삭제합니다. 조건과 널, 정렬을 적용하고, 실행 전 예상한 결과와 실제 결과가 일치하는지도 확인할 수 있어야 합니다.`});
-  set('CHAPTER GOAL', {k:'CHAPTER FLOW',l:'학습 흐름',h:`<h2>이번 장의 학습 흐름</h2><div class="flow"><div class="flow-step">실행 위치<br>확인</div><div class="flow-arrow">→</div><div class="flow-step">Table<br>생성</div><div class="flow-arrow">→</div><div class="flow-step">데이터 입력과<br>조회</div><div class="flow-arrow">→</div><div class="flow-step">조건·정렬·<br>NULL</div><div class="flow-arrow">→</div><div class="flow-step">수정·삭제와<br>결과 검증</div></div>`,s:`먼저 현재 데이터베이스와 스키마를 확인합니다. 학생 테이블을 만들고 데이터를 입력한 뒤 조회합니다. 조건과 정렬, 널을 적용하고 수정과 삭제 결과를 검증합니다.`});
-})();

@@ -1,8 +1,0 @@
-.code-line{display:block;min-height:1.55em;padding:0 7px;border-radius:8px;transition:opacity .25s ease,background-color .25s ease}
-.code-line.focus-active{background:rgba(79,140,255,.28);box-shadow:none!important;transform:none!important}
-.code-line.focus-muted{opacity:.25;transform:none!important;filter:none!important}
-tbody tr.focus-active td{background:var(--s)}
-tbody tr.focus-muted{opacity:.25;transform:none!important;filter:none!important}
-.bullet-list li.focus-active{padding-top:5px;padding-bottom:5px;border-radius:12px;background:rgba(232,240,255,.82)}
-.bullet-list li.focus-muted{transform:none!important}
-.expect.focus-active,.body-text.focus-active,.quote.focus-active,.codebox.focus-active{box-shadow:0 0 0 5px rgba(21,94,239,.12),0 15px 30px rgba(21,94,239,.15)!important}

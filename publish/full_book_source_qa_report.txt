@@ -1,8 +1,0 @@
-Full book Source QA passed
-Publication HTML: 17 files (index + overview + 15 chapters)
-Local references checked: 174
-External references skipped: 2
-Image references checked: 106
-JPG references: 106
-SVG references remaining: 0
-Publication status: Chapter HTML 15/15

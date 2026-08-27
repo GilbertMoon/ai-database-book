@@ -1,7 +1,0 @@
-flowchart TB
-    S[students 기준\n김민지 일치 2건\n이준호 일치 2건\n박서연 일치 1건\n최현우 일치 0건]
-    R[LEFT JOIN 결과\n2 + 2 + 1 + NULL 1행\n총 6행]
-    N[최현우 결과\nstudent_name = 최현우\ncourse_title = NULL\nstatus = NULL]
-    M[일치 행이 없으면 왼쪽 행은 유지되고\n오른쪽 컬럼이 NULL로 채워진다]
-
-    S --> R --> N --> M

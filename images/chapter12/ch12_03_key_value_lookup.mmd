@@ -1,6 +1,0 @@
-flowchart LR
-    A[cache key] --> B{cache hit?}
-    B -->|yes| C[return cache value]
-    B -->|no| D[read source RDBMS]
-    D --> E[refresh cache]
-    E --> C

@@ -1,9 +1,0 @@
-%% Chapter 02 외래키 관계 미리보기
-%% 각 관계는 FK에서 참조되는 PK로 향하는 하나의 선으로만 표현한다.
-flowchart LR
-    S["students<br/>학생<br/><b>PK</b> id<br/>name"]
-    E["enrollments<br/>수강신청 연결 테이블<br/><b>PK</b> id<br/><b>FK</b> student_id<br/><b>FK</b> course_id<br/>status"]
-    C["courses<br/>강의<br/><b>PK</b> id<br/>title"]
-
-    E -- "N · student_id → students.id · 1" --> S
-    E -- "N · course_id → courses.id · 1" --> C

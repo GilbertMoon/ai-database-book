@@ -1,4 +1,0 @@
-flowchart TB
-    C[members N ─── M books<br/>개념상의 다대다 관계]
-    C --> R[members 1 ─── N loans N ─── 1 books]
-    R --> L[loans<br/>PK id<br/>FK member_id<br/>FK book_id<br/>borrowed_at · due_at · returned_at]

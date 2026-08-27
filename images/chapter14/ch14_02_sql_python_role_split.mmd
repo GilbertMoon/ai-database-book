@@ -1,8 +1,0 @@
-flowchart LR
-    DB[(PostgreSQL 원본 테이블)]
-    S[SQL<br/>필터·JOIN·집계<br/>행 단위 확정]
-    V[분석용 VIEW<br/>필요한 행·열만 제공]
-    P[Python·pandas<br/>가공·피벗·시각화<br/>후속 분석]
-    C[결과 검증<br/>SQL 기준값과 비교]
-
-    DB --> S --> V --> P --> C

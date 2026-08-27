@@ -1,7 +1,0 @@
-flowchart LR
-    A[library_records<br/>회원 정보 + 도서 정보 + 대여 정보] --> B[사실의 주인별 분리]
-    B --> C[members<br/>id PK<br/>name · email]
-    B --> D[loans<br/>id PK<br/>member_id FK<br/>book_id FK<br/>대여 날짜]
-    B --> E[books<br/>id PK<br/>title · author]
-    C --> D
-    E --> D

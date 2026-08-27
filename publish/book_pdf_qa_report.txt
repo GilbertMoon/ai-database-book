@@ -1,9 +1,0 @@
-Book PDF QA passed
-Book PDF QA
-PDF: publish/ai_database_book.pdf
-Size: 19,875,546 bytes
-Pages: 332
-Page size: A4 portrait
-Sample text layer chars: 1535
-Metadata title: AI 시대의 데이터베이스 입문 · 통합 출판본
-Repository commit limit check: OK

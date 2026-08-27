@@ -1,8 +1,0 @@
-flowchart TB
-    O[원본 5행\n신청\n수강중\n완료\n신청\n수강중]
-    G[GROUP BY status]
-    B[상태 그룹\n신청 2행\n수강중 2행\n완료 1행]
-    C[COUNT(*)]
-    R[상태별 결과 3행\n신청 2\n수강중 2\n완료 1]
-
-    O --> G --> B --> C --> R

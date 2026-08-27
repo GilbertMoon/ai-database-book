@@ -1,7 +1,0 @@
-@import url('../chapter04/chapter04_player.css');
-.script-icon{width:34px;height:34px;padding:7px}
-.code-line{display:block;min-height:1.55em;margin:0 -10px;padding:0 10px;border-radius:8px;transition:opacity .25s ease,background .25s ease,box-shadow .25s ease,transform .25s ease}
-.code-line.focus-active{background:rgba(21,94,239,.28);box-shadow:inset 4px 0 0 #76a3ff!important;transform:none;border-color:transparent!important}
-.code-line.focus-muted{opacity:.18;transform:none;filter:saturate(.55)}
-.body-text.focus-active,.quote.focus-active,.bullet-list li.focus-active,.table-wrap tbody tr.focus-active{transform:none}
-@media print{.code-line.focus-muted{opacity:1;filter:none}.code-line.focus-active{background:transparent;box-shadow:none!important}}

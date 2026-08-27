@@ -1,7 +1,0 @@
-flowchart TB
-    S[students\n김민지 2건\n이준호 2건\n박서연 1건\n최현우 0건]
-    J[students.id = enrollments.student_id]
-    R[INNER JOIN 결과\n김민지 2행\n이준호 2행\n박서연 1행\n최현우 제외\n총 5행]
-    M[일치하는 행만 포함하고\n한 학생에 일치 행이 여러 개면 결과도 여러 행이다]
-
-    S --> J --> R --> M

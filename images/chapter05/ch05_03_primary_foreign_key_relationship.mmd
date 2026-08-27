@@ -1,6 +1,0 @@
-flowchart LR
-    M[members<br/>PK id<br/>name]
-    L[loans<br/>PK id<br/>FK member_id<br/>FK book_id<br/>borrowed_at]
-    B[books<br/>PK id<br/>title]
-    L -. "member_id → id" .-> M
-    L -. "book_id → id" .-> B
