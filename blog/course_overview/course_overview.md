@@ -62,7 +62,7 @@ SQL이 오류 없이 실행되었다고 해서 항상 올바른 결과가 나온
 
 기초 개념만 설명하고 끝나는 것이 아니라, 실제 데이터베이스를 만들고 실행 결과를 확인하면서 다음 단계로 진행합니다.
 
-![전체 학습 로드맵](https://raw.githubusercontent.com/GilbertMoon/ai-database-book/main/images/overview/overview_learning_roadmap.jpg)
+![전체 학습 로드맵](overview_learning_roadmap.jpg)
 
 ---
 
@@ -181,7 +181,7 @@ ERD와 데이터 모델
 분석과 AI 활용
 ```
 
-![데이터베이스 학습 흐름](https://raw.githubusercontent.com/GilbertMoon/ai-database-book/main/images/overview/overview_study_flow.jpg)
+![데이터베이스 학습 흐름](overview_study_flow.jpg)
 
 이 흐름을 반복하면서 단순히 SQL을 작성하는 사람이 아니라 **데이터의 의미와 결과를 설명할 수 있는 사람**을 목표로 합니다.
 
@@ -402,7 +402,7 @@ SQL 결과와 Python 결과를 서로 비교하면서 재현 가능한 분석 �
 
 까지 전체 과정을 통합합니다.
 
-![15개 Chapter 전체 구성](https://raw.githubusercontent.com/GilbertMoon/ai-database-book/main/images/overview/overview_book_structure.jpg)
+![15개 Chapter 전체 구성](overview_book_structure.jpg)
 
 ---
 
@@ -521,7 +521,7 @@ SQL을 외우는 것에서 끝나지 않고,
 - 원본 강의 Overview: `presentation/course_overview.html`
 
 > **이미지 사용 참고**  
-> 위 Markdown의 이미지는 GitHub raw 절대경로를 사용합니다. 현재 저장소가 private이므로 외부 블로그에서 이미지가 바로 표시되지 않을 수 있습니다. 네이버 블로그 발행 시에는 이미지를 직접 업로드하거나 공개 이미지 경로로 옮기는 방식을 권장합니다.
+> 저장소 내부에서는 같은 폴더의 상대경로 이미지를 사용합니다. 저장소가 private이므로 네이버 블로그 발행 시 GitHub 이미지 URL을 복사하지 말고 `blog/course_overview/` 폴더의 JPG 파일을 글 편집기에 직접 업로드하세요.
 
 ---
 
