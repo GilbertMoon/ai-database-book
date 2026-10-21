@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<rect width="1600" height="900" fill="#f7f9fc"/>
+<text x="90" y="105" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#1f2a44">Transaction · Function · Procedure — 역할을 구분하기</text>
+<text x="90" y="165" font-family="Arial, sans-serif" font-size="30" fill="#5b6475">이번 실습에서는 세 개념을 하나의 수강신청 흐름으로 연결합니다.</text>
+<rect x="90" y="255" rx="28" width="430" height="430" fill="#e8eefc" stroke="#4169b2" stroke-width="3"/>
+<text x="305" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#31569b">Transaction</text>
+<text x="130" y="395" font-family="Arial, sans-serif" font-size="29" fill="#354052">여러 SQL을 하나의 작업 단위로 묶음</text>
+<text x="130" y="455" font-family="Arial, sans-serif" font-size="28" fill="#354052">BEGIN / COMMIT / ROLLBACK</text>
+<text x="130" y="535" font-family="Arial, sans-serif" font-size="27" fill="#5b6475">질문</text>
+<text x="130" y="580" font-family="Arial, sans-serif" font-size="27" fill="#354052">“모두 성공해야 하는가?”</text>
+
+<rect x="585" y="255" rx="28" width="430" height="430" fill="#e9f7ef" stroke="#3f8a5d" stroke-width="3"/>
+<text x="800" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#32744e">Function</text>
+<text x="625" y="395" font-family="Arial, sans-serif" font-size="29" fill="#354052">입력을 받아 값을 계산해 반환</text>
+<text x="625" y="455" font-family="Arial, sans-serif" font-size="28" fill="#354052">SELECT fn_available_seats(...)</text>
+<text x="625" y="535" font-family="Arial, sans-serif" font-size="27" fill="#5b6475">질문</text>
+<text x="625" y="580" font-family="Arial, sans-serif" font-size="27" fill="#354052">“어떤 값을 계산할 것인가?”</text>
+
+<rect x="1080" y="255" rx="28" width="430" height="430" fill="#fff1e3" stroke="#d48745" stroke-width="3"/>
+<text x="1295" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#a9642c">Procedure</text>
+<text x="1120" y="395" font-family="Arial, sans-serif" font-size="29" fill="#354052">DB 안에서 일련의 작업을 수행</text>
+<text x="1120" y="455" font-family="Arial, sans-serif" font-size="28" fill="#354052">CALL sp_register_enrollment(...)</text>
+<text x="1120" y="535" font-family="Arial, sans-serif" font-size="27" fill="#5b6475">질문</text>
+<text x="1120" y="580" font-family="Arial, sans-serif" font-size="27" fill="#354052">“어떤 작업을 실행할 것인가?”</text>
+
+<rect x="220" y="745" rx="24" width="1160" height="90" fill="#ffffff" stroke="#cdd4df" stroke-width="2"/>
+<text x="800" y="801" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="700" fill="#1f2a44">실습 원칙: Transaction이 작업을 보호하고, Function이 계산하고, Procedure가 업무 흐름을 수행한다.</text>
+</svg>
